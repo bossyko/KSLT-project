@@ -115,6 +115,31 @@ async function карточкаСетки(page, что) {
     }
 }
 
+/**
+ * Открыть СУЩЕСТВУЮЩИЙ турнир глубокой ссылкой.
+ *
+ * Новая форма афиши не несёт — у неё пустой короб. Два представления можно
+ * увидеть только у турнира, у которого афиша уже лежит в базе: его заводит
+ * `tests/seed.js` (`test-afisha`, два РАЗНЫХ источника, кадр в image_crop).
+ *
+ * Глубокая ссылка идёт в `loadAndEditTournament`, а та грузит категории и
+ * уровни сама — вторая отрисовка раздела сюда не доезжает (замер 29.09).
+ */
+async function открытьТурнир(page, id) {
+    await page.goto('/pages/admin.html#tournaments/edit/' + id);
+    try {
+        await page.locator('#adTrnCat').waitFor({ state: 'visible', timeout: 20000 });
+    } catch (e) {
+        const след = await page.evaluate(() => ({
+            адрес: location.href,
+            наВходе: /auth\.html/.test(location.pathname),
+            полей: document.querySelectorAll('.ad-field').length,
+            заголовок: (document.querySelector('.ad-section-title') || {}).textContent || 'нет'
+        }));
+        throw new Error('турнир ' + id + ' не открылся. След: ' + JSON.stringify(след));
+    }
+}
+
 for (const вид of ВИДЫ) {
     test.describe(`Форма турнира — ${вид.имя}`, () => {
         test.use({ viewport: { width: вид.w, height: вид.h } });
@@ -241,6 +266,101 @@ for (const вид of ВИДЫ) {
                 return плохо;
             });
             expect(перелив, 'подписи не помещаются: ' + перелив.join(' · ')).toEqual([]);
+        });
+
+        /* ─────────── АФИША: ДВА ПРЕДСТАВЛЕНИЯ ───────────
+           ЧЕГО НЕ ВИДИТ ЗАМОРОЗКА. Правила держат, что в разметке названы
+           две створки и второй источник. Но что в браузере стоят ДВЕ
+           картинки и что они РАЗНЫЕ — видно только прогоном. */
+        test(`${вид.имя}: афиша показана двумя створками, источники разные`, async ({ page }) => {
+            await открытьТурнир(page, 'test-afisha');
+
+            const створки = await page.evaluate(() => {
+                const к = document.querySelector('.ad-afisha-pane--crop .ad-afisha-img');
+                const п = document.querySelector('.ad-afisha-pane--thumb .ad-afisha-img');
+                const вид = э => {
+                    if (!э) return null;
+                    const r = э.getBoundingClientRect();
+                    return { src: э.getAttribute('src'), w: Math.round(r.width), h: Math.round(r.height),
+                             виден: r.width > 0 && r.height > 0 };
+                };
+                return { кадр: вид(к), полная: вид(п),
+                         подписей: document.querySelectorAll('.ad-afisha-cap').length,
+                         короб: !!document.querySelector('.ad-afisha-drop') };
+            });
+
+            expect(створки.кадр, 'створки кадра нет').not.toBeNull();
+            expect(створки.полная, 'створки полной афиши нет').not.toBeNull();
+            expect(створки.кадр.виден).toBe(true);
+            expect(створки.полная.виден).toBe(true);
+            /* ПОРОГ: совпади источники — проверка прошла бы вхолостую при
+               любом коде, в том числе при одной картинке, показанной дважды */
+            expect(створки.кадр.src, 'источники створок совпали — делить окно незачем')
+                .not.toBe(створки.полная.src);
+            expect(створки.подписей, 'у створок нет подписей, что есть что').toBe(2);
+            expect(створки.короб, 'коробa замены афиши нет').toBe(true);
+            /* Пара читается как пара и едет одной границей: высота одна */
+            expect(Math.abs(створки.кадр.h - створки.полная.h),
+                   'створки разной высоты — пара разъехалась').toBeLessThanOrEqual(1);
+        });
+
+        /* Решение Кости: «ссылку на афишу убрать, пусть будут только свои» */
+        test(`${вид.имя}: поля ссылки на афишу в форме нет`, async ({ page }) => {
+            await открытьТурнир(page, 'test-afisha');
+            const ссылки = await page.evaluate(() => {
+                const зона = document.getElementById('adTrnImgZone');
+                const карточка = зона && зона.closest('.ad-form-card');
+                if (!карточка) return { карточкиНет: true };
+                return {
+                    вКарточке: [...карточка.querySelectorAll('input')]
+                        .map(i => i.type + (i.id ? '#' + i.id : '')),
+                    файловых: карточка.querySelectorAll('input[type="file"]').length
+                };
+            });
+            expect(ссылки.карточкиНет, 'карточка афиши не найдена').toBeFalsy();
+            expect(ссылки.вКарточке.filter(т => /^(url|text)/.test(т)),
+                   'в карточку афиши вернулось поле ссылки на чужую картинку').toEqual([]);
+            expect(ссылки.файловых, 'короб загрузки свой файл больше не берёт').toBe(1);
+        });
+
+        /* ─────────── ЛЕСТНИЦА ТЕКСТА ───────────
+           Замер 03.10 нашёл пять уровней на `normal`: межстрочный считался
+           от метрик шрифта, а Inter в админке не подключён вовсе
+           (pages/admin.html его не грузит) — значит у разных людей выходило
+           разное число. ЭТОГО ЗАМОРОЗКА НЕ ВИДИТ: в файле написано
+           `line-height: var(--lh-none)`, а что из этого вышло в браузере,
+           говорит только прогон. */
+        test(`${вид.имя}: ни один уровень не берёт межстрочный от шрифта`, async ({ page }) => {
+            await открытьТурнир(page, 'test-afisha');
+            const лестница = await page.evaluate(() => {
+                const уровни = ['.ad-section-title', '.ad-tab', '.ad-lang-tab', '.ad-btn',
+                                '.ad-form-card-title', '.ad-field-label', '.ad-field-input',
+                                '.ad-field-hint', '.ad-afisha-cap', '.ad-afisha-drop',
+                                '.ad-image-upload-remove'];
+                const вышло = [];
+                уровни.forEach(с => {
+                    const э = document.querySelector(с);
+                    if (!э) return;
+                    const c = getComputedStyle(э);
+                    вышло.push({ уровень: с, кегль: parseFloat(c.fontSize),
+                                 мс: c.lineHeight,
+                                 высота: +э.getBoundingClientRect().height.toFixed(1) });
+                });
+                return вышло;
+            });
+
+            /* ПОРОГ: нашлось меньше восьми уровней — значит форма открылась
+               не целиком, и пустой список «нарушений» ничего не доказывает */
+            expect(лестница.length, 'уровней на экране меньше восьми — мерить нечего')
+                .toBeGreaterThanOrEqual(8);
+            expect(лестница.filter(у => у.мс === 'normal').map(у => у.уровень),
+                   'межстрочный снова считается от шрифта').toEqual([]);
+
+            const вкладка = лестница.find(у => у.уровень === '.ad-tab');
+            /* Ступень шкалы кнопок. При 768 полоса вкладок становится
+               колонкой, и `height` там перебивается `flex-basis: 0%` —
+               вкладка схлопывалась до 14px. Держит порог, а не высота. */
+            expect(вкладка.высота, 'вкладка раздела съехала со ступени 36').toBe(36);
         });
     });
 }

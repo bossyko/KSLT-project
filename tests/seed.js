@@ -409,6 +409,45 @@ async function upsert(table, rows, onConflict) {
     ], 'id');
     console.log('  место в рейтинге: трое с равными очками и гость');
 
+    /* --- Турнир С АФИШЕЙ: два представления ------------------------------
+       Окно афиши делится надвое — кадр 16:9 для страницы турнира и полная
+       картинка для карточки в списке. Доказать, что створки РАЗНЫЕ, можно
+       только прогоном: заморозка читает файлы как текст и видит лишь то,
+       что второй источник в разметке назван.
+       Картинки берутся СВОИ, из репозитория, и ОТЛИЧАЮТСЯ друг от друга:
+       совпади они — проверка «источники разные» прошла бы вхолостую при
+       любом коде. */
+    await upsert('tournaments', [{
+        id: 'test-afisha',
+        title: 'Тестовый турнир: афиша в двух видах',
+        category_id: 'tour',
+        status: 'registration_open',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 8,
+        gender: 'men',
+        image: '/images/kslt-logo.svg',
+        image_full: '/images/kslt-logo-print.svg',
+        image_crop: { x: 0, y: 0.1, width: 1, height: 0.5625 }
+    }], 'id');
+
+    /* СЕВ, КОТОРЫЙ НЕ ПЕРЕЧИТАЛ СЕБЯ, НЕ СЕВ. Столбцы image_full и
+       image_crop завела миграция afisha-dva-predstavleniya.sql; если в
+       тестовой базе её не прогнали, апсерт уйдёт в отказ или потеряет
+       колонки — и проверка упала бы в браузере, назвав виновным код. */
+    var свёлА = await call('GET', '/rest/v1/tournaments?id=eq.test-afisha' +
+        '&select=image,image_full,image_crop');
+    var А = (свёлА || [])[0];
+    if (!А || !А.image || !А.image_full || А.image === А.image_full) {
+        throw new Error('сев афиши не доехал: в базе ' + JSON.stringify(А || null) +
+            ' — нужны ДВА разных источника. Проверь, прогнана ли ' +
+            'sql/схема/afisha-dva-predstavleniya.sql в тестовом проекте');
+    }
+    if (!А.image_crop) {
+        throw new Error('сев афиши: image_crop не записался — столбца нет или он не jsonb');
+    }
+    console.log('  афиша: два представления, кадр в базе');
+
     /* --- Турнир с ГРУППАМИ и плей-офф: метка `A1`, `B1` -----------------
        Метку «кто из какой группы вышел» строит `KSLT_GROUPS.меткиИгроков`,
        и сравнить её НА ДВУХ ЭКРАНАХ может только прогон: заморозка читает

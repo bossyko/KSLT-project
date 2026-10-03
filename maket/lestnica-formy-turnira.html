@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>КСЛТ — лестница текста формы турнира</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Снимает лестницу текста вкладки «Редактирование»
+  настоящими файлами: tokens.css, style.css, admin.css. Разметка скопирована
+  из js/admin/sections/tournaments.js, строки 770-1110 и 1890-1950.
+
+  СТОЯЩЕЕ УСЛОВИЕ: АДМИНКА — ДЕСКТОП И ПЛАНШЕТ. ТЕЛЕФОНА У НЕЁ НЕТ.
+  ТОЛЬКО РУССКИЙ. Виды: 1512 · 1024 · 768.
+
+  ВИД МЕРЯЕТСЯ ЗАГРУЗКОЙ НА НУЖНОЙ ШИРИНЕ: страница грузится внутри рамки
+  нужной ширины, а не сжимается после загрузки.
+
+  Шрифт: pages/admin.html Inter НЕ подключает (замер 03.10), поэтому
+  семейство разрешается в -apple-system. Поэтому межстрочный `normal`
+  у Кости и у меня даёт РАЗНЫЕ числа — и поэтому он и заменяется токеном.
+  Прибор печатает имя шрифта, которым мерил.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=23">
+<link rel="stylesheet" href="../css/style.css?v=383">
+<link rel="stylesheet" href="../css/admin.css?v=195">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); padding: 24px; }
+  .zm-h { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .08em; margin: 24px 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="zm-h">шапка раздела и вкладки</div>
+<div class="ad-trn-sticky-header">
+  <div class="ad-section-header">
+    <h2 class="ad-section-title" data-zm="заголовок страницы">Редактирование турнира</h2>
+    <button class="ad-btn ad-btn-secondary" data-zm="кнопка «Назад»">Назад к списку</button>
+  </div>
+  <div class="ad-tabs ad-trn-nav-tabs">
+    <button class="ad-tab active" data-zm="вкладка раздела">Редактирование</button>
+    <button class="ad-tab disabled" data-zm="вкладка выключенная" disabled>Расписание запусков</button>
+  </div>
+</div>
+
+<div class="zm-h">карточка афиши</div>
+<div class="ad-form-card">
+  <div class="ad-form-card-title" data-zm="название карточки">Афиша турнира</div>
+  <div class="ad-image-upload ad-afisha-zone">
+    <div class="ad-image-upload-placeholder">
+      <div class="ad-image-upload-icon" data-zm="значок короба">&#128444;</div>
+      <div class="ad-field-hint" data-zm="подсказка короба">JPG или PNG, до 5 МБ. Обрежем сами.</div>
+    </div>
+  </div>
+  <div class="ad-afisha-split">
+    <figure class="ad-afisha-pane ad-afisha-pane--crop">
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=" class="ad-afisha-img" alt="">
+      <button type="button" class="ad-image-upload-remove" data-zm="кнопка снятия">&times;</button>
+      <figcaption class="ad-afisha-cap" data-zm="подпись створки">Кадр 16:9 — страница турнира</figcaption>
+    </figure>
+    <figure class="ad-afisha-pane ad-afisha-pane--thumb">
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=" class="ad-afisha-img" alt="">
+      <figcaption class="ad-afisha-cap">Полная афиша — карточка в списке</figcaption>
+    </figure>
+    <button type="button" class="ad-afisha-drop" data-zm="короб замены">
+      <span class="ad-image-upload-icon">&#128444;</span>
+      <span data-zm="текст короба">Заменить афишу</span>
+      <span class="ad-field-hint">JPG или PNG, до 5 МБ</span>
+    </button>
+  </div>
+
+<div class="zm-h">карточка сведений</div>
+<div class="ad-form-card">
+  <div class="ad-form-card-title">Основные сведения</div>
+  <div class="ad-field-row ad-field-row-4">
+    <div class="ad-field">
+      <label class="ad-field-label" data-zm="подпись поля">Категория турнира</label>
+      <select class="ad-field-input" data-zm="значение выбора"><option>Challenger</option></select>
+    </div>
+    <div class="ad-field ad-pole-uzkoe">
+      <label class="ad-field-label">Выходят из группы</label>
+      <input class="ad-field-input" data-zm="значение поля" value="2">
+    </div>
+    <div class="ad-field">
+      <label class="ad-field-label">NTRP максимум</label>
+      <input class="ad-field-input" value="4.5">
+      <div class="ad-field-hint" data-zm="подсказка поля">Выше этого уровня заявки уйдут на рассмотрение</div>
+    </div>
+  </div>
+  <div class="ad-field">
+    <label class="ad-field-label">Описание</label>
+    <textarea class="ad-field-input ad-field-textarea" data-zm="описание">Турнир проводится на кортах клуба КСЛТ в Бишкеке. Регистрация закрывается за сутки до начала.</textarea>
+  </div>
+  <div class="ad-sched-note ad-sched-note-wide" data-zm="подсказка расчёта">28 человек, 7 групп по 4, выходят 2 — в сетке 14 из 16, два свободных места разыгрывают дополнительные матчи.</div>
+</div>
+
+<div class="zm-h">вкладки языка и ряд кнопок</div>
+<div class="ad-lang-tabs">
+  <button class="ad-lang-tab active" data-zm="вкладка языка">RU</button>
+  <button class="ad-lang-tab">EN</button>
+</div>
+<div class="ad-btn-row">
+  <button class="ad-btn ad-btn-primary" data-zm="кнопка действия">Сохранить</button>
+  <button class="ad-btn ad-btn-danger">Удалить</button>
+  <span class="ad-draft-status" data-zm="пометка черновика">Черновик, не опубликован</span>
+</div>
+
+<script>
+/* Лестница снимается с НАСТОЯЩИХ вычисленных значений, а не с объявленных:
+   `normal` в объявлении и число в пикселях — разные вещи, и именно второе
+   видит глаз. Отношение считается как межстрочный / кегль. */
+(function () {
+    function число(s) { var n = parseFloat(s); return isNaN(n) ? null : n; }
+    var строки = [];
+    document.querySelectorAll('[data-zm]').forEach(function (el) {
+        var c = getComputedStyle(el);
+        var кегль = число(c.fontSize);
+        var мс = c.lineHeight === 'normal' ? null : число(c.lineHeight);
+        строки.push({
+            уровень: el.getAttribute('data-zm'),
+            класс: el.className || el.tagName.toLowerCase(),
+            кегль: кегль,
+            вес: c.fontWeight,
+            межстрочный_объявлен: c.lineHeight,
+            межстрочный_px: мс,
+            отношение: мс && кегль ? +(мс / кегль).toFixed(3) : null,
+            цвет: c.color,
+            знаков: (el.textContent || '').trim().length,
+            ширина: Math.round(el.getBoundingClientRect().width),
+            высота: +el.getBoundingClientRect().height.toFixed(1)
+        });
+    });
+    window.__ЛЕСТНИЦА = {
+        ширинаОкна: window.innerWidth,
+        шрифт: getComputedStyle(document.body).fontFamily,
+        строки: строки
+    };
+})();
+</script>
+</body>
+</html>
