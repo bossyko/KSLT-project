@@ -151,3 +151,53 @@ SELECT tablename, policyname, cmd, qual, with_check
  WHERE schemaname = 'public'
    AND tablename IN ('points_by_place', 'points_rules')
  ORDER BY tablename, policyname;
+
+-- ---- Шаг 7. Платила ли кому-нибудь кривая таблица по раундам ----
+--
+-- Замер 02.10 показал: в `points_rules` первые четыре строки (W, F, 3RD,
+-- 4TH) совпадают с таблицей мест до числа у всех пяти уровней, а дальше
+-- шкала ПЕРЕВЁРНУТА: SF платит 8 в первой категории, 18 во второй и 36 в
+-- третьей — чем ниже категория, тем дороже. У итогового SF=70 стоит между
+-- F=80 и 3RD=55, то есть полуфиналист дороже третьего места.
+--
+-- Этой таблицей платит ручной ввод прошлых результатов
+-- (`players.js:2821`). Вопрос, на который отвечает только база: ПОПАЛИ ЛИ
+-- эти числа кому-нибудь в `tournament_results`.
+--
+-- Колонка «совпало» и есть ответ:
+--   «место»          — начислено по таблице мест, всё в порядке;
+--   «РАУНД — чинить» — начислено по кривой таблице;
+--   «ни с чем»       — начислено мимо обеих, разбирать отдельно.
+
+SELECT 'ШАГ 7 · ЧЕМ НАЧИСЛЕНО НА САМОМ ДЕЛЕ' AS шаг;
+
+WITH разбор AS (
+  SELECT coalesce(у.name, '— без уровня —') AS уровень,
+         и.round_reached                    AS раунд,
+         и.points_earned                    AS начислено,
+         пр.points                          AS по_раундам,
+         пм.points                          AS по_месту
+    FROM public.tournament_results и
+    JOIN public.tournaments т        ON т.id = и.tournament_id
+    LEFT JOIN public.tournament_levels у ON у.id = т.level_id
+    LEFT JOIN public.points_rules пр ON пр.level_id = т.level_id
+                                    AND пр.round    = и.round_reached
+    LEFT JOIN public.points_by_place пм ON пм.level_id = т.level_id
+         AND пм.place = CASE и.round_reached
+                            WHEN 'W'   THEN 1
+                            WHEN 'F'   THEN 2
+                            WHEN '3RD' THEN 3
+                            WHEN '4TH' THEN 4
+                        END
+)
+SELECT уровень, раунд,
+       count(*)                                   AS строк,
+       min(начислено) || '…' || max(начислено)    AS начислено,
+       max(по_месту)                              AS таблица_мест,
+       max(по_раундам)                            AS таблица_раундов,
+       CASE WHEN bool_and(начислено = по_месту)   THEN 'место'
+            WHEN bool_and(начислено = по_раундам) THEN 'РАУНД — чинить'
+            ELSE 'ни с чем' END                   AS совпало
+  FROM разбор
+ GROUP BY уровень, раунд
+ ORDER BY уровень, раунд;
