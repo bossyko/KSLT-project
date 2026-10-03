@@ -14,18 +14,34 @@ body { background: #0A0A0A; color: var(--text-primary); margin: 0;
 .st-shapka { position: sticky; top: 0; z-index: 10; padding: 16px 24px;
     background: #0A0A0A; border-bottom: 1px solid var(--border-subtle); }
 .st-shapka b { font-size: var(--fs-sm); letter-spacing: .08em; }
-.st-podpis { padding: 16px 24px; font-size: var(--fs-xs); color: var(--text-muted);
+.st-podpis { padding: 16px 24px; scroll-margin-top: 72px; font-size: var(--fs-xs); color: var(--text-muted);
     border-bottom: 1px solid var(--border-subtle); line-height: 1.6; max-width: 980px; }
 .st-podpis code { color: var(--text-secondary); }
 .st-para { display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
     padding: 24px; border-bottom: 1px solid var(--border-subtle); align-items: start; }
 .st-para > div { min-width: 0; }
-.st-kto { font-size: var(--fs-xs); letter-spacing: .08em; text-transform: uppercase;
-    color: var(--text-dim); margin-bottom: 8px; }
+/* ПОДПИСЬ СТОЛБЦА — ЕДИНСТВЕННОЕ, ЧТО ОТЛИЧАЕТ ДВЕ ТАБЛИЦЫ.
+   Обе озаглавлены «ИТОГИ ТУРНИРА», и по заголовку их не различить. Была
+   12 кеглем цветом --text-dim: контраст 3.19, мимо WCAG и мимо глаза.
+   Стало 14 весом, цвет свой у каждой стороны. */
+.st-kto { font-size: var(--fs-sm); font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 8px; }
 .st-kto.bylo { color: #FFA726; }
 .st-kto.stalo { color: var(--accent); }
 .st-chem { font-size: var(--fs-xs); color: var(--text-muted); margin: 10px 0 0;
     line-height: 1.5; }
+/* БУКВА БЛОКА — ОРИЕНТИР, А НЕ МЕТА.
+   Костя открыл стенд и не нашёл блок глазами: подписи блоков тут не было
+   вовсе, а в чате я писал «посмотри Б». Буква идёт через всю ширину пары,
+   кириллическая, 16 кеглем. */
+.st-bukva {
+    grid-column: 1 / -1;
+    font-size: var(--fs-base, 16px); font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 4px;
+    /* липкая шапка 53 высотой: без отступа якорь уводит заголовок под неё */
+    scroll-margin-top: 72px;
+}
 @media (max-width: 992px) { .st-para { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -223,11 +239,14 @@ var пары = [
      'группе прочерком — третье место группы A и группы B стоят по силе, а не по букве.']
 ];
 
+var БУКВЫ = ['А', 'Б', 'В'];
 var вых = '';
-пары.forEach(function (п) {
-    вых += '<div class="st-para">' +
-        '<div><div class="st-kto bylo">было · ' + п[0] + '</div>' + п[1] + '</div>' +
-        '<div><div class="st-kto stalo">стало · ' + п[0] + '</div>' + п[2] +
+пары.forEach(function (п, и) {
+    var б = БУКВЫ[и] || (и + 1);
+    вых += '<div class="st-para" id="blok-' + б + '">' +
+        '<div class="st-bukva">' + б + ' · ' + п[0] + '</div>' +
+        '<div><div class="st-kto bylo">БЫЛО · так продукт рисует сегодня</div>' + п[1] + '</div>' +
+        '<div><div class="st-kto stalo">СТАЛО · предложение</div>' + п[2] +
             '<p class="st-chem">' + п[3] + '</p></div>' +
     '</div>';
 });
