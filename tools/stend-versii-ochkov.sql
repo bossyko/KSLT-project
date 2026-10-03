@@ -202,3 +202,14 @@ VALUES -- настоящая лестница Высшей: 1000 · 600 · 420 �
        -- победителя нет вовсе, этап записан группой
        ('t-tbsh-bezw', 'p27', 'G1',   250, 2026),
        ('t-tbsh-bezw', 'p28', 'G2',   120, 2026);
+
+-- Крайний случай шага 10в: один уровень турнира, два дивизиона, очки
+-- зачтены в РАЗНЫЕ категории игрока, а числа платит одна таблица.
+INSERT INTO public.tournaments (id, title, level_id, date_start, format, bracket_type, gender, status)
+VALUES ('t-tbsh-divs', 'ТБШ два дивизиона', NULL, DATE '2026-06-01', 'singles', 'fic', 'men', 'completed');
+
+INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season, category_id)
+VALUES ('t-tbsh-divs', 'p30', 'W', 1000, 2026, 'promasters'),
+       ('t-tbsh-divs', 'p31', 'F',  600, 2026, 'promasters'),
+       ('t-tbsh-divs', 'p32', 'W', 1000, 2026, 'tour'),
+       ('t-tbsh-divs', 'p33', 'F',  600, 2026, NULL);
