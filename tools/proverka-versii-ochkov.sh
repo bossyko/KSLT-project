@@ -47,12 +47,21 @@ eq() {
     fi
 }
 
+# ОСНОВАНИЕ МЕРИТСЯ, А НЕ ЗАШИВАЕТСЯ. Первая редакция держала 264 — столько
+# строк мест было у моего первого стенда. Когда стенд привели к боевой (64
+# места у ВСЕХ пяти уровней, включая итоговый), стало 320, и прувер упал на
+# шести проверках, будучи сам виноват. Это та же болезнь, которую он ловит в
+# правилах заморозки: зашитое число старится.
+BASE=$(psql -h $D -U postgres -d kslt -t -A -q -c "SELECT count(*) FROM public.points_by_place;")
+DVA=$((BASE * 2))
+echo "основание померено: строк мест $BASE, после второй версии ждём $DVA"
+echo
 echo "ЗАМЕР ПОСЛЕ МИГРАЦИИ"
 eq "версий" 1 "SELECT count(*) FROM public.points_versions;"
 eq "дата первой версии" "2021-01-01" "SELECT effective_from FROM public.points_versions;"
 eq "за победу и за участие" "25|10" "SELECT per_win||'|'||per_entry FROM public.points_versions;"
 eq "строк без версии" 0 "SELECT count(*) FROM public.points_by_place WHERE version_id IS NULL;"
-eq "всего строк мест" 264 "SELECT count(*) FROM public.points_by_place;"
+eq "всего строк мест" "$BASE" "SELECT count(*) FROM public.points_by_place;"
 eq "старое ограничение снято" 0 "SELECT count(*) FROM pg_constraint WHERE conname='points_by_place_level_id_place_key';"
 eq "новый индекс стоит" 1 "SELECT count(*) FROM pg_indexes WHERE indexname='points_by_place_version_level_place';"
 eq "version_id объявлен NOT NULL" "f" \
@@ -85,7 +94,7 @@ echo "БУДУЩАЯ ВЕРСИЯ ПРАВИТСЯ СВОБОДНО — И ТР�
 must_do "завести версию с завтрашней даты по Бишкеку" "INSERT 0 1" \
   "INSERT INTO public.points_versions (effective_from, per_win, per_entry, note)
    VALUES ($ZAVTRA, 30, 12, 'проба');"
-must_do "налить в неё 264 места копией действующей" "INSERT 0 264" \
+must_do "налить в неё $BASE мест копией действующей" "INSERT 0 $BASE" \
   "INSERT INTO public.points_by_place (version_id, level_id, place, points)
    SELECT (SELECT id FROM public.points_versions WHERE effective_from = $ZAVTRA),
           level_id, place, points
@@ -98,7 +107,7 @@ must_do "поправить пять первых мест в невступив
 must_do "поправить за-победу в невступившей" "UPDATE 1" \
   "UPDATE public.points_versions SET per_win = 28 WHERE effective_from = $ZAVTRA;"
 
-eq "строк мест после второй версии" 528 "SELECT count(*) FROM public.points_by_place;"
+eq "строк мест после второй версии" "$DVA" "SELECT count(*) FROM public.points_by_place;"
 eq "действующее первое место Высшей не поехало" 1000 \
   "SELECT points FROM public.points_by_place p
      JOIN public.tournament_levels l ON l.id = p.level_id
@@ -115,7 +124,7 @@ echo "ВЕРСИЯ НА ДАТУ ТУРНИРА — ОДНО ОПРЕДЕЛЕН�
 eq "прошедший турнир считается по версии 2021" "2021-01-01" \
   "SELECT max(v.effective_from) FROM public.tournaments t
      JOIN public.points_versions v ON v.effective_from <= t.date_start
-    WHERE t.name = 'Прошедший';"
+    WHERE t.id = 't-proshedshiy';"
 eq "турнир через пять дней считается по новой" "ok" \
   "SELECT CASE WHEN (SELECT max(effective_from) FROM public.points_versions
                       WHERE effective_from <= $SEG + 5) = $ZAVTRA
@@ -155,8 +164,11 @@ else
 fi
 
 out=$(run_as $MANAGER "SELECT count(*) FROM public.points_by_place;")
-if echo "$out" | grep -q "528"; then
-  echo "  [+] менеджер видит таблицу целиком (528)"; OK=$((OK+1))
+# run_as зовёт psql без -t -A, поэтому число приходит в рамке и с отбивкой:
+# «   640». Сравниваем строку целиком с допуском на пробелы, а не ищем
+# подстроку: 640 нашлось бы и внутри 1640.
+if echo "$out" | grep -qE "^ *$DVA *\$"; then
+  echo "  [+] менеджер видит таблицу целиком ($DVA)"; OK=$((OK+1))
 else
   echo "  [-] менеджер не видит таблицу:"; echo "      $out"; BAD=$((BAD+1))
 fi
@@ -182,7 +194,7 @@ echo
 echo "УДАЛЕНИЕ БУДУЩЕЙ ВЕРСИИ УВОДИТ ЕЁ МЕСТА, И ТОЛЬКО ЕЁ"
 must_do "удалить невступившую версию" "DELETE 1" \
   "DELETE FROM public.points_versions WHERE effective_from = $ZAVTRA;"
-eq "строк мест вернулось к 264" 264 "SELECT count(*) FROM public.points_by_place;"
+eq "строк мест вернулось к основанию" "$BASE" "SELECT count(*) FROM public.points_by_place;"
 eq "действующая версия на месте" 1 "SELECT count(*) FROM public.points_versions;"
 
 echo
