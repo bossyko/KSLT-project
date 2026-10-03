@@ -203,12 +203,33 @@
             }
         });
 
-        // Delete level (event delegation)
-        panel.addEventListener('click', function(e) {
+        /* УДАЛЕНИЕ УРОВНЯ: СНАЧАЛА ПОСЧИТАТЬ, ПОТОМ СПРАШИВАТЬ.
+           До 03.10 здесь стоял `confirm(L.ratDeleteLevelConfirm)` с текстом
+           «Удалить этот уровень и все его правила?» — и ни слова о том, что
+           турниры этого уровня его ЛИШАТСЯ, а 64 строки таблицы мест уйдут
+           навсегда. Этим крестиком 30.09 и осиротели восемь ТБШ: 269 строк
+           истории с 37 181 очком перестали быть рейтинговыми, и по какой
+           таблице им платили — больше не узнать.
+           Теперь числа называются ДО вопроса. */
+        panel.addEventListener('click', async function(e) {
             var delBtn = e.target.closest('.set-del-level');
             if (!delBtn) return;
             var levelId = delBtn.getAttribute('data-level-id');
-            if (levelId && confirm(L.ratDeleteLevelConfirm)) {
+            if (!levelId) return;
+
+            var что = await чтоПотеряетУровень(levelId);
+            if (!что) return;
+
+            if (что.турниров > 0) {
+                A.showToast(
+                    L.ratLevelHasTournaments
+                        .replace('{n}', что.турниров)
+                        .replace('{m}', что.строкИтогов),
+                    'error');
+                return;
+            }
+
+            if (confirm(L.ratDeleteLevelConfirm.replace('{n}', что.мест))) {
                 deleteLevel(levelId);
             }
         });
@@ -278,7 +299,74 @@
         });
     }
 
+    /**
+     * ЧТО ПОТЕРЯЕТСЯ ВМЕСТЕ С УРОВНЕМ — числами, а не словами.
+     *
+     * Турниры: `deleteLevel` ставит им `level_id = null`, а
+     * `tournament_results` не трогает. Турнир без уровня не рейтинговый
+     * (`isUnrankedTournament`, `bracket.js`), значит его история осиротеет:
+     * очки лежат, а таблицы за ними больше нет.
+     *
+     * Места: `points_by_place.level_id` объявлен `ON DELETE CASCADE`
+     * (`sql/схема/kategorii-i-ochki.sql:67`) — 64 строки уносит САМА БАЗА,
+     * `deleteLevel` их даже не упоминает. Отката нет.
+     *
+     * `head: true` с `count: 'exact'`: нужны числа, а не строки.
+     * Ошибку чтения НЕ глотаем и `0` вместо неё не возвращаем — иначе
+     * порог пропустил бы удаление ровно тогда, когда база недоступна.
+     */
+    async function чтоПотеряетУровень(levelId) {
+        var турниры = await A.client.from('tournaments')
+            .select('id', { count: 'exact', head: true })
+            .eq('level_id', levelId);
+        var места = await A.client.from('points_by_place')
+            .select('id', { count: 'exact', head: true })
+            .eq('level_id', levelId);
+
+        if (турниры.error || места.error) {
+            A.showToast((турниры.error || места.error).message, 'error');
+            return null;
+        }
+
+        var итоги = { count: 0 };
+        if (турниры.count > 0) {
+            var ид = await A.client.from('tournaments')
+                .select('id').eq('level_id', levelId);
+            if (ид.error) {
+                A.showToast(ид.error.message, 'error');
+                return null;
+            }
+            итоги = await A.client.from('tournament_results')
+                .select('id', { count: 'exact', head: true })
+                .in('tournament_id', (ид.data || []).map(function(т) { return т.id; }));
+            if (итоги.error) {
+                A.showToast(итоги.error.message, 'error');
+                return null;
+            }
+        }
+
+        return {
+            турниров: турниры.count || 0,
+            мест: места.count || 0,
+            строкИтогов: итоги.count || 0
+        };
+    }
+
     async function deleteLevel(levelId) {
+        /* ПОРОГ СТОИТ И ЗДЕСЬ, А НЕ ТОЛЬКО В ОБРАБОТЧИКЕ НАЖАТИЯ.
+           Проверка у кнопки — вежливость; проверка у действия — защита.
+           ШАГ, КОТОРЫЙ УДАЛЯЕТ, НЕ НАЧИНАЕТСЯ, ПОКА ЧИСЛА НЕ НАЗВАНЫ. */
+        var что = await чтоПотеряетУровень(levelId);
+        if (!что) return;
+        if (что.турниров > 0) {
+            A.showToast(
+                L.ratLevelHasTournaments
+                    .replace('{n}', что.турниров)
+                    .replace('{m}', что.строкИтогов),
+                'error');
+            return;
+        }
+
         // Unlink tournaments from this level, then delete rules, then level
         await A.client.from('tournaments').update({ level_id: null }).eq('level_id', levelId);
         await A.client.from('points_rules').delete().eq('level_id', levelId);

@@ -34,6 +34,8 @@ const СТЕНД_ЗАМЕР = 'maket/setka-zamer.html';
 const ПУБЛИЧНАЯ = 'js/tournament-detail.js';
 const ПУБЛCSS   = 'css/tournament-detail.css';
 const ПРЕДЕЛ_SQL = 'sql/схема/predel-mest-urovnya.sql';
+const НАСТРОЙКИ = 'js/admin/sections/settings.js';
+const СЛОВАРЬ   = 'js/admin/core/constants.js';
 
 const ОТКАТЫ = [
   /* ─── одно или другое, а не оба разом ─── */
@@ -297,6 +299,37 @@ const ОТКАТЫ = [
    "    IF восьмёрок <> 1 THEN",
    "    IF восьмёрок < 0 THEN",
    'миграция предела перечитывает внутри транзакции'],
+
+  /* ─── крестик удаления уровня: числа до вопроса ─── */
+  [НАСТРОЙКИ,
+   "        var что = await чтоПотеряетУровень(levelId);\n        if (!что) return;\n        if (что.турниров > 0) {\n            A.showToast(\n                L.ratLevelHasTournaments\n                    .replace('{n}', что.турниров)\n                    .replace('{m}', что.строкИтогов),\n                'error');\n            return;\n        }\n\n        // Unlink tournaments",
+   "        // Unlink tournaments",
+   'порог стоит у самого удаления, а не только у кнопки'],
+
+  [НАСТРОЙКИ,
+   "        if (турниры.error || места.error) {\n            A.showToast((турниры.error || места.error).message, 'error');\n            return null;\n        }",
+   "        if (турниры.error || места.error) {\n            return { турниров: 0, мест: 0, строкИтогов: 0 };\n        }",
+   'ошибка чтения не превращается в ноль'],
+
+  [СЛОВАРЬ,
+   "        ratDeleteLevelConfirm: 'Удалить уровень? Вместе с ним исчезнут {n} строк таблицы очков за место. Отката нет.',",
+   "        ratDeleteLevelConfirm: 'Удалить этот уровень и все его правила?',",
+   'диалог называет, сколько мест исчезнет'],
+
+  [СЛОВАРЬ,
+   "в них {m} строк итогов",
+   "в них несколько строк итогов",
+   'отказ называет и турниры, и строки итогов'],
+
+  [НАСТРОЙКИ,
+   "            var что = await чтоПотеряетУровень(levelId);\n            if (!что) return;",
+   "            var что = { турниров: 0, мест: 64, строкИтогов: 0 };",
+   'кнопка считает прежде, чем спрашивать'],
+
+  [НАСТРОЙКИ,
+   "    async function чтоПотеряетУровень(levelId) {",
+   "    async function чтоПотеряетУровень(levelId) { return null; }\n    async function чтоПотеряетУровень(levelId) {",
+   'подсчёт потерь живёт ОДНИМ определением'],
 ];
 
 function прогон() {
