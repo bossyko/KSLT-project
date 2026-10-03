@@ -2626,43 +2626,50 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
             } else if (t.bracket_type === 'group_league') {
-                // GL results: find PL final (highest round_number among PL- matches)
-                var plMatches = matches.filter(function(m) { return m.round && m.round.indexOf('PL-') === 0 && m.round !== 'PL-3RD'; });
-                var plMaxRound = 0;
-                plMatches.forEach(function(m) { if (m.round_number > plMaxRound) plMaxRound = m.round_number; });
-                var plFinal = plMatches.find(function(m) { return m.round_number === plMaxRound && m.status === 'completed' && m.winner_id; });
+                /* ПЬЕДЕСТАЛ У КАЖДОЙ ЛИГИ СВОЙ — слово Кости 03.10:
+                   «в утешиловке тоже сделай пьедестал такой же, 1 2 3 места».
+                   Лиг две, результата два; один пьедестал на обе читался бы
+                   так, будто утешительная — часть верхней. */
+                function пьедесталЛиги(вид) {
+                    var свои = matches.filter(function (m) {
+                        return m.round && m.round.indexOf(вид + '-') === 0 &&
+                               m.round !== вид + '-3RD';
+                    });
+                    var макс = 0;
+                    свои.forEach(function (m) { if (m.round_number > макс) макс = m.round_number; });
+                    var финал = свои.find(function (m) {
+                        return m.round_number === макс && m.status === 'completed' && m.winner_id;
+                    });
+                    if (!финал || !финал.winner_id) return '';
 
-                if (plFinal && plFinal.winner_id) {
-                    var winner = playersMap[plFinal.winner_id] || {};
-                    var finalist_id = plFinal.winner_id === plFinal.player1_id ? plFinal.player2_id : plFinal.player1_id;
-                    var finalist = playersMap[finalist_id] || {};
+                    var поб = playersMap[финал.winner_id] || {};
+                    var ид2 = финал.winner_id === финал.player1_id ? финал.player2_id : финал.player1_id;
+                    var h = '<h3 class="td-league-title td-league-title-' +
+                            (вид === 'PL' ? 'premier' : 'consolation') + '">' +
+                            подписьЛиги(вид, isEn, isKg) + '</h3>' +
+                        '<div class="td-podium">' +
+                            podiumCard(поб, 1, '🥇') +
+                            podiumCard(playersMap[ид2] || {}, 2, '🥈');
 
-                    var resHtml = '<div class="td-podium">' +
-                        podiumCard(winner, 1, '🥇') +
-                        podiumCard(finalist, 2, '🥈');
+                    /* ТРЕТЬЕ МЕСТО ДАЁТ ТОЛЬКО МАТЧ ЗА ТРЕТЬЕ МЕСТО — решение
+                       Кости 01.10, и оно одно на все типы сетки. */
+                    var третий = matches.find(function (m) {
+                        return m.round === вид + '-3RD' && m.status === 'completed' && m.winner_id;
+                    });
+                    if (третий) h += podiumCard(playersMap[третий.winner_id] || {}, 3, '🥉');
+                    return h + '</div>';
+                }
 
-                    var plThird = matches.find(function(m) { return m.round === 'PL-3RD' && m.status === 'completed' && m.winner_id; });
-                    if (plThird) {
-                        var thirdPlayer = playersMap[plThird.winner_id] || {};
-                        resHtml += podiumCard(thirdPlayer, 3, '🥉');
-                    }
+                var пьедесталПЛ = пьедесталЛиги('PL');
+                var пьедесталЦЛ = пьедесталЛиги('CL');
 
-                    resHtml += '</div>';
+                if (пьедесталПЛ || пьедесталЦЛ) {
+                    resultsPodium.innerHTML = пьедесталПЛ + пьедесталЦЛ;
 
-                    resultsPodium.innerHTML = resHtml;
-
-                    /* ИТОГИ ЧИТАЮТСЯ ОТТУДА ЖЕ, ОТКУДА У ВСЕХ.
-                       Здесь стояла своя таблица из `rating_history`: второй
-                       источник одного понятия. Место в ней было НОМЕРОМ
-                       СТРОКИ — не местом вовсе, — а этапа не было совсем.
-                       `tournament_results` пишет админка при завершении
-                       турнира, и его же читают остальные типы сетки.
-
-                       ЛИГА ИГРОКА БЕРЁТСЯ ИЗ МАТЧЕЙ, А НЕ ВЫВОДИТСЯ. В
+                    /* ЛИГА ИГРОКА БЕРЁТСЯ ИЗ МАТЧЕЙ, А НЕ ВЫВОДИТСЯ. В
                        `tournament_results` её нет, а в матчах она стоит
-                       приставкой круга — `PL-` и `CL-`, тем же признаком,
-                       по которому страница рисует две сетки выше (`:1688`).
-                       Один признак на оба экрана. */
+                       приставкой круга — `PL-` и `CL-`, тем же признаком, по
+                       которому страница рисует две сетки выше (`:1688`). */
                     var лигаИгрока = {};
                     matches.forEach(function (m) {
                         var вид = m.round && m.round.indexOf('PL-') === 0 ? 'PL'
@@ -2672,7 +2679,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                             if (ид) лигаИгрока[ид] = вид;
                         });
                     });
-                    показатьРаскладкуОчков(t, resultsPodium, resHtml, isEn, isKg, pName, null, лигаИгрока);
+
+                    /* ИТОГИ ЧИТАЮТСЯ ОТТУДА ЖЕ, ОТКУДА У ВСЕХ. Здесь стояла
+                       своя таблица из `rating_history`: второй источник одного
+                       понятия, где место было НОМЕРОМ СТРОКИ, а этапа не было
+                       совсем. */
+                    показатьРаскладкуОчков(t, resultsPodium, '', isEn, isKg, pName,
+                        null, лигаИгрока, { PL: пьедесталПЛ, CL: пьедесталЦЛ });
                 } else {
                     resultsPodium.innerHTML = '<div class="td-no-results"><p>' + (isRatingTournament(t) ? L.noResults : L.noResultsPlain) + '</p></div>';
                 }
@@ -2795,7 +2808,7 @@ function подписьЛиги(вид, isEn, isKg) {
     return isEn ? П.en : (isKg ? П.kg : П.ru);
 }
 
-function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста, лиги) {
+function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста, лиги, пьедесталыЛиг) {
     if (!контейнер || typeof supabaseClient === 'undefined') return;
     if (typeof KSLT_POINTS === 'undefined') return;
 
@@ -2849,7 +2862,7 @@ function показатьРаскладкуОчков(t, контейнер, п�
             function таблица(свои, заголовок) {
                 if (!свои.length) return '';
                 var h = '<div class="td-results-table">' +
-                '<h3 class="td-results-title">' + заголовок + '</h3>' +
+                (заголовок ? '<h3 class="td-results-title">' + заголовок + '</h3>' : '') +
                 '<table><thead><tr>' +
                     '<th class="td-res-place">' + П.место + '</th>' +
                     '<th>' + П.игрок + '</th>' +
@@ -2911,8 +2924,18 @@ function показатьРаскладкуОчков(t, контейнер, п�
                    группы и не сыграл ни одного матча плей-офф. Таблица «вне
                    лиг» показывает его под своим заголовком, а не прячет. */
                 var безЛиги = строки.filter(function (р) { return !лиги[р.player_id]; });
-                html = таблица(своиЛиги('PL'), подписьЛиги('PL', isEn, isKg)) +
-                       таблица(своиЛиги('CL'), подписьЛиги('CL', isEn, isKg)) +
+
+                /* ЛИГА — ОДИН БЛОК: её название, её пьедестал, её таблица.
+                   Название стоит ОДИН раз, на пьедестале: повторять его ещё и
+                   над таблицей значило бы сказать одно дважды, а читается это
+                   как две разные вещи. Пьедестала нет (лига не доиграна) —
+                   название берёт на себя таблица. */
+                var блок = function (вид, свои) {
+                    var пьед = (пьедесталыЛиг && пьедесталыЛиг[вид]) || '';
+                    return пьед + таблица(свои, пьед ? '' : подписьЛиги(вид, isEn, isKg));
+                };
+                html = блок('PL', своиЛиги('PL')) +
+                       блок('CL', своиЛиги('CL')) +
                        таблица(безЛиги, П.итог);
             } else {
                 html = таблица(строки, П.итог);
