@@ -126,6 +126,54 @@ html, body {
    делает `.ad-pts-scroll` у таблицы мест. */
 .st-mer-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* ---- НОВАЯ ВЕРСИЯ С ДАТЫ ----
+   СВЕРКА ФИГМЫ (аудит `claude/kslt-formy-i-modalki.md`, 18.09): на экране
+   очков уже живёт `ad-modal` 400 — её открывает «+ Добавить уровень»
+   (`setAddLevelBtn`). Второе семейство, `ad-confirm-modal` 440/520, стоит на
+   другом фоне (#0A0A0A против #111111) — видно глазом, если открыть две
+   модалки подряд. Два семейства НА ОДНОМ ЭКРАНЕ — это шов, на котором
+   родится беда. Беру `ad-modal`, ширина 400, та же.
+   Здесь нарисована её внутренность, сама коробка — продуктовая. */
+.st-okno {
+    /* `box-sizing: border-box` — ПОСЧИТАНО, А НЕ ДЛЯ КРАСОТЫ. Прибор дал 402
+       там, где объявлено 400: рамка по пикселю с каждой стороны
+       прибавляется к `max-width` при `content-box`. Та же беда, что у поля,
+       где 28×64 мерилось как 30×82. ОБЪЯВЛЕННОЕ ЧИСЛО ДОЛЖНО БЫТЬ ТЕМ, ЧТО
+       МЕРЯЕТСЯ НА ЭКРАНЕ. */
+    box-sizing: border-box;
+    max-width: 400px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+.st-okno-head {
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--fs-base); font-weight: 600;
+    box-shadow: inset 0 -1px 0 var(--border-subtle);
+}
+.st-okno-body { padding: var(--space-5); }
+.st-okno-foot {
+    padding: var(--space-4) var(--space-5);
+    display: flex; gap: var(--space-2); justify-content: flex-end;
+    box-shadow: inset 0 1px 0 var(--border-subtle);
+}
+.st-polosa {
+    /* Строка переключения версий в шапке карточки. Высота 28 — ступень
+       кнопок; это не вкладки способов начисления, от которых отказались,
+       а ВЕРСИИ: они не пересекаются по определению. */
+    display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+    margin-top: var(--space-2);
+}
+.st-ver {
+    min-height: 28px; display: inline-flex; align-items: center;
+    padding: 0 var(--space-3); border-radius: var(--radius-full);
+    font-size: var(--fs-xs); color: var(--text-muted);
+    background: var(--bg-surface);
+}
+.st-ver-act { color: var(--text-primary); font-weight: 600; }
+.st-ver-bud { color: var(--accent); }
+
 .st-two { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 @media (min-width: 992px) { .st-two { grid-template-columns: 1fr 1fr; } }
 
@@ -312,7 +360,77 @@ html, body {
 
 <!-- ===== Д ===== -->
 <section class="st-block">
-  <span class="st-tag">Д · лестница текста</span>
+  <span class="st-tag">Д · новая версия с даты</span>
+  <h2 class="st-h2">Ввёл числа, сохранил — и один вопрос про дату</h2>
+  <p class="st-note-stand">
+    Вопрос Кости 03.10: «он 1 декабря решил изменить начисления и просто в
+    таблице введёт новые значения, сохранит, и всё да?». Почти: сохранение
+    спрашивает ОДИН раз — с какой даты. Без этого вопроса ответ «со дня
+    изменения» был бы неправдой: сторож в базе не даёт править версию,
+    которая уже в силе, и «Сохранить» просто падало бы с его текстом.
+  </p>
+  <div class="st-two">
+    <div>
+      <p class="st-note-stand"><b>1.</b> Правишь числа и жмёшь «Сохранить»</p>
+      <div class="st-okno">
+        <div class="st-okno-head">Новые очки — с какой даты?</div>
+        <div class="st-okno-body">
+          <p class="st-note-stand" style="margin:0 0 var(--space-4);">
+            Изменено <b>7</b> значений. Турниры, начавшиеся раньше этой даты,
+            не изменятся: у них своя версия.
+          </p>
+          <label class="ad-field-label" for="stDate">Начать начислять с</label>
+          <input id="stDate" type="date" class="ad-field-input" value="2026-12-02">
+          <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+            Раньше завтрашнего дня нельзя: турнир, начавшийся сегодня, уже
+            идёт по старым очкам.
+          </p>
+        </div>
+        <div class="st-okno-foot">
+          <span class="st-dialog-btn">Отмена</span>
+          <span class="st-dialog-btn st-dialog-btn-ok">Завести версию</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="st-note-stand"><b>2.</b> Шапка карточки, когда версий две</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="ad-pts-head">
+          <div class="ad-pts-who">Правит: <b>администратор</b></div>
+          <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+        </div>
+        <div class="st-polosa">
+          <span class="st-ver st-ver-act">В силе с 01.01.2021 · только чтение</span>
+          <span class="st-ver st-ver-bud">Готовится с 02.12.2026 · правится</span>
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-4) 0 0;">
+          <b>СТАРАЯ ОСТАЁТСЯ</b> — слово Кости: «а старая вкладка останется,
+          да». Действующая версия никуда не девается и всегда открыта на
+          чтение: по ней считались прошедшие турниры, и посмотреть, что им
+          начислялось, надо уметь всегда.
+          <span class="st-ok">Правятся только невступившие.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="st-note-stand" style="margin-top:var(--space-4);">
+    <b>ПРЕДПОЛОЖЕНИЕ, КОТОРОЕ Я СДЕЛАЛ САМ:</b> дата по умолчанию —
+    ЗАВТРАШНЯЯ, выбрать можно любую позже. Если у клуба правило вроде «очки
+    меняются только с 1 января» — подставлю его. Костя сказал «давай», на
+    сам вопрос про дату прямо не ответил, и я иду по умолчанию.
+  </p>
+  <p class="st-note-stand">
+    <b>ПОЧЕМУ ЭТО НЕ ТОТ ПЕРЕКЛЮЧАТЕЛЬ, ОТ КОТОРОГО ОТКАЗАЛИСЬ.</b> Там две
+    вкладки делили СПОСОБЫ начисления, и места 1–4 попадали бы в обе — два
+    определения одного понятия. Здесь переключаются ВЕРСИИ: место 1 версии
+    2021 года и место 1 версии 2026-го — разные строки разных таблиц, они не
+    пересекаются по устройству.
+  </p>
+</section>
+
+<!-- ===== Е ===== -->
+<section class="st-block">
+  <span class="st-tag">Е · лестница текста</span>
   <h2 class="st-h2">Замер: каждый уровень на ступени</h2>
   <p class="st-note-stand">
     Снято <code>tools/zamer-ochki-ekran.mjs</code> на ТРЁХ видах — десктоп,
@@ -332,6 +450,11 @@ html, body {
       <tr><td>версия в силе</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
       <tr><td>текст диалога</td><td>14</td><td>400</td><td>normal</td><td>16.67</td><td>да</td></tr>
       <tr><td>отказ с числами</td><td>14</td><td>400</td><td>21</td><td>6.64</td><td>да</td></tr>
+      <tr><td>заголовок окна версии</td><td>16</td><td>600</td><td>normal</td><td>18.88</td><td>да</td></tr>
+      <tr><td>текст окна версии</td><td>14</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>лейбл поля даты</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>версия в силе</td><td>12</td><td>600</td><td>normal</td><td>18.42</td><td>да</td></tr>
+      <tr><td>версия готовится</td><td>12</td><td>400</td><td>normal</td><td>15.68</td><td>да</td></tr>
       <tr><td>подпись блока</td><td>14</td><td>600</td><td>normal</td><td>16.85</td><td>да, макетная</td></tr>
       <tr><td>заголовок блока</td><td>21</td><td>700</td><td>normal</td><td>19.8</td><td>да, макетная</td></tr>
     </tbody>
@@ -355,6 +478,11 @@ html, body {
     больше нет ни одного. Цену платить стало не за что.
   </p>
   <p class="st-note-stand">
+    Окно новой версии: ширина <b>400</b> (с рамкой, <code>border-box</code> —
+    прибор сначала дал 402), поле даты <b>44</b>, полоса версий <b>28</b> —
+    ступень кнопок. Прокрутки страницы нет ни на одном виде.
+  </p>
+  <p class="st-note-stand">
     Ещё из замера: строка <b>36</b>, поле <b>28 × 64</b>, крестик
     <b>28 × 28</b>, шапка и номер места <code>position: sticky</code>,
     полей <b>264</b> и прочерков <b>56</b> — то есть 320 минус 56 за
@@ -363,9 +491,9 @@ html, body {
   </p>
   </section>
 
-<!-- ===== Е ===== -->
+<!-- ===== Ж ===== -->
 <section class="st-block">
-  <span class="st-tag">Е · что ещё открыто</span>
+  <span class="st-tag">Ж · что ещё открыто</span>
   <h2 class="st-h2">Не сделано и названо вслух</h2>
   <p class="st-note-stand">
     · <b>Ручной ввод прошлых результатов</b> (<code>players.js:2795</code>)
@@ -373,8 +501,9 @@ html, body {
     шаг 5 замера нашёл 174 живые строки R16 и R32 — это вилка в 8 и 16 мест, —
     и 28 строк G3/G4 с числами, которых в <code>points_rules</code> нет вовсе.
     Отделено в свой кусок, вместе с правкой счёта.<br>
-    · <b>Новая версия с даты</b> — кнопка нарисована, окна за ней ещё нет.
-    Сама схема версий прогнана в тестовой, в боевой нет.<br>
+    · <b>Новая версия с даты</b> — окно нарисовано в блоке Д, кода за ним
+    ещё нет. Пока его нет, «Сохранить» на действующей версии падает текстом
+    сторожа, и это честный отказ, а не поломка.<br>
     · <b>Цель нажатия у крестика 28, а не 44.</b> В продукте сегодня 18×18
     (<code>settings.js:164</code>); в блоке Г НАМЕРЕНО оставлено 28, чтобы
     снимок показывал нынешнее. Поднять до 44 — в этом же куске, при правке
