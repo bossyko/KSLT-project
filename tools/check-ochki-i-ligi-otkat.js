@@ -17,7 +17,11 @@ const os = require('os');
 const КОРЕНЬ = path.join(__dirname, '..');
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-ochki-'));
 
-['js', 'css', 'tools', 'pages', 'maket'].forEach(д =>
+/* `sql` в копии — потому что замораживается и миграция предела мест.
+   Без неё `чит('sql/схема/predel-mest-urovnya.sql')` падает в копии, и
+   КАЖДЫЙ откат «роняет правило» по чужой причине: прибор обязан
+   называть свою причину, а не соседскую. */
+['js', 'css', 'tools', 'pages', 'maket', 'sql'].forEach(д =>
   fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 fs.mkdirSync(path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
@@ -29,6 +33,7 @@ const СТР   = 'pages/admin.html';
 const СТЕНД_ЗАМЕР = 'maket/setka-zamer.html';
 const ПУБЛИЧНАЯ = 'js/tournament-detail.js';
 const ПУБЛCSS   = 'css/tournament-detail.css';
+const ПРЕДЕЛ_SQL = 'sql/схема/predel-mest-urovnya.sql';
 
 const ОТКАТЫ = [
   /* ─── одно или другое, а не оба разом ─── */
@@ -240,7 +245,58 @@ const ОТКАТЫ = [
   [СТЕНД_ЗАМЕР,
    'rating-points.js?v=',
    'rating-points.js?v=0',
-   'версия rating-points.js одна на странице и стендах']
+   'версия rating-points.js одна на странице и стендах'],
+
+  /* ─── предел мест у уровня: восьмёрка платит восемь ─── */
+  [СЕТКА,
+   "        return (у && у.max_place) || 64;",
+   "        return 64;",
+   'предел читается из уровня, а не зашит'],
+
+  [СЕТКА,
+   "            .lte('place', предел);",
+   "            ;",
+   'место за пределом не приходит из базы'],
+
+  [СЕТКА,
+   "        return await местаУровня(ниже.id);",
+   "        var ответ = await A.client.from('points_by_place')\n            .select('place, points')\n            .eq('level_id', ниже.id);\n        var таблица = {};\n        (ответ.data || []).forEach(function(с) { таблица[с.place] = с.points; });\n        return таблица;",
+   'чтение мест живёт ОДНИМ определением'],
+
+  [СЕТКА,
+   "        var у = (A.cachedLevels || []).find(function(l) { return l.id === levelId; });\n        return (у && у.max_place) || 64;",
+   "        var у = (A.cachedLevels || []).find(function(l) { return l.id === levelId; });\n        return у.max_place;",
+   'пока колонки нет, предел равен 64'],
+
+  [СЕТКА,
+   "        var предел = await пределМест(levelId);",
+   "        var предел = (A.cachedLevels || []).find(function(l) { return l.id === levelId && l.on_ladder; }) ? 64 : 8; var _ = 'max_place';",
+   'предел не склеен с лестницей'],
+
+  [ОЧКИ,
+   "    var МЕСТ_ПО_ТАБЛИЦЕ = 4;",
+   "    var МЕСТ_ПО_ТАБЛИЦЕ = 4;\n    var предел = 64;",
+   'предел не заводит своего условия в правиле очков'],
+
+  [ПРЕДЕЛ_SQL,
+   "   SET max_place = 8",
+   "   SET max_place = 64",
+   'восьмёрка названа в миграции числом, а не словом'],
+
+  [ПРЕДЕЛ_SQL,
+   " WHERE sort_order = 1;\n\n-- ---- Шаг 4.",
+   " WHERE name = 'Итоговый турнир';\n\n-- ---- Шаг 4.",
+   'миграция предела привязана к порядку, а не к имени'],
+
+  [ПРЕДЕЛ_SQL,
+   "    IF итоговых <> 1 THEN",
+   "    IF итоговых < 0 THEN",
+   'миграция предела отказывается при чужом числе уровней'],
+
+  [ПРЕДЕЛ_SQL,
+   "    IF восьмёрок <> 1 THEN",
+   "    IF восьмёрок < 0 THEN",
+   'миграция предела перечитывает внутри транзакции'],
 ];
 
 function прогон() {
