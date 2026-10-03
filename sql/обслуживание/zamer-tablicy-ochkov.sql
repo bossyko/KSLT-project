@@ -20,6 +20,39 @@
 -- Значит привязка по имени больше не сработает, и ПРОВЕРИТЬ надо не
 -- название, а что строки доехали до нынешних уровней по `id`.
 
+-- ---- Шаг 0. Колонки, на которые ссылается этот файл ----
+--
+-- ПЕРВАЯ РЕДАКЦИЯ ЭТОГО ФАЙЛА УПАЛА НА ШАГЕ 5: я написал
+-- `tournaments.start_date`, а колонка зовётся `date_start`
+-- (`supabase/migrations/20260210000000_baseline.sql:2830`). Редактор
+-- Supabase останавливается на первой ошибке, и четыре правильных шага до неё
+-- вывода не дали — весь прогон пропал из-за одного имени.
+--
+-- Поэтому шаг нулевой: сначала база САМА перечисляет, что у неё есть. Пусто
+-- в строке «есть» — дальше читать незачем, имя не то.
+
+SELECT 'ШАГ 0 · КОЛОНКИ' AS шаг;
+
+WITH нужно(таблица, колонка) AS (
+  VALUES ('tournament_levels','sort_order'), ('tournament_levels','name'),
+         ('tournament_levels','on_ladder'),
+         ('points_by_place','level_id'),     ('points_by_place','place'),
+         ('points_by_place','points'),
+         ('points_rules','level_id'),        ('points_rules','round'),
+         ('points_rules','points'),
+         ('tournaments','date_start'),
+         ('tournament_results','tournament_id'),
+         ('tournament_results','points_earned')
+)
+SELECT н.таблица, н.колонка,
+       CASE WHEN к.column_name IS NULL THEN 'НЕТ — имя не то' ELSE 'есть: ' || к.data_type END AS состояние
+  FROM нужно н
+  LEFT JOIN information_schema.columns к
+         ON к.table_schema = 'public'
+        AND к.table_name = н.таблица
+        AND к.column_name = н.колонка
+ ORDER BY (к.column_name IS NULL) DESC, н.таблица, н.колонка;
+
 -- ---- Шаг 1. Уровни: сколько их и в каком порядке ----
 SELECT 'ШАГ 1 · УРОВНИ' AS шаг;
 
@@ -76,6 +109,9 @@ SELECT п.place AS место,
 -- Её правит нынешний экран. Если в ней есть строки, значит экран писал
 -- в неё — и надо знать, читает ли её хоть кто-нибудь.
 -- Читателя я нашёл один: `players.js:142` (список игроков).
+--
+-- ЕСЛИ ШАГ 0 НАПИСАЛ ПРО `points_rules` «НЕТ» — этот шаг пропусти, таблицы в
+-- базе нет; остальные шаги от этого не страдают.
 
 SELECT 'ШАГ 4 · ТАБЛИЦА ПО РАУНДАМ' AS шаг;
 
@@ -96,8 +132,8 @@ SELECT 'ШАГ 5 · ТУРНИРЫ С НАЧИСЛЕННЫМИ ОЧКАМИ' AS 
 
 SELECT count(DISTINCT и.tournament_id) AS турниров,
        count(*)                        AS строк_итогов,
-       min(т.start_date)               AS самый_ранний,
-       max(т.start_date)               AS самый_поздний
+       min(т.date_start)               AS самый_ранний,
+       max(т.date_start)               AS самый_поздний
   FROM public.tournament_results и
   JOIN public.tournaments т ON т.id = и.tournament_id;
 

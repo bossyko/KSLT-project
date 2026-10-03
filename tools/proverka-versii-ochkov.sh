@@ -114,7 +114,7 @@ echo
 echo "ВЕРСИЯ НА ДАТУ ТУРНИРА — ОДНО ОПРЕДЕЛЕНИЕ"
 eq "прошедший турнир считается по версии 2021" "2021-01-01" \
   "SELECT max(v.effective_from) FROM public.tournaments t
-     JOIN public.points_versions v ON v.effective_from <= t.start_date
+     JOIN public.points_versions v ON v.effective_from <= t.date_start
     WHERE t.name = 'Прошедший';"
 eq "турнир через пять дней считается по новой" "ok" \
   "SELECT CASE WHEN (SELECT max(effective_from) FROM public.points_versions

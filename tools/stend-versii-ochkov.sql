@@ -33,7 +33,7 @@ CREATE TABLE public.tournaments (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name       text,
     level_id   uuid REFERENCES public.tournament_levels(id),
-    start_date date
+    date_start date NOT NULL
 );
 
 CREATE TABLE public.tournament_results (
@@ -102,7 +102,7 @@ INSERT INTO public.profiles (id, role) VALUES
     ('11111111-1111-1111-1111-111111111111', 'admin'),
     ('22222222-2222-2222-2222-222222222222', 'manager');
 
-INSERT INTO public.tournaments (name, level_id, start_date)
+INSERT INTO public.tournaments (name, level_id, date_start)
 SELECT 'Прошедший', id, DATE '2026-09-18'
   FROM public.tournament_levels WHERE sort_order = 3;
 
