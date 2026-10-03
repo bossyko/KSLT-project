@@ -467,8 +467,8 @@ const ОТКАТЫ = [
    'предел подписан одним числом, без «до»'],
 
   [ТЕСТ_ФАЙЛ,
-   "    test.skip(({}, info) => /mobile|phone/.test(info.project.name),",
-   "    test.skip(({}, info) => false && /mobile/.test(info.project.name),",
+   "        test.skip(/mobile|phone/.test(info.project.name),",
+   "        test.skip(false && /mobile/.test(info.project.name),",
    'тест экрана пропускает телефон, а не мерит его мягче'],
 
   [ТЕСТ_ФАЙЛ,
@@ -477,8 +477,8 @@ const ОТКАТЫ = [
    'тест экрана ждёт признаки, а не таймеры'],
 
   [ТЕСТ_ФАЙЛ,
-   "        await expect(page.locator('.set-del-level')).toHaveCount(5);",
-   "        await page.locator('.set-del-level').first().click();",
+   "        await expect(page.locator('.set-del-level')).toHaveCount(0);",
+   "        await page.locator('#setNewVerBtn').click();",
    'тест не нажимает кнопок, которые пишут в базу'],
 
   [ТЕСТ_ФАЙЛ,
