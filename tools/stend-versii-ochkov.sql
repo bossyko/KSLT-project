@@ -169,3 +169,16 @@ VALUES ('t-proshedshiy', 'p1', 'W',   360, 2026),
        ('t-proshedshiy', 'p5', 'W',   535, 2026),
        ('t-parnyy',      'p6', 'W',  1000, 2026),
        ('t-sirota',      'p7', 'W',  1000, 2026);
+
+-- Крайние случаи шага 9: осиротевшие с разными очками победителя.
+-- Один оплачен РОВНО по таблице Высшей (1000), один — по 2 категории со
+-- старой добавкой за победы (360 + 7×25 = 535), один — мимо всех шкал (999).
+INSERT INTO public.tournaments (id, title, level_id, date_start, format, bracket_type, gender, status)
+VALUES ('t-tbsh-pro',  'ТБШ ProMasters 2026',  NULL, DATE '2026-06-01', 'singles', 'fic', 'men',   'completed'),
+       ('t-tbsh-chal', 'ТБШ Challengers 2026', NULL, DATE '2026-06-01', 'singles', 'fic', 'men',   'completed'),
+       ('t-tbsh-tour', 'ТБШ Tour 2026',        NULL, DATE '2026-06-01', 'singles', 'fic', 'women', 'completed');
+
+INSERT INTO public.tournament_results (tournament_id, player_id, round_reached, points_earned, season)
+VALUES ('t-tbsh-pro',  'p10', 'W', 1000, 2026),
+       ('t-tbsh-chal', 'p11', 'W',  535, 2026),
+       ('t-tbsh-tour', 'p12', 'W',  999, 2026);

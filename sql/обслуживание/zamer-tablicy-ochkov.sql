@@ -256,3 +256,53 @@ SELECT т.title, т.format, т.gender, т.status, т.date_start,
    AND и.points_earned > 0
  GROUP BY т.id, т.title, т.format, т.gender, т.status, т.date_start
  ORDER BY т.format, т.date_start;
+
+-- ---- Шаг 9. Очки победителя сами называют таблицу ----
+--
+-- Шаг 8б назвал восьмерых осиротевших: ТБШ ProMasters · Masters ·
+-- Masters (женский) · Challengers · Futures · Futures (женский) · Tour ·
+-- Tour (женский), все 2026, все `completed`, 269 строк, 37 181 очко.
+--
+-- В названии стоит КАТЕГОРИЯ ИГРОКА (ProMasters…Tour), а уровень турнира —
+-- другая ось (Высшая…Итоговый). Поэтому по имени уровень не выводится, и
+-- догадку писать нельзя.
+--
+-- НО ОЧКИ ПОБЕДИТЕЛЯ ИЗМЕРИМЫ. За первое место каждая таблица платит своё
+-- число: Высшая 1000, 1 категория 600, 2 категория 360, 3 категория 215,
+-- Итоговый 130 (замер, шаг 3). Если победителю начислено ровно одно из них —
+-- таблица известна. Если больше на кратное 25 — это старое правило «таблица
+-- плюс победы» (отменено 30.09, `rating-points.js`, комментарий перед
+-- `очки`), и таблица всё равно узнаётся по остатку.
+--
+-- Колонка «ровно» и есть ответ. Пусто в ней — ни одна таблица не подошла
+-- даже с поправкой на победы, и тогда это разбор поимённо, а не вывод.
+
+SELECT 'ШАГ 9 · ЧЬЕЙ ТАБЛИЦЕЙ ПЛАТИЛИ ОСИРОТЕВШИМ' AS шаг;
+
+WITH победители AS (
+  SELECT т.id, т.title, т.gender, и.points_earned AS очки
+    FROM public.tournaments т
+    JOIN public.tournament_results и ON и.tournament_id = т.id
+   WHERE т.level_id IS NULL
+     AND и.round_reached = 'W'
+     AND и.points_earned > 0
+),
+за_первое AS (
+  SELECT у.name, у.sort_order, п.points AS очки
+    FROM public.tournament_levels у
+    JOIN public.points_by_place п ON п.level_id = у.id AND п.place = 1
+)
+SELECT п.title,
+       п.gender,
+       п.очки                                            AS начислено_победителю,
+       max(ф.name) FILTER (WHERE ф.очки = п.очки)        AS ровно,
+       string_agg(ф.name || ' +' || ((п.очки - ф.очки) / 25) || '×25',
+                  ', ' ORDER BY (п.очки - ф.очки))
+           FILTER (WHERE ф.очки < п.очки
+                     AND (п.очки - ф.очки) % 25 = 0)     AS или_с_победами
+  FROM победители п
+  LEFT JOIN за_первое ф
+         ON ф.очки <= п.очки
+        AND (п.очки - ф.очки) % 25 = 0
+ GROUP BY п.title, п.gender, п.очки
+ ORDER BY п.очки DESC, п.title;
