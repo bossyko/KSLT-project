@@ -58,6 +58,9 @@ html, body {
     color: var(--accent); margin-bottom: var(--space-2);
 }
 .st-h2 { font-size: var(--fs-lg); margin: 0 0 var(--space-3); }
+/* Третий уровень внутри блока: ступень между h2 (18) и текстом (14). */
+.st-h3 { font-size: var(--fs-base); margin: var(--space-6) 0 var(--space-3); }
+.st-sost { margin: 0 0 var(--space-4); }
 .st-note-stand { color: var(--text-muted); font-size: var(--fs-sm); max-width: 78ch; margin: 0 0 var(--space-4); }
 .st-bad { color: #FF6B6B; }
 .st-ok  { color: var(--accent); }
@@ -158,6 +161,14 @@ html, body {
     display: flex; gap: var(--space-2); justify-content: flex-end;
     box-shadow: inset 0 1px 0 var(--border-subtle);
 }
+.st-ver-on {
+    /* ВЫБРАННАЯ ВЕРСИЯ — это кнопка в нажатом состоянии, а не просто
+       подпись. Первая редакция макета нарисовала две подписи и не показала
+       ни выбора, ни того, что под ними меняется; Костя спросил «где
+       смотреть старую, где новую» — значит переключателя там и не было. */
+    background: var(--accent); color: var(--bg-base); font-weight: 600;
+}
+.st-ver-more { color: var(--text-muted); background: none; text-decoration: underline; }
 .st-polosa {
     /* Строка переключения версий в шапке карточки. Высота 28 — ступень
        кнопок; это не вкладки способов начисления, от которых отказались,
@@ -369,9 +380,99 @@ html, body {
     изменения» был бы неправдой: сторож в базе не даёт править версию,
     которая уже в силе, и «Сохранить» просто падало бы с его текстом.
   </p>
+  <p class="st-note-stand">
+    <b>ГДЕ СМОТРЕТЬ КАКУЮ — ПОЛОСА В ШАПКЕ КАРТОЧКИ.</b> Это переключатель, а
+    не подпись: нажал пилюлю — таблица под ней показывает ТУ версию. Первая
+    редакция этого блока нарисовала две подписи и не показала ни выбора, ни
+    того, что под ними меняется, — Костя спросил «где смотреть старую, где
+    новую», и значит переключателя там и не было.
+  </p>
+
+  <h3 class="st-h3">Полоса версий — три состояния</h3>
+
+  <div class="st-sost">
+    <p class="st-note-stand"><b>Сегодня</b> — версия одна. Полосы нет вовсе:
+      переключать нечего, и лишняя строка только шумит.</p>
+    <div class="ad-table-card" style="padding:var(--space-4);">
+      <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+    </div>
+  </div>
+
+  <div class="st-sost">
+    <p class="st-note-stand"><b>После «Завести версию»</b> — полоса из двух.
+      Выбрана новая: её и правят.</p>
+    <div class="ad-table-card" style="padding:var(--space-4);">
+      <div class="st-polosa">
+        <span class="st-ver">В силе с 01.01.2021</span>
+        <span class="st-ver st-ver-on">Готовится с 02.12.2026</span>
+      </div>
+      <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+        Под полосой: поля <span class="st-ok">открыты</span>, кнопки
+        «Сохранить» и «Удалить версию».
+      </p>
+    </div>
+  </div>
+
+  <div class="st-sost">
+    <p class="st-note-stand"><b>Через годы</b> — версий много. Действующая и
+      невступившие стоят всегда, прошедшие прячутся за «Ещё».
+      <b>ПРАВИЛО, ВЫВЕДЕННОЕ НА ИТОГАХ ДВУХ ЛИГ, ПРИМЕНЯЕТСЯ БЕЗ НОВОГО
+      РАЗБОРА:</b> длинный список отсекается и раскрывается нажатием — там
+      это было 8 строк и «Показать всех (64)».</p>
+    <div class="ad-table-card" style="padding:var(--space-4);">
+      <div class="st-polosa">
+        <span class="st-ver st-ver-more">Ещё 3</span>
+        <span class="st-ver st-ver-on">В силе с 01.01.2027</span>
+        <span class="st-ver">Готовится с 01.07.2027</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="st-h3">Что меняется под полосой</h3>
+
   <div class="st-two">
     <div>
-      <p class="st-note-stand"><b>1.</b> Правишь числа и жмёшь «Сохранить»</p>
+      <p class="st-note-stand"><b>Действующая</b> — только чтение, всегда</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="ad-pts-who">В силе с <b>01.01.2021</b> · только чтение</div>
+        <div class="st-polosa" style="margin-top:var(--space-3);">
+          <input class="ad-pts-in" value="1000" readonly>
+          <input class="ad-pts-in" value="600" readonly>
+          <input class="ad-pts-in" value="420" readonly>
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+          Поля без рамки и без фона — не «заблокированное поле», а текст.
+          Кнопок сохранения нет вовсе. По этой версии считались прошедшие
+          турниры: посмотреть, что им начислялось, надо уметь всегда.
+        </p>
+      </div>
+    </div>
+    <div>
+      <p class="st-note-stand"><b>Невступившая</b> — правится свободно</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="ad-pts-who">Готовится с <b>02.12.2026</b> · правится</div>
+        <div class="st-polosa" style="margin-top:var(--space-3);">
+          <input class="ad-pts-in" value="1200">
+          <input class="ad-pts-in" value="700">
+          <input class="ad-pts-in" value="480">
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+          <span class="st-ok">Править можно сколько угодно раз до даты
+          вступления</span>, и удалить версию целиком тоже — места уедут
+          вместе с ней. Это не обещание: прувер
+          <code>tools/proverka-versii-ochkov.sh</code> требует от базы
+          <code>UPDATE 5</code> на правке невступившей и <code>DELETE 1</code>
+          на её удалении, и обе проверки зелёные. В день вступления версия
+          закрывается сама — сторожем, а не экраном.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="st-h3">Окно, которое открывает «Сохранить»</h3>
+
+  <div class="st-two">
+    <div>
       <div class="st-okno">
         <div class="st-okno-head">Новые очки — с какой даты?</div>
         <div class="st-okno-body">
@@ -393,26 +494,19 @@ html, body {
       </div>
     </div>
     <div>
-      <p class="st-note-stand"><b>2.</b> Шапка карточки, когда версий две</p>
-      <div class="ad-table-card" style="padding:var(--space-4);">
-        <div class="ad-pts-head">
-          <div class="ad-pts-who">Правит: <b>администратор</b></div>
-          <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
-        </div>
-        <div class="st-polosa">
-          <span class="st-ver st-ver-act">В силе с 01.01.2021 · только чтение</span>
-          <span class="st-ver st-ver-bud">Готовится с 02.12.2026 · правится</span>
-        </div>
-        <p class="st-note-stand" style="margin:var(--space-4) 0 0;">
-          <b>СТАРАЯ ОСТАЁТСЯ</b> — слово Кости: «а старая вкладка останется,
-          да». Действующая версия никуда не девается и всегда открыта на
-          чтение: по ней считались прошедшие турниры, и посмотреть, что им
-          начислялось, надо уметь всегда.
-          <span class="st-ok">Правятся только невступившие.</span>
-        </p>
-      </div>
+      <p class="st-note-stand">
+        Окно спрашивает ОДИН раз. Дальше экран сам переключается на новую
+        версию, и дальнейшие правки идут уже в неё — без вопросов, обычным
+        «Сохранить». Второй раз дату не спрашивают: версия уже заведена.
+      </p>
+      <p class="st-note-stand">
+        <b>СТАРАЯ ОСТАЁТСЯ</b> — слово Кости: «а старая вкладка останется,
+        да». Действующая версия никуда не девается.
+        <span class="st-ok">Правятся только невступившие.</span>
+      </p>
     </div>
   </div>
+
   <p class="st-note-stand" style="margin-top:var(--space-4);">
     <b>ПРЕДПОЛОЖЕНИЕ, КОТОРОЕ Я СДЕЛАЛ САМ:</b> дата по умолчанию —
     ЗАВТРАШНЯЯ, выбрать можно любую позже. Если у клуба правило вроде «очки
@@ -453,8 +547,9 @@ html, body {
       <tr><td>заголовок окна версии</td><td>16</td><td>600</td><td>normal</td><td>18.88</td><td>да</td></tr>
       <tr><td>текст окна версии</td><td>14</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
       <tr><td>лейбл поля даты</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
-      <tr><td>версия в силе</td><td>12</td><td>600</td><td>normal</td><td>18.42</td><td>да</td></tr>
-      <tr><td>версия готовится</td><td>12</td><td>400</td><td>normal</td><td>15.68</td><td>да</td></tr>
+      <tr><td>пилюля версии</td><td>12</td><td>400</td><td>normal</td><td>15.68</td><td>да, высота 28</td></tr>
+      <tr><td>пилюля выбранной версии</td><td>12</td><td>600</td><td>normal</td><td>5.30</td><td>да, высота 28</td></tr>
+      <tr><td>подзаголовок блока</td><td>16</td><td>700</td><td>normal</td><td>19.80</td><td>да, макетная</td></tr>
       <tr><td>подпись блока</td><td>14</td><td>600</td><td>normal</td><td>16.85</td><td>да, макетная</td></tr>
       <tr><td>заголовок блока</td><td>21</td><td>700</td><td>normal</td><td>19.8</td><td>да, макетная</td></tr>
     </tbody>
@@ -479,8 +574,10 @@ html, body {
   </p>
   <p class="st-note-stand">
     Окно новой версии: ширина <b>400</b> (с рамкой, <code>border-box</code> —
-    прибор сначала дал 402), поле даты <b>44</b>, полоса версий <b>28</b> —
-    ступень кнопок. Прокрутки страницы нет ни на одном виде.
+    прибор сначала дал 402), поле даты <b>44</b>, все пять пилюль версий
+    ростом <b>28</b> — ступень кнопок, ни одной врозь. Выбранная пилюля —
+    чёрным по лайму, контраст <b>5.30</b>. Прокрутки страницы нет ни на
+    одном виде.
   </p>
   <p class="st-note-stand">
     Ещё из замера: строка <b>36</b>, поле <b>28 × 64</b>, крестик
