@@ -36,6 +36,10 @@ const ПУБЛCSS   = 'css/tournament-detail.css';
 const ПРЕДЕЛ_SQL = 'sql/схема/predel-mest-urovnya.sql';
 const НАСТРОЙКИ = 'js/admin/sections/settings.js';
 const СЛОВАРЬ   = 'js/admin/core/constants.js';
+const УТИЛИТЫ   = 'js/admin/core/utils.js';
+const МАКЕТ_ОЧКИ = 'maket/ochki-ekran.html';
+const АДМИН_CSS = 'css/admin.css';
+const ЗАМЕР_ФАЙЛ = 'tools/zamer-ochki-ekran.mjs';
 
 const ОТКАТЫ = [
   /* ─── одно или другое, а не оба разом ─── */
@@ -250,29 +254,29 @@ const ОТКАТЫ = [
    'версия rating-points.js одна на странице и стендах'],
 
   /* ─── предел мест у уровня: восьмёрка платит восемь ─── */
-  [СЕТКА,
+  [УТИЛИТЫ,
    "        return (у && у.max_place) || 64;",
    "        return 64;",
    'предел читается из уровня, а не зашит'],
 
-  [СЕТКА,
-   "            .lte('place', предел);",
-   "            ;",
-   'место за пределом не приходит из базы'],
+  [УТИЛИТЫ,
+   "            return с.place <= A.пределМест(с.level_id);",
+   "            return true;",
+   'место за пределом не доходит до читателя'],
 
   [СЕТКА,
-   "        return await местаУровня(ниже.id);",
+   "        return await A.местаУровня(ниже.id);",
    "        var ответ = await A.client.from('points_by_place')\n            .select('place, points')\n            .eq('level_id', ниже.id);\n        var таблица = {};\n        (ответ.data || []).forEach(function(с) { таблица[с.place] = с.points; });\n        return таблица;",
-   'чтение мест живёт ОДНИМ определением'],
+   'нижняя лига берёт места через общее чтение'],
 
-  [СЕТКА,
+  [УТИЛИТЫ,
    "        var у = (A.cachedLevels || []).find(function(l) { return l.id === levelId; });\n        return (у && у.max_place) || 64;",
    "        var у = (A.cachedLevels || []).find(function(l) { return l.id === levelId; });\n        return у.max_place;",
    'пока колонки нет, предел равен 64'],
 
-  [СЕТКА,
-   "        var предел = await пределМест(levelId);",
-   "        var предел = (A.cachedLevels || []).find(function(l) { return l.id === levelId && l.on_ladder; }) ? 64 : 8; var _ = 'max_place';",
+  [УТИЛИТЫ,
+   "    A.пределМест = function(levelId) {",
+   "    A.пределМест = function(levelId) { var _ = 'max_place on_ladder'; }\n    A.пределМест = function(levelId) {",
    'предел не склеен с лестницей'],
 
   [ОЧКИ,
@@ -330,6 +334,87 @@ const ОТКАТЫ = [
    "    async function чтоПотеряетУровень(levelId) {",
    "    async function чтоПотеряетУровень(levelId) { return null; }\n    async function чтоПотеряетУровень(levelId) {",
    'подсчёт потерь живёт ОДНИМ определением'],
+
+  /* ─── экран очков по местам ─── */
+  [НАСТРОЙКИ,
+   "        var места = A._местаОчков || [];",
+   "        var места = A._местаОчков || []; var ROUND_KEYS = A.ROUND_KEYS;",
+   'экран читает места, а не раунды'],
+
+  [УТИЛИТЫ,
+   "    A.местаВсехУровней = async function(обновить) {",
+   "    A.местаВсехУровней2 = async function(обновить) {\n        var _ = await A.client.from('points_by_place').select('place');\n    };\n    A.местаВсехУровней = async function(обновить) {",
+   'чтение мест живёт ОДНИМ определением, в core'],
+
+  [УТИЛИТЫ,
+   "        return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Bishkek' });",
+   "        return new Date().toLocaleDateString('sv-SE');",
+   'сегодня считается по Бишкеку, а не по браузеру'],
+
+  [УТИЛИТЫ,
+   "            .lte('effective_from', A.сегодняБишкек())",
+   "",
+   'действующая версия — последняя наступившая'],
+
+  [УТИЛИТЫ,
+   "        if (версия) запрос = запрос.eq('version_id', версия.id);",
+   "        запрос = запрос.eq('version_id', версия.id);",
+   'нет версий — таблица читается целиком'],
+
+  [НАСТРОЙКИ,
+   "            if (новое === было[id]) return;         // не тронуто",
+   "",
+   'сохранение пишет только изменённое'],
+
+  [НАСТРОЙКИ,
+   "                .eq('id', правки[i].id);",
+   "                .eq('level_id', правки[i].id);",
+   'правка идёт по id строки, а не по отбору заново'],
+
+  [НАСТРОЙКИ,
+   "        var сверка = await перечитатьМеста();\n        var разошлось = правки.filter(function(п) { return сверка[п.id] !== п.points; });",
+   "        var разошлось = [];",
+   'результат записи проверяется чтением'],
+
+  [НАСТРОЙКИ,
+   "        if (правит) {\n            var saveBtn = document.getElementById('setSaveRulesBtn');",
+   "        if (true) {\n            var saveBtn = document.getElementById('setSaveRulesBtn');",
+   'у менеджера кнопок нет вовсе'],
+
+  [НАСТРОЙКИ,
+   "        if (!правит && A.currentRole !== 'manager') {",
+   "        if (!правит) {",
+   'менеджер видит вкладку очков'],
+
+  [НАСТРОЙКИ,
+   "            html += '<div class=\"ad-pts-band\"><div class=\"ad-pts-band-text\">' +",
+   "            html += '<div class=\"ad-pts-nope\"><div class=\"ad-pts-band-text\">' +",
+   'плашка вместо переключателя'],
+
+  [НАСТРОЙКИ,
+   "                    if (место > A.пределМест(lv.id)) {",
+   "                    if (false) {",
+   'место за пределом рисуется прочерком'],
+
+  [НАСТРОЙКИ,
+   "            for (var место = 1; место <= строк; место++) {",
+   "            for (var место = 1; место <= 64; место++) {",
+   'число строк берётся из пределов, а не зашито'],
+
+  [НАСТРОЙКИ,
+   "            await завестиМестаУровня(name);",
+   "",
+   'новый уровень получает места'],
+
+  [АДМИН_CSS,
+   ".ad-pts-band {",
+   ".ad-pts-band-NOPE {",
+   'классы экрана очков живут в admin.css, а не в макете'],
+
+  [ЗАМЕР_ФАЙЛ,
+   "  { имя: 'планшет стоя',       w: 820,  h: 1180 }",
+   "  { имя: 'планшет стоя',       w: 820,  h: 1180 },\n  { имя: 'телефон',            w: 390,  h: 844 }",
+   'у макета экрана нет четвёртого вида'],
 ];
 
 function прогон() {
