@@ -19,7 +19,7 @@
   прочитав этих строк.
 -->
 <link rel="stylesheet" href="../css/tokens.css?v=22">
-<link rel="stylesheet" href="../css/admin.css?v=190">
+<link rel="stylesheet" href="../css/admin.css?v=191">
 <style>
 /* ===================================================================
    ПРАВКИ ЖИВУТ В СТЕНДЕ, А НЕ В admin.css — до слова Кости.
@@ -129,102 +129,12 @@ html, body {
 .st-two { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 @media (min-width: 992px) { .st-two { grid-template-columns: 1fr 1fr; } }
 
-/* ---- ПЛАШКА ВМЕСТО ПЕРЕКЛЮЧАТЕЛЯ ----
-   Слово Кости: «может мы просто туда эту плашку вставим и без
-   переключателя обойдёмся». Два вида начисления не две вкладки: места
-   1–4 попали бы в обе, а это два определения одного понятия. */
-.ad-pts-band {
-    display: flex; gap: var(--space-3); align-items: flex-start;
-    padding: var(--space-3) var(--space-4);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-4);
-}
-.ad-pts-band-text { font-size: var(--fs-sm); color: var(--text-secondary); line-height: 1.5; }
-.ad-pts-band-text b { color: var(--text-primary); font-weight: 600; }
-.ad-pts-band-text span { white-space: nowrap; }
-
-/* ---- ПЛОТНАЯ СЕТКА ПО МЕСТАМ ---- */
-.ad-pts-scroll { max-height: 560px; overflow: auto; }
-.ad-pts { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
-.ad-pts th {
-    position: sticky; top: 0; z-index: 2;
-    background: var(--bg-card);
-    text-align: center;
-    padding: 0 var(--space-3);
-    height: 36px;
-    font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .5px;
-    /* ПОСЧИТАНО: --text-dim даёт 3.19 на карточке #111111 — мимо WCAG при
-       кегле 11. --text-secondary даёт 9.94. */
-    color: var(--text-secondary);
-    box-shadow: inset 0 -1px 0 var(--border-subtle);
-    white-space: nowrap;
-}
-.ad-pts th.ad-pts-place-h { text-align: left; left: 0; z-index: 3; }
-.ad-pts td {
-    /* ЛИНИЯ СТРОКИ — ТЕНЬЮ, А НЕ РАМКОЙ. Прибор дал 37 там, где объявлено
-       36: рамка ячейки таблицы прибавляется к высоте. Внутренняя тень
-       рисует ту же линию и высоты не меняет. Померено, не придумано. */
-    height: 36px; padding: 0 var(--space-3);
-    box-shadow: inset 0 -1px 0 rgba(255,255,255,.04);
-    text-align: center; vertical-align: middle;
-}
-.ad-pts tr:last-child td { box-shadow: none; }
-.ad-pts tr:hover td { background: rgba(255,255,255,.02); }
-.ad-pts-place {
-    position: sticky; left: 0; z-index: 1;
-    background: var(--bg-card);
-    text-align: left; color: var(--text-muted);
-    font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-.ad-pts tr:hover .ad-pts-place { background: #171717; }
-/* Первые четыре места платятся таблицей ВСЕГДА — и в группах тоже.
-   Поэтому они отбиты, а не просто идут сверху. */
-.ad-pts-tbl .ad-pts-place { color: var(--text-primary); font-weight: 600; }
-.ad-pts-tbl td { background: rgba(204,255,0,.03); }
-.ad-pts-sep td { height: 8px; padding: 0; box-shadow: inset 0 -1px 0 var(--border-subtle); background: none; }
-
-.ad-pts-in {
-    /* 28×64 — ВНЕШНИЙ размер. Без border-box прибор дал 30×82: отступы и
-       рамка прибавлялись сверху. Объявленное число должно быть тем, что
-       меряется на экране. */
-    box-sizing: border-box;
-    width: 64px; height: 28px; padding: 0 var(--space-2);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: var(--fs-sm); font-weight: 600; font-family: inherit;
-    text-align: center; font-variant-numeric: tabular-nums;
-    transition: var(--transition-fast);
-}
-.ad-pts-in:hover { border-color: var(--alpha-white-16, rgba(255,255,255,.16)); }
-.ad-pts-in:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 1px;
-    border-color: var(--accent);
-}
-.ad-pts-in[readonly] {
-    background: transparent; border-color: transparent;
-    color: var(--text-secondary); font-weight: 400; cursor: default;
-}
-.ad-pts-in[readonly]:hover { border-color: transparent; }
-/* Нулевое значение не кричит: у итогового их тридцать подряд. */
-.ad-pts-in.ad-pts-zero { color: var(--text-dim); font-weight: 400; }
-/* Уровень, которому столько мест не разыграть, вообще не предлагает поле. */
-.ad-pts-off { color: var(--text-dim); font-size: var(--fs-xs); }
-
-.ad-pts-head {
-    display: flex; flex-wrap: wrap; gap: var(--space-3);
-    align-items: baseline; justify-content: space-between;
-    margin-bottom: var(--space-3);
-}
-.ad-pts-who { font-size: var(--fs-xs); color: var(--text-muted); }
-.ad-pts-who b { color: var(--accent); font-weight: 600; }
-.ad-pts-ver { font-size: var(--fs-xs); color: var(--text-muted); }
-.ad-pts-ver b { color: var(--text-primary); font-weight: 600; }
+/* ---- ЭКРАН ОЧКОВ: CSS ПЕРЕЕХАЛ В `css/admin.css` ----
+   Пока Костя не сказал «да», правки жили здесь, чтобы не трогать продукт.
+   03.10 он сказал «да» — и держать классы `.ad-pts-*` в двух файлах значило
+   бы ЗАВЕСТИ ВТОРОЕ ОПРЕДЕЛЕНИЕ: макет и экран начали бы расходиться, а
+   замер с макета перестал бы говорить про продукт. Теперь макет грузит тот
+   же `admin.css`, что и админка, и своих `.ad-pts-*` не имеет. */
 
 /* Замер лестницы текста */
 .st-mer { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }

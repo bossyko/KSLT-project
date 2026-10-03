@@ -18,17 +18,28 @@
         var container = document.getElementById('ad-settings');
         if (!container) return;
 
-        // Only admin can see settings
-        if (A.currentRole !== 'admin') {
+        /* МЕНЕДЖЕР ВИДИТ ТОЛЬКО ТАБЛИЦУ ОЧКОВ, И ТОЛЬКО ГЛАЗАМИ.
+           До 03.10 раздел целиком отвечал «Доступ запрещён» всем, кроме
+           администратора, — то есть обещанного «менеджер смотрит, но не
+           правит» просто не существовало: менеджер не видел экрана вовсе.
+           Слово Кости: «изменить очки может только администратор, не
+           менеджер» — ИЗМЕНИТЬ, а не увидеть. Макет 03.10 одобрен с блоком
+           «менеджер смотрит».
+           Остальные вкладки — промоушен и доступ — остаются только
+           администратору: они меняют не очки, а правила платформы. */
+        var правит = A.currentRole === 'admin';
+        if (!правит && A.currentRole !== 'manager') {
             container.innerHTML = '<div class="ad-empty-state"><p>' + (isEn ? 'Access denied' : 'Доступ запрещён') + '</p></div>';
             return;
         }
 
-        var tabs = [
-            { key: 'rules', label: L.setSubRules },
-            { key: 'promotions', label: L.setSubPromo },
-            { key: 'access', label: isEn ? 'Access' : 'Доступ' }
-        ];
+        var tabs = правит
+            ? [
+                { key: 'rules', label: L.setSubRules },
+                { key: 'promotions', label: L.setSubPromo },
+                { key: 'access', label: isEn ? 'Access' : 'Доступ' }
+              ]
+            : [ { key: 'rules', label: L.setSubRules } ];
 
         var html = '<div class="ad-rat-tabs" id="setTabs">';
         tabs.forEach(function(t, i) {
@@ -58,10 +69,15 @@
 
         // Load data then render sub-tabs
         await A.loadTournamentLevels(true);
-        await A.loadPointsRules();
+        /* `points_rules` больше не нужна этому экрану: он правит места.
+           Таблица остаётся жива у ручного ввода прошлых результатов
+           (`sections/players.js`), и свести его на места — свой кусок. */
+        await A.местаВсехУровней(true);
         renderSetRules();
-        renderSetPromotions();
-        renderSetAccess();
+        if (A.currentRole === 'admin') {
+            renderSetPromotions();
+            renderSetAccess();
+        }
     }
 
     // ---- Доступ: бесплатный период ----
@@ -139,61 +155,135 @@
         if (clear) clear.addEventListener('click', function() { сохранить(null); });
     }
 
-    // ---- Points Rules Sub-tab ----
+    // ---- Points Rules Sub-tab: ОЧКИ ЗА МЕСТО ----
+    //
+    // ЭКРАН ПРАВИЛ ДРУГУЮ ТАБЛИЦУ. До 03.10 здесь рисовались строки по
+    // СТАДИЯМ (`A.ROUND_KEYS`) и писались в `points_rules`, а начисление
+    // читало `points_by_place` — очки по МЕСТАМ. Два определения одного
+    // понятия: правка на этом экране ни на что не влияла, и «куда делась
+    // таблица на 64 места» объяснялось тем, что экрана у неё не было
+    // никогда. Замер 03.10, шаг 2: 320 строк лежат в боевой, полные, без дыр.
+    //
+    // ПЛАШКА ВМЕСТО ПЕРЕКЛЮЧАТЕЛЯ — слово Кости: «может мы просто туда эту
+    // плашку вставим и без переключателя обойдёмся». Двух вкладок быть не
+    // может: места 1–4 попали бы в обе, и это снова два определения.
+    //
+    // МЕНЕДЖЕР СМОТРИТ, НО НЕ ПРАВИТ — слово Кости: «изменить очки может
+    // только администратор, не менеджер». Поля без рамки и без фона, кнопок
+    // сохранения нет вовсе: наружу выходит только безопасное.
     function renderSetRules() {
         var panel = document.getElementById('setPanelRules');
         if (!panel) return;
 
         var cachedLevels = A.cachedLevels || [];
-        var cachedRules = A.cachedRules || {};
-        var ROUND_KEYS = A.ROUND_KEYS;
-        var ROUND_LABELS = A.ROUND_LABELS;
+        var места = A._местаОчков || [];
+        var версия = A._версияОчков;
+        var правит = A.currentRole === 'admin';
 
         var html = '';
 
         if (cachedLevels.length === 0) {
             html += '<div class="ad-empty-state"><p>' + L.ratNoLevels + '</p></div>';
         } else {
-            html += '<div class="ad-table-card"><div class="ad-table-wrap" style="overflow-x:auto;"><table class="ad-table" id="setRulesTable"><thead><tr>' +
-                '<th>' + L.ratRound + '</th>';
+            /* Разбор `{level_id: {место: {id, очки}}}` — чтобы сохранение
+               знало id строки и не угадывало её по (level_id, place). */
+            var по = {};
+            места.forEach(function(с) {
+                if (!по[с.level_id]) по[с.level_id] = {};
+                по[с.level_id][с.place] = { id: с.id, points: с.points };
+            });
+
+            /* СКОЛЬКО СТРОК РИСОВАТЬ — САМЫЙ БОЛЬШОЙ ПРЕДЕЛ, А НЕ 64.
+               Если однажды все уровни станут восьмёрками, экран нарисует
+               восемь строк, а не 56 прочерков. Число берётся из данных. */
+            var строк = 0;
+            cachedLevels.forEach(function(lv) {
+                строк = Math.max(строк, A.пределМест(lv.id));
+            });
+
+            html += '<div class="ad-table-card">';
+
+            html += '<div class="ad-pts-head">' +
+                '<div class="ad-pts-who">' +
+                    (правит ? L.ratWhoEdits : L.ratWhoViews) +
+                '</div>' +
+                '<div class="ad-pts-ver">' +
+                    (версия
+                        ? L.ratVersionInForce
+                            .replace('{d}', A.датаПоРусски ? A.датаПоРусски(версия.effective_from) : версия.effective_from)
+                            .replace('{w}', версия.per_win)
+                            .replace('{e}', версия.per_entry)
+                        : L.ratVersionNone) +
+                '</div>' +
+            '</div>';
+
+            html += '<div class="ad-pts-band"><div class="ad-pts-band-text">' +
+                '<b>' + L.ratBandTitle + '</b><br>' +
+                '<span>' + L.ratBandKnockoutWho + '</span> ' + L.ratBandKnockout + '<br>' +
+                '<span>' + L.ratBandGroupsWho + '</span> ' + L.ratBandGroups +
+            '</div></div>';
+
+            html += '<div class="ad-pts-scroll"><table class="ad-pts" id="setRulesTable"><thead><tr>' +
+                '<th class="ad-pts-place-h">' + L.ratPlace + '</th>';
 
             cachedLevels.forEach(function(lv) {
                 var name = isEn ? (lv.name_en || lv.name) : lv.name;
-                html += '<th style="text-align:center;position:relative;white-space:nowrap;">' +
+                var предел = A.пределМест(lv.id);
+                html += '<th>' +
                     '<span>' + A.esc(name) + '</span>' +
-                    '<button class="ad-btn-icon set-del-level" data-level-id="' + lv.id + '" title="' + L.ratDeleteLevel + '" ' +
-                    'style="position:absolute;top:2px;right:2px;font-size:11px;width:18px;height:18px;line-height:18px;padding:0;border-radius:50%;background:rgba(255,60,60,0.15);color:#ff4444;cursor:pointer;">' +
-                    '&times;</button></th>';
+                    (предел < строк ? '<span class="ad-pts-limit">' +
+                        L.ratPlacesLimit.replace('{n}', предел) + '</span>' : '') +
+                    (правит ? '<button class="ad-btn-icon set-del-level" data-level-id="' + lv.id +
+                        '" title="' + L.ratDeleteLevel + '">&times;</button>' : '') +
+                '</th>';
             });
             html += '</tr></thead><tbody>';
 
-            ROUND_KEYS.forEach(function(round) {
-                html += '<tr><td><strong>' + ROUND_LABELS[round] + '</strong></td>';
+            for (var место = 1; место <= строк; место++) {
+                /* Первые четыре места отбиты: они платятся таблицей ВСЕГДА,
+                   и в группах тоже (`rating-points.js`, МЕСТ_ПО_ТАБЛИЦЕ). */
+                var класс = место <= 4 ? ' class="ad-pts-tbl"' : '';
+                html += '<tr' + класс + '><td class="ad-pts-place">' + место + '</td>';
                 cachedLevels.forEach(function(lv) {
-                    var val = (cachedRules[lv.id] && cachedRules[lv.id][round]) ? cachedRules[lv.id][round].points : 0;
-                    html += '<td style="text-align:center;"><input type="number" class="ad-field-input set-rule-input" ' +
-                        'data-level="' + lv.id + '" data-round="' + round + '" ' +
-                        'value="' + val + '" min="0" style="width:70px;text-align:center;"></td>';
+                    if (место > A.пределМест(lv.id)) {
+                        html += '<td><span class="ad-pts-off" title="' +
+                            L.ratBeyondLimit + '">&mdash;</span></td>';
+                        return;
+                    }
+                    var с = (по[lv.id] || {})[место];
+                    var знач = с ? с.points : 0;
+                    html += '<td><input type="number" class="ad-pts-in set-rule-input" ' +
+                        'data-level="' + lv.id + '" data-place="' + место + '" ' +
+                        'data-id="' + (с ? с.id : '') + '" ' +
+                        'value="' + знач + '" min="0"' + (правит ? '' : ' readonly') + '></td>';
                 });
                 html += '</tr>';
-            });
+                if (место === 4 && строк > 4) html += '<tr class="ad-pts-sep"><td colspan="' + (cachedLevels.length + 1) + '"></td></tr>';
+            }
 
             html += '</tbody></table></div></div>';
         }
 
-        html += '<div class="ad-rat-actions">' +
-            '<button class="ad-btn ad-btn-secondary" id="setAddLevelBtn">' + L.ratAddLevel + '</button>' +
-            (cachedLevels.length > 0 ? '<button class="ad-btn ad-btn-primary" id="setSaveRulesBtn">' + L.ratSaveRules + '</button>' : '') +
-        '</div>';
+        /* У МЕНЕДЖЕРА КНОПОК НЕТ ВОВСЕ, а не заблокированные.
+           Заблокированная кнопка обещает действие, которого не будет; к тому
+           же писать ему и не даст RLS (`points_by_place_admin`,
+           `sql/схема/versii-tablicy-ochkov.sql`). Наружу выходит только
+           безопасное. */
+        if (правит) {
+            html += '<div class="ad-rat-actions">' +
+                '<button class="ad-btn ad-btn-secondary" id="setAddLevelBtn">' + L.ratAddLevel + '</button>' +
+                (cachedLevels.length > 0 ? '<button class="ad-btn ad-btn-primary" id="setSaveRulesBtn">' + L.ratSaveRules + '</button>' : '') +
+            '</div>';
+        }
 
         panel.innerHTML = html;
 
-        // Save rules
-        var saveBtn = document.getElementById('setSaveRulesBtn');
-        if (saveBtn) saveBtn.addEventListener('click', savePointsRules);
-
-        // Add level
-        document.getElementById('setAddLevelBtn').addEventListener('click', showAddLevelModal);
+        if (правит) {
+            var saveBtn = document.getElementById('setSaveRulesBtn');
+            if (saveBtn) saveBtn.addEventListener('click', savePointsByPlace);
+            var addBtn = document.getElementById('setAddLevelBtn');
+            if (addBtn) addBtn.addEventListener('click', showAddLevelModal);
+        }
 
         // Allow only digits in rule inputs
         panel.addEventListener('keydown', function(e) {
@@ -289,14 +379,67 @@
                 A.showToast(res.error.message, 'error');
                 return;
             }
-            A.showToast(L.ratLevelAdded, 'success');
             overlay.remove();
-            // Reset cache and reload
             A.cachedLevels = [];
             await A.loadTournamentLevels(true);
-            await A.loadPointsRules();
+            await завестиМестаУровня(name);
+            await A.местаВсехУровней(true);
             renderSetRules();
         });
+    }
+
+    /**
+     * НОВЫЙ УРОВЕНЬ БЕЗ МЕСТ НЕ ПЛАТИТ НИЧЕГО.
+     *
+     * До 03.10 «+ Добавить уровень» заводил строку в `tournament_levels` и
+     * строки в `points_rules` — а начисление читает `points_by_place`, где у
+     * нового уровня не было НИ ОДНОЙ строки. То есть уровень создавался уже
+     * неработающим, и экран этого не показывал: он рисовал раунды.
+     *
+     * Теперь месту заводится строка — нулём. НОЛЬ ЗДЕСЬ ЧЕСТНЕЕ ЧИСЛА:
+     * придумывать шкалу новому уровню я не вправе, а пустая строка не даёт
+     * её и ввести (сохранение правит по `id`, а не выдумывает строку).
+     *
+     * ЕСЛИ ВЕРСИЯ УЖЕ В СИЛЕ, СТОРОЖ ОТКАЖЕТ — и правильно: цена мест
+     * задним числом не меняется. Его текст показываем как есть, он
+     * объясняет сам, и рядом говорим, что делать. Окна «новая версия с
+     * даты» пока нет — это следующий шаг куска.
+     */
+    async function завестиМестаУровня(имя) {
+        await A.loadTournamentLevels(true);
+        var уровень = (A.cachedLevels || []).find(function(l) { return l.name === имя; });
+        if (!уровень) { A.showToast(L.ratLevelAdded, 'success'); return; }
+
+        var версия = await A.действующаяВерсия(true);
+        var предел = A.пределМест(уровень.id);
+
+        var строки = [];
+        for (var м = 1; м <= предел; м++) {
+            var строка = { level_id: уровень.id, place: м, points: 0 };
+            if (версия) строка.version_id = версия.id;
+            строки.push(строка);
+        }
+
+        var ответ = await A.client.from('points_by_place').insert(строки);
+        if (ответ.error) {
+            A.showToast(ответ.error.message, 'error');
+            A.showToast(L.ratLevelNeedsVersion, 'info');
+            return;
+        }
+
+        /* РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ ЧТЕНИЕМ, а не ответом без ошибки: RLS
+           отказывает молча нулём строк. */
+        var сверка = await A.client.from('points_by_place')
+            .select('id', { count: 'exact', head: true })
+            .eq('level_id', уровень.id);
+        if (сверка.error || сверка.count !== предел) {
+            A.showToast(L.ratLevelPlacesMismatch
+                .replace('{n}', сверка.count === undefined ? '?' : сверка.count)
+                .replace('{m}', предел), 'error');
+            return;
+        }
+
+        A.showToast(L.ratLevelAddedWithPlaces.replace('{n}', предел), 'success');
     }
 
     /**
@@ -378,30 +521,78 @@
         A.showToast(L.ratLevelDeleted, 'success');
         A.cachedLevels = [];
         await A.loadTournamentLevels(true);
-        await A.loadPointsRules();
+        await A.местаВсехУровней(true);
         renderSetRules();
     }
 
-    async function savePointsRules() {
-        var inputs = document.querySelectorAll('.set-rule-input');
-        var cachedRules = A.cachedRules || {};
-        var toUpsert = [];
+    /**
+     * СОХРАНЕНИЕ ОЧКОВ ЗА МЕСТО.
+     *
+     * ПИШЕМ ТОЛЬКО ИЗМЕНЁННОЕ, а не всю таблицу. Прежний
+     * `savePointsRules` собирал все 60 строк и отправлял `upsert` целиком:
+     * сторож версий (`sql/схема/versii-tablicy-ochkov.sql`) уронил бы такую
+     * запись на первой же строке действующей версии, даже если человек не
+     * тронул ни одного числа.
+     *
+     * ПРАВКА ИДЁТ ПО `id` СТРОКИ, А НЕ ПО ОТБОРУ ЗАНОВО. Правило выведено на
+     * ТБШ: между чтением и записью отбор может разойтись.
+     *
+     * РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ ЧТЕНИЕМ. Ответ без ошибки не значит, что числа
+     * легли: сторож отвечает ошибкой, а RLS — молча нулём строк. Поэтому
+     * таблица перечитывается, и сверяется, что в базе лежит ровно
+     * отправленное.
+     */
+    async function savePointsByPlace() {
+        var поля = document.querySelectorAll('#setRulesTable .set-rule-input');
+        var было = {};
+        (A._местаОчков || []).forEach(function(с) { было[с.id] = с.points; });
 
-        inputs.forEach(function(inp) {
-            var levelId = inp.dataset.level;
-            var round = inp.dataset.round;
-            var pts = parseInt(inp.value, 10) || 0;
-            toUpsert.push({ level_id: levelId, round: round, points: pts });
+        var правки = [];
+        поля.forEach(function(п) {
+            var id = п.dataset.id;
+            if (!id) return;                        // строки нет в базе — не выдумываем
+            var новое = parseInt(п.value, 10);
+            if (isNaN(новое) || новое < 0) return;
+            if (новое === было[id]) return;         // не тронуто
+            правки.push({ id: id, points: новое });
         });
 
-        var res = await A.client.from('points_rules').upsert(toUpsert, { onConflict: 'level_id,round', ignoreDuplicates: false });
-        if (res.error) {
-            A.showToast(res.error.message, 'error');
+        if (!правки.length) {
+            A.showToast(L.ratNothingChanged, 'info');
+            return;
+        }
+
+        for (var i = 0; i < правки.length; i++) {
+            var ответ = await A.client.from('points_by_place')
+                .update({ points: правки[i].points })
+                .eq('id', правки[i].id);
+            if (ответ.error) {
+                /* Сторож versions говорит «уже в силе» — это не сбой, а
+                   устройство: поправка заводится новой версией с будущей
+                   даты. Показываем его текст, он объясняет сам. */
+                A.showToast(ответ.error.message, 'error');
+                await перечитатьМеста();
+                return;
+            }
+        }
+
+        var сверка = await перечитатьМеста();
+        var разошлось = правки.filter(function(п) { return сверка[п.id] !== п.points; });
+        if (разошлось.length) {
+            A.showToast(L.ratSaveMismatch.replace('{n}', разошлось.length), 'error');
             return;
         }
 
         A.showToast(L.ratRulesSaved, 'success');
-        await A.loadPointsRules();
+    }
+
+    /** Перечитка таблицы мест: отдаёт `{id: очки}` из базы и перерисовывает экран. */
+    async function перечитатьМеста() {
+        await A.местаВсехУровней(true);
+        renderSetRules();
+        var есть = {};
+        (A._местаОчков || []).forEach(function(с) { есть[с.id] = с.points; });
+        return есть;
     }
 
     // ---- Promotions Sub-tab ----
