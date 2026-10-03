@@ -185,6 +185,11 @@ const ОТКАТЫ = [
    '    min-height: var(--btn-h-sm);',
    '    height: var(--btn-h-sm);',
    'вкладка раздела держит высоту порогом'],
+
+  ['css/admin.css',
+   '    line-height: var(--lh-tight);',
+   '    line-height: 1.5;',
+   'заголовок раздела — на ступени заголовка'],
 ];
 
 function прогон() {

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КСЛТ — заголовок раздела: 1.5 как есть или 1.1 по лестнице</title>
+<!--
+  ДВЕ ШАПКИ ОДНА ПОД ДРУГОЙ, А НЕ РЯДОМ. Рядом они встали бы в колонку по
+  700 пикселей и поймали медиа-правило 768: полоса вкладок стала бы
+  колонкой, и сравнивать было бы нечего. Каждая шапка здесь во всю ширину
+  окна — то есть ровно так, как в админке.
+
+  Настоящие css: tokens.css, style.css, admin.css. Числа под каждой шапкой
+  страница МЕРИТ САМА при загрузке, а не подписаны мною.
+
+  Содержимое крайнее: самое длинное название турнира из боевой базы.
+  АДМИНКА — ДЕСКТОП И ПЛАНШЕТ, ТЕЛЕФОНА У НЕЁ НЕТ. ТОЛЬКО РУССКИЙ.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=23">
+<link rel="stylesheet" href="../css/style.css?v=383">
+<link rel="stylesheet" href="../css/admin.css?v=196">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); }
+  .zm-wrap { padding: 24px 24px 40px; }
+  .zm-h { font-size: 21px; font-weight: 600; margin: 0 0 4px; }
+  .zm-h span { color: var(--accent); }
+  .zm-note { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px; max-width: 760px; line-height: 1.5; }
+  .zm-case { border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 0 0 16px; margin: 0 0 32px; overflow: hidden; }
+  .zm-case > .ad-trn-sticky-header { position: static; }
+  .zm-cap { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted);
+            padding: 12px 20px 0; }
+  .zm-nums { font-size: 14px; line-height: 1.6; padding: 4px 20px 0; font-variant-numeric: tabular-nums; }
+  .zm-nums b { color: var(--accent); font-weight: 600; }
+  .zm-po .ad-section-title { line-height: var(--lh-tight); }
+  .zm-itog { border-top: 1px solid rgba(255,255,255,.12); padding-top: 20px; font-size: 16px; line-height: 1.6; max-width: 820px; }
+  .zm-itog b { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="zm-wrap">
+
+  <p class="zm-h">Заголовок раздела админки: <span>1.5 как есть</span> или <span>1.1 по лестнице</span></p>
+  <p class="zm-note">
+    Межстрочный заголовка сейчас 1.5 — это ступень основного текста. Токен
+    лестницы для заголовков — <code>--lh-tight: 1.1</code>. Ниже две настоящие
+    липкие шапки с самым длинным названием турнира. Числа страница меряет сама.
+    Касается всех пятнадцати разделов админки, а не только турниров.
+  </p>
+
+  <div class="zm-case zm-kak">
+    <div class="ad-trn-sticky-header">
+      <div class="ad-section-header">
+        <h2 class="ad-section-title">Редактирование турнира</h2>
+        <button class="ad-btn ad-btn-secondary">Назад к списку</button>
+      </div>
+      <div class="ad-tabs ad-trn-nav-tabs">
+        <button class="ad-tab active">Редактирование</button>
+        <button class="ad-tab">Заявки</button>
+        <button class="ad-tab">Сетка</button>
+        <button class="ad-tab">Расписание запусков</button>
+        <button class="ad-tab">Результаты</button>
+      </div>
+    </div>
+    <div class="zm-cap">как есть — межстрочный 1.5</div>
+    <div class="zm-nums" data-nums></div>
+  </div>
+
+  <div class="zm-case zm-po">
+    <div class="ad-trn-sticky-header">
+      <div class="ad-section-header">
+        <h2 class="ad-section-title">Редактирование турнира</h2>
+        <button class="ad-btn ad-btn-secondary">Назад к списку</button>
+      </div>
+      <div class="ad-tabs ad-trn-nav-tabs">
+        <button class="ad-tab active">Редактирование</button>
+        <button class="ad-tab">Заявки</button>
+        <button class="ad-tab">Сетка</button>
+        <button class="ad-tab">Расписание запусков</button>
+        <button class="ad-tab">Результаты</button>
+      </div>
+    </div>
+    <div class="zm-cap">по лестнице — межстрочный 1.1 (--lh-tight)</div>
+    <div class="zm-nums" data-nums></div>
+  </div>
+
+  <div class="zm-itog" data-itog></div>
+</div>
+
+<script>
+/* Страница не подписывает себя числами, которых не мерила. */
+(function () {
+    var снято = [];
+    document.querySelectorAll('.zm-case').forEach(function (к) {
+        var з = к.querySelector('.ad-section-title');
+        var ш = к.querySelector('.ad-trn-sticky-header');
+        var п = к.querySelector('.ad-tabs');
+        var c = getComputedStyle(з);
+        var d = {
+            мс: c.lineHeight,
+            отношение: (parseFloat(c.lineHeight) / parseFloat(c.fontSize)).toFixed(2),
+            кегль: parseFloat(c.fontSize),
+            строк: Math.round(parseFloat(c.lineHeight) ? з.getBoundingClientRect().height / parseFloat(c.lineHeight) : 1),
+            hЗаг: +з.getBoundingClientRect().height.toFixed(1),
+            hШапки: +ш.getBoundingClientRect().height.toFixed(1),
+            hПолосы: +п.getBoundingClientRect().height.toFixed(1)
+        };
+        снято.push(d);
+        к.querySelector('[data-nums]').innerHTML =
+            'кегль <b>' + d.кегль + '</b> · межстрочный <b>' + d.мс + '</b> (отношение ' + d.отношение + ')' +
+            ' · строк в заголовке <b>' + d.строк + '</b><br>' +
+            'высота заголовка <b>' + d.hЗаг + '</b> · полоса вкладок <b>' + d.hПолосы + '</b> · ' +
+            'ВСЯ ШАПКА <b>' + d.hШапки + '</b>';
+    });
+    var разница = +(снято[0].hШапки - снято[1].hШапки).toFixed(1);
+    document.querySelector('[data-itog]').innerHTML =
+        'Ширина окна сейчас <b>' + window.innerWidth + '</b>. ' +
+        'Шапка станет ниже на <b>' + разница + ' px</b>. ' +
+        'Заголовок теряет <b>' + (снято[0].hЗаг - снято[1].hЗаг).toFixed(1) +
+        ' px</b> собственной высоты, но шапка столько не отдаёт: ряд держит ' +
+        'кнопка «Назад» ростом ' + Math.round(
+            document.querySelector('.ad-btn').getBoundingClientRect().height) +
+        ' — она выше заголовка, пока тот в одну строку.<br>' +
+        'Строк в заголовке сейчас <b>' + снято[0].строк + '</b>. ' +
+        (снято[0].строк > 1
+          ? 'На двух строках разница доходит до 20.8 — но в продукте заголовок ' +
+            'постоянный и в одну строку, так что это случай не из жизни.'
+          : 'Это и есть случай из жизни: подпись постоянная и короткая.');
+})();
+</script>
+</body>
+</html>
