@@ -89,13 +89,45 @@ if (await page.locator('.td-hero-locked').count()) {
 }
 
 if (естьТаблица) {
+    /* НАЗВАНИЕ ЛИГИ ЖИВЁТ НА ПЬЕДЕСТАЛЕ, А НЕ НАД ТАБЛИЦЕЙ. Первая редакция
+       прибора брала только `.td-results-title` и падала на `undefined`, когда
+       заголовок переехал. Падение было верным по сути — заголовка там и не
+       должно быть, — но прибор обязан СКАЗАТЬ это, а не рухнуть. Ищем
+       название ближайшим заголовком выше: пьедестал лиги или свой. */
     const м = await page.evaluate(() => {
-        return [...document.querySelectorAll('.td-results-table')].map(таб => ({
-            заголовок: (таб.querySelector('.td-results-title') || {}).textContent.trim(),
-            строк: таб.querySelectorAll('tbody tr').length,
-            очки: [...таб.querySelectorAll('.td-res-pts')].slice(1).map(e => e.textContent.trim())
-        }));
+        const текст = э => (э && э.textContent ? э.textContent.trim() : '');
+        return [...document.querySelectorAll('.td-results-table')].map(таб => {
+            let имя = текст(таб.querySelector('.td-results-title'));
+            if (!имя) {
+                let выше = таб.previousElementSibling;
+                while (выше && !имя) {
+                    if (выше.classList && выше.classList.contains('td-league-title')) имя = текст(выше);
+                    выше = выше.previousElementSibling;
+                }
+            }
+            return {
+                заголовок: имя || '(без заголовка)',
+                строк: таб.querySelectorAll('tbody tr').length,
+                очки: [...таб.querySelectorAll('.td-res-pts')].slice(1).map(e => текст(e))
+            };
+        });
     });
+    const пьедесталы = await page.evaluate(() =>
+        [...document.querySelectorAll('.td-podium')].map(п => ({
+            лига: (() => {
+                let в = п.previousElementSibling;
+                while (в) {
+                    if (в.classList && в.classList.contains('td-league-title')) return в.textContent.trim();
+                    в = в.previousElementSibling;
+                }
+                return '(без названия)';
+            })(),
+            мест: п.children.length
+        })));
+
+    console.log('\nПьедесталов на странице:', пьедесталы.length);
+    пьедесталы.forEach(п => console.log('  · ' + п.лига + ' — мест ' + п.мест));
+
     console.log('\nТаблиц итогов на странице:', м.length);
     м.forEach(т => console.log('  · ' + т.заголовок + ' — строк ' + т.строк +
         ', очки ' + т.очки.join(' · ')));
