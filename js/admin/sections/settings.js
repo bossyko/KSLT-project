@@ -9,6 +9,14 @@
     var L = A.L;
     var isEn = A.isEn;
 
+    /* СОСТОЯНИЕ ЭКРАНА ОЧКОВ — СВОЁ, А НЕ ОБЩИЙ КЭШ.
+       Общий `A._местаОчков` держит места ДЕЙСТВУЮЩЕЙ версии: по ним считает
+       начисление. Экран умеет показывать и невступившую — и если бы он
+       писал в общий кэш, начисление могло бы взять числа версии, которую
+       человек просто открыл посмотреть. Беда родилась бы на шве. */
+    var _версияЭкрана = null;   // id версии, открытой на экране
+    var _местаЭкрана = [];      // её строки
+
     // ---- Promotions state ----
     var _promoGenderFilter = '';
     var _promoCatFilter = '';
@@ -72,7 +80,10 @@
         /* `points_rules` больше не нужна этому экрану: он правит места.
            Таблица остаётся жива у ручного ввода прошлых результатов
            (`sections/players.js`), и свести его на места — свой кусок. */
-        await A.местаВсехУровней(true);
+        await A.всеВерсии(true);
+        var действ = await A.действующаяВерсия();
+        _версияЭкрана = действ ? действ.id : null;
+        _местаЭкрана = await A.местаВерсии(_версияЭкрана, true);
         renderSetRules();
         if (A.currentRole === 'admin') {
             renderSetPromotions();
@@ -155,6 +166,53 @@
         if (clear) clear.addEventListener('click', function() { сохранить(null); });
     }
 
+    /**
+     * ПОЛОСА ВЕРСИЙ — ПЕРЕКЛЮЧАТЕЛЬ, А НЕ ПОДПИСЬ.
+     *
+     * Версий ОДНА — полосы нет вовсе: переключать нечего, и лишняя строка
+     * только шумит. Две и больше — пилюли; действующая и невступившие стоят
+     * всегда, прошедшие прячутся за «Ещё N».
+     *
+     * ПРАВИЛО, ВЫВЕДЕННОЕ НА ИТОГАХ ДВУХ ЛИГ, ПРИМЕНЯЕТСЯ БЕЗ НОВОГО
+     * РАЗБОРА: длинный список отсекается и раскрывается нажатием — там это
+     * были 8 строк и «Показать всех (64)».
+     *
+     * ЭТО НЕ ТОТ ПЕРЕКЛЮЧАТЕЛЬ, ОТ КОТОРОГО ОТКАЗАЛИСЬ. Там две вкладки
+     * делили СПОСОБЫ начисления, и места 1–4 попадали бы в обе. Здесь
+     * версии: место 1 версии 2021 года и место 1 версии 2026-го — разные
+     * строки разных таблиц, они не пересекаются по устройству.
+     */
+    var _всеВерсииПоказаны = false;
+
+    function полосаВерсий(выбрана) {
+        var все = A._версииОчков || [];
+        if (все.length < 2) return '';
+
+        var сегодня = A.сегодняБишкек();
+        var действующая = все.filter(function(в) { return в.effective_from <= сегодня; })[0];
+        var видимые = все.filter(function(в) {
+            return _всеВерсииПоказаны
+                || в.effective_from > сегодня
+                || (действующая && в.id === действующая.id)
+                || в.id === выбрана;
+        });
+        var спрятано = все.length - видимые.length;
+
+        var html = '<div class="ad-pts-vers">';
+        if (спрятано > 0) {
+            html += '<button type="button" class="ad-pts-ver-pill ad-pts-ver-more" id="setMoreVers">' +
+                L.ratMoreVersions.replace('{n}', спрятано) + '</button>';
+        }
+        видимые.slice().reverse().forEach(function(в) {
+            var вСиле = в.effective_from <= сегодня;
+            html += '<button type="button" class="ad-pts-ver-pill' +
+                (в.id === выбрана ? ' ad-pts-ver-on' : '') + '" data-ver="' + в.id + '">' +
+                (вСиле ? L.ratPillInForce : L.ratPillComing).replace('{d}', в.effective_from) +
+                '</button>';
+        });
+        return html + '</div>';
+    }
+
     // ---- Points Rules Sub-tab: ОЧКИ ЗА МЕСТО ----
     //
     // ЭКРАН ПРАВИЛ ДРУГУЮ ТАБЛИЦУ. До 03.10 здесь рисовались строки по
@@ -184,9 +242,12 @@
         var cachedLevels = (A.cachedLevels || []).slice().sort(function(a, b) {
             return (b.sort_order || 0) - (a.sort_order || 0);
         });
-        var места = A._местаОчков || [];
-        var версия = A._версияОчков;
-        var правит = A.currentRole === 'admin';
+        var места = _местаЭкрана || [];
+        var версия = A.версияПоId(_версияЭкрана);
+        var вСиле = A.версияВСиле(версия);
+        /* ПРАВИТ АДМИН И ТОЛЬКО НЕВСТУПИВШУЮ. Два условия, и второе —
+           устройство, а не вежливость: сторож в базе откажет и админу. */
+        var правит = A.currentRole === 'admin' && версия !== null && !вСиле;
 
         var html = '';
 
@@ -211,19 +272,40 @@
 
             html += '<div class="ad-table-card">';
 
+            var кто = A.currentRole === 'admin'
+                ? (правит ? L.ratWhoEdits : L.ratWhoReadonly)
+                : L.ratWhoViews;
+
+            /* ЗА ПОБЕДУ И ЗА УЧАСТИЕ — ТРЕТЬЯ ЧАСТЬ ВЕРСИИ.
+               В таблице их нет вовсе: они не привязаны к месту, их получает
+               тот, кому таблица не платит. У невступившей версии — поля, у
+               действующей — текст. */
+            var числаВерсии = '';
+            if (версия) {
+                числаВерсии = правит
+                    ? '<span class="ad-pts-ver">' +
+                        '<label for="setPerWin">' + L.ratPerWin + '</label>' +
+                        '<input id="setPerWin" type="number" min="0" class="ad-pts-in" value="' + версия.per_win + '">' +
+                        '<label for="setPerEntry">' + L.ratPerEntry + '</label>' +
+                        '<input id="setPerEntry" type="number" min="0" class="ad-pts-in" value="' + версия.per_entry + '">' +
+                      '</span>'
+                    : '<span class="ad-pts-ver">' + L.ratPerWin + ' <b>' + версия.per_win + '</b> · ' +
+                      L.ratPerEntry + ' <b>' + версия.per_entry + '</b></span>';
+            }
+
             html += '<div class="ad-pts-head">' +
-                '<div class="ad-pts-who">' +
-                    (правит ? L.ratWhoEdits : L.ratWhoViews) +
-                '</div>' +
+                '<div class="ad-pts-who">' + кто + '</div>' +
                 '<div class="ad-pts-ver">' +
                     (версия
-                        ? L.ratVersionInForce
-                            .replace('{d}', A.датаПоРусски ? A.датаПоРусски(версия.effective_from) : версия.effective_from)
-                            .replace('{w}', версия.per_win)
-                            .replace('{e}', версия.per_entry)
+                        ? (вСиле ? L.ratVersionInForce : L.ratVersionComing)
+                            .replace('{d}', версия.effective_from)
                         : L.ratVersionNone) +
                 '</div>' +
             '</div>';
+
+            if (числаВерсии) html += '<div class="ad-pts-head">' + числаВерсии + '</div>';
+
+            html += полосаВерсий(_версияЭкрана);
 
             html += '<div class="ad-pts-band"><div class="ad-pts-band-text">' +
                 '<b>' + L.ratBandTitle + '</b><br>' +
@@ -279,10 +361,20 @@
            же писать ему и не даст RLS (`points_by_place_admin`,
            `sql/схема/versii-tablicy-ochkov.sql`). Наружу выходит только
            безопасное. */
+        /* КНОПКИ ПО СОСТОЯНИЮ, А НЕ ПО РОЛИ ОДНОЙ.
+           · невступившая у админа — править, удалить версию, сохранить;
+           · действующая у админа — только «Новая версия с даты…»: править
+             её нельзя, и обещать этого кнопкой нельзя тоже;
+           · менеджер — ни одной. */
         if (правит) {
             html += '<div class="ad-rat-actions">' +
                 '<button class="ad-btn ad-btn-secondary" id="setAddLevelBtn">' + L.ratAddLevel + '</button>' +
+                '<button class="ad-btn ad-btn-secondary" id="setDelVerBtn">' + L.ratDeleteVersion + '</button>' +
                 (cachedLevels.length > 0 ? '<button class="ad-btn ad-btn-primary" id="setSaveRulesBtn">' + L.ratSaveRules + '</button>' : '') +
+            '</div>';
+        } else if (A.currentRole === 'admin' && cachedLevels.length > 0) {
+            html += '<div class="ad-rat-actions">' +
+                '<button class="ad-btn ad-btn-primary" id="setNewVerBtn">' + L.ratNewVersion + '</button>' +
             '</div>';
         }
 
@@ -294,6 +386,27 @@
             var addBtn = document.getElementById('setAddLevelBtn');
             if (addBtn) addBtn.addEventListener('click', showAddLevelModal);
         }
+
+        /* Полоса версий: переключение и раскрытие спрятанных. */
+        panel.querySelectorAll('.ad-pts-ver-pill[data-ver]').forEach(function(п) {
+            п.addEventListener('click', function() {
+                открытьВерсию(п.getAttribute('data-ver'));
+            });
+        });
+        var ещё = document.getElementById('setMoreVers');
+        if (ещё) ещё.addEventListener('click', function() {
+            _всеВерсииПоказаны = true;
+            renderSetRules();
+        });
+
+        /* Кнопка «Сохранить» на ДЕЙСТВУЮЩЕЙ версии не рисуется вовсе
+           (`правит` ложно), поэтому отдельная кнопка «Новая версия с даты»
+           стоит там, где её ищут глазами — рядом с таблицей. */
+        var новБтн = document.getElementById('setNewVerBtn');
+        if (новБтн) новБтн.addEventListener('click', function() { окноНовойВерсии(null); });
+
+        var удалБтн = document.getElementById('setDelVerBtn');
+        if (удалБтн) удалБтн.addEventListener('click', удалитьВерсию);
 
         // Allow only digits in rule inputs
         panel.addEventListener('keydown', function(e) {
@@ -546,7 +659,10 @@
         A.showToast(L.ratLevelDeleted, 'success');
         A.cachedLevels = [];
         await A.loadTournamentLevels(true);
-        await A.местаВсехУровней(true);
+        await A.всеВерсии(true);
+        var действ = await A.действующаяВерсия();
+        _версияЭкрана = действ ? действ.id : null;
+        _местаЭкрана = await A.местаВерсии(_версияЭкрана, true);
         renderSetRules();
     }
 
@@ -570,7 +686,7 @@
     async function savePointsByPlace() {
         var поля = document.querySelectorAll('#setRulesTable .set-rule-input');
         var было = {};
-        (A._местаОчков || []).forEach(function(с) { было[с.id] = с.points; });
+        (_местаЭкрана || []).forEach(function(с) { было[с.id] = с.points; });
 
         var правки = [];
         поля.forEach(function(п) {
@@ -582,9 +698,23 @@
             правки.push({ id: id, points: новое });
         });
 
-        if (!правки.length) {
+        /* ЗА ПОБЕДУ И ЗА УЧАСТИЕ — ТАКАЯ ЖЕ ПРАВКА, как число в таблице:
+           они часть версии, а не настройка рядом с ней. */
+        var пв = document.getElementById('setPerWin');
+        var пу = document.getElementById('setPerEntry');
+        var версия = A.версияПоId(_версияЭкрана);
+        var числа = {};
+        if (пв && версия && parseInt(пв.value, 10) !== версия.per_win)   числа.per_win   = parseInt(пв.value, 10);
+        if (пу && версия && parseInt(пу.value, 10) !== версия.per_entry) числа.per_entry = parseInt(пу.value, 10);
+
+        if (!правки.length && !Object.keys(числа).length) {
             A.showToast(L.ratNothingChanged, 'info');
             return;
+        }
+
+        if (Object.keys(числа).length) {
+            var оч = await A.client.from('points_versions').update(числа).eq('id', версия.id);
+            if (оч.error) { A.showToast(оч.error.message, 'error'); return; }
         }
 
         for (var i = 0; i < правки.length; i++) {
@@ -603,6 +733,13 @@
 
         var сверка = await перечитатьМеста();
         var разошлось = правки.filter(function(п) { return сверка[п.id] !== п.points; });
+
+        /* Числа версии сверяются чтением так же, как места. */
+        var стало = A.версияПоId(_версияЭкрана);
+        if (стало) {
+            if (числа.per_win   !== undefined && стало.per_win   !== числа.per_win)   разошлось.push(1);
+            if (числа.per_entry !== undefined && стало.per_entry !== числа.per_entry) разошлось.push(1);
+        }
         if (разошлось.length) {
             A.showToast(L.ratSaveMismatch.replace('{n}', разошлось.length), 'error');
             return;
@@ -611,13 +748,168 @@
         A.showToast(L.ratRulesSaved, 'success');
     }
 
+    /**
+     * ОКНО «НОВАЯ ВЕРСИЯ С ДАТЫ».
+     *
+     * Слово Кости 03.10: «он 1 декабря решил изменить начисления и просто в
+     * таблице введёт новые значения, сохранит, и всё да?». Почти: спрашиваем
+     * ОДИН раз — с какой даты. Без этого вопроса ответ «со дня изменения»
+     * был бы неправдой: сторож не даёт править версию, которая уже в силе.
+     *
+     * РАНЬШЕ ЗАВТРАШНЕГО ДНЯ НЕЛЬЗЯ, и это не вежливость, а устройство:
+     * турнир, начавшийся сегодня, уже идёт по старым очкам, а версия «с
+     * сегодня» пересчитала бы его на середине. Сторож откажет и сам.
+     *
+     * Окно — `ad-modal`, то же семейство, что у «+ Добавить уровень» на этом
+     * же экране. Второе семейство (`ad-confirm-modal`) стоит на другом фоне,
+     * и два семейства на одном экране — шов.
+     */
+    function окноНовойВерсии(правки) {
+        var завтра = new Date(A.сегодняБишкек() + 'T12:00:00Z');
+        завтра.setUTCDate(завтра.getUTCDate() + 1);
+        var минимум = завтра.toISOString().slice(0, 10);
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML =
+            '<div class="ad-modal" style="max-width:400px;">' +
+                '<div class="ad-modal-header">' + L.ratNewVersionTitle + '</div>' +
+                '<div class="ad-modal-body">' +
+                    '<p class="ad-pts-hint">' +
+                        (правки && правки.length
+                            ? L.ratNewVersionChanged.replace('{n}', правки.length)
+                            : L.ratNewVersionCopy) +
+                    '</p>' +
+                    '<label class="ad-field-label" for="setVerDate">' + L.ratNewVersionFrom + '</label>' +
+                    '<input id="setVerDate" type="date" class="ad-field-input" value="' + минимум + '" min="' + минимум + '">' +
+                    '<p class="ad-pts-hint">' + L.ratNewVersionWhyTomorrow + '</p>' +
+                '</div>' +
+                '<div class="ad-modal-footer">' +
+                    '<button class="ad-btn ad-btn-secondary" id="setVerCancel">' + L.cancel + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="setVerOk">' + L.ratNewVersionGo + '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        document.getElementById('setVerCancel').addEventListener('click', function() { overlay.remove(); });
+        document.getElementById('setVerOk').addEventListener('click', async function() {
+            var дата = document.getElementById('setVerDate').value;
+            if (!дата || дата < минимум) {
+                A.showToast(L.ratNewVersionWhyTomorrow, 'error');
+                return;
+            }
+            overlay.remove();
+            await завестиВерсию(дата, правки);
+        });
+    }
+
+    /**
+     * ЗАВЕСТИ ВЕРСИЮ: строка версии, копия всех её мест, затем правки.
+     *
+     * ПОРЯДОК, А НЕ ИСКЛЮЧЕНИЕ. Сначала версия, потом копия мест, и только
+     * потом правки: налить правки в несуществующую версию нельзя — упадёт
+     * внешний ключ; править до копирования нечего.
+     *
+     * РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ ЧТЕНИЕМ: ответ без ошибки не значит, что строки
+     * легли, RLS отказывает молча нулём строк.
+     */
+    async function завестиВерсию(дата, правки) {
+        var откуда = A.версияПоId(_версияЭкрана);
+
+        var созд = await A.client.from('points_versions')
+            .insert({
+                effective_from: дата,
+                per_win:   откуда ? откуда.per_win   : 25,
+                per_entry: откуда ? откуда.per_entry : 10,
+                note: L.ratNewVersionNote.replace('{d}', откуда ? откуда.effective_from : '-')
+            })
+            .select('id, effective_from, per_win, per_entry')
+            .single();
+        if (созд.error) { A.showToast(созд.error.message, 'error'); return; }
+
+        var новая = созд.data;
+
+        /* Копия мест: ВСЕ строки версии-источника, включая те, что за
+           пределом уровня. Предел прячет их на чтении, а не удаляет, и новая
+           версия обязана быть полной копией, а не обрезанной. */
+        var источник = await A.client.from('points_by_place')
+            .select('level_id, place, points')
+            .eq('version_id', откуда ? откуда.id : null);
+        if (источник.error) { A.showToast(источник.error.message, 'error'); return; }
+
+        var строки = (источник.data || []).map(function(с) {
+            return { version_id: новая.id, level_id: с.level_id, place: с.place, points: с.points };
+        });
+
+        if (строки.length) {
+            var лили = await A.client.from('points_by_place').insert(строки);
+            if (лили.error) { A.showToast(лили.error.message, 'error'); return; }
+        }
+
+        var сверка = await A.client.from('points_by_place')
+            .select('id', { count: 'exact', head: true })
+            .eq('version_id', новая.id);
+        if (сверка.error || сверка.count !== строки.length) {
+            A.showToast(L.ratVersionCopyMismatch
+                .replace('{n}', сверка.count === undefined ? '?' : сверка.count)
+                .replace('{m}', строки.length), 'error');
+            return;
+        }
+
+        await A.всеВерсии(true);
+        await открытьВерсию(новая.id);
+
+        /* Правки, набранные на действующей версии, переносим в новую — по
+           МЕСТУ И УРОВНЮ, а не по id: id строк в новой версии свои. */
+        if (правки && правки.length) {
+            var поКлючу = {};
+            (_местаЭкрана || []).forEach(function(с) { поКлючу[с.level_id + '|' + с.place] = с.id; });
+            for (var i = 0; i < правки.length; i++) {
+                var id = поКлючу[правки[i].level_id + '|' + правки[i].place];
+                if (!id) continue;
+                var о = await A.client.from('points_by_place')
+                    .update({ points: правки[i].points }).eq('id', id);
+                if (о.error) { A.showToast(о.error.message, 'error'); return; }
+            }
+            await перечитатьМеста();
+        }
+
+        A.showToast(L.ratVersionCreated.replace('{d}', дата), 'success');
+    }
+
+    /** Удалить невступившую версию: места уедут с ней (ON DELETE CASCADE). */
+    async function удалитьВерсию() {
+        var версия = A.версияПоId(_версияЭкрана);
+        if (!версия || A.версияВСиле(версия)) return;
+
+        if (!confirm(L.ratDeleteVersionConfirm.replace('{d}', версия.effective_from))) return;
+
+        var о = await A.client.from('points_versions').delete().eq('id', версия.id);
+        if (о.error) { A.showToast(о.error.message, 'error'); return; }
+
+        await A.всеВерсии(true);
+        var действ = await A.действующаяВерсия();
+        await открытьВерсию(действ ? действ.id : null);
+        A.showToast(L.ratVersionDeleted, 'success');
+    }
+
     /** Перечитка таблицы мест: отдаёт `{id: очки}` из базы и перерисовывает экран. */
     async function перечитатьМеста() {
-        await A.местаВсехУровней(true);
+        /* ОСТАЁМСЯ НА ОТКРЫТОЙ ВЕРСИИ, а не прыгаем на действующую: человек
+           правил невступившую, и после сохранения он обязан видеть её же. */
+        await A.всеВерсии(true);
+        _местаЭкрана = await A.местаВерсии(_версияЭкрана, true);
         renderSetRules();
         var есть = {};
-        (A._местаОчков || []).forEach(function(с) { есть[с.id] = с.points; });
+        (_местаЭкрана || []).forEach(function(с) { есть[с.id] = с.points; });
         return есть;
+    }
+
+    /** Открыть на экране другую версию. Начисления это не касается. */
+    async function открытьВерсию(id) {
+        _версияЭкрана = id;
+        _местаЭкрана = await A.местаВерсии(id, true);
+        renderSetRules();
     }
 
     // ---- Promotions Sub-tab ----

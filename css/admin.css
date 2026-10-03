@@ -7514,3 +7514,33 @@ select.ad-field-input {
 .ad-pts-who b { color: var(--accent); font-weight: 600; }
 .ad-pts-ver { font-size: var(--fs-xs); color: var(--text-muted); }
 .ad-pts-ver b { color: var(--text-primary); font-weight: 600; }
+.ad-pts-ver label { margin-left: var(--space-2); }
+.ad-pts-ver .ad-pts-in { margin-left: var(--space-2); vertical-align: middle; }
+
+/* ---- ПОЛОСА ВЕРСИЙ ----
+   Переключатель, а не подпись: нажал пилюлю — таблица под ней показывает ТУ
+   версию. Версий одна — полосы нет вовсе (рисуется только от двух).
+   Высота 28 — ступень кнопок. Цель нажатия 28 меньше 44, и это НАМЕРЕНО:
+   админка живёт на десктопе и планшете, где указатель точный; поднять до 44
+   — работа куска про цели нажатия, он записан отдельно. */
+.ad-pts-vers {
+    display: flex; flex-wrap: wrap; gap: var(--space-2);
+    padding: 0 var(--space-4) var(--space-3);
+}
+.ad-pts-ver-pill {
+    min-height: 28px; display: inline-flex; align-items: center;
+    padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full);
+    font-size: var(--fs-xs); font-family: inherit; cursor: pointer;
+    background: var(--bg-surface); color: var(--text-muted);
+}
+.ad-pts-ver-pill:hover { color: var(--text-primary); }
+.ad-pts-ver-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Выбранная — чёрным по лайму: контраст 5.30, ПОСЧИТАНО прибором макета */
+.ad-pts-ver-on { background: var(--accent); color: var(--bg-base); font-weight: 600; }
+.ad-pts-ver-more { background: none; text-decoration: underline; }
+
+.ad-pts-hint {
+    font-size: var(--fs-sm); color: var(--text-secondary);
+    line-height: 1.5; margin: 0 0 var(--space-4);
+}
+.ad-modal-body .ad-pts-hint:last-child { margin: var(--space-3) 0 0; }
