@@ -5033,7 +5033,7 @@
             // Стрелки убраны: место в очереди меняют перетаскиванием строки
 
             var времяHtml = сыгран
-                ? '<span style="font-weight:600;">' + (время || '\u2014') + '</span>'
+                ? '<span class="ad-sched-time-set">' + (время || '\u2014') + '</span>'
                 : '<input type="text" class="ad-sched-time" value="' + время + '" placeholder="00:00" ' +
                   'maxlength="5" inputmode="numeric" autocomplete="off">';
 
@@ -5082,7 +5082,7 @@
             var классСтроки = сыгран ? ' class="ad-sched-row-done"'
                 : (m.status === 'live' ? ' class="ad-sched-row-live"' : '');
             html += '<tr data-match-id="' + m.id + '" data-round-key="' + A.esc(ключКруга) + '"' + классСтроки + '>' +
-                '<td style="text-align:center;color:var(--text-dim);">' + (idx + 1) + '</td>' +
+                '<td class="ad-sched-idx">' + (idx + 1) + '</td>' +
                 '<td>' + времяHtml + '</td>' +
                 '<td><span class="ad-badge">' + круг + '</span></td>' +
                 '<td>' + пара1 + '</td>' +
@@ -5165,7 +5165,7 @@
         function подпись(слот) {
             if (!слот) return '<span class="ad-reg-cell-muted">' + L.byeLabel + '</span>';
             var id = именаСлотов[слот];
-            if (!id) return '<span style="color:var(--text-secondary);">' + слот + '</span>';
+            if (!id) return '<span class="ad-sched-slot-empty">' + слот + '</span>';
             // Имена берём тем же способом, что и настоящая сетка: в парном
             // турнире показываются оба, в одиночном — игрок
             var имя;
@@ -5175,7 +5175,7 @@
                 var и = playersMap[id];
                 имя = A.esc(и ? (isEn ? (и.name_en || и.name) : и.name) : id);
             }
-            return '<b>' + имя + '</b> <span style="color:var(--text-dim);font-size:0.75rem;">' + слот + '</span>';
+            return '<b>' + имя + '</b> <span class="ad-sched-slot">' + слот + '</span>';
         }
 
         var сыгранныхГрупп = 0;
@@ -5184,9 +5184,9 @@
             if (мг.length && мг.every(function(m) { return m.status === 'completed'; })) сыгранныхГрупп++;
         }
 
-        var html = '<div class="ad-grp-playoff-section" style="margin-top:24px;">';
+        var html = '<div class="ad-grp-playoff-section ad-sched-playoff">';
         html += '<div class="ad-grp-section-title">' + L.playoffPreviewTitle + '</div>';
-        html += '<p style="margin:-4px 0 12px;font-size:0.8rem;color:var(--text-dim);">' +
+        html += '<p class="ad-sched-podskazka">' +
             L.playoffPreviewHint
                 .replace('{done}', сыгранныхГрупп)
                 .replace('{all}', groupCount)
@@ -5196,9 +5196,9 @@
         html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><tbody>';
         for (var м = 0; м < размер; м += 2) {
             html += '<tr>' +
-                '<td style="width:36px;text-align:center;color:var(--text-dim);">' + (м / 2 + 1) + '</td>' +
+                '<td class="ad-sched-num">' + (м / 2 + 1) + '</td>' +
                 '<td>' + подпись(сетка[м]) + '</td>' +
-                '<td style="width:40px;text-align:center;color:var(--text-dim);">vs</td>' +
+                '<td class="ad-sched-vs">vs</td>' +
                 '<td>' + подпись(сетка[м + 1]) + '</td>' +
             '</tr>';
         }
@@ -5206,7 +5206,7 @@
 
         // Доп. матчи: без них в сетке висят «IG1» и «IG2» непонятно откуда
         if (расклад.допМатчи.length) {
-            html += '<div class="ad-sched-note" style="margin-top:10px;">' + L.igStageTitle + ': ' +
+            html += '<div class="ad-sched-note ad-sched-note-top">' + L.igStageTitle + ': ' +
                 расклад.допМатчи.map(function(дм) {
                     return 'IG' + дм.номер + ' — ' + дм.первый.метка + ' vs ' + дм.второй.метка;
                 }).join(', ') + '</div>';
@@ -6006,7 +6006,7 @@
 
         // ---- Playoff bracket (after IG, after groups) ----
         if (hasPlayoff) {
-            html += '<div class="ad-grp-playoff-section" style="margin-top:24px;">';
+            html += '<div class="ad-grp-playoff-section ad-sched-playoff">';
             html += '<div class="ad-grp-section-title">' + L.playoffTitle + '</div>';
             var plR1 = plMatches.filter(function(m) { return m.round_number === 1; });
             var plDrawSize = 1;

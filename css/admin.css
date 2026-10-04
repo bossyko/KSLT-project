@@ -850,6 +850,46 @@ body.ad-page {
 .ad-reg-itogo { margin-top: var(--space-4); text-align: center; }
 .ad-reg-itogo p { margin-bottom: var(--space-2); }
 
+/* ═══════════════════════════════════════════════════════════════════
+   ПАНЕЛЬ РАСПИСАНИЯ ЗАПУСКОВ
+   ═══════════════════════════════════════════════════════════════════
+   Замер 04.10: десять инлайнов, среди них кегли `0.75rem` (12) и
+   `0.8rem` (12.8) — второго на шкале нет, — и пять мест с `--text-dim`
+   (3.21 на фоне карточки, мимо WCAG AA). Ступень одна: 12. */
+.ad-sched-num {
+    width: 36px;
+    text-align: center;
+    color: var(--text-muted);
+}
+.ad-sched-vs {
+    width: 40px;
+    text-align: center;
+    color: var(--text-muted);
+}
+/* ВЕС ПРАВИЛА РЕШАЕТ, А НЕ НАМЕРЕНИЕ. Замер 04.10 после правки: краска
+   вышла 0.72, а не заданные 0.5 — общее правило `.ad-table td` весит
+   больше одного класса. Ячейку называем вместе с таблицей. */
+.ad-table td.ad-sched-idx,
+.ad-table td.ad-sched-num,
+.ad-table td.ad-sched-vs { color: var(--text-muted); }
+
+.ad-sched-idx { text-align: center; color: var(--text-muted); }
+.ad-sched-time-set { font-weight: var(--fw-semibold); }
+.ad-sched-slot-empty { color: var(--text-secondary); }
+.ad-sched-slot {
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    color: var(--text-muted);
+}
+.ad-sched-podskazka {
+    margin: calc(var(--space-1) * -1) 0 var(--space-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    color: var(--text-muted);
+}
+.ad-sched-playoff { margin-top: var(--space-6); }
+.ad-sched-note-top { margin-top: var(--space-3); }
+
 /* Предупреждение «ждут парный рейтинг»: своя краска, потому что это не
    ошибка и не отказ, а «нужно дозаполнить». Кегль был 0.88rem (14.08) —
    числа на шкале нет; стал ступень 14. */
