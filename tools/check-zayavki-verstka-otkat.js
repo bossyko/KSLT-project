@@ -34,8 +34,10 @@ const ОТКАТЫ = [
    'в строке заявки нет кеглей 0.65rem'],
 
   ['css/admin.css',
-   '    min-height: var(--chip-h);\n    padding: 0 var(--space-2);',
-   '    min-height: 19px;\n    padding: 0 var(--space-2);',
+   /* ЯКОРЬ ПЕРЕВЯЗАН: ступень чипа завелась вторым блоком — у кнопки
+      «добавить напарника». Держимся за СВОЙ блок по его первой строке. */
+   '.ad-reg-mark {\n    display: inline-flex;\n    align-items: center;\n    min-height: var(--chip-h);',
+   '.ad-reg-mark {\n    display: inline-flex;\n    align-items: center;\n    min-height: 19px;',
    'значок стоит на ступени чипа и шкале кеглей'],
 
   /* ─── подпись ─── */
@@ -96,6 +98,37 @@ const ОТКАТЫ = [
    "    var счётчикОкон = 0;",
    "    var счётчикОконБыло = 0;",
    'подпись окна уникальна'],
+
+  /* ─── парная ветка ─── */
+  ['js/admin/sections/bracket.js',
+   "'<td class=\"ad-reg-ntrp' + доп + '\">' + ntrpПары(p) + '</td>'",
+   "'<td style=\"font-size:0.85rem;\">' + ntrpПары(p) + '</td>'",
+   'в строке заявки нет инлайн-кеглей вовсе'],
+
+  ['css/admin.css',
+   '.ad-reg-ntrp {\n    text-align: center;\n    font-size: var(--fs-sm);',
+   '.ad-reg-ntrp {\n    text-align: center;\n    font-size: 13.6px;',
+   'парный рейтинг — классом, а не инлайном'],
+
+  ['js/admin/sections/bracket.js',
+   "'<div class=\"ad-reg-pair-inline ad-table-user-name\">'",
+   "'<div class=\"ad-table-user-name\">'",
+   'пара рисует вторую строку и оба личных рейтинга'],
+
+  ['css/admin.css',
+   '    .ad-col-ntrp,\n    .ad-col-partner { display: none; }',
+   '    .ad-col-ntrp { display: none; }',
+   'у пары на узком виде уезжают ровно рейтинги и партнёр'],
+
+  ['css/admin.css',
+   '.ad-reg-partner {\n    font-size: var(--fs-sm);',
+   '.ad-reg-partner {\n    font-size: var(--fs-xs);',
+   'имя напарника — уровнем имени, а не подписи'],
+
+  ['css/admin.css',
+   '.ad-ntrp-fix,\n.ad-btn-add-partner,\n.ad-reg-menu-list .ad-reg-act {\n    position: relative;\n}',
+   '.ad-btn-add-partner,\n.ad-reg-menu-list .ad-reg-act {\n    position: relative;\n}',
+   'парные кнопки и пункты меню со слоем цели'],
 
   /* ─── версии ─── */
   ['pages/admin.html',

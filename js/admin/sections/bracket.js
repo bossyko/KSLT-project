@@ -124,17 +124,18 @@
     }
 
     /** Клетка NTRP в заявке: число, а если парного нет — кнопка «вписать». */
-    function ячейкаNtrpПары(p) {
-        var стиль = 'text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;';
-        if (!p || !p.id) return '<td style="' + стиль + '">—</td>';
-        if (!безПарного(p)) return '<td style="' + стиль + '">' + ntrpПары(p) + '</td>';
+    function ячейкаNtrpПары(p, уезжает) {
+        var доп = уезжает ? ' ad-col-ntrp' : '';
+        /* Было инлайном 0.85rem (13.6) и зашитая краска — замер 03.10.
+           Стало классом `.ad-reg-ntrp`: ступень 14, одно определение. */
+        if (!p || !p.id) return '<td class="ad-reg-ntrp' + доп + '">—</td>';
+        if (!безПарного(p)) return '<td class="ad-reg-ntrp' + доп + '">' + ntrpПары(p) + '</td>';
         var одиночный = ntrpПары(p);
-        return '<td style="text-align:center;padding:4px;">' +
+        return '<td class="ad-reg-ntrp' + доп + '">' +
             '<button class="ad-ntrp-fix" data-player-id="' + A.esc(p.id) + '"' +
             ' data-player-name="' + A.esc(p.name || p.id) + '"' +
             ' data-singles="' + (p.ntrp_singles || '') + '"' +
-            ' title="' + L.dblNtrpNeedHint + '"' +
-            ' style="padding:2px 8px;border:1px solid #ffb300;border-radius:4px;background:rgba(255,179,0,0.12);color:#ffb300;cursor:pointer;font-size:0.75rem;font-weight:700;white-space:nowrap;">' +
+            ' title="' + L.dblNtrpNeedHint + '">' +
             '\u26A0 ' + (одиночный || '—') + '</button></td>';
     }
 
@@ -4437,15 +4438,15 @@
             if (isDbl) {
                 // Doubles: # | NTRP | Имя | NTRP | Партнёр | Общий NTRP | Регистрация | Действия
                 var thCombinedNtrp = isEn ? 'Total NTRP' : 'Общий NTRP';
-                regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></th>' +
-                    '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
-                    '<th style="text-align:center;width:50px;">NTRP</th>' +
+                regTableHead = '<th style="width:32px;"><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></span></th>' +
+                    '<th class="ad-reg-num" style="width:32px;">#</th>' +
+                    '<th class="ad-reg-num ad-col-ntrp" style="width:50px;">NTRP</th>' +
                     '<th>' + L.plrName + '</th>' +
-                    '<th style="text-align:center;width:50px;">NTRP</th>' +
-                    '<th>' + L.doublesPartner + '</th>' +
-                    '<th style="text-align:center;width:80px;">' + thCombinedNtrp + '</th>' +
+                    '<th class="ad-reg-num ad-col-ntrp" style="width:50px;">NTRP</th>' +
+                    '<th class="ad-col-partner">' + L.doublesPartner + '</th>' +
+                    '<th class="ad-reg-num ad-col-sum" style="width:80px;">' + thCombinedNtrp + '</th>' +
                     thSeed +
-                    '<th>' + thRegTime + '</th>' +
+                    '<th class="ad-col-dt">' + thRegTime + '</th>' +
                     '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             } else {
                 /* Одиночный: # | Место | Категория | ФИО | Регистрация | Действия.
@@ -4769,7 +4770,17 @@
         // Сетка сформирована — состав закрыт: снимать и одобрять поздно, место
         // в сетке уже разыграно. А замена на месте разрешена: человек выбыл,
         // вместо него выходит другой, место и посев остаются за заявкой
-        var стоп = заморожено ? ' disabled style="opacity:0.35;cursor:not-allowed;' : ' style="';
+        /* ПУСТОЙ `style=""` — СЛЕД ОТ ИНЛАЙНА, КОТОРОГО БОЛЬШЕ НЕТ.
+           Переменная открывала кавычку, потому что дальше в неё лили
+           краски и кегли. Кнопки переведены на классы 03.10, лить больше
+           нечего — остаётся только пометка замороженного турнира. */
+        /* ДВА АТРИБУТА `class` НА ОДНОМ ЭЛЕМЕНТЕ — ВТОРОЙ БРАУЗЕР
+           ИГНОРИРУЕТ. Первая редакция этой правки добавляла класс
+           замороженного ВТОРЫМ атрибутом, и пометка просто не работала бы.
+           Поймано чтением своей же строки до прогона. Пометка висит на
+           `[disabled]` — он тут и так стоит, и это одно состояние, а не
+           два способа его назвать. */
+        var стоп = заморожено ? ' disabled' : '';
         // Кнопок бывает четыре: решить, заменить, снять, отклонить. Держим их
         // одной строкой — столбиком они разъезжались на три этажа и строка
         // таблицы прыгала. Помещаются за счёт мелкого кегля, см. .ad-reg-act
@@ -4813,14 +4824,14 @@
         // три: подтвердить гостя, убрать гостя, одобрить состав. Менеджер
         // выбирал между кнопками, не видя, что именно не так с заявкой
         if (group === 'main') {
-            actionsTd += '<button class="ad-reg-act ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '"' + стоп + 'color:#FFA726;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToWaitlistShort + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-reg-act-tone ad-reg-act-wait ad-btn-to-waitlist" data-reg-id="' + reg.id + '" title="' + L.regMoveToWaitlist + '"' + стоп + '>' + L.regMoveToWaitlistShort + '</button>';
             // Отказ из сетки: человек не придёт совсем. Раньше его можно было
             // только задвинуть в очередь, где он никого не ждал, либо снести
             // скопом — и заявка пропадала из всех списков без следа
-            actionsTd += '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-reg-act-tone ad-reg-act-reject ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + '>' + L.regReject + '</button>';
         } else if (group === 'wait') {
-            actionsTd += '<button class="ad-reg-act ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '"' + стоп + 'color:#4caf50;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regMoveToMainShort + '</button>' +
-                '<button class="ad-reg-act ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + 'color:#f44336;background:none;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regReject + '</button>';
+            actionsTd += '<button class="ad-reg-act ad-reg-act-tone ad-reg-act-approve ad-btn-approve" data-reg-id="' + reg.id + '" title="' + L.regMoveToMain + '"' + стоп + '>' + L.regMoveToMainShort + '</button>' +
+                '<button class="ad-reg-act ad-reg-act-tone ad-reg-act-reject ad-btn-reject" data-reg-id="' + reg.id + '" title="' + L.regReject + '"' + стоп + '>' + L.regReject + '</button>';
         }
         actionsTd += '</div></div></div></td>';
 
@@ -4840,16 +4851,16 @@
                     ' <span class="ad-reg-mark ad-reg-mark-ext">EXT</span>';
             } else {
                 partnerDisplay = '<span style="color:var(--text-dim);font-style:italic;">' + L.doublesNoPartner + '</span>' +
-                    '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '"' + (заморожено ? ' disabled' : '') + ' style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;border:1px solid var(--accent);border-radius:4px;background:rgba(204,255,0,0.08);color:var(--accent);cursor:pointer;font-size:0.7rem;font-weight:600;white-space:nowrap;">+ ' + L.doublesAddPartner + '</button>';
+                    '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '"' + (заморожено ? ' disabled' : '') + '>+ ' + L.doublesAddPartner + '</button>';
             }
-            partnerTd = '<td style="font-size:0.85rem;">' + partnerDisplay + '</td>';
+            partnerTd = '<td class="ad-col-partner ad-reg-partner">' + partnerDisplay + '</td>';
 
             // Combined NTRP column — always calculate, missing = 0
             // Сумму показываем как есть, до сотых: у турнира лимит вроде
             // 8.75, а округление до десятых превращало её в 8.8 — и пара
             // выглядела как не проходящая по допуску
             var combinedNtrp = (playerNtrp || 0) + (partnerNtrp || 0);
-            combinedNtrpTd = '<td style="text-align:center;font-size:0.85rem;font-weight:600;color:var(--accent);">' +
+            combinedNtrpTd = '<td class="ad-reg-ntrp ad-col-sum" style="color:var(--accent);">' +
                 дробь(combinedNtrp) + '</td>';
         }
 
@@ -4868,13 +4879,13 @@
             // У своих показываем парный рейтинг, а если он не проставлен —
             // кнопку «вписать». У приглашённых число вбито руками при заявке
             var playerNtrpTd = isExternal
-                ? '<td style="text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;">' + (playerNtrp || '—') + '</td>'
-                : ячейкаNtrpПары(pmEntry);
+                ? '<td class="ad-reg-ntrp ad-col-ntrp">' + (playerNtrp || '—') + '</td>'
+                : ячейкаNtrpПары(pmEntry, true);
             var partnerNtrpTd;
             if (reg.partner_id) {
-                partnerNtrpTd = ячейкаNtrpПары(playersMap[reg.partner_id]);
+                partnerNtrpTd = ячейкаNtrpПары(playersMap[reg.partner_id], true);
             } else {
-                partnerNtrpTd = '<td style="text-align:center;font-size:0.85rem;color:#ce93d8;font-weight:600;">' +
+                partnerNtrpTd = '<td class="ad-reg-ntrp ad-col-ntrp">' +
                     (reg.partner_external_ntrp || '\u2014') + '</td>';
             }
 
@@ -4885,12 +4896,24 @@
                 '<td><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></span></td>' +
                 '<td class="ad-reg-num">' + num + '</td>' +
                 playerNtrpTd +
-                '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
+                /* РЕШЕНИЕ КОСТИ 03.10: «важнее личные». Личные NTRP остаются
+                   колонками, а на узком виде уезжают подписью СУММА и дата. */
+                /* ПАРА В ДВЕ СТРОКИ НА УЗКОМ ВИДЕ. Разметка одна: вторая
+                   строка и личные рейтинги рисуются ВСЕГДА, а показываются
+                   медиа-правилом — ширину знает css, а не js. */
+                '<td><div class="ad-table-user-name">' +
+                        '<span class="ad-reg-ntrp-inline">' + (playerNtrp || '\u2014') + '</span>' +
+                        A.esc(pName) + seedHtml + debtBadge + externalBadge + '</div>' +
+                    '<div class="ad-reg-pair-inline ad-table-user-name">' +
+                        '<span class="ad-reg-ntrp-inline">' + (partnerNtrp || '\u2014') + '</span>' +
+                        partnerDisplay + '</div>' +
+                    '<div class="ad-table-sub ad-reg-sub-inline">' + дробь(combinedNtrp) +
+                        (regDT ? ' · ' + regDT.replace(/<[^>]+>/g, '') : '') + '</div></td>' +
                 partnerNtrpTd +
                 partnerTd +
                 combinedNtrpTd +
                 посевTd +
-                '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+                '<td class="ad-col-dt ad-table-sub">' + regDT + '</td>' +
                 actionsTd +
             '</tr>';
         } else {

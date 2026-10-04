@@ -817,6 +817,150 @@ body.ad-page {
 
 .ad-reg-check-wrap { display: inline-flex; }
 
+/* ЯЧЕЙКА ПАРНОГО РЕЙТИНГА. Было инлайном: кегль 0.85rem = 13.6, которого
+   на шкале нет, и зашитая краска #ce93d8. Кегль — ступень 14; краска
+   остаётся сиреневой, но одним определением, а не тремя копиями в
+   разметке. Решение Кости 03.10: личные NTRP важнее суммы, поэтому эти
+   две колонки на узком виде НЕ прячутся. */
+.ad-reg-ntrp {
+    text-align: center;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: #ce93d8;
+}
+
+/* «ВПИСАТЬ ПАРНЫЙ РЕЙТИНГ» — КЛАССОМ. Было инлайном: кегль 0.75rem,
+   отступ 2x8, рамка и краска прямо в разметке. Замеренная высота 24 —
+   это ступень чипа, её и объявляем. */
+.ad-ntrp-fix {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--chip-h);
+    padding: 0 var(--space-2);
+    border: 1px solid #ffb300;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 179, 0, 0.12);
+    color: #ffb300;
+    cursor: pointer;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-none);
+    white-space: nowrap;
+}
+
+/* Кнопка «вписать парный рейтинг» и «добавить напарника» — цель нажатия
+   была 24 и 20: замер 03.10 на парной строке. Вид не меняем, слой 44
+   ставится псевдоэлементом, как у остальных низких кнопок. */
+.ad-ntrp-fix,
+.ad-btn-add-partner,
+.ad-reg-menu-list .ad-reg-act {
+    position: relative;
+}
+
+.ad-ntrp-fix::after,
+.ad-btn-add-partner::after,
+.ad-reg-menu-list .ad-reg-act::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--btn-h-md);
+    transform: translateY(-50%);
+}
+
+/* ПАРА СТАНОВИТСЯ ПАРОЙ, А НЕ ДВУМЯ КОЛОНКАМИ — решение 03.10, моё,
+   отданное Костей мне же («сам реши»).
+   Замер: на 768 после первой правки таблица 799.84 при панели 681 —
+   119 пикселей лишние, и прятать дальше нечего, не отняв посев или
+   действия. Два имени стояли СОСЕДЯМИ, и каждое требовало ширины под
+   «Мамбеталиев-Орозбеков».
+   На узком виде четыре колонки — NTRP · Имя · NTRP · Партнёр —
+   схлопываются в одну ячейку в две строки, и личный рейтинг встаёт
+   рядом со своим именем, а не в отдельной колонке: требование Кости
+   «важнее личные» выполняется, место экономится.
+   Порядок цен: прокрутка вбок ПРЯЧЕТ колонку действий, а высота не
+   прячет ничего — страница и так уходит вниз. */
+/* ДЕЙСТВИЯ В СТРОКЕ ЗАЯВКИ — КЛАССАМИ, А НЕ ИНЛАЙНОМ. Было пять кнопок
+   с зашитым кеглем 0.8rem (12.8, мимо шкалы), отступом 2x6 (ни 2, ни 6
+   на шкале нет) и четырьмя красками прямо в разметке. Замер 03.10 дал у
+   них высоту 19 — ниже всего, что есть в шкале кнопок.
+   Кегль — ступень 12, отступ — ступень 8, краски остаются теми же
+   тонами, но одним определением на тон. */
+.ad-reg-act-tone {
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-none);
+}
+
+/* Замороженный турнир: действие видно, но недоступно. Было инлайном
+   `opacity:0.35;cursor:not-allowed`. */
+.ad-reg-act-tone[disabled] { opacity: 0.35; cursor: not-allowed; }
+
+.ad-reg-act-wait    { color: #FFA726; }
+.ad-reg-act-reject  { color: #ff6b6b; }
+.ad-reg-act-approve { color: #66bb6a; }
+
+/* «Добавить напарника» — та же болезнь: инлайн 0.7rem (11.2) и отступ
+   3x10. Кегль 11 ступенью, отступ 4 и 8 — по шкале чипа. */
+.ad-btn-add-partner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+    min-height: var(--chip-h);
+    padding: 0 var(--space-2);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--accent-subtle);
+    color: var(--accent);
+    cursor: pointer;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-none);
+    white-space: nowrap;
+}
+
+/* ИМЯ НАПАРНИКА — УРОВЕНЬ ИМЕНИ, А НЕ ПОДПИСИ. Замер 03.10 поймал мою
+   оплошность: я повесил на эту ячейку `.ad-table-sub`, и на десктопе
+   напарник стал 12 приглушённым — то есть в колонке «Партнёр» имя
+   выглядело пометкой. Уровень тот же, что у первого игрока. */
+.ad-reg-partner {
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+    white-space: normal;
+}
+
+.ad-reg-pair-inline,
+.ad-reg-ntrp-inline { display: none; }
+
+@media (max-width: 992px) {
+    .ad-col-ntrp,
+    .ad-col-partner { display: none; }
+    .ad-reg-pair-inline { display: block; }
+    .ad-reg-ntrp-inline {
+        display: inline-block;
+        min-width: 34px;
+        margin-right: var(--space-2);
+        color: #ce93d8;
+        font-weight: var(--fw-semibold);
+    }
+}
+
+/* СУММА И ДАТА УЕЗЖАЮТ ПОДПИСЬЮ У ПАРНОЙ СТРОКИ — решение Кости 03.10:
+   «важнее личные». Личные NTRP остаются колонками, в подпись уходят
+   общий NTRP и время подачи. */
+.ad-col-sum { }
+
+@media (max-width: 992px) {
+    .ad-col-sum { display: none; }
+}
+
 /* НА УЗКОМ ВИДЕ КАТЕГОРИЯ И ДАТА УЕЗЖАЮТ ПОДПИСЬЮ ПОД ИМЯ.
    Замер 03.10 на боевой вкладке: панель на 1024 и на 768 одинаково
    шириной 681, семь колонок дают прокрутку вбок и ЧЕТЫРЕ разные высоты
