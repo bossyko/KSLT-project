@@ -571,7 +571,12 @@ body.ad-page {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-dim);
+    /* БЫЛО `--text-dim` — 3.21 на фоне карточки при кегле 11, мимо WCAG AA.
+       Замерено прибором на боевой вкладке «Заявки» 03.10; то же число
+       названо в tools/check-knopka-snyat.js про другой элемент. Шапка
+       колонки не украшение: по ней читают таблицу. `--text-muted` даёт
+       5.33. Правило одно на все таблицы админки. */
+    color: var(--text-muted);
     border-bottom: 1px solid var(--border-subtle);
     white-space: nowrap;
 }
@@ -765,9 +770,67 @@ body.ad-page {
     color: var(--text-primary);
 }
 
-.ad-table-user-email {
+/* ПОДПИСЬ ПОД ГЛАВНЫМ В ЯЧЕЙКЕ. Было `.ad-table-user-email` — объявлено
+   парой к `.ad-table-user-name` и МЕРТВО: класс не встречался в js ни
+   разу (проверено грепом 03.10, а не на вид), и в разметке
+   `layout.js:535` до сих пор стоит пустая обёртка, куда вторая строка
+   задумывалась. Имя сменено на общее: подпись несёт категорию и дату
+   заявки, а не почту. Цвет был `--text-dim` — 3.21 на фоне карточки,
+   мимо WCAG AA; стало `--text-muted` — 9.98. */
+.ad-table-sub {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    line-height: var(--lh-normal);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* ЗНАЧОК В СТРОКЕ — КОМПОНЕНТОМ `Badge 27:53`. Его описание: высота 24,
+   отступ 8, 11 Medium uppercase, подложка 10-15% тона, текст тоном. Он и
+   заводился, чтобы убить разнобой, замеренный 18.09: четыре кегля
+   10.4 / 10.88 / 11.2 / 12, «только последний на шкале». Три значка
+   строки заявки стояли инлайном на 10.4 с высотой 18.5. */
+.ad-reg-mark {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--chip-h);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-wide);
+    margin-left: var(--space-1);
+    white-space: nowrap;
+}
+
+/* Тона: подложка тоном в 15%, текст — осветлённым тоном. Чистый #f44336
+   на своей подложке даёт 4.44 — ниже 4.5; осветлённый #ff6b6b даёт 6.1. */
+.ad-reg-mark-dolg { background: rgba(244, 67, 54, 0.15); color: #ff6b6b; }
+.ad-reg-mark-ext  { background: rgba(33, 150, 243, 0.15); color: #64b5f6; }
+.ad-reg-mark-seed { background: var(--accent-subtle); color: var(--accent); }
+
+/* Номер строки. Было инлайном `text-align:center;padding:4px 6px` — 4 и 6
+   на шкале отступов 8·12·16·24·32·40 нет. Отступ отдан системному
+   правилу ячейки (10/12 по описанию `Table cell 131:130`). */
+.ad-reg-num { text-align: center; }
+
+.ad-reg-check-wrap { display: inline-flex; }
+
+/* НА УЗКОМ ВИДЕ КАТЕГОРИЯ И ДАТА УЕЗЖАЮТ ПОДПИСЬЮ ПОД ИМЯ.
+   Замер 03.10 на боевой вкладке: панель на 1024 и на 768 одинаково
+   шириной 681, семь колонок дают прокрутку вбок и ЧЕТЫРЕ разные высоты
+   строки — 63.61 · 84.11 · 84.61 · 126.61. После правки: пять колонок,
+   прокрутки нет, высот три, самая высокая упала со 126 до 84.
+   Граница 992 — своя у проекта, третьего числа не заводим. Цена названа
+   и принята Костей: на 1024 панель всё ещё 681, и прокрутка там
+   остаётся. */
+.ad-reg-sub-inline { display: none; }
+
+@media (max-width: 992px) {
+    .ad-col-cat,
+    .ad-col-dt { display: none; }
+    .ad-reg-sub-inline { display: block; }
 }
 
 .ad-role-badge {
@@ -937,7 +1000,13 @@ body.ad-page {
 .ad-image-upload-remove,
 .ad-mobile-tab,
 .ad-reg-menu-btn,
-.ad-reg-act-vynos {
+.ad-reg-act-vynos,
+/* 03.10: галочка строки 16, «выбрать все» 16, «Отмена» в окне решения 20.
+   Галочке слой нужен обёрткой — у `input` нет псевдоэлементов. «Отмена»
+   намеренно текстовая ссылка (решение 30.09: четыре кнопки давали 474 при
+   окне 440), вид не меняем — добавляем только цель нажатия. */
+.ad-reg-check-wrap,
+.ad-confirm-cancel {
     position: relative;
 }
 
@@ -954,7 +1023,9 @@ body.ad-page {
 .ad-image-upload-remove::after,
 .ad-mobile-tab::after,
 .ad-reg-menu-btn::after,
-.ad-reg-act-vynos::after {
+.ad-reg-act-vynos::after,
+.ad-reg-check-wrap::after,
+.ad-confirm-cancel::after {
     content: '';
     position: absolute;
     left: 0;
@@ -970,7 +1041,9 @@ body.ad-page {
 .ad-image-upload-remove:focus-visible,
 .ad-mobile-tab:focus-visible,
 .ad-reg-menu-btn:focus-visible,
-.ad-reg-act-vynos:focus-visible {
+.ad-reg-act-vynos:focus-visible,
+.ad-reg-check-wrap:focus-visible,
+.ad-confirm-cancel:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }

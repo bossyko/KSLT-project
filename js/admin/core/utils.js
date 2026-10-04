@@ -288,6 +288,10 @@
      *        сохранить, уйти без сохранения, остаться. Отдельного окна для
      *        этого не делаем: одно определение на одно понятие.
      */
+    /* Номер окна — чтобы `aria-labelledby` не указывал на чужой заголовок,
+       когда окон за одну загрузку страницы открыли несколько. */
+    var счётчикОкон = 0;
+
     function showConfirm(title, text, onConfirm, confirmLabel, onCancel, ещё) {
         // Одно окно за раз. Иначе повторные нажатия складывают их стопкой:
         // закрываешь верхнее, под ним такое же — и кажется, что оно замерло
@@ -302,9 +306,21 @@
         var btnClass = confirmLabel ? 'ad-btn-primary' : 'ad-btn-danger';
         var overlay = document.createElement('div');
         overlay.className = 'ad-confirm-overlay';
+        /* ОКНО НАЗЫВАЕТ СЕБЯ ДИКТОРУ И БЕРЁТ ФОКУС. Замер 03.10: окно
+           открывалось, а фокус оставался на кнопке ЗА ним
+           (`фокусВнутри: false`), и ни `role`, ни `aria-modal`, ни
+           `aria-labelledby` в разметке не было ни одного — ноль вхождений
+           на весь showConfirm. Клавиатурой в окно было не попасть: Tab
+           уходил по странице под ним. Esc при этом работал и работает —
+           слушатель на document, ниже.
+           Фокус ставим на САМО окно, а не на кнопку: первой по порядку
+           стоит «Отмена», а дальше бывают необратимые действия, и
+           подставлять их под случайный Enter нельзя. */
+        var номерОкна = 'adConfirmTitle' + (++счётчикОкон);
         overlay.innerHTML =
-            '<div class="ad-confirm-modal">' +
-                '<div class="ad-confirm-title">' + title + '</div>' +
+            '<div class="ad-confirm-modal" role="dialog" aria-modal="true" ' +
+                 'aria-labelledby="' + номерОкна + '" tabindex="-1">' +
+                '<div class="ad-confirm-title" id="' + номерОкна + '">' + title + '</div>' +
                 '<div class="ad-confirm-text">' + text + '</div>' +
                 '<div class="ad-confirm-actions">' +
                     '<button class="ad-btn ad-btn-secondary ad-confirm-cancel" id="adConfirmCancel">' + L.cancel + '</button>' +
@@ -323,6 +339,8 @@
                 '</div>' +
             '</div>';
         document.body.appendChild(overlay);
+        var окно = overlay.querySelector('.ad-confirm-modal');
+        if (окно && окно.focus) окно.focus();
 
         function dismiss() { overlay.remove(); if (onCancel) onCancel(); }
         overlay.querySelector('#adConfirmCancel').addEventListener('click', dismiss);

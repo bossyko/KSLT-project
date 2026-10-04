@@ -4455,13 +4455,13 @@
                    место в рейтинге категории турнира, а не абстрактный ранг,
                    и это ровно то число, по которому сеется сетка. */
                 var thRank = isEn ? 'Rank' : 'Место';
-                regTableHead = '<th style="width:32px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></th>' +
-                    '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
-                    '<th style="width:48px;text-align:center;padding:4px 6px;">' + thRank + '</th>' +
-                    '<th>' + thCategory + '</th>' +
+                regTableHead = '<th style="width:32px;"><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></span></th>' +
+                    '<th class="ad-reg-num" style="width:32px;">#</th>' +
+                    '<th class="ad-reg-num" style="width:48px;">' + thRank + '</th>' +
+                    '<th class="ad-col-cat">' + thCategory + '</th>' +
                     '<th>' + L.plrName + '</th>' +
                     thSeed +
-                    '<th>' + thRegTime + '</th>' +
+                    '<th class="ad-col-dt">' + thRegTime + '</th>' +
                     '<th style="width:150px;text-align:center;">' + thActions + '</th>';
             }
 
@@ -4696,20 +4696,28 @@
         // негде. Где менеджер сеет руками, колонка «Посев» уже есть — значок
         // дублировал её и переносил фамилию на третью строку, раздувая таблицу
         var seedHtml = (reg.seed_number && !нормаПосева)
-            ? ' <span class="ad-badge ad-badge-accent">[' + reg.seed_number + ']</span>' : '';
+            ? ' <span class="ad-reg-mark ad-reg-mark-seed">' + reg.seed_number + '</span>' : '';
         var hasDebt = !isExternal && debtPlayerIds[reg.player_id];
+        /* ЗНАЧКИ — КЛАССОМ. Было инлайном: кегль 0.65rem = 10.4, которого
+           на шкале нет, высота 18.5 вместо ступени чипа 24, и две зашитые
+           краски. Компонент `Badge 27:53` заводился ровно против этого —
+           см. его описание. Одно место на обе ветки, парную и одиночную. */
         var debtBadge = hasDebt
-            ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(244,67,54,0.15);color:#f44336;margin-left:4px;">' + L.regDebt + '</span>'
+            ? ' <span class="ad-reg-mark ad-reg-mark-dolg">' + L.regDebt + '</span>'
             : '';
         var externalBadge = isExternal
-            ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">' + (reg.external_country || 'EXT') + '</span>'
+            ? ' <span class="ad-reg-mark ad-reg-mark-ext">' + (reg.external_country || 'EXT') + '</span>'
             : '';
         // NTRP for main player
         var playerNtrp = isExternal ? (reg.external_ntrp || null)
             : (isDbl ? (ntrpПары(pmEntry) || null) : (pmEntry.ntrp_singles || null));
-        var ntrpBadge = playerNtrp
-            ? ' <span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(156,39,176,0.15);color:#ce93d8;margin-left:4px;">' + playerNtrp + '</span>'
-            : '';
+        /* `ntrpBadge` УДАЛЁН 03.10 КАК МЁРТВЫЙ — и назван мёртвым ПОСЛЕ
+           проверки, а не по виду: `grep -n ntrpBadge` давал одно
+           вхождение, собственное объявление, и ни одной подстановки в
+           разметку. Он нёс четвёртый значок — кегль 0.65rem (10.4) и две
+           зашитые краски `#ce93d8` / rgba(156,39,176,.15), — то есть
+           ровно те беды, которые правило заморозки и ловит. Сама
+           переменная `playerNtrp` жива: её читает парная ветка. */
 
         /* МЕСТО И КАТЕГОРИЯ — ИЗ ОДНОЙ ТАБЛИЦЫ, ВСЕГДА.
            Слово Кости 02.10: «отображать место в рейтинге и категорию
@@ -4829,7 +4837,7 @@
             } else if (reg.partner_external_name) {
                 partnerNtrp = reg.partner_external_ntrp || null;
                 partnerDisplay = A.esc(reg.partner_external_name) +
-                    ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">EXT</span>';
+                    ' <span class="ad-reg-mark ad-reg-mark-ext">EXT</span>';
             } else {
                 partnerDisplay = '<span style="color:var(--text-dim);font-style:italic;">' + L.doublesNoPartner + '</span>' +
                     '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '"' + (заморожено ? ' disabled' : '') + ' style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 10px;border:1px solid var(--accent);border-radius:4px;background:rgba(204,255,0,0.08);color:var(--accent);cursor:pointer;font-size:0.7rem;font-weight:600;white-space:nowrap;">+ ' + L.doublesAddPartner + '</button>';
@@ -4871,8 +4879,11 @@
             }
 
             return '<tr' + rowStyle + '>' +
-                '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></td>' +
-                '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
+                /* ТОТ ЖЕ СБОРЩИК, ТА ЖЕ ПРАВКА. Правило заморозки нашло шов:
+                   парная ветка держала инлайн padding 4px 6px и галочку без
+                   обёртки, хотя это одни и те же понятия, что в одиночной. */
+                '<td><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></span></td>' +
+                '<td class="ad-reg-num">' + num + '</td>' +
                 playerNtrpTd +
                 '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
                 partnerNtrpTd +
@@ -4884,14 +4895,23 @@
             '</tr>';
         } else {
             // Одиночный: # | Место | Категория | ФИО | Регистрация | Действия
+            /* КАТЕГОРИЯ И ДАТА — ПОДПИСЬЮ ПОД ИМЕНЕМ НА УЗКОМ ВИДЕ.
+               Замер 03.10: панель на 1024 и на 768 одинаково 681, семь
+               колонок дают прокрутку вбок и четыре разные высоты строки.
+               Подпись рисуется ВСЕГДА, а показывается медиа-правилом —
+               так разметка одна, а не две (admin.css, .ad-reg-sub-inline).
+               Галочке нужна обёртка: слой цели 44 ставится псевдоэлементом,
+               а у `input` их нет. */
+            var подписьСтроки = A.esc(catLabel) + (regDT ? ' · ' + regDT.replace(/<[^>]+>/g, '') : '');
             return '<tr' + rowStyle + '>' +
-                '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></td>' +
-                '<td style="text-align:center;padding:4px 6px;">' + num + '</td>' +
+                '<td><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></span></td>' +
+                '<td class="ad-reg-num">' + num + '</td>' +
                 '<td class="ad-reg-mesto">' + rankVal + '</td>' +
-                '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
-                '<td>' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</td>' +
+                '<td class="ad-col-cat ad-table-sub">' + A.esc(catLabel) + '</td>' +
+                '<td><div class="ad-table-user-name">' + A.esc(pName) + seedHtml + debtBadge + externalBadge + '</div>' +
+                    '<div class="ad-table-sub ad-reg-sub-inline">' + подписьСтроки + '</div></td>' +
                 посевTd +
-                '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+                '<td class="ad-col-dt ad-table-sub">' + regDT + '</td>' +
                 actionsTd +
             '</tr>';
         }
