@@ -1075,6 +1075,81 @@ body.ad-page {
 .ad-grp-section-title--pl { color: var(--accent); }
 .ad-grp-section-title--cl { color: var(--text-secondary); }
 
+/* ═══════════════════════════════════════════════════════════════════
+   ВКЛАДКА «НОВОСТИ ТУРНИРА»
+   ═══════════════════════════════════════════════════════════════════
+   Замер 04.10: двадцать инлайнов. Кегли `0.85rem` (13.6) и `1.1rem`
+   (17.6) — мимо шкалы, ступени 14 и 18. Состояние новости рисовалось
+   четырьмя разными инлайнами с зашитым `#4caf50`; стало четыре класса
+   на токенах. Крестик удаления снимка был 22×22 с кеглем 14 — ступень
+   высоты 28 и кегль 16, и у него появилась цель нажатия. */
+.ad-trn-news-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+.ad-trn-news-title { margin: 0; font-size: var(--fs-md); line-height: var(--lh-snug); }
+.ad-trn-news-status { font-weight: var(--fw-semibold); }
+.ad-trn-news-status--sent  { color: var(--success); }
+.ad-trn-news-status--pub   { color: var(--accent); }
+.ad-trn-news-status--draft { color: var(--text-secondary); font-weight: var(--fw-regular); }
+.ad-trn-news-status--gen   { color: var(--text-secondary); font-weight: var(--fw-regular); }
+
+.ad-trn-photos-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+.ad-trn-photos-head .ad-form-card-title { margin: 0; }
+.ad-trn-photo-pick { cursor: pointer; font-size: var(--fs-sm); }
+.ad-trn-photo-file { display: none; }
+.ad-trn-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--space-2);
+}
+.ad-trn-photo-empty {
+    grid-column: 1 / -1;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+.ad-trn-photo-cell {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+.ad-trn-photo-img { width: 100%; height: 100%; object-fit: cover; }
+/* Крестик снимка: ступень кнопки 28 вместо 22, кегль 16 вместо 14.
+   Цель нажатия даёт общий слой — класс внесён в список низких кнопок. */
+.ad-trn-photo-remove {
+    position: absolute;
+    top: var(--space-1);
+    right: var(--space-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--btn-h-xs);
+    height: var(--btn-h-xs);
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: var(--fs-base);
+    line-height: var(--lh-none);
+    cursor: pointer;
+}
+.ad-trn-news-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    padding-top: var(--space-3);
+}
+.ad-btn[disabled] { opacity: 0.5; }
+
 /* Предупреждение «ждут парный рейтинг»: своя краска, потому что это не
    ошибка и не отказ, а «нужно дозаполнить». Кегль был 0.88rem (14.08) —
    числа на шкале нет; стал ступень 14. */
@@ -1489,6 +1564,7 @@ body.ad-page {
    а не теснота. Слой растёт на 4 — внутри отступа полосы 12. */
 .ad-reg-floating-remove,
 .ad-btn-restore,
+.ad-trn-photo-remove,
 /* 03.10: галочка строки 16, «выбрать все» 16, «Отмена» в окне решения 20.
    Галочке слой нужен обёрткой — у `input` нет псевдоэлементов. «Отмена»
    намеренно текстовая ссылка (решение 30.09: четыре кнопки давали 474 при
@@ -1523,6 +1599,7 @@ body.ad-page {
 .ad-export-bar .ad-btn::after,
 .ad-reg-floating-remove::after,
 .ad-btn-restore::after,
+.ad-trn-photo-remove::after,
 .ad-reg-check-wrap::after,
 .ad-confirm-cancel::after {
     content: '';

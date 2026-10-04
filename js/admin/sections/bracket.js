@@ -13906,19 +13906,19 @@
         // Status label
         var statusHtml = '';
         if (tgSentAt) {
-            statusHtml = '<span style="color:#4caf50;font-weight:600;">✅ ' + L.trnNewsTgSent + '</span>';
+            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--sent">✅ ' + L.trnNewsTgSent + '</span>';
         } else if (publishedAt) {
             var d = new Date(publishedAt);
             var dateStr = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
-            statusHtml = '<span style="color:var(--accent);font-weight:600;">📰 ' + L.trnNewsPublished + ' ' + dateStr + '</span>';
+            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--pub">📰 ' + L.trnNewsPublished + ' ' + dateStr + '</span>';
         } else if (existing) {
-            statusHtml = '<span style="color:var(--text-secondary);">📝 ' + L.trnNewsDraft + '</span>';
+            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--draft">📝 ' + L.trnNewsDraft + '</span>';
         } else {
-            statusHtml = '<span style="color:var(--text-secondary);">✨ ' + L.trnNewsGenerated + '</span>';
+            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--gen">✨ ' + L.trnNewsGenerated + '</span>';
         }
 
-        var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h3 style="margin:0;font-size:1.1rem;">📰 ' + L.trnTabNews + '</h3>' +
+        var html = '<div class="ad-trn-news-head">' +
+            '<h3 class="ad-trn-news-title">📰 ' + L.trnTabNews + '</h3>' +
             '<div id="adNewsStatus">' + statusHtml + '</div>' +
         '</div>';
 
@@ -13984,14 +13984,14 @@
 
         // Gallery card
         html += '<div class="ad-form-card">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-                '<div class="ad-form-card-title" style="margin:0;">' + L.trnNewsPhotos + ' (<span id="adTrnPhotoCount">' + galleryUrls.length + '</span>/10)</div>' +
-                '<label class="ad-btn ad-btn-secondary" style="cursor:pointer;font-size:0.85rem;">' +
+            '<div class="ad-trn-photos-head">' +
+                '<div class="ad-form-card-title">' + L.trnNewsPhotos + ' (<span id="adTrnPhotoCount">' + galleryUrls.length + '</span>/10)</div>' +
+                '<label class="ad-btn ad-btn-secondary ad-trn-photo-pick">' +
                     '📷 ' + L.trnNewsUploadPhotos +
-                    '<input type="file" id="adTrnPhotoInput" multiple accept="image/*" style="display:none;">' +
+                    '<input type="file" id="adTrnPhotoInput" multiple accept="image/*" class="ad-trn-photo-file">' +
                 '</label>' +
             '</div>' +
-            '<div id="adTrnPhotoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;"></div>' +
+            '<div id="adTrnPhotoGrid" class="ad-trn-photo-grid"></div>' +
         '</div>';
 
         // Actions
@@ -13999,10 +13999,10 @@
         var tgBtnLabel = tgSentAt ? tgSentLabel() : '📢 ' + L.trnNewsSendTg;
         var tgDisabled = !publishedAt || tgSentAt;
 
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;">' +
+        html += '<div class="ad-trn-news-actions">' +
             '<button class="ad-btn ad-btn-secondary" id="adTrnNewsSave">💾 ' + L.trnNewsSaveDraft + '</button>' +
             '<button class="ad-btn ad-btn-primary" id="adTrnNewsPublish">' + publishBtnLabel + '</button>' +
-            '<button class="ad-btn ad-btn-secondary" id="adTrnNewsTg" ' + (tgDisabled ? 'disabled style="opacity:0.5;"' : '') + '>' + tgBtnLabel + '</button>' +
+            '<button class="ad-btn ad-btn-secondary" id="adTrnNewsTg" ' + (tgDisabled ? 'disabled' : '') + '>' + tgBtnLabel + '</button>' +
         '</div>';
 
         container.innerHTML = html;
@@ -14065,8 +14065,13 @@
 
             // Рассылка: только по опубликованному и только если публикация менялась после отправки
             var canSend = !!publishedAt && publishedSnapshot !== sentSnapshot;
+            /* ПОГАСАНИЕ ВИСИТ НА `[disabled]`, А НЕ ВТОРЫМ СПОСОБОМ СКАЗАТЬ
+               ТО ЖЕ. Скрипт ставил `style.opacity` рядом с атрибутом —
+               одно состояние, записанное дважды, и оно же единственный
+               инлайн, переживший правку разметки: его ставит не сборка
+               страницы, а обработчик. Инлайн, который ставит скрипт,
+               чтением разметки не находится — находится замером. */
             tgBtn.disabled = !canSend;
-            tgBtn.style.opacity = canSend ? '' : '0.5';
             tgBtn.textContent = canSend
                 ? '📢 ' + (sentSnapshot ? L.trnNewsResendTg : L.trnNewsSendTg)
                 : (tgSentAt ? tgSentLabel() : '📢 ' + L.trnNewsSendTg);
@@ -14085,15 +14090,15 @@
             if (countEl) countEl.textContent = currentGallery.length;
 
             if (currentGallery.length === 0) {
-                grid.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem;grid-column:1/-1;">' +
+                grid.innerHTML = '<div class="ad-trn-photo-empty">' +
                     (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
                 return;
             }
             var ph = '';
             currentGallery.forEach(function(url, idx) {
-                ph += '<div style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
-                    '<img src="' + A.esc(url) + '" style="width:100%;height:100%;object-fit:cover;">' +
-                    '<button class="ad-trn-photo-remove" data-photo-idx="' + idx + '" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>' +
+                ph += '<div class="ad-trn-photo-cell">' +
+                    '<img src="' + A.esc(url) + '" class="ad-trn-photo-img">' +
+                    '<button class="ad-trn-photo-remove" data-photo-idx="' + idx + '">&times;</button>' +
                 '</div>';
             });
             grid.innerHTML = ph;
@@ -14181,7 +14186,7 @@
                 slug = data.slug;
                 A.showToast(L.saved, 'success');
                 var statusEl = document.getElementById('adNewsStatus');
-                if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-secondary);">📝 ' + L.trnNewsDraft + '</span>';
+                if (statusEl) statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--draft">📝 ' + L.trnNewsDraft + '</span>';
             } catch (e) {
                 A.showToast(e.message || 'Error', 'error');
             }
@@ -14221,7 +14226,7 @@
                 if (statusEl) {
                     var d = new Date(publishedAt);
                     var ds = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
-                    statusEl.innerHTML = '<span style="color:var(--accent);font-weight:600;">📰 ' + L.trnNewsPublished + ' ' + ds + '</span>';
+                    statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--pub">📰 ' + L.trnNewsPublished + ' ' + ds + '</span>';
                 }
                 // Публикация обновлена — фиксируем новый слепок.
                 // Если он отличается от отправленного, рассылка станет доступна повторно.
@@ -14268,7 +14273,7 @@
                     tgSentAt = new Date().toISOString();
                     A.showToast(isEn ? 'Sent to Telegram!' : 'Отправлено в Telegram!', 'success');
                     var statusEl = document.getElementById('adNewsStatus');
-                    if (statusEl) statusEl.innerHTML = '<span style="color:#4caf50;font-weight:600;">✅ ' + L.trnNewsTgSent + ' ' + fmtSent(tgSentAt) + '</span>';
+                    if (statusEl) statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--sent">✅ ' + L.trnNewsTgSent + ' ' + fmtSent(tgSentAt) + '</span>';
                     // Отправили текущую публикацию — кнопка гаснет до следующего обновления
                     sentSnapshot = publishedSnapshot;
                     refreshNewsButtons();
