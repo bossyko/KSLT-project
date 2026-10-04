@@ -784,6 +784,104 @@ body.ad-page {
     white-space: nowrap;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   ПАНЕЛЬ ЗАЯВОК: ШИРИНЫ КОЛОНОК И УРОВНИ ПОДПИСЕЙ — КЛАССАМИ
+   ═══════════════════════════════════════════════════════════════════
+   Замер 04.10: в панели (315 строк) было 46 инлайновых `style=`, среди
+   них девять кеглей `0.8rem` (12.8), два `0.82rem` (13.12) и зашитые
+   краски #f44336 / #ff9800 / #4caf50 — ни одного числа со шкалы.
+   Кегли встали на ступени 12 и 14, краски — на токены состояний.
+
+   ШИРИНЫ КОЛОНОК ОСТАЮТСЯ ЧИСЛАМИ, И ЭТО НАМЕРЕНО: у ширины колонки
+   таблицы своей шкалы нет, числа эти ПОМЕРЕНЫ под содержимое (галочка
+   16 + отступы, номер до трёх знаков, NTRP «4.25», ряд из двух кнопок).
+   Уезжают они из разметки в одно место, а не придумываются заново. */
+.ad-reg-w-check  { width: 32px; }
+.ad-reg-w-num    { width: 32px; }
+.ad-reg-w-rank   { width: 48px; }
+.ad-reg-w-ntrp   { width: 50px; }
+.ad-reg-w-sum    { width: 80px; }
+.ad-reg-w-seed   { width: 78px; text-align: center; }
+.ad-reg-w-act    { width: 150px; text-align: center; }
+.ad-reg-w-act-sm { width: 110px; text-align: center; }
+
+/* Примечание над таблицей и подпись под заголовком блока */
+.ad-reg-note     { margin-bottom: var(--space-3); }
+.ad-reg-podskazka {
+    margin: calc(var(--space-1) * -1) 0 var(--space-3);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    /* Было `--text-dim` — 3.21 на фоне карточки, мимо WCAG AA.
+       Та же правка, что у шапки таблиц 03.10. */
+    color: var(--text-muted);
+}
+.ad-reg-podpis {
+    margin-top: var(--space-1);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    font-weight: var(--fw-regular);
+    color: var(--text-secondary);
+}
+.ad-reg-pusto { padding: var(--space-4) 0; }
+
+/* Заголовки блоков «Снятые» и «Не допущены» и их счётчики */
+.ad-reg-blok-title { margin-top: var(--space-6); }
+.ad-reg-title-out  { color: var(--danger); }
+.ad-reg-title-blk  { color: var(--warning); }
+.ad-badge-out { background: var(--danger-subtle);  color: var(--danger); }
+.ad-badge-blk { background: var(--warning-subtle); color: var(--warning); }
+
+/* ОДНА ПРИГЛУШЁННОСТЬ НА ОДНО ПОНЯТИЕ. Было два значения — 0.65 у
+   снятых и 0.75 у недопущенных, — хотя смысл один: строка не в деле.
+   Два числа читаются как два разных состояния, а их два и есть, но
+   различает их заголовок блока и краска, а не прозрачность. */
+.ad-reg-row-dim { opacity: 0.65; }
+
+.ad-reg-cell-sm { font-size: var(--fs-xs); line-height: var(--lh-normal); }
+.ad-reg-cell-muted { color: var(--text-secondary); }
+.ad-reg-cell-nowrap { white-space: nowrap; }
+.ad-reg-num-sm {
+    width: 32px;
+    text-align: center;
+    padding: var(--space-1) var(--space-2);
+}
+
+.ad-reg-itogo { margin-top: var(--space-4); text-align: center; }
+.ad-reg-itogo p { margin-bottom: var(--space-2); }
+
+/* Предупреждение «ждут парный рейтинг»: своя краска, потому что это не
+   ошибка и не отказ, а «нужно дозаполнить». Кегль был 0.88rem (14.08) —
+   числа на шкале нет; стал ступень 14. */
+.ad-reg-ntrp-zhdut {
+    margin-bottom: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid rgba(255, 179, 0, 0.35);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 179, 0, 0.08);
+    color: #ffb300;
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+    font-weight: var(--fw-semibold);
+}
+
+.ad-reg-cell-center { text-align: center; }
+
+/* Кнопка «Вернуть» у снятой заявки. ИМЯ БЕРЁМ ТО, ЧТО УЖЕ В РАЗМЕТКЕ
+   (`ad-btn-restore`, bracket.js:4618), а не заводим второе: одно
+   определение на одно понятие. Цель нажатия 44 даёт слой — кнопка
+   внесена в общий список низких кнопок. */
+.ad-btn-restore {
+    color: var(--success);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-none);
+    padding: var(--space-1) var(--space-2);
+}
+
 /* ЗНАЧОК В СТРОКЕ — КОМПОНЕНТОМ `Badge 27:53`. Его описание: высота 24,
    отступ 8, 11 Medium uppercase, подложка 10-15% тона, текст тоном. Он и
    заводился, чтобы убить разнобой, замеренный 18.09: четыре кегля
@@ -1165,6 +1263,7 @@ body.ad-page {
    маленькую цель ей оставлять нельзя: от промаха защищает подтверждение,
    а не теснота. Слой растёт на 4 — внутри отступа полосы 12. */
 .ad-reg-floating-remove,
+.ad-btn-restore,
 /* 03.10: галочка строки 16, «выбрать все» 16, «Отмена» в окне решения 20.
    Галочке слой нужен обёрткой — у `input` нет псевдоэлементов. «Отмена»
    намеренно текстовая ссылка (решение 30.09: четыре кнопки давали 474 при
@@ -1198,6 +1297,7 @@ body.ad-page {
 .ad-reg-act-vynos::after,
 .ad-export-bar .ad-btn::after,
 .ad-reg-floating-remove::after,
+.ad-btn-restore::after,
 .ad-reg-check-wrap::after,
 .ad-confirm-cancel::after {
     content: '';

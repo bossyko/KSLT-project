@@ -4327,7 +4327,7 @@
             pair: L.regReplacePair
         };
 
-        var html = '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regChangesTitle +
+        var html = '<h3 class="ad-reg-section-title ad-reg-blok-title">' + L.regChangesTitle +
             ' <span class="ad-badge">' + строки.length + '</span></h3>' +
             '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                 '<th style="width:150px;">' + L.regChangesWhen + '</th>' +
@@ -4343,7 +4343,7 @@
                 '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
                     датаВремя(r.created_at) + '</td>' +
                 '<td style="font-size:0.8rem;">' + (подписьСтороны[r.side] || r.side) + '</td>' +
-                '<td>' + A.esc(было) + ' <span style="color:var(--text-dim);">\u2192</span> ' +
+                '<td>' + A.esc(было) + ' <span class="ad-reg-cell-muted">\u2192</span> ' +
                     '<span style="color:var(--accent);">' + A.esc(стало) + '</span></td>' +
                 '<td style="font-size:0.8rem;color:var(--text-secondary);">' +
                     A.esc(авторы[r.changed_by] || '\u2014') + '</td>' +
@@ -4404,7 +4404,7 @@
         if (isDbl) {
             var unpaired = mainDraw.filter(function(r) { return !r.partner_id && !r.partner_external_name; });
             if (unpaired.length > 0) {
-                html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
+                html += '<div class="ad-alert ad-alert-warning ad-reg-note">' +
                     '⚠ ' + L.doublesUnpaired + ' (' + unpaired.length + ')' +
                 '</div>';
             }
@@ -4425,7 +4425,7 @@
             var руками = посевРуками(tournament);
             var норма = нормаСеяных(tournament);
             var thSeed = руками
-                ? '<th style="width:78px;text-align:center;">' + L.regSeedCol + '</th>' : '';
+                ? '<th class="ad-reg-w-seed">' + L.regSeedCol + '</th>' : '';
 
             // Какие номера уже разобраны
             var занятыеНомера = {};
@@ -4440,16 +4440,16 @@
             if (isDbl) {
                 // Doubles: # | NTRP | Имя | NTRP | Партнёр | Общий NTRP | Регистрация | Действия
                 var thCombinedNtrp = isEn ? 'Total NTRP' : 'Общий NTRP';
-                regTableHead = '<th style="width:32px;"><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></label></th>' +
-                    '<th class="ad-reg-num" style="width:32px;">#</th>' +
-                    '<th class="ad-reg-num ad-col-ntrp" style="width:50px;">NTRP</th>' +
+                regTableHead = '<th class="ad-reg-w-check"><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></label></th>' +
+                    '<th class="ad-reg-num ad-reg-w-num">#</th>' +
+                    '<th class="ad-reg-num ad-col-ntrp ad-reg-w-ntrp">NTRP</th>' +
                     '<th>' + L.plrName + '</th>' +
-                    '<th class="ad-reg-num ad-col-ntrp" style="width:50px;">NTRP</th>' +
+                    '<th class="ad-reg-num ad-col-ntrp ad-reg-w-ntrp">NTRP</th>' +
                     '<th class="ad-col-partner">' + L.doublesPartner + '</th>' +
-                    '<th class="ad-reg-num ad-col-sum" style="width:80px;">' + thCombinedNtrp + '</th>' +
+                    '<th class="ad-reg-num ad-col-sum ad-reg-w-sum">' + thCombinedNtrp + '</th>' +
                     thSeed +
                     '<th class="ad-col-dt">' + thRegTime + '</th>' +
-                    '<th style="width:150px;text-align:center;">' + thActions + '</th>';
+                    '<th class="ad-reg-w-act">' + thActions + '</th>';
             } else {
                 /* Одиночный: # | Место | Категория | ФИО | Регистрация | Действия.
                    ПОРЯДОК — РЕШЕНИЕ КОСТИ 30.09: место и категория идут ДО
@@ -4458,19 +4458,19 @@
                    место в рейтинге категории турнира, а не абстрактный ранг,
                    и это ровно то число, по которому сеется сетка. */
                 var thRank = isEn ? 'Rank' : 'Место';
-                regTableHead = '<th style="width:32px;"><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></label></th>' +
-                    '<th class="ad-reg-num" style="width:32px;">#</th>' +
-                    '<th class="ad-reg-num" style="width:48px;">' + thRank + '</th>' +
+                regTableHead = '<th class="ad-reg-w-check"><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></label></th>' +
+                    '<th class="ad-reg-num ad-reg-w-num">#</th>' +
+                    '<th class="ad-reg-num ad-reg-w-rank">' + thRank + '</th>' +
                     '<th class="ad-col-cat">' + thCategory + '</th>' +
                     '<th>' + L.plrName + '</th>' +
                     thSeed +
                     '<th class="ad-col-dt">' + thRegTime + '</th>' +
-                    '<th style="width:150px;text-align:center;">' + thActions + '</th>';
+                    '<th class="ad-reg-w-act">' + thActions + '</th>';
             }
 
             // Overflow warning
             if (mainDraw.length > maxPart) {
-                html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
+                html += '<div class="ad-alert ad-alert-warning ad-reg-note">' +
                     (isEn ? 'Warning: ' : 'Внимание: ') + mainDraw.length + ' ' + L.regCount + ', ' +
                     (isEn ? 'but max participants is ' : 'но макс. участников — ') + maxPart +
                 '</div>';
@@ -4488,10 +4488,9 @@
                 });
                 var ждутЧисло = Object.keys(ждут).length;
                 if (ждутЧисло > 0) {
-                    html += '<div style="margin-bottom:12px;padding:10px 14px;border:1px solid rgba(255,179,0,0.35);' +
-                        'border-radius:8px;background:rgba(255,179,0,0.08);color:#ffb300;font-size:0.88rem;font-weight:600;">' +
+                    html += '<div class="ad-reg-ntrp-zhdut">' +
                         '\u26A0 ' + L.dblNtrpNeedTitle + ': ' + ждутЧисло +
-                        '<div style="font-weight:400;color:var(--text-secondary);font-size:0.82rem;margin-top:4px;">' +
+                        '<div class="ad-reg-podpis">' +
                         L.dblNtrpNeedHint + '</div></div>';
                 }
             }
@@ -4507,9 +4506,9 @@
             // менеджеру важно, сколько заявок ждёт его, а не по какой статье
             var ждут = registrations.filter(нужноРешение);
             if (ждут.length) {
-                html += '<div class="ad-alert ad-alert-warning" style="margin-bottom:12px;">' +
+                html += '<div class="ad-alert ad-alert-warning ad-reg-note">' +
                     '\u26A0 ' + L.regReview + ': ' + ждут.length +
-                    '<div style="font-weight:400;color:var(--text-secondary);font-size:0.82rem;margin-top:4px;">' +
+                    '<div class="ad-reg-podpis">' +
                     L.regReviewHint + '</div></div>';
             }
 
@@ -4519,7 +4518,7 @@
             if (руками && норма > 0) {
                 var расставлено = mainDraw.filter(function(r) { return r.seed_number; }).length;
                 var хватает = расставлено >= норма;
-                html += '<div class="ad-alert ad-alert-info" style="margin-bottom:12px;">' +
+                html += '<div class="ad-alert ad-alert-info ad-reg-note">' +
                     (хватает ? '\u2713 ' : '\u00B7 ') +
                     L.regSeedCount.replace('{n}', расставлено).replace('{m}', норма) +
                     (хватает ? '' : ' \u00B7 ' + L.regSeedHint) +
@@ -4543,11 +4542,11 @@
                 });
                 html += '</tbody></table></div>';
             } else {
-                html += '<div class="ad-empty-state" style="padding:16px 0;"><p>' + L.noRegistrations + '</p></div>';
+                html += '<div class="ad-empty-state ad-reg-pusto"><p>' + L.noRegistrations + '</p></div>';
             }
 
             // ---- Waitlist ----
-            html += '<h3 class="ad-reg-section-title" style="margin-top:24px;">' + L.regWaitlist + ' <span class="ad-badge">' + waitlistRegs.length + '</span></h3>';
+            html += '<h3 class="ad-reg-section-title ad-reg-blok-title">' + L.regWaitlist + ' <span class="ad-badge">' + waitlistRegs.length + '</span></h3>';
             if (waitlistRegs.length > 0) {
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     regTableHead.replace('GRP', 'wait') +
@@ -4558,7 +4557,7 @@
                 });
                 html += '</tbody></table></div>';
             } else {
-                html += '<div class="ad-empty-state" style="padding:16px 0;"><p>' + L.regNoWaitlist + '</p></div>';
+                html += '<div class="ad-empty-state ad-reg-pusto"><p>' + L.regNoWaitlist + '</p></div>';
             }
 
             // ---- Rejected (admin only) ----
@@ -4572,17 +4571,17 @@
                 .sort(function(a, b) { return (a.registered_at || '').localeCompare(b.registered_at || ''); });
 
             if (внеТурнира.length > 0) {
-                html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#f44336;">' + L.regOut +
-                    ' <span class="ad-badge" style="background:rgba(244,67,54,0.15);color:#f44336;">' +
+                html += '<h3 class="ad-reg-section-title ad-reg-blok-title ad-reg-title-out">' + L.regOut +
+                    ' <span class="ad-badge ad-badge-out">' +
                     внеТурнира.length + '</span></h3>';
-                html += '<p style="margin:-4px 0 10px;font-size:0.8rem;color:var(--text-dim);">' + L.regOutHint + '</p>';
+                html += '<p class="ad-reg-podskazka">' + L.regOutHint + '</p>';
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
-                    '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
+                    '<th class="ad-reg-num-sm">#</th>' +
                     '<th>' + L.plrName + '</th>' +
                     (isDbl ? '<th>' + L.doublesPartner + '</th>' : '<th>' + (isEn ? 'Category' : 'Категория') + '</th>') +
                     '<th>' + L.regOutWhy + '</th>' +
                     '<th>' + (isEn ? 'Registered' : 'Регистрация') + '</th>' +
-                    '<th style="width:110px;text-align:center;">' + thActions + '</th>' +
+                    '<th class="ad-reg-w-act-sm">' + thActions + '</th>' +
                 '</tr></thead><tbody>';
 
                 внеТурнира.forEach(function(reg, idx) {
@@ -4606,19 +4605,18 @@
                     if (reg.registered_at) {
                         var d = new Date(reg.registered_at);
                         regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
-                            ' <span style="color:var(--text-dim);">' +
+                            ' <span class="ad-reg-cell-muted">' +
                             d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit' }) + '</span>';
                     }
-                    html += '<tr style="opacity:0.65;">' +
-                        '<td style="text-align:center;padding:4px 6px;">' + (idx + 1) + '</td>' +
+                    html += '<tr class="ad-reg-row-dim">' +
+                        '<td class="ad-reg-num-sm">' + (idx + 1) + '</td>' +
                         '<td>' + A.esc(pName) + '</td>' +
-                        '<td style="font-size:0.8rem;">' + A.esc(вторая) + '</td>' +
-                        '<td style="font-size:0.8rem;color:var(--text-secondary);">' + A.esc(причина) + '</td>' +
-                        '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
-                        '<td style="text-align:center;">' +
+                        '<td class="ad-reg-cell-sm">' + A.esc(вторая) + '</td>' +
+                        '<td class="ad-reg-cell-sm ad-reg-cell-muted">' + A.esc(причина) + '</td>' +
+                        '<td class="ad-reg-cell-sm ad-reg-cell-muted ad-reg-cell-nowrap">' + regDT + '</td>' +
+                        '<td class="ad-reg-cell-center">' +
                             '<button class="ad-reg-act ad-btn-restore" data-reg-id="' + reg.id + '"' +
-                            ' title="' + L.regRestoreTitle + '" style="color:#4caf50;background:none;border:none;' +
-                            'cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 6px;">' + L.regRestore + '</button>' +
+                            ' title="' + L.regRestoreTitle + '">' + L.regRestore + '</button>' +
                         '</td>' +
                     '</tr>';
                 });
@@ -4631,11 +4629,11 @@
                 var blkHint = isEn
                     ? 'Did not pass the entry rules. Kept for statistics — shows how many wanted to join.'
                     : 'Не прошли правила допуска. Сохраняются для статистики — видно, сколько человек хотело участвовать.';
-                html += '<h3 class="ad-reg-section-title" style="margin-top:24px;color:#ff9800;">' + blkTitle +
-                    ' <span class="ad-badge" style="background:rgba(255,152,0,0.15);color:#ff9800;">' + blocked.length + '</span></h3>';
-                html += '<p style="margin:-4px 0 10px;font-size:0.8rem;color:var(--text-dim);">' + blkHint + '</p>';
+                html += '<h3 class="ad-reg-section-title ad-reg-blok-title ad-reg-title-blk">' + blkTitle +
+                    ' <span class="ad-badge ad-badge-blk">' + blocked.length + '</span></h3>';
+                html += '<p class="ad-reg-podskazka">' + blkHint + '</p>';
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
-                    '<th style="width:32px;text-align:center;padding:4px 6px;">#</th>' +
+                    '<th class="ad-reg-num-sm">#</th>' +
                     '<th>' + L.plrName + '</th>' +
                     '<th>' + (isEn ? 'Category' : 'Категория') + '</th>' +
                     '<th>' + (isEn ? 'Reason' : 'Причина') + '</th>' +
@@ -4649,15 +4647,15 @@
                     if (reg.registered_at) {
                         var bd = new Date(reg.registered_at);
                         bDT = bd.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
-                            ' <span style="color:var(--text-dim);">' +
+                            ' <span class="ad-reg-cell-muted">' +
                             bd.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit' }) + '</span>';
                     }
-                    html += '<tr style="opacity:0.75;">' +
-                        '<td style="text-align:center;padding:4px 6px;">' + (idx + 1) + '</td>' +
+                    html += '<tr class="ad-reg-row-dim">' +
+                        '<td class="ad-reg-num-sm">' + (idx + 1) + '</td>' +
                         '<td>' + A.esc(bName) + '</td>' +
-                        '<td style="font-size:0.8rem;">' + A.esc(bCat) + '</td>' +
-                        '<td style="font-size:0.8rem;color:var(--text-secondary);">' + A.esc(reg.block_reason || '—') + '</td>' +
-                        '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + bDT + '</td>' +
+                        '<td class="ad-reg-cell-sm">' + A.esc(bCat) + '</td>' +
+                        '<td class="ad-reg-cell-sm ad-reg-cell-muted">' + A.esc(reg.block_reason || '—') + '</td>' +
+                        '<td class="ad-reg-cell-sm ad-reg-cell-muted ad-reg-cell-nowrap">' + bDT + '</td>' +
                     '</tr>';
                 });
                 html += '</tbody></table></div>';
@@ -4677,8 +4675,8 @@
             var мест = групповой
                 ? (tournament.max_participants || mainDraw.length)
                 : (tournament.draw_size || 16);
-            html += '<div style="margin-top:16px;text-align:center;">' +
-                '<p style="margin-bottom:8px;">' + mainDraw.length + ' ' + L.regCount + ' / ' + мест + '</p>' +
+            html += '<div class="ad-reg-itogo">' +
+                '<p>' + mainDraw.length + ' ' + L.regCount + ' / ' + мест + '</p>' +
                 '<button class="ad-btn ad-btn-primary" id="adBrkGenerateDraw">' + L.generateDraw + '</button>' +
             '</div>';
         }
@@ -4748,7 +4746,7 @@
         if (reg.registered_at) {
             var d = new Date(reg.registered_at);
             regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit' }) +
-                ' <span style="color:var(--text-dim);">' +
+                ' <span class="ad-reg-cell-muted">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit' }) + '</span>';
         }
         // Посев руками: список чисел до нормы. Больше нормы номеров не бывает —
@@ -5165,7 +5163,7 @@
         var размер = расклад.размер;
 
         function подпись(слот) {
-            if (!слот) return '<span style="color:var(--text-dim);">' + L.byeLabel + '</span>';
+            if (!слот) return '<span class="ad-reg-cell-muted">' + L.byeLabel + '</span>';
             var id = именаСлотов[слот];
             if (!id) return '<span style="color:var(--text-secondary);">' + слот + '</span>';
             // Имена берём тем же способом, что и настоящая сетка: в парном
@@ -5916,7 +5914,7 @@
                     if (!id) {
                         return метка
                             ? '<span style="color:var(--text-secondary);">' + A.esc(метка) + '</span>'
-                            : '<span style="color:var(--text-dim);">' + L.byeLabel + '</span>';
+                            : '<span class="ad-reg-cell-muted">' + L.byeLabel + '</span>';
                     }
                     if (isDbl) return getTeamDisplayName(id, regsMap, playersMap, true);
                     var и = playersMap[id] || {};
@@ -6136,7 +6134,7 @@
                     // жеребьёвки, когда групп ещё никто не доиграл
                     if (метка) return '<span style="color:var(--text-secondary);">' + A.esc(метка) + '</span>';
                     if (isXSlot) return xSlotMark;
-                    return '<span style="color:var(--text-dim);">TBD</span>';
+                    return '<span class="ad-reg-cell-muted">TBD</span>';
                 }
                 if (isDbl && regsMap) {
                     p1Name = match.player1_id ? getTeamDisplayName(match.player1_id, regsMap, playersMap, true) : emptySlotName(isXSlotP1, byeСторона1, match.slot1_label);
@@ -12005,7 +12003,7 @@
             html += '</div>';
         });
 
-        html += '<div style="margin-top:16px;text-align:center;">';
+        html += '<div class="ad-reg-itogo">';
         html += '<button class="ad-btn ad-btn-primary" id="adXSlotConfirm">' + L.xSlotConfirm + '</button>';
         html += '</div>';
         html += '</div>';
@@ -13397,8 +13395,8 @@
                 var p2 = playersMap[match.player2_id];
                 var p1GrpLbl = match.player1_id && playerGroupLabel[match.player1_id] ? playerGroupLabel[match.player1_id] : '';
                 var p2GrpLbl = match.player2_id && playerGroupLabel[match.player2_id] ? playerGroupLabel[match.player2_id] : '';
-                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : '<span style="color:var(--text-dim);">TBD</span>');
-                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : '<span style="color:var(--text-dim);">TBD</span>');
+                var p1Name = p1 ? A.esc(isEn ? (p1.name_en || p1.name) : p1.name) : (match.player1_id ? 'TBD' : '<span class="ad-reg-cell-muted">TBD</span>');
+                var p2Name = p2 ? A.esc(isEn ? (p2.name_en || p2.name) : p2.name) : (match.player2_id ? 'TBD' : '<span class="ad-reg-cell-muted">TBD</span>');
 
                 var isCompleted = match.status === 'completed';
                 var isBye = match.score === 'BYE';
