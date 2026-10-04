@@ -768,9 +768,18 @@ tr.td-rr-row-dimmed {
     font-size: var(--fs-sm);
 }
 
+/* ШАПКА ТАБЛИЦЫ — `--text-muted`, А НЕ `--text-dim`. Замер 04.10 на боевой:
+   шапка таблицы группы давала контраст 3.21 при норме WCAG AA 4.5 — это
+   ТЕКСТ, и правило для текста к нему применяется целиком. `--text-muted`
+   даёт 5.33. Та же правка, что сделана в админке 03.10: ПРАВИЛО, ВЫВЕДЕННОЕ
+   НА ОДНОМ КУСКЕ, ПРИМЕНЯЕТСЯ К СЛЕДУЮЩЕМУ БЕЗ НОВОГО РАЗБОРА.
+   Шапок на странице ЧЕТЫРЕ — круговая, заявки, группа и расписание, — и все
+   четыре стояли на одной и той же краске.
+   `--text-dim` остаётся там, где он ОСМЫСЛЕН: им рисуется «TBD», и про это
+   уже записано выше, у .td-slot-wait. */
 .td-rr-table thead th {
     background: var(--bg-elevated);
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
@@ -1232,7 +1241,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-reg-table thead th {
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
@@ -1548,6 +1557,13 @@ tr.td-rr-row-dimmed {
 }
 
 /* === LOCKED PAGE === */
+/* Дорога назад на экране «турнир не найден»: отступ ступенью, а не инлайном.
+   У экрана «нужен вход» он стоял числом в атрибуте style — туда же, куда
+   пакетная правка потом не доберётся */
+.td-notfound-back {
+    margin-top: var(--space-4);
+}
+
 .td-hero-locked {
     text-align: center;
     display: flex;
@@ -1706,7 +1722,7 @@ tr.td-rr-row-dimmed {
 
 .td-group-table thead th {
     background: var(--bg-elevated);
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
@@ -2410,7 +2426,7 @@ tr.td-rr-row-dimmed {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-weight: 600;
     padding: 8px 10px;
     border-bottom: 1px solid var(--border-subtle);

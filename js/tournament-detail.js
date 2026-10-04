@@ -1201,7 +1201,24 @@ function loadFromSupabase(client, id) {
     client.from('tournaments').select('*').eq('id', id).single()
         .then(function(result) {
             if (result.error || !result.data) {
-                renderLockedPage(id);
+                /* НЕ НАЙДЕН И «НУЖЕН ВХОД» — РАЗНЫЕ ЭКРАНЫ, И ДО 04.10 ОНИ
+                   БЫЛИ ОДНИМ. Человек, открывший устаревшую ссылку, видел
+                   «Войдите, чтобы увидеть полную сетку» у турнира, которого
+                   нет вовсе.
+
+                   ОТЛИЧИТЬ ИХ ПО ОТВЕТУ БАЗЫ НЕЛЬЗЯ: RLS прячет строку тем же
+                   нулём строк, что и несуществующий id, а PostgREST отвечает
+                   на .single() при нуле строк кодом 406 в обоих случаях.
+                   Поэтому решает не ошибка, а ВОШЁЛ ЛИ ЧЕЛОВЕК: гостю
+                   показываем вход — дело может быть в доступе; вошедшему
+                   «не найден», потому что доступ у него уже есть. */
+                var клиент = client;
+                try {
+                    клиент.auth.getSession().then(function(сес) {
+                        var вошёл = !!(сес && сес.data && сес.data.session);
+                        if (вошёл) renderNotFoundPage(); else renderLockedPage(id);
+                    }).catch(function() { renderLockedPage(id); });
+                } catch (e) { renderLockedPage(id); }
                 return;
             }
             var tournament = result.data;
@@ -3633,6 +3650,76 @@ function initCountdown(t) {
 // LOCKED PAGE (not authorized)
 // ========================================
 
+/**
+ * Спрятать тело страницы турнира: вкладки, разделы, ИХ ЗАГОЛОВКИ и спонсоров.
+ *
+ * ЗАГОЛОВКИ РАЗДЕЛОВ ПРЯТАЛИСЬ НЕ ВСЕ. До 04.10 скрывались только .td-section,
+ * а заголовок каждого раздела живёт в СОСЕДНЕМ узле .td-section-header — и
+ * шесть пустых заголовков оставались на экране: «Описание турнира», «Место
+ * проведения», «Участники», «Турнирная сетка», «Расписание запусков», «Очки».
+ * Человек видел турнир, в котором «ничего нет». Замер 04.10 на боевой базе:
+ * видимых разделов ноль, видимых заголовков шесть, высота страницы 1502.
+ */
+function спрятатьТелоСтраницы() {
+    var tabsBar = document.getElementById('tabsBar');
+    if (tabsBar) tabsBar.style.display = 'none';
+    document.querySelectorAll('.td-section, .td-section-header').forEach(function(s) {
+        s.style.display = 'none';
+    });
+    var sponsors = document.getElementById('sponsors');
+    if (sponsors) sponsors.style.display = 'none';
+}
+
+/**
+ * Турнира нет. Говорим это словами и даём дорогу назад.
+ *
+ * ПРОЧЕРК НЕ ОБЪЯСНЯЕТ СЕБЯ — и пустая страница тоже. Кнопки входа здесь нет
+ * нарочно: человек уже вошёл, и предлагать ему войти значит врать о причине.
+ */
+function renderNotFoundPage() {
+    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var backUrl = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
+
+    var texts = isEn ? {
+        title: 'Tournament not found',
+        subtitle: 'The link may be out of date, or the tournament has been removed.',
+        back: 'Back to Tournaments'
+    } : (isKg ? {
+        title: 'Мелдеш табылган жок',
+        subtitle: 'Шилтеме эскирген болушу мүмкүн же мелдеш өчүрүлгөн.',
+        back: 'Мелдештерге кайтуу'
+    } : {
+        title: 'Турнир не найден',
+        subtitle: 'Возможно, ссылка устарела или турнир удалили.',
+        back: 'Назад к турнирам'
+    });
+
+    спрятатьТелоСтраницы();
+
+    var hero = document.getElementById('tournamentHero');
+    if (!hero) return;
+    hero.innerHTML =
+        '<div class="td-hero-bg">' +
+            '<img src="../images/heroes/tournaments.jpg" alt="">' +
+            '<div class="td-hero-overlay"></div>' +
+        '</div>' +
+        '<div class="td-hero-content td-hero-locked">' +
+            '<h1>' + texts.title + '</h1>' +
+            '<p class="td-locked-subtitle">' + texts.subtitle + '</p>' +
+            '<a href="' + backUrl + '" class="td-back-link td-notfound-back">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg> ' +
+                texts.back +
+            '</a>' +
+        '</div>';
+    /* ТИТУЛ В ПОРЯДКЕ СТРАНИЦЫ, А НЕ НАОБОРОТ: остальные страницы пишут
+       «КСЛТ — X», и латиницей на английской и кыргызской. Первый заход 04.10
+       дал «Tournament not found — КСЛТ» — кириллица в английском титуле.
+       ЧИСЛО, ПОМЕРЕННОЕ НА ОДНОМ ЯЗЫКЕ, НЕ ЯВЛЯЕТСЯ ЧИСЛОМ; к подписям это
+       относится так же. */
+    document.title = (isEn || isKg ? 'KSLT' : 'КСЛТ') + ' — ' + texts.title;
+}
+
 function renderLockedPage(tournamentId) {
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
@@ -3662,14 +3749,7 @@ function renderLockedPage(tournamentId) {
         back: 'Назад к турнирам'
     });
 
-    // Hide tabs
-    var tabsBar = document.getElementById('tabsBar');
-    if (tabsBar) tabsBar.style.display = 'none';
-
-    // Hide all sections and sponsors
-    document.querySelectorAll('.td-section').forEach(function(s) { s.style.display = 'none'; });
-    var sponsors = document.getElementById('sponsors');
-    if (sponsors) sponsors.style.display = 'none';
+    спрятатьТелоСтраницы();
 
     // Render hero as locked
     var hero = document.getElementById('tournamentHero');

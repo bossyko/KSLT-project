@@ -195,6 +195,47 @@ const ОТКАТЫ = [
  '    padding: 16px 24px;',
  'отступы вкладки стоят на шкале'],
 
+
+['вернуть шапку таблицы группы на тусклую краску', 'css/tournament-detail.css',
+ '.td-group-table thead th {\n    background: var(--bg-elevated);\n    color: var(--text-muted);',
+ '.td-group-table thead th {\n    background: var(--bg-elevated);\n    color: var(--text-dim);',
+ 'шапка group не на --text-dim'],
+
+['притушить саму краску --text-muted', 'css/tokens.css',
+ '--text-muted:     var(--alpha-white-50);',
+ '--text-muted:     var(--alpha-white-35);',
+ '--text-muted не опущен ниже половины'],
+
+['убрать экран «турнир не найден»', 'js/tournament-detail.js',
+ 'function renderNotFoundPage() {',
+ 'function renderNotFoundPageOtkl() {',
+ 'экран «турнир не найден» существует'],
+
+['прятать разделы без их заголовков', 'js/tournament-detail.js',
+ "querySelectorAll('.td-section, .td-section-header')",
+ "querySelectorAll('.td-section')",
+ 'тело страницы прячется вместе с ЗАГОЛОВКАМИ разделов'],
+
+['решать экран по ошибке базы, а не по сессии', 'js/tournament-detail.js',
+ 'if (вошёл) renderNotFoundPage(); else renderLockedPage(id);',
+ 'renderLockedPage(id);',
+ 'какой экран показать, решает СЕССИЯ, а не ошибка базы'],
+
+['увести кыргызскую подпись «не найден»', 'js/tournament-detail.js',
+ "title: 'Мелдеш табылган жок',",
+ "title: 'Tournament not found',",
+ 'у экрана «не найден» есть подпись «Мелдеш табылган жок»'],
+
+['вернуть кириллицу в английский титул', 'js/tournament-detail.js',
+ "(isEn || isKg ? 'KSLT' : 'КСЛТ')",
+ "('КСЛТ')",
+ 'титул «не найден» латиницей на английской и кыргызской'],
+
+['вернуть отступ дороги назад инлайном', 'css/tournament-detail.css',
+ '.td-notfound-back {\n    margin-top: var(--space-4);',
+ '.td-notfound-back {\n    margin-top: 16px;',
+ 'дорога назад на экране «не найден» отступает ступенью, а не инлайном'],
+
 ];
 
 /* ── прогон ──────────────────────────────────────────────────────────────── */
@@ -205,14 +246,14 @@ const копия = (отн) => {
     fs.mkdirSync(path.dirname(dst), { recursive: true });
     fs.copyFileSync(path.join(КОРЕНЬ, отн), dst);
 };
-['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournaments-overview.css', 'css/tournament-detail.css'].forEach(копия);
+['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournaments-overview.css', 'css/tournament-detail.css', 'js/tournament-detail.js'].forEach(копия);
 fs.readdirSync(path.join(КОРЕНЬ, 'pages')).filter(ф => ф.endsWith('.html')).forEach(ф => копия('pages/' + ф));
 fs.readdirSync(КОРЕНЬ).filter(ф => /^index.*\.html$/.test(ф)).forEach(копия);
 fs.mkdirSync(path.join(ВРЕМ, 'tools'), { recursive: true });
 fs.writeFileSync(path.join(ВРЕМ, 'tools', 'check-oblozhka.js'), ПРАВИЛО);
 
 const исходник = {};
-['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournament-detail.css'].forEach(ф => {
+['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournament-detail.css', 'js/tournament-detail.js'].forEach(ф => {
     исходник[ф] = fs.readFileSync(path.join(ВРЕМ, ф), 'utf8');
 });
 
