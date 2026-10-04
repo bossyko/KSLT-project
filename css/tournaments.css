@@ -28,14 +28,17 @@
    который стоит строкой ниже. */
 .tournament-hero {
     position: relative;
-    min-height: 460px;
+    /* ПОЛ, ВОЗДУХ И ЛЕСТНИЦА ЖИВУТ В ОДНОМ МЕСТЕ — css/tokens.css, раздел
+       «ОБЛОЖКА РАЗДЕЛА». Здесь своих чисел больше нет. Было: пол 460,
+       воздух --section-y сверху и снизу. */
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--section-y) var(--pad-x) var(--section-y);
+    padding: var(--oblozhka-vozduh) var(--pad-x) var(--oblozhka-vozduh-niz);
     overflow: hidden;
     /* Воздух между шапкой и полосой фильтров: без него поиск лип к фотографии */
-    margin-bottom: 24px;
+    margin-bottom: var(--space-6);
 }
 
 .tournament-hero-bg {
@@ -68,10 +71,10 @@
 }
 
 .tournament-hero-content h1 {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 18px;
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-extrabold);
+    line-height: var(--lh-tight);
+    margin-bottom: var(--space-4);
     color: var(--text-primary);
     /* «Pro-Masters Tournaments» и «Challengers Tournaments» ломались
        пополам — на широком экране держим строку целой */
@@ -83,12 +86,12 @@
    Цвет приглушённый и вес меньше, чем у заголовка: белым и жирным она
    сливалась с названием категории в одну нечитаемую массу. */
 .trn-hero-sub {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
-    font-weight: 600;
+    font-size: var(--fs-hero-sub);
+    font-weight: var(--fw-semibold);
     color: var(--text-secondary);
     max-width: 720px;
     margin: 0 auto var(--space-lg);
-    line-height: 1.5;
+    line-height: var(--lh-normal);
 }
 
 /* Цифры — тем же видом, что на странице «Турниры»: раздел один,
@@ -106,13 +109,13 @@
 
 .hero-stat-value {
     display: block;
-    font-size: var(--fs-3xl);
-    font-weight: 800;
+    font-size: var(--fs-hero-num);
+    font-weight: var(--fw-extrabold);
     color: var(--accent);
 }
 
 .hero-stat-label {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-hero-cap);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -814,8 +817,8 @@
        обложка не должна прыгать, а длина названия — менять её размер.
        Содержимое стоит у нижнего края с отступом в 30 */
     .tournament-hero {
-        min-height: 275px;
-        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
+        /* Пол и воздух пришли из tokens.css. Здесь остаётся только
+           раскладка: название вверху, цифры внизу. */
         display: flex;
         align-items: stretch;
         justify-content: center;
