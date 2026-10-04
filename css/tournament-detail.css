@@ -7,7 +7,11 @@
 .td-hero {
     position: relative;
     z-index: 0;
-    min-height: 300px;
+    /* ПОЛ — ОБЩИЙ НА ВСЕ РАЗДЕЛЫ, css/tokens.css. Было 300 здесь, 360 в
+       медиа 992, 320 в 768 и 280 в 480 — четыре числа на одно понятие.
+       Воздух остаётся своим: обложка турнира прижата книзу (flex-end), и
+       воздух у неё живёт на .td-hero-content, а не на самой обложке. */
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: flex-end;
     padding: 0 var(--pad-x);
@@ -213,11 +217,15 @@
 }
 
 .td-hero h1 {
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 800;
+    /* СТУПЕНЬ, А НЕ ДОЛЯ ШИРИНЫ. Было clamp(1.8rem, 4vw, 3rem) и давало 48
+       на десктопе, 40.96 на планшете боком, 33.76 на телефоне боком — ни
+       одного числа со шкалы. Крутилка живёт в css/tokens.css и одна на все
+       разделы: 40 · 40 · 32 · 32 · 26. */
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-extrabold);
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
-    line-height: 1.1;
+    line-height: var(--lh-tight);
 }
 
 .td-hero-meta {
@@ -1697,8 +1705,24 @@ tr.td-rr-row-dimmed {
 
 /* === RESPONSIVE === */
 @media (max-width: 992px) {
+    /* РЕШЕНИЕ СТРАНИЦЫ СОХРАНЕНО, ТОЛЬКО ВЫРАЖЕНО СТУПЕНЬЮ И НА СВОЕЙ
+       ГРАНИЦЕ. Причина прежняя и записана автором правила ниже: три
+       показателя в одну строку рядом с названием турнира кричали громче
+       него. Обложка турнира КРУТИТ общую ручку у себя — ступенью ниже
+       стандарта раздела, — а не заводит собственный размер долями ширины.
+       Было clamp(1rem, 4.4vw, 1.35rem): 21.6 на планшете и 17.16 на
+       телефоне, чисел со шкалы среди них нет.
+
+       ГРАНИЦА 992, А НЕ 768. Первый заход 04.10 поставил крутилку в медиа
+       768 — и телефон БОКОМ (844) в неё не попал: цифры там остались 32,
+       крупнее, чем на планшете стоя. ВИД НЕ ДЕЛИТСЯ ОДНОЙ ШИРИНОЙ, а
+       границы у нас две — 640 и 992.
+
+       ПРЕДПОЛОЖЕНИЕ: ступень ниже — это --fs-md (18) и --fs-2xs (11).
+       Угадан размер, не причина. */
     .td-hero {
-        min-height: 360px;
+        --fs-hero-num: var(--fs-md);
+        --fs-hero-cap: var(--fs-2xs);
     }
 
     .td-hero-stats {
@@ -1716,11 +1740,6 @@ tr.td-rr-row-dimmed {
 }
 
 @media (max-width: 768px) {
-    .td-hero {
-        min-height: 320px;
-        padding: 0 var(--pad-x);
-    }
-
     .td-section {
         padding: var(--section-y-sm) var(--pad-x);
     }
@@ -1794,14 +1813,6 @@ tr.td-rr-row-dimmed {
 }
 
 @media (max-width: 480px) {
-    .td-hero {
-        min-height: 280px;
-    }
-
-    .td-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
     .td-match {
         width: 170px;
         min-width: 170px;
@@ -1850,9 +1861,6 @@ tr.td-rr-row-dimmed {
 }
 
 @media (max-width: 375px) {
-    .td-hero h1 {
-        font-size: var(--fs-lg);
-    }
     .td-hero-meta {
         font-size: var(--fs-sm);
     }
@@ -2482,10 +2490,10 @@ tr.td-rr-row-dimmed {
     .td-back-link { margin-bottom: 14px; }
     .td-hero-badges { margin-bottom: 10px; }
 
+    /* Кегль и межстрочный пришли из крутилки обложки — здесь остаётся
+       только отступ, и он встал на ступень (было 10) */
     .td-hero-content h1 {
-        font-size: var(--fs-lg);
-        line-height: 1.25;
-        margin-bottom: 10px;
+        margin-bottom: var(--space-3);
     }
 
     .td-hero-meta { margin-bottom: 14px; }
@@ -2928,15 +2936,6 @@ tr.td-rr-row-dimmed {
        стандарт рассчитан на две колонки в два ряда, а здесь три показателя
        в одну строку, и один из них — длинная пара «2 500 / 3 000». Рядом с
        названием турнира они кричали громче него, поэтому мельче */
-    .td-hero-stats .hero-stat-value {
-        font-size: clamp(1rem, 4.4vw, 1.35rem);
-        line-height: 1.15;
-    }
-
-    .td-hero-stats .hero-stat-label {
-        font-size: clamp(0.6rem, 2.7vw, 0.7rem);
-    }
-
     .td-hero-stats { gap: 10px; }
 
     /* Счётчик до старта: цифры в трёх коробках по 60 пикселей занимали

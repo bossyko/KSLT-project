@@ -139,6 +139,32 @@ const ОТКАТЫ = [
  '    .tournament-hero {\n        min-height: 275px;\n        /* Пол и воздух пришли из tokens.css',
  'в узком медиа обложка категории не возвращает себе пол и воздух'],
 
+
+['вернуть обложке турнира своё число высоты', 'css/tournament-detail.css',
+ '    min-height: var(--oblozhka-pol);\n    display: flex;\n    align-items: flex-end;',
+ '    min-height: 300px;\n    display: flex;\n    align-items: flex-end;',
+ '.td-hero не держит своего числа высоты'],
+
+['вернуть заголовку турнира clamp', 'css/tournament-detail.css',
+ '    font-size: var(--fs-hero);\n    font-weight: var(--fw-extrabold);\n    color: var(--text-primary);',
+ '    font-size: clamp(1.8rem, 4vw, 3rem);\n    font-weight: var(--fw-extrabold);\n    color: var(--text-primary);',
+ 'заголовок турнира стоит на --fs-hero'],
+
+['вернуть межстрочный заголовка турнира числом', 'css/tournament-detail.css',
+ '    margin-bottom: var(--space-sm);\n    line-height: var(--lh-tight);',
+ '    margin-bottom: var(--space-sm);\n    line-height: 1.1;',
+ 'межстрочный заголовка турнира — ступень'],
+
+['вернуть второе объявление кегля заголовка турнира', 'css/tournament-detail.css',
+ '    .td-hero-content h1 {\n        margin-bottom: var(--space-3);',
+ '    .td-hero-content h1 {\n        font-size: var(--fs-lg);\n        margin-bottom: var(--space-3);',
+ 'кегль заголовка турнира объявлен ОДИН раз'],
+
+['вернуть цифрам турнира собственный размер долями ширины', 'css/tournament-detail.css',
+ '        --fs-hero-num: var(--fs-md);',
+ '        --fs-hero-num: clamp(1rem, 4.4vw, 1.35rem);',
+ 'исключение страницы турнира выражено КРУТИЛКОЙ, а не своим размером'],
+
 ];
 
 /* ── прогон ──────────────────────────────────────────────────────────────── */
@@ -149,14 +175,14 @@ const копия = (отн) => {
     fs.mkdirSync(path.dirname(dst), { recursive: true });
     fs.copyFileSync(path.join(КОРЕНЬ, отн), dst);
 };
-['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournaments-overview.css'].forEach(копия);
+['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournaments-overview.css', 'css/tournament-detail.css'].forEach(копия);
 fs.readdirSync(path.join(КОРЕНЬ, 'pages')).filter(ф => ф.endsWith('.html')).forEach(ф => копия('pages/' + ф));
 fs.readdirSync(КОРЕНЬ).filter(ф => /^index.*\.html$/.test(ф)).forEach(копия);
 fs.mkdirSync(path.join(ВРЕМ, 'tools'), { recursive: true });
 fs.writeFileSync(path.join(ВРЕМ, 'tools', 'check-oblozhka.js'), ПРАВИЛО);
 
 const исходник = {};
-['css/tokens.css', 'css/tournaments.css', 'css/style.css'].forEach(ф => {
+['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournament-detail.css'].forEach(ф => {
     исходник[ф] = fs.readFileSync(path.join(ВРЕМ, ф), 'utf8');
 });
 
