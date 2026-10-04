@@ -2744,7 +2744,7 @@
         if (isTournamentCompleted) {
             html += '<div class="ad-brk-panel" id="adBrkResultsPanel" style="' + (activeTab !== 'results' ? 'display:none;' : '') + '">';
             html += renderResultsPanel(tournament, tournamentResults, playersMap, matches, registrations, isDbl);
-            html += '<div style="text-align:right;margin-top:16px;">' +
+            html += '<div class="ad-res-podval">' +
                 '<button class="ad-btn ad-btn-primary" id="adBrkRecalcPoints">' +
                 (isEn ? 'Recalculate Points' : 'Пересчитать очки') + '</button></div>';
             html += '</div>';
@@ -5500,7 +5500,7 @@
                     (isEn ? 'provisional, ' + сыгранныхПар + ' of ' + всегоПар + ' played'
                           : 'предварительно, сыграно ' + сыгранныхПар + ' из ' + всегоПар) +
                     '</span>') + '</div>';
-            html += '<div class="ad-table-wrap" style="overflow-x:auto;">';
+            html += '<div class="ad-table-wrap">';
             html += '<table class="ad-table ad-grp-matrix">';
 
             // Header
@@ -5798,7 +5798,7 @@
                 html += '<div class="ad-qual-block" style="margin-top:20px;">';
                 html += '<div class="ad-grp-section-title">' + L.qualTableTitle + '</div>';
                 html += '<div class="ad-qual-note">' + L.qualTableNote + '</div>';
-                html += '<div class="ad-table-wrap" style="overflow-x:auto;"><table class="ad-table ad-grp-matrix">';
+                html += '<div class="ad-table-wrap"><table class="ad-table ad-grp-matrix">';
                 html += '<thead><tr>' +
                     '<th style="width:30px;">№</th>' +
                     '<th>' + (isEn ? 'Player' : 'Игрок') + '</th>' +
@@ -7035,7 +7035,7 @@
             // Player not in playersMap — check registrations for external name
             var reg = regsById[playerId];
             if (reg && reg.is_external && reg.external_name) {
-                return A.esc(reg.external_name) + ' <span style="background:#ff9800;color:#000;font-size:0.65rem;padding:1px 5px;border-radius:4px;margin-left:4px;font-weight:700;">EXT</span>';
+                return A.esc(reg.external_name) + ' <span class="ad-reg-mark ad-reg-mark-ext">EXT</span>';
             }
             return playerId || '?';
         }
@@ -7052,7 +7052,7 @@
             }
             if (reg.partner_external_name) {
                 return ' / ' + A.esc(reg.partner_external_name) +
-                    ' <span style="background:#ff9800;color:#000;font-size:0.65rem;padding:1px 5px;border-radius:4px;margin-left:2px;font-weight:700;">EXT</span>';
+                    ' <span class="ad-reg-mark ad-reg-mark-ext">EXT</span>';
             }
             return '';
         }
@@ -7071,12 +7071,12 @@
 
         // Render a results table
         function renderTable(tableResults) {
-            var tbl = '<div class="ad-table-card"><div class="ad-table-wrap" style="overflow-x:auto;"><table class="ad-table">' +
+            var tbl = '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table">' +
                 '<thead><tr>' +
-                    '<th style="width:50px;">' + L.resPlace + '</th>' +
+                    '<th class="ad-res-w-place">' + L.resPlace + '</th>' +
                     '<th>' + L.resPlayer + '</th>' +
                     '<th>' + L.resRound + '</th>' +
-                    '<th style="text-align:right;">' + L.resPoints + '</th>' +
+                    '<th class="ad-res-pts-head">' + L.resPoints + '</th>' +
                 '</tr></thead><tbody>';
 
             tableResults.forEach(function(r, idx) {
@@ -7092,15 +7092,15 @@
                 var isExt = !playersMap[r.player_id];
 
                 var medal = '';
-                if (place === 1) medal = '<span style="margin-right:4px;">🥇</span>';
-                else if (place === 2) medal = '<span style="margin-right:4px;">🥈</span>';
-                else if (place === 3) medal = '<span style="margin-right:4px;">🥉</span>';
+                if (place === 1) medal = '<span class="ad-res-medal">🥇</span>';
+                else if (place === 2) medal = '<span class="ad-res-medal">🥈</span>';
+                else if (place === 3) medal = '<span class="ad-res-medal">🥉</span>';
 
-                tbl += '<tr style="' + (isWinner ? 'background:rgba(204,255,0,0.08);' : '') + '">' +
-                    '<td style="font-weight:600;text-align:center;">' + medal + подписьМеста + '</td>' +
-                    '<td style="' + (isWinner ? 'font-weight:700;color:var(--accent);' : (isFinalist ? 'font-weight:600;' : '')) + '">' + pName + '</td>' +
+                tbl += '<tr' + (isWinner ? ' class="ad-res-row-winner"' : '') + '>' +
+                    '<td class="ad-res-place">' + medal + подписьМеста + '</td>' +
+                    '<td' + (isWinner ? ' class="ad-res-name-winner"' : (isFinalist ? ' class="ad-res-name-finalist"' : '')) + '>' + pName + '</td>' +
                     '<td>' + roundLabel + '</td>' +
-                    '<td style="text-align:right;font-weight:700;' + (isExt ? 'color:var(--text-secondary);' : 'color:var(--accent);') + 'font-size:1.1rem;">' + (r.points_earned || 0) + '</td>' +
+                    '<td class="ad-res-pts' + (isExt ? ' ad-res-pts--ext' : '') + '">' + (r.points_earned || 0) + '</td>' +
                 '</tr>';
             });
 
@@ -7115,18 +7115,18 @@
         var html = '';
 
         // Summary header
-        html += '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">' +
-            '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:140px;">' +
-                '<div style="font-size:0.75rem;color:var(--text-secondary);">' + L.resTotalPlayers + '</div>' +
-                '<div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">' + results.length + '</div>' +
+        html += '<div class="ad-res-stats">' +
+            '<div class="ad-stat-card">' +
+                '<div class="ad-stat-label">' + L.resTotalPlayers + '</div>' +
+                '<div class="ad-stat-value ad-stat-value--neutral">' + results.length + '</div>' +
             '</div>' +
-            '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:140px;">' +
-                '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (isEn ? 'Total Points Distributed' : 'Всего очков распределено') + '</div>' +
-                '<div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' + totalPoints + '</div>' +
+            '<div class="ad-stat-card">' +
+                '<div class="ad-stat-label">' + (isEn ? 'Total Points Distributed' : 'Всего очков распределено') + '</div>' +
+                '<div class="ad-stat-value">' + totalPoints + '</div>' +
             '</div>' +
-            '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:140px;">' +
-                '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (isEn ? 'Tournament Level' : 'Уровень турнира') + '</div>' +
-                '<div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">' + (function() {
+            '<div class="ad-stat-card">' +
+                '<div class="ad-stat-label">' + (isEn ? 'Tournament Level' : 'Уровень турнира') + '</div>' +
+                '<div class="ad-stat-value ad-stat-value--neutral">' + (function() {
                     if (!tournament.level_id) return '—';
                     var lv = A.cachedLevels.find(function(l) { return l.id === tournament.level_id; });
                     return lv ? A.esc(isEn ? (lv.name_en || lv.name) : lv.name) : '—';
@@ -7171,28 +7171,28 @@
                 var кат = катId && A.categoriesMap ? A.categoriesMap[катId] : null;
                 if (!кат) return '';
                 var имя = isEn ? (кат.name_en || кат.name) : кат.name;
-                return ' <span style="font-size:0.8rem;color:var(--accent);font-weight:500;">— ' +
+                return ' <span class="ad-res-zachet">— ' +
                     (isEn ? 'counts toward ' : 'зачёт ') + A.esc(имя) + '</span>';
             };
 
             // Premier League section
             if (plResults.length > 0) {
-                html += '<h3 style="margin:20px 0 12px;color:var(--accent);font-size:1.1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-                    '<span style="font-size:1.2rem;">🏆</span> ' +
+                html += '<h3 class="ad-res-group-title ad-res-group-title--pl">' +
+                    '<span class="ad-res-group-icon">🏆</span> ' +
                     (isEn ? 'Premier League' : 'Высшая лига') +
                     зачёт(plResults) +
-                    ' <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:400;">(' + plResults.length + (isEn ? ' players' : ' уч.') + ')</span>' +
+                    ' <span class="ad-res-group-count">(' + plResults.length + (isEn ? ' players' : ' уч.') + ')</span>' +
                 '</h3>';
                 html += renderTable(plResults);
             }
 
             // Consolation League section
             if (clResults.length > 0) {
-                html += '<h3 style="margin:20px 0 12px;color:var(--text-secondary);font-size:1.1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-                    '<span style="font-size:1.2rem;">🎯</span> ' +
+                html += '<h3 class="ad-res-group-title ad-res-group-title--cl">' +
+                    '<span class="ad-res-group-icon">🎯</span> ' +
                     (isEn ? 'Consolation League' : 'Утешительная лига') +
                     зачёт(clResults) +
-                    ' <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:400;">(' + clResults.length + (isEn ? ' players' : ' уч.') + ')</span>' +
+                    ' <span class="ad-res-group-count">(' + clResults.length + (isEn ? ' players' : ' уч.') + ')</span>' +
                 '</h3>';
                 html += renderTable(clResults);
             }
@@ -13198,7 +13198,7 @@
                     (isEn ? 'provisional, ' + сыгранныхПар + ' of ' + всегоПар + ' played'
                           : 'предварительно, сыграно ' + сыгранныхПар + ' из ' + всегоПар) +
                     '</span>') + '</div>';
-            html += '<div class="ad-table-wrap" style="overflow-x:auto;">';
+            html += '<div class="ad-table-wrap">';
             html += '<table class="ad-table ad-grp-matrix">';
             html += '<thead><tr>';
             html += '<th style="width:30px;">№</th>';

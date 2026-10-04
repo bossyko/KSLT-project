@@ -890,6 +890,80 @@ body.ad-page {
 .ad-sched-playoff { margin-top: var(--space-6); }
 .ad-sched-note-top { margin-top: var(--space-3); }
 
+/* ═══════════════════════════════════════════════════════════════════
+   ПАНЕЛЬ РЕЗУЛЬТАТОВ
+   ═══════════════════════════════════════════════════════════════════
+   Замер 04.10: 29 инлайнов на 188 строк — самая плотная панель. Кегли
+   шли `0.65rem` (10.4), `0.75rem` (12), `0.8rem` (12.8), `1.1rem`
+   (17.6), `1.2rem` (19.2), `1.4rem` (22.4): со шкалы — ОДИН из шести.
+   Ступени: 11 · 12 · 18 · 21.
+
+   ПЛИТКИ ИТОГА БЕРУТ ГОТОВЫЙ КОМПОНЕНТ. В админке уже есть
+   `.ad-stat-card` + `.ad-stat-value` + `.ad-stat-label` (admin.css:264),
+   а панель рисовала свои коробки инлайном — третье определение одного
+   понятия. Приём, уже стоящий в продукте, ищется до того, как
+   придумывать свой. */
+.ad-res-stats {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+}
+.ad-res-stats .ad-stat-card {
+    flex: 1 1 auto;
+    min-width: 140px;
+    padding: var(--space-3) var(--space-4);
+}
+/* Число в плитке итога крупнее, чем в полосе статистики раздела: это
+   главное число экрана. Ступень 21, а не 22.4. */
+.ad-res-stats .ad-stat-value { font-size: var(--fs-lg); }
+.ad-res-stats .ad-stat-value--neutral { color: var(--text-primary); }
+
+/* Заголовок лиги */
+.ad-res-group-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin: var(--space-5) 0 var(--space-3);
+    font-size: var(--fs-md);
+    line-height: var(--lh-snug);
+}
+.ad-res-group-title--pl { color: var(--accent); }
+.ad-res-group-title--cl { color: var(--text-secondary); }
+.ad-res-group-icon { font-size: var(--fs-md); }
+.ad-res-group-count {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-regular);
+    color: var(--text-secondary);
+}
+.ad-res-zachet {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    color: var(--accent);
+}
+
+/* Таблица результатов */
+.ad-res-w-place { width: 50px; }
+.ad-table td.ad-res-place { text-align: center; font-weight: var(--fw-semibold); }
+.ad-res-medal { margin-right: var(--space-1); }
+.ad-res-row-winner { background: var(--accent-subtle); }
+.ad-table td.ad-res-name-winner { font-weight: var(--fw-bold); color: var(--accent); }
+.ad-table td.ad-res-name-finalist { font-weight: var(--fw-semibold); }
+.ad-table th.ad-res-pts-head { text-align: right; }
+.ad-table td.ad-res-pts {
+    text-align: right;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-md);
+    color: var(--accent);
+}
+.ad-table td.ad-res-pts--ext { color: var(--text-secondary); }
+
+/* Полоса под таблицей результатов с кнопкой пересчёта очков. Живёт она
+   не в `renderResultsPanel`, а в сборке вкладок (bracket.js:2747) —
+   поэтому и пряталась от замера панели до последнего. */
+.ad-res-podval { margin-top: var(--space-4); text-align: right; }
+
 /* Предупреждение «ждут парный рейтинг»: своя краска, потому что это не
    ошибка и не отказ, а «нужно дозаполнить». Кегль был 0.88rem (14.08) —
    числа на шкале нет; стал ступень 14. */
