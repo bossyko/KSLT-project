@@ -724,6 +724,96 @@ async function upsert(table, rows, onConflict) {
     console.log('  заявки: восемь строк, все края на месте (посев, одна и три причины, ' +
         'гость, внешний, очередь); уровень и домашние категории проверены чтением');
 
+    /* --- ПАРНЫЙ турнир: у строки заявки ВТОРАЯ ветка ---------------------
+       Костя открыл дружеский парный и увидел прокрутку вбок там, где её
+       только что убрали: у парной строки СВОЯ разметка и девять колонок —
+       # · NTRP · Имя · NTRP · Партнёр · Общий NTRP · Посев · Регистрация ·
+       Действия, — а ни «Места», ни «Категории» там нет вовсе.
+       ПРИБОР, ПОМЕРИВШИЙ ОДИН СЛУЧАЙ, НЕ ЗНАЕТ ДРУГОГО: сев заводил
+       одиночный, прибор мерил одиночный, правка легла в одиночную ветку.
+       Здесь крайние случаи парной: пара без напарника, внешний напарник,
+       длинные фамилии ОБОИХ, пара без парного рейтинга (причина
+       ntrp_doubles) и пара выше предела суммы (ntrp_combined). */
+    await upsert('players', [
+        { id: 'pr-dlin1', name: 'Абдыкадыров-Сатыбалдиев Тилек Жумабекович',
+          name_en: 'Abdykadyrov-Satybaldiev Tilek', gender: 'men' },
+        { id: 'pr-dlin2', name: 'Мамбеталиев-Орозбеков Нурсултан Акылбекович',
+          name_en: 'Mambetaliev-Orozbekov Nursultan', gender: 'men' },
+        { id: 'pr-bez',   name: 'Без Напарника',   name_en: 'No Partner',  gender: 'men' },
+        { id: 'pr-vnesh', name: 'Со Внешним',      name_en: 'With External', gender: 'men' },
+        { id: 'pr-nizk1', name: 'Первый Из Пары',  name_en: 'Pair First',  gender: 'men' },
+        { id: 'pr-nizk2', name: 'Второй Из Пары',  name_en: 'Pair Second', gender: 'men' }
+    ], 'id');
+
+    /* Парный рейтинг — PATCH'ем: у апсерта есть INSERT-часть. У
+       `pr-nizk2` его НЕТ намеренно: это и есть причина ntrp_doubles —
+       «нечем проверить» не равно «проходит». */
+    for (const [ид, нтрп] of [['pr-dlin1', 4], ['pr-dlin2', 4.25], ['pr-bez', 3.5],
+                              ['pr-vnesh', 3.75], ['pr-nizk1', 3]]) {
+        const р = await call('PATCH', '/rest/v1/players?id=eq.' + ид, { ntrp_doubles: нтрп });
+        if (!р.ok) console.log('  ВНИМАНИЕ: парный рейтинг не лёг у ' + ид + ' — ' +
+            String(JSON.stringify(р.data)).slice(0, 140));
+    }
+
+    await upsert('tournaments', [{
+        id: 'test-zayavki-pary',
+        title: 'Тестовый турнир: крайние случаи парных заявок',
+        category_id: 'tour',
+        level_id: урЗid,
+        status: 'registration_open',
+        format: 'doubles',
+        gender: 'men',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 4,
+        ntrp_combined_max: 7.5
+    }], 'id');
+
+    var заявкаП = function(о) {
+        return {
+            id: о.id, tournament_id: 'test-zayavki-pary',
+            player_id: о.player_id || null,
+            partner_id: о.partner_id || null,
+            partner_external_name: о.partner_external_name || null,
+            partner_external_ntrp: о.partner_external_ntrp || null,
+            status: о.status,
+            seed_number: о.seed_number || null,
+            review_reasons: о.review_reasons || [],
+            is_external: false
+        };
+    };
+    await upsert('tournament_registrations', [
+        заявкаП({ id: 'ef000001-0000-4000-8000-000000000001', player_id: 'pr-dlin1',
+                  partner_id: 'pr-dlin2', status: 'approved', seed_number: 1,
+                  review_reasons: ['ntrp_combined'] }),
+        заявкаП({ id: 'ef000001-0000-4000-8000-000000000002', player_id: 'pr-bez',
+                  status: 'approved' }),
+        заявкаП({ id: 'ef000001-0000-4000-8000-000000000003', player_id: 'pr-vnesh',
+                  partner_external_name: 'Приглашённый Напарник Из Алматы',
+                  partner_external_ntrp: 3.5, status: 'approved' }),
+        заявкаП({ id: 'ef000001-0000-4000-8000-000000000004', player_id: 'pr-nizk1',
+                  partner_id: 'pr-nizk2', status: 'approved',
+                  review_reasons: ['ntrp_doubles'] })
+    ], 'id');
+
+    var свёлП2 = await call('GET', '/rest/v1/tournament_registrations' +
+        '?tournament_id=eq.test-zayavki-pary&select=id,player_id,partner_id,' +
+        'partner_external_name,seed_number,review_reasons');
+    if (!свёлП2.ok) throw new Error('сев парных заявок: база отказала — ' + свёлП2.status +
+        ' ' + String(JSON.stringify(свёлП2.data)).slice(0, 200));
+    var рядыП = свёлП2.data || [];
+    var краяП = {
+        'всего четыре':        рядыП.length === 4,
+        'пара без напарника':  рядыП.some(function(р) { return !р.partner_id && !р.partner_external_name; }),
+        'внешний напарник':    рядыП.some(function(р) { return !!р.partner_external_name; }),
+        'своя пара':           рядыП.some(function(р) { return !!р.partner_id; }),
+        'причины':             рядыП.filter(function(р) { return (р.review_reasons || []).length; }).length === 2
+    };
+    var нетП = Object.keys(краяП).filter(function(к) { return !краяП[к]; });
+    if (нетП.length) throw new Error('сев парных заявок: не легли края — ' + нетП.join(', ') +
+        '. В базе ' + рядыП.length + ' строк');
+    console.log('  парные заявки: четыре строки — своя пара, без напарника, внешний напарник, две причины');
+
     /* --- Турнир с ГРУППАМИ и плей-офф: метка `A1`, `B1` -----------------
        Метку «кто из какой группы вышел» строит `KSLT_GROUPS.меткиИгроков`,
        и сравнить её НА ДВУХ ЭКРАНАХ может только прогон: заморозка читает
