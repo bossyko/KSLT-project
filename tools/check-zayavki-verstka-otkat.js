@@ -73,13 +73,34 @@ const ОТКАТЫ = [
    'шапка таблиц админки читается'],
 
   /* ─── цель нажатия ─── */
+  /* ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ, А НЕ НА СОСЕДЕ: возвращаем прежнее
+     состояние — полосы выгрузки в списке слоя не было вовсе. */
+  ['css/admin.css',
+   '.ad-export-bar .ad-btn::after,\n',
+   '',
+   'кнопки полосы выгрузки со слоем цели'],
+
+  /* ОТКАТ ВОЗВРАЩАЕТ ИМЕННО ПРЕЖНЕЕ: обёртка была `span`. */
+  /* ЯКОРЬ ОДНОЙ ВЕТКИ, А НЕ ОБЩЕЕ НАЧАЛО: обёртка одинакова в одиночной и
+     парной строках, и короткий якорь встречался дважды. Держимся за
+     ПАРНУЮ — её выдаёт следующая за галочкой ячейка `playerNtrpTd`. */
+  ['js/admin/sections/bracket.js',
+   "'<td><label class=\"ad-reg-check-wrap\"><input type=\"checkbox\" class=\"ad-reg-check\" data-group=\"' + group + '\" data-reg-id=\"' + reg.id + '\" data-player-name=\"' + A.esc(pName) + '\"' + (заморожено ? ' disabled' : '') + '></label></td>' +\n                '<td class=\"ad-reg-num\">' + num + '</td>' +\n                playerNtrpTd",
+   "'<td><span class=\"ad-reg-check-wrap\"><input type=\"checkbox\" class=\"ad-reg-check\" data-group=\"' + group + '\" data-reg-id=\"' + reg.id + '\" data-player-name=\"' + A.esc(pName) + '\"' + (заморожено ? ' disabled' : '') + '></span></td>' +\n                '<td class=\"ad-reg-num\">' + num + '</td>' +\n                playerNtrpTd",
+   'обёртка галочки — label, а не span'],
+
+  ['css/admin.css',
+   '.ad-reg-floating-remove::after,\n',
+   '',
+   '«Снять выбранные» со слоем цели'],
+
   ['css/admin.css',
    '.ad-reg-check-wrap,\n.ad-confirm-cancel {\n    position: relative;\n}',
    '.ad-confirm-cancel {\n    position: relative;\n}',
    'галочка и «Отмена» в списке слоя цели'],
 
   ['js/admin/sections/bracket.js',
-   "'<td><span class=\"ad-reg-check-wrap\"><input type=\"checkbox\" class=\"ad-reg-check\" data-group=\"' + group + '\" data-reg-id=\"' + reg.id + '\" data-player-name=\"' + A.esc(pName) + '\"' + (заморожено ? ' disabled' : '') + '></span></td>' +\n                '<td class=\"ad-reg-num\">' + num + '</td>' +\n                '<td class=\"ad-reg-mesto\">'",
+   "'<td><label class=\"ad-reg-check-wrap\"><input type=\"checkbox\" class=\"ad-reg-check\" data-group=\"' + group + '\" data-reg-id=\"' + reg.id + '\" data-player-name=\"' + A.esc(pName) + '\"' + (заморожено ? ' disabled' : '') + '></label></td>' +\n                '<td class=\"ad-reg-num\">' + num + '</td>' +\n                '<td class=\"ad-reg-mesto\">'",
    "'<td><input type=\"checkbox\" class=\"ad-reg-check\" data-group=\"' + group + '\" data-reg-id=\"' + reg.id + '\" data-player-name=\"' + A.esc(pName) + '\"' + (заморожено ? ' disabled' : '') + '></td>' +\n                '<td class=\"ad-reg-num\">' + num + '</td>' +\n                '<td class=\"ad-reg-mesto\">'",
    'ни одной галочки строки без обёртки'],
 

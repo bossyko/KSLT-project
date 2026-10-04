@@ -4438,7 +4438,7 @@
             if (isDbl) {
                 // Doubles: # | NTRP | Имя | NTRP | Партнёр | Общий NTRP | Регистрация | Действия
                 var thCombinedNtrp = isEn ? 'Total NTRP' : 'Общий NTRP';
-                regTableHead = '<th style="width:32px;"><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></span></th>' +
+                regTableHead = '<th style="width:32px;"><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></label></th>' +
                     '<th class="ad-reg-num" style="width:32px;">#</th>' +
                     '<th class="ad-reg-num ad-col-ntrp" style="width:50px;">NTRP</th>' +
                     '<th>' + L.plrName + '</th>' +
@@ -4456,7 +4456,7 @@
                    место в рейтинге категории турнира, а не абстрактный ранг,
                    и это ровно то число, по которому сеется сетка. */
                 var thRank = isEn ? 'Rank' : 'Место';
-                regTableHead = '<th style="width:32px;"><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></span></th>' +
+                regTableHead = '<th style="width:32px;"><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"' + (заморожено ? ' disabled' : '') + '></label></th>' +
                     '<th class="ad-reg-num" style="width:32px;">#</th>' +
                     '<th class="ad-reg-num" style="width:48px;">' + thRank + '</th>' +
                     '<th class="ad-col-cat">' + thCategory + '</th>' +
@@ -4893,7 +4893,7 @@
                 /* ТОТ ЖЕ СБОРЩИК, ТА ЖЕ ПРАВКА. Правило заморозки нашло шов:
                    парная ветка держала инлайн padding 4px 6px и галочку без
                    обёртки, хотя это одни и те же понятия, что в одиночной. */
-                '<td><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></span></td>' +
+                '<td><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></label></td>' +
                 '<td class="ad-reg-num">' + num + '</td>' +
                 playerNtrpTd +
                 /* РЕШЕНИЕ КОСТИ 03.10: «важнее личные». Личные NTRP остаются
@@ -4927,7 +4927,7 @@
                а у `input` их нет. */
             var подписьСтроки = A.esc(catLabel) + (regDT ? ' · ' + regDT.replace(/<[^>]+>/g, '') : '');
             return '<tr' + rowStyle + '>' +
-                '<td><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></span></td>' +
+                '<td><label class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"' + (заморожено ? ' disabled' : '') + '></label></td>' +
                 '<td class="ad-reg-num">' + num + '</td>' +
                 '<td class="ad-reg-mesto">' + rankVal + '</td>' +
                 '<td class="ad-col-cat ad-table-sub">' + A.esc(catLabel) + '</td>' +
