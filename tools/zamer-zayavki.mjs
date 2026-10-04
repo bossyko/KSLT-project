@@ -66,7 +66,15 @@ if (!(await живСервер())) {
     process.exit(1);
   }
 }
-const ТУРНИР = 'test-zayavki';
+/* ДВА ТУРНИРА, А НЕ ОДИН. У строки заявки две ветки: одиночная и парная,
+   и у парной СВОИ девять колонок. 03.10 Костя открыл дружеский парный и
+   увидел прокрутку вбок там, где её только что убрали: прибор мерил
+   одиночный и о парной ветке не знал ничего.
+   ПРИБОР, ПОМЕРИВШИЙ ОДИН СЛУЧАЙ, НЕ ЗНАЕТ ДРУГОГО. */
+const ТУРНИРЫ = [
+  { имя: 'одиночный', id: 'test-zayavki',      колонок: 7 },
+  { имя: 'парный',    id: 'test-zayavki-pary', колонок: 9 }
+];
 const виды = [
   { имя: 'десктоп',      w: 1512, h: 950 },
   { имя: 'планшет лежа', w: 1024, h: 768 },
@@ -92,6 +100,7 @@ function сохранить() {
 const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined });
 let плохо = 0;
 
+for (const т of ТУРНИРЫ) {
 for (const в of виды) {
   const ctx = await browser.newContext({
     viewport: { width: в.w, height: в.h },
@@ -108,20 +117,20 @@ for (const в of виды) {
   const ошибки = [];
   page.on('pageerror', e => ошибки.push(String(e.message)));
 
-  await page.goto(BASE + '/pages/admin.html#tournaments/edit/' + ТУРНИР,
+  await page.goto(BASE + '/pages/admin.html#tournaments/edit/' + т.id,
                   { waitUntil: 'domcontentloaded' });
   try {
     await page.waitForSelector('#adTrnCat', { state: 'visible', timeout: 25000 });
   } catch (e) {
-    console.log('\n  ✗ ' + в.имя + ': форма турнира не открылась. Адрес: ' + page.url() +
+    console.log('\n  ✗ ' + т.имя + ' · ' + в.имя + ': форма турнира не открылась. Адрес: ' + page.url() +
                 (ошибки.length ? '\n    ошибки страницы: ' + ошибки.join(' | ') : ''));
     плохо++; await ctx.close(); continue;
   }
   await page.click('[data-trn-nav="regs"]');
   try {
-    await page.waitForSelector('.ad-reg-mesto', { timeout: 25000 });
+    await page.waitForSelector('.ad-reg-check', { timeout: 25000 });
   } catch (e) {
-    console.log('\n  ✗ ' + в.имя + ': таблица заявок не появилась' +
+    console.log('\n  ✗ ' + т.имя + ' · ' + в.имя + ': таблица заявок не появилась' +
                 (ошибки.length ? '\n    ошибки страницы: ' + ошибки.join(' | ') : ''));
     плохо++; await ctx.close(); continue;
   }
@@ -170,7 +179,12 @@ for (const в of виды) {
        прибора считала строки ОДНОЙ и требовала восьми — порог падал на
        всех трёх видах, хотя в продукте 6 + 2. ПРИБОР СО СВОЕЙ ШКАЛОЙ —
        НЕ ПРИБОР: считать надо так, как рисует продукт. */
-    const табл = document.querySelector('.ad-reg-mesto').closest('table');
+    /* У ПАРНОГО КОЛОНКИ «МЕСТО» НЕТ ВОВСЕ — цепляться за неё нельзя.
+       Таблицу находим по строке с галочкой заявки: она есть у обеих
+       веток. ЯКОРЬ ДЕРЖИТСЯ НА ТОМ, ЧТО ЕСТЬ ВСЕГДА. */
+    const якорь = document.querySelector('.ad-reg-check');
+    const табл = якорь ? якорь.closest('table') : null;
+    if (!табл) return { беда: 'таблицы заявок нет' };
     const панель = табл.closest('.ad-brk-panel') || табл.parentElement;
     const всеТаблицы = [...панель.querySelectorAll('table')]
         .filter(т => т.querySelector('tbody tr'));
@@ -196,6 +210,7 @@ for (const в of виды) {
            экране. Ищем оба: старый на случай, если где-то остался. */
         посев: панель.querySelectorAll('.ad-reg-mark-seed, .ad-badge-accent').length,
         внешних: [...панель.querySelectorAll('td')].filter(t => /EXT|🇰🇿/.test(t.textContent)).length,
+        местоЕсть: !!панель.querySelector('.ad-reg-mesto'),
         прочерковВМесте: [...панель.querySelectorAll('.ad-reg-mesto')]
                            .filter(t => /^[—-]$/.test(t.textContent.trim())).length,
         самоеДлинноеФИО: длинная ? длинная.n : 0
@@ -263,6 +278,13 @@ for (const в of виды) {
   /* ПОРОГ: без крайних случаев замер ничего не доказывает */
   const к = м.края;
   const нет = [];
+  if (т.имя === 'парный') {
+    /* У парного свои края и свой счёт: четыре строки, девять колонок,
+       «Места» и «Категории» нет вовсе — значит и порогов по ним нет. */
+    if (к.строкВсего !== 4) нет.push('строк всего ' + к.строкВсего + ', а сев завёл 4');
+    if (к.колонокВидимых < 5) нет.push('видимых колонок ' + к.колонокВидимых);
+    if (!к.ждётРешения) нет.push('ни одной строки, ждущей решения');
+  } else {
   if (к.строкВсего !== 8) нет.push('строк всего ' + к.строкВсего + ' (' +
       JSON.stringify(к.строкПоТаблицам) + '), а сев завёл 8: шесть в основе и двое в очереди');
   if (к.таблиц !== 2) нет.push('таблиц на вкладке ' + к.таблиц + ', а должно быть две — основа и лист ожидания');
@@ -271,8 +293,9 @@ for (const в of виды) {
   if (!к.посев) нет.push('плашки посева нет');
   if (!к.внешних) нет.push('внешнего участника нет');
   if (к.самоеДлинноеФИО < 30) нет.push('длинного ФИО нет (самое длинное ' + к.самоеДлинноеФИО + ' знаков)');
+  }
 
-  console.log('\n────────── ' + в.имя + '  ' + в.w + '×' + в.h + ' ──────────');
+  console.log('\n────────── ' + т.имя + ' · ' + в.имя + '  ' + в.w + '×' + в.h + ' ──────────');
   if (нет.length) {
     console.log('  ✗ ПОРОГ НЕ ПРОЙДЕН, замер не считается:');
     нет.forEach(с => console.log('      · ' + с));
@@ -353,6 +376,7 @@ for (const в of виды) {
   }
   if (ошибки.length) console.log('  ошибки страницы: ' + ошибки.join(' | '));
   await ctx.close();
+}
 }
 
 await browser.close();
