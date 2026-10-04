@@ -5378,7 +5378,7 @@
         var бедыГрупп = сверитьГруппыСЗаявками(matches, regsMap, groupCount, playersMap)
             .concat(сверитьСеткуСГруппами(matches, regsMap, playersMap));
         if (бедыГрупп.length) {
-            html += '<div class="ad-alert-warning" style="margin-bottom:12px;">' +
+            html += '<div class="ad-alert-warning ad-reg-note">' +
                 '<strong>' + L.groupMismatchTitle + '</strong><br>' +
                 бедыГрупп.join('<br>') + '</div>';
         }
@@ -5386,7 +5386,7 @@
         // Правило выхода — над таблицами. Раньше о нём нигде не говорилось:
         // подсветка показывала, кто прошёл, но не объясняла, почему именно
         // столько. Менеджер знал правило из настроек, игрок — ниоткуда
-        html += '<div class="ad-sched-note" style="margin-bottom:12px;">' +
+        html += '<div class="ad-sched-note ad-reg-note">' +
             L.groupRule.replace('{n}', qualifiers).replace('{groups}', groupCount) + '</div>';
 
         // Строка действий под примечанием: пересоздание слева, выгрузка
@@ -5505,14 +5505,14 @@
 
             // Header
             html += '<thead><tr>';
-            html += '<th style="width:30px;">№</th>';
+            html += '<th class="ad-grp-th-num">№</th>';
             html += '<th>' + (isEn ? 'Player' : 'Игрок') + '</th>';
             for (var c = 0; c < standings.length; c++) {
-                html += '<th class="ad-grp-score" style="width:60px;text-align:center;">' + (c + 1) + '</th>';
+                html += '<th class="ad-grp-score ad-grp-th-score">' + (c + 1) + '</th>';
             }
-            html += '<th class="ad-grp-pts" style="width:40px;text-align:center;">' + L.groupWins + '</th>';
-            html += '<th class="ad-grp-games" style="width:56px;text-align:center;">' + L.groupGames + '</th>';
-            html += '<th class="ad-grp-place" style="width:64px;text-align:center;">' + L.groupPlace + '</th>';
+            html += '<th class="ad-grp-pts ad-grp-th-wins">' + L.groupWins + '</th>';
+            html += '<th class="ad-grp-games ad-grp-th-games">' + L.groupGames + '</th>';
+            html += '<th class="ad-grp-place ad-grp-th-place">' + L.groupPlace + '</th>';
             html += '</tr></thead>';
 
             // Body
@@ -5523,7 +5523,7 @@
                 var pName = isDbl
                     ? getTeamDisplayName(st.playerId, regsMap, playersMap, true)
                     : A.esc(isEn ? (p.name_en || p.name || '?') : (p.name || '?'));
-                var seedHtml = st.seed ? ' <span class="ad-badge" style="font-size:0.65rem;">[' + st.seed + ']</span>' : '';
+                var seedHtml = st.seed ? ' <span class="ad-badge ad-badge-sm">[' + st.seed + ']</span>' : '';
                 // Прошёл — значит стоит в сетке. Пока её нет, показываем
                 // ожидание по месту: первые qualifiers идут дальше
                 var isQualified = hasPlayoff || hasIG
@@ -5533,13 +5533,13 @@
                 var добран = isQualified && st.place > qualifiers;
 
                 html += '<tr' + (isQualified && hasPlayoff && группаДоиграна
-                    ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
-                html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
+                    ? ' class="ad-grp-row-sel"' : '') + '>';
+                html += '<td class="ad-grp-rownum">' + (row + 1) + '</td>';
                 var номерДопа = вДопМатчах[st.playerId];
-                html += '<td style="white-space:nowrap;">' + pName + seedHtml +
+                html += '<td class="ad-grp-name">' + pName + seedHtml +
                     (isQualified && hasPlayoff
                         ? ' <span class="ad-badge ad-league-go ad-league-pl">' + L.grpGoesToPlayoff + '</span>' : '') +
-                    (добран ? ' <span class="ad-badge" style="background:rgba(204,255,0,0.15);color:var(--accent);font-size:0.6rem;" title="' +
+                    (добран ? ' <span class="ad-badge ad-reg-mark-seed ad-badge-sm" title="' +
                         L.qualAddedHint + '">' + L.qualAdded + '</span>' : '') +
                     (номерДопа ? ' <span class="ad-badge ad-badge-ig" title="' +
                         (isEn ? 'Plays an additional match for a spot in the draw'
@@ -5565,12 +5565,12 @@
                             // колонке «П». По отметке клетка оставалась без
                             // заливки у того, кто выиграл по цифрам
                             var isWin = ктоВыиграл(match) === st.playerId;
-                            html += '<td class="ad-grp-score ' + (isWin ? 'ad-grp-win' : 'ad-grp-loss') + '" ' +
-                                'data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" style="cursor:pointer;text-align:center;">' +
+                            html += '<td class="ad-grp-score ad-grp-cell-click ' + (isWin ? 'ad-grp-win' : 'ad-grp-loss') + '" ' +
+                                'data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '">' +
                                 scoreDisplay + '</td>';
                         } else if (match) {
-                            html += '<td class="ad-grp-score ad-grp-pending" data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" ' +
-                                'style="cursor:pointer;text-align:center;">—</td>';
+                            html += '<td class="ad-grp-score ad-grp-pending ad-grp-cell-click" data-match-edit="' + match.id + '" ' +
+                                'data-row-player="' + st.playerId + '">—</td>';
                         } else {
                             // Встречи нет в базе, но по кругу она должна быть:
                             // на Futures в двух группах одна пара оказалась
@@ -5582,12 +5582,12 @@
                                 'data-row-player="' + st.playerId + '" ' +
                                 'title="' + (isEn ? 'No match yet — will be created with the score'
                                                  : 'Матча ещё нет — заведётся вместе со счётом') + '" ' +
-                                'style="cursor:pointer;text-align:center;">—</td>';
+                                'class="ad-grp-cell-click">—</td>';
                         }
                     }
                 }
 
-                html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + st.wins + '</td>';
+                html += '<td class="ad-grp-pts">' + st.wins + '</td>';
                 // Геймы выигранные-проигранные: по ним и считается место,
                 // когда побед поровну
                 /* ЧИСЛО В КОЛОНКЕ — ТО, ПО КОТОРОМУ МЕСТО И РЕШИЛОСЬ.
@@ -5628,7 +5628,7 @@
                    пишем отдельной строкой и СО СЛОВОМ: «52,9% геймов».
                    Из чего она сложилась — сказано словами под таблицей. */
                 var доли = KSLT_GROUPS.долиГеймов(база);
-                html += '<td class="ad-grp-games" style="text-align:center;">' +
+                html += '<td class="ad-grp-games">' +
                     (groupHasResults && доли
                         ? база.gamesWon + '-' + база.gamesLost +
                           '<div class="ad-grp-lot ad-grp-lot-odna" title="' + L.groupBaseHint + '">' +
@@ -5638,7 +5638,7 @@
                 // Почему место такое: жребий либо то, чем расчёт развёл равных
                 var значокЖребия = группаДоиграна ? почемуМесто(st) : '';
                 if (!groupHasResults) {
-                    html += '<td class="ad-grp-place" style="text-align:center;font-weight:700;">—</td>';
+                    html += '<td class="ad-grp-place ad-grp-place-strong">—</td>';
                 } else if (st.жребий && tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {
                     // Ничья по победам — место выбирает менеджер. Поле выбора
                     // показываем только у доигранной группы: пока матчи идут,
@@ -5661,14 +5661,12 @@
                     // сеткой. Поле оставляем видимым, но запертым: менеджер
                     // должен видеть, что место решала жеребьёвка
                     var сеткаСобрана = hasPlayoff || hasIG;
-                    html += '<td class="ad-grp-place" style="text-align:center;">' +
+                    html += '<td class="ad-grp-place">' +
                         '<select class="ad-grp-place-select" data-group="' + g + '" data-player="' + st.playerId + '" ' +
                         'data-place="' + st.place + '" data-tip="' +
                         (сеткаСобрана ? L.groupPlaceLockedHint : L.groupPlaceSwapHint) + '" ' +
                         (сеткаСобрана ? 'disabled ' : '') +
-                        'style="background:rgba(204,255,0,0.1);color:var(--accent);border:1px solid var(--accent);border-radius:4px;' +
-                        'font-weight:700;font-size:0.85rem;padding:2px 4px;text-align:center;width:42px;' +
-                        (сеткаСобрана ? 'opacity:0.45;cursor:not-allowed;' : 'cursor:pointer;') + '">';
+                        '>';
                     for (var pi = 0; pi < местаРавных.length; pi++) {
                         var placeVal = местаРавных[pi];
                         html += '<option value="' + placeVal + '"' + (placeVal === st.place ? ' selected' : '') + '>' + placeVal + '</option>';
@@ -5676,9 +5674,8 @@
                     html += '</select>' + значокЖребия + '</td>';
                 } else {
                     var placeAccent = st.place <= qualifiers && группаДоиграна;
-                    html += '<td class="ad-grp-place' + (группаДоиграна ? '' : ' ad-grp-place-draft') +
-                        '" style="text-align:center;font-weight:700;white-space:nowrap;' +
-                        (placeAccent ? 'color:var(--accent);' : '') + '">' + st.place + значокЖребия + '</td>';
+                    html += '<td class="ad-grp-place ad-grp-place-strong' + (группаДоиграна ? '' : ' ad-grp-place-draft') +
+                        (placeAccent ? ' ad-grp-place-accent' : '') + '">' + st.place + значокЖребия + '</td>';
                 }
                 html += '</tr>';
             }
@@ -5709,7 +5706,7 @@
                         .replace('{t}', д.всего)
                         .replace('{p}', д.процент);
                 }).filter(Boolean).join(' ');
-                html += '<div class="ad-qual-note" style="margin-top:8px;">' +
+                html += '<div class="ad-qual-note ad-qual-note-top">' +
                     '<b>' + L.groupTiedExplainHead + '</b> ' +
                     L.groupTiedExplainBody
                         .replace('{n}', равныеСтроки.length)
@@ -5736,7 +5733,7 @@
             if (расклад && расклад.свободно > 0) {
                 var черезДопМатчи = расклад.допМатчи.length;
                 var безИгрыМест = расклад.свободно - черезДопМатчи;
-                html += '<div class="ad-qual-block" style="margin-top:20px;">';
+                html += '<div class="ad-qual-block ad-qual-block-top">';
                 html += '<div class="ad-grp-section-title">' + L.qualTableTitle + '</div>';
                 html += '<div class="ad-qual-note">' + L.qualPlanNote
                     .replace('{free}', расклад.свободно)
@@ -5795,20 +5792,20 @@
                     return порядокП.indexOf(a.ст) - порядокП.indexOf(b.ст);
                 });
 
-                html += '<div class="ad-qual-block" style="margin-top:20px;">';
+                html += '<div class="ad-qual-block ad-qual-block-top">';
                 html += '<div class="ad-grp-section-title">' + L.qualTableTitle + '</div>';
                 html += '<div class="ad-qual-note">' + L.qualTableNote + '</div>';
                 html += '<div class="ad-table-wrap"><table class="ad-table ad-grp-matrix">';
                 html += '<thead><tr>' +
-                    '<th style="width:30px;">№</th>' +
+                    '<th class="ad-grp-th-num">№</th>' +
                     '<th>' + (isEn ? 'Player' : 'Игрок') + '</th>' +
                     /* 40 хватало на одну цифру, но под ней встала подпись
                        «по доле побед» и разорвалась на три строки. Ширину
                        задаёт ПОДПИСЬ, а не значение. */
-                    '<th class="ad-grp-pts" style="width:104px;text-align:center;">' + L.groupWins + '</th>' +
-                    '<th class="ad-grp-games" style="width:66px;text-align:center;">' + L.qualSets + '</th>' +
-                    '<th class="ad-grp-games" style="width:66px;text-align:center;">' + L.groupGames + '</th>' +
-                    '<th class="ad-qual-res" style="width:96px;text-align:center;">' + L.qualResult + '</th>' +
+                    '<th class="ad-grp-pts ad-qual-th-wins">' + L.groupWins + '</th>' +
+                    '<th class="ad-grp-games ad-qual-th-sets">' + L.qualSets + '</th>' +
+                    '<th class="ad-grp-games ad-qual-th-games">' + L.groupGames + '</th>' +
+                    '<th class="ad-qual-res ad-qual-th-res">' + L.qualResult + '</th>' +
                     '</tr></thead><tbody>';
 
                 претенденты.forEach(function(п, и) {
@@ -5822,13 +5819,13 @@
                     // этого никто никуда не попал, и «не прошёл» у всех
                     // читается как приговор, хотя не сыграно ни одной встречи
                     var итог = allGroupCompleted ? L.qualOut : L.qualWait;
-                    var цветИтога = 'color:var(--text-dim);';
+                    var цветИтога = 'ad-qual-res--wait';
                     if (вДопМатчах[ст.playerId]) {
                         итог = L.qualViaIG + ' ' + вДопМатчах[ст.playerId];
-                        цветИтога = 'color:var(--text-secondary);';
+                        цветИтога = 'ad-qual-res--ig';
                     } else if (вПлейофф[ст.playerId]) {
                         итог = L.qualViaBye;
-                        цветИтога = 'color:var(--accent);';
+                        цветИтога = 'ad-qual-res--bye';
                         /* ЖРЕБИЙ РЕШИЛ — И ОБ ЭТОМ НАПИСАНО.
                            Решение Кости: при полном равенстве автопроход
                            выбирает жеребьёвка, а не менеджер, «чтобы не было
@@ -5851,9 +5848,9 @@
                     };
 
                     html += '<tr>';
-                    html += '<td style="text-align:center;font-weight:600;">' + (и + 1) + '</td>';
-                    html += '<td style="white-space:nowrap;">' + имяП +
-                        ' <span class="ad-badge" style="font-size:0.65rem;">' + меткаП + '</span></td>';
+                    html += '<td class="ad-grp-rownum">' + (и + 1) + '</td>';
+                    html += '<td class="ad-grp-name">' + имяП +
+                        ' <span class="ad-badge ad-badge-sm">' + меткаП + '</span></td>';
                     /* ЧИСЛА В СТРОКЕ — ТЕ, ПО КОТОРЫМ СРАВНИВАЛИ.
                        Группы бывают разного размера, и тогда у бОльшей
                        отброшены матчи против последних. Показывать при этом
@@ -5863,13 +5860,13 @@
                     var подписьП = ст.базаСравнения === 'без последних'
                         ? '<div class="ad-grp-lot ad-grp-lot-odna" title="' + L.groupBaseCutHint + '">' +
                           L.groupBaseCut + '</div>' : '';
-                    html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + базаП.wins +
+                    html += '<td class="ad-grp-pts">' + базаП.wins +
                         почемуМесто(ст, true) + подписьП + '</td>';
-                    html += '<td class="ad-grp-games" style="text-align:center;">' + базаП.setsWon + '-' + базаП.setsLost +
-                        ' <span style="opacity:0.7;">' + процент(базаП.setsWon, базаП.setsLost) + '</span></td>';
-                    html += '<td class="ad-grp-games" style="text-align:center;">' + базаП.gamesWon + '-' + базаП.gamesLost +
-                        ' <span style="opacity:0.7;">' + процент(базаП.gamesWon, базаП.gamesLost) + '</span></td>';
-                    html += '<td class="ad-qual-res" style="text-align:center;' + цветИтога + '">' + итог + '</td>';
+                    html += '<td class="ad-grp-games">' + базаП.setsWon + '-' + базаП.setsLost +
+                        ' <span class="ad-grp-dolya">' + процент(базаП.setsWon, базаП.setsLost) + '</span></td>';
+                    html += '<td class="ad-grp-games">' + базаП.gamesWon + '-' + базаП.gamesLost +
+                        ' <span class="ad-grp-dolya">' + процент(базаП.gamesWon, базаП.gamesLost) + '</span></td>';
+                    html += '<td class="ad-qual-res ' + цветИтога + '">' + итог + '</td>';
                     html += '</tr>';
                 });
 
@@ -5878,7 +5875,7 @@
 
         // ---- IG matches section (after groups) — SE-style bracket ----
         if (hasIG) {
-            html += '<div class="ad-ig-section" style="margin-top:24px;">';
+            html += '<div class="ad-ig-section ad-ig-section-top">';
             html += '<div class="ad-grp-section-title">' + L.igStageTitle + '</div>';
             html += '<div class="ad-ig-matches-grid">';
             igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
@@ -5913,7 +5910,7 @@
                 function имяУчастникаДоп(id, метка) {
                     if (!id) {
                         return метка
-                            ? '<span style="color:var(--text-secondary);">' + A.esc(метка) + '</span>'
+                            ? '<span class="ad-grp-meta-sec">' + A.esc(метка) + '</span>'
                             : '<span class="ad-reg-cell-muted">' + L.byeLabel + '</span>';
                     }
                     if (isDbl) return getTeamDisplayName(id, regsMap, playersMap, true);
@@ -6022,10 +6019,10 @@
         }
 
         // Action buttons (bottom)
-        html += '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:24px;padding:16px 0;">';
+        html += '<div class="ad-brk-actions">';
         if (allGroupCompleted && !hasPlayoff && !hasIG && !isTournamentCompleted) {
             // Always show format modal — it auto-detects IG availability
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkPlayoffFormat" style="font-size:1rem;padding:12px 32px;">' + L.playoffFormatTitle + '</button>';
+            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkPlayoffFormat">' + L.playoffFormatTitle + '</button>';
         }
 
 
@@ -6036,11 +6033,11 @@
                 return m.status !== 'completed' && m.status !== 'cancelled' &&
                     m.player1_id && m.player2_id;
             }).length;
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize"' +
+            /* ПОГАСАНИЕ ВИСИТ НА `[disabled]`, А НЕ ВТОРЫМ СПОСОБОМ СКАЗАТЬ ТО ЖЕ:
+               атрибут тут и так стоит, и это одно состояние, а не два. */
+            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkFinalize"' +
                 (totalAllCompleted ? '' : ' disabled title="' + L.finalizeLeft.replace('{n}', незаписано) + '"') +
-                ' style="font-size:1rem;padding:12px 32px;' +
-                (totalAllCompleted ? '' : 'opacity:0.45;cursor:not-allowed;') + '">' +
-                L.finalizeTournament + '</button>';
+                '>' + L.finalizeTournament + '</button>';
             if (!totalAllCompleted && незаписано > 0) {
                 /* КНОПКА И ПОЯСНЕНИЕ СТОЯТ В ОДНОЙ СТРОКЕ — ЗНАЧИТ И ПО
                    ОДНОЙ ЛИНИИ. `margin-top: 10px` задумывался как отступ
@@ -6053,7 +6050,7 @@
                    `margin-bottom: 16px`, он сместил бы центр вверх. Высота
                    выравнивается по центру родителем, а не числом: кнопка 44,
                    полоса 45. И 10 мимо шкалы 8 · 12 · 16 · 24 · 32 · 40. */
-                html += '<div class="ad-sched-note" style="margin:0;flex-basis:100%;">' +
+                html += '<div class="ad-sched-note ad-sched-note-flat">' +
                     L.finalizeLeft.replace('{n}', незаписано) + '</div>';
             }
         }
@@ -6124,15 +6121,15 @@
                    которых метки нет, и только они BYE. */
                 var byeСторона1 = (isByeMatch || (безДопМатчей && isR1 && !match.slot1_label)) && !match.player1_id;
                 var byeСторона2 = (isByeMatch || (безДопМатчей && isR1 && !match.slot2_label)) && !match.player2_id;
-                var xSlotMark = '<span style="color:var(--accent);font-weight:600;">' + L.xSlot + '</span>';
-                var byeMark = '<span style="color:var(--text-dim);font-style:italic;">BYE</span>';
+                var xSlotMark = '<span class="ad-brk-accent">' + L.xSlot + '</span>';
+                var byeMark = '<span class="ad-brk-bye">BYE</span>';
                 var p1Name, p2Name;
                 function emptySlotName(isXSlot, isByeSide, метка) {
                     if (isByeSide) return byeMark;
                     // Слот знает, кого ждёт: «A1» — победитель группы A.
                     // Это понятнее, чем безликое TBD, и видно сразу после
                     // жеребьёвки, когда групп ещё никто не доиграл
-                    if (метка) return '<span style="color:var(--text-secondary);">' + A.esc(метка) + '</span>';
+                    if (метка) return '<span class="ad-grp-meta-sec">' + A.esc(метка) + '</span>';
                     if (isXSlot) return xSlotMark;
                     return '<span class="ad-reg-cell-muted">TBD</span>';
                 }
@@ -6234,7 +6231,7 @@
             if (r < totalRounds) {
                 var pairCount = Math.floor(roundMatches.length / 2);
                 html += '<div class="ad-brk-connector">';
-                html += '<div class="ad-brk-title" style="visibility:hidden;">&nbsp;</div>';
+                html += '<div class="ad-brk-title ad-brk-title-ghost">&nbsp;</div>';
                 html += '<div class="ad-brk-connector-inner">';
                 for (var ci = 0; ci < pairCount; ci++) {
                     html += '<div class="ad-brk-conn-pair"><div class="ad-brk-conn-top"></div><div class="ad-brk-conn-mid"></div><div class="ad-brk-conn-bottom"></div></div>';
@@ -6267,9 +6264,9 @@
             var tCanEdit = thirdMatch.player1_id && thirdMatch.player2_id && thirdMatch.score !== 'BYE';
             var tSetData = parseSets(thirdMatch.score);
 
-            html += '<div style="margin-top:20px;display:flex;justify-content:flex-end;">';
-            html += '<div style="width:220px;">';
-            html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' + L.round3rd + '</div>';
+            html += '<div class="ad-brk-third">';
+            html += '<div class="ad-brk-third-col">';
+            html += '<div class="ad-brk-title ad-brk-title-sm">' + L.round3rd + '</div>';
             html += '<div class="ad-brk-match' + (tCompleted ? ' completed' : '') +
                 (thirdMatch.status === 'cancelled' ? ' ad-brk-cancelled' : '') + '">';
             if (thirdMatch.scheduled_time) {
@@ -6526,7 +6523,7 @@
             if (r < totalRounds) {
                 var pairCount = Math.floor(roundMatches.length / 2);
                 html += '<div class="ad-brk-connector">';
-                html += '<div class="ad-brk-title" style="visibility:hidden;">&nbsp;</div>';
+                html += '<div class="ad-brk-title ad-brk-title-ghost">&nbsp;</div>';
                 html += '<div class="ad-brk-connector-inner">';
                 for (var i = 0; i < pairCount; i++) {
                     html += '<div class="ad-brk-conn-pair">' +
@@ -6566,8 +6563,8 @@
                 (thirdMatch.status === 'live' ? ' live' : '') +
                 (thirdMatch.status === 'cancelled' ? ' ad-brk-cancelled' : '');
 
-            html += '<div style="margin-top:20px;max-width:220px;">';
-            html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' + L.round3rd + '</div>';
+            html += '<div class="ad-brk-third-inline">';
+            html += '<div class="ad-brk-title ad-brk-title-sm">' + L.round3rd + '</div>';
             html += '<div class="' + tMatchClass + '">';
             if (thirdMatch.scheduled_time) {
                 html += '<div class="ad-brk-schedule">' + thirdMatch.scheduled_time.slice(0, 5) +
@@ -6604,7 +6601,7 @@
         }
 
         // Action buttons
-        html += '<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">';
+        html += '<div class="ad-brk-btn-row">';
         if (!anyCompleted && !isTournamentCompleted) {
             html += кнопкаПережеребить();
         }
@@ -6614,8 +6611,8 @@
         html += '</div>';
 
         if (isTournamentCompleted) {
-            html += '<div style="text-align:center;margin-top:16px;">' +
-                '<span style="color:var(--accent);font-weight:600;">' + (isEn ? 'Tournament completed.' : 'Турнир завершён.') + '</span>' +
+            html += '<div class="ad-brk-done">' +
+                '<span class="ad-brk-accent">' + (isEn ? 'Tournament completed.' : 'Турнир завершён.') + '</span>' +
                 '&nbsp;&nbsp;<button class="ad-btn ad-btn-sm ad-btn-secondary" id="adBrkRecalc">' + (isEn ? 'Recalculate Points' : 'Пересчитать очки') + '</button>' +
             '</div>';
         }
@@ -6920,7 +6917,7 @@
             // расходятся с основной сеткой на её ширину.
             for (var пусто = 1; пусто < section.rounds[0].roundNum; пусто++) {
                 html += '<div class="ad-brk-round">' +
-                        '<div class="ad-brk-title" style="visibility:hidden;">&nbsp;</div>' +
+                        '<div class="ad-brk-title ad-brk-title-ghost">&nbsp;</div>' +
                         '<div class="ad-brk-matches"></div></div>' +
                         '<div class="ad-brk-connector"></div>';
             }
@@ -6950,7 +6947,7 @@
                     var pairCount = Math.floor(roundMatches.length / 2);
                     if (pairCount > 0) {
                         html += '<div class="ad-brk-connector">';
-                        html += '<div class="ad-brk-title" style="visibility:hidden;">&nbsp;</div>';
+                        html += '<div class="ad-brk-title ad-brk-title-ghost">&nbsp;</div>';
                         html += '<div class="ad-brk-connector-inner">';
                         for (var i = 0; i < pairCount; i++) {
                             html += '<div class="ad-brk-conn-pair">' +
@@ -6975,10 +6972,11 @@
                            m.match_order === section.placeMatch.matchOrder;
                 });
                 if (pmЗдесь && живой(pmЗдесь)) {
-                    html += '<div class="ad-brk-place" data-round="' +
-                            section.placeMatch.roundNum +
-                            '" style="margin-top:12px;max-width:220px;">';
-                    html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' +
+                    /* ДВА `class` НА ОДНОМ УЗЛЕ — моя же ошибка пакетной правки, пойманная
+                       чтением diff в третий раз за день. Классы стоят вместе. */
+                    html += '<div class="ad-brk-place ad-brk-third-inline--fic" data-round="' +
+                            section.placeMatch.roundNum + '">';
+                    html += '<div class="ad-brk-title ad-brk-title-sm">' +
                             section.placeMatch.label + '</div>';
                     html += renderFicMatchCard(pmЗдесь, playersMap, parseSets, isDbl, regsMap);
                     html += '</div>';
@@ -6989,7 +6987,7 @@
         });
 
         // Action buttons
-        html += '<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">';
+        html += '<div class="ad-brk-btn-row">';
         if (!anyCompleted && !isTournamentCompleted) {
             html += кнопкаПережеребить();
         }
@@ -6999,8 +6997,8 @@
         html += '</div>';
 
         if (isTournamentCompleted) {
-            html += '<div style="text-align:center;margin-top:16px;">' +
-                '<span style="color:var(--accent);font-weight:600;">' + (isEn ? 'Tournament completed.' : 'Турнир завершён.') + '</span>' +
+            html += '<div class="ad-brk-done">' +
+                '<span class="ad-brk-accent">' + (isEn ? 'Tournament completed.' : 'Турнир завершён.') + '</span>' +
                 '&nbsp;&nbsp;<button class="ad-btn ad-btn-sm ad-btn-secondary" id="adBrkRecalc">' + (isEn ? 'Recalculate Points' : 'Пересчитать очки') + '</button>' +
             '</div>';
         }
@@ -13109,7 +13107,7 @@
 
         // Regenerate button (only before any results)
         if (!anyGroupCompleted && !isTournamentCompleted) {
-            html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">';
+            html += '<div class="ad-league-actions">';
             html += кнопкаПережеребить();
             html += '</div>';
         }
@@ -13201,13 +13199,13 @@
             html += '<div class="ad-table-wrap">';
             html += '<table class="ad-table ad-grp-matrix">';
             html += '<thead><tr>';
-            html += '<th style="width:30px;">№</th>';
+            html += '<th class="ad-grp-th-num">№</th>';
             html += '<th>' + (isEn ? 'Player' : 'Игрок') + '</th>';
             for (var c = 0; c < standings.length; c++) {
-                html += '<th class="ad-grp-score" style="width:60px;text-align:center;">' + (c + 1) + '</th>';
+                html += '<th class="ad-grp-score ad-grp-th-score">' + (c + 1) + '</th>';
             }
-            html += '<th class="ad-grp-pts" style="width:40px;text-align:center;">' + L.groupWins + '</th>';
-            html += '<th class="ad-grp-place" style="width:50px;text-align:center;">' + L.groupPlace + '</th>';
+            html += '<th class="ad-grp-pts ad-grp-th-wins">' + L.groupWins + '</th>';
+            html += '<th class="ad-grp-place ad-league-th-place">' + L.groupPlace + '</th>';
             html += '</tr></thead>';
 
             html += '<tbody>';
@@ -13217,7 +13215,7 @@
                 var pName = isDbl
                     ? getTeamDisplayName(st.playerId, regsMap, playersMap, true)
                     : A.esc(isEn ? (p.name_en || p.name || '?') : (p.name || '?'));
-                var seedHtml = st.seed ? ' <span class="ad-badge" style="font-size:0.65rem;">[' + st.seed + ']</span>' : '';
+                var seedHtml = st.seed ? ' <span class="ad-badge ad-badge-sm">[' + st.seed + ']</span>' : '';
                 /* КУДА ИДЁТ ЭТОТ ЧЕЛОВЕК — СЛОВОМ, А НЕ ЦВЕТОМ.
                    Здесь стоял цветной треугольник: лаймовый — в Высшую,
                    тусклый — в Утешительную. Один и тот же знак на оба
@@ -13228,10 +13226,10 @@
                 var isPLRow = вЛигу === 'PL' && группаДоиграна;
                 var isCLRow = вЛигу === 'CL' && группаДоиграна;
 
-                html += '<tr' + (isPLRow && hasLeagues ? ' style="background:rgba(204,255,0,0.06);"' : '') +
-                    (isCLRow && hasLeagues ? ' style="background:rgba(255,255,255,0.03);"' : '') + '>';
-                html += '<td style="font-weight:600;text-align:center;">' + (row + 1) + '</td>';
-                html += '<td style="white-space:nowrap;">' + pName + seedHtml +
+                html += '<tr' + (isPLRow && hasLeagues ? ' class="ad-grp-row-sel"' : '') +
+                    (isCLRow && hasLeagues ? ' class="ad-league-row-cl"' : '') + '>';
+                html += '<td class="ad-grp-rownum">' + (row + 1) + '</td>';
+                html += '<td class="ad-grp-name">' + pName + seedHtml +
                     (isPLRow ? ' <span class="ad-badge ad-league-go ad-league-pl">' + L.leagueGoPL + '</span>' : '') +
                     (isCLRow ? ' <span class="ad-badge ad-league-go ad-league-cl">' + L.leagueGoCL + '</span>' : '') + '</td>';
 
@@ -13247,12 +13245,12 @@
                             // колонке «П». По отметке клетка оставалась без
                             // заливки у того, кто выиграл по цифрам
                             var isWin = ктоВыиграл(match) === st.playerId;
-                            html += '<td class="ad-grp-score ' + (isWin ? 'ad-grp-win' : 'ad-grp-loss') + '" ' +
-                                'data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" style="cursor:pointer;text-align:center;">' +
+                            html += '<td class="ad-grp-score ad-grp-cell-click ' + (isWin ? 'ad-grp-win' : 'ad-grp-loss') + '" ' +
+                                'data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '">' +
                                 scoreDisplay + '</td>';
                         } else if (match) {
-                            html += '<td class="ad-grp-score ad-grp-pending" data-match-edit="' + match.id + '" data-row-player="' + st.playerId + '" ' +
-                                'style="cursor:pointer;text-align:center;">—</td>';
+                            html += '<td class="ad-grp-score ad-grp-pending ad-grp-cell-click" data-match-edit="' + match.id + '" ' +
+                                'data-row-player="' + st.playerId + '">—</td>';
                         } else {
                             // Встречи нет в базе, но по кругу она должна быть:
                             // на Futures в двух группах одна пара оказалась
@@ -13264,15 +13262,15 @@
                                 'data-row-player="' + st.playerId + '" ' +
                                 'title="' + (isEn ? 'No match yet — will be created with the score'
                                                  : 'Матча ещё нет — заведётся вместе со счётом') + '" ' +
-                                'style="cursor:pointer;text-align:center;">—</td>';
+                                'class="ad-grp-cell-click">—</td>';
                         }
                     }
                 }
 
-                html += '<td class="ad-grp-pts" style="text-align:center;font-weight:600;">' + st.wins + '</td>';
+                html += '<td class="ad-grp-pts">' + st.wins + '</td>';
                 var значокЖребия = группаДоиграна ? почемуМесто(st) : '';
                 if (!groupHasResults) {
-                    html += '<td class="ad-grp-place" style="text-align:center;font-weight:700;">—</td>';
+                    html += '<td class="ad-grp-place ad-grp-place-strong">—</td>';
                 } else if (st.жребий && tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {
                     // Поле выбора места — только у доигранной группы: пока
                     // матчи идут, равенство побед промежуточное
@@ -13285,11 +13283,10 @@
                     var местаРавных = tiedStandings
                         .map(function(s) { return s.расчётноеМесто; })
                         .sort(function(a, b) { return a - b; });
-                    html += '<td class="ad-grp-place" style="text-align:center;">' +
+                    html += '<td class="ad-grp-place">' +
                         '<select class="ad-grp-place-select" data-group="' + g + '" data-player="' + st.playerId + '" ' +
                         'data-place="' + st.place + '" data-tip="' + L.groupPlaceSwapHint + '" ' +
-                        'style="background:rgba(204,255,0,0.1);color:var(--accent);border:1px solid var(--accent);border-radius:4px;' +
-                        'font-weight:700;font-size:0.85rem;padding:2px 4px;cursor:pointer;text-align:center;width:42px;">';
+                        '>';
                     for (var pi = 0; pi < местаРавных.length; pi++) {
                         var placeVal = местаРавных[pi];
                         html += '<option value="' + placeVal + '"' + (placeVal === st.place ? ' selected' : '') + '>' + placeVal + '</option>';
@@ -13298,9 +13295,8 @@
                 } else {
                     var glQualifiers2 = tournament.qualifiers_per_group || 2;
                     var placeAccent = st.place <= glQualifiers2 && группаДоиграна;
-                    html += '<td class="ad-grp-place' + (группаДоиграна ? '' : ' ad-grp-place-draft') +
-                        '" style="text-align:center;font-weight:700;' +
-                        (placeAccent ? 'color:var(--accent);' : '') + '">' + st.place + значокЖребия + '</td>';
+                    html += '<td class="ad-grp-place ad-grp-place-strong' + (группаДоиграна ? '' : ' ad-grp-place-draft') +
+                        (placeAccent ? ' ad-grp-place-accent' : '') + '">' + st.place + значокЖребия + '</td>';
                 }
                 html += '</tr>';
             }
@@ -13309,11 +13305,11 @@
 
         // ---- League brackets ----
         if (hasLeagues) {
-            html += '<div class="ad-dual-league" style="display:flex;gap:24px;margin-top:24px;">';
+            html += '<div class="ad-dual-league ad-dual-league-row">';
 
             // Premier League
-            html += '<div class="ad-league-bracket" style="flex:1;min-width:0;">';
-            html += '<div class="ad-grp-section-title" style="color:var(--accent);">' + L.premierLeague + '</div>';
+            html += '<div class="ad-league-bracket ad-league-col">';
+            html += '<div class="ad-grp-section-title ad-grp-section-title--pl">' + L.premierLeague + '</div>';
             var plR1 = plMatches.filter(function(m) { return m.round_number === 1; });
             var plDrawSize = 1;
             while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
@@ -13322,8 +13318,8 @@
             html += '</div>';
 
             // Consolation League
-            html += '<div class="ad-league-bracket" style="flex:1;min-width:0;">';
-            html += '<div class="ad-grp-section-title" style="color:var(--text-secondary);">' + L.consolationLeague + '</div>';
+            html += '<div class="ad-league-bracket ad-league-col">';
+            html += '<div class="ad-grp-section-title ad-grp-section-title--cl">' + L.consolationLeague + '</div>';
             var clR1 = clMatches.filter(function(m) { return m.round_number === 1; });
             var clDrawSize = 1;
             while (clDrawSize < clR1.length * 2) clDrawSize *= 2;
@@ -13335,12 +13331,12 @@
         }
 
         // Action buttons
-        html += '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:24px;padding:16px 0;">';
+        html += '<div class="ad-brk-actions">';
         if (allGroupCompleted && !hasLeagues && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkGenLeagues" style="font-size:1rem;padding:12px 32px;">' + L.generateLeagues + '</button>';
+            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkGenLeagues">' + L.generateLeagues + '</button>';
         }
         if (totalAllCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize" style="font-size:1rem;padding:12px 32px;">' + L.finalizeTournament + '</button>';
+            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
         }
         html += '</div>';
 
@@ -13440,7 +13436,7 @@
             if (r < totalRounds) {
                 var pairCount = Math.floor(roundMatches.length / 2);
                 html += '<div class="ad-brk-connector">';
-                html += '<div class="ad-brk-title" style="visibility:hidden;">&nbsp;</div>';
+                html += '<div class="ad-brk-title ad-brk-title-ghost">&nbsp;</div>';
                 html += '<div class="ad-brk-connector-inner">';
                 for (var ci = 0; ci < pairCount; ci++) {
                     html += '<div class="ad-brk-conn-pair"><div class="ad-brk-conn-top"></div><div class="ad-brk-conn-mid"></div><div class="ad-brk-conn-bottom"></div></div>';
@@ -13464,9 +13460,9 @@
             var tCanEdit = thirdMatch.player1_id && thirdMatch.player2_id && thirdMatch.score !== 'BYE';
             var tSetData = parseSets(thirdMatch.score);
 
-            html += '<div style="margin-top:16px;display:flex;justify-content:flex-end;">';
-            html += '<div style="width:220px;">';
-            html += '<div class="ad-brk-title" style="font-size:0.8rem;margin-bottom:8px;">' + L.round3rd + '</div>';
+            html += '<div class="ad-league-actions ad-league-actions--top">';
+            html += '<div class="ad-brk-third-col">';
+            html += '<div class="ad-brk-title ad-brk-title-sm">' + L.round3rd + '</div>';
             html += '<div class="ad-brk-match' + (tCompleted ? ' completed' : '') + '">';
             html += '<div class="ad-brk-player' + (tp1Win ? ' winner' : (tp2Win ? ' loser' : '')) + '">' +
                 '<span class="ad-brk-name">' + tp1Name + '</span><span class="ad-brk-sets">';

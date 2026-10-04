@@ -964,6 +964,117 @@ body.ad-page {
    поэтому и пряталась от замера панели до последнего. */
 .ad-res-podval { margin-top: var(--space-4); text-align: right; }
 
+/* ═══════════════════════════════════════════════════════════════════
+   ПАНЕЛЬ ГРУППЫ: ШИРИНЫ ШАПОК И УРОВНИ ЯЧЕЕК
+   ═══════════════════════════════════════════════════════════════════
+   Замер 04.10: 44 инлайна. Больше половины — `text-align:center` на
+   ячейках, у которых центровка УЖЕ есть в их классе (`.ad-grp-pts`,
+   `.ad-grp-place`, `.ad-grp-games`, `.ad-qual-res`, admin.css:5033):
+   инлайн повторял то, что и так стоит. Остальное — ширины шапок и
+   кегли 0.6rem (9.6), 0.65rem (10.4), 0.85rem (13.6): со шкалы ни
+   одного, ступень 11 и 14. */
+.ad-grp-th-num   { width: 30px; }
+.ad-grp-th-score { width: 60px; text-align: center; }
+.ad-grp-th-wins  { width: 40px; text-align: center; }
+.ad-grp-th-games { width: 56px; text-align: center; }
+.ad-grp-th-place { width: 64px; text-align: center; }
+.ad-qual-th-wins  { width: 104px; text-align: center; }
+.ad-qual-th-sets  { width: 66px;  text-align: center; }
+.ad-qual-th-games { width: 66px;  text-align: center; }
+.ad-qual-th-res   { width: 96px;  text-align: center; }
+
+.ad-table td.ad-grp-rownum { text-align: center; font-weight: var(--fw-semibold); }
+.ad-grp-name { white-space: nowrap; }
+.ad-table td.ad-grp-cell-click { cursor: pointer; text-align: center; }
+/* Строка выбранного игрока: подложка слабее, чем у победителя в итогах,
+   потому что здесь она не награда, а «вот этот ряд». */
+.ad-grp-row-sel { background: rgba(204, 255, 0, 0.06); }
+.ad-grp-dolya { opacity: 0.7; }
+.ad-table td.ad-grp-place-strong { font-weight: var(--fw-bold); white-space: nowrap; }
+.ad-grp-place-accent { color: var(--accent); }
+.ad-badge-sm { font-size: var(--fs-2xs); }
+.ad-grp-meta-sec { color: var(--text-secondary); }
+
+/* Итог отбора: три исхода — ждёт, через доп. матч, прошёл прямо */
+.ad-qual-res--wait  { color: var(--text-muted); }
+.ad-qual-res--ig    { color: var(--text-secondary); }
+.ad-qual-res--bye   { color: var(--accent); }
+
+/* Выбор места у равных: кнопка-список в краске акцента */
+.ad-grp-place-select {
+    background: var(--accent-subtle);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-xs);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-sm);
+    padding: var(--space-1) var(--space-1);
+    text-align: center;
+    width: 42px;
+    cursor: pointer;
+}
+.ad-grp-place-select[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* Полоса действий под сеткой и широкая кнопка-действие */
+.ad-brk-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding: var(--space-4) 0;
+}
+.ad-btn-wide { font-size: var(--fs-base); padding: var(--space-3) var(--space-8); }
+.ad-btn-off { opacity: 0.45; cursor: not-allowed; }
+.ad-qual-block-top { margin-top: var(--space-5); }
+.ad-qual-note-top { margin-top: var(--space-2); }
+.ad-ig-section-top { margin-top: var(--space-6); }
+.ad-sched-note-flat { margin: 0; flex-basis: 100%; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   СЕТКА: ПЛЕЙ-ОФФ, ПАНЕЛЬ СЕТКИ И ФИК
+   ═══════════════════════════════════════════════════════════════════
+   Замер 04.10: двадцать инлайнов на три куска, и почти все — одни и те
+   же четыре понятия, написанные по-разному: пустой заголовок-распорка,
+   колонка матча за третье место, полоса кнопок под сеткой и подпись
+   «турнир завершён». Кегль `0.8rem` (12.8) мимо шкалы — ступень 12. */
+.ad-brk-title-ghost { visibility: hidden; }
+.ad-brk-title-sm { font-size: var(--fs-xs); margin-bottom: var(--space-2); }
+.ad-brk-third {
+    margin-top: var(--space-5);
+    display: flex;
+    justify-content: flex-end;
+}
+.ad-brk-third-col { width: 220px; }
+.ad-brk-third-inline { margin-top: var(--space-5); max-width: 220px; }
+.ad-brk-third-inline--fic { margin-top: var(--space-3); max-width: 220px; }
+.ad-brk-btn-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+.ad-brk-done { text-align: center; margin-top: var(--space-4); }
+.ad-brk-accent { color: var(--accent); font-weight: var(--fw-semibold); }
+.ad-brk-bye { color: var(--text-muted); font-style: italic; }
+
+/* Панель лиг: та же полоса кнопок, те же места, свой ряд из двух сеток */
+.ad-league-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+.ad-league-actions--top { margin-top: var(--space-4); margin-bottom: 0; }
+.ad-league-th-place { width: 50px; text-align: center; }
+/* Строка утешительной лиги на общем экране: подложка ещё слабее, чем у
+   выбранной строки группы — она лишь разделяет два списка. */
+.ad-league-row-cl { background: rgba(255, 255, 255, 0.03); }
+.ad-dual-league-row { display: flex; gap: var(--space-6); margin-top: var(--space-6); }
+.ad-league-col { flex: 1; min-width: 0; }
+.ad-grp-section-title--pl { color: var(--accent); }
+.ad-grp-section-title--cl { color: var(--text-secondary); }
+
 /* Предупреждение «ждут парный рейтинг»: своя краска, потому что это не
    ошибка и не отказ, а «нужно дозаполнить». Кегль был 0.88rem (14.08) —
    числа на шкале нет; стал ступень 14. */
