@@ -1037,9 +1037,10 @@
         var catGender = userGenderToCategory(user.gender);
         var catOpts = buildCatOptions(catGender, null);
 
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа.
+           Тело окна остаётся своим, оно сюда и передаётся. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal" style="max-width:440px;">' +
                 '<div class="ad-confirm-title">' + L.usrGiveMembershipTitle + '</div>' +
                 (user.player_id ? '' :
@@ -1062,9 +1063,8 @@
                     '<button class="ad-btn ad-btn-secondary" id="adMemCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-primary" id="adMemSubmit">' + L.usrGiveMembership + '</button>' +
                 '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
         document.getElementById('adMemCancel').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
@@ -1294,9 +1294,9 @@
     }
 
     function openBanModal(userId) {
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal" style="max-width:440px;">' +
                 '<div class="ad-confirm-title">' + L.usrBanConfirm + '</div>' +
                 '<div style="margin-bottom:16px;">' +
@@ -1317,9 +1317,8 @@
                     '<button class="ad-btn ad-btn-secondary" id="adBanCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-danger" id="adBanSubmit">' + L.usrBanUser + '</button>' +
                 '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
         document.getElementById('adBanCancel').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
@@ -1397,9 +1396,9 @@
     }
 
     function openAddManagerModal() {
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal" style="max-width:440px;">' +
                 '<div class="ad-confirm-title">' + L.usrAddManagerTitle + '</div>' +
                 '<div style="margin-bottom:16px;">' +
@@ -1421,9 +1420,8 @@
                     '<button class="ad-btn ad-btn-secondary" id="adMgrCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-primary" id="adMgrSubmit">' + L.usrAddManager + '</button>' +
                 '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
         document.getElementById('adMgrCancel').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });

@@ -106,8 +106,10 @@ const ОТКАТЫ = [
 
   /* ─── окно подтверждения ─── */
   ['js/admin/core/utils.js',
-   "'<div class=\"ad-confirm-modal\" role=\"dialog\" aria-modal=\"true\" ' +",
-   "'<div class=\"ad-confirm-modal\" data-bylo=\"1\" ' +",
+   /* 04.10: разметку окна строит оболочка, и строка с `role` переехала
+      в неё вместе с проверкой ширины. Якорь — на содержимое оболочки. */
+   "'\" role=\"dialog\" aria-modal=\"true\" ' +",
+   "'\" data-bylo=\"1\" ' +",
    'окно подтверждения называет себя диктору'],
 
   ['js/admin/core/utils.js',

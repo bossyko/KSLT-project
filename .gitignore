@@ -100,3 +100,6 @@ slepki/
 tests/reports/metka-*.png
 tests/reports/sloty-*.png
 snimki/
+
+# Временное для приборов: сюда кладётся вход в тестовую базу, он несёт живой токен
+tmp/

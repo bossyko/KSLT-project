@@ -34,6 +34,7 @@ const КУСКИ = [
     ['статус турнира',      'check-status.js',       'check-status-otkat.js'],
     ['форма турнира',       'check-trn-forma.js',    'check-trn-forma-otkat.js'],
     ['вёрстка заявок',      'check-zayavki-verstka.js', 'check-zayavki-verstka-otkat.js'],
+    ['оболочка окна',       'check-okno-obolochka.js', 'check-okno-obolochka-otkat.js'],
     ['жеребьёвка',          'check-zhrebiy.js',      'check-zhrebiy-otkat.js'],
     ['места в группе',      'check-mesta-v-gruppe.js','check-mesta-v-gruppe-otkat.js'],
     ['плей-офф',            'check-setka-plei-off.js','check-setka-plei-off-otkat.js'],

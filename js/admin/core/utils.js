@@ -292,11 +292,133 @@
        когда окон за одну загрузку страницы открыли несколько. */
     var счётчикОкон = 0;
 
-    function showConfirm(title, text, onConfirm, confirmLabel, onCancel, ещё) {
+    /**
+     * ОБОЛОЧКА ОКНА — ОДНА НА ВСЮ АДМИНКУ.
+     *
+     * Было двенадцать мест, создающих окно: три сборщика здесь и девять
+     * рукодельных в разделах. Замер 04.10: `role="dialog"` и фокус были
+     * ровно у одного из двенадцати, Esc — у двух. Одно понятие, двенадцать
+     * определений — и беда рождается ровно на шве.
+     *
+     * Оболочка даёт: подложку, окно с `role`/`aria-modal`/уникальной
+     * подписью, фокус внутрь, ЛОВУШКУ ФОКУСА (Tab не уходит под окно),
+     * ВОЗВРАТ ФОКУСА тому, кто звал, Esc, клик мимо, одно окно за раз.
+     * Тело и кнопки даёт зовущий — оболочка в них не лезет.
+     *
+     * @param {Object} о — {заголовок, тело, кнопки, широкое, слева, приЗакрытии}
+     * @returns {{overlay: Element, окно: Element, тело: Element, закрыть: Function}}
+     */
+    function оболочкаОкна(о) {
         // Одно окно за раз. Иначе повторные нажатия складывают их стопкой:
         // закрываешь верхнее, под ним такое же — и кажется, что оно замерло
         document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
 
+        /* КОМУ ВЕРНУТЬ ФОКУС. Окно забирает фокус себе, и после закрытия
+           он обязан вернуться туда, откуда пришёл, — иначе клавиатура
+           начинает обход страницы с начала. Если звавший элемент к тому
+           времени стёрт перерисовкой раздела, отдаём фокус заголовку
+           раздела: он есть всегда. */
+        var звал = document.activeElement;
+
+        var номерОкна = 'adConfirmTitle' + (++счётчикОкон);
+        var overlay = document.createElement('div');
+        overlay.className = 'ad-confirm-overlay';
+        /* ДВА ВХОДА, ОДНА ОБОЛОЧКА.
+           `о.сырое` принимает ГОТОВУЮ разметку окна — ту, что девять
+           рукодельных окон уже написали у себя. Так они получают `role`,
+           фокус, ловушку и Esc, не переписывая ни строки своего тела:
+           переписывание девяти разных тел за один заход — это девять
+           поводов сломать работающее. Их вёрстка остаётся долгом и стоит
+           в трекере числом, а не прячется.
+           Остальные зовут по частям: заголовок, тело, кнопки. */
+        overlay.innerHTML = о.сырое ||
+            ('<div class="ad-confirm-modal' + (о.широкое ? ' ad-confirm-modal-wide' : '') +
+                 '" role="dialog" aria-modal="true" ' +
+                 'aria-labelledby="' + номерОкна + '" tabindex="-1"' +
+                 (о.слева ? ' style="text-align:left;"' : '') + '>' +
+                '<div class="ad-confirm-title" id="' + номерОкна + '">' + (о.заголовок || '') + '</div>' +
+                '<div class="ad-confirm-text">' + (о.тело || '') + '</div>' +
+                '<div class="ad-confirm-actions">' + (о.кнопки || '') + '</div>' +
+            '</div>');
+        document.body.appendChild(overlay);
+        var окно = overlay.querySelector('.ad-confirm-modal');
+        /* ГОТОВОЙ РАЗМЕТКЕ ДОСТАВЛЯЕМ ТО, ЧЕГО В НЕЙ НЕТ. Подпись диктору
+           вешаем на её же заголовок — у окна он есть всегда. */
+        if (окно && о.сырое) {
+            окно.setAttribute('role', 'dialog');
+            окно.setAttribute('aria-modal', 'true');
+            окно.setAttribute('tabindex', '-1');
+            var свойЗаголовок = окно.querySelector('.ad-confirm-title');
+            if (свойЗаголовок) {
+                if (!свойЗаголовок.id) свойЗаголовок.id = номерОкна;
+                окно.setAttribute('aria-labelledby', свойЗаголовок.id);
+            }
+        }
+        if (окно && окно.focus) окно.focus();
+
+        var закрыто = false;
+        function закрыть() {
+            if (закрыто) return;
+            закрыто = true;
+            document.removeEventListener('keydown', поКлавише);
+            overlay.remove();
+            /* РАЗДЕЛЫ ПРЯЧУТСЯ КЛАССОМ, А НЕ СТИЛЕМ. Замер 04.10: в
+               админке десять `.ad-section-title`, видим ОДИН, а мой
+               селектор по `style*="display: none"` брал первый из десяти
+               — скрытый, и фокус уезжал на `body`. Берём видимый.
+               ВИДИМОСТЬ ПРОВЕРЯЕТСЯ ЗАМЕРОМ, А НЕ СЕЛЕКТОРОМ. */
+            /* «ЕЩЁ В РАЗМЕТКЕ» НЕ ЗНАЧИТ «НА ЭКРАНЕ». Замер 04.10: окно
+               звала кнопка из выпадающего меню; меню закрылось КЛАССОМ, и
+               кнопка осталась в разметке, но невидимой. `focus()` на
+               скрытом не делает ничего — фокус оставался на `body`.
+               Спрашиваем про высоту, а не про присутствие. */
+            var звалЖив = звал && document.body.contains(звал) &&
+                          звал.getBoundingClientRect().height > 0;
+            var куда = звалЖив ? звал : null;
+            if (!куда) {
+                куда = Array.prototype.slice
+                    .call(document.querySelectorAll('.ad-section-title'))
+                    .filter(function(э) { return э.getBoundingClientRect().height > 0; })[0] || null;
+            }
+            /* ЗАГОЛОВОК РАЗДЕЛА САМ ПО СЕБЕ ФОКУС НЕ БЕРЁТ. Замер 04.10:
+               окно звала кнопка внутри меню, меню закрылось вместе с
+               окном, запасным был заголовок — и фокус уехал на `body`,
+               то есть обход начался с начала страницы. Даём заголовку
+               `tabindex="-1"`: мышью он по-прежнему не фокусируется, а
+               программно — да. */
+            if (куда && куда.focus) {
+                if (!куда.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(куда.tagName)) {
+                    куда.setAttribute('tabindex', '-1');
+                }
+                try { куда.focus(); } catch (e) {}
+            }
+            if (о.приЗакрытии) о.приЗакрытии();
+        }
+
+        /* ВЫЙТИ БЕЗ ДЕЙСТВИЯ МОЖНО С КЛАВИАТУРЫ, И TAB НЕ УХОДИТ ПОД ОКНО.
+           Ловушка нужна не для красоты: под окном лежит вся страница с
+           кнопками, которые меняют данные, и слепой обход по ней из
+           открытого окна — это нажатие вслепую. */
+        function поКлавише(e) {
+            if (e.key === 'Escape') { закрыть(); return; }
+            if (e.key !== 'Tab') return;
+            var куда = окно.querySelectorAll(
+                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]),' +
+                ' textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+            if (!куда.length) { e.preventDefault(); окно.focus(); return; }
+            var первый = куда[0], последний = куда[куда.length - 1];
+            if (!окно.contains(document.activeElement)) { e.preventDefault(); первый.focus(); return; }
+            if (e.shiftKey && document.activeElement === первый) { e.preventDefault(); последний.focus(); }
+            else if (!e.shiftKey && document.activeElement === последний) { e.preventDefault(); первый.focus(); }
+        }
+        document.addEventListener('keydown', поКлавише);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) закрыть(); });
+
+        return { overlay: overlay, окно: окно,
+                 тело: overlay.querySelector('.ad-confirm-text'), закрыть: закрыть };
+    }
+
+    function showConfirm(title, text, onConfirm, confirmLabel, onCancel, ещё) {
         /* `ещё` принимает и одну кнопку, и список: старые двадцать с лишним
            вызовов передают объект, и переписывать их ради новой — значит
            трогать то, что работает. */
@@ -304,46 +426,32 @@
 
         var btnLabel = confirmLabel || L.delete;
         var btnClass = confirmLabel ? 'ad-btn-primary' : 'ad-btn-danger';
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        /* ОКНО НАЗЫВАЕТ СЕБЯ ДИКТОРУ И БЕРЁТ ФОКУС. Замер 03.10: окно
-           открывалось, а фокус оставался на кнопке ЗА ним
-           (`фокусВнутри: false`), и ни `role`, ни `aria-modal`, ни
-           `aria-labelledby` в разметке не было ни одного — ноль вхождений
-           на весь showConfirm. Клавиатурой в окно было не попасть: Tab
-           уходил по странице под ним. Esc при этом работал и работает —
-           слушатель на document, ниже.
-           Фокус ставим на САМО окно, а не на кнопку: первой по порядку
-           стоит «Отмена», а дальше бывают необратимые действия, и
-           подставлять их под случайный Enter нельзя. */
-        var номерОкна = 'adConfirmTitle' + (++счётчикОкон);
-        overlay.innerHTML =
-            '<div class="ad-confirm-modal" role="dialog" aria-modal="true" ' +
-                 'aria-labelledby="' + номерОкна + '" tabindex="-1">' +
-                '<div class="ad-confirm-title" id="' + номерОкна + '">' + title + '</div>' +
-                '<div class="ad-confirm-text">' + text + '</div>' +
-                '<div class="ad-confirm-actions">' +
-                    '<button class="ad-btn ad-btn-secondary ad-confirm-cancel" id="adConfirmCancel">' + L.cancel + '</button>' +
-                    /* ДОПОЛНИТЕЛЬНЫХ ДЕЙСТВИЙ БЫВАЕТ НЕСКОЛЬКО, И ОНИ УМЕЮТ
-                       БЫТЬ ОПАСНЫМИ. Было одно, и всегда такое же серое, как
-                       «Отмена»: в окне решения по заявке рядом стояли два
-                       одинаковых на вид действия — безобидное закрытие и
-                       необратимый отказ. Замер 30.09: обе rgba(255,255,255,.72).
-                       У заявки исходов три — снять, отклонить, одобрить, —
-                       и все три обязаны стоять в одном окне. Решение Кости. */
-                    добавочные.map(function(д, и) {
-                        return '<button class="ad-btn ' + (д.опасная ? 'ad-btn-danger' : 'ad-btn-secondary') +
-                               '" data-dop="' + и + '">' + д.label + '</button>';
-                    }).join('') +
-                    '<button class="ad-btn ' + btnClass + '" id="adConfirmOk">' + btnLabel + '</button>' +
-                '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
-        var окно = overlay.querySelector('.ad-confirm-modal');
-        if (окно && окно.focus) окно.focus();
 
-        function dismiss() { overlay.remove(); if (onCancel) onCancel(); }
-        overlay.querySelector('#adConfirmCancel').addEventListener('click', dismiss);
+        /* ОКНО СТРОИТ ОБОЛОЧКА, А НЕ ЭТОТ СБОРЩИК. Здесь остаются только
+           кнопки и то, что они делают: подложка, край, подпись диктору,
+           фокус, ловушка, Esc и клик мимо — её работа, одна на админку. */
+        var окноГот = оболочкаОкна({
+            заголовок: title,
+            тело: text,
+            кнопки:
+                '<button class="ad-btn ad-btn-secondary ad-confirm-cancel" id="adConfirmCancel">' + L.cancel + '</button>' +
+                /* ДОПОЛНИТЕЛЬНЫХ ДЕЙСТВИЙ БЫВАЕТ НЕСКОЛЬКО, И ОНИ УМЕЮТ
+                   БЫТЬ ОПАСНЫМИ. Было одно, и всегда такое же серое, как
+                   «Отмена»: в окне решения по заявке рядом стояли два
+                   одинаковых на вид действия — безобидное закрытие и
+                   необратимый отказ. Замер 30.09: обе rgba(255,255,255,.72).
+                   У заявки исходов три — снять, отклонить, одобрить, —
+                   и все три обязаны стоять в одном окне. Решение Кости. */
+                добавочные.map(function(д, и) {
+                    return '<button class="ad-btn ' + (д.опасная ? 'ad-btn-danger' : 'ad-btn-secondary') +
+                           '" data-dop="' + и + '">' + д.label + '</button>';
+                }).join('') +
+                '<button class="ad-btn ' + btnClass + '" id="adConfirmOk">' + btnLabel + '</button>',
+            приЗакрытии: onCancel
+        });
+        var overlay = окноГот.overlay;
+
+        overlay.querySelector('#adConfirmCancel').addEventListener('click', окноГот.закрыть);
         // Ошибку внутри действия надо показать, а не проглотить: раньше окно
         // просто оставалось на экране и выглядело замершим — «кнопка не
         // реагирует», хотя на самом деле код упал
@@ -374,17 +482,6 @@
                 overlay.remove();
             });
         });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
-
-        /* ВЫЙТИ БЕЗ ДЕЙСТВИЯ МОЖНО С КЛАВИАТУРЫ. Esc работал в окне ввода
-           (`showPrompt`), а здесь его не было: окно с тремя действиями без
-           выхода по Esc заставляет целиться мышью в «Отмену». */
-        function поEsc(e) {
-            if (e.key !== 'Escape') return;
-            document.removeEventListener('keydown', поEsc);
-            if (document.body.contains(overlay)) dismiss();
-        }
-        document.addEventListener('keydown', поEsc);
     }
 
     /**
@@ -399,23 +496,17 @@
      *        и на отказе он читается как приглашение продолжить.
      */
     function showNotice(title, text, okLabel, вид) {
-        document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
-
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        overlay.innerHTML =
-            '<div class="ad-confirm-modal' + (вид === 'warn' ? ' ad-confirm-warn' : '') + '">' +
-                '<div class="ad-confirm-title">' + title + '</div>' +
-                '<div class="ad-confirm-text">' + text + '</div>' +
-                '<div class="ad-confirm-actions">' +
-                    '<button class="ad-btn ' + (вид === 'warn' ? 'ad-btn-danger' : 'ad-btn-primary') + '" id="adNoticeOk">' +
-                        (okLabel || (L.ok || 'Понятно')) + '</button>' +
-                '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
-
-        overlay.querySelector('#adNoticeOk').addEventListener('click', function() { overlay.remove(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        /* ТА ЖЕ ОБОЛОЧКА. До 04.10 у этого окна не было ни `role`, ни
+           фокуса, ни Esc: чинили только `showConfirm`, а сообщение
+           осталось как было. */
+        var окноГот = оболочкаОкна({
+            заголовок: title,
+            тело: text,
+            кнопки: '<button class="ad-btn ' + (вид === 'warn' ? 'ad-btn-danger' : 'ad-btn-primary') +
+                    '" id="adNoticeOk">' + (okLabel || (L.ok || 'Понятно')) + '</button>'
+        });
+        if (вид === 'warn') окноГот.окно.classList.add('ad-confirm-warn');
+        окноГот.overlay.querySelector('#adNoticeOk').addEventListener('click', окноГот.закрыть);
     }
 
     /**
@@ -428,40 +519,39 @@
      */
     function showPromptAsync(opts) {
         return new Promise(function(resolve) {
-            var overlay = document.createElement('div');
-            overlay.className = 'ad-confirm-overlay';
-            overlay.innerHTML =
-                '<div class="ad-confirm-modal">' +
-                    '<div class="ad-confirm-title">' + (opts.title || '') + '</div>' +
-                    (opts.text ? '<div class="ad-confirm-text">' + opts.text + '</div>' : '') +
-                    '<input type="text" class="ad-field-input" id="adPromptInput" ' +
-                        'placeholder="' + (opts.placeholder || '') + '" ' +
-                        'value="' + (opts.value || '') + '" style="margin-bottom:16px;">' +
-                    '<div class="ad-confirm-actions">' +
-                        '<button class="ad-btn ad-btn-secondary" id="adPromptCancel">' + L.cancel + '</button>' +
-                        '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + (opts.okLabel || L.confirm || 'OK') + '</button>' +
-                    '</div>' +
-                '</div>';
-            document.body.appendChild(overlay);
-
-            var input = document.getElementById('adPromptInput');
-            input.focus();
-
-            var done = false;
+            /* ТА ЖЕ ОБОЛОЧКА. Esc и клик мимо тут были и раньше, а вот
+               `role`, подписи диктору и ловушки фокуса — не было. */
+            var готово = false;
             function finish(value) {
-                if (done) return;
-                done = true;
-                overlay.remove();
+                if (готово) return;
+                готово = true;
+                окноГот.закрыть();
                 resolve(value);
             }
+            var окноГот = оболочкаОкна({
+                заголовок: opts.title || '',
+                тело: (opts.text ? '<div class="ad-confirm-text">' + opts.text + '</div>' : '') +
+                      '<input type="text" class="ad-field-input" id="adPromptInput" ' +
+                          'placeholder="' + (opts.placeholder || '') + '" ' +
+                          'value="' + (opts.value || '') + '">',
+                кнопки:
+                    '<button class="ad-btn ad-btn-secondary" id="adPromptCancel">' + L.cancel + '</button>' +
+                    '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + (opts.okLabel || L.confirm || 'OK') + '</button>',
+                приЗакрытии: function() { if (!готово) { готово = true; resolve(null); } }
+            });
 
-            document.getElementById('adPromptCancel').addEventListener('click', function() { finish(null); });
-            document.getElementById('adPromptOk').addEventListener('click', function() { finish(input.value.trim() || ''); });
+            var overlay = окноГот.overlay;
+            var input = overlay.querySelector('#adPromptInput');
+            /* ФОКУС В ПОЛЕ, А НЕ В ОКНО: тут вводят, и первое нажатие
+               клавиши должно попасть в поле. Это единственное окно, где
+               фокус уезжает с самого окна — потому и сказано вслух. */
+            if (input) input.focus();
+
+            overlay.querySelector('#adPromptCancel').addEventListener('click', function() { finish(null); });
+            overlay.querySelector('#adPromptOk').addEventListener('click', function() { finish(input.value.trim() || ''); });
             input.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') finish(input.value.trim() || '');
-                if (e.key === 'Escape') finish(null);
             });
-            overlay.addEventListener('click', function(e) { if (e.target === overlay) finish(null); });
         });
     }
 
@@ -902,6 +992,10 @@
 
     // ---- Export to namespace ----
     A.showToast = showToast;
+    /* ОБОЛОЧКА ОТДАЁТСЯ РАЗДЕЛАМ. Девять окон в разделах строились
+       руками; теперь берут её — и `role`, фокус, ловушка и Esc у них
+       те же, что у сборщиков. */
+    A.оболочкаОкна = оболочкаОкна;
     A.showConfirm = showConfirm;
     A.showNotice = showNotice;
     A.showConfirmAsync = showConfirmAsync;

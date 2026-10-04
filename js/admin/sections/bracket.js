@@ -206,9 +206,10 @@
      * считается по нему, а пометка с заявки уходит.
      */
     function открытьОкноПарного(playerId, playerName, singles, tournamentId) {
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа.
+           Тело окна остаётся своим, оно сюда и передаётся. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal">' +
                 '<div class="ad-confirm-title">' + L.dblNtrpNeedTitle + '</div>' +
                 '<div class="ad-confirm-text" style="text-align:left;margin-bottom:14px;color:var(--text-secondary);">' +
@@ -223,11 +224,11 @@
                     '<button class="ad-btn ad-btn-primary" id="adDblNtrpSave">' + L.save + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adDblNtrpCancel">' + L.cancel + '</button>' +
                 '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
-        function dismiss() { overlay.remove(); }
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+        // ЗАКРЫТИЕ ТОЖЕ ОДНО: оно возвращает фокус и снимает слушатель Esc
+        var dismiss = окноГот.закрыть;
         document.getElementById('adDblNtrpCancel').addEventListener('click', dismiss);
 
         document.getElementById('adDblNtrpSave').addEventListener('click', async function() {
@@ -3598,9 +3599,9 @@
                     ? tournament.gender : null;
 
                 // Create modal overlay
-                var overlay = document.createElement('div');
-                overlay.className = 'ad-confirm-overlay';
-                overlay.innerHTML =
+                /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+                   ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
+                var окноГот = A.оболочкаОкна({ сырое:
                     '<div class="ad-confirm-modal" style="min-width:380px;">' +
                         '<div class="ad-confirm-title">' + L.regAddFromDb + '</div>' +
                         '<div class="ad-confirm-text" style="text-align:left;">' +
@@ -3610,8 +3611,8 @@
                         '<div class="ad-confirm-actions">' +
                             '<button class="ad-btn ad-btn-secondary" id="adDbClose">' + L.cancel + '</button>' +
                         '</div>' +
-                    '</div>';
-                document.body.appendChild(overlay);
+                    '</div>' });
+                var overlay = окноГот.overlay;
 
                 var добавлено = 0;
 
@@ -3874,9 +3875,10 @@
                     var hasPartner = reg && (reg.partner_id || reg.partner_external_name);
                     if (hasPartner) {
                         // Show choice modal: main player or partner
-                        var choiceOverlay = document.createElement('div');
-                        choiceOverlay.className = 'ad-confirm-overlay';
-                        choiceOverlay.innerHTML =
+                        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+                           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа.
+                           Тело окна остаётся своим, оно сюда и передаётся. */
+                        var окноГот = A.оболочкаОкна({ сырое:
                             '<div class="ad-confirm-modal">' +
                                 '<div class="ad-confirm-title">' + L.regReplaceWho + '</div>' +
                                 // Игроки рядом, пара — отдельной строкой снизу:
@@ -3891,8 +3893,8 @@
                                     '<button class="ad-btn ad-btn-primary" id="adReplacePairBtn">' +
                                         L.regReplacePair + '</button>' +
                                 '</div>' +
-                            '</div>';
-                        document.body.appendChild(choiceOverlay);
+                            '</div>' });
+                        var choiceOverlay = окноГот.overlay;
                         choiceOverlay.addEventListener('click', function(e) { if (e.target === choiceOverlay) choiceOverlay.remove(); });
                         document.getElementById('adReplaceMainBtn').addEventListener('click', function() {
                             choiceOverlay.remove();
@@ -9347,8 +9349,6 @@
         var freeSlots = dSize - directCount;
         var hasCandidates = has3PlayerGroups && candidateCount > 0;
 
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
 
         var infoHtml = '<p style="margin-bottom:8px;">' + L.igDirectQualifiers + ': <b>' + directCount + '</b></p>';
         if (hasCandidates) {
@@ -9356,7 +9356,9 @@
             infoHtml += '<p style="margin-bottom:8px;">' + L.candidateFreeSlots + ': <b>' + freeSlots + '</b></p>';
         }
 
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal">' +
                 '<div class="ad-confirm-title">' + L.playoffFormatTitle + '</div>' +
                 '<div class="ad-confirm-text" style="text-align:left;margin-bottom:16px;color:var(--text-secondary);">' + infoHtml + '</div>' +
@@ -9367,11 +9369,11 @@
                     '<button class="ad-btn ' + (hasCandidates ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adFormatCancel" style="width:100%;">' + L.cancel + '</button>' +
                 '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
-        function dismiss() { overlay.remove(); }
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+        // ЗАКРЫТИЕ ТОЖЕ ОДНО: оно возвращает фокус и снимает слушатель Esc
+        var dismiss = окноГот.закрыть;
         document.getElementById('adFormatCancel').addEventListener('click', dismiss);
 
         document.getElementById('adFormatDirect').addEventListener('click', async function() {
@@ -9483,8 +9485,6 @@
         // Build modal HTML
         var isDoubles = tournament.format === 'doubles';
         var regsMap = {};
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
 
         var rowsHtml = '';
         for (var ci = 0; ci < candidates.length; ci++) {
@@ -9508,7 +9508,9 @@
                 '</tr>';
         }
 
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal" style="max-width:540px;text-align:left;">' +
                 '<div class="ad-confirm-title" style="text-align:center;font-size:1.15rem;margin-bottom:12px;">' + L.candidateSelectionTitle + '</div>' +
                 '<p style="text-align:center;color:var(--text-secondary, #aaa);margin-bottom:16px;font-size:14px;">' +
@@ -9529,11 +9531,11 @@
                     '<button class="ad-btn ad-btn-primary" id="adCandidateConfirm">' + L.candidateConfirm + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adCandidateCancel">' + L.cancel + '</button>' +
                 '</div>' +
-            '</div>';
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
-        function dismiss() { overlay.remove(); }
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+        // ЗАКРЫТИЕ ТОЖЕ ОДНО: оно возвращает фокус и снимает слушатель Esc
+        var dismiss = окноГот.закрыть;
         document.getElementById('adCandidateCancel').addEventListener('click', dismiss);
 
         // Live summary update
@@ -11082,6 +11084,12 @@
             }).join('');
             var overlay = document.createElement('div');
             overlay.className = 'ad-modal-overlay';
+            /* ВТОРОЕ СЕМЕЙСТВО ОКОН — `ad-modal`, а не `ad-confirm`.
+               04.10 моя пакетная правка затащила его в оболочку окна
+               подтверждения: подложка подменилась бы, и окно с
+               зависимыми матчами поехало в чужой рамке. Поймано
+               чтением собственного diff до прогона. Второе семейство
+               сводится с первым ОТДЕЛЬНЫМ куском, не этим. */
             overlay.innerHTML =
                 '<div class="ad-modal" style="max-width:640px;">' +
                     '<div class="ad-modal-header"><h3>' + A.esc(заголовок) + '</h3></div>' +

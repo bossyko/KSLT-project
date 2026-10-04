@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КСЛТ — стенд: одна оболочка окна</title>
+<!--
+  СТЕНД, А НЕ ПРОДУКТ. Правки живут здесь, пока Костя не сказал «да».
+  Что показывает стенд: ОДНУ оболочку окна на три разных тела.
+  Содержимое — КРАЙНЕЕ: длинный заголовок, 24 строки в списке, три
+  действия плюс выход. Экран показан целиком, а не серединой.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=23">
+<link rel="stylesheet" href="../css/style.css?v=383">
+<link rel="stylesheet" href="../css/admin.css?v=204">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); padding: var(--space-6); }
+  .стенд-заг { font-size: var(--fs-xl); line-height: var(--lh-tight); margin: 0 0 var(--space-2); }
+  .стенд-под { font-size: var(--fs-sm); line-height: var(--lh-normal);
+               color: var(--text-muted); margin: 0 0 var(--space-6); max-width: 70ch; }
+  .стенд-ряд { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: flex-start; }
+  .стенд-клетка { flex: 1 1 320px; min-width: 0; }
+  .стенд-имя { font-size: var(--fs-xs); line-height: var(--lh-none);
+               letter-spacing: var(--ls-wide); text-transform: uppercase;
+               color: var(--text-muted); margin-bottom: var(--space-2); }
+  /* Окно в стенде показываем НЕ в подложке, чтобы три стояли рядом.
+     ШИРИНУ РЕШАЕТ САМО ОКНО, А НЕ СТЕНД: клетке даём запас 580, и
+     действуют правила продукта — 400 обычное, 440 при трёх действиях,
+     520 при поле ввода. Стенд, подставивший свою ширину, врёт. */
+  .стенд-клетка { flex: 0 0 580px; }
+  /* `width: 90%` у окна считается от КЛЕТКИ, а в продукте — от экрана:
+     в клетке 580 третье окно выходило 522 вместо своих 540. Стенд,
+     подставивший свою ширину, врёт — даём клетке 100%, и ширину решают
+     только `max-width` продукта. */
+  .стенд-клетка .ad-confirm-modal { margin: 0; width: 100%; }
+
+  /* ============ ПРЕДЛОЖЕНИЕ. ЖИВЁТ В СТЕНДЕ, НЕ В admin.css ============
+
+     1. ОКНО НЕ РВЁТ ЭКРАН. У `.ad-confirm-modal` нет предела высоты
+        вовсе, а у второго семейства `.ad-modal` он есть: 90vh плюс
+        прокрутка в теле. Окно «выбор кандидатов» — список, и на 768
+        он уезжает за край экрана вместе с кнопками. Предел и прокрутка
+        переезжают в оболочку: ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ.
+     2. ПРОКРУЧИВАЕТСЯ ТЕЛО, А НЕ ОКНО: заголовок и кнопки обязаны
+        оставаться на виду, иначе на коротком экране до «Отмены» надо
+        доезжать прокруткой.
+     3. ПОЛЕ ОТ КРАЯ ЭКРАНА 16 — на 768 окно шириной 90% давало по 38
+        слева и справа и съедало ширину у списка.
+  */
+  /* ПРЕДЕЛ ВЫСОТЫ — 90vh, И ЭТО НЕ НОВОЕ ЧИСЛО: столько у второго
+     семейства окон (`.ad-modal`, замер 18.09). Своё число завёл бы
+     третье определение одного понятия. */
+  .стенд-ряд .ad-confirm-modal { display: flex; flex-direction: column;
+                                 max-height: 90vh; overflow: hidden; }
+  .стенд-ряд .ad-confirm-text  { overflow-y: auto; min-height: 0;
+                                 margin-bottom: var(--space-md); }
+
+  /* 4. ШИРИНА СПИСКА — 540. Это НЕ новое число: столько у второго
+        семейства окон (`.ad-modal`, замер 18.09 — баттл и Live). Список
+        из имени и меты в 400 не живёт: имя обрезается на половине. */
+  .ad-confirm-modal-wide { max-width: 540px; }
+
+  /* 5. ЗАГОЛОВОК ОКНА СТОИТ НА СТУПЕНИ АБЗАЦА. Замер 04.10: 18 / 27,
+        то есть 1.5 — межстрочный ТЕКСТА, а не заголовка. Ровно эта же
+        беда была у `.ad-section-title` и закрыта 03.10. Ступень
+        заголовка — `--lh-tight` 1.1; у двухстрочного заголовка окна
+        беру `--lh-snug` 1.3: в 1.1 две строки в 18 кегле сходятся
+        слишком тесно для текста, который читают один раз и быстро. */
+  .стенд-ряд .ad-confirm-title { line-height: var(--lh-snug); }
+
+  /* Тело-список: строки выбора — те же понятия, что в заявках */
+  .окно-строка { display: flex; align-items: center; gap: var(--space-2);
+                 min-height: var(--btn-h-md); padding: 0 var(--space-2);
+                 border-bottom: 1px solid var(--border-subtle); text-align: left; }
+  .окно-строка:last-child { border-bottom: 0; }
+  .окно-имя  { font-size: var(--fs-sm); line-height: var(--lh-normal);
+               color: var(--text-primary); flex: 1; min-width: 0;
+               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .окно-мета { font-size: var(--fs-xs); line-height: var(--lh-normal);
+               color: var(--text-muted); white-space: nowrap; }
+
+  /* Таблица окна «Распределение 3-х мест» — по разметке продукта, но
+     числами со шкалы: в коде там зашиты 8px/10px/12px/13px инлайном. */
+  .окно-слоты { font-size: var(--fs-sm); line-height: var(--lh-normal);
+                color: var(--text-secondary); text-align: center; margin: 0 0 var(--space-4); }
+  .окно-слоты b { color: var(--accent); }
+  .окно-табл { width: 100%; border-collapse: collapse; }
+  .окно-табл th { padding: var(--space-2) var(--space-3); font-size: var(--fs-2xs);
+                  line-height: var(--lh-none); letter-spacing: var(--ls-wide);
+                  text-transform: uppercase; color: var(--text-muted);
+                  text-align: left; border-bottom: 1px solid var(--border-subtle); }
+  .окно-табл td { padding: var(--space-2) var(--space-3); font-size: var(--fs-sm);
+                  line-height: var(--lh-normal); color: var(--text-primary);
+                  border-bottom: 1px solid var(--border-subtle); }
+  .окно-табл .по-центру { text-align: center; }
+  .окно-табл .окно-группа { color: var(--accent); font-weight: var(--fw-semibold); }
+  .окно-табл .окно-счёт { color: var(--text-secondary); }
+  /* ШИРИНУ ВЫБОРУ ЗАДАЁТ СОДЕРЖИМОЕ, А НЕ КОЛОНКА. Поставил было 100% —
+     и подписи обрезались в «Авто…», «Допм…», «Выбы…»: мой стенд сам
+     завёл беду, которой в продукте нет (там ширина по содержимому). */
+  .окно-табл select { width: auto; min-width: 150px; }
+  .окно-итог { font-size: var(--fs-xs); line-height: var(--lh-normal);
+               color: var(--text-muted); text-align: center; margin-top: var(--space-4); }
+</style>
+</head>
+<body>
+
+<h1 class="стенд-заг">Одна оболочка — три тела</h1>
+<p class="стенд-под">
+  Оболочка одна: подложка, край, заголовок, тело, ряд кнопок, предел высоты,
+  прокрутка тела. Разное — только тело. Содержимое крайнее: заголовок в 52
+  знака, список в 24 строки, три действия плюс выход.
+</p>
+
+<div class="стенд-ряд">
+
+  <div class="стенд-клетка">
+    <div class="стенд-имя">1 · подтверждение (440)</div>
+    <div class="ad-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="з1" tabindex="-1">
+      <div class="ad-confirm-title" id="з1">Отклонить заявку Абдыкадырова-Сатыбалдиева?</div>
+      <div class="ad-confirm-text">
+        Человек уйдёт с турнира, а его место достанется первому в очереди.
+        Отменить это нельзя.
+      </div>
+      <div class="ad-confirm-actions">
+        <button class="ad-btn ad-btn-secondary ad-confirm-cancel">Отмена</button>
+        <button class="ad-btn ad-btn-secondary">В очередь</button>
+        <button class="ad-btn ad-btn-danger">Отклонить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="стенд-клетка">
+    <div class="стенд-имя">2 · поиск (520)</div>
+    <div class="ad-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="з2" tabindex="-1">
+      <div class="ad-confirm-title" id="з2">Добавить участника из базы</div>
+      <div class="ad-confirm-text">
+        <div class="ad-field">
+          <label class="ad-field-label" for="п2">Кого ищем</label>
+          <input class="ad-field-input" id="п2" type="text" value="Мамбеталиев">
+        </div>
+        <div class="окно-строка"><span class="окно-имя">Мамбеталиев-Орозбеков Нурсултан Акылбекович</span><span class="окно-мета">NTRP 4.25</span></div>
+        <div class="окно-строка"><span class="окно-имя">Мамбеталиев Азамат</span><span class="окно-мета">NTRP 3.5</span></div>
+        <div class="окно-строка"><span class="окно-имя">Мамбеталиева Айпери</span><span class="окно-мета">гость</span></div>
+      </div>
+      <div class="ad-confirm-actions">
+        <button class="ad-btn ad-btn-secondary ad-confirm-cancel">Отмена</button>
+        <button class="ad-btn ad-btn-primary">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="стенд-клетка">
+    <div class="стенд-имя">3 · распределение 3-х мест (540) — крайний случай</div>
+    <!-- СНЯТО С КОДА, А НЕ ПРИДУМАНО: bracket.js:9511-9530. Заголовок,
+         подпись про свободные слоты, таблица из четырёх колонок, выбор
+         на каждой строке (Авто-проход · Допматч · Выбывает), итог под
+         таблицей, кнопки в порядке продукта: сначала действие. -->
+    <div class="ad-confirm-modal ad-confirm-modal-wide" role="dialog" aria-modal="true" aria-labelledby="з3" tabindex="-1" style="text-align:left;">
+      <div class="ad-confirm-title" id="з3" style="text-align:center;">Распределение 3-х мест</div>
+      <div class="ad-confirm-text">
+        <p class="окно-слоты">Свободных слотов: <b>2</b></p>
+        <table class="окно-табл">
+          <thead><tr><th>Игрок</th><th class="по-центру">Группа</th><th class="по-центру">Победы</th><th>Действие</th></tr></thead>
+          <tbody id="т3"></tbody>
+        </table>
+        <div class="окно-итог">Авто-проход: 2 | Допматчей: 2 (4 игроков) | Выбывает: 2</div>
+      </div>
+      <div class="ad-confirm-actions">
+        <button class="ad-btn ad-btn-primary">Сформировать сетку</button>
+        <button class="ad-btn ad-btn-secondary ad-confirm-cancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<section style="margin-top: var(--space-10); max-width: 70ch;">
+  <h2 style="font-size: var(--fs-lg); line-height: var(--lh-tight); margin: 0 0 var(--space-2);">Что ещё открыто</h2>
+  <ul style="font-size: var(--fs-sm); line-height: var(--lh-relaxed); color: var(--text-muted); padding-left: var(--space-5); margin: 0;">
+    <li><b>Ряд из трёх кнопок ломается на длинных подписях.</b> В окне 1
+        «Отклонить» уехала на вторую строку. Замер 30.09 считал короткие
+        подписи и говорил, что три помещаются в 440. ПОСЧИТАНО на коротких —
+        ПОМЕРЕНО на длинных.</li>
+    <li><b>Ловушка фокуса и возврат фокуса</b> видны только с клавиатуры —
+        на снимке их нет. Проверяются прогоном, а не глазом.</li>
+    <li><b>Фон окна #0A0A0A против #111111 у второго семейства</b> — два
+        фона у одного понятия. Свожу к одному в коде, не в стенде.</li>
+    <li><b>Подпись поля в окне</b> стоит 12.8 — числа, которого на шкале
+        нет. Это общая беда 145 полей админки, отдельный кусок.</li>
+  </ul>
+</section>
+
+<script>
+/* 24 строки — чтобы предел высоты и прокрутка тела были видны, а не
+   обещаны. ДЛИННЫЕ ИМЕНА ТОЖЕ КРАЙНИЕ. */
+var имена = ['Абдыкадыров-Сатыбалдиев Тилек Жумабекович','Орозбеков Нурсултан',
+  'Ким Александр','Тен Виктор','Исаев Бакыт','Жумабеков Эльдар','Пак Сергей',
+  'Усенов Данияр','Шин Олег','Токтосунов Азамат','Ли Георгий','Асанов Мирлан',
+  'Югай Руслан','Бейшеналиев Тилек','Цой Денис','Сыдыков Нурлан','Хан Константин',
+  'Мураталиев Адилет','Ан Валерий','Карыпбеков Эрлан','Шаршеев Айбек',
+  'Ким Вячеслав','Осмонов Бекзат','Эгембердиев Нурбек'];
+document.getElementById('т3').innerHTML = имена.slice(0, 8).map(function (и, н) {
+  var выбор = ['auto','auto','ig','ig','ig','ig','out','out'][н];
+  return '<tr>' +
+    '<td>' + и + '</td>' +
+    '<td class="по-центру окно-группа">' + String.fromCharCode(65 + (н % 4)) + '</td>' +
+    '<td class="по-центру окно-счёт">' + (2 - (н % 3)) + '-' + (1 + (н % 3)) + '</td>' +
+    '<td><select class="ad-field-input">' +
+      '<option' + (выбор === 'auto' ? ' selected' : '') + '>Авто-проход</option>' +
+      '<option' + (выбор === 'ig' ? ' selected' : '') + '>Допматч</option>' +
+      '<option' + (выбор === 'out' ? ' selected' : '') + '>Выбывает</option>' +
+    '</select></td></tr>';
+}).join('');
+</script>
+
+</body>
+</html>

@@ -1412,9 +1412,10 @@
 
     // ---- Player Ban Modal ----
     function openPlayerBanModal(playerId) {
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
-        overlay.innerHTML =
+        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
+           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа.
+           Тело окна остаётся своим, оно сюда и передаётся. */
+        var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal" style="max-width:440px;">' +
                 '<div class="ad-confirm-title">' + L.plrBanConfirm + '</div>' +
                 '<div style="margin-bottom:16px;">' +
@@ -1440,9 +1441,8 @@
                     '<button class="ad-btn ad-btn-secondary" id="adPlrBanCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-danger" id="adPlrBanSubmit">' + L.plrBanPlayer + '</button>' +
                 '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
+            '</div>' });
+        var overlay = окноГот.overlay;
 
         // Show/hide custom date
         document.getElementById('adPlrBanDuration').addEventListener('change', function() {
