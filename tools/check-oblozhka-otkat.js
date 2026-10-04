@@ -165,6 +165,36 @@ const ОТКАТЫ = [
  '        --fs-hero-num: clamp(1rem, 4.4vw, 1.35rem);',
  'исключение страницы турнира выражено КРУТИЛКОЙ, а не своим размером'],
 
+
+['снять с вкладки настоящую высоту', 'css/tournament-detail.css',
+ '    min-height: var(--btn-h-md);\n    display: inline-flex;',
+ '    display: inline-flex;',
+ 'вкладка не ниже ступени кнопки'],
+
+['вернуть вкладке прозрачный слой вместо высоты', 'css/tournament-detail.css',
+ '.td-tab:hover {',
+ '.td-tab::after { content: \'\'; position: absolute; height: var(--btn-h-md); }\n.td-tab:hover {',
+ 'цель вкладки задана ВЫСОТОЙ, а не прозрачным слоем'],
+
+['вернуть межстрочный вкладки на normal', 'css/tournament-detail.css',
+ '    line-height: var(--lh-none);\n    cursor: pointer;',
+ '    line-height: normal;\n    cursor: pointer;',
+ 'межстрочный вкладки — ступень, а не normal'],
+
+/* ОТКАТ ОБЯЗАН ВЕРНУТЬ ЗНАЧЕНИЕ, А НЕ ПЕРЕПИСАТЬ КОММЕНТАРИЙ. Первая попытка
+   меняла только текст пояснения — правило, понятно, не падало: «откат прошёл
+   НЕЗАМЕЧЕННЫМ». Вторая берёт само объявление вместе с соседней строкой,
+   которая есть только у полосы вкладок: у самой вкладки min-height такой же. */
+['снять пол с полосы вкладок', 'css/tournament-detail.css',
+ '    min-height: var(--btn-h-md);\n    /* Override global nav styles */',
+ '    /* Override global nav styles */',
+ 'полоса вкладок не ниже цели, которую несёт'],
+
+['вернуть отступы вкладки числами', 'css/tournament-detail.css',
+ '    padding: var(--space-3) var(--space-6);',
+ '    padding: 16px 24px;',
+ 'отступы вкладки стоят на шкале'],
+
 ];
 
 /* ── прогон ──────────────────────────────────────────────────────────────── */

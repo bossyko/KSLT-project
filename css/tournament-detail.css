@@ -280,6 +280,12 @@
     align-items: center;
     gap: 28px;
     padding: 0 var(--pad-x);
+    /* ПОЛОСА НЕ НИЖЕ ЦЕЛИ НАЖАТИЯ, КОТОРУЮ НЕСЁТ. Замер 04.10 после правки:
+       слой 44 у вкладки стоял, но на узких видах полоса была 39, слой вылезал
+       за неё на 3 сверху — и эти 3 перекрывала обложка. Прибор показал это
+       прямо: elementFromPoint над центром вкладки возвращал td-hero-content, а
+       не td-tab. СЛОЙ, ВЫЛЕЗШИЙ ЗА СВОЮ ПОЛОСУ, ПЕРЕКРЫВАЕТСЯ СОСЕДОМ. */
+    min-height: var(--btn-h-md);
     /* Override global nav styles */
     height: auto;
     max-width: none;
@@ -335,7 +341,20 @@
 }
 
 .td-tab {
-    padding: 16px 24px;
+    /* ЦЕЛЬ НАЖАТИЯ 44 — НАСТОЯЩЕЙ ВЫСОТОЙ, А НЕ СЛОЕМ. Замер 04.10: на
+       планшете стоя и на телефоне стоя шесть вкладок были по 35 при норме 44,
+       и это ГЛАВНАЯ навигация страницы.
+
+       ПРОЗРАЧНЫЙ СЛОЙ ::after ЗДЕСЬ НЕ РАБОТАЕТ, и это поймал замер, а не
+       чтение: у ленты .td-tabs стоит overflow-x: auto, а ОБЁРТКА С OVERFLOW —
+       ЭТО ОКНО, А НЕ ОФОРМЛЕНИЕ. Слой, выросший за высоту ленты, ею же и
+       обрезается. Прибор показал это прямо: elementFromPoint в крайней точке
+       слоя возвращал td-tabs-bar, а не td-tab — то есть нажатие туда не
+       доходило. Приём со слоем остаётся верным там, где обёртки-окна нет. */
+    min-height: var(--btn-h-md);
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-3) var(--space-6);
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
@@ -343,6 +362,9 @@
     font-family: 'Inter', sans-serif;
     font-size: var(--fs-sm);
     font-weight: 500;
+    /* ОДНА СТРОКА, ВЫСОТУ ЗАДАЮТ ОТСТУПЫ. Было `normal` на всех пяти видах —
+       оно считается ОТ МЕТРИК ШРИФТА, и у разных людей выходит своё число. */
+    line-height: var(--lh-none);
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s;
@@ -1752,11 +1774,6 @@ tr.td-rr-row-dimmed {
         padding: 0 var(--pad-x);
     }
 
-    .td-tab {
-        padding: 12px 16px;
-        font-size: var(--fs-sm);
-    }
-
     /* Первая вкладка на телефоне не прижимается вплотную к краю: базовое
        правило снимает ей левый отступ, и без этой строки она упиралась в
        границу экрана */
@@ -1827,12 +1844,6 @@ tr.td-rr-row-dimmed {
         -webkit-overflow-scrolling: touch;
     }
 
-    .td-tab {
-        padding: 10px 12px;
-        font-size: var(--fs-xs);
-        white-space: nowrap;
-    }
-
     .td-schedule-players {
         font-size: var(--fs-xs);
     }
@@ -1873,10 +1884,6 @@ tr.td-rr-row-dimmed {
     }
     .td-bracket-round {
         min-width: 160px;
-    }
-    .td-tab {
-        padding: 8px 10px;
-        font-size: var(--fs-xs);
     }
     .td-info-stat-num {
         font-size: var(--fs-lg);
@@ -2529,10 +2536,16 @@ tr.td-rr-row-dimmed {
 
     .td-tabs::-webkit-scrollbar { display: none; }
 
+    /* ОДНО ОБЪЯВЛЕНИЕ НА УЗКИЕ ВИДЫ. Было ЧЕТЫРЕ: 12/16 в медиа 768, 10/12 в
+       480, 8/10 в 375 и 10/2 здесь же — и выигрывало последнее. Ни одно из
+       восьми чисел не стоит на шкале отступов 8 · 12 · 16 · 24 · 32 · 40.
+       Горизонтальный отступ вырос с 2 до 8: лента вкладок прокручивается
+       вбок, а активная сама подъезжает в середину, поэтому ширина полосы
+       здесь ничего не ломает. */
     .td-tab {
         flex: 0 0 auto;
         font-size: var(--fs-xs);
-        padding: 10px 2px;
+        padding: var(--space-3) var(--space-2);
     }
 
     /* ─── Сетка плей-офф на телефоне ───
