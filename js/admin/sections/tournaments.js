@@ -777,14 +777,13 @@
                     '<h2 class="ad-section-title">' + title + '</h2>' +
                     '<button class="ad-btn ad-btn-secondary" id="adTrnBack">' + L.back + '</button>' +
                 '</div>' +
-                '<div class="ad-tabs ad-trn-nav-tabs">' +
-                    '<button class="ad-tab active" data-trn-nav="edit">' + L.trnTabEdit + '</button>' +
-                    '<button class="ad-tab' + (isExisting ? '' : ' disabled') + '"' + (isExisting ? ' data-trn-nav="regs"' : '') + ' ' + (isExisting ? '' : 'disabled') + '>' + L.trnTabRegs + '</button>' +
-                    '<button class="ad-tab' + (hasBracket ? '' : ' disabled') + '"' + (hasBracket ? ' data-trn-nav="bracket"' : '') + ' ' + (hasBracket ? '' : 'disabled') + '>' + L.trnTabBracket + '</button>' +
-                    '<button class="ad-tab' + (hasBracket ? '' : ' disabled') + '"' + (hasBracket ? ' data-trn-nav="schedule"' : '') + ' ' + (hasBracket ? '' : 'disabled') + '>' + L.trnTabSchedule + '</button>' +
-                    // Friendly не начисляет очки — вкладка «Результаты» ему не нужна
-                    (item && A.безОчковЗаКатегорию(item.category_id) ? '' :
-                    '<button class="ad-tab' + (isExisting ? '' : ' disabled') + '"' + (isExisting ? ' data-trn-nav="points"' : '') + ' ' + (isExisting ? '' : 'disabled') + '>' + L.trnTabPoints + '</button>') +
+                /* ПОЛОСА ВКЛАДОК — ОДНА НА ОБА ПУТИ. Эта копия и была
+                   той, что не знала про «Новости». */
+                A.полосаВкладокТурнира({
+                    турнир: item || null,
+                    активная: 'edit',
+                    новый: !isExisting
+                }) +
                 '</div>' +
             '</div>' +
 

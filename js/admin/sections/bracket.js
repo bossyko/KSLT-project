@@ -2651,16 +2651,16 @@
                 '</div>' +
                 '<button class="ad-btn ad-btn-secondary" id="adBrkBack">' + L.back + '</button>' +
             '</div>' +
-            '<div class="ad-tabs ad-trn-nav-tabs">' +
-            '<button class="ad-tab" data-trn-nav="edit">' + L.trnTabEdit + '</button>' +
-            '<button class="ad-tab' + (navActive === 'regs' ? ' active' : '') + '" data-trn-nav="regs">' + L.trnTabRegs +
-                ' <span class="ad-badge">' + (tournament.max_participants || '?') +
-                '/' + registrations.filter(function(r) { return r.status === 'approved' || r.status === 'draw' || r.status === 'waitlist'; }).length + '</span>' +
-            '</button>' +
-            '<button class="ad-tab' + (navActive === 'bracket' ? ' active' : '') + '" data-trn-nav="bracket">' + (tournament.bracket_type === 'round_robin' || tournament.bracket_type === 'group_league' ? L.groupLabel : L.trnTabBracket) + '</button>' +
-            '<button class="ad-tab' + (navActive === 'schedule' ? ' active' : '') + '" data-trn-nav="schedule">' + L.trnTabSchedule + '</button>' +
-            (isFriendly ? '' : '<button class="ad-tab' + (navActive === 'points' ? ' active' : '') + '" data-trn-nav="points">' + L.trnTabPoints + '</button>') +
-            (isTournamentCompleted ? '<button class="ad-tab' + (navActive === 'news' ? ' active' : '') + '" data-trn-nav="news">📰 ' + L.trnTabNews + '</button>' : '') +
+            /* ПОЛОСА ВКЛАДОК — ОДНА НА ОБА ПУТИ (`A.полосаВкладокТурнира`).
+               Своя копия жила здесь и вторая в форме турнира; у формы
+               не было вкладки «Новости» вовсе. */
+            A.полосаВкладокТурнира({
+                турнир: tournament,
+                активная: navActive,
+                заявок: registrations.filter(function(r) {
+                    return r.status === 'approved' || r.status === 'draw' || r.status === 'waitlist';
+                }).length
+            }) +
             '</div>' +
         '</div>'; // /ad-brk-sticky-header
 
