@@ -25,6 +25,7 @@ test-results/
 tests/reports/html/
 tests/reports/html-*/
 tests/reports/results.json
+tests/reports/zamer-*.txt
 .playwright/
 
 # Картинки новостей с tennis.kg — временные, заливаются в Supabase Storage

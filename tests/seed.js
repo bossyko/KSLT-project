@@ -76,7 +76,100 @@ async function ensureUser(acc) {
     return res.data.id;
 }
 
+/* СТОРОЖ ВХОДА, А НЕ ПАМЯТЬ. 03.10 сев упал дважды подряд, и оба раза не
+   из-за базы, а из-за формы запроса:
+     · PGRST102 «All object keys must match» — PostgREST принимает массив
+       как ТАБЛИЦУ, и у таблицы одинаковые колонки во всех строках;
+     · 22P02 «invalid input syntax for type uuid» — id с префиксом `zz`,
+       а буквы `z` в шестнадцатеричной записи нет.
+   Оба отказа приходят от базы после сетевого запроса и читаются как беда
+   базы. Проверить это можно НА ВХОДЕ и назвать виновную строку. */
+function сторожВхода(table, rows) {
+    if (!Array.isArray(rows) || !rows.length) return;
+    const набор = о => Object.keys(о).sort().join(',');
+    const первый = набор(rows[0]);
+    for (let i = 1; i < rows.length; i++) {
+        if (набор(rows[i]) !== первый) {
+            throw new Error('сев ' + table + ': строка ' + (i + 1) + ' несёт другой набор ключей.\n' +
+                '  строка 1: ' + первый + '\n  строка ' + (i + 1) + ': ' + набор(rows[i]) +
+                '\n  Массив для базы — это ТАБЛИЦА: одинаковые колонки во всех строках, ' +
+                'null там, где значения нет.');
+        }
+    }
+    /* ЗНАЧЕНИЕ ПЕРЕЧИСЛИМОГО БЕРЁТСЯ У ПРОДУКТА, А НЕ ИЗ ОБЩЕГО ЗНАНИЯ.
+       03.10 я завёл семь карточек с `gender: 'male'` — из общего знания, —
+       а продукт всюду сравнивает с 'men'/'women' напрямую
+       (kslt-rules.js:888, users.js:1147, players.js:646). Отказа базы не
+       было: столбец текстовый, значение легло. Молча пропал РЕЙТИНГ —
+       колонка «Место» показала прочерк во всех восьми строках, и я почти
+       назвал это бедой продукта. ОТКАЗ БАЗЫ ЛОВИТСЯ САМ, А ТИХОЕ
+       НЕСОВПАДЕНИЕ — ТОЛЬКО СТОРОЖЕМ. */
+    const ПЕРЕЧИСЛИМЫЕ = { gender: ['men', 'women'] };
+    rows.forEach((о, i) => {
+        Object.keys(ПЕРЕЧИСЛИМЫЕ).forEach(к => {
+            if (о[к] === undefined || о[к] === null) return;
+            if (ПЕРЕЧИСЛИМЫЕ[к].indexOf(о[к]) === -1) {
+                throw new Error('сев ' + table + ': строка ' + (i + 1) + ', поле ' + к +
+                    ' = "' + о[к] + '". Продукт знает только ' +
+                    ПЕРЕЧИСЛИМЫЕ[к].join(' и ') + ' — база такое значение примет, ' +
+                    'а рейтинг и отбор по полу тихо перестанут работать.');
+            }
+        });
+    });
+
+    const похожНаUuid = /^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$/;
+    const настоящийUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    rows.forEach((о, i) => {
+        Object.keys(о).forEach(к => {
+            const v = о[к];
+            if (typeof v !== 'string') return;
+            if (похожНаUuid.test(v) && !настоящийUuid.test(v)) {
+                throw new Error('сев ' + table + ': строка ' + (i + 1) + ', поле ' + к +
+                    ' = "' + v + '" похоже на uuid, но uuid-ом не является: ' +
+                    'шестнадцатеричные только 0-9 и a-f.');
+            }
+        });
+    });
+}
+
+/* ТРЕТЬЯ ОШИБКА ОДНОЙ СЕМЬИ — 23502: null в колонку, объявленную NOT NULL.
+   Сторож выше знает про форму массива и про uuid, но не знал про схему.
+   Схему можно СПРОСИТЬ: корень PostgREST отдаёт описание всех таблиц с
+   обязательностью колонок. Спрашивается один раз за прогон; не ответил —
+   сторож молчит и работа идёт дальше (он помощник, а не ворота). */
+var _схема = null;
+async function обязательные(table) {
+    if (_схема === null) {
+        _схема = {};
+        try {
+            const о = await call('GET', '/rest/v1/');
+            const d = о.data && о.data.definitions;
+            if (d) Object.keys(d).forEach(function(т) {
+                _схема[т] = (d[т].required || []).slice();
+            });
+        } catch (e) { /* не ответил — молчим */ }
+    }
+    return _схема[table] || [];
+}
+
+async function сторожСхемы(table, rows) {
+    const нужны = await обязательные(table);
+    if (!нужны.length) return;
+    rows.forEach(function(о, i) {
+        нужны.forEach(function(к) {
+            if (Object.prototype.hasOwnProperty.call(о, к) && о[к] === null) {
+                throw new Error('сев ' + table + ': строка ' + (i + 1) + ', колонка ' + к +
+                    ' объявлена NOT NULL, а посылается null. ПУСТОЕ ЗНАЧЕНИЕ — ' +
+                    'СВОЙСТВО КОЛОНКИ: у списка это [], у числа 0, у текста "". ' +
+                    'Либо не посылай эту колонку вовсе — тогда встанет умолчание базы.');
+            }
+        });
+    });
+}
+
 async function upsert(table, rows, onConflict) {
+    сторожВхода(table, rows);
+    await сторожСхемы(table, rows);
     const q = onConflict ? '?on_conflict=' + onConflict : '';
     const res = await fetch(db.url + '/rest/v1/' + table + q, {
         method: 'POST',
@@ -457,6 +550,179 @@ async function upsert(table, rows, onConflict) {
         throw new Error('сев афиши: image_crop не записался — столбца нет или он не jsonb');
     }
     console.log('  афиша: два представления, кадр в базе');
+
+    /* --- Турнир «ЗАЯВКИ»: КРАЙНИЕ СЛУЧАИ, А НЕ УДОБНЫЕ --------------------
+       Замер вкладки «Заявки» 03.10 шёл по боевому CHALLENGERS: 28 строк, и
+       среди них НИ ОДНОЙ ждущей решения и ни одной с задолженностью. Значит
+       ни полосы-пометки, ни кнопки «Решить» на экране не было — а вёрстка
+       ломается именно на них. Слово Кости: «таких нет, заведи тестовый».
+
+       Здесь собрано восемь строк, и каждая — отдельный край:
+       посев · самое длинное ФИО · одна причина · три причины · гость ·
+       внешний участник · двое в листе ожидания.
+       Задолженность отдельно сеять не нужно: метку ставит ОТСУТСТВИЕ
+       действующего членства (bracket.js:4700), а членств в тестовой базе
+       нет ни у кого — значит она встанет у всех своих. */
+    await upsert('players', [
+        { id: 'zv-seed',   name: 'Сеяный Первый',  name_en: 'Seeded First',  gender: 'men' },
+        { id: 'zv-dolgoe', name: 'Абдыкадырова-Сатыбалдиева Айзирек Жумабековна',
+                           name_en: 'Abdykadyrova-Satybaldieva Aizirek Zhumabekovna', gender: 'men' },
+        { id: 'zv-prichina1', name: 'Одна Причина', name_en: 'One Reason', gender: 'men' },
+        { id: 'zv-prichina3', name: 'Три Причины',  name_en: 'Three Reasons', gender: 'men' },
+        { id: 'zv-gost',   name: 'Гостевой Участник', name_en: 'Guest Entrant', gender: 'men' },
+        { id: 'zv-ocher1', name: 'Первый В Очереди', name_en: 'First In Queue', gender: 'men' },
+        { id: 'zv-ocher2', name: 'Второй В Очереди', name_en: 'Second In Queue', gender: 'men' }
+    ], 'id');
+
+    /* Гость — PATCH'ем, а не апсертом: у апсерта есть INSERT-часть, и она
+       требует обязательные колонки. Правило куплено ошибкой 02.10. */
+    var пг = await call('PATCH', '/rest/v1/players?id=eq.zv-gost', { is_guest: true });
+    if (!пг.ok) console.log('  ВНИМАНИЕ: zv-gost гостем не стал — ' +
+        String(JSON.stringify(пг.data)).slice(0, 160));
+
+    /* Очки в категории — чтобы колонка «Место» показывала ЧИСЛО, а не
+       прочерк у всех: иначе крайний случай «у гостя места нет» неотличим
+       от «места нет ни у кого». */
+    await upsert('player_categories', [
+        { player_id: 'zv-seed',      category_id: 'tour', points: 500, wins: 0, losses: 0 },
+        { player_id: 'zv-dolgoe',    category_id: 'tour', points: 400, wins: 0, losses: 0 },
+        { player_id: 'zv-prichina1', category_id: 'tour', points: 350, wins: 0, losses: 0 },
+        { player_id: 'zv-prichina3', category_id: 'tour', points: 275, wins: 0, losses: 0 },
+        { player_id: 'zv-ocher1',    category_id: 'tour', points: 150, wins: 0, losses: 0 },
+        { player_id: 'zv-ocher2',    category_id: 'tour', points: 125, wins: 0, losses: 0 }
+    ], 'player_id,category_id');
+
+    /* УРОВЕНЬ ОБЯЗАТЕЛЕН. Без `level_id` турнир не рейтинговый, и
+       `местаВКатегории` возвращает пусто — колонка «Место» показала бы
+       прочерк во всех строках, и мерить было бы нечего. */
+    var урЗ = await call('GET', '/rest/v1/tournament_levels?select=id&order=sort_order&limit=1');
+    var урЗid = (урЗ.ok && (урЗ.data || [])[0]) ? урЗ.data[0].id : null;
+    if (!урЗid) {
+        /* УРОВЕНЬ ЗАВОДИТСЯ, А НЕ ЖДЁТСЯ. Первая редакция только печатала
+           предупреждение — и замер 03.10 показал прочерк в «Месте» во ВСЕХ
+           восьми строках. Беда была не в продукте: без `level_id` турнир
+           не рейтинговый, `местаВКатегории` возвращает пусто, и место с
+           категорией честно не рисуются. ПРЕДУПРЕЖДЕНИЕ, КОТОРОЕ НИЧЕГО
+           НЕ ЧИНИТ, РАВНО МОЛЧАНИЮ. */
+        await call('POST', '/rest/v1/tournament_levels',
+            [{ name: 'Вторая', name_en: 'Second', sort_order: 3 }]);
+        var пВ = await call('GET', '/rest/v1/tournament_levels?select=id&order=sort_order&limit=1');
+        урЗid = (пВ.ok && (пВ.data || [])[0]) ? пВ.data[0].id : null;
+    }
+    if (!урЗid) throw new Error('сев заявок: уровень турнира не завёлся — без него ' +
+        'турнир не рейтинговый, и колонка «Место» будет пустой во всех строках');
+
+    /* ДОМАШНЯЯ КАТЕГОРИЯ — НА КАРТОЧКЕ, А НЕ ТОЛЬКО В ТАБЛИЦЕ ОЧКОВ.
+       Колонка «Категория» читает `pmEntry.rankCat || player.category_id`
+       (bracket.js:4721). Очки в `player_categories` я завёл, а категорию
+       на карточке — нет, и подпись вышла прочерком. */
+    for (const ид of ['zv-seed','zv-dolgoe','zv-prichina1','zv-prichina3','zv-ocher1','zv-ocher2']) {
+        const рк = await call('PATCH', '/rest/v1/players?id=eq.' + ид, { category_id: 'tour' });
+        if (!рк.ok) console.log('  ВНИМАНИЕ: категория не легла у ' + ид + ' — ' +
+            String(JSON.stringify(рк.data)).slice(0, 140));
+    }
+
+    await upsert('tournaments', [{
+        id: 'test-zayavki',
+        title: 'Тестовый турнир: крайние случаи заявок',
+        category_id: 'tour',
+        level_id: урЗid,
+        status: 'registration_open',
+        format: 'singles',
+        gender: 'men',
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 6
+    }], 'id');
+
+    /* id — НАСТОЯЩИЙ uuid, А НЕ ПОХОЖАЯ НА НЕГО СТРОКА. Первая редакция
+       несла префикс `zz` — буквы `z` в шестнадцатеричной записи нет, и база
+       отказала `22P02 invalid input syntax for type uuid`. У соседнего сева
+       префикс `cc`, здесь `ee`: оба — настоящие шестнадцатеричные.
+       ВСЕ ОБЪЕКТЫ ОДНИМ НАБОРОМ КЛЮЧЕЙ. PostgREST отказывает на массиве с
+       разными наборами: `PGRST102 All object keys must match` — поймано
+       первым же прогоном у Кости. Отсюда `null` там, где поля нет: это не
+       лишние данные, а требование входа. */
+    var заявкаЗ = function(о) {
+        return {
+            id: о.id, tournament_id: 'test-zayavki',
+            player_id: о.player_id || null,
+            status: о.status,
+            seed_number: о.seed_number || null,
+            /* ПУСТОЕ ЗНАЧЕНИЕ — СВОЙСТВО КОЛОНКИ, А НЕ МОЯ ДОГАДКА.
+               `review_reasons` объявлена NOT NULL с умолчанием `{}`
+               (миграция zayavki-mesto-i-prichiny-shag1.sql): пусто здесь —
+               это ПУСТОЙ СПИСОК, а не null. База отказала 23502. */
+            review_reasons: о.review_reasons || [],
+            is_external: !!о.is_external,
+            external_name: о.external_name || null,
+            external_country: о.external_country || null,
+            external_ntrp: о.external_ntrp || null
+        };
+    };
+    await upsert('tournament_registrations', [
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000001', player_id: 'zv-seed',
+                  status: 'approved', seed_number: 1 }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000002', player_id: 'zv-dolgoe',
+                  status: 'approved' }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000003', player_id: 'zv-prichina1',
+                  status: 'approved', review_reasons: ['gender'] }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000004', player_id: 'zv-prichina3',
+                  status: 'approved', review_reasons: ['gender', 'category', 'ntrp_combined'] }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000005', player_id: 'zv-gost',
+                  status: 'approved' }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000006', status: 'approved',
+                  is_external: true, external_name: 'Приглашённый Из Казахстана',
+                  external_country: '\uD83C\uDDF0\uD83C\uDDFF', external_ntrp: 3.5 }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000007', player_id: 'zv-ocher1',
+                  status: 'waitlist' }),
+        заявкаЗ({ id: 'ee000001-0000-4000-8000-000000000008', player_id: 'zv-ocher2',
+                  status: 'waitlist' })
+    ], 'id');
+
+    /* СЕВ, КОТОРЫЙ НЕ ПЕРЕЧИТАЛ СЕБЯ, НЕ СЕВ. И проверка здесь не «есть ли
+       строки», а «есть ли КАЖДЫЙ край»: восемь строк могут лечь, а причины
+       рассмотрения не лечь вовсе — столбца `review_reasons` в тестовой базе
+       может не быть, он приехал миграцией 02.10. Тогда вкладка покажет
+       ровную таблицу без единой пометки, и замер пройдёт вхолостую. */
+    var свёлЗ = await call('GET', '/rest/v1/tournament_registrations' +
+        '?tournament_id=eq.test-zayavki&select=id,player_id,status,seed_number,review_reasons,is_external');
+    if (!свёлЗ.ok) {
+        throw new Error('сев заявок: база отказала на чтении — ' + свёлЗ.status + ' ' +
+            String(JSON.stringify(свёлЗ.data)).slice(0, 200));
+    }
+    var ряды = свёлЗ.data || [];
+    var края = {
+        'всего восемь':        ряды.length === 8,
+        'сеяный':              ряды.some(function(р) { return р.seed_number === 1; }),
+        'одна причина':        ряды.some(function(р) { return (р.review_reasons || []).length === 1; }),
+        'три причины':         ряды.some(function(р) { return (р.review_reasons || []).length === 3; }),
+        'внешний участник':    ряды.some(function(р) { return р.is_external === true; }),
+        'двое в очереди':      ряды.filter(function(р) { return р.status === 'waitlist'; }).length === 2
+    };
+    var нет = Object.keys(края).filter(function(к) { return !края[к]; });
+    if (нет.length) {
+        throw new Error('сев заявок: не легли края — ' + нет.join(', ') +
+            '. В базе ' + ряды.length + ' строк: ' +
+            JSON.stringify(ряды.map(function(р) {
+                return [р.player_id || 'внешний', р.status, (р.review_reasons || []).length].join('/');
+            })) + '. Если не легли причины — в тестовом проекте нет столбца review_reasons');
+    }
+    /* РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ ЧТЕНИЕМ. Уровень и домашняя категория — это
+       то, без чего колонки «Место» и «Категория» пусты, то есть замер
+       прошёл бы вхолостую и обвинил продукт. */
+    var свёлТ = await call('GET', '/rest/v1/tournaments?id=eq.test-zayavki&select=level_id,format,gender');
+    var Т = (свёлТ.data || [])[0] || {};
+    if (!Т.level_id) throw new Error('сев заявок: у турнира нет level_id — ' +
+        'колонка «Место» будет пустой во всех строках, и замер это покажет как беду продукта');
+    var свёлК = await call('GET', '/rest/v1/players?id=in.(zv-seed,zv-dolgoe,zv-prichina1,' +
+        'zv-prichina3,zv-ocher1,zv-ocher2)&select=id,category_id,gender,is_guest');
+    var безКат = (свёлК.data || []).filter(function(и) { return !и.category_id; });
+    if (безКат.length) throw new Error('сев заявок: без домашней категории остались ' +
+        JSON.stringify(безКат.map(function(и) { return и.id; })) +
+        ' — колонка «Категория» покажет прочерк');
+    console.log('  заявки: восемь строк, все края на месте (посев, одна и три причины, ' +
+        'гость, внешний, очередь); уровень и домашние категории проверены чтением');
 
     /* --- Турнир с ГРУППАМИ и плей-офф: метка `A1`, `B1` -----------------
        Метку «кто из какой группы вышел» строит `KSLT_GROUPS.меткиИгроков`,

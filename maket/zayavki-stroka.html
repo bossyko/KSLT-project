@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КСЛТ — строка заявки: было и предложение</title>
+<!--
+  СТОЯЩЕЕ УСЛОВИЕ: АДМИНКА — ДЕСКТОП И ПЛАНШЕТ. ТЕЛЕФОНА У НЕЁ НЕТ.
+  ТОЛЬКО РУССКИЙ. Виды: 1512 · 1024 · 768.
+
+  Две таблицы одна под другой, а не рядом: рядом они встали бы по 700
+  пикселей и поймали медиа-правило 992 — сравнивать было бы нечего.
+  Каждая во всю ширину окна, то есть ровно как в админке.
+
+  Данные ОДНИ на обе таблицы (ниже, `СТРОКИ`) и крайние, а не удобные:
+  самая длинная фамилия из сева, строка ждущая решения, строка с долгом,
+  гость без места, внешний участник, двое в очереди.
+
+  Разметка «как есть» скопирована из js/admin/sections/bracket.js,
+  renderRegRow (:4686-4900), вместе с инлайн-стилями — они часть беды.
+  Числа внизу страница меряет сама.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=23">
+<link rel="stylesheet" href="../css/style.css?v=383">
+<link rel="stylesheet" href="../css/admin.css?v=197">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); padding: 24px; }
+  .zm-h   { font-size: 21px; font-weight: 600; margin: 32px 0 4px; }
+  .zm-h:first-of-type { margin-top: 0; }
+  .zm-h b { color: var(--accent); }
+  .zm-note { font-size: 14px; line-height: 1.5; color: var(--text-secondary);
+             max-width: 860px; margin: 0 0 16px; }
+  .zm-nums { font-size: 14px; line-height: 1.7; margin: 12px 0 0;
+             font-variant-numeric: tabular-nums; }
+  .zm-nums b { color: var(--accent); font-weight: 600; }
+  .zm-nums .bad { color: #ff6b6b; font-weight: 600; }
+
+  /* ===== ПРЕДЛОЖЕНИЕ ПЕРЕЕХАЛО В ПРОДУКТ 03.10 =====
+     Правила `.ad-table-sub`, `.ad-reg-mark`, `.ad-reg-num`,
+     `.ad-reg-check-wrap`, цвет шапки и медиа-правило 992 теперь живут в
+     css/admin.css (v=197). Своих копий макет не держит: ОДНО
+     ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ — иначе макет и продукт разойдутся, и
+     макет станет врущим свидетелем.
+     Раздел «КАК ЕСТЬ» ниже сохраняет инлайн-стили НАМЕРЕННО: это
+     историческая запись того, что было до правки. */
+</style>
+</head>
+<body>
+
+<p class="zm-h">Строка заявки: <b>как есть</b> и <b>предложение</b></p>
+<p class="zm-note">
+  Данные одни на обе таблицы и крайние: самая длинная фамилия, строка
+  ждущая решения, строка с долгом, гость без места, внешний участник, двое
+  в очереди. Сузь окно до планшета и посмотри ещё раз — число пересчитается
+  при перезагрузке на нужной ширине.
+</p>
+
+<p class="zm-h">КАК ЕСТЬ</p>
+<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table" id="tblBylo"></table></div></div>
+<p class="zm-nums" data-nums="bylo"></p>
+
+<p class="zm-h">ПРЕДЛОЖЕНИЕ</p>
+<div class="ad-table-card pr-tbl"><div class="ad-table-wrap"><table class="ad-table" id="tblStalo"></table></div></div>
+<p class="zm-nums" data-nums="stalo"></p>
+
+<script>
+/* ОДНИ ДАННЫЕ НА ОБЕ ТАБЛИЦЫ: иначе сравниваешь не вёрстку, а содержимое. */
+var СТРОКИ = [
+  { n: 1, место: '1',  кат: 'tour', фио: 'Сеяный Первый', посев: 1, дата: '03.10 20:46' },
+  { n: 2, место: '2',  кат: 'tour', фио: 'Абдыкадырова-Сатыбалдиева Айзирек Жумабековна',
+    долг: true, дата: '03.10 20:46' },
+  { n: 3, место: '3',  кат: 'tour', фио: 'Одна Причина', ждёт: true, долг: true, дата: '03.10 20:46' },
+  { n: 4, место: '4',  кат: 'tour', фио: 'Три Причины',  ждёт: true, долг: true, дата: '03.10 20:46' },
+  { n: 5, место: '—',  кат: '—',    фио: 'Гостевой Участник', долг: true, дата: '03.10 20:46' },
+  { n: 6, место: '—',  кат: '—',    фио: 'Приглашённый Из Казахстана', ext: 'KZ', дата: '03.10 20:46' },
+  { n: 7, место: '5',  кат: 'tour', фио: 'Первый В Очереди', долг: true, дата: '03.10 20:47', очередь: true },
+  { n: 8, место: '6',  кат: 'tour', фио: 'Второй В Очереди', долг: true, дата: '03.10 20:47', очередь: true }
+];
+
+var ШАПКА = ['', '#', 'МЕСТО', 'КАТЕГОРИЯ', 'ФИО', 'РЕГИСТРАЦИЯ', 'ДЕЙСТВИЯ'];
+
+/* --- КАК ЕСТЬ: разметка и инлайн-стили из renderRegRow как они есть --- */
+function рядБыло(р) {
+  var знач = '';
+  if (р.посев) знач += ' <span class="ad-badge ad-badge-accent">[' + р.посев + ']</span>';
+  if (р.долг)  знач += ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(244,67,54,0.15);color:#f44336;margin-left:4px;">ДОЛГ</span>';
+  if (р.ext)   знач += ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">' + р.ext + '</span>';
+  var кл = р.ждёт ? ' class="ad-reg-row-reshenie"' : (р.долг ? ' class="ad-reg-row-dolg"' : '');
+  return '<tr' + кл + '>' +
+    '<td><input type="checkbox" class="ad-reg-check"></td>' +
+    '<td style="text-align:center;padding:4px 6px;">' + р.n + '</td>' +
+    '<td class="ad-reg-mesto">' + р.место + '</td>' +
+    '<td style="font-size:0.8rem;">' + р.кат + '</td>' +
+    '<td>' + р.фио + знач + '</td>' +
+    '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + р.дата + '</td>' +
+    '<td class="ad-reg-actions-cell"><div class="ad-reg-ryad">' +
+      (р.ждёт ? '<button class="ad-reg-act ad-reg-act-vynos ad-reg-act-reshit">Решить</button>' : '') +
+      '<button class="ad-reg-act ad-reg-act-vynos ad-btn-replace">Заменить</button>' +
+      '<div class="ad-reg-menu"><button type="button" class="ad-reg-menu-btn">⋯</button></div>' +
+    '</div></td></tr>';
+}
+
+/* --- ПРЕДЛОЖЕНИЕ: те же данные, классы вместо инлайна, подпись под именем --- */
+function рядСтало(р) {
+  var знач = '';
+  if (р.посев) знач += ' <span class="ad-reg-mark ad-reg-mark-seed">' + р.посев + '</span>';
+  if (р.долг)  знач += ' <span class="ad-reg-mark ad-reg-mark-dolg">долг</span>';
+  if (р.ext)   знач += ' <span class="ad-reg-mark ad-reg-mark-ext">' + р.ext + '</span>';
+  var кл = р.ждёт ? ' class="ad-reg-row-reshenie"' : (р.долг ? ' class="ad-reg-row-dolg"' : '');
+  return '<tr' + кл + '>' +
+    '<td><span class="ad-reg-check-wrap"><input type="checkbox" class="ad-reg-check"></span></td>' +
+    '<td class="ad-reg-num">' + р.n + '</td>' +
+    '<td class="ad-reg-mesto">' + р.место + '</td>' +
+    '<td class="ad-col-cat ad-table-sub">' + р.кат + '</td>' +
+    '<td><div class="ad-table-user-name">' + р.фио + знач + '</div>' +
+        '<div class="ad-table-sub ad-reg-sub-inline">' + р.кат + ' · ' + р.дата + '</div></td>' +
+    '<td class="ad-col-dt ad-table-sub">' + р.дата + '</td>' +
+    '<td class="ad-reg-actions-cell"><div class="ad-reg-ryad">' +
+      (р.ждёт ? '<button class="ad-reg-act ad-reg-act-vynos ad-reg-act-reshit">Решить</button>' : '') +
+      '<button class="ad-reg-act ad-reg-act-vynos ad-btn-replace">Заменить</button>' +
+      '<div class="ad-reg-menu"><button type="button" class="ad-reg-menu-btn">⋯</button></div>' +
+    '</div></td></tr>';
+}
+
+function собрать(id, ряд, скрытые) {
+  var th = ШАПКА.map(function(т, и) {
+    var к = скрытые && и === 3 ? ' class="ad-col-cat"' : (скрытые && и === 5 ? ' class="ad-col-dt"' : '');
+    return '<th' + к + '>' + т + '</th>';
+  }).join('');
+  document.getElementById(id).innerHTML =
+    '<thead><tr>' + th + '</tr></thead><tbody>' + СТРОКИ.map(ряд).join('') + '</tbody>';
+}
+собрать('tblBylo', рядБыло, false);
+собрать('tblStalo', рядСтало, true);
+
+/* Страница не подписывает себя числами, которых не мерила. */
+function свет(c) {
+  var m = c.match(/[\d.]+/g).map(Number);
+  var f = function(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  return 0.2126 * f(m[0]) + 0.7152 * f(m[1]) + 0.0722 * f(m[2]);
+}
+function смесьНа(э) {
+  var у = э, слои = [];
+  while (у && у !== document.documentElement) {
+    var c = getComputedStyle(у).backgroundColor.match(/[\d.]+/g);
+    if (c && (c[3] === undefined || +c[3] > 0)) слои.push(c.map(Number));
+    у = у.parentElement;
+  }
+  слои.push([10, 10, 10, 1]);
+  var ф = слои.pop();
+  while (слои.length) {
+    var п = слои.pop(), a = п[3] === undefined ? 1 : п[3];
+    ф = [п[0] * a + ф[0] * (1 - a), п[1] * a + ф[1] * (1 - a), п[2] * a + ф[2] * (1 - a), 1];
+  }
+  return ф;
+}
+function контрастУ(э) {
+  var c = getComputedStyle(э).color.match(/[\d.]+/g).map(Number);
+  var a = c[3] === undefined ? 1 : c[3], ф = смесьНа(э);
+  var т = [c[0] * a + ф[0] * (1 - a), c[1] * a + ф[1] * (1 - a), c[2] * a + ф[2] * (1 - a)];
+  var l1 = свет('rgb(' + т.join(',') + ')'), l2 = свет('rgb(' + ф.slice(0, 3).join(',') + ')');
+  return Math.round(((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)) * 100) / 100;
+}
+function числа(id, куда) {
+  var т = document.getElementById(id);
+  var стр = [].slice.call(т.querySelectorAll('tbody tr'));
+  var видимыхКолонок = [].slice.call(т.querySelectorAll('thead th'))
+      .filter(function(э) { return э.getBoundingClientRect().width > 0; }).length;
+  var высоты = стр.map(function(р) { return Math.round(р.getBoundingClientRect().height * 100) / 100; });
+  var обёртка = т.closest('.ad-table-wrap');
+  var цели = [].slice.call(т.querySelectorAll('button, input[type=checkbox]'))
+      .map(function(b) {
+        /* СЛОЙ ЦЕЛИ СТОИТ НА САМОЙ КНОПКЕ (`.ad-reg-act::after`,
+           admin.css:938), а у галочки его нет вовсе — ей нужна обёртка.
+           Первая редакция проверки смотрела `::after` РОДИТЕЛЯ и
+           обвиняла кнопки, у которых слой есть. Проверка смотрит туда,
+           где свойство объявлено. */
+        var h = Math.round(b.getBoundingClientRect().height);
+        var свой = getComputedStyle(b, '::after').height;
+        var родителя = b.parentElement ? getComputedStyle(b.parentElement, '::after').height : 'auto';
+        var слой = Math.max(parseFloat(свой) || 0, parseFloat(родителя) || 0);
+        return { к: (b.className || b.type).split(' ')[0], h: h, слой: слой };
+      });
+  var мелкие = цели.filter(function(x) { return x.h > 0 && x.h < 44 && x.слой < 44; });
+  мелкие = мелкие.filter(function(x, и, а) {
+      return а.findIndex(function(y) { return y.к === x.к; }) === и; });
+  var знач = т.querySelector('.ad-badge, .ad-reg-mark');
+  var шапка = т.querySelector('th:nth-child(3)');
+  var подпись = т.querySelector('.ad-table-sub');
+  document.querySelector('[data-nums="' + куда + '"]').innerHTML =
+    'ширина окна <b>' + window.innerWidth + '</b> · видимых колонок <b>' + видимыхКолонок + '</b>' +
+    ' · прокрутка вбок ' + (обёртка.scrollWidth > обёртка.clientWidth + 1
+        ? '<span class="bad">есть</span>' : '<b>нет</b>') + '<br>' +
+    'высоты строк: <b>' + [].concat(высоты).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(' · ') + '</b>' +
+    ' (разных ' + [].concat(высоты).filter(function(v, i, a) { return a.indexOf(v) === i; }).length + ')<br>' +
+    'шапка колонки: ' + Math.round(parseFloat(getComputedStyle(шапка).fontSize) * 10) / 10 + '/' +
+      getComputedStyle(шапка).fontWeight + ', контраст ' +
+      (контрастУ(шапка) < 4.5 ? '<span class="bad">' + контрастУ(шапка) + '</span>' : '<b>' + контрастУ(шапка) + '</b>') + '<br>' +
+    'значок: ' + (знач ? Math.round(parseFloat(getComputedStyle(знач).fontSize) * 10) / 10 + ', высота ' +
+      Math.round(знач.getBoundingClientRect().height * 10) / 10 : 'нет') +
+    (подпись ? ' · подпись: ' + Math.round(parseFloat(getComputedStyle(подпись).fontSize) * 10) / 10 +
+      ', контраст ' + контрастУ(подпись) : '') + '<br>' +
+    'цели нажатия ниже 44 без слоя: ' + (мелкие.length
+        ? '<span class="bad">' + мелкие.map(function(x) { return x.к + ':' + x.h; }).join(', ') + '</span>'
+        : '<b>нет</b>');
+}
+числа('tblBylo', 'bylo');
+числа('tblStalo', 'stalo');
+</script>
+</body>
+</html>
