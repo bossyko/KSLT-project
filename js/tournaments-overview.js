@@ -293,8 +293,22 @@
             var all = (res.data || []).filter(function(t) { return t.published_at !== null; });
             if (all.length === 0) all = res.data || [];
 
-            var el = document.getElementById('toStatTotal');
-            if (el) el.textContent = all.length;
+            /* ТУРНИРОВ — ТО ЖЕ ЧИСЛО, ЧТО НА ГЛАВНОЙ. Решение Кости 27.09
+               (доска 482:9, блок B) и его же слова 04.10: «от 300 мы
+               отталкиваемся и дальше начисляем турниры». До 04.10 здесь
+               стояло all.length — все опубликованные строки, и выходило 49
+               против 340 на главной. Формула одна, живёт в js/stats.js;
+               день отсечки — в функции базы get_club_stats.
+               БАЗА МОЛЧИТ — ОСТАЁТСЯ ПРОЧЕРК: соврать числом хуже, чем
+               честно не знать, и запасной счёт вернул бы прежний шов. */
+            var elВсего = document.getElementById('toStatTotal');
+            if (elВсего && window.KSLT_STATS && window.KSLT_STATS.турнировВсего) {
+                client.rpc('get_club_stats').then(function(ст) {
+                    var д = (ст.data && ст.data[0]) || null;
+                    if (ст.error || !д) return;
+                    elВсего.textContent = window.KSLT_STATS.турнировВсего(д.tournaments);
+                });
+            }
 
             // Считаем все турнирные категории, включая Friendly Weekend.
             // Рейтинговых пять, но страница про турниры: ниже на ней шесть
@@ -318,8 +332,24 @@
                     }
                 }
             });
+            /* НОЛЬ ПРЯЧЕМ ЦЕЛИКОМ, А НЕ ПОКАЗЫВАЕМ НУЛЁМ. Решение Кости
+               27.09, доска 482:9, блок B: «если 0 стоит то скрывать». До
+               04.10 оно было записано на доску и не доехало до кода —
+               обложка показывала «ПРИЗОВОЙ ФОНД 0». Костя увидел это
+               глазами на закрытой странице.
+               Прячется ВЕСЬ показатель, а не только цифра: подпись без
+               числа сообщает ещё меньше, чем ноль. Тот же приём, что у
+               нулевых карточек в js/stats.js. */
             el = document.getElementById('toStatPrize');
-            if (el) el.textContent = formatPrize(totalPrize);
+            if (el) {
+                var ячейка = el.closest('.hero-stat');
+                if (totalPrize > 0) {
+                    el.textContent = formatPrize(totalPrize);
+                    if (ячейка) ячейка.style.display = '';
+                } else if (ячейка) {
+                    ячейка.style.display = 'none';
+                }
+            }
 
             // Игроки в рейтинге, сложенные по всем разрядам. Кто играет в
             // двух — считается дважды: это два разных места в двух таблицах.

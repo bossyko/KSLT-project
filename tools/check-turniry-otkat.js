@@ -28,6 +28,7 @@ const CSS = 'css/tournaments-overview.css';
 const JSФ = 'js/tournaments-overview.js';
 const ТОК = 'css/tokens.css';
 const HTML = 'pages/tournaments-overview.html';
+const СТАТ = 'js/stats.js';
 const HTMLen = 'pages/tournaments-overview-en.html';
 const СТЕНД = 'maket/turniry-zamer.html';
 const ТЕСТ  = 'tests/e2e/design-system/44-turniry.spec.js';
@@ -237,6 +238,39 @@ const ОТКАТЫ = [
   [ТЕСТ, `'переливает из карточки: '`,
          `'переливает из кармана: '`,
    'тест меряет перелив из карточки, а не только высоты блоков'],
+
+/* ── ЧЕТЫРЕ ЧИСЛА ОБЛОЖКИ, 04.10 ─────────────────────────────────────── */
+  /* Форма записи здесь СВОЯ: [файл, ищем, меняем, какое правило упадёт].
+     Первый заход 04.10 написал пятиэлементную, с именем впереди, — и прувер
+     принял имя за путь к файлу: ENOENT на «увести имя общей формулы». ФОРМА
+     ОТКАТА ЧИТАЕТСЯ У СОСЕДА, А НЕ ВСПОМИНАЕТСЯ. */
+
+  [СТАТ, `window.KSLT_STATS.турнировВсего = function(изБазы) {`,
+         `window.KSLT_STATS.турнировИтого = function(изБазы) {`,
+   'счёт турниров — ОДНО определение, и оно названо именем'],
+
+  [СТАТ, `apply('statTournaments', null, window.KSLT_STATS.турнировВсего(d.tournaments));`,
+         `apply('statTournaments', null, ARCHIVE_TOURNAMENTS + (d.tournaments || 0));`,
+   'главная читает имя, а не повторяет сложение'],
+
+  /* Второе объявление ТОГО ЖЕ имени, а не похожего: правило считает
+     вхождения `ARCHIVE_TOURNAMENTS =`, и `ARCHIVE_TOURNAMENTS_OLD =` под него
+     не попадало — откат проходил незамеченным. Прувер сказал об этом прямо. */
+  [СТАТ, `    var ARCHIVE_TOURNAMENTS = 300;`,
+         `    var ARCHIVE_TOURNAMENTS = 300;\n    var ARCHIVE_TOURNAMENTS = 300;`,
+   'архив клуба заведён ОДНИМ числом'],
+
+  [JSФ, `            var elВсего = document.getElementById('toStatTotal');`,
+        `            var el = document.getElementById('toStatTotal');\n            if (el) el.textContent = all.length;\n            var elВсего = document.getElementById('toStatTotal');`,
+   'обзорная не считает турниры своим all.length'],
+
+  [HTML, `<script src="../js/stats.js?v=5"></script>`,
+         `<!-- stats.js otklyuchen -->`,
+   'обзорная ru подключает js/stats.js'],
+
+  [JSФ, `                if (totalPrize > 0) {`,
+        `                if (totalPrize >= 0) {`,
+   'нулевой призовой фонд прячет ВЕСЬ показатель'],
 
 ];
 
