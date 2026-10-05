@@ -32,6 +32,8 @@ const СТАТ = 'js/stats.js';
 const HTMLen = 'pages/tournaments-overview-en.html';
 const СТЕНД = 'maket/turniry-zamer.html';
 const ТЕСТ  = 'tests/e2e/design-system/44-turniry.spec.js';
+const КРУПФ = 'js/tournament-featured.js';
+const БЛОКФ = 'js/tournament-blocks.js';
 
 const ОТКАТЫ = [
   /* ── отношения ─────────────────────────────────────────────────────── */
@@ -98,7 +100,7 @@ const ОТКАТЫ = [
    'воздух и шаг обложки — крутилки, а не вторые объявления'],
 
   /* ── лестница ──────────────────────────────────────────────────────── */
-  [CSS, `    font-size: var(--fs-3xl);\n    font-weight: 800;\n    line-height: 1.1;`,
+  [CSS, `    font-size: var(--fs-3xl);\n    font-weight: 800;\n    line-height: var(--lh-tight);`,
         `    font-size: clamp(1.9rem, 4.4vw, 3.1rem);\n    font-weight: 800;\n    line-height: 1.1;`,
    'заголовок и подзаголовок обложки стоят на ступенях, а не на clamp'],
 
@@ -271,6 +273,74 @@ const ОТКАТЫ = [
   [JSФ, `                if (totalPrize > 0) {`,
         `                if (totalPrize >= 0) {`,
    'нулевой призовой фонд прячет ВЕСЬ показатель'],
+
+  /* ── вход на турнир: ссылка, а не обработчик ──────────────────────── */
+
+  [КРУПФ, `    function слойСсылки(href, имя) {`,
+          `    function слойВхода(href, имя) {`,
+   'слой входа объявлен ОДИН раз и вынесен в общий модуль'],
+
+  [КРУПФ, `return '<a class="to-compact-cover" href="' + экр(href) + '"'`,
+          `return '<div class="to-compact-cover" data-href="' + экр(href) + '"'`,
+   'слой входа отдаёт ССЫЛКУ с адресом, а не div с обработчиком'],
+
+  [КРУПФ, `               ' aria-label="' + экр(имя) + '"></a>';`,
+          `               '></a>';`,
+   'у слоя есть имя для диктора'],
+
+  [КРУПФ, `            .replace(/&/g, '&amp;').replace(/"/g, '&quot;')`,
+          `            .replace(/&/g, '&amp;')`,
+   'имя турнира экранируется перед подстановкой в атрибут'],
+
+  [БЛОКФ, `            ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +`,
+          `            ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +\n            ' data-href="' + detailPage + '?id=' + t.id + '"' +`,
+   'полоса общего модуля не носит data-href'],
+
+  [БЛОКФ, `            window.KSLT_TFEATURED.слойСсылки(detailPage + '?id=' + t.id, t.name) +`,
+          `            '' +`,
+   'полоса общего модуля зовёт ОБЩИЙ слой входа'],
+
+  [JSФ, `            '" data-cat="' + catKey + '" data-idx="' + idx + '"' +`,
+        `            '" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +`,
+   'полоса обзорной не носит data-href'],
+
+  [JSФ, `            window.KSLT_TFEATURED.слойСсылки(compactHref, t.name) +`,
+        `            '' +`,
+   'полоса обзорной зовёт ТОТ ЖЕ слой входа'],
+
+  [CSS, `.to-compact > .to-compact-cover {\n    position: absolute;\n    inset: 0;`,
+        `.to-compact > .to-compact-cover {\n    position: static;`,
+   'слой растянут на всю полосу, а не на своё содержимое'],
+
+  [CSS, `    z-index: 2;\n    border-radius: inherit;`,
+        `    z-index: 0;\n    border-radius: inherit;`,
+   'слой лежит ВЫШЕ содержимого, а не под ним'],
+
+  [CSS, `.to-compact > .to-compact-right {\n    z-index: 3;\n}`,
+        `.to-compact > .to-compact-right {\n    z-index: 1;\n}`,
+   'то, у чего своё действие, стоит ВЫШЕ слоя'],
+
+  [CSS, `.to-compact > .to-compact-cover:focus-visible {`,
+        `.to-compact > .to-compact-cover:hover {`,
+   'у слоя виден фокус с клавиатуры'],
+
+  [CSS, `    padding: 2px var(--space-2);\n    line-height: var(--lh-snug);`,
+        `    padding: 2px var(--space-2);\n    line-height: 1.2;`,
+   'межстрочных числами в файле не осталось ни одного'],
+
+  [CSS, `       «название + мета» ехала двумя разными границами */\n    line-height: var(--lh-snug);`,
+        `       «название + мета» ехала двумя разными границами */\n    line-height: 1.5;`,
+   'название полосы держит ОДНУ ступень на все виды'],
+
+  /* ── мёртвая краска состояний ──────────────────────────────────────── */
+
+  [CSS, `.to-slots-tight {`,
+        `.btn-register.is-refused { color: #f44336; }\n\n.to-slots-tight {`,
+   'нет краски для состояния, которое никто не ставит'],
+
+  [CSS, `.to-compact-right {\n    display: flex;`,
+        `.to-compact-right {\n    display: flex !important;`,
+   '!important остался только там, где он часть приёма'],
 
 ];
 

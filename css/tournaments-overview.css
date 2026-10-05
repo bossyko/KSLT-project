@@ -67,7 +67,7 @@
        34 на планшете — числа, которого нет ни в одной шкале. Замерено 27.09 */
     font-size: var(--fs-3xl);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: var(--lh-tight);
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
 }
@@ -84,7 +84,7 @@
     margin-bottom: 8px;
     text-transform: none;
     letter-spacing: 0;
-    line-height: 1.5;
+    line-height: var(--lh-normal);
 }
 
 .to-hero p {
@@ -92,7 +92,7 @@
     color: var(--text-secondary);
     max-width: 560px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
 }
 
 .tournament-hero-stats {
@@ -443,7 +443,7 @@
     color: #000;
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
-    line-height: 1;
+    line-height: var(--lh-none);
     margin-bottom: var(--space-sm);
 }
 
@@ -752,6 +752,41 @@
     z-index: 1;
 }
 
+/* ВХОД НА ТУРНИР — НАСТОЯЩАЯ ССЫЛКА, РАСТЯНУТАЯ НА ВСЮ ПОЛОСУ.
+   Вес 0,2,0 — выше общего `.to-compact > *` (0,1,0): иначе слой получил бы
+   от него `position: relative` и встал бы в поток.
+
+   ПОРЯДОК СЛОЁВ ВЫВЕДЕН ЗАМЕРОМ, А НЕ ЗДРАВЫМ СМЫСЛОМ. Сначала я положил
+   слой НИЖЕ содержимого (`z-index: 0`), чтобы не перекрыть кнопку записи,
+   — и замер 04.10 показал, что в середине полосы `elementFromPoint`
+   возвращает `SPAN`, а не ссылку: нажатие на название и мету перестало
+   вести куда-либо вовсе. До правки туда жал обработчик всей полосы.
+   Вчерашнее правило «СЛОЙ ЦЕЛИ МОЖЕТ СЪЕСТЬ САМУ ЦЕЛЬ» работает и в
+   обратную сторону: СОДЕРЖИМОЕ СЪЕДАЕТ СЛОЙ, если слой под ним.
+
+   Поэтому слой идёт ВЫШЕ неинтерактивного содержимого (2), а то, что
+   жмётся само, поднимается НАД слоем (3). Поднимается ровно то, у чего
+   своё действие, — иначе слой снова съел бы цель. */
+.to-compact > .to-compact-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+}
+
+/* Колонка со своими действиями: кнопка записи и счётчик. Выше слоя */
+.to-compact > .to-compact-right {
+    z-index: 3;
+}
+
+/* ФОКУС ВИДЕН НА ВСЕЙ ПОЛОСЕ: слой прозрачный, и обводка по его границам —
+   это рамка вокруг карточки, то есть именно то, что человек выбрал. До
+   04.10 полоса не бралась клавиатурой вовсе, и выделять было нечего */
+.to-compact > .to-compact-cover:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 .to-compact-left {
     display: flex;
     flex-direction: column;
@@ -769,7 +804,7 @@
     color: var(--accent);
     border: 1px solid rgba(204, 255, 0, 0.4);
     white-space: nowrap;
-    line-height: 1.3;
+    line-height: var(--lh-snug);
 }
 
 .to-compact-norating-badge {
@@ -782,7 +817,7 @@
     color: var(--text-secondary);
     border: 1px solid var(--border-subtle);
     white-space: nowrap;
-    line-height: 1.3;
+    line-height: var(--lh-snug);
     margin-top: var(--space-2);
 }
 
@@ -796,7 +831,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    line-height: 1;
+    line-height: var(--lh-none);
     min-width: 44px;
 }
 
@@ -823,6 +858,10 @@
 .to-compact-info h4 {
     font-size: var(--fs-base);
     font-weight: 600;
+    /* ОДНА СТУПЕНЬ НА ВСЕ ВИДЫ. Замер 04.10: при одном кегле 16
+       межстрочный выходил 24 на 1024 и 1280 и 20 на 768 — пара
+       «название + мета» ехала двумя разными границами */
+    line-height: var(--lh-snug);
     color: var(--text-primary);
     margin-bottom: var(--space-2);
     display: -webkit-box;
@@ -861,8 +900,13 @@
 }
 
 /* Осталась треть мест или запись закрыта — цифру видно сразу */
+/* Этот показатель ЖИВОЙ: класс ставит js/tournaments-overview.js:906.
+   !important снят — правило и так стоит ПОСЛЕ .to-compact-slots с тем же
+   весом и выигрывает порядком. Краска #FFB020 осталась числом намеренно:
+   ближайший токен --warning это #FF9F43, другой оттенок, и менять его без
+   твоих глаз нельзя. Записано открытым. */
 .to-slots-tight {
-    color: #FFB020 !important;
+    color: #FFB020;
     font-weight: 600;
 }
 
@@ -949,7 +993,7 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #fff;
-    line-height: 1;
+    line-height: var(--lh-none);
     position: relative;
     overflow: hidden;
     animation: toCdAppear 0.4s ease-out;
@@ -1107,7 +1151,8 @@
     opacity: 0.9;
 }
 
-.btn-register.to-register.is-registered,
+/* `is-registered` снят из группы 05.10: класса не ставит никто.
+   `:disabled` — живой, его ставит браузер. */
 .btn-register.to-register:disabled {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.18);
@@ -1177,7 +1222,7 @@
     height: auto;
     min-height: var(--chip-h);
     padding: 2px var(--space-2);
-    line-height: 1.2;
+    line-height: var(--lh-snug);
     white-space: normal;
     text-align: left;
 }
@@ -1213,31 +1258,16 @@
     cursor: default;
 }
 
-/* В боковой карточке состояние заявки тоже по центру своей колонки */
-.to-compact .btn-register.is-registered,
-.to-compact .btn-register.is-pending-guest,
-.to-compact .btn-register.is-refused,
-.to-featured .btn-register.is-registered,
-.to-featured .btn-register.is-pending-guest,
-.to-featured .btn-register.is-refused {
-    align-self: center;
-    text-align: center;
-}
-
-/* Отказ — красным: молчать о нём нельзя */
-.btn-register.is-refused {
-    background: rgba(244, 67, 54, 0.14) !important;
-    border-color: rgba(244, 67, 54, 0.45) !important;
-    color: #f44336 !important;
-}
-
-/* Заявка с гостем ждёт решения менеджера: не зелёная «вы в сетке», но и не
-   отказ — янтарная, как всё, что требует внимания */
-.btn-register.is-pending-guest {
-    background: rgba(255, 179, 0, 0.14) !important;
-    border-color: rgba(255, 179, 0, 0.4) !important;
-    color: #ffb300 !important;
-}
+/* СНЯТО 05.10 — МЁРТВЫЙ КОД, ПРОВЕРЕННЫЙ, А НЕ УВИДЕННЫЙ.
+   Здесь жили три состояния кнопки записи: is-registered, is-pending-guest,
+   is-refused — восемь объявлений, шесть из них с !important и красками
+   #f44336 / #ffb300 мимо токенов.
+   Проверка: ни одного вхождения вне css — ни в js, ни в разметке, ни в
+   mobile/www; `git log -S` по js/ не нашёл их и в истории. Класс не
+   собирался и строкой: конструкций вида 'is-' + состояние нет.
+   Ставить эти классы некому, значит краска никогда не показывалась.
+   Правило заморозки стережёт, чтобы они не вернулись краской раньше, чем
+   кодом, который их ставит. */
 
 /* ============================================================
    Телефон
@@ -1362,7 +1392,7 @@
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        line-height: 1.25;
+        line-height: var(--lh-snug);
     }
 
 
@@ -1600,7 +1630,7 @@
 
     .to-featured-content h3 {
         font-size: var(--fs-sm);
-        line-height: 1.25;
+        line-height: var(--lh-snug);
         margin-bottom: var(--space-2);
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -1663,7 +1693,7 @@
 
     .to-side-stack .to-compact-info h4 {
         font-size: var(--fs-xs);
-        line-height: 1.2;
+        line-height: var(--lh-snug);
         -webkit-line-clamp: 2;
     }
 

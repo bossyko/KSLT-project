@@ -1017,24 +1017,12 @@
     margin: 0 var(--space-md);
 }
 
-/* Заявка уже подана — кнопка гаснет и подписывается статусом */
-/* «Вы в основной сетке» — это хорошая новость, а не выключенная кнопка.
-   Серый цвет читался как «недоступно», и человек не понимал, записан он или нет */
-.btn-register.is-registered {
-    background: rgba(204, 255, 0, 0.14);
-    border: 1px solid rgba(204, 255, 0, 0.45);
-    color: var(--accent, #CCFF00);
-    font-weight: 700;
-    cursor: default;
-    pointer-events: none;
-}
-
-.btn-register.is-registered:hover {
-    background: rgba(204, 255, 0, 0.14);
-    color: var(--accent, #CCFF00);
-    transform: none;
-    box-shadow: none;
-}
+/* СНЯТО 05.10 — МЁРТВЫЙ КОД, ПРОВЕРЕННЫЙ, А НЕ УВИДЕННЫЙ.
+   Здесь жили два правила состояния `.btn-register.is-registered` — лаймовая
+   «вы в основной сетке» и её наведение. Класс не ставит НИКТО: ни одного
+   вхождения вне css во всём дереве, и `git log -S` по js/ не нашёл его в
+   истории. Снято вместе с is-pending-guest и is-refused в
+   css/tournaments-overview.css и css/style.css. */
 
 /* ============================================================
    Телефон
