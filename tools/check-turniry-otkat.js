@@ -342,6 +342,14 @@ const ОТКАТЫ = [
         `.to-compact-right {\n    display: flex !important;`,
    '!important остался только там, где он часть приёма'],
 
+  /* ── стенд не расходится со страницей ──────────────────────────────── */
+
+  [СТЕНД, `<script src="../js/tournament-status.js?v=1"></script>\n`, ``,
+   'стенд грузит КАЖДЫЙ модуль, который зовёт страница'],
+
+  [СТЕНД, `tournaments-overview.css?v=106`, `tournaments-overview.css?v=102`,
+   'версии в стенде те же, что на странице'],
+
 ];
 
 function прогон() {
