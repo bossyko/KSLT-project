@@ -347,8 +347,33 @@ const ОТКАТЫ = [
   [СТЕНД, `<script src="../js/tournament-status.js?v=1"></script>\n`, ``,
    'стенд грузит КАЖДЫЙ модуль, который зовёт страница'],
 
-  [СТЕНД, `tournaments-overview.css?v=106`, `tournaments-overview.css?v=102`,
+  /* ЯКОРЬ НЕ ДЕРЖИТСЯ ЗА НОМЕР ВЕРСИИ — он меняется при каждой правке
+     файла, и откат устаревает сам собой. Поймано прувером 05.10, второй
+     раз за два дня. Ломаем ПРИЗНАК: вставка цифры перед номером делает
+     версию другой, не называя её. */
+  [СТЕНД, `tournaments-overview.css?v=`, `tournaments-overview.css?v=9`,
    'версии в стенде те же, что на странице'],
+
+  /* ── один рост карточек ────────────────────────────────────────────── */
+
+  [CSS, `    min-height: 144px;\n    display: grid;`, `    display: grid;`,
+   'у полосы есть СВОЯ СТУПЕНЬ высоты, а не рост от содержимого'],
+
+  [CSS, `        min-height: 160px;\n        grid-template-columns: minmax(0, 1fr);`,
+        `        min-height: 155px;\n        grid-template-columns: minmax(0, 1fr);`,
+   'ступень полосы стоит на шкале восьмёрки'],
+
+  [CSS, `.to-compact-sub {\n    min-height: calc(var(--fs-xs) * 1.5);`,
+        `.to-compact-sub {`,
+   'строка меты держит своё место, когда адреса нет'],
+
+  [CSS, `    min-height: calc(2 * var(--lh-snug) * 1em);`,
+        `    min-height: 42px;`,
+   'название держит две строки, и мера в em, а не в пикселях'],
+
+  [CSS, `        min-height: 160px;\n        grid-template-columns: minmax(0, 1fr);\n        gap: var(--space-sm);`,
+        `        min-height: 160px;\n        grid-template-columns: auto 1fr;\n        gap: var(--space-sm);`,
+   'на телефоне карточка в ОДНУ колонку'],
 
 ];
 
