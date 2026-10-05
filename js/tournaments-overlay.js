@@ -480,7 +480,10 @@
                 // Архив — полосами: на завершённый смотрят ради результата,
                 // ему не нужны крупная афиша и кнопка регистрации
                 pastGrid.innerHTML = pastItems.slice(0, _pastShown).map(function(t) {
-                    return TB.compact(t);
+                    /* Каждой карточке — своя ячейка-контейнер: она
+                       перестраивается по собственной ширине, а не по ширине
+                       окна. Определение одно, в KSLT_TBLOCK. */
+                    return TB.ячейка(TB.compact(t));
                 }).join('');
                 TB.bindLinks(pastGrid);
                 syncShowMore(pastSection, 'pastShowMore', _pastShown, pastItems.length, function() {

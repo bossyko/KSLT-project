@@ -375,6 +375,16 @@ const ОТКАТЫ = [
         `        min-height: 160px;\n        grid-template-columns: auto 1fr;\n        gap: var(--space-sm);`,
    'на телефоне карточка в ОДНУ колонку'],
 
+  /* ── ячейка-контейнер карточки ─────────────────────────────────────── */
+
+  [БЛОКФ, `items.slice(1).map(function(t) { return ячейка(compact(t)); }).join('')`,
+          `items.slice(1).map(function(t) { return compact(t); }).join('')`,
+   'у карточки есть СВОЯ ячейка-контейнер, и контейнер объявлен'],
+
+  [CSS, `.to-card-slot {\n    display: flex;\n    min-width: 0;`,
+        `.to-card-slot {\n    display: flex;\n    min-width: 0;\n    height: 100%;`,
+   'ячейка не задаёт высоту — её даёт сетка'],
+
 ];
 
 function прогон() {
