@@ -876,8 +876,13 @@
         var афиша = постер ? ' style="--poster:url(' + постер + ')"' : '';
 
         return '<div class="to-compact to-compact-thumb' + (прошёл ? ' to-compact-past' : '') +
-            '" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +
+            '" data-cat="' + catKey + '" data-idx="' + idx + '"' +
             афиша + '>' +
+            /* ВХОД — НАСТОЯЩАЯ ССЫЛКА. Полосу рисуют ДВА места: здесь и
+               js/tournament-blocks.js:208, и содержимое у копий разное —
+               места показывает только эта. Слой входа у обеих ОДИН, из
+               KSLT_TFEATURED, чтобы на шве не разошлось ещё и это */
+            window.KSLT_TFEATURED.слойСсылки(compactHref, t.name) +
             '<div class="to-compact-left">' +
                 // СТАТУС НАД ДАТОЙ, И НЕ ПОВЕРХ АФИШИ — решение Кости 28.09:
                 // «на афишу не залезай, до границы афиш». Плашка ушла из
@@ -928,8 +933,13 @@
             // проверки нажатие на «Регистрацию» просто уводило со страницы
             if (e.target.closest('.btn-register, .btn-calendar')) return;
 
-            // Any card with data-href → navigate
-            var card = e.target.closest('.to-featured[data-href], .to-compact[data-href]');
+            /* Полоса больше не ходит обработчиком — у неё настоящая
+               ссылка (KSLT_TFEATURED.слойСсылки). Остаётся крупная
+               карточка: её вариант с афишей фоном рисует
+               js/tournament-featured.js:121 всё ещё как div[data-href].
+               Записано открытым — закрывается вместе со страницей
+               категории, где эта карточка и живёт */
+            var card = e.target.closest('.to-featured[data-href]');
             if (card) {
                 window.location.href = card.dataset.href;
             }

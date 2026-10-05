@@ -208,8 +208,11 @@
         return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') + '"' +
             (extraAttrs || '') +
             ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +
-            ' data-href="' + detailPage + '?id=' + t.id + '"' +
             афиша + '>' +
+            /* ВХОД — НАСТОЯЩАЯ ССЫЛКА, А НЕ ОБРАБОТЧИК. Было
+               data-href плюс слушатель: ни новой вкладки, ни клавиатуры,
+               ни «ссылка» у диктора */
+            window.KSLT_TFEATURED.слойСсылки(detailPage + '?id=' + t.id, t.name) +
             '<div class="to-compact-left">' +
                 /* СТАТУС НАД ДАТОЙ, в той же колонке, что и на странице
                    турниров (js/tournaments-overview.js) — решение Кости
