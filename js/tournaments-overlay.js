@@ -84,56 +84,127 @@
 
     // Load hero stats from Supabase (tournament count, participants, prize fund)
     // Always overwrites static fallback with real data (even if 0)
+    /* ОБЛОЖКА ДРУЖЕСКИХ — ВАРИАНТ «Г», слово Кости 05.10.
+       Первый слот слово в слово тот же, что у пяти остальных категорий
+       (подписи взяты из pages/tournaments*.html), второй — ИГРОКИ, и это
+       заявленные, а не рейтинговые: у дружеских рейтинга нет вовсе
+       (решение Кости 30.09), а призового фонда у них не бывает.
+       Так у всех шести категорий обложка несёт три живых числа, и ни одна
+       не выглядит пустой. */
     var friendlyLabels = isEn ? {
-        total: 'total this season',
-        upcoming: 'upcoming',
+        total: 'tournaments this season',
+        players: 'players',
         completed: 'completed'
     } : (isKg ? {
-        total: 'мезгилде баары',
-        upcoming: 'алдыдагы',
+        total: 'мезгилдеги мелдештер',
+        players: 'оюнчу',
         completed: 'аяктаган'
     } : {
-        total: 'всего за сезон',
-        upcoming: 'предстоящих',
+        total: 'турниров в сезоне',
+        players: 'игроков',
         completed: 'завершённых'
     });
+
+    /**
+     * ОДНА ОБЛОЖКА НА ВСЕ ШЕСТЬ КАТЕГОРИЙ — по слову Кости 05.10
+     * «и френдли приводи к общей обложке».
+     *
+     * До этого обложку строили ДВА места: отдельная ветка для дружеских и
+     * общая для остальных пяти. Разметка в них была одна и та же, и шов
+     * держался только на моей памяти.
+     *
+     * СОСТАВ ОБЛОЖКИ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ: сборщик один, а
+     * какие показатели в него класть, решает категория. У дружеских
+     * рейтинга нет вовсе (решение Кости 30.09), поэтому «Участников» и
+     * «Призовой фонд» им нечем наполнить — у них свои три числа.
+     * ПРЕДПОЛОЖЕНИЕ: «общая обложка» — это один сборщик и одна вёрстка, а
+     * не одинаковые подписи. Угадал — скажешь.
+     */
+    function нарисоватьОбложку(показатели) {
+        var блок = document.querySelector('.tournament-hero-stats');
+        if (!блок) return;
+        блок.innerHTML = показатели.map(function(п) {
+            return '<div class="hero-stat">' +
+                '<span class="hero-stat-value" id="' + п.id + '">&mdash;</span>' +
+                '<span class="hero-stat-label">' + п.подпись + '</span></div>';
+        }).join('');
+        блок.style.display = '';
+    }
+
+    /**
+     * НОЛЬ ПРЯЧЕТ ВЕСЬ ПОКАЗАТЕЛЬ, А НЕ ПОКАЗЫВАЕТСЯ НУЛЁМ.
+     * Решение Кости 27.09, доска 482:9 блок B. На обзорной оно сделано
+     * 04.10, а сюда не доехало: призовой фонд стоял нулём во всех пяти
+     * категориях. Подпись без числа сообщает ещё меньше, чем ноль.
+     */
+    function поставитьПоказатель(id, число, текст) {
+        var э = document.getElementById(id);
+        if (!э) return;
+        var ячейка = э.closest('.hero-stat');
+        if (число > 0) {
+            э.textContent = (текст != null) ? текст : число;
+            if (ячейка) ячейка.style.display = '';
+        } else if (ячейка) {
+            ячейка.style.display = 'none';
+        }
+    }
 
     async function loadHeroStats(category) {
         var statsBlock = document.querySelector('.tournament-hero-stats');
 
         if (category === 'friendly') {
             // Friendly: show Total / Upcoming / Completed
-            if (statsBlock) {
-                statsBlock.innerHTML =
-                    '<div class="hero-stat"><span class="hero-stat-value" id="statFriendlyTotal">&mdash;</span><span class="hero-stat-label">' + friendlyLabels.total + '</span></div>' +
-                    '<div class="hero-stat"><span class="hero-stat-value" id="statFriendlyUpcoming">&mdash;</span><span class="hero-stat-label">' + friendlyLabels.upcoming + '</span></div>' +
-                    '<div class="hero-stat"><span class="hero-stat-value" id="statFriendlyCompleted">&mdash;</span><span class="hero-stat-label">' + friendlyLabels.completed + '</span></div>';
-                statsBlock.style.display = '';
-            }
+            нарисоватьОбложку([
+                { id: 'statFriendlyTotal',     подпись: friendlyLabels.total },
+                { id: 'statFriendlyPlayers',   подпись: friendlyLabels.players },
+                { id: 'statFriendlyCompleted', подпись: friendlyLabels.completed }
+            ]);
             try {
                 var result = await client.from('tournaments')
                     .select('id, date_end, published_at')
                     .eq('category_id', 'friendly');
+                /* ЗАПАСНОГО СЧЁТА НЕТ. Было: нет опубликованных — показываем
+                   ВСЕ строки, то есть черновики. Ноль — законный ответ. */
                 var allT = (result.data || []).filter(function(t) { return t.published_at !== null; });
-                if (allT.length === 0) allT = result.data || [];
                 var today = new Date().toISOString().substring(0, 10);
-                var upcoming = allT.filter(function(t) { return !t.date_end || t.date_end >= today; }).length;
                 var completed = allT.filter(function(t) { return t.date_end && t.date_end < today; }).length;
-                var el = document.getElementById('statFriendlyTotal');
-                if (el) el.textContent = allT.length;
-                el = document.getElementById('statFriendlyUpcoming');
-                if (el) el.textContent = upcoming;
-                el = document.getElementById('statFriendlyCompleted');
-                if (el) el.textContent = completed;
+
+                /* ИГРОКИ ДРУЖЕСКИХ — РАЗНЫЕ ЛЮДИ, А НЕ ЧИСЛО ЗАЯВОК.
+                   Один человек играет в нескольких дружеских за сезон, и
+                   счёт заявок ответил бы на другой вопрос — ту же ошибку
+                   уже ловили на Futures: 22 заявки при 68 игроках. */
+                var игроков = 0;
+                try {
+                    var идТурниров = allT.map(function(t) { return t.id; });
+                    if (идТурниров.length > 0) {
+                        var зая = await client.from('tournament_registrations')
+                            .select('player_id')
+                            .in('tournament_id', идТурниров);
+                        if (зая.data) {
+                            var разные = {};
+                            зая.data.forEach(function(з) {
+                                if (з.player_id) разные[з.player_id] = 1;
+                            });
+                            игроков = Object.keys(разные).length;
+                        }
+                    }
+                } catch (ie) {
+                    console.warn('Friendly players count unavailable:', ie.message);
+                }
+
+                поставитьПоказатель('statFriendlyTotal', allT.length);
+                поставитьПоказатель('statFriendlyPlayers', игроков);
+                поставитьПоказатель('statFriendlyCompleted', completed);
             } catch(e) {}
             return;
         }
 
+        /* У пяти категорий слоты обложки лежат в pages/tournaments.html —
+           там же их переводы на три языка. Собирать их заново значит
+           потерять перевод, поэтому сборщик нужен только дружеским, у
+           которых разметки в странице нет. Общее у всех — ВИД слота и
+           правило «ноль прячет показатель»; оно и сведено в одно место. */
         if (statsBlock) statsBlock.style.display = '';
-
-        var elCount = document.getElementById('statTournaments');
-        var elPart = document.getElementById('statParticipants');
-        var elPrize = document.getElementById('statPrize');
 
         try {
             // All tournaments in this category (all statuses)
@@ -142,8 +213,10 @@
                 .eq('category_id', category);
 
             var allT = (result.data && !result.error) ? result.data : [];
+            /* ЗАПАСНОГО СЧЁТА НЕТ — он был заряженным ружьём: у категории с
+               нулём опубликованных обложка показала бы число ЧЕРНОВИКОВ.
+               Соврать числом хуже, чем честно показать ноль. */
             var tournaments = allT.filter(function(t) { return t.published_at !== null; });
-            if (tournaments.length === 0) tournaments = allT;
             var tournamentCount = tournaments.length;
 
             // Sum prize funds — extract number from text like "100,000 сом" or "500000"
@@ -159,12 +232,10 @@
                     }
                 }
             });
-            if (elCount) elCount.textContent = tournamentCount;
-            if (elPrize) {
-                // В шапке — коротко, как на «Турнирах»: «2.6M», а не
-                // «2 626 000 сом». Полная сумма ломала строку цифр
-                elPrize.textContent = shortPrize(totalPrize);
-            }
+            поставитьПоказатель('statTournaments', tournamentCount);
+            // В шапке — коротко, как на «Турнирах»: «2.6M», а не
+            // «2 626 000 сом». Полная сумма ломала строку цифр
+            поставитьПоказатель('statPrize', totalPrize, shortPrize(totalPrize));
 
             // Игроки разряда — те, кто стоит в его таблице рейтинга, а не те,
             // кто подавал заявки на турниры. Заявок было 22 при 68 игроках в
@@ -172,10 +243,10 @@
             try {
                 var счёт = window.KSLT_RANKINGS && window.KSLT_RANKINGS.countByCategory
                     ? await window.KSLT_RANKINGS.countByCategory() : null;
-                if (elPart) elPart.textContent = (счёт && счёт[category]) || 0;
+                поставитьПоказатель('statParticipants', (счёт && счёт[category]) || 0);
             } catch (re) {
                 console.warn('Rating count unavailable:', re.message);
-                if (elPart) elPart.textContent = '0';
+                поставитьПоказатель('statParticipants', 0);
             }
 
         } catch (e) {
@@ -192,8 +263,10 @@
 
             // Filter out drafts (published_at null = draft)
             var allData = result.data || [];
+            /* ЧЕРНОВИК НЕ ПОКАЗЫВАЕТСЯ НИКОГДА. Было: нет опубликованных —
+               рисуем ВСЁ, и посетитель видел неопубликованные турниры.
+               Это уже не враньё числом, а утечка. */
             var publishedData = allData.filter(function(t) { return t.published_at !== null; });
-            if (publishedData.length === 0) publishedData = allData;
 
             // Load registration counts per tournament for participant display
             var tIds = publishedData.map(function(t) { return t.id; });
@@ -553,9 +626,15 @@
             soon: upcomingItems.length - open,
             past: pastItems.length
         };
+        /* ЧИП, КОТОРЫЙ НИЧЕГО НЕ НАЙДЁТ, ГАСНЕТ.
+           Было: ноль прятался в пустую строку, и «Предстоящие» без числа
+           нельзя было отличить от «числа не знаем». Гашение отвечает на
+           вопрос прямо, а нажать на пустоту больше нельзя. */
         document.querySelectorAll('.trn-chip-count[data-count]').forEach(function(el) {
             var v = counts[el.dataset.count];
             el.textContent = v ? v : '';
+            var чип = el.closest('.trn-chip');
+            if (чип && чип.dataset.value !== 'all') чип.disabled = !v;
         });
     }
 
@@ -563,10 +642,15 @@
         document.querySelectorAll('.trn-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 var group = chip.dataset.filter;
+                /* СОСТОЯНИЕ ЕДЕТ ВМЕСТЕ С ВИДОМ. Класс active красит чип, а
+                   диктору про выбор говорит только aria-checked: без него
+                   человек с диктором слышал семь одинаковых кнопок. */
                 document.querySelectorAll('.trn-chip[data-filter="' + group + '"]').forEach(function(c) {
                     c.classList.remove('active');
+                    c.setAttribute('aria-checked', 'false');
                 });
                 chip.classList.add('active');
+                chip.setAttribute('aria-checked', 'true');
                 applyFilters(grid);
             });
         });
