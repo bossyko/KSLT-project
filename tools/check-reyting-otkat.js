@@ -197,7 +197,39 @@ const ОТКАТЫ = [
 ['снова стирать ключ записи при чистке адреса', 'js/script.js',
  "        history.replaceState(history.state, '', window.location.pathname + window.location.search);",
  "        history.replaceState(null, '', window.location.pathname + window.location.search);",
- 'чистка токенов из адреса не стирает ключ записи истории']
+ 'чистка токенов из адреса не стирает ключ записи истории'],
+
+/* ── обложка, фильтры и таблица рейтинга — 06.10 ──────────────────────── */
+
+['вернуть обложке рейтинга своё число высоты', 'css/players.css',
+ '    min-height: var(--oblozhka-pol);',
+ '    min-height: 460px;',
+ 'обложка рейтинга стоит на общем полу раздела'],
+
+['вернуть заголовку обложки плавающий clamp', 'css/players.css',
+ '    font-size: var(--fs-hero);\n    font-weight: var(--fw-extrabold);',
+ '    font-size: clamp(1.9rem, 4.4vw, 3.1rem);\n    font-weight: var(--fw-extrabold);',
+ 'заголовок обложки — крутилка раздела, а не clamp'],
+
+['увести цифру обложки со своего токена', 'css/players.css',
+ '    font-size: var(--fs-hero-num);',
+ '    font-size: 2.4rem;',
+ 'цифра обложки — плашка, и числа у неё из токенов'],
+
+['вернуть онлайн на обложку рейтинга', 'js/players.js',
+ '                    плашка(totalPlayers, labels.statPlayers) +',
+ '                    плашка(totalPlayers, labels.statPlayers) +\n                    плашка(onlineCount, labels.statOnline) +',
+ 'онлайн на обложке рейтинга не показывается'],
+
+['вернуть чипу пола высоту полями', 'css/players.css',
+ '    min-height: var(--btn-h-md);\n    line-height: var(--lh-none);',
+ '    line-height: var(--lh-none);',
+ 'чип пола — ступень шкалы и кегль со шкалы'],
+
+['растянуть таблицу рейтинга на всю ширину', 'css/players.css',
+ '    max-width: 1100px;\n    margin-inline: auto;',
+ '    margin-inline: auto;',
+ 'таблица рейтинга живёт в колонке, а не во всю ширину окна']
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'reyting-otkat-'));
