@@ -171,6 +171,11 @@ const ОТКАТЫ = [
  '        var cats = menCats.concat(womenCats);',
  'на обзорной нет поиска, а фильтр пола и пилюли на месте'],
 
+['вернуть очкам свой кегль на телефоне', 'css/players.css',
+ '    .pl-col-points {\n        /* кегль держит базовое правило — одно место на все виды */',
+ '    .pl-col-points {\n        font-size: var(--fs-xs);',
+ 'очки в таблице — один кегль на все виды'],
+
 ['вернуть пустую десятую колонку в ряд', 'css/players.css',
  '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px;',
  '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px 90px;',

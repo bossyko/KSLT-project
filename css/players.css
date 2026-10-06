@@ -629,8 +629,14 @@
     font-size: var(--fs-sm);
 }
 
+/* ОЧКИ НЕ РАСТУТ ОТ ТОГО, ЧТО ЭКРАН УЖЕ. Замер 06.10: на широких видах
+   колонка очков шла 12, на телефоне — 14, то есть на маленьком экране
+   главное число было КРУПНЕЕ, чем на большом. Оба числа со шкалы, но
+   порядок перевёрнут. Кегль объявлен один раз здесь: 14 на всех видах —
+   мельче имени (16) и не мельче прочих колонок. */
 .pl-col-points {
-    font-weight: 800;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-extrabold);
     color: var(--accent);
     text-align: center;
 }
@@ -1540,7 +1546,7 @@
     }
 
     .pl-col-points {
-        font-size: var(--fs-sm);
+        /* кегль держит базовое правило — одно место на все виды */
         margin-left: auto;
     }
 
@@ -1702,9 +1708,6 @@
         height: 28px;
     }
     .pl-player-name {
-        font-size: var(--fs-sm);
-    }
-    .pl-col-points {
         font-size: var(--fs-sm);
     }
     .pl-col-rank {
