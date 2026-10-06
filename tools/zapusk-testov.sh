@@ -87,9 +87,12 @@ for arg in "$@"; do
     [ "$arg" = "--admin" ]   && { S_BAZOY="da"; ADMIN="da"; }
 done
 
-# Три файла админки — перечень ОДИН, и живёт он здесь
+# Файлы админки — перечень ОДИН, и живёт он здесь
+# 06.10: четвёртым встал прогон завершённого турнира. Он тоже сидит за
+# входом и стучит в базу, значит без неё не идёт — ему место ровно здесь.
 FILES_ADMIN="tests/e2e/features/17-trn-forma.spec.js \
 tests/e2e/features/12-admin-page.spec.js \
+tests/e2e/features/22-zavershyonnyy-turnir.spec.js \
 tests/e2e/design-system/20-header-offsets.spec.js"
 
 if [ -n "$S_BAZOY" ]; then
