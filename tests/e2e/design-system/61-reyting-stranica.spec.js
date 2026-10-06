@@ -232,6 +232,12 @@ const уровень = (page, сел) => page.evaluate(с => {
 for (const Я of ЯЗЫКИ) {
 
 test.describe('пьедестал рейтинга · ' + Я.имя, () => {
+    /* ПОД СЕССИЕЙ АДМИНА, А НЕ ГОСТЕМ. Прогон 06.10 пропустил ВСЕ пятнадцать
+       проверок пьедестала: гостю отдаётся обрезанный список, и трёх карточек
+       на экране не оказалось. Проверка, которая всегда пропускается, ничего
+       не доказывает — ровно как проверка, которая не может упасть. */
+    test.use({ storageState: 'tests/.auth/admin.json' });
+
 
     test('очки видны на всех видах, а не только на широких', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
@@ -245,9 +251,14 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
         /* ПОРОГ: пьедестала может не быть вовсе — в базе прогона меньше трёх
            игроков, или список закрыт входом. Это не беда вёрстки, и
            проверять тогда нечего. */
-        const нетПьедестала = await page.evaluate(() =>
-            document.querySelectorAll('.pl-podium-card').length < 3);
-        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+        const скольжко = await page.evaluate(() => ({
+            карточек: document.querySelectorAll('.pl-podium-card').length,
+            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
+            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
+        }));
+        test.skip(скольжко.карточек < 3,
+            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
+            скольжко.строк + ', экран гостя: ' + скольжко.гость);
 
         снято.forEach((у, i) => {
             expect(у, 'очки ' + (i + 1) + '-го места: элемента нет в разметке').toBeTruthy();
@@ -264,9 +275,14 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
     test('первое место крупнее второго, второе крупнее третьего', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
 
-        const нетПьедестала = await page.evaluate(() =>
-            document.querySelectorAll('.pl-podium-card').length < 3);
-        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+        const скольжко = await page.evaluate(() => ({
+            карточек: document.querySelectorAll('.pl-podium-card').length,
+            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
+            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
+        }));
+        test.skip(скольжко.карточек < 3,
+            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
+            скольжко.строк + ', экран гостя: ' + скольжко.гость);
 
         for (const часть of ['medal', 'points']) {
             const кл = часть === 'medal' ? '.pl-podium-medal' : '.pl-podium-points';
@@ -291,9 +307,14 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
     test('кегли и межстрочный пьедестала стоят на ступенях', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
 
-        const нетПьедестала = await page.evaluate(() =>
-            document.querySelectorAll('.pl-podium-card').length < 3);
-        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+        const скольжко = await page.evaluate(() => ({
+            карточек: document.querySelectorAll('.pl-podium-card').length,
+            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
+            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
+        }));
+        test.skip(скольжко.карточек < 3,
+            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
+            скольжко.строк + ', экран гостя: ' + скольжко.гость);
 
         const ЛЕСТНИЦА_МС = [1, 1.1, 1.3, 1.5, 1.65];
         for (const сел of ['.pl-podium-first .pl-podium-name',
@@ -314,9 +335,14 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
     test('кружок пьедестала — объявленный диаметр, а не диаметр с рамкой', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
 
-        const нетПьедестала = await page.evaluate(() =>
-            document.querySelectorAll('.pl-podium-card').length < 3);
-        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+        const скольжко = await page.evaluate(() => ({
+            карточек: document.querySelectorAll('.pl-podium-card').length,
+            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
+            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
+        }));
+        test.skip(скольжко.карточек < 3,
+            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
+            скольжко.строк + ', экран гостя: ' + скольжко.гость);
 
         const ДИАМЕТРЫ = [110, 80, 72, 60, 48, 40];
         const кружки = await page.evaluate(() =>
