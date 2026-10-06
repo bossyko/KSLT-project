@@ -3,9 +3,14 @@
    ======================================== */
 
 /* Back link */
-.trn-back-link {
+/* ЦЕЛЬ НАЖАТИЯ — НАСТОЯЩЕЙ ВЫСОТОЙ, А НЕ СЛОЕМ. Замер 06.10: ссылка
+   «Все турниры» отдавала 21 при норме 44 — на телефоне в неё надо целиться.
+   Высоту даёт сама ссылка, поля сверху остаются полем страницы. */
+.trn-back-link,
+.trn-back {
     display: inline-flex;
     align-items: center;
+    min-height: var(--btn-h-md);
     gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;

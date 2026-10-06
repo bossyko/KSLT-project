@@ -515,6 +515,9 @@
             // Init search + filter buttons interaction
             initSearch(grid);
             initFilterSearch(grid);
+            // Полоса пола убирается ДО первого applyFilters: иначе чип
+            // «Женские» успевает отработать и показать пустой экран
+            полосаПола(category);
             // Apply current filter state
             applyFilters(grid);
             if (TB) TB.startTimer();
@@ -668,6 +671,33 @@
      * оставшихся блоков; блок, из которого выбило все карточки, прячется —
      * заголовок над пустотой читается как поломка.
      */
+    /* ЧИПА НЕ СТАВЯТ ТАМ, ГДЕ ВЫБОРА НЕТ.
+       Какие категории бывают женскими, продукт знает с 30.09 —
+       `KSLT_RULES.WOMEN_CATEGORIES`, — но страница категорий это правило не
+       читала и предлагала «Женские» в Pro-Masters и Challengers, где женских
+       турниров не бывает: замер боевой базы дал 1 карточку и 4, все мужские.
+       Нажатие на такой чип давало пустой экран — продукт обещал то, чего у
+       него нет. ОДНА КАРТА НА ПРОДУКТ, а не копия на экран. */
+    function полосаПола(category) {
+        var чипы = document.querySelectorAll('.trn-chip[data-filter="gender"]');
+        if (!чипы.length) return;
+        var П = window.KSLT_RULES;
+        /* ПРАВИЛА НЕТ — ЗНАЧИТ, НЕЧЕМ РЕШАТЬ. Молча спрятать полосу, не
+           прочитав карту категорий, хуже, чем оставить её: выбор исчезнет
+           там, где он есть. */
+        if (!П || !П.MEN_CATEGORIES || !П.WOMEN_CATEGORIES || !category) return;
+        var мужская = П.MEN_CATEGORIES.indexOf(category) !== -1;
+        var женская = П.WOMEN_CATEGORIES.indexOf(category) !== -1;
+        if (мужская && женская) return;
+        var группа = чипы[0].parentElement;
+        if (группа) группа.hidden = true;
+        чипы.forEach(function (ч) {
+            var свой = ч.dataset.value === 'all';
+            ч.classList.toggle('active', свой);
+            ч.setAttribute('aria-checked', свой ? 'true' : 'false');
+        });
+    }
+
     function applyFilters(grid) {
         var input = document.getElementById('tournamentSearch');
         var query = input ? input.value.trim().toLowerCase() : '';
@@ -692,6 +722,21 @@
             if (!section || !b.grid) return;
 
             var visible = 0;
+
+            /* ПРЯЧЕТСЯ ЕДИНИЦА РАСКЛАДКИ, А НЕ ЕЁ СОДЕРЖИМОЕ.
+               Карточка лежит в слоте `.to-card-slot`, и слот — ячейка сетки.
+               Пряча карточку, мы оставляли слот: замер фильтра «Мужские» на
+               masters дал ЧЕТЫРЕ пустых слота высотой 144 в архиве — те самые
+               дыры, из-за которых список читался как поломка. Поэтому
+               показываем и прячем ТО, ЧТО ЛЕЖИТ В СЕТКЕ, а карточка внутри
+               только отвечает на вопрос, годится ли слот. */
+            function единицаСетки(card) {
+                var у = card;
+                while (у.parentElement && у.parentElement !== b.grid) у = у.parentElement;
+                return у.parentElement === b.grid ? у : card;
+            }
+            var годные = new Map();
+
             // Карточка с афишей сбоку — тоже карточка: когда турнир в блоке
             // один, рисуется именно она, и без неё блок считался пустым
             b.grid.querySelectorAll('.to-featured, .to-featured-side, .to-compact').forEach(function(card) {
@@ -705,7 +750,15 @@
                 var nameMatch = !query || (title && title.textContent.toLowerCase().indexOf(query) !== -1);
                 var ok = statusMatch && genderMatch && nameMatch;
                 card.style.display = ok ? '' : 'none';
+                var единица = единицаСетки(card);
+                годные.set(единица, (годные.get(единица) || false) || ok);
                 if (ok) visible++;
+            });
+
+            /* Слот с двумя карточками остаётся, если годится хоть одна. */
+            годные.forEach(function (годится, единица) {
+                if (единица.classList && единица.classList.contains('to-featured')) return;
+                единица.style.display = годится ? '' : 'none';
             });
 
             var moreBtn = section.querySelector('.trn-show-more');

@@ -2094,15 +2094,21 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         return m.round === '3RD' && m.status !== 'cancelled';
                     });
 
-                    bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Playoff' : (isKg ? 'Плей-офф' : 'Плей-офф')) + '</h3>';
-                    bHtml += '<div class="td-bracket-scroll"><div class="td-bracket">';
+                    /* ГРУППЫ ВЫШЕ ПЛЕЙ-ОФФА, ПОКА ПЛЕЙ-ОФФ ПУСТ.
+                       Замер идущего FUTURES: пустая сетка плей-офф (793)
+                       стояла НАД группами (1032) — зритель приходил за
+                       тем, что играется сейчас, а видел пустые клетки.
+                       Порядок блоков — свойство того, что живое. */
+                    var плейофф = '';
+                    плейофф += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Playoff' : (isKg ? 'Плей-офф' : 'Плей-офф')) + '</h3>';
+                    плейофф += '<div class="td-bracket-scroll"><div class="td-bracket">';
                     plRounds.forEach(function(round, ri) {
                         var isLastRound = ri === plRounds.length - 1;
-                        bHtml += '<div class="td-bracket-round">';
-                        bHtml += '<div class="td-round-title">' + round.name + '</div>';
-                        bHtml += '<div class="td-bracket-matches">';
-                        round.matches.forEach(function(match) { bHtml += renderMatch(plTournObj, match, predOpts); });
-                        bHtml += '</div>';
+                        плейофф += '<div class="td-bracket-round">';
+                        плейофф += '<div class="td-round-title">' + round.name + '</div>';
+                        плейофф += '<div class="td-bracket-matches">';
+                        round.matches.forEach(function(match) { плейофф += renderMatch(plTournObj, match, predOpts); });
+                        плейофф += '</div>';
 
                         // Матч за третье место — в колонке финала, но ниже
                         // самого финала, а не рядом с ним.
@@ -2111,39 +2117,39 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         // финал уезжал вверх и переставал попадать на свою
                         // соединительную линию
                         if (isLastRound && thirdMatch) {
-                            bHtml += '<div class="td-third-place">';
-                            bHtml += '<div class="td-round-title">' +
+                            плейофф += '<div class="td-third-place">';
+                            плейофф += '<div class="td-round-title">' +
                                 (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
-                            bHtml += renderMatch(plTournObj, {
+                            плейофф += renderMatch(plTournObj, {
                                 matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
                                 score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
                             }, predOpts);
-                            bHtml += '</div>';
+                            плейофф += '</div>';
                         }
 
-                        bHtml += '</div>';
+                        плейофф += '</div>';
                         if (ri < plRounds.length - 1) {
                             var pc = Math.floor(round.matches.length / 2);
-                            bHtml += '<div class="td-connector-column">';
-                            bHtml += '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>';
-                            bHtml += '<div class="td-connector-inner">';
+                            плейофф += '<div class="td-connector-column">';
+                            плейофф += '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>';
+                            плейофф += '<div class="td-connector-inner">';
                             for (var ci = 0; ci < pc; ci++) {
-                                bHtml += '<div class="td-connector-pair"><div class="td-conn-top"></div><div class="td-conn-mid"></div><div class="td-conn-bottom"></div></div>';
+                                плейофф += '<div class="td-connector-pair"><div class="td-conn-top"></div><div class="td-conn-mid"></div><div class="td-conn-bottom"></div></div>';
                             }
-                            bHtml += '</div></div>';
+                            плейофф += '</div></div>';
                         }
                     });
-                    bHtml += '</div></div>';
+                    плейофф += '</div></div>';
 
-                    bHtml += '<div style="margin-bottom:32px;"></div>';
+                    плейофф += '<div style="margin-bottom:32px;"></div>';
                 }
 
                 // Inter-group matches section
                 if (hasIG) {
-                    bHtml += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Additional Matches' : (isKg ? 'Кошумча матчтар' : 'Дополнительные матчи')) + '</h3>';
+                    плейофф += '<h3 style="color:var(--accent);margin-bottom:16px;font-size:1.1rem;">' + (isEn ? 'Additional Matches' : (isKg ? 'Кошумча матчтар' : 'Дополнительные матчи')) + '</h3>';
                     // Класс нужен, чтобы на телефоне поставить карточки по две
                     // в ряд: минимум в 220 пикселей оставлял их по одной
-                    bHtml += '<div class="td-ig-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
+                    плейофф += '<div class="td-ig-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
                     igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
                     igMatches.forEach(function(m, idx) {
                         var p1Name = pName(m.player1_id);
@@ -2165,20 +2171,20 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         }
 
                         var matchLabel = isEn ? 'Match ' : (isKg ? 'Матч ' : 'Матч ');
-                        bHtml += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
-                        bHtml += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
+                        плейофф += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
+                        плейофф += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
                         // P1
-                        bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
-                        bHtml += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p1Name + '</span>';
-                        bHtml += '<span style="font-size:0.8rem;font-weight:600;' + (isP1Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p1Score || '—') + '</span>';
-                        bHtml += '</div>';
+                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
+                        плейофф += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p1Name + '</span>';
+                        плейофф += '<span style="font-size:0.8rem;font-weight:600;' + (isP1Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p1Score || '—') + '</span>';
+                        плейофф += '</div>';
                         // P2
-                        bHtml += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
-                        bHtml += '<span style="font-size:0.85rem;' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p2Name + '</span>';
-                        bHtml += '<span style="font-size:0.8rem;font-weight:600;' + (isP2Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p2Score || '—') + '</span>';
-                        bHtml += '</div></div>';
+                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
+                        плейофф += '<span style="font-size:0.85rem;' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p2Name + '</span>';
+                        плейофф += '<span style="font-size:0.8rem;font-weight:600;' + (isP2Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p2Score || '—') + '</span>';
+                        плейофф += '</div></div>';
                     });
-                    bHtml += '</div>';
+                    плейофф += '</div>';
                 }
 
                 // Group tables (2-column grid)
@@ -2310,6 +2316,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 }
 
                 bHtml += '</div>'; // close td-groups-grid
+                bHtml += (typeof плейофф === 'string' ? плейофф : '');
                 bracketContainer.innerHTML = bHtml;
 
 
