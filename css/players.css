@@ -1107,8 +1107,15 @@
         grid-column: 2;
         grid-row: 1;
         justify-self: end;
-        align-self: start;
-        line-height: var(--btn-h-md);
+        /* Выравнивание — свойство РАСКЛАДКИ, а не межстрочного. Я поставил
+           сюда line-height 44, чтобы подогнать под высоту чипа, и выбил
+           уровень с лестницы: прибор намерил 2.75 при ступенях
+           1 · 1.1 · 1.3 · 1.5 · 1.65. Теперь высоту даёт сама строка. */
+        align-self: center;
+        min-height: var(--btn-h-md);
+        display: inline-flex;
+        align-items: center;
+        line-height: var(--lh-none);
     }
 
     .trn-filters.pl-cat-mode .trn-chips {
