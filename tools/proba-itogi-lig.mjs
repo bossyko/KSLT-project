@@ -33,15 +33,15 @@ for (const в of [{имя:'десктоп',w:1440,h:900},{имя:'телефон
       таблицЛиг: q('.td-results-table', лиги).length,
       заголовкиЛиг: q('.td-results-title', лиги).map(e => e.textContent.trim()),
       очкиЛиг: q('.td-results-table', лиги).map(t => q('.td-res-pts', t).slice(1).map(e => e.textContent.trim())),
-      кнопокВлигах: q('.td-res-more', лиги).length,
+      кнопокВлигах: q('.td-more', лиги).length,
       многоВсего: q('tbody tr', много).length,
       многоВидно: видимых(много),
-      кнопка: много.querySelector('.td-res-more') ? много.querySelector('.td-res-more').textContent.trim() : null,
-      кнопкаВысота: много.querySelector('.td-res-more') ? Math.round(много.querySelector('.td-res-more').getBoundingClientRect().height) : null,
+      кнопка: много.querySelector('.td-more') ? много.querySelector('.td-more').textContent.trim() : null,
+      кнопкаВысота: много.querySelector('.td-more') ? Math.round(много.querySelector('.td-more').getBoundingClientRect().height) : null,
       обычноВидно: видимых(обычно),
       обычноКнопка: obычноБтн()
     };
-    function obычноБтн(){ return !!document.getElementById('обычно').querySelector('.td-res-more'); }
+    function obычноБтн(){ return !!document.getElementById('обычно').querySelector('.td-more'); }
   });
   check('в лигах три таблицы (PL, CL, вне лиг)', м.таблицЛиг === 3, м.таблицЛиг);
   check('заголовки лиг верные', JSON.stringify(м.заголовкиЛиг) === JSON.stringify(['Высшая лига','Утешительная лига','Итоги турнира']), м.заголовкиЛиг);
@@ -55,11 +55,11 @@ for (const в of [{имя:'десктоп',w:1440,h:900},{имя:'телефон
   check('у восьми строк кнопки нет', м.обычноКнопка === false, м.обычноКнопка);
   check('в обычной видно все восемь', м.обычноВидно === 8, м.обычноВидно);
 
-  await p.click('#много .td-res-more');
+  await p.click('#много .td-more');
   const после = await p.evaluate(() => {
     const t = document.querySelector('#много .td-results-table');
     return { видно: [...t.querySelectorAll('tbody tr')].filter(r => getComputedStyle(r).display !== 'none').length,
-             кнопка: !!t.querySelector('.td-res-more') };
+             кнопка: !!t.querySelector('.td-more') };
   });
   check('после нажатия видны все 64', после.видно === 64, после.видно);
   check('кнопка исчезла', после.кнопка === false, после.кнопка);

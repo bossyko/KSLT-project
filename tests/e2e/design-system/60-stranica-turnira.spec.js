@@ -315,6 +315,92 @@ test.describe('страница турнира · ' + Я.имя, () => {
         expect(перелив, 'страница переливает вбок на ' + перелив).toBe(0);
     });
 
+    /* ОТСЕЧКА ДЛИННОЙ ТАБЛИЦЫ — 06.10, слово Кости: «10 везде».
+       Чего заморозка не видит: СКОЛЬКО СТРОК ОСТАЛОСЬ НА ЭКРАНЕ и доходит
+       ли нажатие. Класс в файле есть, а строка может быть видна. */
+    test('длинная таблица показывает десять строк, а хвост прячет классом', async ({ page }) => {
+        await открыть(page, Я.файл, РАСПИСАНИЕ, '#scheduleContainer table tbody tr');
+        const до = await page.evaluate(() => {
+            const вид = э => э && э.offsetParent !== null && !э.hidden;
+            const длинные = [...document.querySelectorAll('table')]
+                .filter(t => t.offsetParent !== null && t.querySelectorAll('tbody tr').length > 10)
+                .map(t => ({
+                    всего: t.querySelectorAll('tbody tr').length,
+                    видно: [...t.querySelectorAll('tbody tr')].filter(вид).length
+                }));
+            const кн = [...document.querySelectorAll('.td-more')].map(b => ({
+                текст: b.textContent.trim(),
+                высота: Math.round(b.getBoundingClientRect().height),
+                aria: b.getAttribute('aria-expanded')
+            }));
+            return { длинные, кн };
+        });
+        expect(до.длинные.length, 'ПОРОГ: длинных таблиц на экране нет — мерить нечего')
+            .toBeGreaterThan(0);
+        for (const т of до.длинные) {
+            expect(т.видно, 'таблица из ' + т.всего + ' строк показывает ' + т.видно +
+                ', а должна десять').toBe(10);
+        }
+        expect(до.кн.length, 'кнопок отсечки меньше, чем длинных таблиц')
+            .toBe(до.длинные.length);
+        for (const к of до.кн) {
+            expect(ШКАЛА_КНОПОК, 'кнопка «' + к.текст + '» высотой ' + к.высота +
+                ' — такой ступени на шкале нет').toContain(к.высота);
+            expect(к.aria, 'кнопка не сказала диктору, что раздел свёрнут').toBe('false');
+            expect(/\(\d+\)/.test(к.текст), 'кнопка не называет, сколько прячет: ' + к.текст)
+                .toBe(true);
+        }
+
+        /* НАЖАТИЕ, А НЕ ЧТЕНИЕ КЛАССА: слой цели уже однажды съедал кнопку. */
+        const сколько = await page.locator('.td-more').count();
+        for (let i = 0; i < сколько; i++) await page.locator('.td-more').first().click();
+        await page.waitForTimeout(300);
+        const после = await page.evaluate(() => {
+            const вид = э => э && э.offsetParent !== null && !э.hidden;
+            return {
+                спрятанных: [...document.querySelectorAll('table')]
+                    .filter(t => t.offsetParent !== null && t.querySelectorAll('tbody tr').length > 10)
+                    .map(t => [...t.querySelectorAll('tbody tr')].filter(r => !вид(r)).length)
+                    .reduce((a, b) => a + b, 0),
+                кнопок: document.querySelectorAll('.td-more').length
+            };
+        });
+        expect(после.спрятанных, 'после нажатия часть строк осталась скрытой').toBe(0);
+        expect(после.кнопок, 'кнопка осталась после раскрытия').toBe(0);
+    });
+
+    /* ДВЕ ПРЯТАЛКИ НЕ РАБОТАЮТ ВМЕСТЕ. Это про ДАННЫЕ, и заморозка такого
+       не видит: условие стоит в коде, а истина — в статусах матчей. */
+    test('у идущего турнира прячет полоса «Сыгранные», а отсечка молчит', async ({ page }) => {
+        await page.route('**/rest/v1/matches*', async route => {
+            const ответ = await route.fetch();
+            let тело;
+            try { тело = await ответ.json(); } catch (e) { return route.fulfill({ response: ответ }); }
+            if (Array.isArray(тело)) {
+                тело = тело.map((м, i) => (i % 2 === 1)
+                    ? Object.assign({}, м, { status: 'scheduled', score: null, winner_id: null })
+                    : м);
+            }
+            await route.fulfill({ response: ответ, body: JSON.stringify(тело) });
+        });
+        await открыть(page, Я.файл, РАСПИСАНИЕ, '#scheduleContainer table tbody tr');
+        const r = await page.evaluate(() => {
+            const sc = document.querySelector('#scheduleContainer');
+            return {
+                полоса: !!sc.querySelector('.td-sched-ranshe'),
+                отсечка: sc.querySelectorAll('.td-more').length,
+                спрятаноКлассом: sc.querySelectorAll('.td-row-skryta').length,
+                строк: sc.querySelectorAll('tbody tr').length
+            };
+        });
+        expect(r.строк, 'ПОРОГ: строк расписания нет').toBeGreaterThan(10);
+        expect(r.полоса, 'у идущего турнира пропала полоса «Сыгранные»').toBe(true);
+        expect(r.отсечка, 'отсечка по длине включилась вместе с полосой — ' +
+            'ждущие матчи спрятаны длиной, а они и есть главное').toBe(0);
+        expect(r.спрятаноКлассом, 'строки расписания спрятаны классом отсечки ' +
+            'при живой полосе').toBe(0);
+    });
+
 });
 
 }
