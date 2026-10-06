@@ -8277,3 +8277,27 @@ select.ad-field-input {
     line-height: 1.5; margin: 0 0 var(--space-4);
 }
 .ad-modal-body .ad-pts-hint:last-child { margin: var(--space-3) 0 0; }
+
+/* === ЗАВЕРШЁННЫЙ ТУРНИР: ТИШЕ, НО НЕ МЁРТВО === */
+/* Решение Кости 06.10: «гасить и предупреждать» — кнопки остаются, но
+   перестают звать. Лайм в админке значит утверждающее действие, и у
+   завершённого турнира ему в клетке не место: правка счёта там уже не
+   нормальный ход, а исключение, за которым идёт пересчёт очков.
+   Краска `--text-muted` даёт на карточке 5.33 при норме WCAG AA 4.5 — то
+   же число, на которое 04.10 перевели шапки таблиц.
+   Класс стоит ОДИН раз на панели: семнадцать кнопок правятся краской, а
+   не семнадцатью правками в разметке. */
+.ad-brk-zavershyon .ad-brk-edit,
+.ad-brk-zavershyon .ad-sq-fix {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+}
+
+/* Наведение и фокус возвращают голос: действие доступно, просто не зовёт */
+.ad-brk-zavershyon .ad-brk-edit:hover,
+.ad-brk-zavershyon .ad-sq-fix:hover,
+.ad-brk-zavershyon .ad-brk-edit:focus-visible,
+.ad-brk-zavershyon .ad-sq-fix:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}

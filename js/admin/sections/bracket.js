@@ -2708,7 +2708,21 @@
         html += '</div>';
 
         // Bracket / Group panel
-        html += '<div class="ad-brk-panel" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
+        /* ЗАВЕРШЁННОСТЬ — СВОЙСТВО ЭКРАНА, А НЕ ОДНОЙ КНОПКИ ВНИЗУ.
+           Признак не доходил до клеток вовсе: `renderPlayoffBracketHtml` и
+           соседи его даже не принимают, и семнадцать кнопок «Изм.» и
+           «Снять» у завершённого турнира выглядели ровно так же, как у
+           идущего. Костя 06.10: «после завершения турнира не понятно что
+           можно тут, так как всё там активно».
+           Решение Кости — ГАСИТЬ И ПРЕДУПРЕЖДАТЬ, а не прятать: правка
+           счёта после завершения в продукте нужна, рядом для того и стоит
+           «Пересчитать очки». Класс ставится ОДИН раз на панель, и клетки
+           тише становятся краской, а не семнадцатью правками. */
+        html += '<div class="ad-brk-panel' + (isTournamentCompleted ? ' ad-brk-zavershyon' : '') +
+            '" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
+        if (isTournamentCompleted && hasMatches) {
+            html += '<div class="ad-sched-note ad-sched-note-top">' + L.doneEditWarn + '</div>';
+        }
         if (hasMatches) html += шапкаВыгрузки('adBrkBracketPanel',
             (tournament.bracket_type === 'round_robin' || tournament.bracket_type === 'group_league') ? L.groupLabel : L.trnTabBracket);
         // Счета, которые вписали сами игроки: ждущие подтверждения и спорные.

@@ -47,6 +47,31 @@ const ТЕСТ_ФАЙЛ  = 'tests/e2e/features/19-ekran-ochkov.spec.js';
 const СТАТ_SQL   = 'sql/функции/stats-rating-only.sql';
 
 const ОТКАТЫ = [
+  /* ─── завершённый турнир виден экраном ─── */
+  [УТИЛИТЫ, 'id="adBrkFinalize"', 'id="adBrkFinalizeБыло"',
+   'кнопка завершения объявлена ОДИН раз, и не в рисовальщиках'],
+
+  [УТИЛИТЫ, "                'id=\"adBrkRecalc\">' + (L.recalcPoints || '') + '</button>' +",
+            "                '>' + (L.recalcPoints || '') + '</button>' +",
+   'полоса завершения знает ТРИ состояния, а не два'],
+
+  [СЕТКА, "                L.generateLeagues + '</button></div>';\n        }\n\n        html += A.полосаЗавершения({",
+          "                L.generateLeagues + '</button></div>';\n        }\n\n        html += ({",
+   'полосу завершения зовут ВСЕ четыре раскладки'],
+
+  [УТИЛИТЫ, " disabled title=\"' + пояснение + '\"'", " style=\"opacity:0.5\"'",
+   'погасание висит на `[disabled]`, а не вторым способом'],
+
+  [СЕТКА, "(isTournamentCompleted ? ' ad-brk-zavershyon' : '')", "('')",
+   'завершённость доходит до панели сетки одним признаком'],
+
+  [СЕТКА, "L.doneEditWarn", "L.tournamentDone",
+   'завершённый турнир предупреждает о цене правки словом'],
+
+  [АДМИН_CSS, '.ad-brk-zavershyon .ad-brk-edit,\n.ad-brk-zavershyon .ad-sq-fix {\n    background: rgba(255, 255, 255, 0.03);\n    color: var(--text-muted);',
+              '.ad-brk-zavershyon .ad-brk-edit,\n.ad-brk-zavershyon .ad-sq-fix {\n    background: rgba(204,255,0,0.05);\n    color: var(--accent);',
+   'клетки завершённого турнира перестают звать лаймом'],
+
 
   /* ─── порядок: причина раньше следствия ─── */
   [СЕТКА,
