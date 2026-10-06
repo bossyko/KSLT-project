@@ -5119,7 +5119,11 @@ h2 {
     padding: 10px 16px 10px 42px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
+    /* РАДИУС ИЗ КОМПОНЕНТА, А НЕ ТАБЛЕТКА. `Search field 50:67`: radius 8
+       («radius/sm»), как у `Input 25:5`. В коде стояла таблетка — поле
+       поиска читалось как чип, а не как поле ввода, и расходилось с полями
+       всех форм продукта. Одно объявление на пять разделов с поиском. */
+    border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: var(--font-primary);
     outline: none;
