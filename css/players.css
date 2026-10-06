@@ -305,36 +305,6 @@
     background: var(--bg-primary);
 }
 
-/* ЦИФРЫ ОБЛОЖКИ — ПЛАШКАМИ, А НЕ СТРОКОЙ. До 06.10 «391 игроков · 0
-   онлайн · Сезон 2026» был одной строкой подзаголовка: число ничем не
-   отличалось от слова рядом. Вид взят у обложки раздела турниров, числа —
-   из тех же токенов (--fs-hero-num 40 → 32 → 21, --fs-hero-cap 14).
-   ДОЛГ: класс .hero-stat-* живёт в продукте в пяти файлах; свести их в
-   один — отдельный кусок, он записан в трекере. */
-.pl-hero-stats {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-xl);
-    flex-wrap: wrap;
-}
-
-.pl-hero-stat { text-align: center; }
-
-.pl-hero-stat-value {
-    display: block;
-    font-size: var(--fs-hero-num);
-    font-weight: var(--fw-extrabold);
-    line-height: var(--lh-tight);
-    color: var(--accent);
-}
-
-.pl-hero-stat-label {
-    font-size: var(--fs-hero-cap);
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
 .pl-gender-tabs {
     display: flex;
     justify-content: center;

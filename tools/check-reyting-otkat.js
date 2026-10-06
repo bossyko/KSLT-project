@@ -211,15 +211,10 @@ const ОТКАТЫ = [
  '    font-size: clamp(1.9rem, 4.4vw, 3.1rem);\n    font-weight: var(--fw-extrabold);',
  'заголовок обложки — крутилка раздела, а не clamp'],
 
-['увести цифру обложки со своего токена', 'css/players.css',
- '    font-size: var(--fs-hero-num);',
- '    font-size: 2.4rem;',
- 'цифра обложки — плашка, и числа у неё из токенов'],
-
-['вернуть онлайн на обложку рейтинга', 'js/players.js',
- '                    плашка(totalPlayers, labels.statPlayers) +',
- '                    плашка(totalPlayers, labels.statPlayers) +\n                    плашка(onlineCount, labels.statOnline) +',
- 'онлайн на обложке рейтинга не показывается'],
+['вернуть числа на обложку рейтинга', 'js/players.js',
+ "                '<p class=\"pl-hero-subtitle\">' + labels.subtitle + '</p>' +",
+ "                '<p class=\"pl-hero-subtitle\">' + labels.subtitle + '</p>' +\n                '<div class=\"pl-hero-stat\">' + totalPlayers + '</div>' +",
+ 'на обложке рейтинга нет чисел — только название и сезон'],
 
 ['вернуть чипу пола высоту полями', 'css/players.css',
  '    min-height: var(--btn-h-md);\n    line-height: var(--lh-none);',
