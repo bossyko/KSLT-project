@@ -328,9 +328,19 @@
     .pl-podium-second .pl-podium-points,
     .pl-podium-third  .pl-podium-points { font-size: var(--fs-sm); }
 
-    .pl-podium-first { padding: var(--space-md) var(--space-lg) 0; }
+    /* БОКОВОЕ ПОЛЕ ОДНО НА ВСЕ ТРИ МЕСТА — ЛЕСЕНКУ ДЕРЖИТ ВЕРХНЕЕ.
+       Здесь у первого места боковое поле было на ступень больше, чем у
+       соседей, и первое место оказывалось САМЫМ УЗКИМ из трёх: замер 06.10
+       на 768 и 844 дал карточку 150 против 182 у второго и третьего при
+       одинаковой тумбе 230. Высоту ступени задаёт ВЕРХНЕЕ поле, и оно
+       по-прежнему разное; ширина у всех троих теперь одна. */
+    .pl-podium-first,
     .pl-podium-second,
-    .pl-podium-third { padding: var(--space-sm) var(--space-md) 0; }
+    .pl-podium-third { padding-left: var(--space-md); padding-right: var(--space-md); }
+
+    .pl-podium-first { padding-top: var(--space-md); }
+    .pl-podium-second,
+    .pl-podium-third { padding-top: var(--space-sm); }
 
     /* ДЛИННОЕ СЛОВО ПЕРЕНОСИТСЯ, А НЕ РЕЖЕТСЯ ПОСРЕДИ БУКВЫ.
        Здесь стоял запрет переноса по буквам: «в карточке 112 это читается
@@ -392,9 +402,14 @@
     .pl-podium-second .pl-podium-points,
     .pl-podium-third  .pl-podium-points { font-size: var(--fs-xs); }
 
-    .pl-podium-first { padding: var(--space-sm) var(--space-md) 0; }
+    /* То же правило на узком виде: ширина одна, лесенку держит верх */
+    .pl-podium-first,
     .pl-podium-second,
-    .pl-podium-third { padding: var(--space-xs) var(--space-sm) 0; }
+    .pl-podium-third { padding-left: var(--space-sm); padding-right: var(--space-sm); }
+
+    .pl-podium-first { padding-top: var(--space-sm); }
+    .pl-podium-second,
+    .pl-podium-third { padding-top: var(--space-xs); }
 
     .pl-podium-card {
         padding-left: 4px;
