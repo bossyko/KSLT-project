@@ -26,7 +26,7 @@
 const fs = require('fs');
 const path = require('path');
 const { test } = require('../../fixtures');
-const db = require('../../test-db');
+const подстава = require('../../podstava-reytinga');
 
 test.setTimeout(15 * 60 * 1000);
 
@@ -208,9 +208,9 @@ test('замер раздела рейтинга — всё в файл', async 
     for (const [вид, w, h] of ВИДЫ) {
         for (const [яз, путь] of ЯЗЫКИ) {
             for (const [экран, хвост] of ЭКРАНЫ) {
-                const ctx = await browser.newContext({ viewport: { width: w, height: h } });
-                await ctx.addInitScript(cfg => { window.KSLT_DB = cfg; },
-                    { url: db.url, key: db.key });
+                /* Контекст заводит подстава: прибор меряет вёрстку на своих
+                   данных, а не на том, что сегодня лежит в базе прогона. */
+                const ctx = await подстава.контекст(browser, { width: w, height: h });
                 const page = await ctx.newPage();
                 const ошибки = [];
                 page.on('console', c => {
@@ -221,7 +221,13 @@ test('замер раздела рейтинга — всё в файл', async 
                 try {
                     await page.goto('http://localhost:8000' + путь + хвост,
                         { waitUntil: 'domcontentloaded' });
-                    await page.waitForTimeout(1400);
+                    /* ЖДАТЬ НАДО ПРИЗНАК, А НЕ ИСТЕЧЕНИЕ ВРЕМЕНИ: на шестидесяти
+                       игроках отрисовка дольше, и полторы секунды врали. */
+                    await page.waitForFunction(() =>
+                        document.querySelectorAll('.pl-row, .pl-cat-row, .pl-podium-card').length > 0
+                        || document.querySelector('.pl-no-results'),
+                        null, { timeout: 8000 }).catch(() => null);
+                    await page.waitForTimeout(500);
                     const д = await page.evaluate(СНЯТЬ, УРОВНИ);
                     отчёт.страницы.push({ вид, яз, экран, ...д, ошибкиКонсоли: ошибки });
                 } catch (e) {
