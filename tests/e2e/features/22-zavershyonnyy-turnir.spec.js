@@ -62,12 +62,28 @@ function контраст(a, b) {
     return (св + 0.05) / (тм + 0.05);
 }
 
-/** Открыть сетку турнира и дождаться ПРИЗНАКА, а не тишины сети. */
+/**
+ * Открыть сетку турнира и дождаться ПРИЗНАКА, а не тишины сети.
+ *
+ * ВКЛАДКУ НАДО НАЖАТЬ, А НЕ ПРОСИТЬ АДРЕСОМ. Первый прогон 06.10 упал
+ * шесть раз подряд на ожидании клетки: у ЗАВЕРШЁННОГО турнира экран
+ * открывается на «Результатах», а не на сетке — `bracket.js:2623`,
+ * `isTournamentCompleted ? 'results' : …`. Это задумано: закончился
+ * турнир — смотрят итоги. Маршрут `#tournaments/bracket/<id>` вкладку не
+ * навязывает, `forceTab` приходит не из адреса.
+ * Поэтому делаем то же, что делает менеджер: жмём вкладку.
+ */
 async function открытьСетку(page, id) {
     await page.goto('/pages/admin.html#tournaments/bracket/' + id,
         { waitUntil: 'domcontentloaded' });
+
+    // Ждём ПРИЗНАК — саму вкладку, а не загрузку страницы
+    const вкладка = page.locator('[data-trn-nav="bracket"]');
+    await вкладка.waitFor({ state: 'visible', timeout: 20000 });
+    await вкладка.click();
+
     await page.waitForSelector('#adBrkBracketPanel .ad-brk-edit, #adBrkBracketPanel .ad-grp-cell-click',
-        { timeout: 20000 });
+        { state: 'visible', timeout: 20000 });
 }
 
 test.describe('Завершённый турнир виден экраном', () => {
