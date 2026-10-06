@@ -134,7 +134,13 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
         await открыть(page, Я.адрес);
         const r = await page.evaluate(() => {
             const т = document.querySelector('.pl-table');
-            if (!т) return null;
+            /* ПРОВЕРКА ОБЯЗАНА ЗНАТЬ, КОГДА ЕЁ УСЛОВИЕ НЕ ДЕЙСТВУЕТ.
+               Таблицы может не быть по двум законным причинам: в базе
+               прогона нет игроков (рисуется «Игроки не найдены») или
+               страница открыта гостем и список закрыт входом. Это не
+               беда вёрстки, и падать тут значит врать. */
+            if (!т) return { пусто: !!document.querySelector('.pl-no-results'),
+                             гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta') };
             const ряды = [...т.querySelectorAll('.pl-row:not(.pl-row-header)')]
                 .filter(э => э.offsetParent !== null);
             const к = т.getBoundingClientRect();
@@ -145,7 +151,11 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
                      высоты: [...new Set(ряды.slice(0, 10)
                          .map(э => Math.round(э.getBoundingClientRect().height)))] };
         });
-        expect(r, 'ПОРОГ: таблицы рейтинга нет на экране').not.toBeNull();
+        test.skip(!!(r && (r.пусто || r.гость)),
+            r && r.пусто ? 'в базе прогона нет игроков — таблицу рисовать не из чего'
+                         : 'список закрыт входом: это экран гостя, а не таблица');
+        expect(r && r.ширина, 'ПОРОГ: таблицы рейтинга нет на экране, и это не пустая ' +
+            'база и не экран гостя — значит таблица пропала').toBeTruthy();
         expect(r.рядов, 'ПОРОГ: в таблице нет строк').toBeGreaterThan(0);
         expect(r.ширина, 'таблица ' + r.ширина + ' при окне ' + r.окно +
             ' — снова во всю ширину. ATP, WTA и ITF держат рейтинг в узкой колонке')
