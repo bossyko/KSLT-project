@@ -1029,7 +1029,6 @@
                             '<option value="16"' + (item && +item.draw_size === 16 ? ' selected' : '') + '>16</option>' +
                             '<option value="32"' + (item && +item.draw_size === 32 ? ' selected' : '') + '>32</option>' +
                             '<option value="64"' + (item && +item.draw_size === 64 ? ' selected' : '') + '>64</option>' +
-                            '<option value="128"' + (item && +item.draw_size === 128 ? ' selected' : '') + '>128</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ad-field ad-pole-uzkoe" id="adTrnGroupCountWrap">' +
