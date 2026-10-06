@@ -838,11 +838,11 @@
                     // равные колонки и переключатель пола встаёт ровно под
                     // вершиной пьедестала
                     '<div class="pl-cat-bar-left">' +
+                        /* ПОИСКА В ЛИПКОЙ ПОЛОСЕ РАЗРЯДА НЕТ — слово Кости 06.10:
+                           «поисковая строка не нужна». Полоса липнет к шапке и
+                           занимала на телефоне три ряда из четырёх уровней;
+                           поиск по игрокам живёт на отдельной странице. */
                         '<a href="' + playersPage + '" class="kslt-back trn-back">\u2190 ' + labels.catPageBack + '</a>' +
-                        '<div class="trn-search-wrap">' +
-                            '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-                            '<input type="text" class="trn-search-input" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
-                        '</div>' +
                     '</div>' +
                     // Переключатель пола показываем только там, где есть обе
                     // половины: женских Pro-Masters и Challengers у клуба нет
