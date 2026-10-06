@@ -34,6 +34,14 @@ const ГЕН = 'js/tournament-generator.js';
 const ПРАВ = 'js/kslt-rules.js';
 
 const ОТКАТЫ = [
+  [CSS, '    line-height: var(--lh-tight);\n    color: var(--text-primary);\n}',
+        '    color: var(--text-primary);\n}',
+   'у заголовка раздела межстрочный задан ступенью, а не наследуется'],
+
+  [CSS, '        font-size: var(--fs-lg);\n        font-weight: 700;\n        letter-spacing: -0.03em;',
+        '        font-size: clamp(1.15rem, 5vw, 1.32rem);\n        font-weight: 700;\n        letter-spacing: -0.03em;',
+   'кегль заголовка раздела на узких видах — ступень, а не clamp'],
+
   [JSФ, "        drawNotYet: 'Тор азырынча түзүлө элек',",
         "        drawNotYet: 'Тор \u04d9зырынча түзүлө элек',",
    'в киргизских строках нет букв из чужих алфавитов'],
