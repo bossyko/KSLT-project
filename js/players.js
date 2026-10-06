@@ -526,11 +526,13 @@
            оставить, привести к стандартам». Состав экрана вернулся к
            исходному — поиск, чипы пола и пилюли разрядов на своих местах;
            менялись только размеры и ступени. */
+        /* ПОИСКОВОЙ СТРОКИ НА ОБЗОРНОЙ НЕТ. Слово Кости сказано трижды:
+           «на обзорной убери, там всё равно обрезанная версия стоит»,
+           «поисковая строка не нужна», «поисковая строка — сколько раз
+           можно писать». Фильтр пола и пилюли разрядов при этом остаются:
+           их снятие было моей отсебятиной, и оно откачено.
+           Поиск по игрокам живёт на отдельной странице. */
         html += '<div class="pl-category-row">';
-        html += '<div class="trn-search-wrap">' +
-            '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-            '<input type="text" class="trn-search-input" id="playersSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off" value="' + esc(searchQuery) + '">' +
-        '</div>';
         html += '<div class="pl-category-pills" id="categoryPills">';
         var cats = currentGender === 'men' ? menCats : womenCats;
         for (var i = 0; i < cats.length; i++) {

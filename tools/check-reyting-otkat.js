@@ -156,20 +156,20 @@ const ОТКАТЫ = [
  'у рейтинга две границы по ширине, а не четыре'],
 
 
-['снять поиск с обзорной', 'js/players.js',
- "            '<input type=\"text\" class=\"trn-search-input\" id=\"playersSearch\"",
- "            '<input type=\"text\" class=\"trn-search-input\" id=\"нету\"",
- 'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
+['вернуть поиск на обзорную', 'js/players.js',
+ "        html += '<div class=\"pl-category-row\">';",
+ "        html += '<input id=\"playersSearch\">';",
+ 'на обзорной нет поиска, а фильтр пола и пилюли на месте'],
 
 ['снять чипы пола с обзорной', 'js/players.js',
  "        var html = '<div class=\"pl-gender-tabs\">' +",
  "        var html = '' + '' +",
- 'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
+ 'на обзорной нет поиска, а фильтр пола и пилюли на месте'],
 
 ['свести оба пола в один ряд пилюль', 'js/players.js',
  "        var cats = currentGender === 'men' ? menCats : womenCats;",
  '        var cats = menCats.concat(womenCats);',
- 'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
+ 'на обзорной нет поиска, а фильтр пола и пилюли на месте'],
 
 ['вернуть пустую десятую колонку в ряд', 'css/players.css',
  '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px;',
