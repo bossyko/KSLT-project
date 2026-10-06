@@ -354,6 +354,16 @@
    категории уходят — иначе они обещают фильтр, которого нет */
 .pl-filters-searching .pl-gender-tabs,
 .pl-filters-searching .pl-category-pills,
+.pl-view-all::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--btn-h-md);
+}
+
 .pl-filters-searching .pl-view-all {
     display: none;
 }
@@ -381,7 +391,11 @@
     flex-wrap: wrap;
 }
 
+/* ССЫЛКА БЫЛА ВЫСОТОЙ 21 — ЦЕЛЬ НАЖАТИЯ ВТРОЕ МЕНЬШЕ НОРМЫ. Высоту строки
+   не трогаем: ссылка стоит в ряду с пилюлями и выросла бы над ними. Слой
+   цели 44, как у «Назад» в полосе фильтров. */
 .pl-view-all {
+    position: relative;
     grid-column: 3;
     justify-self: end;
     display: inline-flex;
@@ -407,17 +421,37 @@
     transform: translateX(3px);
 }
 
+/* ВЫСОТУ ДАЁТ СТУПЕНЬ, А НЕ ПОЛЯ. Замер 06.10: пилюля 34 на десктопе и 32
+   на узких — таких ступеней на шкале кнопок нет (28 · 36 · 44 · 52), и обе
+   меньше цели нажатия. Ступень 36 плюс прозрачный слой цели 44: КНОПКА 36
+   ЗАКОННА, ЕСЛИ У НЕЁ ЕСТЬ СЛОЙ ЦЕЛИ 44. */
 .pl-category-pill {
-    padding: 8px 20px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-sm);
+    padding: 0 20px;
     background: transparent;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
     font-size: var(--fs-sm);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
     cursor: pointer;
     transition: all 0.2s;
+}
+
+/* Слой цели нажатия: сама пилюля 36, попадать в неё можно как в 44 */
+.pl-category-pill::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--btn-h-md);
 }
 
 .pl-category-pill:hover {
@@ -1450,7 +1484,7 @@
     }
 
     .pl-category-pill {
-        padding: 6px 14px;
+        padding: 0 14px;
         font-size: var(--fs-xs);
     }
 
@@ -1621,7 +1655,7 @@
     }
 
     .pl-category-pill {
-        padding: 6px 12px;
+        padding: 0 12px;
         font-size: var(--fs-xs);
     }
 
@@ -1657,7 +1691,7 @@
         font-size: var(--fs-xs);
     }
     .pl-category-pill {
-        padding: 5px 10px;
+        padding: 0 10px;
         font-size: var(--fs-2xs);
     }
     .pl-row {

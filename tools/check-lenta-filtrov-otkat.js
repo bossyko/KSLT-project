@@ -53,8 +53,8 @@ const ОТКАТЫ = [
         `    line-height: var(--lh-none);`,
    'цель нажатия чипа — ступень кнопки, и задана ВЫСОТОЙ'],
 
-  [CSS, `    .pl-category-pill.pl-category-pill,\n    .db-chip.db-chip {`,
-        `    .trn-chip.trn-chip,\n    .pl-category-pill.pl-category-pill,\n    .db-chip.db-chip {`,
+  [CSS, `    .db-chip.db-chip {`,
+        `    .trn-chip.trn-chip,\n    .db-chip.db-chip {`,
    'чип не вернулся в общий блок мелких кнопок'],
 
   [CSS, `.trn-search-input {\n    min-height: var(--btn-h-md);\n}`,
