@@ -171,6 +171,11 @@ const ОТКАТЫ = [
  '        var cats = menCats.concat(womenCats);',
  'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
 
+['вернуть пустую десятую колонку в ряд', 'css/players.css',
+ '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px;',
+ '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px 90px;',
+ 'колонок в ряду столько же, сколько ячеек в шапке'],
+
 ['погасить очки пьедестала на узком', 'css/podium.css',
  '    /* Значки уходят, очки — НЕТ. Значок украшает, очки объясняют место */',
  '    .pl-podium-points { display: none; }',
