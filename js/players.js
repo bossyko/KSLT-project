@@ -709,29 +709,67 @@
     // PAGINATION
     // ========================================
 
-    function renderPagination(total, page) {
+    /* ОДНА ПОЛОСА СТРАНИЦ НА ДВА ЭКРАНА.
+       До 06.10 её рисовали ДВЕ копии кода — `renderPagination` для обзорной
+       и `renderCatPaginationUI` для категории, — и различались они ровно
+       одним: шагом страницы (10 против 20). Одно определение на одно
+       понятие; беда родилась бы ровно на шве между копиями.
+
+       ОКНО, А НЕ ВСЕ СТРАНИЦЫ ПОДРЯД. 391 игрок при шаге 10 — это сорок
+       кнопок в строку: на телефоне они занимали шесть ряд­ов и полоса
+       страниц становилась выше самой страницы. ATP, WTA и ITF показывают
+       окно: первая, многоточие, сосед­и текущей, многоточие, последняя.
+       Окно считается, а не рисуется наугад: всегда видно не больше семи
+       номеров, и первая с последней видны всегда. */
+    function полосаСтраниц(total, page, шаг) {
         var container = document.getElementById('playersPagination');
         if (!container) return;
 
-        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (totalPages <= 1) {
+        var всего = Math.max(1, Math.ceil(total / шаг));
+        if (всего <= 1) {
             container.innerHTML = '';
             return;
         }
 
+        page = Math.min(Math.max(1, page), всего);
         var labels = getLabels();
-        var html = '<div class="pl-pagination">';
 
-        html += '<button class="pl-page-btn pl-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + labels.prevPage + '</button>';
-
-        for (var p = 1; p <= totalPages; p++) {
-            html += '<button class="pl-page-btn pl-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+        /* Какие номера показываем: первая, последняя, текущая и по соседу с
+           каждой стороны. Многоточие ставится там, где между соседями
+           остался разрыв больше одной страницы. */
+        var номера = [];
+        for (var n = 1; n <= всего; n++) {
+            if (n === 1 || n === всего || Math.abs(n - page) <= 1) номера.push(n);
         }
 
-        html += '<button class="pl-page-btn pl-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + labels.nextPage + '</button>';
+        var html = '<div class="pl-pagination">';
+        html += '<button class="pl-page-btn pl-page-prev"' +
+            (page === 1 ? ' disabled' : '') + '>' + labels.prevPage + '</button>';
+
+        var прошлый = 0;
+        номера.forEach(function (n) {
+            if (прошлый && n - прошлый > 1) {
+                html += '<span class="pl-page-gap" aria-hidden="true">…</span>';
+            }
+            html += '<button class="pl-page-btn pl-page-num' +
+                (n === page ? ' active' : '') + '" data-page="' + n + '"' +
+                (n === page ? ' aria-current="page"' : '') + '>' + n + '</button>';
+            прошлый = n;
+        });
+
+        html += '<button class="pl-page-btn pl-page-next"' +
+            (page === всего ? ' disabled' : '') + '>' + labels.nextPage + '</button>';
         html += '</div>';
 
         container.innerHTML = html;
+    }
+
+    function renderPagination(total, page) {
+        полосаСтраниц(total, page, PER_PAGE);
+    }
+
+    function renderCatPaginationUI(total, page) {
+        полосаСтраниц(total, page, CAT_PER_PAGE);
     }
 
     // ========================================
@@ -1039,28 +1077,6 @@
 
 
         initScrollAnimations();
-    }
-
-    function renderCatPaginationUI(total, page) {
-        var container = document.getElementById('playersPagination');
-        if (!container) return;
-
-        var totalPages = Math.max(1, Math.ceil(total / CAT_PER_PAGE));
-        if (totalPages <= 1) {
-            container.innerHTML = '';
-            return;
-        }
-
-        var labels = getLabels();
-        var html = '<div class="pl-pagination">';
-        html += '<button class="pl-page-btn pl-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + labels.prevPage + '</button>';
-        for (var p = 1; p <= totalPages; p++) {
-            html += '<button class="pl-page-btn pl-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
-        }
-        html += '<button class="pl-page-btn pl-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + labels.nextPage + '</button>';
-        html += '</div>';
-
-        container.innerHTML = html;
     }
 
     function initCatPagination() {

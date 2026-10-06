@@ -922,12 +922,16 @@
     gap: 6px;
 }
 
+/* КНОПКА СТРАНИЦЫ — СТУПЕНЬ ШКАЛЫ И ЦЕЛЬ НАЖАТИЯ.
+   Было 40 × 40 — такой ступени на шкале кнопок нет (28 · 36 · 44 · 52), и
+   это меньше цели нажатия 44. Ниже 480 стояло второе определение на 36 —
+   ещё и по запрещённой ширине. Теперь одно число на все виды: 44. */
 .pl-page-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
-    height: 40px;
+    min-width: var(--btn-h-md);
+    height: var(--btn-h-md);
     padding: 0 12px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -935,9 +939,23 @@
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
     font-size: var(--fs-sm);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
     cursor: pointer;
     transition: all 0.2s;
+}
+
+/* Многоточие между далёкими страницами: не кнопка и нажатия не просит */
+.pl-page-gap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: var(--btn-h-md);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-none);
+    user-select: none;
 }
 
 .pl-page-btn:hover:not(:disabled) {
@@ -949,7 +967,7 @@
     background: var(--accent);
     border-color: var(--accent);
     color: #000;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
 }
 
 .pl-page-btn:disabled {
@@ -1063,6 +1081,33 @@
     .pl-cat-bar-left {
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    /* ВЫБОР ПОЛА И НАЗВАНИЕ РАЗДЕЛА — ОДИН РЯД, А НЕ ДВА.
+       Замер 06.10 на 375×812: липкая полоса занимала 195, вместе с шапкой
+       251 из 812 — почти треть экрана у списка, за которым человек пришёл.
+       Три ряда были «назад + поиск», «чипы», «название». Два коротких
+       уровня — чип 120 и название 36 — умещаются рядом на любом из узких
+       видов, и ряд уходит. Название НЕ снимается: при прокрутке вниз
+       обложки уже не видно, и полоса остаётся единственным местом, которое
+       говорит, в каком ты разряде. */
+    .trn-filters.pl-cat-mode .trn-filters-inner,
+    .trn-filters.pl-cat-mode .trn-filters-inner:not(:has(.trn-chips)) {
+        grid-template-columns: auto auto;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .trn-filters.pl-cat-mode .pl-cat-bar-left {
+        grid-column: 1 / -1;
+    }
+
+    .trn-filters.pl-cat-mode .trn-chips {
+        justify-self: end;
+    }
+
+    .trn-filters.pl-cat-mode .trn-cat-name {
+        justify-self: start;
     }
 }
 
@@ -1443,11 +1488,8 @@
         font-size: var(--fs-xs);
     }
 
-    .pl-page-btn {
-        min-width: 36px;
-        height: 36px;
-        font-size: var(--fs-sm);
-    }
+    /* Второе определение кнопки страницы снято: 36 по ширине 480 — и не
+       ступень цели нажатия, и запрещённая граница. Число одно на все виды. */
 
     /* Category page mobile: cards inherit flex layout */
     .pl-cat-row {

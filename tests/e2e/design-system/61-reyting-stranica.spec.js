@@ -183,3 +183,221 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
 });
 
 }
+
+/* ============================================================================
+   ПЬЕДЕСТАЛ, ОБЛОЖКА КАТЕГОРИИ И ПОЛОСА СТРАНИЦ — 06.10, НОЧЬ
+   ============================================================================
+   Замер пяти видов нашёл шесть бед, и главную из них заморозка увидеть не
+   могла: `display: none` у очков пьедестала ниже 768 — правило в файле
+   честное, а на экране пропадало главное число рейтинга. Такое ловит только
+   прогон.
+
+   ЧЕГО ЗАМОРОЗКА НЕ ВИДИТ, А ВИДИТ ТОЛЬКО ПРОГОН:
+     • ЧТО ОЧКИ ВООБЩЕ ЕСТЬ НА ЭКРАНЕ. Кегль объявлен — и при этом коробка
+       нулевая;
+     • ОТНОШЕНИЕ МЕЖДУ ТРЕМЯ МЕСТАМИ. Числа стоят в разных медиа, и равными
+       они оказываются только на каком-то одном виде;
+     • ЧТО ЛЕСТНИЦА ОБЗОРНОЙ И КАТЕГОРИИ ОДНА. Два экрана, один файл — и
+       разойтись они могут на любом из пяти видов;
+     • ОКНО ПОЛОСЫ СТРАНИЦ. Сорок кнопок подряд — это правильный css и
+       шесть рядов на телефоне.
+   ============================================================================ */
+
+const ВИДЫ_ПЬЕДЕСТАЛА = ['desktop', 'tablet', 'mobile', 'phone-landscape', 'tablet-landscape'];
+
+async function открытьЭкран(page, адрес) {
+    await page.goto(адрес);
+    await page.waitForFunction(() => document.querySelectorAll('.pl-podium-card').length > 0,
+        null, { timeout: 15000 }).catch(() => null);
+    await page.waitForTimeout(1400);
+}
+
+/** Кегль, вес и РЕАЛЬНАЯ коробка уровня пьедестала. */
+const уровень = (page, сел) => page.evaluate(с => {
+    const э = document.querySelector(с);
+    if (!э) return null;
+    const c = getComputedStyle(э);
+    const r = э.getBoundingClientRect();
+    return {
+        кегль: Math.round(parseFloat(c.fontSize)),
+        вес: c.fontWeight,
+        мс: c.lineHeight === 'normal' ? null
+            : Math.round(parseFloat(c.lineHeight) / parseFloat(c.fontSize) * 100) / 100,
+        показ: c.display,
+        ш: Math.round(r.width),
+        в: Math.round(r.height),
+    };
+}, сел);
+
+for (const Я of ЯЗЫКИ) {
+
+test.describe('пьедестал рейтинга · ' + Я.имя, () => {
+
+    test('очки видны на всех видах, а не только на широких', async ({ page }) => {
+        await открытьЭкран(page, Я.адрес);
+
+        const места = ['first', 'second', 'third'];
+        const снято = [];
+        for (const м of места) {
+            снято.push(await уровень(page, '.pl-podium-' + м + ' .pl-podium-points'));
+        }
+
+        /* ПОРОГ: пьедестала может не быть вовсе — в базе прогона меньше трёх
+           игроков, или список закрыт входом. Это не беда вёрстки, и
+           проверять тогда нечего. */
+        const нетПьедестала = await page.evaluate(() =>
+            document.querySelectorAll('.pl-podium-card').length < 3);
+        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+
+        снято.forEach((у, i) => {
+            expect(у, 'очки ' + (i + 1) + '-го места: элемента нет в разметке').toBeTruthy();
+            expect(у.показ,
+                'очки ' + (i + 1) + '-го места погашены display:none — ровно это и было ' +
+                'до 06.10 ниже 768: кегль объявлен, а главного числа рейтинга на экране нет')
+                .not.toBe('none');
+            expect(у.в,
+                'коробка очков ' + (i + 1) + '-го места нулевой высоты: на экране их нет')
+                .toBeGreaterThan(0);
+        });
+    });
+
+    test('первое место крупнее второго, второе крупнее третьего', async ({ page }) => {
+        await открытьЭкран(page, Я.адрес);
+
+        const нетПьедестала = await page.evaluate(() =>
+            document.querySelectorAll('.pl-podium-card').length < 3);
+        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+
+        for (const часть of ['medal', 'points']) {
+            const кл = часть === 'medal' ? '.pl-podium-medal' : '.pl-podium-points';
+            const а = await уровень(page, '.pl-podium-first ' + кл);
+            const б = await уровень(page, '.pl-podium-second ' + кл);
+            const в = await уровень(page, '.pl-podium-third ' + кл);
+            expect(а && б && в, часть + ': уровня нет на экране').toBeTruthy();
+            expect(а.кегль, часть + ': первое место (' + а.кегль + ') не крупнее второго (' +
+                б.кегль + ') — иерархия пьедестала исчезла').toBeGreaterThan(б.кегль);
+            expect(б.кегль, часть + ': второе место (' + б.кегль + ') мельче третьего (' +
+                в.кегль + ')').toBeGreaterThanOrEqual(в.кегль);
+        }
+
+        /* Медаль третьего места РАВНЯЛАСЬ медали второго на 844: третье
+           место читалось как второе. Отношение строгое. */
+        const м2 = await уровень(page, '.pl-podium-second .pl-podium-medal');
+        const м3 = await уровень(page, '.pl-podium-third .pl-podium-medal');
+        expect(м2.кегль, 'медаль третьего места (' + м3.кегль + ') равна медали второго')
+            .toBeGreaterThan(м3.кегль);
+    });
+
+    test('кегли и межстрочный пьедестала стоят на ступенях', async ({ page }) => {
+        await открытьЭкран(page, Я.адрес);
+
+        const нетПьедестала = await page.evaluate(() =>
+            document.querySelectorAll('.pl-podium-card').length < 3);
+        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+
+        const ЛЕСТНИЦА_МС = [1, 1.1, 1.3, 1.5, 1.65];
+        for (const сел of ['.pl-podium-first .pl-podium-name',
+                           '.pl-podium-second .pl-podium-name',
+                           '.pl-podium-first .pl-podium-points',
+                           '.pl-podium-first .pl-podium-medal']) {
+            const у = await уровень(page, сел);
+            expect(у, сел + ': уровня нет на экране').toBeTruthy();
+            expect(ШКАЛА_КЕГЛЕЙ, сел + ': кегль ' + у.кегль + ' мимо шкалы')
+                .toContain(у.кегль);
+            if (у.мс !== null) {
+                expect(ЛЕСТНИЦА_МС, сел + ': межстрочный ' + у.мс + ' мимо лестницы')
+                    .toContain(у.мс);
+            }
+        }
+    });
+
+    test('кружок пьедестала — объявленный диаметр, а не диаметр с рамкой', async ({ page }) => {
+        await открытьЭкран(page, Я.адрес);
+
+        const нетПьедестала = await page.evaluate(() =>
+            document.querySelectorAll('.pl-podium-card').length < 3);
+        test.skip(нетПьедестала, 'пьедестала на экране нет: в базе прогона нет трёх игроков');
+
+        const ДИАМЕТРЫ = [110, 80, 72, 60, 48, 40];
+        const кружки = await page.evaluate(() =>
+            [...document.querySelectorAll('.pl-podium-photo')].map(э => ({
+                правило: Math.round(parseFloat(getComputedStyle(э).width)),
+                короб: getComputedStyle(э).boxSizing,
+            })));
+        expect(кружки.length, 'кружков пьедестала на экране нет').toBeGreaterThanOrEqual(3);
+        кружки.forEach(к => {
+            expect(к.короб, 'кружок считает коробку без рамки: объявленный диаметр ' +
+                'перестаёт быть диаметром, и на разных видах он гулял на шесть пикселей')
+                .toBe('border-box');
+            expect(ДИАМЕТРЫ, 'диаметр ' + к.правило + ' мимо шести размеров компонента')
+                .toContain(к.правило);
+        });
+    });
+
+    test('обложка категории живёт по тем же правилам, что обзорная', async ({ page }) => {
+        await открытьЭкран(page, Я.адрес);
+        const обзорная = await кегль(page, '.pl-hero-title');
+
+        await открытьЭкран(page, Я.адрес + '?tab=men-tour');
+        const категория = await кегль(page, '.pl-cat-title');
+
+        expect(категория, 'заголовка обложки категории нет на экране').toBeTruthy();
+        expect(категория.кегль,
+            'заголовок категории (' + категория.кегль + ') разошёлся с обзорной (' +
+            (обзорная && обзорная.кегль) + '): это ОДИН разворот на двух экранах')
+            .toBe(обзорная.кегль);
+
+        const плашек = await page.evaluate(() =>
+            document.querySelectorAll('.pl-cat-stat, .pl-hero-stat').length);
+        expect(плашек, 'на обложке категории вернулись плашки с числами — решение ' +
+            'Кости 06.10 «числа не надо» и «онлайн убери» применяется к ней тоже')
+            .toBe(0);
+    });
+
+});
+
+}
+
+/* ---------------------------------------------------------------------------
+   ПОЛОСА СТРАНИЦ ВИДНА ТОЛЬКО ВОШЕДШЕМУ: гостю отдаются первые десять строк,
+   и страниц у него одна. Поэтому эти проверки идут под сессией админа.
+   --------------------------------------------------------------------------- */
+test.describe('полоса страниц рейтинга', () => {
+    test.use({ storageState: 'tests/.auth/admin.json' });
+
+    test('страниц показывается окно, а не все подряд', async ({ page }, testInfo) => {
+        test.skip(!ВИДЫ_ПЬЕДЕСТАЛА.includes(testInfo.project.name), 'вид не из набора');
+
+        await page.goto('/pages/players.html?tab=men-tour');
+        await page.waitForTimeout(1800);
+
+        const r = await page.evaluate(() => {
+            const кнопки = [...document.querySelectorAll('.pl-page-btn.pl-page-num')];
+            if (!кнопки.length) return { нет: true };
+            const s = getComputedStyle(кнопки[0]);
+            return {
+                номеров: кнопки.length,
+                первая: кнопки[0].textContent.trim(),
+                последняя: кнопки[кнопки.length - 1].textContent.trim(),
+                многоточий: document.querySelectorAll('.pl-page-gap').length,
+                высота: Math.round(parseFloat(s.height)),
+                ширина: Math.round(parseFloat(s.minWidth)),
+                строк: document.querySelectorAll('.pl-cat-row:not(.pl-row-header)').length,
+            };
+        });
+
+        /* ПОРОГ С НАЗВАННОЙ ПРИЧИНОЙ: страниц может быть одна — в базе
+           прогона меньше двадцати игроков этого разряда. */
+        test.skip(!!(r && r.нет), 'полосы страниц нет: в разряде меньше одной страницы игроков');
+
+        expect(r.номеров, 'номеров страниц ' + r.номеров + ' — окно должно показывать ' +
+            'не больше семи: первую, последнюю, текущую и по соседу с каждой стороны')
+            .toBeLessThanOrEqual(7);
+        expect(r.первая, 'первая страница пропала из окна').toBe('1');
+        expect(Number(r.последняя), 'последняя страница пропала из окна')
+            .toBeGreaterThanOrEqual(Number(r.первая));
+        expect(ШКАЛА_КНОПОК, 'кнопка страницы ' + r.высота + ' мимо шкалы кнопок')
+            .toContain(r.высота);
+        expect(r.ширина, 'кнопка страницы уже цели нажатия 44').toBeGreaterThanOrEqual(44);
+    });
+});
