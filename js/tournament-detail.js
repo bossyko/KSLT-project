@@ -16,6 +16,40 @@ function языкСтраницы() {
          : (путь.indexOf('-kg') !== -1 ? 'kg' : 'ru');
 }
 
+/* ОТСЕЧКА ДЛИННОЙ ТАБЛИЦЫ — ОДНА НА ВСЮ СТРАНИЦУ.
+   Длинных таблиц на странице три: итоги, заявки и расписание. Прятать хвост
+   каждая умела бы по-своему, и это было бы три определения одного понятия.
+   Число одно — слово Кости 06.10: «10 везде».
+
+   СТРОКА СКРЫТА, А НЕ ВЫБРОШЕНА: она есть в разметке, её находит поиск по
+   странице и читает диктор. Кнопка лишь ставит класс на коробку таблицы. */
+var СТРОК_СРАЗУ = 10;
+
+function классОтсечки(номер, всего) {
+    return (всего > СТРОК_СРАЗУ && номер >= СТРОК_СРАЗУ) ? ' td-row-skryta' : '';
+}
+
+function кнопкаОтсечки(всего) {
+    if (!всего || всего <= СТРОК_СРАЗУ) return '';
+    var л = языкСтраницы();
+    var слово = л === 'en' ? 'Show all' : (л === 'kg' ? 'Баарын көрсөтүү' : 'Показать всех');
+    return '<button type="button" class="td-more" aria-expanded="false">' +
+           слово + ' (' + всего + ')</button>';
+}
+
+/* Кнопка раскрывает СВОЮ коробку, а не все: таблиц на экране бывает две
+   (две лиги, заявки и лист ожидания), и раскрытая соседка — чужое решение. */
+function включитьОтсечку(контейнер) {
+    контейнер.querySelectorAll('.td-more').forEach(function (кнопка) {
+        кнопка.addEventListener('click', function () {
+            var коробка = кнопка.parentElement;
+            if (коробка) коробка.classList.add('td-row-vse');
+            кнопка.setAttribute('aria-expanded', 'true');
+            кнопка.remove();
+        });
+    });
+}
+
 function esc(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1700,6 +1734,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 '</tr></thead>';
 
             var сыграноШтук = очередь.filter(function(m) { return m.status === 'completed'; }).length;
+            var ждутШтук = очередь.length - сыграноШтук;
+
+            /* ПРЯЧЕМ ТО, ЧТО ВТОРОСТЕПЕННО СЕЙЧАС, И ОДНИМ СПОСОБОМ ЗА РАЗ.
+               Пока есть ждущие матчи, главное — они, и прячет полоса
+               «Сыгранные». Когда играть больше нечего, сыгранное И ЕСТЬ
+               расписание: прятать по состоянию стало нечего, и работает
+               отсечка по длине. Две пряталки на одной таблице не включаются
+               вместе никогда. */
+            var отсечкаНужна = !(сыграноШтук && ждутШтук);
             расписаниеHtml += '<tbody>';
 
             очередь.forEach(function(m, i) {
@@ -1727,7 +1770,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                    Поэтому тело одно, строки стоят в своём порядке всегда, а
                    сыгранные прячутся атрибутом `hidden` каждая у себя. */
                 var вСыгранные = (m.status === 'completed');
-                расписаниеHtml += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') +
+                var классыСтроки = (m.status === 'live' ? 'td-sched-row-live' : '') +
+                    (отсечкаНужна ? классОтсечки(i, очередь.length) : '');
+                расписаниеHtml += '<tr' + (классыСтроки.trim() ? ' class="' + классыСтроки.trim() + '"' : '') +
                     (вСыгранные ? ' data-sygran="1"' : '') + '>' +
                     '<td class="td-sched-num">' + (i + 1) + '</td>' +
                     '<td class="td-sched-time">' + esc(String(m.scheduled_time).slice(0, 5)) + '</td>' +
@@ -1756,7 +1801,6 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                больше нечего, сыгранное И ЕСТЬ расписание.
                Поэтому два условия, а не одно: есть что прятать И есть ради
                чего прятать. */
-            var ждутШтук = очередь.length - сыграноШтук;
             var полосаHtml = '';
             if (сыграноШтук && ждутШтук) {
                 var словоСыгранные = isEn ? 'Played matches' : (isKg ? 'Ойнолгон оюндар' : 'Сыгранные');
@@ -1769,10 +1813,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     esc(словоСыгранные) + ' — ' + сыграноШтук + '</button>';
             }
 
-            расписаниеHtml = полосаHtml + расписаниеHtml + '</tbody></table></div>';
+            расписаниеHtml = полосаHtml + расписаниеHtml + '</tbody></table>' +
+                кнопкаОтсечки(отсечкаНужна ? очередь.length : 0) + '</div>';
 
             scheduleContainer.innerHTML = расписаниеHtml;
 
+            включитьОтсечку(scheduleContainer);
             var полоса = scheduleContainer.querySelector('.td-sched-ranshe');
             var сыгранныеСтроки = scheduleContainer.querySelectorAll('tr[data-sygran]');
             if (полоса && сыгранныеСтроки.length) {
@@ -2638,7 +2684,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var thDate = isEn ? 'Date' : (isKg ? 'Датасы' : 'Дата');
             var thTime = isEn ? 'Time' : (isKg ? 'Убактысы' : 'Время');
 
-            function pubRegRow(reg, idx) {
+            function pubRegRow(reg, idx, всего) {
                 var p = reg.players || playersMap[reg.player_id] || {};
                 var regDisplayName = isDbl
                     ? getPublicTeamName(reg.player_id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
@@ -2672,7 +2718,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     regDate = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
                     regTime = d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 }
-                return '<tr>' +
+                var скрыта = классОтсечки(idx - 1, всего);
+                return '<tr' + (скрыта ? ' class="' + скрыта.trim() + '"' : '') + '>' +
                     '<td>' + idx + '</td>' +
                     '<td>' + photoHtml + '</td>' +
                     '<td>' + esc(pName) + '</td>' +
@@ -2692,8 +2739,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             partHtml += '<div class="td-reg-table-wrap"><table class="td-reg-table"><thead><tr>' +
                 regTHead +
             '</tr></thead><tbody>';
-            mainDraw.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1); });
+            mainDraw.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1, mainDraw.length); });
             partHtml += '</tbody></table></div>';
+            partHtml += кнопкаОтсечки(mainDraw.length);
             partHtml += '</div>';
 
             // Right: Waitlist
@@ -2703,8 +2751,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 partHtml += '<div class="td-reg-table-wrap"><table class="td-reg-table td-reg-table-waitlist"><thead><tr>' +
                     regTHead +
                 '</tr></thead><tbody>';
-                waitlist.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1); });
+                waitlist.forEach(function(reg, idx) { partHtml += pubRegRow(reg, idx + 1, waitlist.length); });
                 partHtml += '</tbody></table></div>';
+                partHtml += кнопкаОтсечки(waitlist.length);
             } else {
                 partHtml += '<div class="td-no-results" style="padding:var(--space-md) 0;"><p>' + (isEn ? 'No waitlisted players' : (isKg ? 'Күтүү тизмесинде оюнчулар жок' : 'Нет игроков в листе ожидания')) + '</p></div>';
             }
@@ -2712,6 +2761,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             partHtml += '</div>';
             participantsGrid.innerHTML = partHtml;
+            включитьОтсечку(participantsGrid);
         } else {
             participantsGrid.innerHTML = '<div class="td-no-results"><p>' + L.noParticipants + '</p></div>';
         }
@@ -3005,7 +3055,6 @@ function показатьРаскладкуОчков(t, контейнер, п�
         en: { место: 'Place', игрок: 'Player', этап: 'Stage', очки: 'Points', итог: 'Tournament results' },
         kg: { место: 'Орун', игрок: 'Оюнчу', этап: 'Этап', очки: 'Упай', итог: 'Турнирдин жыйынтыгы' }
     }[язык];
-    var ВСЕХ = { ru: 'Показать всех', en: 'Show all', kg: 'Баарын көрсөтүү' }[язык];
 
     /* СКОЛЬКО СТРОК ВИДНО СРАЗУ.
        Ограничения не было вовсе: запрос идёт без `limit`, и строки рисуются
@@ -3013,7 +3062,6 @@ function показатьРаскладкуОчков(t, контейнер, п�
        смотрят её с телефона. Восемь — не красивое число, а размер самой
        мелкой сетки: столько мест разыгрывает турнир, где играют все.
        Решение Кости 03.10: «первые 8, остальные под кнопку». */
-    var СТРОК_СРАЗУ = 8;
 
     supabaseClient.from('tournament_results')
         .select('player_id, round_reached, points_earned')
@@ -3058,10 +3106,7 @@ function показатьРаскладкуОчков(t, контейнер, п�
                 '</tr></thead><tbody>';
                 h += строкиТаблицы(свои);
                 h += '</tbody></table>';
-                if (свои.length > СТРОК_СРАЗУ) {
-                    h += '<button type="button" class="td-res-more">' +
-                         ВСЕХ + ' (' + свои.length + ')</button>';
-                }
+                h += кнопкаОтсечки(свои.length);
                 return h + '</div>';
             }
 
@@ -3089,8 +3134,7 @@ function показатьРаскладкуОчков(t, контейнер, п�
                 /* СКРЫТА, А НЕ ВЫБРОШЕНА: строка есть в разметке, её читает
                    поиск по странице и диктор, кнопка лишь снимает класс.
                    Выброшенную пришлось бы дорисовывать вторым проходом. */
-                var скрыта = свои.length > СТРОК_СРАЗУ && номер >= СТРОК_СРАЗУ
-                    ? ' td-res-hidden' : '';
+                var скрыта = классОтсечки(номер, свои.length);
                 var классы = (место === 1 ? 'td-res-winner' : '') + скрыта;
                 html += '<tr' + (классы ? ' class="' + классы.trim() + '"' : '') + '>' +
                     '<td class="td-res-place">' + медаль + (подпись === null ? '—' : подпись) + '</td>' +
@@ -3132,13 +3176,7 @@ function показатьРаскладкуОчков(t, контейнер, п�
 
             /* Кнопка снимает класс со СВОЕЙ таблицы, а не со всех: лиг две, и
                раскрытая верхняя не должна раскрывать утешительную. */
-            контейнер.querySelectorAll('.td-res-more').forEach(function (кнопка) {
-                кнопка.addEventListener('click', function () {
-                    var таб = кнопка.closest('.td-results-table');
-                    if (таб) таб.classList.add('td-res-full');
-                    кнопка.remove();
-                });
-            });
+            включитьОтсечку(контейнер);
         });
 }
 

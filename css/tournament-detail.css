@@ -1586,12 +1586,14 @@ tr.td-rr-row-dimmed {
  * это читается, на 64 — стена в треть экрана, и смотрят её с телефона.
  *
  * СТРОКА СКРЫТА, А НЕ ВЫБРОШЕНА: она есть в разметке, её находит поиск по
- * странице и читает диктор. Кнопка лишь снимает класс со своей таблицы.
+ * странице и читает диктор. Кнопка лишь ставит класс на свою коробку.
+ * ОДНА ОТСЕЧКА НА ТРИ ТАБЛИЦЫ: итоги, заявки и расписание прячут хвост
+ * одним правилом, а не тремя похожими.
  */
-.td-results-table .td-res-hidden { display: none; }
-.td-results-table.td-res-full .td-res-hidden { display: table-row; }
+.td-row-skryta { display: none; }
+.td-row-vse .td-row-skryta { display: table-row; }
 
-.td-res-more {
+.td-more {
     display: block;
     width: 100%;
     /* 44 — ступень шкалы кнопок и нижняя граница цели нажатия */
@@ -1606,8 +1608,8 @@ tr.td-rr-row-dimmed {
     cursor: pointer;
     transition: var(--transition-fast);
 }
-.td-res-more:hover { border-color: var(--accent); color: var(--accent); }
-.td-res-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.td-more:hover { border-color: var(--accent); color: var(--accent); }
+.td-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Две лиги идут одна под другой: заголовок каждой — её собственный. */
 .td-results-table + .td-results-table { margin-top: var(--space-6); }
