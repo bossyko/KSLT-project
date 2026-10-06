@@ -212,6 +212,30 @@ async function открытьЭкран(page, адрес) {
     await page.waitForTimeout(1400);
 }
 
+/* ПРОПУСК — ЭТО ТОЖЕ НЕПРОВЕРЕННЫЙ КОД.
+   Прогон 06.10 пропустил ВСЕ пятнадцать проверок пьедестала: они шли
+   гостем, которому отдаются первые десять строк, и трёх карточек на экране
+   не оказалось. Слово Кости: «мы каждый раз будем гонять одно и то же».
+   Теперь пропуск оставлен ровно на ОДИН настоящий случай — в базе прогона
+   нет игроков вовсе, и рисовать пьедестал не из чего. Во всех остальных
+   случаях под сессией админа пьедестал ОБЯЗАН быть, и его отсутствие
+   роняет проверку с числами на руках. */
+async function естьПьедестал(page) {
+    const r = await page.evaluate(() => ({
+        карточек: document.querySelectorAll('.pl-podium-card').length,
+        строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
+        гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
+        пусто: !!document.querySelector('.pl-no-results'),
+    }));
+    test.skip(r.строк === 0 && r.карточек === 0 && r.пусто,
+        'в базе прогона нет игроков — пьедестал рисовать не из чего');
+    expect(r.карточек,
+        'пьедестала на экране нет, и это не пустая база: карточек ' + r.карточек +
+        ', строк списка ' + r.строк + ', экран гостя: ' + r.гость + '. Проверка под ' +
+        'сессией админа обязана видеть тройку — ПРОПУСК ЭТО ТОЖЕ НЕПРОВЕРЕННЫЙ КОД')
+        .toBeGreaterThanOrEqual(3);
+}
+
 /** Кегль, вес и РЕАЛЬНАЯ коробка уровня пьедестала. */
 const уровень = (page, сел) => page.evaluate(с => {
     const э = document.querySelector(с);
@@ -251,14 +275,7 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
         /* ПОРОГ: пьедестала может не быть вовсе — в базе прогона меньше трёх
            игроков, или список закрыт входом. Это не беда вёрстки, и
            проверять тогда нечего. */
-        const скольжко = await page.evaluate(() => ({
-            карточек: document.querySelectorAll('.pl-podium-card').length,
-            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
-            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
-        }));
-        test.skip(скольжко.карточек < 3,
-            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
-            скольжко.строк + ', экран гостя: ' + скольжко.гость);
+        await естьПьедестал(page);
 
         снято.forEach((у, i) => {
             expect(у, 'очки ' + (i + 1) + '-го места: элемента нет в разметке').toBeTruthy();
@@ -275,14 +292,7 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
     test('первое место крупнее второго, второе крупнее третьего', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
 
-        const скольжко = await page.evaluate(() => ({
-            карточек: document.querySelectorAll('.pl-podium-card').length,
-            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
-            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
-        }));
-        test.skip(скольжко.карточек < 3,
-            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
-            скольжко.строк + ', экран гостя: ' + скольжко.гость);
+        await естьПьедестал(page);
 
         for (const часть of ['medal', 'points']) {
             const кл = часть === 'medal' ? '.pl-podium-medal' : '.pl-podium-points';
@@ -307,14 +317,7 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
     test('кегли и межстрочный пьедестала стоят на ступенях', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
 
-        const скольжко = await page.evaluate(() => ({
-            карточек: document.querySelectorAll('.pl-podium-card').length,
-            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
-            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
-        }));
-        test.skip(скольжко.карточек < 3,
-            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
-            скольжко.строк + ', экран гостя: ' + скольжко.гость);
+        await естьПьедестал(page);
 
         const ЛЕСТНИЦА_МС = [1, 1.1, 1.3, 1.5, 1.65];
         for (const сел of ['.pl-podium-first .pl-podium-name',
@@ -335,14 +338,7 @@ test.describe('пьедестал рейтинга · ' + Я.имя, () => {
     test('кружок пьедестала — объявленный диаметр, а не диаметр с рамкой', async ({ page }) => {
         await открытьЭкран(page, Я.адрес);
 
-        const скольжко = await page.evaluate(() => ({
-            карточек: document.querySelectorAll('.pl-podium-card').length,
-            строк: document.querySelectorAll('.pl-row:not(.pl-row-header)').length,
-            гость: !!document.querySelector('.pl-guest-overlay, .pl-guest-cta'),
-        }));
-        test.skip(скольжко.карточек < 3,
-            'пьедестала на экране нет: карточек ' + скольжко.карточек + ', строк списка ' +
-            скольжко.строк + ', экран гостя: ' + скольжко.гость);
+        await естьПьедестал(page);
 
         const ДИАМЕТРЫ = [110, 80, 72, 60, 48, 40];
         const кружки = await page.evaluate(() =>
@@ -425,5 +421,75 @@ test.describe('полоса страниц рейтинга', () => {
         expect(ШКАЛА_КНОПОК, 'кнопка страницы ' + r.высота + ' мимо шкалы кнопок')
             .toContain(r.высота);
         expect(r.ширина, 'кнопка страницы уже цели нажатия 44').toBeGreaterThanOrEqual(44);
+    });
+});
+
+/* ---------------------------------------------------------------------------
+   СТОРОЖ, А НЕ ПАМЯТЬ.
+   06.10 я дважды подвёл одним и тем же: сперва не дал пробам пьедестала
+   сессию — и пятнадцать проверок молча пропустились; потом померил полосу
+   фильтров на УДОБНОМ разряде «Tour» (имя 36) вместо крайнего «ProMasters»
+   (98) — и на «Masters» чипы переносились в столбик, полоса росла со 159 до
+   209, с шапкой 265 из 667.
+   Поэтому проверка идёт по ВСЕМ разрядам сразу и падает на любом.
+   Заморозка этого увидеть не может: перенос — свойство ширины окна и длины
+   слова, а не текста файла.
+   --------------------------------------------------------------------------- */
+const РАЗРЯДЫ = ['men-masters', 'men-tour', 'men-challenger', 'men-promasters'];
+
+test.describe('липкая полоса разряда', () => {
+
+    test('чипы не переносятся в столбик ни в одном разряде', async ({ page }) => {
+        const беды = [];
+        for (const разряд of РАЗРЯДЫ) {
+            await page.goto('/pages/players.html?tab=' + разряд);
+            await page.waitForSelector('.trn-filters', { timeout: 15000 }).catch(() => null);
+            await page.waitForTimeout(700);
+
+            const r = await page.evaluate(() => {
+                const чипы = [...document.querySelectorAll('.pl-cat-gender-btn')]
+                    .map(э => Math.round(э.getBoundingClientRect().top));
+                const ф = document.querySelector('.trn-filters');
+                const ш = document.querySelector('header');
+                return {
+                    чипов: чипы.length,
+                    столбиком: чипы.length === 2 ? Math.abs(чипы[0] - чипы[1]) > 8 : false,
+                    доля: (ф && ш)
+                        ? Math.round((ф.getBoundingClientRect().height +
+                                      ш.getBoundingClientRect().height) / window.innerHeight * 100)
+                        : null,
+                    перелив: document.documentElement.scrollWidth - window.innerWidth,
+                };
+            });
+
+            if (r.столбиком) беды.push(разряд + ': чипы встали в столбик');
+            if (r.перелив > 0) беды.push(разряд + ': страница шире окна на ' + r.перелив);
+            /* Полоса вместе с шапкой не должна забирать больше половины
+               экрана: человек пришёл за списком, а не за фильтрами. */
+            if (r.доля !== null && r.доля > 50) {
+                беды.push(разряд + ': шапка и полоса заняли ' + r.доля + ' % экрана');
+            }
+        }
+        expect(беды, 'липкая полоса разряда поехала').toEqual([]);
+    });
+
+    test('поиск и чипы держат цель нажатия на всех разрядах', async ({ page }) => {
+        const мелкие = [];
+        for (const разряд of РАЗРЯДЫ) {
+            await page.goto('/pages/players.html?tab=' + разряд);
+            await page.waitForSelector('.trn-filters', { timeout: 15000 }).catch(() => null);
+            await page.waitForTimeout(600);
+
+            const r = await page.evaluate(() => {
+                const мер = э => э ? Math.round(э.getBoundingClientRect().height) : null;
+                return {
+                    поиск: мер(document.querySelector('.trn-search-input')),
+                    чип: мер(document.querySelector('.pl-cat-gender-btn')),
+                };
+            });
+            if (r.поиск !== null && r.поиск < 44) мелкие.push(разряд + ': поиск ' + r.поиск);
+            if (r.чип !== null && r.чип < 44) мелкие.push(разряд + ': чип пола ' + r.чип);
+        }
+        expect(мелкие, 'цель нажатия в полосе разряда меньше 44').toEqual([]);
     });
 });

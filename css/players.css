@@ -1083,6 +1083,43 @@
         justify-content: center;
     }
 
+    /* НАЗВАНИЕ РАЗДЕЛА ЕДЕТ К «НАЗАД», А ЧИПЫ БЕРУТ РЯД ЦЕЛИКОМ.
+       Первая попытка 06.10 поставила чипы и название в один ряд — и была
+       померена на УДОБНОМ случае: «Tour», имя 36. У «Masters» имя 64, и
+       120 + 122 + 64 в 343 не влезают: чипы переносились в столбик, полоса
+       вырастала со 159 до 209, с шапкой — 265 из 667, сорок процентов
+       экрана. ПОКАЗЫВАТЬ НАДО КРАЙНИЙ СЛУЧАЙ, А НЕ УДОБНЫЙ.
+       Теперь название стоит рядом с «Назад» — оба коротких уровня в одной
+       строке, — а чипы занимают ряд целиком и переноситься им некуда.
+       Платим шириной поиска: он становится уже на ширину названия. */
+    .trn-filters.pl-cat-mode .trn-filters-inner,
+    .trn-filters.pl-cat-mode .trn-filters-inner:not(:has(.trn-chips)) {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+    }
+
+    .trn-filters.pl-cat-mode .pl-cat-bar-left {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .trn-filters.pl-cat-mode .trn-cat-name {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+        align-self: start;
+        line-height: var(--btn-h-md);
+    }
+
+    .trn-filters.pl-cat-mode .trn-chips {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-self: center;
+    }
+}
+
+/* Старая раскладка полосы — снята, оставлена причина */
+@media (max-width: 992px) {
     /* ВЫБОР ПОЛА И НАЗВАНИЕ РАЗДЕЛА — ОДИН РЯД, А НЕ ДВА.
        Замер 06.10 на 375×812: липкая полоса занимала 195, вместе с шапкой
        251 из 812 — почти треть экрана у списка, за которым человек пришёл.
@@ -1091,24 +1128,7 @@
        видов, и ряд уходит. Название НЕ снимается: при прокрутке вниз
        обложки уже не видно, и полоса остаётся единственным местом, которое
        говорит, в каком ты разряде. */
-    .trn-filters.pl-cat-mode .trn-filters-inner,
-    .trn-filters.pl-cat-mode .trn-filters-inner:not(:has(.trn-chips)) {
-        grid-template-columns: auto auto;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .trn-filters.pl-cat-mode .pl-cat-bar-left {
-        grid-column: 1 / -1;
-    }
-
-    .trn-filters.pl-cat-mode .trn-chips {
-        justify-self: end;
-    }
-
-    .trn-filters.pl-cat-mode .trn-cat-name {
-        justify-self: start;
-    }
+*/
 }
 
 .pl-filters-section.pl-cat-mode {
