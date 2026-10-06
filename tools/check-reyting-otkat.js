@@ -155,20 +155,21 @@ const ОТКАТЫ = [
  '@media (max-width: 768px) {',
  'у рейтинга две границы по ширине, а не четыре'],
 
-['вернуть поиск на обзорную рейтинга', 'js/players.js',
- "        html += '<div class=\"pl-category-row\">';",
- "        html += '<input id=\"playersSearch\">';",
- 'на обзорной нет ни поиска, ни чипов пола'],
 
-['вернуть чипы пола на обзорную', 'js/players.js',
- "        html += '<div class=\"pl-category-pills\" id=\"categoryPills\">';",
- "        html += '<div class=\"pl-gender-tabs\"></div>';",
- 'на обзорной нет ни поиска, ни чипов пола'],
+['снять поиск с обзорной', 'js/players.js',
+ "            '<input type=\"text\" class=\"trn-search-input\" id=\"playersSearch\"",
+ "            '<input type=\"text\" class=\"trn-search-input\" id=\"нету\"",
+ 'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
 
-['вернуть пилюлям только один пол', 'js/players.js',
+['снять чипы пола с обзорной', 'js/players.js',
+ "        var html = '<div class=\"pl-gender-tabs\">' +",
+ "        var html = '' + '' +",
+ 'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
+
+['свести оба пола в один ряд пилюль', 'js/players.js',
+ "        var cats = currentGender === 'men' ? menCats : womenCats;",
  '        var cats = menCats.concat(womenCats);',
- '        var cats = menCats;',
- 'на обзорной нет ни поиска, ни чипов пола'],
+ 'состав обзорной рейтинга не тронут: поиск, чипы пола и пилюли'],
 
 ['погасить очки пьедестала на узком', 'css/podium.css',
  '    /* Значки уходят, очки — НЕТ. Значок украшает, очки объясняют место */',
