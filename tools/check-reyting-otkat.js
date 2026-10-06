@@ -176,10 +176,25 @@ const ОТКАТЫ = [
  '    .pl-col-points {\n        font-size: var(--fs-xs);',
  'очки в таблице — один кегль на все виды'],
 
-['вернуть пустую десятую колонку в ряд', 'css/players.css',
- '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px;',
- '    grid-template-columns: 50px 1fr 65px 60px 78px 80px 70px 100px 60px 90px;',
+['вернуть пустую лишнюю колонку в набор', 'css/players.css',
+ '    --колонки-рейтинга: 50px 1fr 60px 78px 80px 70px 100px 60px;',
+ '    --колонки-рейтинга: 50px 1fr 60px 78px 80px 70px 100px 60px 90px;',
  'колонок в ряду столько же, сколько ячеек в шапке'],
+
+['развести шапки обзорной и разряда по разным наборам ячеек', 'js/players.js',
+ `pl-row pl-row-header pl-cat-row">' +
+            '<span class="pl-col-rank">' + labels.rank + '</span>' +
+            '<span class="pl-col-player">' + labels.player + '</span>' +
+            '<span class="pl-col-country">' + labels.country + '</span>' +`,
+ `pl-row pl-row-header pl-cat-row">' +
+            '<span class="pl-col-rank">' + labels.rank + '</span>' +
+            '<span class="pl-col-player">' + labels.player + '</span>' +`,
+ 'колонок в ряду столько же, сколько ячеек в шапке'],
+
+['вернуть колонке действий свой полный набор колонок', 'css/players.css',
+ '    grid-template-columns: var(--колонки-рейтинга) 90px;',
+ '    grid-template-columns: 50px 1fr 60px 78px 80px 70px 100px 60px 90px;',
+ 'колонка действий дописывается к набору, а не переобъявляет его'],
 
 ['погасить очки пьедестала на узком', 'css/podium.css',
  '    /* Значки уходят, очки — НЕТ. Значок украшает, очки объясняют место */',
@@ -226,10 +241,20 @@ const ОТКАТЫ = [
  "'<div class=\"pl-cat-stat\"></div>' +",
  'на обложке категории нет чисел и нет онлайна'],
 
-['вернуть категории свой чип пола из общего листа', 'css/players.css',
- '.pl-gender-tab,\n.trn-filters.pl-cat-mode .pl-cat-gender-btn {',
- '.pl-gender-tab {',
+['вернуть категории свой чип пола из общего листа', 'js/players.js',
+ "'<button class=\"pl-gender-tab' + (cat.gender === 'men'",
+ "'<button class=\"trn-chip pl-cat-gender-btn' + (cat.gender === 'men'",
  'выбор пола на категории — тот же элемент, что на обзорной'],
+
+['вернуть полосе разряда свою раскладку', 'js/players.js',
+ "filtersEl.className = 'pl-filters-section pl-cat-mode';",
+ "filtersEl.className = 'trn-filters pl-cat-mode';",
+ 'полоса разряда — тот же компонент, что строка фильтров обзорной'],
+
+['вернуть полосе разряда свою левую половину', 'js/players.js',
+ "'<div class=\"pl-category-row\">' +",
+ "'<div class=\"pl-category-row\">' +\n                    '<div class=\"pl-cat-bar-left\"></div>' +",
+ 'полоса разряда — тот же компонент, что строка фильтров обзорной'],
 
 ['отпустить имя на главной — тумбы разъедутся', 'css/podium.css',
  '    min-height: calc(2em * var(--lh-snug));',

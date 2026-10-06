@@ -57,8 +57,8 @@ const ОТКАТЫ = [
         `    .trn-chip.trn-chip,\n    .db-chip.db-chip {`,
    'чип не вернулся в общий блок мелких кнопок'],
 
-  [CSS, `.trn-search-input {\n    min-height: var(--btn-h-md);\n}`,
-        `.trn-search-input {\n    min-height: 39px;\n}`,
+  [CSS, `    min-height: var(--btn-h-md);\n    width: 100%;\n    padding: 10px 16px 10px 42px;`,
+        `    min-height: 39px;\n    width: 100%;\n    padding: 10px 16px 10px 42px;`,
    'поле поиска — ступень кнопки, а не 39'],
 
   [CSS, `    font-size: var(--fs-xs);\n    font-family: var(--font-primary);`,

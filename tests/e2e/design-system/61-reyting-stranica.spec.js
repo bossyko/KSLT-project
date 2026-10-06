@@ -141,16 +141,16 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
     test('чип пола разряда — ступень шкалы кнопок, и нажатие доходит', async ({ page }) => {
         /* Чип пола живёт на странице разряда, а не на обзорной. */
         await page.goto(Я.адрес + '?tab=men-masters');
-        await page.waitForSelector('.pl-cat-gender-btn', { timeout: 8000 }).catch(() => null);
+        await page.waitForSelector('.pl-gender-tab', { timeout: 8000 }).catch(() => null);
         await page.waitForTimeout(600);
 
-        const чипы = page.locator('.pl-cat-gender-btn');
+        const чипы = page.locator('.pl-gender-tab');
         const сколько = await чипы.count();
         expect(сколько, 'ПОРОГ: чипов пола на странице разряда нет — мерить нечего')
             .toBeGreaterThan(0);
 
         const высоты = await page.evaluate(() =>
-            [...document.querySelectorAll('.pl-cat-gender-btn')]
+            [...document.querySelectorAll('.pl-gender-tab')]
                 .filter(э => э.offsetParent !== null)
                 .map(э => Math.round(э.getBoundingClientRect().height)));
         for (const h of высоты) {
@@ -158,7 +158,7 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
                 'кнопок нет (28 · 36 · 44 · 52). Замер 06.10 давал 37 на 768 и 390')
                 .toContain(h);
         }
-        const к = await кегль(page, '.pl-cat-gender-btn');
+        const к = await кегль(page, '.pl-gender-tab');
         expect(ШКАЛА_КЕГЛЕЙ, 'кегль чипа ' + к.fs + ' мимо шкалы').toContain(к.fs);
 
         /* НАЖАТИЕ, А НЕ КЛАСС: цель нажатия и коробка — разные вещи. */
@@ -167,7 +167,7 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
             await второй.click();
             await page.waitForTimeout(600);
             const активных = await page.evaluate(() =>
-                document.querySelectorAll('.pl-cat-gender-btn.active').length);
+                document.querySelectorAll('.pl-gender-tab.active').length);
             expect(активных, 'после нажатия выбранным должен быть ровно один чип').toBe(1);
         }
     });
@@ -499,15 +499,15 @@ test.describe('липкая полоса разряда', () => {
         const нету = [];
         for (const разряд of РАЗРЯДЫ) {
             await page.goto('/pages/players.html?tab=' + разряд);
-            const полосаЕсть = await page.waitForSelector('.trn-filters', { timeout: 4000 })
+            const полосаЕсть = await page.waitForSelector('.pl-filters-section.pl-cat-mode', { timeout: 4000 })
                 .then(() => true).catch(() => false);
             if (!полосаЕсть) { нету.push(разряд); continue; }
             await page.waitForTimeout(400);
 
             const r = await page.evaluate(() => {
-                const чипы = [...document.querySelectorAll('.pl-cat-gender-btn')]
+                const чипы = [...document.querySelectorAll('.pl-gender-tab')]
                     .map(э => Math.round(э.getBoundingClientRect().top));
-                const ф = document.querySelector('.trn-filters');
+                const ф = document.querySelector('.pl-filters-section.pl-cat-mode');
                 const ш = document.querySelector('header');
                 return {
                     чипов: чипы.length,
@@ -542,7 +542,7 @@ test.describe('липкая полоса разряда', () => {
         const нету = [];
         for (const разряд of РАЗРЯДЫ) {
             await page.goto('/pages/players.html?tab=' + разряд);
-            const полосаЕсть = await page.waitForSelector('.trn-filters', { timeout: 4000 })
+            const полосаЕсть = await page.waitForSelector('.pl-filters-section.pl-cat-mode', { timeout: 4000 })
                 .then(() => true).catch(() => false);
             if (!полосаЕсть) { нету.push(разряд); continue; }
             await page.waitForTimeout(400);
@@ -551,7 +551,7 @@ test.describe('липкая полоса разряда', () => {
                 const мер = э => э ? Math.round(э.getBoundingClientRect().height) : null;
                 return {
                     поиск: мер(document.querySelector('.trn-search-input')),
-                    чип: мер(document.querySelector('.pl-cat-gender-btn')),
+                    чип: мер(document.querySelector('.pl-gender-tab')),
                 };
             });
             if (r.поиск !== null && r.поиск < 44) мелкие.push(разряд + ': поиск ' + r.поиск);

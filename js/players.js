@@ -581,13 +581,21 @@
         var clearRows = isSearchMode ? GUEST_SEARCH_VISIBLE : GUEST_VISIBLE_ROWS;
         var totalVisible = isGuest ? Math.min(pageItems.length, clearRows + GUEST_BLURRED_ROWS) : pageItems.length;
 
-        var html = '<div class="pl-table">';
+        /* ТАБЛИЦА РЕЙТИНГА — ОДНА НА ДВА ЭКРАНА. Слово Кости 06.10: «таблицу
+           надо было привести к стандарту как на обзорной». Было две: 1100 с
+           девятью колонками здесь и 860 с семью на разряде — шестнадцать
+           чисел ширин, заведённых дважды. Теперь состав ячеек один, сетка
+           объявлена один раз в css, а ширина у обеих 1100.
+           «ОНЛАЙН» СНЯТА С ОБЕИХ — слово Кости: «онлайн можно убрать, она не
+           нужна на рейтингах». Колонка действий живёт только у вошедшего и
+           только здесь, поэтому она не в общем наборе, а пристраивается
+           классом: восемь колонок объявлены один раз, девятая дописывается. */
+        var html = '<div class="pl-table' + (logged ? ' pl-table-actions' : '') + '">';
 
         // Header
         html += '<div class="pl-row pl-row-header">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
-            '<span class="pl-col-online">' + labels.online + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +
             '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') +
                 '<span class="pl-col-sub">' + ntrpПодпись() + '</span></span>' +
@@ -677,7 +685,6 @@
                         catLabel +
                     '</div>' +
                 '</div>' +
-                '<span class="pl-col-online">' + (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '<span class="pl-offline-dot"></span>') + '</span>' +
                 '<span class="pl-col-country">' + p.country + '</span>' +
                 '<span class="pl-col-ntrp">' + ntrpЯчейка(p) + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
@@ -833,27 +840,44 @@
             // Полоса та же, что на турнирах, кортах и тренерах: ссылка назад,
             // поиск и название — одной строкой. Раньше они стояли на трёх
             // разных уровнях и не совпадали ни с чем на странице
-            filtersEl.className = 'trn-filters pl-cat-mode';
+            /* ПОЛОСА РАЗРЯДА — ТОТ ЖЕ КОМПОНЕНТ, ЧТО СТРОКА ФИЛЬТРОВ НА
+               ОБЗОРНОЙ. Слово Кости 06.10: «мне не нравится раскладка
+               фильтра и поисковой строки и назад», «они должны быть
+               одинаковыми по ширине и содержанию — приведи как с обзорной
+               стр рейтинга», «обзорная уже есть на всех видах, не
+               придумывай — отталкивайся от неё».
+               Было два разных компонента: здесь `trn-filters` в ОДИН ряд
+               (назад и поиск слева, чипы втиснуты в середину, имя у правого
+               края), а на обзорной — чипы отдельным рядом по центру плюс
+               `pl-category-row`. Ни ширина, ни состав не совпадали.
+               Теперь это буквально те же классы: `pl-gender-tabs` сверху и
+               `pl-category-row` снизу — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ,
+               раскладку и ступени держит один набор правил на два экрана. */
+            filtersEl.className = 'pl-filters-section pl-cat-mode';
             filtersEl.innerHTML =
-                '<div class="trn-filters-inner">' +
-                    // Левая часть одним блоком: так строка делится на три
-                    // равные колонки и переключатель пола встаёт ровно под
-                    // вершиной пьедестала
-                    '<div class="pl-cat-bar-left">' +
-                        /* ПОИСКА В ЛИПКОЙ ПОЛОСЕ РАЗРЯДА НЕТ — слово Кости 06.10:
-                           «поисковая строка не нужна». Полоса липнет к шапке и
-                           занимала на телефоне три ряда из четырёх уровней;
-                           поиск по игрокам живёт на отдельной странице. */
-                        '<a href="' + playersPage + '" class="kslt-back trn-back">\u2190 ' + labels.catPageBack + '</a>' +
+                // Переключатель пола показываем только там, где есть обе
+                // половины: женских Pro-Masters и Challengers у клуба нет
+                (hasWomenHalf ? '<div class="pl-gender-tabs">' +
+                    '<button class="pl-gender-tab' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men">' +
+                        (isEnPage() ? 'Men' : (isKgPage() ? 'Эркектер' : 'Мужчины')) + '</button>' +
+                    '<button class="pl-gender-tab' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women">' +
+                        (isEnPage() ? 'Women' : (isKgPage() ? 'Аялдар' : 'Женщины')) + '</button>' +
+                '</div>' : '') +
+                '<div class="pl-category-row">' +
+                    '<a href="' + playersPage + '" class="kslt-back trn-back pl-cat-back">\u2190 ' + labels.catPageBack + '</a>' +
+                    /* ПОИСК В ПОЛОСЕ РАЗРЯДА ЕСТЬ — слово Кости 06.10, второе и
+                       окончательное: «тут у нас уже должна быть поисковая
+                       строка — на стр категории рейтинга сюда надо будет
+                       вернуть». На разряде список полный, искать по нему
+                       есть что; убрана поисковая строка только с обзорной,
+                       где видно первые десять строк. */
+                    '<div class="trn-search-wrap">' +
+                        '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+                        '<input type="text" class="trn-search-input" id="catSearchSticky" placeholder="' + labels.searchPlaceholder + '" autocomplete="off">' +
                     '</div>' +
-                    // Переключатель пола показываем только там, где есть обе
-                    // половины: женских Pro-Masters и Challengers у клуба нет
-                    (hasWomenHalf ? '<div class="trn-chips">' +
-                        '<button class="trn-chip pl-cat-gender-btn' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men">' +
-                            (isEnPage() ? 'Men' : (isKgPage() ? 'Эркектер' : 'Мужчины')) + '</button>' +
-                        '<button class="trn-chip pl-cat-gender-btn' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women">' +
-                            (isEnPage() ? 'Women' : (isKgPage() ? 'Аялдар' : 'Женщины')) + '</button>' +
-                    '</div>' : '') +
+                    // Название НЕ снимается: при прокрутке обложки уже не
+                    // видно, и полоса остаётся единственным местом, которое
+                    // говорит, в каком ты разряде
                     '<span class="trn-cat-name">' + esc(cat.name) + '</span>' +
                 '</div>';
 
@@ -887,7 +911,11 @@
 
     function initCatGenderToggle() {
         document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.pl-cat-gender-btn');
+            // Чип пола на обеих страницах рейтинга — ОДИН класс
+            // `pl-gender-tab`. Разводит не класс, а режим: в обзорном
+            // слушателя ставит initTabs, здесь — этот, и оба за одним
+            // `isCategoryMode`
+            var btn = e.target.closest('.pl-gender-tab');
             if (!btn || !isCategoryMode) return;
             var newGender = btn.dataset.gender;
             var baseCatId = currentTab.indexOf('-') !== -1 ? currentTab.split('-').slice(1).join('-') : currentTab;
@@ -963,6 +991,7 @@
         var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
+            '<span class="pl-col-country">' + labels.country + '</span>' +
             '<span class="pl-col-ntrp">' + (labels.ntrp || 'NTRP') +
                 '<span class="pl-col-sub">' + ntrpПодпись() + '</span></span>' +
             '<span class="pl-col-points">' + labels.points + '</span>' +
@@ -1030,6 +1059,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
+                '<span class="pl-col-country">' + (p.country || '') + '</span>' +
                 '<span class="pl-col-ntrp">' + ntrpЯчейка(p) + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
