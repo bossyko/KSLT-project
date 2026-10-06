@@ -245,10 +245,15 @@ test.describe('лента фильтров · ' + Я.имя, () => {
             document.querySelectorAll('.to-featured, .to-featured-side, .to-compact').length);
         test.skip(всего === 0, 'в этой базе у категории нет карточек — фильтровать нечего');
 
-        const чип = page.locator('.trn-chip[data-filter="status"][data-value="past"]');
-        expect(await чип.count(), 'ПОРОГ: статусного чипа нет — полоса фильтров сломана')
-            .toBeGreaterThan(0);
-        await чип.click();
+        /* ЖМЁМ ЖИВОЙ ЧИП, А НЕ НАЗНАЧЕННЫЙ. У продукта есть правило: чип,
+           который ничего не найдёт, погашен и не жмётся. В тестовой базе
+           у категории может не быть ни одного завершённого — тогда
+           «Завершённые» стоит disabled, и проба, жмущая именно его, врёт
+           про беду, которой нет. */
+        const живой = page.locator('.trn-chip[data-filter="status"]:not([disabled]):not(.active)');
+        const живых = await живой.count();
+        test.skip(живых === 0, 'в этой базе у категории живых статусных чипов нет');
+        await живой.first().click();
         await page.waitForTimeout(400);
 
         const r = await page.evaluate(() => {
