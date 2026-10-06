@@ -104,6 +104,11 @@ test.describe('страница турнира · ' + Я.имя, () => {
         const r = await page.evaluate(() => {
             const чипы = Array.from(document.querySelectorAll('.td-fic-chip'));
             const первый = чипы[0];
+            /* ЭЛЕМЕНТ ВНЕ ОКНА НЕ ОТДАЁТ ПОПАДАНИЯ. Первая редакция мерила
+               elementFromPoint, не прокрутив к ленте: сетка лежит на третьем
+               экране, точка уходила за край окна, и браузер честно возвращал
+               null. Прогон сказал «пусто» — и это врал прибор, а не код. */
+            первый.scrollIntoView({ block: 'center' });
             const к = первый.getBoundingClientRect();
             /* Цель нажатия меряем ПОПАДАНИЕМ, а не наличием правила: слой
                ::after однажды уже обрезался обёрткой с overflow. */
@@ -182,7 +187,7 @@ test.describe('страница турнира · ' + Я.имя, () => {
             return {
                 полоса: !!sc.querySelector('.td-sched-ranshe'),
                 всего: строки.length,
-                видимых: sc.querySelectorAll('tbody:not([hidden]) tr').length
+                видимых: sc.querySelectorAll('tbody tr:not([hidden])').length
             };
         });
         expect(r.всего, 'ПОРОГ: расписания нет — проверять нечего').toBeGreaterThan(0);
@@ -200,6 +205,11 @@ test.describe('страница турнира · ' + Я.имя, () => {
             let тело;
             try { тело = await ответ.json(); } catch (e) { return route.fulfill({ response: ответ }); }
             if (Array.isArray(тело)) {
+                /* Делаем несыгранной ПОЛОВИНУ, и именно вперемешку: прогон
+                   05.10 этим и поймал настоящую беду. Один запуск бывает
+                   доигран наполовину — на четырёх кортах матчи кончаются в
+                   разное время, — и первая редакция, уводившая сыгранные в
+                   отдельное тело таблицы, рвала порядок по времени. */
                 тело = тело.map((м, i) => (i % 2 === 1)
                     ? Object.assign({}, м, { status: 'scheduled', score: null, winner_id: null })
                     : м);
@@ -216,7 +226,7 @@ test.describe('страница турнира · ' + Я.имя, () => {
                 aria: п ? п.getAttribute('aria-expanded') : null,
                 управляет: п ? п.getAttribute('aria-controls') : null,
                 всего: sc.querySelectorAll('tbody tr').length,
-                видимых: sc.querySelectorAll('tbody:not([hidden]) tr').length
+                видимых: sc.querySelectorAll('tbody tr:not([hidden])').length
             };
         });
         expect(закрыто.всего, 'ПОРОГ: расписания нет').toBeGreaterThan(0);
@@ -231,7 +241,7 @@ test.describe('страница турнира · ' + Я.имя, () => {
         await page.waitForTimeout(400);
         const открыто = await page.evaluate(() => {
             const sc = document.querySelector('#scheduleContainer');
-            const номера = Array.from(sc.querySelectorAll('tbody:not([hidden]) .td-sched-num'))
+            const номера = Array.from(sc.querySelectorAll('tr:not([hidden]) .td-sched-num'))
                 .map(e => parseInt(e.innerText.trim(), 10));
             return {
                 aria: sc.querySelector('.td-sched-ranshe').getAttribute('aria-expanded'),
@@ -252,10 +262,18 @@ test.describe('страница турнира · ' + Я.имя, () => {
         const вкладок = await page.evaluate(() => document.querySelectorAll('.td-tab').length);
         expect(вкладок, 'ПОРОГ: вкладок нет').toBeGreaterThan(1);
 
-        const последняя = вкладок - 1;
+        /* БЕРЁМ НЕ ПОСЛЕДНЮЮ ВКЛАДКУ. Прогон 05.10 дал зазор 31 на десктопе и
+           58 на планшете — и это не промах смещения: прокрутка УПЁРЛАСЬ В
+           КОНЕЦ СТРАНИЦЫ. Ниже «Очков» содержимого почти нет, и заголовок
+           физически не может встать выше. На телефоне страница длиннее, и
+           там выходило ровно 12 — то самое число.
+           Мерим «Сетку»: под ней лежат ещё два раздела, запас прокрутки есть
+           наверняка. И всё равно проверяем упор — ПРОВЕРКА ОБЯЗАНА ЗНАТЬ,
+           КОГДА ЕЁ УСЛОВИЕ НЕ ДЕЙСТВУЕТ. */
+        const средняя = 3;
         await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'auto' }));
         await page.waitForTimeout(200);
-        await page.evaluate(i => document.querySelectorAll('.td-tab')[i].click(), последняя);
+        await page.evaluate(i => document.querySelectorAll('.td-tab')[i].click(), средняя);
         await дождатьсяПокоя(page);
 
         const r = await page.evaluate(i => {
@@ -264,19 +282,28 @@ test.describe('страница турнира · ' + Я.имя, () => {
             const полоса = document.querySelector('.td-tabs-bar');
             const пр = узел.getBoundingClientRect();
             const пол = полоса.getBoundingClientRect();
+            const предел = document.documentElement.scrollHeight - window.innerHeight;
             return {
                 зазор: Math.round(пр.top - (пол.top + пол.height)),
+                упёрлись: Math.round(window.scrollY) >= Math.round(предел) - 2,
                 отмечена: вк.getAttribute('aria-current'),
                 отмеченных: Array.from(document.querySelectorAll('.td-tab'))
                     .filter(t => t.getAttribute('aria-current') === 'true').length
             };
-        }, последняя);
+        }, средняя);
 
-        /* Зазор — ступень 12 плюс округление. Раньше смещение писалось
-           числом 120 при полосе 45, и выходило 11 — числа не со шкалы. */
-        expect(r.зазор, 'заголовок встал не под полосой: зазор ' + r.зазор)
-            .toBeGreaterThanOrEqual(0);
-        expect(r.зазор, 'заголовок уехал далеко вниз: зазор ' + r.зазор).toBeLessThanOrEqual(24);
+        /* Зазор — ступень 12 плюс округление полосы. Раньше смещение
+           писалось числом 120 при полосе 45, и выходило 11 — не со шкалы. */
+        if (!r.упёрлись) {
+            expect(r.зазор, 'заголовок встал не под полосой: зазор ' + r.зазор)
+                .toBeGreaterThanOrEqual(0);
+            expect(r.зазор, 'заголовок уехал далеко вниз: зазор ' + r.зазор).toBeLessThanOrEqual(24);
+        } else {
+            /* Упор — не повод промолчать: заголовок обязан хотя бы быть виден
+               и не уехать под липкую полосу. */
+            expect(r.зазор, 'упёрлись в конец страницы, но заголовок уехал ПОД полосу: ' + r.зазор)
+                .toBeGreaterThanOrEqual(0);
+        }
         expect(r.отмечена, 'выбранная вкладка не помечена для диктора').toBe('true');
         expect(r.отмеченных, 'помеченной для диктора должна быть ровно одна вкладка').toBe(1);
     });

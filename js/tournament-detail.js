@@ -1662,7 +1662,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var естьГруппы = очередь.some(function(m) { return !!m.group_number; });
 
             var расписаниеHtml = '<div class="td-sched-court">' +
-                '<table class="td-sched-table"><thead><tr>' +
+                '<table class="td-sched-table" id="tdSchedTable"><thead><tr>' +
                     '<th>№</th>' +
                     '<th>' + подписи.time + '</th>' +
                     // Заголовок по содержимому: в групповых турнирах в этой
@@ -1673,8 +1673,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '<th>' + подписи.status + '</th>' +
                 '</tr></thead>';
 
-            var строки = { 'сыгранные': '', 'ждут': '' };
             var сыграноШтук = очередь.filter(function(m) { return m.status === 'completed'; }).length;
+            расписаниеHtml += '<tbody>';
 
             очередь.forEach(function(m, i) {
                 var круг = m.round || '';
@@ -1685,17 +1685,24 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var классСост = m.status === 'completed' ? 'td-sched-done'
                     : (m.status === 'live' ? 'td-sched-live' : 'td-sched-soon');
 
-                /* СЫГРАННОЕ УХОДИТ ПОД ПОЛОСУ, А ХРОНОЛОГИЯ ОСТАЁТСЯ.
-                   Замер 05.10 на боевом CHALLENGERS: 42 строки, из них
-                   СЫГРАНО 18, ждут — 24; таблица 1861 при экране 900.
-                   Сыгранные — это ранние запуски, поэтому они лежат ПЕРВЫМ
-                   телом таблицы и раскрываются НАД несыгранными: откроешь —
-                   и порядок по времени снова сплошной, сверху вниз.
-                   Номер остаётся сквозным по всему расписанию: это порядок
-                   запуска, а не номер строки в видимом куске. */
+                /* СЫГРАННОЕ ПРЯЧЕТСЯ НА СВОЁМ МЕСТЕ, А НЕ УЕЗЖАЕТ В ОТДЕЛЬНОЕ
+                   ТЕЛО ТАБЛИЦЫ.
+
+                   Первая редакция собирала два `<tbody>`: сыгранные первым,
+                   ждущие вторым. Довод был «сыгранные — это ранние запуски»,
+                   и он НЕВЕРЕН: прогон 05.10 уронил проверку хронологии, а
+                   замер боевого CHALLENGERS показал почему — в запуске 09:00
+                   три матча «Завершён» и один «Ожидает». ОДИН ЗАПУСК БЫВАЕТ
+                   ДОИГРАН НАПОЛОВИНУ: на четырёх кортах матчи кончаются в
+                   разное время. Раздели строки по состоянию — и при раскрытии
+                   номера пойдут 1, 3, 5… 2, 4, 6, то есть порядок по времени,
+                   единственный смысл этой таблицы, порвётся.
+
+                   Поэтому тело одно, строки стоят в своём порядке всегда, а
+                   сыгранные прячутся атрибутом `hidden` каждая у себя. */
                 var вСыгранные = (m.status === 'completed');
-                var кудаHtml = вСыгранные ? 'сыгранные' : 'ждут';
-                строки[кудаHtml] += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') + '>' +
+                расписаниеHtml += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') +
+                    (вСыгранные ? ' data-sygran="1"' : '') + '>' +
                     '<td class="td-sched-num">' + (i + 1) + '</td>' +
                     '<td class="td-sched-time">' + esc(String(m.scheduled_time).slice(0, 5)) + '</td>' +
                     // Короткая подпись для телефона: там колонка узкая, и вместо
@@ -1728,27 +1735,29 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             if (сыграноШтук && ждутШтук) {
                 var словоСыгранные = isEn ? 'Played matches' : (isKg ? 'Ойнолгон оюндар' : 'Сыгранные');
                 полосаHtml = '<button type="button" class="td-sched-ranshe" ' +
-                    'aria-expanded="false" aria-controls="tdSchedDone">' +
+                    /* Называем ТАБЛИЦУ, а не исчезнувшее тело: строки прячутся
+                       каждая у себя, общего узла у них нет, а `aria-controls`,
+                       указывающий в пустоту, хуже отсутствующего. */
+                    'aria-expanded="false" aria-controls="tdSchedTable">' +
                     '<span class="td-sched-ranshe-znak" aria-hidden="true"></span>' +
                     esc(словоСыгранные) + ' — ' + сыграноШтук + '</button>';
             }
 
-            расписаниеHtml = полосаHtml + расписаниеHtml +
-                '<tbody id="tdSchedDone" class="td-sched-done-body"' +
-                    (полосаHtml ? ' hidden' : '') + '>' + строки['сыгранные'] + '</tbody>' +
-                '<tbody>' + строки['ждут'] + '</tbody>' +
-                '</table></div>';
+            расписаниеHtml = полосаHtml + расписаниеHtml + '</tbody></table></div>';
 
             scheduleContainer.innerHTML = расписаниеHtml;
 
             var полоса = scheduleContainer.querySelector('.td-sched-ranshe');
-            var телоСыгранных = scheduleContainer.querySelector('#tdSchedDone');
-            if (полоса && телоСыгранных) {
-                полоса.addEventListener('click', function() {
-                    var открыто = полоса.getAttribute('aria-expanded') === 'true';
-                    полоса.setAttribute('aria-expanded', открыто ? 'false' : 'true');
-                    телоСыгранных.hidden = открыто;
-                    полоса.classList.toggle('is-open', !открыто);
+            var сыгранныеСтроки = scheduleContainer.querySelectorAll('tr[data-sygran]');
+            if (полоса && сыгранныеСтроки.length) {
+                var показать = function (видно) {
+                    сыгранныеСтроки.forEach(function (тр) { тр.hidden = !видно; });
+                    полоса.setAttribute('aria-expanded', видно ? 'true' : 'false');
+                    полоса.classList.toggle('is-open', видно);
+                };
+                показать(false);
+                полоса.addEventListener('click', function () {
+                    показать(полоса.getAttribute('aria-expanded') !== 'true');
                 });
             }
         }
