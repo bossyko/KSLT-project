@@ -150,9 +150,39 @@ const ОТКАТЫ = [
  '    min-width: 0;',
  'на главной размер пьедестала считается от КОЛОНКИ, а не от окна'],
 
+['вернуть заголовку категории свой плавающий clamp', 'css/players.css',
+ '.pl-hero-title,\n.pl-cat-title {',
+ '.pl-hero-title {\n    font-size: clamp(2rem, 5vw, 3.2rem);\n}\n.pl-cat-title {',
+ 'обложка категории и обзорная — одно определение, а не два'],
+
+['развести подзаголовки обложек по двум определениям', 'css/players.css',
+ '.pl-hero-subtitle,\n.pl-cat-subtitle {',
+ '.pl-hero-subtitle {',
+ 'обложка категории и обзорная — одно определение, а не два'],
+
+['вернуть плашки с числами на обложку категории', 'js/players.js',
+ "'<p class=\"pl-cat-subtitle\">' + labels.subtitle + '</p>' +",
+ "'<div class=\"pl-cat-stat\"></div>' +",
+ 'на обложке категории нет чисел и нет онлайна'],
+
+['вернуть категории свой чип пола из общего листа', 'css/players.css',
+ '.pl-gender-tab,\n.trn-filters.pl-cat-mode .pl-cat-gender-btn {',
+ '.pl-gender-tab {',
+ 'выбор пола на категории — тот же элемент, что на обзорной'],
+
 ['отпустить имя на главной — тумбы разъедутся', 'css/podium.css',
- '    min-height: calc(2em * 1.25);',
+ '    min-height: calc(2em * var(--lh-snug));',
  '    min-height: 0;',
+ 'имя на главной занимает ровно две строки всегда'],
+
+['развести запас и межстрочный имени по разным числам', 'css/podium.css',
+ '    min-height: calc(2em * var(--lh-snug));',
+ '    min-height: calc(2em * 1.25);',
+ 'имя на главной занимает ровно две строки всегда'],
+
+['вернуть имени пьедестала межстрочный мимо лестницы', 'css/podium.css',
+ '    line-height: var(--lh-snug);\n    overflow-wrap: break-word;',
+ '    line-height: 1.25;\n    overflow-wrap: break-word;',
  'имя на главной занимает ровно две строки всегда'],
 
 /* ── движение ─────────────────────────────────────────────────────────── */

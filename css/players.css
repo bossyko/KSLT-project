@@ -45,7 +45,14 @@
 /* ТА ЖЕ КРУТИЛКА, ЧТО У ОБЛОЖКИ РАЗДЕЛА ТУРНИРОВ: 40 → 32 → 21.
    Было clamp(1.9rem, 4.4vw, 3.1rem) — замер пяти видов дал 49.6 · 45.1 ·
    37.1 · 33.8 · 26, и ни одно число, кроме последнего, не стоит на шкале. */
-.pl-hero-title {
+/* ОДНА ОБЛОЖКА НА ДВА ЭКРАНА РЕЙТИНГА. Обзорная и страница категории —
+   один и тот же разворот: название раздела и сезон. До 06.10 у категории
+   был СВОЙ заголовок на `clamp(2rem, 5vw, 3.2rem)` — замер дал 51 · 42 ·
+   38 · 26, ни одно число не ступень шкалы и ни одно не совпадало с
+   крутилкой обложки. Теперь оба имени ведут на одно определение, и правило
+   «заголовок обложки — крутилка раздела, а не clamp» держит их обоих. */
+.pl-hero-title,
+.pl-cat-title {
     font-size: var(--fs-hero);
     font-weight: var(--fw-extrabold);
     line-height: var(--lh-tight);
@@ -53,61 +60,27 @@
     margin-bottom: 18px;
 }
 
-.pl-hero-subtitle {
+.pl-hero-subtitle,
+.pl-cat-subtitle {
     font-size: var(--fs-hero-sub);
     font-weight: var(--fw-semibold);
     color: var(--text-secondary);
     max-width: 720px;
     margin: 0 auto var(--space-lg);
-    line-height: 1.5;
+    line-height: var(--lh-normal);
     letter-spacing: 0;
 }
 
-/* Search */
-.pl-search-wrap {
-    position: relative;
-    max-width: 480px;
-    margin: 0 auto;
-}
-
-.pl-search-icon {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.pl-search-input {
-    width: 100%;
-    padding: 14px 20px 14px 50px;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    font-size: var(--fs-base);
-    outline: none;
-    transition: all 0.3s;
-}
-
-.pl-search-input::placeholder {
-    color: var(--text-dim);
-}
-
-.pl-search-input:focus {
-    border-color: var(--accent);
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
-}
-
-/* Category search positioning */
-.pl-cat-search-wrap {
-    margin-top: 40px;
-}
+/* ПОИСКОВОЙ СТРОКИ НА ОБЗОРНОЙ РЕЙТИНГА НЕТ — И CSS ПОД НЕЁ УБРАН.
+   06.10 замер показал: `.pl-search-wrap`, `.pl-search-icon`,
+   `.pl-search-input` и `.pl-cat-search-wrap` не встречаются ни в одном html
+   и ни в одном js продукта — проверено поиском по всему дереву, а не на
+   глаз. Пятьдесят строк оформления ждали разметку, которой нет.
+   Слово Кости 06.10: «на обзорной давай уберём, там всё равно обрезанная
+   версия стоит и всех не отображает — для чего там поиск тогда».
+   Поиск по имени живёт на отдельной странице `partners.html`, в меню он
+   зовётся «Поиск игрока». Модалка поиска для гостя (`.pl-search-modal*`)
+   ЖИВАЯ — её строит `js/players.js:1245`, и она остаётся. */
 
 /* Search auth modal (guest) */
 .pl-search-modal-overlay {
@@ -316,7 +289,13 @@
    768 и 390 чип отдавал 37 — такой ступени на шкале кнопок нет вовсе
    (28 · 36 · 44 · 52), а кегль 16 расходился с чипами турниров. Вид взят
    у компонента Filter chip 49:77, как и на доске рейтинга. */
-.pl-gender-tab {
+/* ВЫБОР ПОЛА — ОДИН ЭЛЕМЕНТ НА ДВА ЭКРАНА РЕЙТИНГА. На обзорной он был
+   `.pl-gender-tab` (14 · 500), на странице категории — `.trn-chip` из
+   общего листа (12 · 600). Замер 06.10: одна и та же кнопка выглядела
+   по-разному в зависимости от того, с какого экрана на неё смотрят. Теперь
+   оба имени ведут на одно определение; высота у обоих была 44 и осталась. */
+.pl-gender-tab,
+.trn-filters.pl-cat-mode .pl-cat-gender-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -334,12 +313,14 @@
     transition: all 0.2s;
 }
 
-.pl-gender-tab:hover {
+.pl-gender-tab:hover,
+.trn-filters.pl-cat-mode .pl-cat-gender-btn:hover {
     border-color: var(--border-light);
     color: var(--text-primary);
 }
 
-.pl-gender-tab.active {
+.pl-gender-tab.active,
+.trn-filters.pl-cat-mode .pl-cat-gender-btn.active {
     background: var(--accent);
     border-color: var(--accent);
     color: #000;
@@ -1007,57 +988,18 @@
 }
 
 
-.pl-cat-title {
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: var(--space-lg);
-}
-
 .pl-cat-gender {
     font-weight: 400;
     opacity: 0.5;
     font-size: var(--fs-2xs);
 }
 
-.pl-cat-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-md);
-    max-width: 520px;
-    margin: 0 auto;
-}
-
-.pl-cat-stat {
-    padding: var(--space-md) var(--space-lg);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-.pl-cat-stat-value {
-    font-size: var(--fs-2xl);
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1.2;
-}
-
-.pl-cat-stat-label {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    margin-top: 4px;
-}
-
-.pl-cat-stat-online .pl-cat-stat-value {
-    color: #22c55e;
-}
-
-.pl-cat-stat-online .pl-cat-stat-value .pl-online-dot {
-    vertical-align: middle;
-    margin-left: 4px;
-}
+/* ПЛАШЕК С ЧИСЛАМИ НА ОБЛОЖКЕ КАТЕГОРИИ БОЛЬШЕ НЕТ — те же три, что были
+   на обзорной: игроки, турниры и онлайн. Сняты 06.10 по уже принятому
+   решению Кости, вместе с запросом к базе, который считал турниры только
+   ради одной из них. Оформление снято здесь, разметка — в
+   `js/players.js:renderCatHero`: КОД, КОТОРОМУ НЕЧЕГО ОФОРМЛЯТЬ, НЕ
+   ОСТАЁТСЯ ЖДАТЬ. */
 
 /* In category mode — always visible bar with back link */
 /* Полоса на странице категории: те же три равные колонки, что и в строке
@@ -1374,15 +1316,12 @@
 @media (max-width: 768px) {
 
 
-    /* Отступы по краям экрана. Селектор был оборван запятой — секции
-       забирали размеры фотографии пьедестала, и таблица игроков
-       схлопывалась в полоску шириной 20 пикселей */
-    .pl-filters-section,
-.pl-table-section,
-.pl-pagination-section {
-        padding-left: var(--pad-x);
-        padding-right: var(--pad-x);
-    }
+    /* ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. Эти три секции получают боковой
+       отступ `var(--pad-x)` в своих базовых правилах (`:265`, `:413`,
+       `:894`) — тем же самым значением. Повтор здесь ничего не менял и
+       заводил ВТОРОЕ определение отступа у раздела пагинации: беда
+       родилась бы ровно на шве, как только одно из двух мест поправят.
+       Снято 06.10 после замера: отступы на 768 те же, что были. */
 
     
 
@@ -1529,33 +1468,14 @@
 /* Phone */
 @media (max-width: 480px) {
 
-    .pl-cat-stats {
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 100%;
-        gap: var(--space-sm);
-    }
-
-    .pl-cat-stat {
-        padding: var(--space-sm) var(--space-md);
-    }
-
-    .pl-cat-stat-value {
-        font-size: var(--fs-xl);
-    }
-
-    .pl-cat-title {
-        font-size: var(--fs-xl);
-    }
+    /* Плашек обложки категории больше нет, и своего кегля у её заголовка
+       тоже: он стоит на той же крутилке `--fs-hero`, что обзорная.
+       ОДНА ВЕЛИЧИНА — ОДИН ВЛАДЕЛЕЦ. */
 
     
 
     /* Кегли обложки держит крутилка в tokens.css — здесь своих чисел нет:
        ОДНА ВЕЛИЧИНА — ОДИН ВЛАДЕЛЕЦ. */
-
-    .pl-search-input {
-        padding: 12px 16px 12px 44px;
-        font-size: var(--fs-sm);
-    }
 
     /* On phone: keep pedestal layout but smaller */
     
@@ -1630,10 +1550,6 @@
     
     .pl-hero-title {
         font-size: var(--fs-xl);
-    }
-    .pl-search-input {
-        padding: 10px 14px 10px 40px;
-        font-size: var(--fs-sm);
     }
     .pl-container {
         padding: 32px 12px 48px;

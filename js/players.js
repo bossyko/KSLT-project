@@ -119,8 +119,6 @@
             guestText: 'Full rankings, player profiles and statistics open after registration',
             guestBtn: 'Sign in / Sign up',
             catPageBack: 'Back to rankings',
-            catPagePlayers: 'Players',
-            catPageTournaments: 'Tournaments played'
         };
 
         if (isKg) return {
@@ -140,8 +138,6 @@
             guestText: 'Толук рейтинг, оюнчулардын профилдери жана статистикасы каттоодон кийин ачылат',
             guestBtn: 'Кирүү / Катталуу',
             catPageBack: 'Рейтингге кайтуу',
-            catPagePlayers: 'Оюнчулар',
-            catPageTournaments: 'Аяктаган мелдештер'
         };
 
         return {
@@ -161,8 +157,6 @@
             guestText: 'Полный рейтинг, профили игроков и статистика доступны после регистрации',
             guestBtn: 'Войти / Регистрация',
             catPageBack: 'Назад к рейтингу',
-            catPagePlayers: 'Игроков',
-            catPageTournaments: 'Завершённых турниров'
         };
     }
 
@@ -766,23 +760,12 @@
         // Extract base category ID (e.g. "men-promasters" → "promasters")
         var baseCatId = tabId.indexOf('-') !== -1 ? tabId.split('-').slice(1).join('-') : tabId;
 
-        // Count completed tournaments for this category + gender
-        var tournamentsCount = 0;
-        if (window.supabaseClient) {
-            try {
-                var tRes = await window.supabaseClient
-                    .from('tournaments')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('category_id', baseCatId)
-                    .eq('gender', cat.gender)
-                    .eq('status', 'completed')
-                    .not('published_at', 'is', null);
-                if (tRes.count !== null && tRes.count !== undefined) tournamentsCount = tRes.count;
-            } catch(e) {}
-        }
-
-        // Render hero
-        renderCatHero(cat, labels, playersPage, tournamentsCount);
+        /* ЗАПРОС, РЕЗУЛЬТАТ КОТОРОГО НЕ ПОКАЗЫВАЕТСЯ, — ЭТО ПОТРАЧЕННАЯ
+           КВОТА. Здесь считалось число завершённых турниров категории
+           ОДНИМ запросом к базе на каждую загрузку страницы, и единственным
+           его потребителем была плашка на обложке. Плашек на обложке больше
+           нет (слово Кости 06.10), значит и запроса быть не должно. */
+        renderCatHero(cat, labels, playersPage);
 
         var hasWomenHalf = isWomenCategory('women-' + baseCatId);
 
@@ -866,41 +849,28 @@
         });
     }
 
-    function renderCatHero(cat, labels, playersPage, tournamentsCount) {
+    function renderCatHero(cat, labels, playersPage) {
         var container = document.getElementById('playersHero');
         if (!container) return;
-
-        var players = cat.players || [];
-        var playerCount = players.length;
-        var onlineCount = 0;
-        for (var i = 0; i < players.length; i++) {
-            if (players[i].online) onlineCount++;
-        }
-
-        var onlineLabel = isEnPage() ? 'Online' : (isKgPage() ? 'Онлайн' : 'Онлайн');
 
         // Ни поиска, ни переключателя пола в шапке нет: и то и другое живёт
         // в липкой полосе и здесь только дублировалось
 
+        /* ОБЛОЖКА КАТЕГОРИИ ЖИВЁТ ПО ТОМУ ЖЕ ПРАВИЛУ, ЧТО ОБЗОРНАЯ.
+           Слово Кости 06.10 про обложку рейтинга: сперва «онлайн убери,
+           смысла нет», потом «391 игроков — убери тоже, числа не надо».
+           ПРАВИЛО, ВЫВЕДЕННОЕ НА ОДНОМ КУСКЕ, ПРИМЕНЯЕТСЯ К СЛЕДУЮЩЕМУ БЕЗ
+           НОВОГО РАЗБОРА: здесь стояли те же три плашки — игроки, турниры и
+           онлайн, — и та же обложка называет теперь раздел и сезон. Числа
+           живут там, где по ним принимают решение, — в самом списке.
+           Подзаголовок берётся из тех же подписей, что у обзорной: сезон
+           объявлен ОДИН раз на три языка. */
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
             '<div class="pl-cat-hero-content">' +
                 '<h1 class="pl-cat-title">' + esc(cat.name) + '</h1>' +
-                '<div class="pl-cat-stats">' +
-                    '<div class="pl-cat-stat">' +
-                        '<div class="pl-cat-stat-value">' + playerCount + '</div>' +
-                        '<div class="pl-cat-stat-label">' + labels.catPagePlayers + '</div>' +
-                    '</div>' +
-                    '<div class="pl-cat-stat">' +
-                        '<div class="pl-cat-stat-value">' + tournamentsCount + '</div>' +
-                        '<div class="pl-cat-stat-label">' + labels.catPageTournaments + '</div>' +
-                    '</div>' +
-                    '<div class="pl-cat-stat pl-cat-stat-online">' +
-                        '<div class="pl-cat-stat-value">' + onlineCount + ' <span class="pl-online-dot pl-online-pulse"></span></div>' +
-                        '<div class="pl-cat-stat-label">' + onlineLabel + '</div>' +
-                    '</div>' +
-                '</div>' +
+                '<p class="pl-cat-subtitle">' + labels.subtitle + '</p>' +
             '</div>';
     }
 

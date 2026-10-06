@@ -171,21 +171,41 @@
     background: var(--border-subtle);
 }
 
+/* ============================================================================
+   ЛЕСТНИЦА ПЬЕДЕСТАЛА — ТРИ СТУПЕНИ И ДВЕ ГРАНИЦЫ
+   ============================================================================
+   До 06.10 здесь было ЧЕТЫРЕ границы по ширине — 992, 768, 480, 375 — и
+   ВТОРОЙ блок на 768 в конце файла, который перебивал первый. Замер на пяти
+   видах показал, что он делал:
+
+     · ОЧКИ ИГРОКА НЕ ПОКАЗЫВАЛИСЬ НИЖЕ 768 ВОВСЕ — `display: none` при живом
+       тексте «1 600 очков». Главное число рейтинга пропадало на планшете и
+       телефоне, а три правила их кегля в тех же медиа были мёртвыми: кегль
+       объявлен, показывать нечего.
+     · ИМЯ ПАДАЛО С 18 СРАЗУ НА 12, через три ступени, и имя первого места
+       становилось равно имени второго: иерархия исчезала там, где пьедестал
+       и нужен.
+     · МЕДАЛЬ ТРЕТЬЕГО МЕСТА РАВНЯЛАСЬ МЕДАЛИ ВТОРОГО на 844 — 26 и 26.
+     · Диаметров кружка было ОДИННАДЦАТЬ: 116 · 110 · 90 · 80 · 76 · 72 · 68
+       · 60 · 58 · 54 · 44 · 40.
+
+   ЗАМОРАЖИВАЕТСЯ ОТНОШЕНИЕ, А НЕ ЧИСЛО: на каждом виде первое место строго
+   крупнее второго, второе строго крупнее третьего, и очки видны всегда.
+
+   Границы — только 992 и 640, как по всему продукту. Диаметров шесть:
+   110 · 80 · 72 · 60 · 48 · 40. Кегль инициалов идёт за диаметром долей 0.36,
+   округлённой до ступени шкалы: 110→40, 80→26, 72→26, 60→21, 48→18, 40→14.
+   ПОСЧИТАНО и проверено в браузере на пяти видах и трёх языках.
+   ============================================================================ */
+
 .pl-podium-medal {
     margin-bottom: var(--space-xs);
+    line-height: var(--lh-none);
 }
 
-.pl-podium-first .pl-podium-medal {
-    font-size: var(--fs-3xl);
-}
-
-.pl-podium-second .pl-podium-medal {
-    font-size: var(--fs-2xl);
-}
-
-.pl-podium-third .pl-podium-medal {
-    font-size: var(--fs-xl);
-}
+.pl-podium-first  .pl-podium-medal { font-size: var(--fs-3xl); }
+.pl-podium-second .pl-podium-medal { font-size: var(--fs-2xl); }
+.pl-podium-third  .pl-podium-medal { font-size: var(--fs-xl); }
 
 .pl-podium-photo-wrap {
     position: relative;
@@ -196,20 +216,17 @@
     border-radius: 50%;
     object-fit: cover;
     transition: transform 0.3s;
+    /* ОБЪЯВЛЕННЫЙ ДИАМЕТР — ЭТО И ЕСТЬ ДИАМЕТР. Замер 06.10: кружок первого
+       места выходил то 110, то 116 на видах с одними и теми же правилами —
+       разницу давала рамка 3px, потому что фотография и кружок с инициалами
+       считают коробку по-разному. Шесть пикселей гуляли между видами. */
+    box-sizing: border-box;
 }
 
 .pl-podium-card:hover .pl-podium-photo {
     transform: scale(1.05);
 }
 
-/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
-   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
-   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
-   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
-   увидел на главной, но беда была и на странице рейтинга.
-   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
-   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
-   32 · 40. ПОСЧИТАНО и проверено в браузере. */
 .pl-podium-first .pl-podium-photo {
     width: 110px;
     height: 110px;
@@ -217,9 +234,6 @@
     box-shadow: 0 0 20px rgba(233, 184, 36, 0.18);
 }
 .pl-podium-first .avatar-initials { font-size: var(--fs-3xl); }
-
-
-
 
 .pl-podium-second .pl-podium-photo {
     width: 80px;
@@ -236,41 +250,33 @@
 .pl-podium-third .avatar-initials { font-size: var(--fs-xl); }
 
 .pl-podium-name {
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: var(--text-primary);
     margin-bottom: 4px;
-    line-height: 1.25;
+    /* Ступень лестницы, а не 1.25: межстрочный берётся из системы */
+    line-height: var(--lh-snug);
     overflow-wrap: break-word;
     max-width: 100%;
 }
 
-.pl-podium-first .pl-podium-name {
-    font-size: var(--fs-md);
-}
-
+.pl-podium-first  .pl-podium-name { font-size: var(--fs-md); }
 .pl-podium-second .pl-podium-name,
-.pl-podium-third .pl-podium-name {
-    font-size: var(--fs-base);
-}
+.pl-podium-third  .pl-podium-name { font-size: var(--fs-base); }
 
 .pl-podium-points {
-    font-weight: 800;
+    font-weight: var(--fw-extrabold);
     /* Белые, а не лаймовые: лайм на поле зрения один и принадлежит
        «Полный рейтинг →». Место здесь несут медаль и цвет тумбы. */
     color: var(--text-primary);
     /* Число с подписью держим одной строкой: «1 420» и «очков» на разных
        строках читаются как два разных числа */
     white-space: nowrap;
+    line-height: var(--lh-snug);
 }
 
-.pl-podium-first .pl-podium-points {
-    font-size: var(--fs-lg);
-}
-
+.pl-podium-first  .pl-podium-points { font-size: var(--fs-lg); }
 .pl-podium-second .pl-podium-points,
-.pl-podium-third .pl-podium-points {
-    font-size: var(--fs-base);
-}
+.pl-podium-third  .pl-podium-points { font-size: var(--fs-base); }
 
 .pl-podium-badges {
     display: flex;
@@ -283,141 +289,39 @@
     padding-bottom: 1px;
 }
 
+/* --- Средняя ступень: от 640 до 992 ------------------------------------- */
 @media (max-width: 992px) {
-/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
-   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
-   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
-   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
-   увидел на главной, но беда была и на странице рейтинга.
-   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
-   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
-   32 · 40. ПОСЧИТАНО и проверено в браузере. */
-.pl-podium-first .pl-podium-photo {
-        width: 90px;
-        height: 90px;
-    }
-.pl-podium-first .avatar-initials { font-size: var(--fs-2xl); }
-.pl-podium-second .pl-podium-photo {
-        width: 68px;
-        height: 68px;
-    }
-.pl-podium-second .avatar-initials { font-size: var(--fs-xl); }
-.pl-podium-third .pl-podium-photo {
-        width: 60px;
-        height: 60px;
-    }
-.pl-podium-third .avatar-initials { font-size: var(--fs-lg); }
-.pl-podium-first .pl-podium-medal { font-size: var(--fs-2xl); }
-.pl-podium-second .pl-podium-medal { font-size: var(--fs-xl); }
-.pl-podium-third .pl-podium-medal { font-size: var(--fs-xl); }
-}
-
-@media (max-width: 768px) {
-.pl-podium-section {
+    .pl-podium-section {
         padding-left: var(--pad-x);
         padding-right: var(--pad-x);
     }
-/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
-   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
-   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
-   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
-   увидел на главной, но беда была и на странице рейтинга.
-   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
-   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
-   32 · 40. ПОСЧИТАНО и проверено в браузере. */
-.pl-podium-first .pl-podium-photo {
-        width: 80px;
-        height: 80px;
-    }
-.pl-podium-first .avatar-initials { font-size: var(--fs-xl); }
-.pl-podium-second .pl-podium-photo {
-        width: 60px;
-        height: 60px;
-    }
-.pl-podium-second .avatar-initials { font-size: var(--fs-lg); }
-.pl-podium-third .pl-podium-photo {
-        width: 54px;
-        height: 54px;
-    }
-.pl-podium-third .avatar-initials { font-size: var(--fs-md); }
-.pl-podium-first .pl-podium-name { font-size: var(--fs-base); }
-.pl-podium-second .pl-podium-name,
-    .pl-podium-third .pl-podium-name { font-size: var(--fs-sm); }
-.pl-podium-first .pl-podium-points { font-size: var(--fs-md); }
-.pl-podium-second .pl-podium-points,
-    .pl-podium-third .pl-podium-points { font-size: var(--fs-sm); }
-.pl-podium-first .pl-podium-medal { font-size: var(--fs-2xl); }
-.pl-podium-second .pl-podium-medal { font-size: var(--fs-xl); }
-.pl-podium-third .pl-podium-medal { font-size: var(--fs-lg); }
-.pl-podium-first { padding: var(--space-md) var(--space-lg) 0; }
-.pl-podium-second,
+
+    .pl-podium-first .pl-podium-photo  { width: 80px; height: 80px; }
+    .pl-podium-first .avatar-initials  { font-size: var(--fs-xl); }
+    .pl-podium-second .pl-podium-photo { width: 60px; height: 60px; }
+    .pl-podium-second .avatar-initials { font-size: var(--fs-lg); }
+    .pl-podium-third .pl-podium-photo  { width: 48px; height: 48px; }
+    .pl-podium-third .avatar-initials  { font-size: var(--fs-md); }
+
+    .pl-podium-first  .pl-podium-medal { font-size: var(--fs-2xl); }
+    .pl-podium-second .pl-podium-medal { font-size: var(--fs-xl); }
+    .pl-podium-third  .pl-podium-medal { font-size: var(--fs-lg); }
+
+    .pl-podium-first  .pl-podium-name { font-size: var(--fs-base); }
+    .pl-podium-second .pl-podium-name,
+    .pl-podium-third  .pl-podium-name { font-size: var(--fs-sm); }
+
+    .pl-podium-first  .pl-podium-points { font-size: var(--fs-md); }
+    .pl-podium-second .pl-podium-points,
+    .pl-podium-third  .pl-podium-points { font-size: var(--fs-sm); }
+
+    .pl-podium-first { padding: var(--space-md) var(--space-lg) 0; }
+    .pl-podium-second,
     .pl-podium-third { padding: var(--space-sm) var(--space-md) 0; }
-}
 
-@media (max-width: 480px) {
-/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
-   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
-   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
-   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
-   увидел на главной, но беда была и на странице рейтинга.
-   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
-   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
-   32 · 40. ПОСЧИТАНО и проверено в браузере. */
-.pl-podium-first .pl-podium-photo {
-        width: 68px;
-        height: 68px;
-    }
-.pl-podium-first .avatar-initials { font-size: var(--fs-xl); }
-.pl-podium-second .pl-podium-photo {
-        width: 50px;
-        height: 50px;
-    }
-.pl-podium-second .avatar-initials { font-size: var(--fs-md); }
-.pl-podium-third .pl-podium-photo {
-        width: 44px;
-        height: 44px;
-    }
-.pl-podium-third .avatar-initials { font-size: var(--fs-base); }
-.pl-podium-first .pl-podium-medal { font-size: var(--fs-xl); }
-.pl-podium-second .pl-podium-medal { font-size: var(--fs-lg); }
-.pl-podium-third .pl-podium-medal { font-size: var(--fs-md); }
-.pl-podium-first { padding: var(--space-sm) var(--space-md) 0; }
-.pl-podium-second,
-    .pl-podium-third { padding: var(--space-xs) var(--space-sm) 0; }
-.pl-podium-first .pl-podium-name { font-size: var(--fs-sm); }
-.pl-podium-second .pl-podium-name,
-    .pl-podium-third .pl-podium-name { font-size: var(--fs-xs); }
-.pl-podium-first .pl-podium-points { font-size: var(--fs-base); }
-.pl-podium-second .pl-podium-points,
-    .pl-podium-third .pl-podium-points { font-size: var(--fs-xs); }
-.pl-podium-badges { display: none; }
-}
-
-@media (max-width: 375px) {
-/* КЕГЛЬ ИНИЦИАЛОВ ИДЁТ ЗА ДИАМЕТРОМ КРУЖКА, А НЕ ЖИВЁТ ОТДЕЛЬНО.
-   До 24.09 кегль был объявлен ОДИН раз — 40 · 32 · 26, — а диаметр менялся
-   на каждой ступени. На телефоне кружок первого места сжимался со 110 до 68,
-   кегль оставался 40, и две буквы занимали шесть десятых кружка: Костя это
-   увидел на главной, но беда была и на странице рейтинга.
-   Теперь кегль стоит рядом с КАЖДЫМ диаметром и считается от него: доля
-   0.36, округлённая до ступени шкалы 11 · 12 · 14 · 16 · 18 · 21 · 26 ·
-   32 · 40. ПОСЧИТАНО и проверено в браузере. */
-.pl-podium-first .pl-podium-photo {
-        width: 58px;
-        height: 58px;
-    }
-.pl-podium-first .avatar-initials { font-size: var(--fs-lg); }
-.pl-podium-second .pl-podium-photo,
-    .pl-podium-third .pl-podium-photo {
-        width: 40px;
-        height: 40px;
-    }
-.pl-podium-second .avatar-initials,
-.pl-podium-third .avatar-initials { font-size: var(--fs-sm); }
-}
-
-@media (max-width: 768px) {
-.pl-podium-name {
+    /* Длинная фамилия не ломается по слогам, а обрезается двумя строками:
+       в карточке шириной 112 перенос по буквам читается как опечатка */
+    .pl-podium-name {
         overflow-wrap: normal;
         word-break: normal;
         hyphens: none;
@@ -425,27 +329,43 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-    }
-.pl-podium-first .pl-podium-name,
-    .pl-podium-second .pl-podium-name,
-    .pl-podium-third .pl-podium-name {
-        font-size: var(--fs-xs);
-    }
-.pl-podium-points {
-        display: none;
-    }
-.pl-podium-name {
-        -webkit-line-clamp: 3;
-        margin-bottom: 0;
-        /* Имя занимало 85 пикселей из 133: карточка отдавала половину
-           ширины полям. Длинная фамилия упиралась в край и срезалась */
         width: 100%;
         padding: 0 2px;
     }
-.pl-podium-card {
+}
+
+/* --- Нижняя ступень: до 640 --------------------------------------------- */
+@media (max-width: 640px) {
+    .pl-podium-first .pl-podium-photo  { width: 60px; height: 60px; }
+    .pl-podium-first .avatar-initials  { font-size: var(--fs-lg); }
+    .pl-podium-second .pl-podium-photo { width: 48px; height: 48px; }
+    .pl-podium-second .avatar-initials { font-size: var(--fs-md); }
+    .pl-podium-third .pl-podium-photo  { width: 40px; height: 40px; }
+    .pl-podium-third .avatar-initials  { font-size: var(--fs-sm); }
+
+    .pl-podium-first  .pl-podium-medal { font-size: var(--fs-xl); }
+    .pl-podium-second .pl-podium-medal { font-size: var(--fs-lg); }
+    .pl-podium-third  .pl-podium-medal { font-size: var(--fs-md); }
+
+    .pl-podium-first  .pl-podium-name { font-size: var(--fs-sm); }
+    .pl-podium-second .pl-podium-name,
+    .pl-podium-third  .pl-podium-name { font-size: var(--fs-xs); }
+
+    .pl-podium-first  .pl-podium-points { font-size: var(--fs-base); }
+    .pl-podium-second .pl-podium-points,
+    .pl-podium-third  .pl-podium-points { font-size: var(--fs-xs); }
+
+    .pl-podium-first { padding: var(--space-sm) var(--space-md) 0; }
+    .pl-podium-second,
+    .pl-podium-third { padding: var(--space-xs) var(--space-sm) 0; }
+
+    .pl-podium-card {
         padding-left: 4px;
         padding-right: 4px;
     }
+
+    /* Значки уходят, очки — НЕТ. Значок украшает, очки объясняют место */
+    .pl-podium-badges { display: none; }
 }
 
 /* ============================================================================
@@ -481,7 +401,11 @@
     -webkit-box-orient: vertical;
     line-clamp: 2;
     overflow: hidden;
-    min-height: calc(2em * 1.25);
+    /* ДВА МЕСТА ДЛЯ ОДНОГО ЧИСЛА — ЭТО ОДНО ЧИСЛО И ОДНА БЕДА. Запас под
+       две строки обязан считаться ТЕМ ЖЕ межстрочным, что стоит у имени:
+       до 06.10 здесь было зашито 1.25, а имя жило своей строкой. Теперь
+       оба берут ступень лестницы. */
+    min-height: calc(2em * var(--lh-snug));
 }
 
 @container rk-col (max-width: 700px) {
