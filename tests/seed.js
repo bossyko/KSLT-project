@@ -1396,6 +1396,346 @@ async function upsert(table, rows, onConflict) {
         console.log('  ВНИМАНИЕ: пол турнира не завёлся — ' + String(e.message).slice(0, 160));
     }
 
+    /* --- РАСКЛАДКИ СЕТКИ И НАСТОЯЩИЙ КОРТ -------------------------------
+       Слово Кости 05.10: «да на досев».
+
+       Замер 05.10 читал обе базы и сравнил с тем, что умеет завести
+       админка (`tournaments.js:1016–1033`). В тестовой базе из всех
+       раскладок нет НИ ОДНОЙ одиночной сетки крупнее восьми, в раскладке
+       «Группы + Лиги» нет ни одного ГРУППОВОГО матча, а КОРТА НЕТ НИ У
+       ОДНОГО из двадцати турниров — секция «Место проведения» не
+       рисовалась с данными ни разу, и проверка на неё прошла бы вхолостую.
+       БАЗА ЗАМЕРА РЕШАЕТ, ЧТО ВИДНО.
+
+       Корта заводится ДВА, потому что у секции две ветки: полный корт
+       ведёт на свою страницу, черновик (без фотографий, покрытий и цен)
+       оставляет название текстом и даёт только карту
+       (`tournament-detail.js:2989`). Одна ветка не доказывает другую. */
+    try {
+    /* ДВА ВЫЗОВА, А НЕ ОДИН МАССИВ: у полного корта и у черновика наборы
+       полей РАЗНЫЕ, а массив для базы — это таблица с одинаковыми
+       колонками во всех строках. Сторож входа (`:87`) ровно на этом и
+       падает, и правильно падает. */
+    await upsert('courts', [{
+        id: 'test-court',
+        name: 'Тестовый корт КСЛТ',
+        name_en: 'KSLT Test Court',
+        photo: 'https://placehold.co/800x450/111111/CCFF00?text=KSLT',
+        gallery: [],
+        street: 'ул. Тестовая',
+        street_en: 'Testovaya St',
+        building: '7',
+        city: 'Бишкек',
+        city_en: 'Bishkek',
+        country: 'Кыргызстан',
+        country_en: 'Kyrgyzstan',
+        phone: '+996 555 000 111',
+        short_desc: 'Корт для проверок: две площадки, свет, раздевалки.',
+        lat: 42.8746,
+        lng: 74.5698,
+        google_maps_url: 'https://maps.google.com/?q=42.8746,74.5698',
+        court_types: [{ type: 'outdoor', count: '2', price: '1200', surface: 'hard', partner: false }],
+        amenities: [],
+        amenities_en: [],
+        schedule: {},
+        schedule_en: {},
+        additional_services: [],
+        published_at: new Date().toISOString()
+    }], 'id');
+
+    /* ЧЕРНОВИК — крайний случай: ни фотографий, ни покрытий, ни цен.
+       Страницы у такого корта на сайте нет, и название обязано остаться
+       текстом, а не ссылкой (`tournament-detail.js:2989`). */
+    await upsert('courts', [{
+        id: 'test-court-chernovik',
+        name: 'Корт-черновик без страницы',
+        gallery: [],
+        street: 'ул. Безымянная',
+        building: '1',
+        city: 'Бишкек',
+        country: 'Кыргызстан',
+        court_types: [],
+        amenities: [],
+        amenities_en: [],
+        schedule: {},
+        schedule_en: {},
+        additional_services: []
+    }], 'id');
+    console.log('  корты: полный и черновик');
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: корты не завелись — ' + String(e.message).slice(0, 180));
+    }
+
+    /* ОДИНОЧНЫЕ СЕТКИ 16 · 32 · 64 — тех размеров, которых в базе не было.
+       Победитель чередуется по чётности матча: сделай победителем всегда
+       первого, и проверка «следующий круг собран из победителей» прошла бы
+       при любом коде. Счёт тоже чередуется — две одинаковые строки не
+       различают колонку счёта от заглушки. */
+    try {
+    const СЕ_ОПИС = 'Турнир для проверки одиночной сетки. Описание намеренно длинное, ' +
+        'чтобы секция «Описание» мерилась на переносах, а не на одной строке: ' +
+        'замер лестницы текста снимает длину строки в знаках, и короткая строка ' +
+        'её не покажет. Сетка собрана от первого круга до финала, счёт стоит у ' +
+        'каждого матча, и победитель чередуется по чётности.';
+
+    function сеткаSE(турнир, размер, игроки, префиксИд) {
+        /* Коды кругов — те же приставки, что в ROUND_DEFS
+           (`tournament-generator.js:71`): R1, R2, R3, QF, SF, F. */
+        const всего = Math.log2(размер);
+        const матчи = [];
+        let круг = 1, текущие = игроки.slice(0, размер), н = 0;
+        while (текущие.length > 1) {
+            const осталось = всего - круг;
+            const код = осталось === 0 ? 'F' : кодКруга(осталось, круг);
+            const дальше = [];
+            for (let i = 0; i < текущие.length; i += 2) {
+                const порядок = (i / 2) + 1;
+                const п1 = текущие[i], п2 = текущие[i + 1];
+                const первыйПобедил = порядок % 2 === 1;
+                const поб = первыйПобедил ? п1 : п2;
+                дальше.push(поб);
+                н += 1;
+                матчи.push({
+                    id: префиксИд + String(н).padStart(3, '0'),
+                    tournament_id: турнир,
+                    player1_id: п1, player2_id: п2,
+                    winner_id: поб,
+                    score: первыйПобедил ? '6/4 6/2' : '3/6 6/4 7/5',
+                    group_number: null,
+                    round: код,
+                    round_number: круг,
+                    match_order: порядок,
+                    played_at: today.toISOString(),
+                    status: 'completed',
+                    match_type: 'tournament'
+                });
+            }
+            текущие = дальше;
+            круг += 1;
+        }
+        return матчи;
+
+        function кодКруга(осталось, номер) {
+            if (осталось === 1) return 'SF';
+            if (осталось === 2) return 'QF';
+            return 'R' + номер;
+        }
+    }
+
+    const ИГРОКИ64 = [];
+    for (let i = 1; i <= 64; i++) ИГРОКИ64.push('trial-p' + i);
+
+    const РАЗМЕРЫ = [16, 32, 64];
+    for (const размер of РАЗМЕРЫ) {
+        const ид = 'test-se-' + размер;
+        await upsert('tournaments', [{
+            id: ид,
+            title: 'Тестовый турнир: одиночная сетка на ' + размер,
+            title_en: 'Test tournament: single elimination, ' + размер,
+            category_id: 'tour',
+            status: 'completed',
+            bracket_type: 'single_elimination',
+            draw_size: размер,
+            qualifiers_per_group: 2,
+            date_start: today.toISOString().slice(0, 10),
+            date_end: today.toISOString().slice(0, 10),
+            max_participants: размер,
+            gender: 'men',
+            format: 'singles',
+            description: СЕ_ОПИС,
+            court_id: 'test-court',
+            published_at: new Date().toISOString()
+        }], 'id');
+
+        await call('DELETE', '/rest/v1/matches?tournament_id=eq.' + ид);
+        const пре = 'cc0000' + размер + '-0000-4000-8000-000000000';
+        const матчи = сеткаSE(ид, размер, ИГРОКИ64, пре);
+        await upsert('matches', матчи, 'id');
+
+        await call('DELETE', '/rest/v1/tournament_registrations?tournament_id=eq.' + ид);
+        const заявки = ИГРОКИ64.slice(0, размер).map(function (p, i) {
+            return { tournament_id: ид, player_id: p, status: 'approved', draw_position: i + 1 };
+        });
+        await upsert('tournament_registrations', заявки);
+
+        /* ПЕРЕЧИТКА СПРАШИВАЕТ РОВНО ТО, ЧТО РАЗЛИЧАЕТ ПРОВЕРКУ: кругов
+           должно быть log2(размер), матчей размер−1, и у ВСЕХ счёт. */
+        const свёл = await call('GET', '/rest/v1/matches?tournament_id=eq.' + ид +
+            '&select=round_number,score');
+        const строки = свёл.data || [];
+        const кругов = new Set(строки.map(function (м) { return м.round_number; })).size;
+        const безСчёта = строки.filter(function (м) { return !м.score; }).length;
+        if (строки.length !== размер - 1 || кругов !== Math.log2(размер) || безСчёта) {
+            console.log('  ВНИМАНИЕ: сетка на ' + размер + ' свелась не так — матчей ' +
+                строки.length + ' вместо ' + (размер - 1) + ', кругов ' + кругов +
+                ' вместо ' + Math.log2(размер) + ', без счёта ' + безСчёта);
+        } else {
+            console.log('  одиночная сетка на ' + размер + ': ' + строки.length +
+                ' матчей, ' + кругов + ' кругов, счёт у всех');
+        }
+    }
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: одиночные сетки не завелись — ' + String(e.message).slice(0, 180));
+    }
+
+    /* «ГРУППЫ + ЛИГИ» С ГРУППОВЫМ ЭТАПОМ.
+       `test-dve-ligi` НЕ ТРОГАЕМ: групповых матчей у него нет НАМЕРЕННО,
+       на это стоит проверка таблицы итогов (53-itogi-turnira). Раскладка с
+       группами — отдельный турнир, иначе правка одной проверки сломала бы
+       другую. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ — и у проверки тоже. */
+    try {
+    const ГЛ = function (н) { return 'dd000003-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
+    await upsert('tournaments', [{
+        id: 'test-gruppy-ligi',
+        title: 'Тестовый турнир: группы и две лиги',
+        category_id: 'tour',
+        status: 'completed',
+        bracket_type: 'group_league',
+        draw_size: 8,
+        group_count: 2,
+        qualifiers_per_group: 2,
+        date_start: today.toISOString().slice(0, 10),
+        date_end: today.toISOString().slice(0, 10),
+        max_participants: 8,
+        gender: 'men',
+        format: 'singles',
+        description: 'Группы, а затем две лиги: высшая и утешительная. ' +
+            'Эта раскладка есть в админке, и до 05.10 группового этапа у неё ' +
+            'не было ни в одной базе — ветка групп не рисовалась ни разу.',
+        court_id: 'test-court-chernovik',
+        published_at: new Date().toISOString()
+    }], 'id');
+
+    await call('DELETE', '/rest/v1/matches?tournament_id=eq.test-gruppy-ligi');
+    const ЧЕТВ_A = ['trial-p1', 'trial-p2', 'trial-p3', 'trial-p4'];
+    const ЧЕТВ_B = ['trial-p5', 'trial-p6', 'trial-p7', 'trial-p8'];
+    const групповые = [];
+    let сч = 0;
+    [[1, ЧЕТВ_A], [2, ЧЕТВ_B]].forEach(function (пара) {
+        const номер = пара[0], люди = пара[1];
+        let порядок = 0;
+        for (let i = 0; i < люди.length; i++) {
+            for (let j = i + 1; j < люди.length; j++) {
+                порядок += 1; сч += 1;
+                /* Круг внутри группы — матчдень, как в боевой: там у группы
+                   из четырёх три круга по два матча (замер 05.10,
+                   `c6883b98`: G1 круг 1, 2, 3). */
+                const матчдень = Math.ceil(порядок / 2);
+                групповые.push({
+                    id: ГЛ(сч),
+                    tournament_id: 'test-gruppy-ligi',
+                    player1_id: люди[i], player2_id: люди[j],
+                    winner_id: порядок % 2 === 1 ? люди[i] : люди[j],
+                    score: порядок % 2 === 1 ? '6/3 6/4' : '4/6 6/2 6/3',
+                    group_number: номер,
+                    round: 'G' + номер,
+                    round_number: матчдень,
+                    match_order: порядок,
+                    played_at: today.toISOString(),
+                    status: 'completed',
+                    match_type: 'tournament'
+                });
+            }
+        }
+    });
+    /* Лиги поверх групп: высшая берёт первых двух из каждой группы,
+       утешительная — третьих и четвёртых.
+
+       СОБИРАЮ СВОИМ ПОМОЩНИКОМ, А НЕ `итогМатч`: набор и порядок ключей
+       обязаны совпасть с групповыми до буквы — PostgREST отказывает
+       массиву, где объекты несут разные наборы полей (PGRST102, попадались
+       02.10), и один лишний ключ уронил бы весь досев. */
+    function лиговыйМатч(ид, круг, порядок, п1, п2, поб, код) {
+        return {
+            id: ид,
+            tournament_id: 'test-gruppy-ligi',
+            player1_id: п1, player2_id: п2,
+            winner_id: поб,
+            score: порядок % 2 === 1 ? '6/3 6/4' : '4/6 6/2 6/3',
+            group_number: null,
+            round: код,
+            round_number: круг,
+            match_order: порядок,
+            played_at: today.toISOString(),
+            status: 'completed',
+            match_type: 'tournament'
+        };
+    }
+    const лиговые = [
+        лиговыйМатч(ГЛ(21), 2, 1, 'trial-p1', 'trial-p6', 'trial-p1', 'PL-SF'),
+        лиговыйМатч(ГЛ(22), 2, 2, 'trial-p5', 'trial-p2', 'trial-p5', 'PL-SF'),
+        лиговыйМатч(ГЛ(23), 3, 1, 'trial-p1', 'trial-p5', 'trial-p1', 'PL-F'),
+        лиговыйМатч(ГЛ(24), 3, 2, 'trial-p2', 'trial-p6', 'trial-p2', 'PL-3RD'),
+        лиговыйМатч(ГЛ(25), 2, 3, 'trial-p3', 'trial-p8', 'trial-p3', 'CL-SF'),
+        лиговыйМатч(ГЛ(26), 2, 4, 'trial-p7', 'trial-p4', 'trial-p7', 'CL-SF'),
+        лиговыйМатч(ГЛ(27), 3, 3, 'trial-p3', 'trial-p7', 'trial-p3', 'CL-F'),
+        лиговыйМатч(ГЛ(28), 3, 4, 'trial-p4', 'trial-p8', 'trial-p4', 'CL-3RD')
+    ];
+    await upsert('matches', групповые.concat(лиговые), 'id');
+
+    await call('DELETE', '/rest/v1/tournament_registrations?tournament_id=eq.test-gruppy-ligi');
+    await upsert('tournament_registrations', ЧЕТВ_A.concat(ЧЕТВ_B).map(function (p, i) {
+        return { tournament_id: 'test-gruppy-ligi', player_id: p, status: 'approved',
+                 draw_position: i + 1, group_number: i < 4 ? 1 : 2 };
+    }));
+
+    /* ПЕРЕЧИТКА: групповых должно быть 12 (две группы по четыре — шесть
+       матчей в каждой), лиговых 8, и ОБА вида обязаны быть непусты —
+       иначе раскладка снова проверялась бы одной своей половиной. */
+    const свёлГЛ = await call('GET', '/rest/v1/matches?tournament_id=eq.test-gruppy-ligi' +
+        '&select=group_number,round');
+    const стр = свёлГЛ.data || [];
+    const вГруппах = стр.filter(function (м) { return м.group_number > 0; }).length;
+    const вЛигах = стр.filter(function (м) { return м.round && /^(PL|CL)-/.test(м.round); }).length;
+    if (вГруппах !== 12 || вЛигах !== 8) {
+        console.log('  ВНИМАНИЕ: группы и лиги свелись не так — в группах ' + вГруппах +
+            ' вместо 12, в лигах ' + вЛигах + ' вместо 8');
+    } else {
+        console.log('  группы и две лиги: 12 групповых матчей и 8 лиговых');
+    }
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: группы и лиги не завелись — ' + String(e.message).slice(0, 180));
+    }
+
+    /* КОРТ, ОПИСАНИЕ И ПУБЛИКАЦИЯ ТРЁМ УЖЕ ЗАВЕДЁННЫМ ТУРНИРАМ.
+       Без `published_at` посетитель их не видит вовсе: отбор по публикации
+       стоит на обзорной (`tournaments-overlay.js`), и 05.10 замер показал,
+       что из двадцати турниров тестовой базы видно четыре. */
+    try {
+    const ДОПИСАТЬ = [
+        { id: 'tsikl-odinochka', корт: 'test-court',
+          опис: 'Одиночный турнир с семью группами и плей-офф из доп. матчей. ' +
+                'Описание длинное намеренно: короткая строка не показывает переносов.' },
+        { id: 'test-dve-ligi', корт: 'test-court-chernovik',
+          опис: 'Две лиги без группового этапа. Корт здесь ЧЕРНОВИК: ' +
+                'страницы у него нет, и название обязано остаться текстом.' },
+        { id: 'trial-fic-32', корт: 'test-court',
+          опис: 'Сетка «все места» на 32. Первые круги подписаны «Раунд N»: ' +
+                'словарь ROUND_DEFS знает 8, 16 и 32, а эта ветка его не читает.' }
+    ];
+    for (const т of ДОПИСАТЬ) {
+        await call('PATCH', '/rest/v1/tournaments?id=eq.' + т.id, {
+            court_id: т.корт,
+            description: т.опис,
+            published_at: new Date().toISOString()
+        });
+    }
+    const свёлД = await call('GET', '/rest/v1/tournaments?id=in.(' +
+        ДОПИСАТЬ.map(function (т) { return т.id; }).join(',') +
+        ')&select=id,court_id,published_at,description');
+    const д = свёлД.data || [];
+    const безКорта = д.filter(function (т) { return !т.court_id; }).map(function (т) { return т.id; });
+    const безПубл = д.filter(function (т) { return !т.published_at; }).map(function (т) { return т.id; });
+    if (д.length !== ДОПИСАТЬ.length || безКорта.length || безПубл.length) {
+        console.log('  ВНИМАНИЕ: дописка не легла — строк ' + д.length +
+            ', без корта [' + безКорта.join(' ') + '], без публикации [' + безПубл.join(' ') + ']');
+    } else {
+        console.log('  корт, описание и публикация дописаны трём турнирам');
+    }
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: дописка не легла — ' + String(e.message).slice(0, 180));
+    }
+
     console.log('\nГотово. Вход для проверок:');
     ACCOUNTS.forEach(a => console.log('  ' + a.email + '  ' + a.password));
     console.log('  woman@test.kslt.kg  TestWoman1!');
