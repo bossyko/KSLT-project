@@ -231,6 +231,59 @@ test.describe('лента фильтров · ' + Я.имя, () => {
         expect(п).toBe(0);
     });
 
+    /* ФИЛЬТР ОСТАВЛЯЛ ДЫРЫ — 06.10. Заморозка видит код, но не видит, что
+       вышло на экране: прятали карточку, а ячейка сетки оставалась. */
+    test('фильтр пола не оставляет пустых ячеек', async ({ page }) => {
+        await открыть(page, Я.адрес);
+        const чип = page.locator('.trn-chip[data-filter="gender"][data-value="men"]');
+        const есть = await чип.count() > 0 && await чип.isVisible();
+        expect(есть, 'ПОРОГ: у masters полоса пола обязана быть — там есть и те, и другие')
+            .toBe(true);
+        await чип.click();
+        await page.waitForTimeout(400);
+        const r = await page.evaluate(() => {
+            const вид = э => э.offsetParent !== null && э.getBoundingClientRect().height > 0;
+            const сетки = ['liveGrid', 'tournamentsGrid', 'pastTournamentsGrid']
+                .map(id => document.getElementById(id)).filter(Boolean);
+            let ячеек = 0, пустых = 0, карточек = 0;
+            сетки.forEach(g => [...g.children].filter(вид).forEach(ч => {
+                ячеек++;
+                const к = [...ч.querySelectorAll('.to-featured, .to-featured-side, .to-compact')].filter(вид).length;
+                карточек += к;
+                if (к === 0) пустых++;
+            }));
+            return { ячеек, пустых, карточек };
+        });
+        expect(r.ячеек, 'ПОРОГ: после фильтра на экране не осталось ячеек').toBeGreaterThan(0);
+        expect(r.пустых, 'пустых ячеек в сетке: ' + r.пустых +
+            '. Фильтр снова прячет карточку и оставляет слот').toBe(0);
+        expect(r.карточек, 'карточек меньше, чем ячеек — ячейка без карточки это дыра')
+            .toBe(r.ячеек);
+    });
+
+    /* КАРТА КАТЕГОРИЙ — ЭТО ДАННЫЕ, И ЗАМОРОЗКА ИХ НЕ ВИДИТ. */
+    test('в мужских категориях полосы пола нет, и выбран «Все»', async ({ page }) => {
+        const адрес = Я.адрес.replace('category=masters', 'category=challenger');
+        await открыть(page, адрес);
+        const r = await page.evaluate(() => {
+            const чипы = [...document.querySelectorAll('.trn-chip[data-filter="gender"]')];
+            const группа = чипы.length ? чипы[0].parentElement : null;
+            const акт = чипы.find(c => c.classList.contains('active'));
+            const полы = {};
+            document.querySelectorAll('.to-featured, .to-featured-side, .to-compact')
+                .forEach(к => { const г = к.dataset.gender || '—'; полы[г] = (полы[г] || 0) + 1; });
+            return { видна: !!(группа && группа.offsetParent !== null),
+                     активный: акт ? акт.dataset.value : null, полы,
+                     карточек: document.querySelectorAll('.to-featured, .to-featured-side, .to-compact').length };
+        });
+        expect(r.карточек, 'ПОРОГ: в Challengers нет карточек — мерить нечего').toBeGreaterThan(0);
+        expect(r.видна, 'полоса пола стоит там, где женских турниров не бывает: ' +
+            'чип обещает пустой экран').toBe(false);
+        expect(r.активный, 'после скрытия полосы выбранным обязан остаться «Все»').toBe('all');
+        expect(r.полы.women || 0, 'в Challengers нашлись женские турниры — ' +
+            'тогда карту категорий в KSLT_RULES надо менять, а не полосу').toBe(0);
+    });
+
 });
 
 }

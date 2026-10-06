@@ -77,6 +77,21 @@ const ОТКАТЫ = [
         `    gap: 12px;\n    max-width: var(--container-max);\n    margin: 0 auto;\n    padding: 0 var(--gutter);\n}`,
    'левый край ленты считается ТОЙ ЖЕ формулой, что содержимое'],
 
+  [JSФ, "        var мужская = П.MEN_CATEGORIES.indexOf(category) !== -1;",
+        "        var мужская = ['promasters', 'masters'].indexOf(category) !== -1;",
+   'полоса пола стоит там, где пол бывает двух видов'],
+
+  [RU, '<script src="../js/kslt-rules.js?v=27"></script>',
+       '<!-- правила отвалились -->',
+   'правила продукта подключены к странице категорий'],
+
+  [JSФ, "        if (!П || !П.MEN_CATEGORIES || !П.WOMEN_CATEGORIES || !category) return;",
+        "        if (!category) return;",
+   'нет правил — чипы не трогаем'],
+
+  [JSФ, "                единица.style.display = годится ? '' : 'none';",
+        "                единица.style.display = '';",
+   'прячется единица раскладки, а не её содержимое'],
 ];
 
 function прогон() {
