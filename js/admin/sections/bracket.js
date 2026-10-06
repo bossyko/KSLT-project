@@ -6019,42 +6019,23 @@
         }
 
         // Action buttons (bottom)
-        html += '<div class="ad-brk-actions">';
+        /* ПУСТАЯ КОРОБКА ВСЁ РАВНО ЗАНИМАЕТ МЕСТО: обёртка рисуется только
+           тогда, когда внутри есть кнопка. */
         if (allGroupCompleted && !hasPlayoff && !hasIG && !isTournamentCompleted) {
-            // Always show format modal — it auto-detects IG availability
-            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkPlayoffFormat">' + L.playoffFormatTitle + '</button>';
+            html += '<div class="ad-brk-actions">' +
+                '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkPlayoffFormat">' +
+                L.playoffFormatTitle + '</button></div>';
         }
 
-
-        if (!isTournamentCompleted) {
-            // Кнопку показываем всегда. Раньше она просто не появлялась, пока
-            // не записан последний счёт, и менеджер гадал, чего не хватает
-            var незаписано = matches.filter(function(m) {
+        html += A.полосаЗавершения({
+            завершён: isTournamentCompleted,
+            всёСыграно: totalAllCompleted,
+            незаписано: matches.filter(function(m) {
                 return m.status !== 'completed' && m.status !== 'cancelled' &&
                     m.player1_id && m.player2_id;
-            }).length;
-            /* ПОГАСАНИЕ ВИСИТ НА `[disabled]`, А НЕ ВТОРЫМ СПОСОБОМ СКАЗАТЬ ТО ЖЕ:
-               атрибут тут и так стоит, и это одно состояние, а не два. */
-            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkFinalize"' +
-                (totalAllCompleted ? '' : ' disabled title="' + L.finalizeLeft.replace('{n}', незаписано) + '"') +
-                '>' + L.finalizeTournament + '</button>';
-            if (!totalAllCompleted && незаписано > 0) {
-                /* КНОПКА И ПОЯСНЕНИЕ СТОЯТ В ОДНОЙ СТРОКЕ — ЗНАЧИТ И ПО
-                   ОДНОЙ ЛИНИИ. `margin-top: 10px` задумывался как отступ
-                   для полосы, перенесённой НА НОВУЮ строку, но у родителя
-                   нет `flex-wrap`, переноса не происходит, и маргин
-                   превратился в сдвиг вниз. Замер 01.10: верх полосы ниже
-                   верха кнопки на 10, низ — на 11. Костя: «можешь выровнять
-                   эти строчки, они не на одном уровне идут».
-                   Маргины зануляем оба: у `.ad-sched-note` есть и
-                   `margin-bottom: 16px`, он сместил бы центр вверх. Высота
-                   выравнивается по центру родителем, а не числом: кнопка 44,
-                   полоса 45. И 10 мимо шкалы 8 · 12 · 16 · 24 · 32 · 40. */
-                html += '<div class="ad-sched-note ad-sched-note-flat">' +
-                    L.finalizeLeft.replace('{n}', незаписано) + '</div>';
-            }
-        }
-        html += '</div>';
+            }).length,
+            подписи: L
+        });
 
         return html;
     }
@@ -6601,21 +6582,21 @@
         }
 
         // Action buttons
-        html += '<div class="ad-brk-btn-row">';
         if (!anyCompleted && !isTournamentCompleted) {
-            html += кнопкаПережеребить();
+            html += '<div class="ad-brk-btn-row">' + кнопкаПережеребить() + '</div>';
         }
-        if (allCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
-        }
-        html += '</div>';
 
-        if (isTournamentCompleted) {
-            html += '<div class="ad-brk-done">' +
-                '<span class="ad-brk-accent">' + (isEn ? 'Tournament completed.' : 'Турнир завершён.') + '</span>' +
-                '&nbsp;&nbsp;<button class="ad-btn ad-btn-sm ad-btn-secondary" id="adBrkRecalc">' + (isEn ? 'Recalculate Points' : 'Пересчитать очки') + '</button>' +
-            '</div>';
-        }
+        html += A.полосаЗавершения({
+            завершён: isTournamentCompleted,
+            всёСыграно: allCompleted,
+            незаписано: matches.filter(function(m) {
+                return m.status !== 'completed' && m.status !== 'cancelled' &&
+                    m.player1_id && m.player2_id;
+            }).length,
+            подписи: L,
+            обёртка: 'ad-brk-btn-row',
+            широкая: false
+        });
 
         return html;
     }
@@ -6987,21 +6968,21 @@
         });
 
         // Action buttons
-        html += '<div class="ad-brk-btn-row">';
         if (!anyCompleted && !isTournamentCompleted) {
-            html += кнопкаПережеребить();
+            html += '<div class="ad-brk-btn-row">' + кнопкаПережеребить() + '</div>';
         }
-        if (allCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
-        }
-        html += '</div>';
 
-        if (isTournamentCompleted) {
-            html += '<div class="ad-brk-done">' +
-                '<span class="ad-brk-accent">' + (isEn ? 'Tournament completed.' : 'Турнир завершён.') + '</span>' +
-                '&nbsp;&nbsp;<button class="ad-btn ad-btn-sm ad-btn-secondary" id="adBrkRecalc">' + (isEn ? 'Recalculate Points' : 'Пересчитать очки') + '</button>' +
-            '</div>';
-        }
+        html += A.полосаЗавершения({
+            завершён: isTournamentCompleted,
+            всёСыграно: allCompleted,
+            незаписано: matches.filter(function(m) {
+                return m.status !== 'completed' && m.status !== 'cancelled' &&
+                    m.player1_id && m.player2_id;
+            }).length,
+            подписи: L,
+            обёртка: 'ad-brk-btn-row',
+            широкая: false
+        });
 
         return html;
     }
@@ -13361,14 +13342,21 @@
         }
 
         // Action buttons
-        html += '<div class="ad-brk-actions">';
         if (allGroupCompleted && !hasLeagues && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkGenLeagues">' + L.generateLeagues + '</button>';
+            html += '<div class="ad-brk-actions">' +
+                '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkGenLeagues">' +
+                L.generateLeagues + '</button></div>';
         }
-        if (totalAllCompleted && !isTournamentCompleted) {
-            html += '<button class="ad-btn ad-btn-primary ad-btn-wide" id="adBrkFinalize">' + L.finalizeTournament + '</button>';
-        }
-        html += '</div>';
+
+        html += A.полосаЗавершения({
+            завершён: isTournamentCompleted,
+            всёСыграно: totalAllCompleted,
+            незаписано: matches.filter(function(m) {
+                return m.status !== 'completed' && m.status !== 'cancelled' &&
+                    m.player1_id && m.player2_id;
+            }).length,
+            подписи: L
+        });
 
         return html;
     }
