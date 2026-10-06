@@ -510,20 +510,27 @@
             }
         }
 
-        // Рейтинг ведётся только в одиночном разряде. Парные и микст турниры
-        // очков не начисляют, поэтому переключателя разрядов здесь нет.
-        var html = '<div class="pl-gender-tabs">' +
-            '<button class="pl-gender-tab' + (currentGender === 'men' ? ' active' : '') + '" data-gender="men">' + labels.men + '</button>' +
-            '<button class="pl-gender-tab' + (currentGender === 'women' ? ' active' : '') + '" data-gender="women">' + labels.women + '</button>' +
-        '</div>';
+        /* ЧИПЫ ПОЛА С ОБЗОРНОЙ СНЯТЫ — слово Кости 06.10: «фильтры, поисковую
+           строку надо убрать с обзорной рейтинга». Пол выбирается пилюлями
+           разрядов: мужские и женские разряды названы по-разному, и отдельная
+           пара чипов над ними — второй орган управления для одного выбора.
+           Рейтинг ведётся только в одиночном разряде: парные и микст очков не
+           начисляют, поэтому переключателя разрядов здесь нет и не было. */
+        var html = '';
 
+        /* ПОИСКА НА ОБЗОРНОЙ НЕТ — слово Кости 06.10: «на обзорной убери, там
+           всё равно обрезанная версия стоит и всех не отображает — для чего
+           там поиск тогда». Обзорная показывает первые десять строк разряда;
+           искать человека по ней бессмысленно — за этим идут на страницу
+           разряда, где список полный, и поиск живёт там. */
         html += '<div class="pl-category-row">';
-        html += '<div class="trn-search-wrap">' +
-            '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-            '<input type="text" class="trn-search-input" id="playersSearch" placeholder="' + labels.searchPlaceholder + '" autocomplete="off" value="' + esc(searchQuery) + '">' +
-        '</div>';
+        /* ОДИН ОРГАН УПРАВЛЕНИЯ НА ОДИН ВЫБОР. Чипов пола над пилюлями больше
+           нет, поэтому пилюли несут оба пола сразу: мужские разряды и женские
+           названы по-разному, выбор однозначен, а второй ряд кнопок за то же
+           самое с экрана уходит. Женские идут после мужских — порядок тот же,
+           что в разрядах клуба. */
         html += '<div class="pl-category-pills" id="categoryPills">';
-        var cats = currentGender === 'men' ? menCats : womenCats;
+        var cats = menCats.concat(womenCats);
         for (var i = 0; i < cats.length; i++) {
             html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '">' + cats[i].name + '</button>';
         }

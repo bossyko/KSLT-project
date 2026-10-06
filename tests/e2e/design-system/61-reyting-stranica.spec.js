@@ -438,13 +438,22 @@ test.describe('полоса страниц рейтинга', () => {
 const РАЗРЯДЫ = ['men-masters', 'men-tour', 'men-challenger', 'men-promasters'];
 
 test.describe('липкая полоса разряда', () => {
+    /* ЧЕТЫРЕ РАЗРЯДА В ОДНОЙ ПРОВЕРКЕ НЕ УКЛАДЫВАЮТСЯ В ТРИДЦАТЬ СЕКУНД.
+       Прогон 06.10 упал по таймауту, и это была беда прибора, а не продукта:
+       разрядов нет в базе прогона, ожидание полосы висело по пятнадцать
+       секунд на каждом. Ждём коротко и называем причину, когда разряда нет. */
+    test.setTimeout(90 * 1000);
+
 
     test('чипы не переносятся в столбик ни в одном разряде', async ({ page }) => {
         const беды = [];
+        const нету = [];
         for (const разряд of РАЗРЯДЫ) {
             await page.goto('/pages/players.html?tab=' + разряд);
-            await page.waitForSelector('.trn-filters', { timeout: 15000 }).catch(() => null);
-            await page.waitForTimeout(700);
+            const полосаЕсть = await page.waitForSelector('.trn-filters', { timeout: 4000 })
+                .then(() => true).catch(() => false);
+            if (!полосаЕсть) { нету.push(разряд); continue; }
+            await page.waitForTimeout(400);
 
             const r = await page.evaluate(() => {
                 const чипы = [...document.querySelectorAll('.pl-cat-gender-btn')]
@@ -470,15 +479,24 @@ test.describe('липкая полоса разряда', () => {
                 беды.push(разряд + ': шапка и полоса заняли ' + r.доля + ' % экрана');
             }
         }
-        expect(беды, 'липкая полоса разряда поехала').toEqual([]);
+        /* ПОРОГ С НАЗВАННОЙ ПРИЧИНОЙ: все четыре разряда могут отсутствовать в
+           базе прогона — тогда проверять было нечего, и молчать об этом
+           нельзя. */
+        test.skip(нету.length === РАЗРЯДЫ.length,
+            'ни одного разряда нет в базе прогона: ' + нету.join(', '));
+        expect(беды, 'липкая полоса разряда поехала (разрядов нет в базе: ' +
+            (нету.join(', ') || 'нет таких') + ')').toEqual([]);
     });
 
     test('поиск и чипы держат цель нажатия на всех разрядах', async ({ page }) => {
         const мелкие = [];
+        const нету = [];
         for (const разряд of РАЗРЯДЫ) {
             await page.goto('/pages/players.html?tab=' + разряд);
-            await page.waitForSelector('.trn-filters', { timeout: 15000 }).catch(() => null);
-            await page.waitForTimeout(600);
+            const полосаЕсть = await page.waitForSelector('.trn-filters', { timeout: 4000 })
+                .then(() => true).catch(() => false);
+            if (!полосаЕсть) { нету.push(разряд); continue; }
+            await page.waitForTimeout(400);
 
             const r = await page.evaluate(() => {
                 const мер = э => э ? Math.round(э.getBoundingClientRect().height) : null;
@@ -490,6 +508,8 @@ test.describe('липкая полоса разряда', () => {
             if (r.поиск !== null && r.поиск < 44) мелкие.push(разряд + ': поиск ' + r.поиск);
             if (r.чип !== null && r.чип < 44) мелкие.push(разряд + ': чип пола ' + r.чип);
         }
+        test.skip(нету.length === РАЗРЯДЫ.length,
+            'ни одного разряда нет в базе прогона: ' + нету.join(', '));
         expect(мелкие, 'цель нажатия в полосе разряда меньше 44').toEqual([]);
     });
 });
