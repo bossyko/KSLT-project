@@ -167,8 +167,36 @@ async function сторожСхемы(table, rows) {
     });
 }
 
+/* ДУБЛИКАТ ЛОВИТ ПРОВЕРКА, А НЕ ПАМЯТЬ.
+   06.10: сев положил шесть групповых матчей `test-metka` под id `dd000001-…
+   -01..06`, а сотней строк ниже те же id занял блок итогов. `on_conflict=id`
+   на это не жалуется — он переписывает. Сев перечитал базу СРАЗУ после своей
+   вставки и честно напечатал «матчей в группах 6»: правду на тот миг. К концу
+   прогона их не было, и три проверки неделю искали беду в вёрстке.
+   Сторож помнит, кому id выдан, и падает, когда его просит второй хозяин.
+   ПОВТОРНАЯ ПОСЫЛКА ТОГО ЖЕ ХОЗЯИНА РАЗРЕШЕНА: это правка строки, ею сев
+   поднимает игроков из очереди. */
+var _хозяинИд = {};
+function сторожХозяина(table, rows) {
+    if (!Array.isArray(rows)) return;
+    rows.forEach(function (о, i) {
+        if (!о || !о.id) return;
+        const ключ = table + ':' + о.id;
+        const кто = Object.prototype.hasOwnProperty.call(о, 'tournament_id')
+            ? String(о.tournament_id) : '—';
+        if (_хозяинИд[ключ] === undefined) { _хозяинИд[ключ] = кто; return; }
+        if (_хозяинИд[ключ] !== кто) {
+            throw new Error('сев ' + table + ': id ' + о.id + ' уже выдан «' +
+                _хозяинИд[ключ] + '», а строка ' + (i + 1) + ' отдаёт его «' + кто +
+                '». on_conflict=id не отказывает — он ПЕРЕПИШЕТ, и первый хозяин ' +
+                'потеряет строку молча. Заведи этому блоку свой префикс.');
+        }
+    });
+}
+
 async function upsert(table, rows, onConflict) {
     сторожВхода(table, rows);
+    сторожХозяина(table, rows);
     await сторожСхемы(table, rows);
     const q = onConflict ? '?on_conflict=' + onConflict : '';
     const res = await fetch(db.url + '/rest/v1/' + table + q, {
@@ -1107,7 +1135,12 @@ async function upsert(table, rows, onConflict) {
         };
     }
 
-    var ИД = function (н) { return 'dd000001-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
+    /* СВОЙ ПРЕФИКС, А НЕ ОБЩИЙ. До 06.10 здесь стоял `dd000001` — тот же,
+       что у шести групповых матчей `test-metka` (:853). `on_conflict=id`
+       не отказывает, он ПЕРЕПИСЫВАЕТ: эти шесть строк уезжали к
+       `test-itogi` и `test-itogi-fic`, и групповой этап у `test-metka`
+       пропадал молча. Три проверки искали беду в вёрстке неделю. */
+    var ИД = function (н) { return 'dd000004-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
 
     await upsert('matches', [
         // Олимпийка: финал и матч за третье место — пьедестал из троих
@@ -1734,6 +1767,27 @@ async function upsert(table, rows, onConflict) {
     }
     } catch (e) {
         console.log('  ВНИМАНИЕ: дописка не легла — ' + String(e.message).slice(0, 180));
+    }
+
+    /* СВЕРКА В КОНЦЕ, А НЕ СРАЗУ ПОСЛЕ ВСТАВКИ. Проверка на :905 читает
+       базу через строку после своего upsert и видит правду, которая через
+       сто строк перестаёт быть правдой. Здесь — последнее слово прогона:
+       что лежит в базе, когда сев закончил. */
+    try {
+        const свёлК = await call('GET', '/rest/v1/matches?tournament_id=eq.test-metka' +
+            '&select=id,group_number,status');
+        const к = свёлК.data || [];
+        const вГр = к.filter(function (м) { return м.group_number > 0; }).length;
+        const вСет = к.filter(function (м) { return !м.group_number; }).length;
+        if (вГр !== 6 || вСет !== 1) {
+            console.log('\n  ВНИМАНИЕ: в конце прогона у test-metka групповых ' + вГр +
+                ', в сетке ' + вСет + ' — ждали 6 и 1. Чьи-то id переехали поверх ' +
+                'этих строк. Проверки метки группы пройдут вхолостую.');
+        } else {
+            console.log('  сверка в конце: у test-metka 6 групповых и 1 в сетке');
+        }
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: итоговая сверка не прошла — ' + String(e.message).slice(0, 160));
     }
 
     console.log('\nГотово. Вход для проверок:');
