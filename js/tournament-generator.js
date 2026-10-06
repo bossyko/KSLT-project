@@ -70,6 +70,14 @@ var SEED_POSITIONS = {
 // --- Названия раундов ---
 var ROUND_DEFS = {
     ru: {
+        64: [
+            { name: "1/32 Финала", nameShort: "R1/32", prefix: "R1" },
+            { name: "1/16 Финала", nameShort: "R1/16", prefix: "R2" },
+            { name: "1/8 Финала", nameShort: "R1/8", prefix: "R3" },
+            { name: "Четвертьфинал", nameShort: "QF", prefix: "QF" },
+            { name: "Полуфинал", nameShort: "SF", prefix: "SF" },
+            { name: "Финал", nameShort: "F", prefix: "F" }
+        ],
         32: [
             { name: "1/16 Финала", nameShort: "R1/16", prefix: "R1" },
             { name: "1/8 Финала", nameShort: "R1/8", prefix: "R2" },
@@ -90,6 +98,14 @@ var ROUND_DEFS = {
         ]
     },
     en: {
+        64: [
+            { name: "Round of 64", nameShort: "R64", prefix: "R1" },
+            { name: "Round of 32", nameShort: "R32", prefix: "R2" },
+            { name: "Round of 16", nameShort: "R16", prefix: "R3" },
+            { name: "Quarterfinal", nameShort: "QF", prefix: "QF" },
+            { name: "Semifinal", nameShort: "SF", prefix: "SF" },
+            { name: "Final", nameShort: "F", prefix: "F" }
+        ],
         32: [
             { name: "Round of 32", nameShort: "R32", prefix: "R1" },
             { name: "Round of 16", nameShort: "R16", prefix: "R2" },
@@ -108,6 +124,72 @@ var ROUND_DEFS = {
             { name: "Semifinal", nameShort: "SF", prefix: "SF" },
             { name: "Final", nameShort: "F", prefix: "F" }
         ]
+    },
+    kg: {
+        64: [
+            { name: "1/32 финал", nameShort: "R1/32", prefix: "R1" },
+            { name: "1/16 финал", nameShort: "R1/16", prefix: "R2" },
+            { name: "1/8 финал", nameShort: "R1/8", prefix: "R3" },
+            { name: "Чейрек финал", nameShort: "QF", prefix: "QF" },
+            { name: "Жарым финал", nameShort: "SF", prefix: "SF" },
+            { name: "Финал", nameShort: "F", prefix: "F" }
+        ],
+        32: [
+            { name: "1/16 финал", nameShort: "R1/16", prefix: "R1" },
+            { name: "1/8 финал", nameShort: "R1/8", prefix: "R2" },
+            { name: "Чейрек финал", nameShort: "QF", prefix: "QF" },
+            { name: "Жарым финал", nameShort: "SF", prefix: "SF" },
+            { name: "Финал", nameShort: "F", prefix: "F" }
+        ],
+        16: [
+            { name: "1/8 финал", nameShort: "R1", prefix: "R1" },
+            { name: "Чейрек финал", nameShort: "QF", prefix: "QF" },
+            { name: "Жарым финал", nameShort: "SF", prefix: "SF" },
+            { name: "Финал", nameShort: "F", prefix: "F" }
+        ],
+        8: [
+            { name: "Чейрек финал", nameShort: "QF", prefix: "QF" },
+            { name: "Жарым финал", nameShort: "SF", prefix: "SF" },
+            { name: "Финал", nameShort: "F", prefix: "F" }
+        ]
+    }
+};
+
+/**
+ * ПОДПИСЬ КРУГА — ОДНО ОПРЕДЕЛЕНИЕ НА ВЕСЬ ПРОДУКТ.
+ *
+ * До 06.10 круг называли ТРИ разных места в `js/tournament-detail.js`, и на
+ * одном и том же размере сетки выходили разные слова: ветка олимпийки читала
+ * `ROUND_DEFS` и на 32 давала «1/16 Финала», ветка «все места» и плей-офф
+ * после групп словарь не читали и на том же размере давали «Раунд 1».
+ * А у киргизского обе ветки тернарника были ОДИНАКОВЫ —
+ * `isKg ? 'Раунд ' + r : 'Раунд ' + r`, — и рядом с переведёнными «Чейрек
+ * финал» и «Жарым финал» стояло русское «РАУНД 1».
+ *
+ * Словарь теперь знает три языка и размеры 8 · 16 · 32 · 64. Вычисление
+ * осталось ТОЛЬКО как запасной ход для размеров, которых в словаре нет, и
+ * оно даёт ту же форму «1/N», а не «Раунд N»: одно понятие — одно слово.
+ *
+ * @param {string} lang  'ru' | 'en' | 'kg'
+ * @param {number} размерСетки  8 · 16 · 32 · 64 — или любой другой
+ * @param {number} круг         номер круга, с единицы
+ * @param {number} всегоКругов  сколько кругов в сетке
+ */
+var KSLT_ROUNDS = {
+    подпись: function (lang, размерСетки, круг, всегоКругов) {
+        var словарь = ROUND_DEFS[lang] || ROUND_DEFS.ru;
+        var ряд = словарь[размерСетки];
+        if (ряд && ряд[круг - 1]) return ряд[круг - 1].name;
+
+        var доФинала = всегоКругов - круг;
+        if (доФинала === 0) return lang === 'en' ? 'Final' : 'Финал';
+        if (доФинала === 1) return lang === 'en' ? 'Semifinal'
+                                 : (lang === 'kg' ? 'Жарым финал' : 'Полуфинал');
+        if (доФинала === 2) return lang === 'en' ? 'Quarterfinal'
+                                 : (lang === 'kg' ? 'Чейрек финал' : 'Четвертьфинал');
+        var доля = Math.pow(2, доФинала);
+        if (lang === 'en') return 'Round of ' + (доля * 2);
+        return '1/' + доля + (lang === 'kg' ? ' финал' : ' Финала');
     }
 };
 

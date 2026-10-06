@@ -1748,6 +1748,25 @@ tr.td-rr-row-dimmed {
     color: var(--text-muted);
 }
 
+/* ПУСТОЕ СОСТОЯНИЕ НЕ МОЛЧИТ: строка называет, чего нет, подпись — когда
+   появится. `Empty state 37:53`: «never just no data». Два уровня, а не
+   один: заголовок несёт вес, подсказка — тише и мельче, и обе стоят на
+   ступенях шкалы (16 и 14), а не на числах. */
+.td-empty-title {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-xs);
+}
+
+.td-empty-hint {
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
 /* === LOCKED PAGE === */
 /* Дорога назад на экране «турнир не найден»: отступ ступенью, а не инлайном.
    У экрана «нужен вход» он стоял числом в атрибуте style — туда же, куда

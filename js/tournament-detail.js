@@ -336,10 +336,11 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
         var prMatches = nonThird.filter(function(m) { return m.round_number === pr; })
             .sort(function(a, b) { return a.match_order - b.match_order; });
         var prf = totalRounds - pr;
-        var prName = prf === 0 ? (isEn ? 'Final' : (isKg ? 'Финал' : 'Финал')) :
-                     prf === 1 ? (isEn ? 'Semifinal' : (isKg ? 'Жарым финал' : 'Полуфинал')) :
-                     prf === 2 ? (isEn ? 'Quarterfinal' : (isKg ? 'Чейрек финал' : 'Четвертьфинал')) :
-                     (isEn ? 'Round ' + pr : (isKg ? 'Раунд ' + pr : 'Раунд ' + pr));
+        /* ПОДПИСЬ КРУГА БЕРЁТСЯ ИЗ ОДНОГО МЕСТА. Здесь стоял свой
+           тернарник, и на 32 он давал «Раунд 1» там, где соседняя
+           ветка давала «1/16 Финала». */
+        var prName = KSLT_ROUNDS.подпись((isEn ? 'en' : (isKg ? 'kg' : 'ru')),
+            Math.pow(2, totalRounds), pr, totalRounds);
 
         var prConverted = prMatches.map(function(m) {
             return {
@@ -493,7 +494,7 @@ function getFicSectionsPublic(drawSize, isEn) {
     // Таблица блоков живёт в общем своде правил: её же читают админка и
     // приложение, иначе третья копия рано или поздно разойдётся
     return (window.KSLT_RULES && window.KSLT_RULES.ficSections)
-        ? window.KSLT_RULES.ficSections(drawSize, isEn ? 'en' : 'ru')
+        ? window.KSLT_RULES.ficSections(drawSize, isEn ? 'en' : (isKg ? 'kg' : 'ru'))
         : [];
 }
 
@@ -1443,6 +1444,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         feeYouGuest: 'Your fee is {sum} {cur}. KSLT membership brings it down to {member} {cur}',
         description: 'About Tournament', scheduleSoon: 'Schedule will be published soon',
         noParticipants: 'Participants will be announced soon',
+        drawNotYet: 'The draw has not been made yet',
+        drawNotYetHint: 'The bracket will appear here once the draw is done.',
         noResults: 'Points will be awarded after the tournament ends',
         noResultsPlain: 'Results will appear after the tournament ends',
         countdownTitle: 'TOURNAMENT STARTS IN',
@@ -1456,6 +1459,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         feeYouGuest: 'Сиздин акыңыз {sum} {cur}. КСЛТ мүчөлүгү менен {member} {cur} болот',
         description: 'Мелдеш жөнүндө', scheduleSoon: 'Тартип кийинчерээк жарыяланат',
         noParticipants: 'Катышуучулар кийинчерээк жарыяланат',
+        drawNotYet: 'Жеребьёвка әлі өткөн жок',
+        drawNotYetHint: 'Жеребьёвка өткөндөн кийин тор ушул жерде көрүнөт.',
         noResults: 'Жыйынтыктар мелдеш аяктагандан кийин жеткиликтүү болот',
         noResultsPlain: 'Жыйынтыктар мелдеш аяктагандан кийин чыгат',
         countdownTitle: 'МЕЛДЕШ БАШТАЛГАНГА',
@@ -1469,6 +1474,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         feeYouGuest: 'Ваш взнос {sum} {cur}. С членством КСЛТ — {member} {cur}',
         description: 'О турнире', scheduleSoon: 'Расписание будет опубликовано позже',
         noParticipants: 'Участники будут объявлены позже',
+        drawNotYet: 'Сетка ещё не сформирована',
+        drawNotYetHint: 'Она появится здесь, когда пройдёт жеребьёвка.',
         noResults: 'Очки будут начислены после завершения турнира',
         noResultsPlain: 'Результаты появятся после завершения турнира',
         countdownTitle: 'ТУРНИР НАЧИНАЕТСЯ ЧЕРЕЗ',
@@ -1999,10 +2006,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var prMatches = ploffMatches.filter(function(m) { return m.round_number === pr && m.round !== '3RD'; })
                             .sort(function(a, b) { return a.match_order - b.match_order; });
                         var prf = plTotalRounds - pr;
-                        var prName = prf === 0 ? (isEn ? 'Final' : (isKg ? 'Финал' : 'Финал')) :
-                                     prf === 1 ? (isEn ? 'Semifinal' : (isKg ? 'Жарым финал' : 'Полуфинал')) :
-                                     prf === 2 ? (isEn ? 'Quarterfinal' : (isKg ? 'Чейрек финал' : 'Четвертьфинал')) :
-                                     (isEn ? 'Round ' + pr : (isKg ? 'Раунд ' + pr : 'Раунд ' + pr));
+                        var prName = KSLT_ROUNDS.подпись((isEn ? 'en' : (isKg ? 'kg' : 'ru')),
+                            Math.pow(2, plTotalRounds), pr, plTotalRounds);
 
                         var prConverted = prMatches.map(function(m) {
                             return {
@@ -2505,7 +2510,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             // Build rounds structure
             var rounds = [];
-            var lang = isEn ? 'en' : 'ru';
+            /* КИРГИЗСКИЙ ЗДЕСЬ ПАДАЛ В РУССКИЙ: ветки `kg` не было вовсе. */
+            var lang = (isEn ? 'en' : (isKg ? 'kg' : 'ru'));
             var roundDefs = (typeof ROUND_DEFS !== 'undefined' && ROUND_DEFS[lang] && ROUND_DEFS[lang][drawSize])
                 ? ROUND_DEFS[lang][drawSize]
                 : null;
@@ -2515,15 +2521,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     .sort(function(a, b) { return a.match_order - b.match_order; });
 
                 var roundName = '';
-                if (roundDefs && roundDefs[r - 1]) {
-                    roundName = roundDefs[r - 1].name;
-                } else {
-                    var rf = totalRounds - r;
-                    if (rf === 0) roundName = isEn ? 'Final' : (isKg ? 'Финал' : 'Финал');
-                    else if (rf === 1) roundName = isEn ? 'Semifinal' : (isKg ? 'Жарым финал' : 'Полуфинал');
-                    else if (rf === 2) roundName = isEn ? 'Quarterfinal' : (isKg ? 'Чейрек финал' : 'Четвертьфинал');
-                    else roundName = isEn ? 'Round ' + r : (isKg ? 'Раунд ' + r : 'Раунд ' + r);
-                }
+                roundName = KSLT_ROUNDS.подпись(lang, drawSize, r, totalRounds);
 
                 var convertedMatches = roundMatches.map(function(m) {
                     return {
@@ -2563,16 +2561,19 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             renderSingleEliminationBracket(tournamentObj, predOpts);
             }
         } else {
-            var desc = isEn ? (t.description_en || t.description || '') : (t.description || '');
-            if (desc) {
-                bracketContainer.innerHTML =
-                    '<div style="max-width:800px">' +
-                        '<h3 style="color:var(--text-primary);margin-bottom:var(--space-md)">' + L.description + '</h3>' +
-                        '<p style="color:var(--text-secondary);line-height:1.8;font-size:1rem">' + desc.replace(/\n/g, '<br>') + '</p>' +
-                    '</div>';
-            } else {
-                bracketContainer.innerHTML = '<div class="td-no-results"><p>' + L.scheduleSoon + '</p></div>';
-            }
+            /* ПОД ЗАГОЛОВКОМ «ТУРНИРНАЯ СЕТКА» ЛЕЖИТ СЕТКА, А НЕ ОПИСАНИЕ.
+               Здесь стояло описание турнира — то же самое, что уже стоит
+               разделом выше: на странице оно оказывалось ДВАЖДЫ, а человек,
+               пришедший за сеткой, читал вместо неё пересказ регламента.
+               Замер 06.10 по боевой базе: под эту ветку попадают два живых
+               турнира и тридцать архивных.
+               Пустое состояние НЕ МОЛЧИТ, а называет причину и срок:
+               `Empty state 37:53` — «never just no data». */
+            bracketContainer.innerHTML =
+                '<div class="td-no-results">' +
+                    '<p class="td-empty-title">' + L.drawNotYet + '</p>' +
+                    '<p class="td-empty-hint">' + L.drawNotYetHint + '</p>' +
+                '</div>';
         }
     }
 

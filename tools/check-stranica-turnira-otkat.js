@@ -20,13 +20,55 @@ const КОРЕНЬ = path.join(__dirname, '..');
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-strturn-'));
 ['css', 'tools', 'js', 'pages'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
+/* ВТОРАЯ КОПИЯ ПРАВИЛ ПРОДУКТА — В КОПИЮ ТОЖЕ. Без неё `чит` падает, и
+   КАЖДЫЙ откат «роняет правило» по чужой причине: прибор обязан называть
+   свою причину, а не соседскую. */
+fs.mkdirSync(path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
+fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
 
 const CSS = 'css/tournament-detail.css';
 const JSФ = 'js/tournament-detail.js';
 const RU  = 'pages/tournament.html';
 const EN  = 'pages/tournament-en.html';
+const ГЕН = 'js/tournament-generator.js';
+const ПРАВ = 'js/kslt-rules.js';
 
 const ОТКАТЫ = [
+  /* ── подпись круга и пустая сетка (06.10) ── */
+  [JSФ, '                            Math.pow(2, plTotalRounds), pr, plTotalRounds);',
+        "                            0, pr, plTotalRounds); prName = 'Раунд ' + pr;",
+   'подпись круга берётся из одного места, а не из трёх'],
+
+  [ГЕН, '    kg: {', '    kgБыло: {',
+   'словарь кругов знает три языка, а не два'],
+
+  [ГЕН, '        64: [\n            { name: "1/32 Финала"', '        640: [\n            { name: "1/32 Финала"',
+   'каждый из трёх языков знает все четыре размера сетки'],
+
+  [JSФ, "            var lang = (isEn ? 'en' : (isKg ? 'kg' : 'ru'));",
+        "            var lang = isEn ? 'en' : 'ru';",
+   'киргизский не падает в русский при выборе словаря'],
+
+  [JSФ, "                    '<p class=\"td-empty-title\">' + L.drawNotYet + '</p>' +",
+        "                    '<h3>' + L.description + '</h3>' +",
+   'под заголовком «Турнирная сетка» лежит сетка, а не описание'],
+
+  [JSФ, "        drawNotYet: 'Сетка ещё не сформирована',",
+        "        drawNotYetБыло: 'Сетка ещё не сформирована',",
+   'пустая сетка называет причину и срок, а не молчит'],
+
+  [CSS, '.td-empty-title {\n    font-size: var(--fs-base);',
+        '.td-empty-title {\n    font-size: 17px;',
+   'у пустого состояния два уровня текста, и оба на ступенях шкалы'],
+
+  [ПРАВ, '                ? KSLT_ROUNDS.подпись(lang, 0, 1, кругов)',
+         "                ? (isEn ? 'Semifinal' : 'Полуфинал')",
+   'блок «все места» не называет круг своими словами'],
+
+  [ПРАВ, '    R.ficSections = function(drawSize, lang) {',
+         '    R.ficSections = function(drawSize, lang) { /* разошлись */',
+   'две копии правил продукта не разошлись'],
+
   /* ── мера абзаца ── */
   [CSS, '    max-width: 80ch;', '    max-width: 900px;',
    'мера абзаца считается в ЗНАКАХ, а не в пикселях'],
