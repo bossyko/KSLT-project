@@ -45,8 +45,19 @@ const АДМИН_CSS = 'css/admin.css';
 const ЗАМЕР_ФАЙЛ = 'tools/zamer-ochki-ekran.mjs';
 const ТЕСТ_ФАЙЛ  = 'tests/e2e/features/19-ekran-ochkov.spec.js';
 const СТАТ_SQL   = 'sql/функции/stats-rating-only.sql';
+const ПРОГОН_ЗАВ = 'tests/e2e/features/22-zavershyonnyy-turnir.spec.js';
 
 const ОТКАТЫ = [
+  [ПРОГОН_ЗАВ, 'await первая.hover();', 'await первая.focus();',
+   'у завершённого турнира есть свой прогон, и он меряет невидимое заморозке'],
+
+  [ПРОГОН_ЗАВ, "    ['группы и лиги',  'test-dve-ligi']", "    ['группы и лиги',  'test-dve-ligi-БЫЛО']",
+   'прогон накрывает все четыре раскладки, а не три'],
+
+  [ПРОГОН_ЗАВ, "await expect(page.locator('#adBrkRecalc')).toBeVisible();\n\n            // Завершить второй раз",
+               "await page.locator('#adBrkRecalc').click();\n\n            // Завершить второй раз",
+   'прогон не жмёт кнопки, пишущие в базу'],
+
   /* ─── завершённый турнир виден экраном ─── */
   [УТИЛИТЫ, 'id="adBrkFinalize"', 'id="adBrkFinalizeБыло"',
    'кнопка завершения объявлена ОДИН раз, и не в рисовальщиках'],
