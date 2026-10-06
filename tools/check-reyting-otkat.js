@@ -150,6 +150,21 @@ const ОТКАТЫ = [
  '    min-width: 0;',
  'на главной размер пьедестала считается от КОЛОНКИ, а не от окна'],
 
+['вернуть поиск на обзорную рейтинга', 'js/players.js',
+ "        html += '<div class=\"pl-category-row\">';",
+ "        html += '<input id=\"playersSearch\">';",
+ 'на обзорной нет ни поиска, ни чипов пола'],
+
+['вернуть чипы пола на обзорную', 'js/players.js',
+ "        html += '<div class=\"pl-category-pills\" id=\"categoryPills\">';",
+ "        html += '<div class=\"pl-gender-tabs\"></div>';",
+ 'на обзорной нет ни поиска, ни чипов пола'],
+
+['вернуть пилюлям только один пол', 'js/players.js',
+ '        var cats = menCats.concat(womenCats);',
+ '        var cats = menCats;',
+ 'на обзорной нет ни поиска, ни чипов пола'],
+
 ['погасить очки пьедестала на узком', 'css/podium.css',
  '    /* Значки уходят, очки — НЕТ. Значок украшает, очки объясняют место */',
  '    .pl-podium-points { display: none; }',

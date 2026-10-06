@@ -114,14 +114,48 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
         expect(r.текст, 'в обложке пропал сезон').toContain('2026');
     });
 
-    test('чип пола — ступень шкалы кнопок, и нажатие доходит', async ({ page }) => {
+    test('на обзорной нет ни поиска, ни чипов пола', async ({ page }) => {
         await открыть(page, Я.адрес);
-        const чипы = page.locator('.pl-gender-tab');
+
+        /* РЕШЕНИЕ КОСТИ 06.10: «фильтры, поисковую строку надо убрать с
+           обзорной рейтинга». Обзорная показывает первые десять строк
+           разряда — искать по ней человека бессмысленно, за этим идут на
+           страницу разряда, где список полный. Чипы пола сняты там же: пол
+           выбирается пилюлями разрядов, и второй орган управления за тот же
+           выбор с экрана ушёл.
+           Решение живёт в отрисовке, а не в css: вернуть его может любой,
+           кто правит `renderFilters`. Поэтому сторож здесь, а не только в
+           заморозке. */
+        const r = await page.evaluate(() => ({
+            поиск: document.querySelectorAll(
+                '.trn-search-input, .pl-search-input, input[type="search"]').length,
+            чипы: document.querySelectorAll('.pl-gender-tab').length,
+            пилюли: document.querySelectorAll('.pl-category-pill').length,
+            полов: [...document.querySelectorAll('.pl-category-pill')]
+                .map(э => (э.textContent || '').trim()).length,
+        }));
+
+        expect(r.поиск, 'на обзорную вернулась поисковая строка').toBe(0);
+        expect(r.чипы, 'на обзорную вернулись чипы пола').toBe(0);
+        /* ПОРОГ: пилюли разрядов — единственная навигация этого экрана. Если
+           исчезнут и они, выбрать разряд будет нечем. */
+        expect(r.пилюли, 'ПОРОГ: пилюль разрядов нет — выбрать разряд нечем')
+            .toBeGreaterThanOrEqual(2);
+    });
+
+    test('чип пола разряда — ступень шкалы кнопок, и нажатие доходит', async ({ page }) => {
+        /* Чип пола живёт на странице разряда, а не на обзорной. */
+        await page.goto(Я.адрес + '?tab=men-masters');
+        await page.waitForSelector('.pl-cat-gender-btn', { timeout: 8000 }).catch(() => null);
+        await page.waitForTimeout(600);
+
+        const чипы = page.locator('.pl-cat-gender-btn');
         const сколько = await чипы.count();
-        expect(сколько, 'ПОРОГ: чипов пола нет — мерить нечего').toBeGreaterThan(0);
+        expect(сколько, 'ПОРОГ: чипов пола на странице разряда нет — мерить нечего')
+            .toBeGreaterThan(0);
 
         const высоты = await page.evaluate(() =>
-            [...document.querySelectorAll('.pl-gender-tab')]
+            [...document.querySelectorAll('.pl-cat-gender-btn')]
                 .filter(э => э.offsetParent !== null)
                 .map(э => Math.round(э.getBoundingClientRect().height)));
         for (const h of высоты) {
@@ -129,16 +163,16 @@ test.describe('страница рейтинга · ' + Я.имя, () => {
                 'кнопок нет (28 · 36 · 44 · 52). Замер 06.10 давал 37 на 768 и 390')
                 .toContain(h);
         }
-        const к = await кегль(page, '.pl-gender-tab');
+        const к = await кегль(page, '.pl-cat-gender-btn');
         expect(ШКАЛА_КЕГЛЕЙ, 'кегль чипа ' + к.fs + ' мимо шкалы').toContain(к.fs);
 
         /* НАЖАТИЕ, А НЕ КЛАСС: цель нажатия и коробка — разные вещи. */
         const второй = чипы.nth(1);
         if (await второй.count()) {
             await второй.click();
-            await page.waitForTimeout(400);
+            await page.waitForTimeout(600);
             const активных = await page.evaluate(() =>
-                document.querySelectorAll('.pl-gender-tab.active').length);
+                document.querySelectorAll('.pl-cat-gender-btn.active').length);
             expect(активных, 'после нажатия выбранным должен быть ровно один чип').toBe(1);
         }
     });
