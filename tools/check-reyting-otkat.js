@@ -217,13 +217,28 @@ const ОТКАТЫ = [
  'полоса страниц — одно определение на два экрана'],
 
 ['печатать все номера страниц подряд', 'js/players.js',
- '            if (n === 1 || n === всего || Math.abs(n - page) <= 1) номера.push(n);',
+ '            if (n === 1 || n === всего || Math.abs(n - page) <= соседей) номера.push(n);',
  '            номера.push(n);',
  'страниц показывается окно, а не все подряд'],
 
+['уравнять окно страниц на узком и широком виде', 'js/players.js',
+ '        var соседей = узкий ? 0 : 1;',
+ '        var соседей = 1;',
+ 'страниц показывается окно, а не все подряд'],
+
 ['вернуть кнопке страницы размер 40', 'css/players.css',
- '    min-width: var(--btn-h-md);\n    height: var(--btn-h-md);',
+ '    min-width: var(--btn-h-sm);\n    height: var(--btn-h-sm);',
  '    min-width: 40px;\n    height: 40px;',
+ 'кнопка страницы — ступень шкалы и цель нажатия'],
+
+['отпустить слою цели нажатия высоту', 'css/players.css',
+ '    transform: translateY(-50%);\n    height: var(--btn-h-md);\n}\n\n/* Многоточие',
+ '    transform: translateY(-50%);\n    height: var(--btn-h-sm);\n}\n\n/* Многоточие',
+ 'кнопка страницы — ступень шкалы и цель нажатия'],
+
+['вернуть кнопке страницы радиус 12', 'css/players.css',
+ '    border-radius: var(--radius-sm);\n    color: var(--text-secondary);\n    font-family: \'Inter\', sans-serif;',
+ '    border-radius: var(--radius-md);\n    color: var(--text-secondary);\n    font-family: \'Inter\', sans-serif;',
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
 ['вернуть заголовку категории свой плавающий clamp', 'css/players.css',

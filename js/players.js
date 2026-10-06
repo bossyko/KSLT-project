@@ -755,14 +755,35 @@
         /* Какие номера показываем: первая, последняя, текущая и по соседу с
            каждой стороны. Многоточие ставится там, где между соседями
            остался разрыв больше одной страницы. */
+        /* ОКНО УЗКОГО ВИДА УЖЕ НА ОДНУ СТУПЕНЬ — ЭТО ПОСЧИТАНО, А НЕ НА ГЛАЗ.
+           Замер 06.10 на стенде `maket/polosa-stranic-zamer.html`, крайний
+           случай «40 страниц, два многоточия»: при соседях ±1 полоса просит
+           364 при ряде 343 на телефоне 375 — перелив 21 даже после того, как
+           кнопки сели на ступень 36. Соседи ±0 (первая · … · текущая · … ·
+           последняя) просят 276 из 343. На всех остальных видах окно
+           прежнее. */
+        var узкий = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+        var соседей = узкий ? 0 : 1;
         var номера = [];
         for (var n = 1; n <= всего; n++) {
-            if (n === 1 || n === всего || Math.abs(n - page) <= 1) номера.push(n);
+            if (n === 1 || n === всего || Math.abs(n - page) <= соседей) номера.push(n);
         }
 
+        /* ШЕВРОН, А НЕ СЛОВО — ТАК НАПИСАНО В КОМПОНЕНТЕ `Pagination item
+           31:43`: «Previous and next reuse this component with a chevron
+           instead of a number». Слово «Назад» просило 66 на широких видах и
+           сжималось до 44 на телефоне, обрезая само себя. Слово не теряется:
+           оно уходит в `aria-label`, диктор читает его целиком. */
+        var шеврон = function (влево) {
+            return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
+                'stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+                '<path d="' + (влево ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6') + '"/></svg>';
+        };
+
         var html = '<div class="pl-pagination">';
-        html += '<button class="pl-page-btn pl-page-prev"' +
-            (page === 1 ? ' disabled' : '') + '>' + labels.prevPage + '</button>';
+        html += '<button class="pl-page-btn pl-page-prev" aria-label="' +
+            esc(labels.prevPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
+            (page === 1 ? ' disabled' : '') + '>' + шеврон(true) + '</button>';
 
         var прошлый = 0;
         номера.forEach(function (n) {
@@ -775,8 +796,9 @@
             прошлый = n;
         });
 
-        html += '<button class="pl-page-btn pl-page-next"' +
-            (page === всего ? ' disabled' : '') + '>' + labels.nextPage + '</button>';
+        html += '<button class="pl-page-btn pl-page-next" aria-label="' +
+            esc(labels.nextPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
+            (page === всего ? ' disabled' : '') + '>' + шеврон(false) + '</button>';
         html += '</div>';
 
         container.innerHTML = html;

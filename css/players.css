@@ -994,7 +994,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    /* Шаг 6 на шкале отсутствует (8 · 12 · 16 · 24 · 32 · 40), и ровно 8
+       назван в описании компонента `Pagination row 115:171`. */
+    gap: var(--space-2);
 }
 
 /* КНОПКА СТРАНИЦЫ — СТУПЕНЬ ШКАЛЫ И ЦЕЛЬ НАЖАТИЯ.
@@ -1005,12 +1007,19 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: var(--btn-h-md);
-    height: var(--btn-h-md);
-    padding: 0 12px;
+    position: relative;
+    /* РАЗМЕР И РАДИУС ИЗ КОМПОНЕНТА `Pagination item 31:43`: «36x36
+       (control/btn-h-sm), radius/sm. Active fills with accent/default».
+       Здесь стояли 44 и радиус 12 — моё число, поставленное ради цели
+       нажатия. Цель остаётся: КНОПКА 36 ЗАКОННА, ЕСЛИ У НЕЁ ЕСТЬ ПРОЗРАЧНЫЙ
+       СЛОЙ ЦЕЛИ 44 (принято Костей 04.10) — слой ниже. Тем же приёмом живут
+       пилюли разрядов и «Показать всех» на этой же странице. */
+    min-width: var(--btn-h-sm);
+    height: var(--btn-h-sm);
+    padding: 0 8px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
     font-size: var(--fs-sm);
@@ -1020,13 +1029,25 @@
     transition: all 0.2s;
 }
 
+/* Слой цели нажатия: коробка 36, попадание 44. Слой прозрачный и ничего не
+   рисует; у `.pl-pagination` нет `overflow`, так что он не обрезается. */
+.pl-page-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--btn-h-md);
+}
+
 /* Многоточие между далёкими страницами: не кнопка и нажатия не просит */
 .pl-page-gap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 24px;
-    height: var(--btn-h-md);
+    height: var(--btn-h-sm);
     color: var(--text-muted);
     font-size: var(--fs-sm);
     line-height: var(--lh-none);
