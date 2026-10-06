@@ -104,7 +104,8 @@
 
         if (isEn) return {
             title: 'KSLT Rankings',
-            subtitle: '{count} players \u00b7 {online} online \u00b7 Season 2026',
+            subtitle: 'Season 2026',
+            statPlayers: 'players', statOnline: 'online',
             searchPlaceholder: 'Search player...',
             men: 'Men', women: 'Women',
             rank: '#', player: 'Player', country: 'Ctry', points: 'Pts',
@@ -124,7 +125,8 @@
 
         if (isKg) return {
             title: 'KSLT рейтинги',
-            subtitle: '{count} оюнчу \u00b7 {online} онлайн \u00b7 2026-сезон',
+            subtitle: '2026-сезон',
+            statPlayers: 'оюнчу', statOnline: 'онлайн',
             searchPlaceholder: 'Оюнчуну издөө...',
             men: 'Эркектер', women: 'Аялдар',
             rank: '#', player: 'Оюнчу', country: 'Өлк.', points: 'Упай',
@@ -144,7 +146,8 @@
 
         return {
             title: 'Рейтинг KSLT',
-            subtitle: '{count} игроков \u00b7 {online} онлайн \u00b7 Сезон 2026',
+            subtitle: 'Сезон 2026',
+            statPlayers: 'игроков', statOnline: 'онлайн',
             searchPlaceholder: 'Поиск игрока...',
             men: 'Мужчины', women: 'Женщины',
             rank: '#', player: 'Игрок', country: 'Стр.', points: 'Очки',
@@ -427,16 +430,30 @@
         var поКарточкам = window.KSLT_RANKINGS && window.KSLT_RANKINGS.всегоИгроков;
         var totalPlayers = поКарточкам || getAllPlayers().length;
         var onlineCount = countOnline();
-        var subtitle = labels.subtitle
-            .replace('{count}', totalPlayers)
-            .replace('{online}', onlineCount);
+        /* ЦИФРА — ПЛАШКОЙ, А НЕ СЛОВОМ В СТРОКЕ. Было «391 игроков · 0
+           онлайн · Сезон 2026» одной строкой: число ничем не отличалось от
+           слова рядом, а на обложке раздела турниров это плашки. Сезон
+           остаётся подзаголовком — он не число. */
+        function плашка(значение, подпись) {
+            return '<div class="pl-hero-stat">' +
+                '<span class="pl-hero-stat-value">' + значение + '</span>' +
+                '<span class="pl-hero-stat-label">' + подпись + '</span>' +
+            '</div>';
+        }
 
         container.innerHTML =
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
             '<div class="pl-hero-content">' +
                 '<h1 class="pl-hero-title">' + labels.title + '</h1>' +
-                '<p class="pl-hero-subtitle">' + subtitle + '</p>' +
+                '<p class="pl-hero-subtitle">' + labels.subtitle + '</p>' +
+                /* ОНЛАЙН С РЕЙТИНГА СНЯТ — слово Кости 06.10: «смысла нет
+                   там это отображать». Рейтинг отвечает на вопрос «кто
+                   где стоит», а не «кто сейчас в сети». Счётчик онлайна
+                   остаётся в коде: он нужен точке в списке. */
+                '<div class="pl-hero-stats">' +
+                    плашка(totalPlayers, labels.statPlayers) +
+                '</div>' +
             '</div>';
     }
 
