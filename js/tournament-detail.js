@@ -1034,7 +1034,23 @@ function initTabsNavigation() {
         return top;
     }
 
-    var SCROLL_OFFSET = 120; // 64px header + ~50px tabs + 6px gap
+    /* ЧИСЛО, КОТОРОЕ МОЖНО ПОМЕРИТЬ, НЕ ПИШЕТСЯ РУКАМИ.
+       Было `var SCROLL_OFFSET = 120` с комментарием «64px header + ~50px
+       tabs + 6px gap» — и тильда в нём не случайна: высоту полосы никто не
+       мерил. Обход 05.10 померил: шапка 64, полоса вкладок **45**, не ~50.
+       Отсюда и зазор под полосой выходил 11 — числа, которого нет на шкале
+       отступов 8 · 12 · 16 · 24 · 32 · 40.
+       Теперь обе высоты спрашиваются у страницы, а своим остаётся только
+       зазор — и он ступень. Высота полосы зависит от числа вкладок (у
+       дружеского их пять, у рейтингового шесть) и от вида, поэтому
+       считается при КАЖДОМ прыжке, а не один раз при загрузке. */
+    function смещениеПодПолосу() {
+        var шапка = document.querySelector('.floating-header');
+        var полоса = document.querySelector('.td-tabs-bar');
+        var высота = (шапка ? шапка.getBoundingClientRect().height : 0) +
+                     (полоса ? полоса.getBoundingClientRect().height : 0);
+        return Math.round(высота) + 12;
+    }
 
     /**
      * Лента вкладок едет за разделом, который читают.
@@ -1070,8 +1086,20 @@ function initTabsNavigation() {
         var tab = e.target.closest('.td-tab');
         if (!tab) return;
 
-        tabsBar.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
+        tabsBar.querySelectorAll('.td-tab').forEach(function(t) {
+            t.classList.remove('active');
+            /* ДИКТОР ДОЛЖЕН ЗНАТЬ, КУДА МЫ ПРИШЛИ. Обход 05.10: вкладки —
+               `button` без `role`, без `aria-selected` и без `aria-current`.
+               Фокус встаёт, Tab доходит, нажатие работает — а какая из шести
+               выбрана, диктор не говорит.
+               Берём `aria-current`, а не `aria-selected`: вкладки не
+               переключают вид, все шесть разделов на странице видны всегда.
+               Это навигация по одной странице, а `aria-selected` обещало бы
+               набор вкладок, которого здесь нет. */
+            t.removeAttribute('aria-current');
+        });
         tab.classList.add('active');
+        tab.setAttribute('aria-current', 'true');
         показатьАктивную();
         // Ещё раз, когда плавная прокрутка страницы утихнет: она успевает
         // перебить движение ленты, и крайняя вкладка не доезжала
@@ -1080,7 +1108,7 @@ function initTabsNavigation() {
         var targetId = tab.dataset.target;
         var targetSection = document.getElementById(targetId);
         if (targetSection) {
-            window.scrollTo({ top: getDocTop(targetSection) - SCROLL_OFFSET, behavior: 'smooth' });
+            window.scrollTo({ top: getDocTop(targetSection) - смещениеПодПолосу(), behavior: 'smooth' });
         }
     });
 
@@ -1091,7 +1119,12 @@ function initTabsNavigation() {
             if (entry.isIntersecting) {
                 var id = entry.target.id;
                 tabsBar.querySelectorAll('.td-tab').forEach(function(t) {
-                    t.classList.toggle('active', t.dataset.target === id);
+                    var своя = (t.dataset.target === id);
+                    t.classList.toggle('active', своя);
+                    /* Пометка ставится ТАМ ЖЕ, где класс: разведи их по двум
+                       местам — и диктор рано или поздно назовёт не ту. */
+                    if (своя) t.setAttribute('aria-current', 'true');
+                    else t.removeAttribute('aria-current');
                 });
                 показатьАктивную();
             }
@@ -1106,7 +1139,7 @@ function initTabsNavigation() {
             var next = sh.nextElementSibling;
             if (next) next = next.nextElementSibling;
             if (next && next.classList.contains('td-section-header')) {
-                window.scrollTo({ top: getDocTop(next) - SCROLL_OFFSET, behavior: 'smooth' });
+                window.scrollTo({ top: getDocTop(next) - смещениеПодПолосу(), behavior: 'smooth' });
             }
         });
     });
@@ -1638,7 +1671,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '<th colspan="3">' + (isEn ? 'Match' : (isKg ? 'Оюн' : 'Игра')) + '</th>' +
                     '<th>' + подписи.court + '</th>' +
                     '<th>' + подписи.status + '</th>' +
-                '</tr></thead><tbody>';
+                '</tr></thead>';
+
+            var строки = { 'сыгранные': '', 'ждут': '' };
+            var сыграноШтук = очередь.filter(function(m) { return m.status === 'completed'; }).length;
 
             очередь.forEach(function(m, i) {
                 var круг = m.round || '';
@@ -1649,7 +1685,17 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var классСост = m.status === 'completed' ? 'td-sched-done'
                     : (m.status === 'live' ? 'td-sched-live' : 'td-sched-soon');
 
-                расписаниеHtml += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') + '>' +
+                /* СЫГРАННОЕ УХОДИТ ПОД ПОЛОСУ, А ХРОНОЛОГИЯ ОСТАЁТСЯ.
+                   Замер 05.10 на боевом CHALLENGERS: 42 строки, из них
+                   СЫГРАНО 18, ждут — 24; таблица 1861 при экране 900.
+                   Сыгранные — это ранние запуски, поэтому они лежат ПЕРВЫМ
+                   телом таблицы и раскрываются НАД несыгранными: откроешь —
+                   и порядок по времени снова сплошной, сверху вниз.
+                   Номер остаётся сквозным по всему расписанию: это порядок
+                   запуска, а не номер строки в видимом куске. */
+                var вСыгранные = (m.status === 'completed');
+                var кудаHtml = вСыгранные ? 'сыгранные' : 'ждут';
+                строки[кудаHtml] += '<tr' + (m.status === 'live' ? ' class="td-sched-row-live"' : '') + '>' +
                     '<td class="td-sched-num">' + (i + 1) + '</td>' +
                     '<td class="td-sched-time">' + esc(String(m.scheduled_time).slice(0, 5)) + '</td>' +
                     // Короткая подпись для телефона: там колонка узкая, и вместо
@@ -1668,9 +1714,43 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 '</tr>';
             });
 
-            расписаниеHtml += '</tbody></table></div>';
+            /* ПОЛОСА ПРЯЧЕТ ЛИШНЕЕ ТОЛЬКО ТОГДА, КОГДА ЕСТЬ ГЛАВНОЕ.
+               Поймал замер 05.10, а не рассуждение: у `tsikl-odinochka`
+               сыграны ВСЕ 42 матча, и раздел схлопнулся в одну кнопку с
+               пустой таблицей высотой 94 — зритель завершённого турнира не
+               видел расписания вовсе. Прятать сыгранное имеет смысл, пока
+               есть несыгранное, которое оно загораживает; когда играть
+               больше нечего, сыгранное И ЕСТЬ расписание.
+               Поэтому два условия, а не одно: есть что прятать И есть ради
+               чего прятать. */
+            var ждутШтук = очередь.length - сыграноШтук;
+            var полосаHtml = '';
+            if (сыграноШтук && ждутШтук) {
+                var словоСыгранные = isEn ? 'Played matches' : (isKg ? 'Ойнолгон оюндар' : 'Сыгранные');
+                полосаHtml = '<button type="button" class="td-sched-ranshe" ' +
+                    'aria-expanded="false" aria-controls="tdSchedDone">' +
+                    '<span class="td-sched-ranshe-znak" aria-hidden="true"></span>' +
+                    esc(словоСыгранные) + ' — ' + сыграноШтук + '</button>';
+            }
+
+            расписаниеHtml = полосаHtml + расписаниеHtml +
+                '<tbody id="tdSchedDone" class="td-sched-done-body"' +
+                    (полосаHtml ? ' hidden' : '') + '>' + строки['сыгранные'] + '</tbody>' +
+                '<tbody>' + строки['ждут'] + '</tbody>' +
+                '</table></div>';
 
             scheduleContainer.innerHTML = расписаниеHtml;
+
+            var полоса = scheduleContainer.querySelector('.td-sched-ranshe');
+            var телоСыгранных = scheduleContainer.querySelector('#tdSchedDone');
+            if (полоса && телоСыгранных) {
+                полоса.addEventListener('click', function() {
+                    var открыто = полоса.getAttribute('aria-expanded') === 'true';
+                    полоса.setAttribute('aria-expanded', открыто ? 'false' : 'true');
+                    телоСыгранных.hidden = открыто;
+                    полоса.classList.toggle('is-open', !открыто);
+                });
+            }
         }
     }
 
@@ -2210,6 +2290,16 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             });
             var участниковВСетке = Object.keys(вСетке).length || drawSize;
 
+            /* ЛЕНТА ВЫБОРА БЛОКА — вместо стопки из пятнадцати.
+               Замер 05.10: у «всех мест» 32 сетка 5279, и основная занимает
+               1416 — ВОСЕМЬ процентов из каждых тридцати. У 64 ещё хуже:
+               11 270, основная 2553. Человек, которому нужен финал, листал
+               четыре экрана мимо утешительных блоков; человек, взявший 23-е
+               место, листал их же в обратную сторону.
+               Собираем подписи по ходу отрисовки, а не заранее: какие блоки
+               рисуются, решают два условия ниже, и вторая копия этих условий
+               разошлась бы с первой ровно на шве. */
+            var ficВидимые = [];
             ficSections.forEach(function(section) {
                 // Прячем только ветки, чьих мест в турнире не бывает: сетка
                 // строится на степень двойки, и при 22 участниках из 32 мест
@@ -2219,7 +2309,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 // появляются по мере игры.
                 if (!ficВБлокеЕстьЛюди(section, matches)) return;
 
-                bHtml += '<div class="td-fic-section">';
+                var номерБлока = ficВидимые.length;
+                ficВидимые.push(section.label);
+                bHtml += '<div class="td-fic-section' + (номерБлока ? ' td-fic-skryt' : '') +
+                         '" data-fic-blok="' + номерБлока + '">';
+                /* Подпись блока остаётся в разметке: лента называет блок
+                   кнопкой, а диктор читает заголовок. Прятать её значило бы
+                   оставить раздел без имени для того, кто ленты не видит. */
                 bHtml += '<div class="td-fic-section-title">' + section.label + '</div>';
                 bHtml += '<div class="td-bracket-scroll"><div class="td-bracket">';
 
@@ -2302,6 +2398,23 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 bHtml += '</div>'; // /td-fic-section
             });
 
+            /* Лента рисуется ТОЛЬКО когда блоков больше одного: при одном
+               она не выбирает ничего и лишь отнимает ступень высоты. */
+            if (ficВидимые.length > 1) {
+                var подписьЛенты = isEn ? 'Bracket blocks'
+                    : (isKg ? 'Тор блокторy' : 'Блоки сетки');
+                var лентаHtml = '<div class="td-fic-lenta" role="radiogroup" aria-label="' +
+                    esc(подписьЛенты) + '">';
+                ficВидимые.forEach(function(имя, i) {
+                    лентаHtml += '<button type="button" class="td-fic-chip' +
+                        (i ? '' : ' is-active') + '" role="radio" aria-checked="' +
+                        (i ? 'false' : 'true') + '" data-fic-chip="' + i + '">' +
+                        esc(имя) + '</button>';
+                });
+                лентаHtml += '</div>';
+                bHtml = лентаHtml + bHtml;
+            }
+
             bracketContainer.innerHTML = bHtml;
 
             // Ставим матчи за места под их круг: измеряем, где стоит нужный
@@ -2313,6 +2426,34 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             requestAnimationFrame(function() {
                 выровнятьМатчиЗаМеста(bracketContainer);
             });
+
+            /* ВЫРАВНИВАНИЕ СЧИТАЕТСЯ ЗАНОВО ПРИ ПОКАЗЕ БЛОКА.
+               `выровнятьМатчиЗаМеста` меряет `offsetLeft` и `clientWidth`, а
+               ЭЛЕМЕНТ СО СКРЫТЫМ РОДИТЕЛЕМ ОТДАЁТ НУЛИ — правило выведено
+               24.09 и стоит в указателе. Посчитай мы сдвиг один раз при
+               отрисовке, у всех скрытых блоков матчи за места встали бы к
+               левому краю и остались там навсегда. */
+            if (ficВидимые.length > 1) {
+                bracketContainer.addEventListener('click', function(e) {
+                    var чип = e.target.closest('.td-fic-chip');
+                    if (!чип) return;
+                    var нужен = чип.getAttribute('data-fic-chip');
+                    bracketContainer.querySelectorAll('.td-fic-chip').forEach(function(к) {
+                        var свой = k_акт(к, нужен);
+                        к.classList.toggle('is-active', свой);
+                        к.setAttribute('aria-checked', свой ? 'true' : 'false');
+                    });
+                    bracketContainer.querySelectorAll('.td-fic-section').forEach(function(б) {
+                        б.classList.toggle('td-fic-skryt', б.getAttribute('data-fic-blok') !== нужен);
+                    });
+                    requestAnimationFrame(function() {
+                        выровнятьМатчиЗаМеста(bracketContainer);
+                    });
+                });
+            }
+            function k_акт(узел, нужен) {
+                return узел.getAttribute('data-fic-chip') === нужен;
+            }
 
             } else {
 

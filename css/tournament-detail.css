@@ -416,6 +416,178 @@
     margin: var(--space-lg) 0 var(--space-md);
 }
 
+/* ───────── ПОЛОСА «ПОКАЗАТЬ СЫГРАННЫЕ» ─────────
+
+   Сверка фигмы 05.10, компонент `Utility button 56:101`. Его описание
+   решает, кнопка это или утилита, прямым текстом: «If the click sends
+   something or changes state for real, it is a Button. If it only
+   rearranges what is already on screen, it is a Utility button». Полоса
+   только перекладывает показанное — значит утилита: радиус 8, никогда не
+   таблетка, ступени ТОЛЬКО 28 и 36.
+
+   Берём 36 и слой цели 44, как у чипов ленты сетки. */
+.td-sched-ranshe {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    position: relative;
+    min-height: var(--btn-h-sm);
+    margin-bottom: var(--space-md);
+    padding: 0 var(--space-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    line-height: var(--lh-none);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.td-sched-ranshe::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--btn-h-md);
+    transform: translateY(-50%);
+}
+
+.td-sched-ranshe:hover {
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+.td-sched-ranshe:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Знак раскрывашки — та же механика, что у `Accordion 38:63`: плюс
+   переворачивается в минус. Рисуется поворотом одной палочки, а не
+   подменой символа: подменённый символ диктор прочитает вслух. */
+.td-sched-ranshe-znak {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    flex: none;
+}
+
+.td-sched-ranshe-znak::before,
+.td-sched-ranshe-znak::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 10px;
+    height: 1.5px;
+    background: currentColor;
+    transform: translateY(-50%);
+    transition: transform 0.2s;
+}
+
+.td-sched-ranshe-znak::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.td-sched-ranshe.is-open .td-sched-ranshe-znak::after {
+    transform: translateY(-50%) rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .td-sched-ranshe,
+    .td-sched-ranshe-znak::before,
+    .td-sched-ranshe-znak::after {
+        transition: none;
+    }
+}
+
+/* ───────── ЛЕНТА ВЫБОРА БЛОКА СЕТКИ ─────────
+
+   Сверка фигмы 05.10, компонент `Filter chip 49:77`, его описание решает
+   спор прямым текстом: «A chip filters a list in place. A Tab switches the
+   whole view. They look similar and must not be swapped». Лента выбирает,
+   какой блок показан НА МЕСТЕ, и ничего больше — значит чип, не вкладка.
+
+   Числа взяты из описания компонента, а не придуманы: высота 36
+   (control/btn-h-sm), поля 16, радиус полный, подпись 14.
+
+   ЦЕЛЬ НАЖАТИЯ — ПРОЗРАЧНЫМ СЛОЕМ, А НЕ РОСТОМ: «кнопка 36 законна, если у
+   неё есть прозрачный слой цели 44» — принято 04.10. Слой принадлежит самой
+   кнопке, поэтому он ничего не перекрывает: беда 04.10 случилась на
+   обёртке вокруг `input`, а не на кнопке. */
+.td-fic-lenta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+    max-width: var(--container-max);
+    margin: 0 auto var(--space-md);
+    /* Поля нет: лента встаёт по левому краю своего раздела, тем же, что у
+       заголовка. ПАРА, КОТОРАЯ ЧИТАЕТСЯ КАК ПАРА, ЕДЕТ ОДНОЙ ГРАНИЦЕЙ. */
+}
+
+.td-fic-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    line-height: var(--lh-none);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Слой цели 44 — по центру кнопки, высоты кнопки он не знает */
+.td-fic-chip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--btn-h-md);
+    transform: translateY(-50%);
+}
+
+.td-fic-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.td-fic-chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-on);
+    font-weight: 600;
+}
+
+.td-fic-chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Скрытый блок: `display: none`, а не нулевая высота. Прятать высотой
+   значило бы оставить его в раскладке, и `выровнятьМатчиЗаМеста` считала бы
+   по нему настоящие числа при невидимом содержимом. */
+.td-fic-section.td-fic-skryt {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .td-fic-chip {
+        transition: none;
+    }
+}
+
 /* === SINGLE ELIMINATION BRACKET === */
 .td-bracket-scroll {
     overflow-x: auto;
@@ -1304,11 +1476,31 @@ tr.td-rr-row-dimmed {
 }
 
 /* === DESCRIPTION === */
+/* ───────── МЕРА АБЗАЦА ЗАДАЁТСЯ В ЗНАКАХ, А НЕ В ПИКСЕЛЯХ ─────────
+
+   Костя нашёл глазами 05.10: «не понятно как расположен текст». Замер
+   пяти видов назвал причину: `max-width: 900px` плюс `margin: 0 auto`
+   центровали блок в контейнере 1400, и левый край текста уезжал на 306
+   при заголовке на 56 — РАЗРЫВ 250. На 1024 то же слабее (23 против 62),
+   на 768 и ниже края совпадали, потому что 900 туда не влезает.
+
+   ПАРА, КОТОРАЯ ЧИТАЕТСЯ КАК ПАРА, ЕДЕТ ОДНОЙ ГРАНИЦЕЙ: заголовок раздела
+   и его текст — это пара, и общий левый край у них теперь один.
+
+   900 пикселей при кегле 16 давали 94 знака в строке. Читаемая мера
+   45–75, и на 94 глаз теряет начало следующей строки. Мера задана в `ch`
+   — единице, которая считает знаки, а не пиксели, и потому не врёт при
+   другом кегле. Замерено по видам: 84 · 84 · 76 · 84 · 37.
+
+   80ch, А НЕ 66ch — слово Кости 05.10: «можно будет шире». 88ch отвергнуто
+   замером: даёт 92 знака, то есть практически прежние 94.
+
+   ОГОВОРКА: `ch` считается по ширине нуля, а кириллица в Inter уже, и
+   80ch выходит 84 знака. Число снято замером, а не посчитано. */
 .td-description-text {
-    max-width: 900px;
-    margin: 0 auto;
+    max-width: 80ch;
     font-size: var(--fs-base);
-    line-height: 1.7;
+    line-height: var(--lh-relaxed);
     color: var(--text-secondary);
 }
 
