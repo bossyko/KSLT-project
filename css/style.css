@@ -5088,13 +5088,6 @@ h2 {
     font-size: var(--fs-sm);
 }
 
-/* Поле поиска было 39 — не ступень кнопок (28 · 36 · 44 · 52) и не цель
-   нажатия. Слой здесь не годится: в поле надо попадать курсором, а не
-   слоем над ним, — поэтому настоящая высота */
-.trn-search-input {
-    min-height: var(--btn-h-md);
-}
-
 .trn-search-wrap {
     position: relative;
     flex: 0 1 320px;
@@ -5111,13 +5104,23 @@ h2 {
 }
 
 .trn-search-input {
+    /* КЕГЛЬ ПОЛЯ — 16, А НЕ 14. Компонент `Search field 50:67`: «Same 44px
+       height, radius/sm and 16px text as Input». У `Input 25:5` причина
+       названа прямо: всё, что меньше 16, заставляет Safari на iOS
+       ПРИБЛИЖАТЬ СТРАНИЦУ при фокусе в поле. Стояло `--fs-sm` 14 — на всех
+       пяти разделах с поиском сразу. Высота 44 держится `min-height` и от
+       кегля не зависит: померено. */
+    font-size: var(--fs-base);
+    /* НАСТОЯЩАЯ ВЫСОТА, А НЕ СЛОЙ ЦЕЛИ: в поле надо попадать курсором, а не
+       слоем над ним. 44 — высота компонента `Search field 50:67` и ступень
+       шкалы кнопок. */
+    min-height: var(--btn-h-md);
     width: 100%;
     padding: 10px 16px 10px 42px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-primary);
-    font-size: var(--fs-sm);
     font-family: var(--font-primary);
     outline: none;
     transition: all 0.25s;
