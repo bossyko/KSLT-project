@@ -1,3 +1,18 @@
+/* ТИХИХ УРОВНЕЙ ТЕКСТА ТРИ, А НЕ ЧЕТЫРЕ — решение Кости 06.10, путь «C».
+   `--text-dim` это `rgba(255,255,255,0.35)`, и на фоне карточки он даёт
+   КОНТРАСТ 3.14 при норме WCAG AA 4.5. Померено в браузере 06.10; первый
+   замер врал 19.8 всем уровням подряд, потому что отбрасывал альфу вместо
+   того, чтобы смешать её с фоном.
+   WCAG не делает скидки «тихому» тексту: 3.0 допустим только на крупном —
+   от 24, или от 18.7 жирного. На мелком `--text-dim` незаконен по
+   определению, а стоял он почти везде на мелком.
+   Поднять сам токен нельзя: до порога это ~0.46, а `--text-muted` стоит на
+   0.5 — два уровня схлопнулись бы в один во всех 138 местах продукта разом,
+   включая каждый закрытый кусок. Поэтому токен уходит ИЗ ТЕКСТА по кускам,
+   а не правкой значения: на этой странице он снят со всех шестнадцати мест,
+   и правило не даёт ему вернуться. Для границ и фона он остаётся законным.
+*/
+
 /* ========================================
    TOURNAMENT DETAIL PAGE STYLES
    ======================================== */
@@ -724,11 +739,11 @@ tr.td-rr-row-dimmed {
 }
 
 .td-match-player.loser .td-player-name {
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 
 .td-seed {
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-2xs);
     min-width: 24px;
 }
@@ -1264,14 +1279,14 @@ tr.td-rr-row-dimmed {
 }
 
 .td-schedule-vs {
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-xs);
     flex-shrink: 0;
 }
 
 .td-schedule-round {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
     text-align: right;
@@ -1300,7 +1315,7 @@ tr.td-rr-row-dimmed {
 
 .td-status-pill.completed {
     background: rgba(255,255,255,0.06);
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 
 .td-status-pill.live {
@@ -1441,7 +1456,7 @@ tr.td-rr-row-dimmed {
 
 .td-reg-table td:first-child {
     width: 24px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-weight: 600;
     text-align: center;
 }
@@ -1470,7 +1485,7 @@ tr.td-rr-row-dimmed {
     align-items: center;
     justify-content: center;
     font-size: var(--fs-2xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 
 .td-reg-table-waitlist {
@@ -1729,7 +1744,7 @@ tr.td-rr-row-dimmed {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-bottom: var(--space-xs);
 }
 
@@ -1902,7 +1917,7 @@ tr.td-rr-row-dimmed {
 
 .td-official-role {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -1925,7 +1940,7 @@ tr.td-rr-row-dimmed {
     font-size: var(--fs-2xs);
     font-weight: 500;
     line-height: 1;
-    color: var(--text-dim);
+    color: var(--text-muted);
     cursor: help;
     white-space: nowrap;
 }
@@ -1976,7 +1991,16 @@ tr.td-rr-row-dimmed {
        ПРЕДПОЛОЖЕНИЕ: ступень ниже — это --fs-md (18) и --fs-2xs (11).
        Угадан размер, не причина. */
     .td-hero {
-        --fs-hero-num: var(--fs-md);
+        /* 06.10: ЧЕТЫРЕ СТУПЕНИ ЗА ОДИН ШАГ — лестница померила, чего стоила
+           догадка 04.10. Крутилка идёт 40 → 32 → 21, а страница пришпиливала
+           18 на ВЕСЬ диапазон ниже 992: средняя ступень крутилки до этой
+           страницы не доезжала никогда, и выходило 40 → 18.
+           Замысел был верен, число — нет. «Ступень ниже крутилки» на 992
+           это 26, а не 18. Проверено отношением к названию турнира: на 768
+           название 32 — цифра 26 тише его, как и хотел Костя; на десктопе
+           40 против 26 — то же отношение. Ниже 640 крутилка даёт 21, и
+           ступень ниже — это и есть 18. */
+        --fs-hero-num: var(--fs-xl);   /* 26 — ступень ниже крутилки (32) */
         --fs-hero-cap: var(--fs-2xs);
     }
 
@@ -1991,6 +2015,17 @@ tr.td-rr-row-dimmed {
     .td-schedule-round,
     .td-schedule-status {
         display: none;
+    }
+}
+
+
+/* ЦИФРА ОБЛОЖКИ НИЖЕ 640 — ступень ниже крутилки и здесь.
+   Порядок правил решает: блок 640 выше по файлу стоит ДО блока 992, и
+   на 390 выигрывал бы 992-й. Поэтому ступень для узких объявлена здесь,
+   после него, а не там. Крутилка на 640 даёт 21 — ступень ниже это 18. */
+@media (max-width: 640px) {
+    .td-hero {
+        --fs-hero-num: var(--fs-md);   /* 18 — ступень ниже крутилки (21) */
     }
 }
 
@@ -2177,7 +2212,7 @@ tr.td-rr-row-dimmed {
 .td-pred-label {
     text-align: center;
     font-size: var(--fs-2xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-top: 3px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -2429,7 +2464,7 @@ tr.td-rr-row-dimmed {
 
 .td-match-wait {
     text-align: center;
-    color: var(--text-dim);
+    color: var(--text-muted);
     background: rgba(255, 255, 255, 0.03);
     font-weight: 500;
     text-transform: none;
@@ -2461,7 +2496,7 @@ tr.td-rr-row-dimmed {
 
 .td-grp-opp {
     display: block;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-2xs);
     opacity: 0.7;
     white-space: nowrap;
@@ -2658,7 +2693,7 @@ tr.td-rr-row-dimmed {
 
 .td-sched-num {
     width: 36px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     text-align: center;
 }
 
@@ -2685,7 +2720,7 @@ tr.td-rr-row-dimmed {
 .td-sched-vs {
     width: 34px;
     text-align: center;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-xs);
 }
 
@@ -2981,7 +3016,7 @@ tr.td-rr-row-dimmed {
     .td-reg-table td:nth-child(5) {
         width: 54px;
         white-space: nowrap;
-        color: var(--text-dim);
+        color: var(--text-muted);
     }
 
     .td-participants-subtitle {

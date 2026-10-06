@@ -34,6 +34,14 @@ const ГЕН = 'js/tournament-generator.js';
 const ПРАВ = 'js/kslt-rules.js';
 
 const ОТКАТЫ = [
+  [CSS, '    color: var(--text-muted);\n    font-size: var(--fs-2xs);\n    min-width: 24px;',
+        '    color: var(--text-dim);\n    font-size: var(--fs-2xs);\n    min-width: 24px;',
+   'тихий текст страницы не держится на краске ниже порога AA'],
+
+  [CSS, '        --fs-hero-num: var(--fs-xl);   /* 26 — ступень ниже крутилки (32) */',
+        '        --fs-hero-num: var(--fs-md);   /* 18 */',
+   'цифра обложки идёт ступенью НИЖЕ крутилки, а не четырьмя'],
+
   [CSS, '    line-height: var(--lh-tight);\n    color: var(--text-primary);\n}',
         '    color: var(--text-primary);\n}',
    'у заголовка раздела межстрочный задан ступенью, а не наследуется'],
