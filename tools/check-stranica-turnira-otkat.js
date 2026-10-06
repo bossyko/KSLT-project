@@ -34,6 +34,10 @@ const ГЕН = 'js/tournament-generator.js';
 const ПРАВ = 'js/kslt-rules.js';
 
 const ОТКАТЫ = [
+  [JSФ, "        drawNotYet: 'Тор азырынча түзүлө элек',",
+        "        drawNotYet: 'Тор \u04d9зырынча түзүлө элек',",
+   'в киргизских строках нет букв из чужих алфавитов'],
+
   /* ── подпись круга и пустая сетка (06.10) ── */
   [JSФ, '                            Math.pow(2, plTotalRounds), pr, plTotalRounds);',
         "                            0, pr, plTotalRounds); prName = 'Раунд ' + pr;",
