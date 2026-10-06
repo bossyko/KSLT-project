@@ -2,6 +2,20 @@
 // TOURNAMENT DETAIL — Rendering Logic
 // ========================================
 
+/* ЯЗЫК СТРАНИЦЫ — ОДНО ОПРЕДЕЛЕНИЕ НА ФАЙЛ.
+   Флаги `isEn` и `isKg` живут здесь в РАЗНЫХ областях видимости: в одних
+   функциях это свои переменные, в других — ПАРАМЕТР, и тогда `isKg` не
+   существует вовсе. 06.10 я подставил пару флагов в `renderLeagueBracketPublic`
+   и `getFicSectionsPublic`, где есть только `isEn`, и страница упала целиком:
+   `isKg is not defined`. Заморозка этого не видит — она читает текст, а не
+   область видимости; поймал прогон, тридцатью шестью падениями.
+   Язык берётся из адреса и не зависит от того, что объявлено рядом. */
+function языкСтраницы() {
+    var путь = window.location.pathname;
+    return путь.indexOf('-en') !== -1 ? 'en'
+         : (путь.indexOf('-kg') !== -1 ? 'kg' : 'ru');
+}
+
 function esc(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -339,7 +353,7 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
         /* ПОДПИСЬ КРУГА БЕРЁТСЯ ИЗ ОДНОГО МЕСТА. Здесь стоял свой
            тернарник, и на 32 он давал «Раунд 1» там, где соседняя
            ветка давала «1/16 Финала». */
-        var prName = KSLT_ROUNDS.подпись((isEn ? 'en' : (isKg ? 'kg' : 'ru')),
+        var prName = KSLT_ROUNDS.подпись(языкСтраницы(),
             Math.pow(2, totalRounds), pr, totalRounds);
 
         var prConverted = prMatches.map(function(m) {
@@ -494,7 +508,7 @@ function getFicSectionsPublic(drawSize, isEn) {
     // Таблица блоков живёт в общем своде правил: её же читают админка и
     // приложение, иначе третья копия рано или поздно разойдётся
     return (window.KSLT_RULES && window.KSLT_RULES.ficSections)
-        ? window.KSLT_RULES.ficSections(drawSize, isEn ? 'en' : (isKg ? 'kg' : 'ru'))
+        ? window.KSLT_RULES.ficSections(drawSize, языкСтраницы())
         : [];
 }
 
@@ -1405,7 +1419,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
     // Status labels & CSS class mapping
     /* Подписи статусов живут в js/tournament-status.js — одно определение на одно понятие */
-    var statusLabels = window.KSLT_STATUS.подписи(isEn ? 'en' : (isKg ? 'kg' : 'ru'));
+    var statusLabels = window.KSLT_STATUS.подписи(языкСтраницы());
 
     var statusClassMap = { registration_open: 'live', registration_closed: 'upcoming', ongoing: 'live', cancelled: 'completed', upcoming: 'upcoming', completed: 'completed' };
     var statusClass = statusClassMap[effectiveStatus] || 'upcoming';
@@ -2011,7 +2025,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var prMatches = ploffMatches.filter(function(m) { return m.round_number === pr && m.round !== '3RD'; })
                             .sort(function(a, b) { return a.match_order - b.match_order; });
                         var prf = plTotalRounds - pr;
-                        var prName = KSLT_ROUNDS.подпись((isEn ? 'en' : (isKg ? 'kg' : 'ru')),
+                        var prName = KSLT_ROUNDS.подпись(языкСтраницы(),
                             Math.pow(2, plTotalRounds), pr, plTotalRounds);
 
                         var prConverted = prMatches.map(function(m) {
@@ -2516,7 +2530,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             // Build rounds structure
             var rounds = [];
             /* КИРГИЗСКИЙ ЗДЕСЬ ПАДАЛ В РУССКИЙ: ветки `kg` не было вовсе. */
-            var lang = (isEn ? 'en' : (isKg ? 'kg' : 'ru'));
+            var lang = языкСтраницы();
             var roundDefs = (typeof ROUND_DEFS !== 'undefined' && ROUND_DEFS[lang] && ROUND_DEFS[lang][drawSize])
                 ? ROUND_DEFS[lang][drawSize]
                 : null;
@@ -2985,7 +2999,7 @@ function показатьРаскладкуОчков(t, контейнер, п�
     if (!контейнер || typeof supabaseClient === 'undefined') return;
     if (typeof KSLT_POINTS === 'undefined') return;
 
-    var язык = isEn ? 'en' : (isKg ? 'kg' : 'ru');
+    var язык = языкСтраницы();
     var П = {
         ru: { место: 'Место', игрок: 'Игрок', этап: 'Этап', очки: 'Очки', итог: 'Итоги турнира' },
         en: { место: 'Place', игрок: 'Player', этап: 'Stage', очки: 'Points', итог: 'Tournament results' },
@@ -3140,7 +3154,7 @@ function renderVenueSection(court, isEn) {
 
     var courtName = isEn ? (court.name_en || court.name) : (isKg ? (court.name_kg || court.name) : court.name);
     /* Адрес собирается в одном месте — js/court-address.js */
-    var address = window.KSLT_ADDRESS.адрес(court, isEn ? 'en' : (isKg ? 'kg' : 'ru'));
+    var address = window.KSLT_ADDRESS.адрес(court, языкСтраницы());
 
     /* Черновик — корт без фотографий, покрытий и цен: его страницы на сайте
        нет, и вести на неё некуда. Название остаётся текстом, карта работает:
