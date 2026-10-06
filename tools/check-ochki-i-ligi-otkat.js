@@ -44,8 +44,27 @@ const МАКЕТ_ОЧКИ = 'maket/ochki-ekran.html';
 const АДМИН_CSS = 'css/admin.css';
 const ЗАМЕР_ФАЙЛ = 'tools/zamer-ochki-ekran.mjs';
 const ТЕСТ_ФАЙЛ  = 'tests/e2e/features/19-ekran-ochkov.spec.js';
+const СТАТ_SQL   = 'sql/функции/stats-rating-only.sql';
 
 const ОТКАТЫ = [
+
+  /* ─── порядок: причина раньше следствия ─── */
+  [СЕТКА,
+   '                await saveRatingHistory(tournament, toUpsert, isDblGrp);\n' +
+   '                if (isDblGrp) {',
+   '                if (isDblGrp) {',
+   'история рейтинга пишется РАНЬШЕ пересчёта очков — во всех четырёх завершениях'],
+
+  [СЕТКА,
+   '                await saveRatingHistory(tournament, toUpsert, isDblFic);\n',
+   '                await saveRatingHistory(tournament, toUpsert, isDblFic);\n' +
+   '                await saveRatingHistory(tournament, toUpsert, isDblFic);\n',
+   'завершений ровно четыре, и пятая копия не завелась'],
+
+  [СТАТ_SQL,
+   '        SET points = EXCLUDED.points, updated_at = now();',
+   '        SET points = player_categories.points + EXCLUDED.points, updated_at = now();',
+   'пересчёт категорий КЛАДЁТ сумму истории, а не прибавляет к прежней'],
   /* ─── одно или другое, а не оба разом ─── */
   [ОЧКИ,
    '            if (место && место <= МЕСТ_ПО_ТАБЛИЦЕ) return заМесто(место, таблица);',

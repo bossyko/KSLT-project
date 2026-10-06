@@ -12233,12 +12233,22 @@
 
                 // Recalculate player points
                 var resultPlayerIds = toUpsert.map(function(r) { return r.player_id; });
+                /* ПРИЧИНА ПИШЕТСЯ ДО ТОГО, КАК СЧИТАЮТ СЛЕДСТВИЕ.
+                   `recalc_player_categories` в базе суммирует `rating_history`
+                   и КЛАДЁТ сумму в `player_categories`, а не прибавляет к ней.
+                   Пока истории этого турнира нет, он кладёт сумму БЕЗ него.
+                   Замер 06.10 на боевом `a1c6ae2f`: `player_categories`
+                   обновились в 04:54:14, `rating_history` появилась в
+                   04:54:22 — на восемь секунд позже. У финалистки в рейтинге
+                   осталось 40 при 215 заработанных, а у заменённой участницы
+                   строки не завелось вовсе. Порядок этих двух вызовов — не
+                   стиль, а смысл: следствие нельзя считать раньше причины. */
+                await saveRatingHistory(tournament, toUpsert, isDbl);
                 if (isDbl) {
                     await recalcDoublesPoints(resultPlayerIds);
                 } else {
                     await A.recalcPlayerPoints(resultPlayerIds);
                 }
-                await saveRatingHistory(tournament, toUpsert, isDbl);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -12377,12 +12387,22 @@
                     return;
                 }
                 var ficResultIds = toUpsert.map(function(r) { return r.player_id; });
+                /* ПРИЧИНА ПИШЕТСЯ ДО ТОГО, КАК СЧИТАЮТ СЛЕДСТВИЕ.
+                   `recalc_player_categories` в базе суммирует `rating_history`
+                   и КЛАДЁТ сумму в `player_categories`, а не прибавляет к ней.
+                   Пока истории этого турнира нет, он кладёт сумму БЕЗ него.
+                   Замер 06.10 на боевом `a1c6ae2f`: `player_categories`
+                   обновились в 04:54:14, `rating_history` появилась в
+                   04:54:22 — на восемь секунд позже. У финалистки в рейтинге
+                   осталось 40 при 215 заработанных, а у заменённой участницы
+                   строки не завелось вовсе. Порядок этих двух вызовов — не
+                   стиль, а смысл: следствие нельзя считать раньше причины. */
+                await saveRatingHistory(tournament, toUpsert, isDblFic);
                 if (isDblFic) {
                     await recalcDoublesPoints(ficResultIds);
                 } else {
                     await A.recalcPlayerPoints(ficResultIds);
                 }
-                await saveRatingHistory(tournament, toUpsert, isDblFic);
             }
 
             // Update player form arrays (W/L from recent matches)
@@ -12632,12 +12652,22 @@
                     return;
                 }
                 var grpResultIds = toUpsert.map(function(r) { return r.player_id; });
+                /* ПРИЧИНА ПИШЕТСЯ ДО ТОГО, КАК СЧИТАЮТ СЛЕДСТВИЕ.
+                   `recalc_player_categories` в базе суммирует `rating_history`
+                   и КЛАДЁТ сумму в `player_categories`, а не прибавляет к ней.
+                   Пока истории этого турнира нет, он кладёт сумму БЕЗ него.
+                   Замер 06.10 на боевом `a1c6ae2f`: `player_categories`
+                   обновились в 04:54:14, `rating_history` появилась в
+                   04:54:22 — на восемь секунд позже. У финалистки в рейтинге
+                   осталось 40 при 215 заработанных, а у заменённой участницы
+                   строки не завелось вовсе. Порядок этих двух вызовов — не
+                   стиль, а смысл: следствие нельзя считать раньше причины. */
+                await saveRatingHistory(tournament, toUpsert, isDblGrp);
                 if (isDblGrp) {
                     await recalcDoublesPoints(grpResultIds);
                 } else {
                     await A.recalcPlayerPoints(grpResultIds);
                 }
-                await saveRatingHistory(tournament, toUpsert, isDblGrp);
             }
 
             // Update player form arrays
@@ -13629,12 +13659,22 @@
                     return;
                 }
                 var glResultIds = toUpsert.map(function(r) { return r.player_id; });
+                /* ПРИЧИНА ПИШЕТСЯ ДО ТОГО, КАК СЧИТАЮТ СЛЕДСТВИЕ.
+                   `recalc_player_categories` в базе суммирует `rating_history`
+                   и КЛАДЁТ сумму в `player_categories`, а не прибавляет к ней.
+                   Пока истории этого турнира нет, он кладёт сумму БЕЗ него.
+                   Замер 06.10 на боевом `a1c6ae2f`: `player_categories`
+                   обновились в 04:54:14, `rating_history` появилась в
+                   04:54:22 — на восемь секунд позже. У финалистки в рейтинге
+                   осталось 40 при 215 заработанных, а у заменённой участницы
+                   строки не завелось вовсе. Порядок этих двух вызовов — не
+                   стиль, а смысл: следствие нельзя считать раньше причины. */
+                await saveRatingHistory(tournament, toUpsert, isDblGL);
                 if (isDblGL) {
                     await recalcDoublesPoints(glResultIds);
                 } else {
                     await A.recalcPlayerPoints(glResultIds);
                 }
-                await saveRatingHistory(tournament, toUpsert, isDblGL);
             }
 
             // Update player form arrays
