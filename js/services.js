@@ -383,16 +383,47 @@
         attachEvents();
         revealTelegramMarks();
 
-        // Скорость ленты как у спонсоров на главной: там на карточку уходит
-        // примерно двенадцать секунд, и имена успеваешь прочитать. Было
-        // четыре — лента пролетала мимо
+        // СКОРОСТЬ ЛЕНТЫ — ВРЕМЯ НА КАРТОЧКУ, А НЕ ВРЕМЯ НА ЛЕНТУ.
+        // Здесь стояло `children.length / 2 * 12s` на animationDuration.
+        // Детьми ленты были карточки, а с 07.10 ими стали два прохода
+        // (.sv-carousel-pass), и счёт давал 1 → вся лента за 12 секунд
+        // при любом числе кортов. Лента летела мимо.
+        // Теперь js сообщает ТОЛЬКО число карточек одного прохода, а шаг
+        // (9 с на широких, 11 с на узких — замерено на ленте спонсоров
+        // лендинга) живёт в css/services.css. Так шаг переключается на
+        // границе сам, без слушателя resize и без чисел в скрипте.
         var carousels = container.querySelectorAll('.sv-carousel');
         carousels.forEach(function(car) {
-            var itemCount = car.children.length / 2;
-            if (itemCount > 0) {
-                car.style.animationDuration = (itemCount * 12) + 's';
+            var pass = car.querySelector('.sv-carousel-pass');
+            var count = pass ? pass.children.length : car.children.length / 2;
+            if (count > 0) {
+                car.style.removeProperty('animation-duration');
+                car.style.setProperty('--sv-karto4ek', String(count));
             }
         });
+
+        // ДВА РЯДА У ВИТРИНЫ ИГРОКОВ — ОТНОШЕНИЕ, А НЕ ЧИСЛО.
+        // css держит правило «видно = колонок × 2» (css/services.css,
+        // блок `data-vidno`), а колонок у `auto-fit` столько, сколько
+        // влезло: замер 07.10 дал 5 · 4 · 3 внутри одной границы 992.
+        // Считать их можно только после раскладки, поэтому число приходит
+        // отсюда. ResizeObserver, а не resize у окна: коробка меняет
+        // ширину и от поворота, и от появления полосы прокрутки.
+        var box = container.querySelector('.sv-players-box');
+        if (box) {
+            var пересчитать = function() {
+                var колонок = getComputedStyle(box)
+                    .gridTemplateColumns.split(' ')
+                    .filter(function(x) { return x && x !== 'none'; }).length;
+                if (!колонок) колонок = 1;
+                if (колонок > 5) колонок = 5;
+                box.setAttribute('data-vidno', String(колонок * 2));
+            };
+            пересчитать();
+            if (window.ResizeObserver) {
+                new ResizeObserver(пересчитать).observe(box);
+            }
+        }
 
         // Sticky headers: remove border-radius when stuck
         var headers = container.querySelectorAll('.sv-column-header');
