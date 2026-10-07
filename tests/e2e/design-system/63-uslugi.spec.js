@@ -282,5 +282,100 @@ test.describe('услуги · ' + Я.имя, () => {
         }
         expect(з.колонок, 'колонок не осталось вовсе').toBeGreaterThan(0);
     });
+
+    /* ──────────────────────────────────────────────────────────────────
+       ДВА РЯДА — ОТНОШЕНИЕ, А НЕ ЧИСЛО. Колонок у `auto-fit` 5 · 4 · 3 на
+       одной и той же границе, поэтому проверяем не число карточек, а
+       равенство «видно = колонок × 2». На телефоне лёжа витрина — полоса:
+       там рядов нет вовсе, и признак полосы — прокрутка вбок.
+       ────────────────────────────────────────────────────────────────── */
+    test('витрина игроков укладывается в два ряда, а лёжа — в полосу', async ({ page }) => {
+        await открыть(page, Я.адрес);
+        const з = await page.evaluate(() => {
+            const б = document.querySelector('.sv-players-box');
+            if (!б) return null;
+            const все = [...б.querySelectorAll('.sv-player')];
+            const видно = все.filter(к => getComputedStyle(к).display !== 'none');
+            const ряды = new Set(видно.map(к => Math.round(к.getBoundingClientRect().top)));
+            const s = getComputedStyle(б);
+            return {
+                всего: все.length,
+                видно: видно.length,
+                рядов: ряды.size,
+                лента: s.display === 'flex',
+                вбок: б.scrollWidth - б.clientWidth,
+                vidno: Number(б.getAttribute('data-vidno')),
+                колонок: s.gridTemplateColumns.trim().split(/\s+/).filter(x => x && x !== 'none').length,
+            };
+        });
+        expect(з, 'ПОРОГ: блока поиска игрока нет').not.toBeNull();
+        expect(з.всего, 'ПОРОГ: в поиске игрока нет карточек').toBeGreaterThan(0);
+
+        if (з.лента) {
+            expect(з.рядов, 'в полосе должен быть ровно один ряд').toBe(1);
+            expect(з.видно, 'в полосе прячется карточка — прятать нечего').toBe(з.всего);
+            if (з.всего > 3) {
+                expect(з.вбок, 'полоса не прокручивается вбок').toBeGreaterThan(0);
+            }
+        } else {
+            expect(з.vidno, 'js не сообщил число колонок').toBe(з.колонок * 2);
+            expect(з.видно, 'видно не равно «колонок × 2»')
+                .toBe(Math.min(з.всего, з.колонок * 2));
+            expect(з.рядов, 'рядов больше двух').toBeLessThanOrEqual(2);
+        }
+    });
+
+    /* ──────────────────────────────────────────────────────────────────
+       ШАГ ЛЕНТЫ РАВЕН ШАГУ ЛЕНТЫ СПОНСОРОВ — слово Кости 07.10.
+       Замораживается ОТНОШЕНИЕ двух страниц, а не число секунд: 9 с на
+       широких, 11 с на узких — это замер, а правило здесь одно, «столько
+       же». Обе ленты меряем ПРОБОЙ: в тестовой базе может не быть ни
+       спонсоров, ни девяти кортов, и настоящей ленты тогда не рисуется —
+       а компонент всё равно обязан ехать с тем же шагом.
+       ────────────────────────────────────────────────────────────────── */
+    test('лента услуг едет с шагом ленты спонсоров', async ({ page }) => {
+        await открыть(page, Я.адрес);
+        const услуги = await page.evaluate(() => {
+            const об = document.createElement('div');
+            об.className = 'sv-carousel-wrap';
+            об.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px';
+            const л = document.createElement('div');
+            л.className = 'sv-carousel';
+            л.style.setProperty('--sv-karto4ek', '10');
+            об.appendChild(л);
+            document.body.appendChild(об);
+            const s = getComputedStyle(л);
+            const от = { время: parseFloat(s.animationDuration), шаг: s.getPropertyValue('--sv-shag').trim() };
+            об.remove();
+            return от;
+        });
+
+        await page.goto('/index.html');
+        await page.waitForFunction(() => document.readyState === 'complete', null, { timeout: 20000 });
+        const спонсоры = await page.evaluate(() => {
+            const об = document.createElement('div');
+            об.className = 'sponsors-carousel-infinite';
+            об.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px';
+            const д = document.createElement('div');
+            д.className = 'carousel-track-infinite';
+            for (let i = 0; i < 20; i++) {
+                const п = document.createElement('a');
+                п.className = 'carousel-slide-infinite';
+                п.innerHTML = '<span>x</span>';
+                д.appendChild(п);
+            }
+            об.appendChild(д);
+            document.body.appendChild(об);
+            const время = parseFloat(getComputedStyle(д).animationDuration);
+            об.remove();
+            /* Проход — половина дорожки: 20 плиток, значит 10 на проход */
+            return { время, наПлитку: время / 10 };
+        });
+
+        expect(спонсоры.время, 'ПОРОГ: лента спонсоров никуда не едет').toBeGreaterThan(0);
+        expect(услуги.время, 'ПОРОГ: лента услуг никуда не едет').toBeGreaterThan(0);
+        expect(услуги.время / 10, 'шаг ленты услуг разошёлся с лентой спонсоров')
+            .toBeCloseTo(спонсоры.наПлитку, 1);
+    });
 });
 }
