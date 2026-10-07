@@ -3,8 +3,7 @@
 SELECT id, name, gender, category_id, is_guest, is_member, has_account
   FROM public.players
  WHERE id = 'murat-noruzbaev-2';
--- ЖДЁМ: name = «Мурат Норузбаев», gender = men.
--- category_id остаётся пустым — это открытый вопрос, не ошибка правки.
+-- ЖДЁМ: name = «Мурат Норузбаев», gender = men, category_id = masters.
 
 -- Нет ли в базе второго Норузбаева, с которым карточка могла разойтись
 SELECT id, name, gender, category_id
