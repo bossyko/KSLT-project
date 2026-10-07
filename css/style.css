@@ -5401,6 +5401,12 @@ h2 {
     .ip-hero.ip-hero,
     .io-hero.io-hero,
     .sv-hero.sv-hero,
+    /* 07.10: `pt-hero` был НАЗВАН в комментарии к этому правилу
+       (css/style.css:11863), но в самом списке его не было — и страница
+       «Поиск игрока» оставалась единственной со своей высотой обложки.
+       Замер 07.10: 358.4 и 253.2 против 275 у шести соседей, причём
+       ДОЛЯМИ ВЫСОТЫ ОКНА (35vh и 30vh). */
+    .pt-hero.pt-hero,
     .pr-hero.pr-hero {
         min-height: 275px;
         padding: var(--section-y) var(--pad-x) var(--section-y-sm);
