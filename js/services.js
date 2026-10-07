@@ -11,7 +11,7 @@
     var L = isEn ? {
         heroTagline: 'KSLT Services',
         heroTitle: 'Your tennis starts here',
-        heroDesc: 'Best courts and professional coaches in Kyrgyzstan',
+        heroDesc: 'Courts, coaches and hitting partners',
         courtsTitle: 'Courts',
         coachesTitle: 'Coaches',
         partnersTitle: 'Player Search',
@@ -40,7 +40,7 @@
     } : isKg ? {
         heroTagline: 'KSLT Кызматтар',
         heroTitle: 'Сенин теннисиң ушул жерден башталат',
-        heroDesc: 'Кыргызстандагы мыкты корттор жана кесипкөй машыктыруучулар',
+        heroDesc: 'Корттор, машыктыруучулар жана оюн боюнча өнөктөштөр',
         courtsTitle: 'Корттор',
         coachesTitle: 'Машыктыруучулар',
         partnersTitle: 'Оюнчу издөө',
@@ -69,7 +69,7 @@
     } : {
         heroTagline: 'KSLT Услуги',
         heroTitle: 'Ваш теннис начинается здесь',
-        heroDesc: 'Лучшие корты и профессиональные тренеры Кыргызстана',
+        heroDesc: 'Корты, тренеры и партнёры по игре',
         courtsTitle: 'Корты',
         coachesTitle: 'Тренеры',
         partnersTitle: 'Поиск игрока',

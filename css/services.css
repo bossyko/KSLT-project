@@ -8,9 +8,14 @@
    один сайт, шапки разделов должны читаться одинаково */
 .sv-hero {
     position: relative;
-    padding: var(--section-y) var(--pad-x) var(--section-y);
+    /* ПОЛ, ВОЗДУХ И ЛЕСТНИЦА ЖИВУТ В ОДНОМ МЕСТЕ — css/tokens.css, раздел
+       «ОБЛОЖКА РАЗДЕЛА», решение Кости 04.10 и доска 482:9 блок N.
+       Здесь своих чисел больше нет. Было: пол 460 при 360 у «Турниров» и
+       «Рейтинга», воздух --section-y сверху и снизу, и на телефоне лёжа
+       обложка выходила 460 при экране 390 — выше самого экрана. */
+    min-height: var(--oblozhka-pol);
+    padding: var(--oblozhka-vozduh) var(--pad-x) var(--oblozhka-vozduh-niz);
     text-align: center;
-    min-height: 460px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,25 +52,31 @@
     z-index: 2;
 }
 
+/* СТУПЕНЬ, А НЕ ДОЛЯ ШИРИНЫ. `clamp(1.9rem, 4.4vw, 3.1rem)` давал
+   26 · 37.1 · 26 · 45.1 · 49.6 — три значения из пяти мимо шкалы кеглей.
+   `--fs-hero` даёт 26 · 32 · 32 · 40 · 40, и это те же числа, что на
+   «Турнирах» и «Рейтинге»: раздел один, шапки должны читаться одинаково. */
 .sv-hero h1 {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
-    font-weight: 800;
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-extrabold);
     color: var(--text-primary);
-    margin-bottom: 18px;
-    line-height: 1.1;
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-tight);
 }
 
 .sv-hero h1 span {
     color: var(--accent);
 }
 
+/* Подзаголовок — та же крутилка, что у «Турниров»: 16 · 18 · 18 · 21 · 21.
+   Было 14 · 18.6 · 16.9 · 20.8 · 20.8 — четыре значения из пяти мимо шкалы. */
 .sv-hero p {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
-    font-weight: 600;
+    font-size: var(--fs-hero-sub);
+    font-weight: var(--fw-semibold);
     color: var(--text-secondary);
     max-width: 720px;
     margin: 0 auto;
-    line-height: 1.5;
+    line-height: var(--lh-normal);
 }
 
 /* Two columns layout */
@@ -89,8 +100,11 @@
     border-bottom: 1px solid var(--border-subtle);
 }
 
+/* ЗАГОЛОВОК КОЛОНКИ СТОИТ ВЫШЕ ИМЕНИ КАРТОЧКИ ПОД НИМ. Замер 06.10: h2
+   был 18, а h3 главной карточки — 21, то есть лестница перевёрнута на
+   самом видном месте страницы. Ступень 21 против 18 у имени. */
 .sv-column-title {
-    font-size: var(--fs-md);
+    font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -184,7 +198,7 @@
 }
 
 .sv-featured-content h3 {
-    font-size: var(--fs-lg);
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-xs);
@@ -239,9 +253,15 @@
     color: var(--accent);
 }
 
+/* ВЫСОТА КНОПКИ — СТУПЕНЬ, А НЕ ПОЛЯ. Замер 07.10: ссылка главной карточки
+   отдавала 41, кнопка игрока 35 — ни то, ни другое не стоит на шкале кнопок
+   (28 · 36 · 44 · 52) и обе ниже цели нажатия 44 (`Button 17:82`, md). */
 .sv-featured-link {
-    display: inline-block;
-    padding: 10px 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-md);
+    padding: 0 28px;
     background: var(--accent);
     color: #000;
     font-size: var(--fs-sm);
@@ -323,7 +343,9 @@
     width: 220px;
     min-width: 220px;
     max-width: 220px;
-    height: 244px;
+    /* ВЫСОТА — СЛЕДСТВИЕ СОДЕРЖИМОГО, А НЕ ЧИСЛО. Было 244 намертво, и при
+       фото 170×123 карточка читалась приплюснутой: отношение 1.4 вместо
+       эталонных 4:3. Ровность ряда даёт сам ряд, а не число у карточки. */
     padding: var(--space-md);
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -341,9 +363,14 @@
     border-color: var(--accent);
 }
 
+/* ОТНОШЕНИЕ ФОТО ОБЪЯВЛЕНО ОДИН РАЗ — 4:3, как на лендинге и на кортах.
+   Слово Кости 07.10. При ширине полосы 170 это 128 вместо 100: карточка
+   подрастает ровно настолько, насколько фото перестаёт быть сплющенным. */
 .sv-compact-photo {
     width: 100%;
-    height: 100px;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    display: block;
     object-fit: cover;
     border-radius: var(--radius-md);
     margin-bottom: var(--space-sm);
@@ -361,8 +388,11 @@
     display: block;
 }
 
+/* Портрет тренера стоит в коробке того же отношения, что фото корта:
+   ленты идут рядом и должны быть одного роста */
 .sv-carousel[data-type="coaches"] .sv-compact-img-wrap {
-    height: 100px;
+    aspect-ratio: 4 / 3;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -702,9 +732,13 @@
        если нашлось трое: пустые колонки всё равно занимали ширину, и блок
        выглядел недорисованным. Теперь колонок ровно столько, сколько карточек,
        но не больше пяти */
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    /* ПЯТЬ В РЯД — слово Кости 07.10. Минимум поднят с 210 до 220, то есть
+       до ширины карточки карусели: при коробке 1338 это даёт ровно пять
+       колонок вместо шести, а ниже — четыре, три и две, без единой новой
+       границы. Зазор со шкалы: было 14, стало 16. */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     justify-items: center;
-    gap: 14px;
+    gap: var(--space-sm);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
     background: var(--surface-glass);
@@ -741,11 +775,13 @@
     width: 100%;
     /* Шире этого карточка пустеет: внутри аватар, имя и кнопка по центру, и
        на растянутой колонке они повисают в воздухе */
-    max-width: 240px;
-    height: 244px;
+    max-width: 260px;
+    /* Высота от содержимого и поля карусельной карточки: две витрины стоят
+       на одной странице и не должны выглядеть разными компонентами */
+    min-height: 244px;
     display: flex;
     flex-direction: column;
-    padding: 18px 16px 16px;
+    padding: var(--space-md);
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -867,7 +903,11 @@
 .sv-player-btn {
     width: 100%;
     margin-top: auto;
-    padding: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-md);
+    padding: 0 var(--space-xs);
     border-radius: var(--radius-full);
     border: 1px solid var(--border-subtle);
     background: transparent;
