@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Корты — пять видов</title>
+<style>
+  body { margin:0; background:#111; color:#eee; font:14px/1.4 system-ui, sans-serif; }
+  h1 { font-size:16px; padding:12px 16px; margin:0; }
+  .vid { padding:8px 16px 24px; }
+  .vid > b { display:block; margin-bottom:6px; font-size:13px; color:#ccff00; }
+  .ramka { position:relative; overflow:hidden; border:1px solid #333; }
+  .ramka > iframe { position:absolute; top:0; left:0; border:0; transform-origin:0 0; }
+</style>
+</head>
+<body>
+<h1>Корты · обложка, полоса фильтров и витрина · загрузка на своей ширине, затем уменьшение картинки</h1>
+<div id="vse"></div>
+<script>
+var VIDY = [
+  ['Десктоп 1440 × 900', 1440, 900, 0.46],
+  ['Планшет лёжа 1024 × 768', 1024, 768, 0.62],
+  ['Планшет стоя 768 × 1024', 768, 1024, 0.62],
+  ['Телефон стоя 390 × 844', 390, 844, 0.80],
+  ['Телефон лёжа 844 × 390', 844, 390, 0.74]
+];
+var dom = document.getElementById('vse');
+VIDY.forEach(function (v) {
+  var ime = v[0], w = v[1], h = v[2], k = v[3];
+  var d = document.createElement('div');
+  d.className = 'vid';
+  d.innerHTML = '<b>' + ime + ' · уменьшено ×' + k + '</b>';
+  var r = document.createElement('div');
+  r.className = 'ramka';
+  r.style.width = Math.round(w * k) + 'px';
+  r.style.height = Math.round(h * k) + 'px';
+  var f = document.createElement('iframe');
+  f.width = w; f.height = h;
+  f.style.width = w + 'px'; f.style.height = h + 'px';
+  f.style.transform = 'scale(' + k + ')';
+  f.src = '/pages/courts.html';
+  f.onload = function () {
+    /* Ждём ПРИЗНАК, а не время: карточки приезжают из базы, и прокрутка,
+       сделанная по таймеру, попадала в пустоту. */
+    var ждём = setInterval(function () {
+      try {
+        var g = f.contentDocument.querySelector('.ct-grid');
+        if (g && g.children.length) {
+          clearInterval(ждём);
+          setTimeout(function () { g.scrollIntoView({ block: 'start' }); }, 400);
+        }
+      } catch (e) { clearInterval(ждём); }
+    }, 300);
+    setTimeout(function () { clearInterval(ждём); }, 20000);
+  };
+  r.appendChild(f);
+  d.appendChild(r);
+  dom.appendChild(d);
+});
+</script>
+</body>
+</html>

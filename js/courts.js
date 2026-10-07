@@ -90,6 +90,10 @@
         phone: 'Телефон',
         newBadge: 'Жаңы',
         filterType: 'Корт түрү',
+        shownOf: 'ичинен',
+        pageOf: 'ичинен',
+        prevPage: '\u2190 Артка',
+        nextPage: 'Кийинки \u2192',
         filterSurface: 'Жабуу',
         filterCarpet: 'Килем',
         filterGrass: 'Чөп',
@@ -153,6 +157,10 @@
         phone: "Телефон",
         newBadge: "Новый",
         filterType: "Тип корта",
+        shownOf: "из",
+        pageOf: "из",
+        prevPage: "\u2190 Назад",
+        nextPage: "Далее \u2192",
         filterSurface: "Покрытие",
         filterCarpet: "Ковёр",
         filterGrass: "Трава",
@@ -209,7 +217,16 @@
     var _searchQuery = '';
 
     var _accessLevel = 'guest';
-    var PER_PAGE = 20;
+    /* ШАГ СТРАНИЦЫ — КОЛОНОК × РЯДОВ, А НЕ ЧИСЛО.
+       Стояло 20 на все виды: на десктопе это пять рядов по четыре, на
+       телефоне десять рядов по две — страница в 2.7 экрана против 1.6.
+       Слово Кости 07.10: четыре ряда на широких, три на телефоне. Рядов
+       держит css (`--ct-ryadov`, 4 и 3 на границе 992), колонок считает
+       браузер — их у `auto-fill` 4 · 3 · 2 внутри одной границы, числом
+       не описать. Замер: 16 · 12 · 6 · 6 · 6 карточек, страница
+       2.2 · 2.6 · 1.7 · 1.6 · 3.9 экрана. */
+    var PER_PAGE = 16;
+    var _шагИдёт = false;
     var _currentPage = 1;
     var _toastTimer = null;
 
@@ -542,6 +559,7 @@
         renderHero();
         renderFilters();
         renderGrid();
+        следитьЗаШагом();
         initSearchInput();
         initFilterClicks();
         initPaginationClicks();
@@ -569,6 +587,22 @@
     function dropdownOptions(kind) {
         var counts = {};
         var order = [];
+
+        /* ТИП КОРТА — ТАКАЯ ЖЕ ВЫПАДАШКА, КАК ГОРОД И ПОКРЫТИЕ.
+           Слово Кости 07.10. Стоял ряд из трёх чипов плюс разделитель —
+           четыре места в полосе под ОДИН признак, тогда как два других
+           признака занимали по одному. Выпадающий фильтр — компонент на
+           весь сайт (css/style.css:5420, `.f-dd` / `.ct-dd`): им уже
+           пользуются корты, тренеры, поиск игрока и новости. */
+        if (kind === 'type') {
+            var типы = { indoor: L_labels.filterIndoor, outdoor: L_labels.filterOutdoor };
+            var бассейн = applyFilters('type');
+            ['indoor', 'outdoor'].forEach(function(key) {
+                var n = бассейн.filter(function(c) { return c.type === key; }).length;
+                if (n) order.push({ value: key, label: типы[key], count: n });
+            });
+            return order;
+        }
 
         if (kind === 'city') {
             applyFilters('city').forEach(function(c) {
@@ -600,13 +634,16 @@
         var options = dropdownOptions(kind);
         if (!options.length) return '';
 
-        var allLabel = kind === 'city' ? L_labels.filterCity : L_labels.filterSurface;
-        var current = kind === 'city' ? currentCityFilter : currentSurfaceFilter;
+        var allLabel = kind === 'type' ? L_labels.filterType
+            : (kind === 'city' ? L_labels.filterCity : L_labels.filterSurface);
+        var current = kind === 'type' ? currentTypeFilter
+            : (kind === 'city' ? currentCityFilter : currentSurfaceFilter);
 
         if (current !== 'all' && !options.some(function(o) { return o.value === current; })) {
             var labelsMap = {
                 hard: L_labels.filterHard, clay: L_labels.filterClay,
-                carpet: L_labels.filterCarpet, grass: L_labels.filterGrass
+                carpet: L_labels.filterCarpet, grass: L_labels.filterGrass,
+                indoor: L_labels.filterIndoor, outdoor: L_labels.filterOutdoor
             };
             options = options.concat([{ value: current, label: labelsMap[current] || current, count: 0 }]);
         }
@@ -651,11 +688,11 @@
                     '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
                     '<input type="text" class="trn-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
                 '</div>' +
+                /* Три признака — три одинаковых выпадашки. Разделитель
+                   `.trn-chip-div` ушёл вместе с чипами: разделять стало
+                   нечего, все три места в полосе теперь однородны. */
                 '<div class="trn-chips" id="courtsChips">' +
-                    '<button class="trn-chip active ct-filter-btn" data-filter-type="all">' + L_labels.filterAll + '</button>' +
-                    '<button class="trn-chip ct-filter-btn" data-filter-type="indoor">' + L_labels.filterIndoor + '</button>' +
-                    '<button class="trn-chip ct-filter-btn" data-filter-type="outdoor">' + L_labels.filterOutdoor + '</button>' +
-                    '<span class="trn-chip-div"></span>' +
+                    dropdownHtml('type') +
                     dropdownHtml('city') +
                     dropdownHtml('surface') +
                 '</div>' +
@@ -775,8 +812,11 @@
                         (c.rating ? '<div class="ct-card-stat"><div class="ct-card-stat-num">\u2605 ' + c.rating + '</div><div class="ct-card-stat-label">' + L_labels.rating + '</div></div>' : '') +
                     '</div>' +
                     (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
+                    /* «Подробнее →» снято: карточка САМА ссылка на корт, и
+                       кнопка была нажимаемым внутри нажимаемого — с
+                       клавиатуры до неё не добраться, а ведёт она туда же.
+                       Остаётся одно действие, которое карточку не повторяет. */
                     '<div class="ct-card-actions">' +
-                        '<span class="ct-card-btn">' + L_labels.detailsBtn + ' \u2192</span>' +
                         // Кнопка скидки только у партнёров: у остальных она вела
                         // в тупик — гостя звали оформить членство, а член клуба
                         // упирался в «скидки не настроены»
@@ -787,8 +827,48 @@
         });
         html += '</div>';
         container.innerHTML = html;
+        /* ШАГ ИЗВЕСТЕН ТОЛЬКО ПОСЛЕ РАСКЛАДКИ. Колонки у `auto-fill`
+           считает браузер, а до первой отрисовки сетки считать нечего —
+           поэтому шаг проверяется здесь и, если изменился, сетка рисуется
+           ЕЩЁ РАЗ. Сторож `_шагИдёт` держит ровно один повтор: второй
+           пересчёт даёт то же число и возвращает false. */
+        if (!_шагИдёт && пересчитатьШаг()) {
+            _шагИдёт = true;
+            var всего = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+            if (_currentPage > всего) _currentPage = всего;
+            renderGrid();
+            _шагИдёт = false;
+            return;
+        }
+
         renderPagination(filtered.length, _currentPage);
         initScrollAnimations();
+    }
+
+    /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
+       считается из живой сетки, а не из ширины окна. Возвращает true,
+       если шаг изменился и сетку надо перерисовать. */
+    function пересчитатьШаг() {
+        var grid = document.querySelector('.ct-grid');
+        if (!grid) return false;
+        var cs = window.getComputedStyle(grid);
+        var колонок = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
+        var рядов = parseInt(cs.getPropertyValue('--ct-ryadov'), 10);
+        if (!колонок || !рядов) return false;
+        var шаг = колонок * рядов;
+        if (шаг === PER_PAGE) return false;
+        PER_PAGE = шаг;
+        return true;
+    }
+
+    /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
+       поворота, и от появления полосы прокрутки, о чём окно не сообщает. */
+    function следитьЗаШагом() {
+        var коробка = document.getElementById('courtsGrid');
+        if (!коробка || !window.ResizeObserver) return;
+        new ResizeObserver(function () {
+            if (пересчитатьШаг()) renderGrid();
+        }).observe(коробка);
     }
 
     // ---- PAGINATION ----
@@ -796,32 +876,24 @@
         var container = document.getElementById('courtsPagination');
         if (!container) return;
 
-        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (totalPages <= 1) {
-            container.innerHTML = '';
-            return;
-        }
-
-        var prevLabel = isEn ? '\u2190 Back' : (isKg ? '\u2190 Артка' : '\u2190 Назад');
-        var nextLabel = isEn ? 'Next \u2192' : (isKg ? 'Кийинки \u2192' : 'Далее \u2192');
-        var html = '<div class="ct-pagination">';
-        html += '<button class="ct-page-btn ct-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
-        for (var p = 1; p <= totalPages; p++) {
-            html += '<button class="ct-page-btn ct-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
-        }
-        html += '<button class="ct-page-btn ct-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + nextLabel + '</button>';
-        html += '</div>';
-        container.innerHTML = html;
+        /* ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ, `js/polosa-stranic.js`.
+           Своя была второй копией и худшей: слова «← Назад / Далее →»
+           вместо шевронов, ВСЕ номера подряд без окна (при двадцати
+           кортах и шаге 16 это два номера, при двухстах — тринадцать) и
+           ни одного счётчика строк. Теперь определение одно на рейтинг и
+           на корты, собранное по `Pagination row 115:171`. */
+        if (!window.KSLT_полосаСтраниц) { container.innerHTML = ''; return; }
+        window.KSLT_полосаСтраниц(container, total, page, PER_PAGE, L_labels);
     }
 
     function initPaginationClicks() {
         document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.ct-page-btn');
+            var btn = e.target.closest('.pl-page-btn');
             if (!btn || btn.disabled) return;
 
-            if (btn.classList.contains('ct-page-prev')) {
+            if (btn.classList.contains('pl-page-prev')) {
                 _currentPage = Math.max(1, _currentPage - 1);
-            } else if (btn.classList.contains('ct-page-next')) {
+            } else if (btn.classList.contains('pl-page-next')) {
                 _currentPage++;
             } else if (btn.dataset.page) {
                 _currentPage = parseInt(btn.dataset.page);
@@ -944,22 +1016,10 @@
         });
     }
 
+    /* Чипов типа в полосе больше нет — тип выбирается выпадашкой, и её
+       нажатия разбирает initDropdowns. Отдельный обработчик `.ct-filter-btn`
+       снят: он остался бы слушателем, которому некого слушать. */
     function initFilterClicks() {
-        document.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('ct-filter-btn')) return;
-
-            // Группы больше нет — чипы идут одной строкой, поэтому снимаем
-            // отметку у соседей по признаку, а не по общему предку
-            if (e.target.hasAttribute('data-filter-type')) {
-                currentTypeFilter = e.target.getAttribute('data-filter-type');
-                document.querySelectorAll('[data-filter-type]').forEach(function(b) { b.classList.remove('active'); });
-                e.target.classList.add('active');
-                _currentPage = 1;
-                refreshDropdowns();
-                renderGrid();
-            }
-        });
-
         initDropdowns();
     }
 
@@ -968,7 +1028,8 @@
         if (!chips) return;
 
         chips.querySelectorAll('.ct-dd').forEach(function(el) { el.remove(); });
-        chips.insertAdjacentHTML('beforeend', dropdownHtml('city') + dropdownHtml('surface'));
+        chips.insertAdjacentHTML('beforeend',
+            dropdownHtml('type') + dropdownHtml('city') + dropdownHtml('surface'));
     }
 
     function initDropdowns() {
@@ -993,7 +1054,8 @@
             var wrap = item.closest('.ct-dd');
             var kind = wrap.getAttribute('data-dd');
             var value = item.getAttribute('data-dd-value');
-            if (kind === 'city') currentCityFilter = value;
+            if (kind === 'type') currentTypeFilter = value;
+            else if (kind === 'city') currentCityFilter = value;
             else currentSurfaceFilter = value;
 
             wrap.classList.remove('open');

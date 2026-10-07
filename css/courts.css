@@ -8,14 +8,19 @@
 /* Высота общая для всех карточек: игрок, тренер, корт, турнир */
 /* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
    один сайт, шапки разделов должны читаться одинаково */
+/* ОБЛОЖКА СТОИТ НА ОБЩИХ КРУТИЛКАХ РАЗДЕЛА — решение Кости 04.10,
+   доска 482:9 блок N. «Корты» были последним разделом со своими числами:
+   пол 460 при 360 у остальных, на 768 — наоборот 275, а воздух снизу
+   давал 37.4 на десктопе и 26.6 на 1024, мимо шкалы (замер 07.10).
+   Компонент один на ДВЕ страницы — список кортов и страницу корта. */
 .ct-hero {
     position: relative;
-    min-height: 460px;
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: var(--section-y) var(--pad-x) var(--section-y);
+    padding: var(--oblozhka-vozduh) var(--pad-x) var(--oblozhka-vozduh-niz);
     overflow: hidden;
 }
 
@@ -41,12 +46,15 @@
     max-width: 700px;
 }
 
+/* Кегль — ступень шкалы, а не доля ширины. Было 22.6 · 33.8 · 37.1 ·
+   45.1 · 49.6 — ни одного числа со шкалы. Стало 26 · 32 · 32 · 40 · 40,
+   как у «Турниров», «Рейтинга» и «Услуг». */
 .ct-hero-title {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
-    font-weight: 800;
-    line-height: 1.1;
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-extrabold);
+    line-height: var(--lh-tight);
     letter-spacing: -0.02em;
-    margin-bottom: 18px;
+    margin-bottom: var(--space-4);
 }
 
 .ct-hero-title span {
@@ -54,131 +62,90 @@
 }
 
 .ct-hero-subtitle {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
-    font-weight: 600;
+    font-size: var(--fs-hero-sub);
+    font-weight: var(--fw-semibold);
     color: var(--text-secondary);
     max-width: 720px;
     margin: 0 auto;
-    line-height: 1.5;
+    line-height: var(--lh-normal);
 }
 
 /* ---- CONTAINER ---- */
+/* ВИТРИНА ИДЁТ ПО ШИРОКОЙ КОРОБКЕ, ТАБЛИЦА — ПО УЗКОЙ (правило 07.10).
+   1100 — ширина СТРОК рейтинга по ATP/WTA/ITF; карточки у тех же ATP, у
+   Airbnb и у нашего лендинга идут по широкой. При 1100 четыре карточки
+   дают 245, при 1400 — 332 (посчитано и проверено в браузере). */
 .ct-container {
-    max-width: var(--container-narrow);
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 60px 24px 80px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
 }
 
-/* ---- FILTERS ---- */
-.ct-filters-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    padding: 14px 24px;
-    margin-bottom: 0;
-    position: sticky;
-    top: var(--header-h);
-    z-index: 90;
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-subtle);
-    transition: box-shadow 0.2s;
-}
+/* ---- ПОЛОСА ФИЛЬТРОВ ----
+   СВОЕЙ ПОЛОСЫ У КОРТОВ НЕТ. Разметка берёт общие классы `trn-filters`,
+   `trn-back`, `trn-search-wrap`, `trn-search-input`, `trn-chips` из
+   style.css (js/courts.js:644) — те же, что на страницах категорий
+   турниров. Замер 07.10 подтвердил совпадение: назад 14, поиск 320 × 44
+   радиусом 8, выпадашки 44 высотой и 12 кеглем.
 
-.ct-filters-wrap.stuck {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-
-.ct-filters-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px 24px;
-}
-
-/* Search */
-.ct-search-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-}
-
-.ct-search-icon {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.ct-search-input {
-    width: 100%;
-    padding: 14px 20px 14px 50px;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    font-size: var(--fs-base);
-    outline: none;
-    transition: all 0.3s;
-}
-
-.ct-search-input::placeholder {
-    color: var(--text-dim);
-}
-
-.ct-search-input:focus {
-    border-color: var(--accent);
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
-}
-
-.ct-filter-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.ct-filter-divider {
-    width: 1px;
-    height: 24px;
-    background: var(--border-subtle);
-    flex-shrink: 0;
-}
-
-.ct-filter-label {
-    font-size: var(--fs-xs);
-    color: var(--accent);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    flex-shrink: 0;
-    white-space: nowrap;
-    border: 1.5px solid var(--accent);
-    border-radius: var(--radius-full);
-    padding: 6px 14px;
-}
-
-.ct-filter-chips {
-    display: flex;
-    gap: 6px;
-    flex-wrap: nowrap;
-}
-
-/* Кнопки фильтров размечены классом .trn-chip — вид и размеры берутся
-   из общей полосы фильтров в style.css. Свои значения здесь держать
-   нельзя: у кортов, тренеров и поиска игрока они расходились */
+   ЗДЕСЬ ЛЕЖАЛА ВТОРАЯ ПОЛОСА — тринадцать классов (`.ct-filters-wrap`,
+   `.ct-filters-row`, `.ct-search-wrap`, `.ct-search-icon`,
+   `.ct-search-input`, `.ct-filter-group`, `.ct-filter-divider`,
+   `.ct-filter-label`, `.ct-filter-chips`, `.ct-back-links`,
+   `.ct-back-sep`, `.ct-back-link`, `.ct-back-service`), и в ней поле
+   поиска было таблеткой на 480. МЁРТВЫМ КОД НАЗВАН ПОСЛЕ ПРОВЕРКИ:
+   ни один из тринадцати не встречается ни в одной разметке и ни в одном
+   скрипте — проверено по всему дереву 07.10. Второе определение одного
+   понятия ждало только того, кто его применит.
+   ---- */
 
 /* ---- COURTS GRID ---- */
+/* ЧИСЛО КОЛОНОК — СЛЕДСТВИЕ ШИРИНЫ КАРТОЧКИ, А НЕ ГРАНИЦЫ ЭКРАНА.
+   Правило выведено на «Услугах» 07.10 и применяется без нового разбора.
+   `auto-fill` с минимумом 300 даёт 4 · 3 · 2 · 2 на наших пяти видах —
+   замерено. Четыре в ряд — слово Кости 07.10; четыре на 1024 ставить
+   нельзя: там карточка 226, метка «Партнёр» вылезает за край и обе
+   кнопки переносятся на вторую строку (замер ночью 07.10). */
 .ct-grid {
+    /* РЯДОВ НА СТРАНИЦЕ — ЧЕТЫРЕ НА ШИРОКИХ, ТРИ НА УЗКИХ. Слово Кости
+       07.10. Число читает js и умножает на колонки: шаг страницы — это
+       отношение «колонок × рядов», а не число. Замер длины страницы:
+       3 ряда дают 1.8 · 2.1 · 1.7 · 1.6 · 3.9 экрана, 4 ряда —
+       2.2 · 2.6 · 2.1 · 1.9 · 5.1. */
+    --ct-ryadov: 4;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-6);
+}
+
+@media (max-width: 992px) {
+    .ct-grid { --ct-ryadov: 3; }
+}
+
+/* ДВЕ В РЯД НА ТЕЛЕФОНЕ — своим минимумом, а не числом колонок: при
+   минимуме 300 экран 390 давал бы одну карточку, а двадцать кортов в
+   столбик — это пять экранов. Граница 640: ширин в медиа две. */
+@media (max-width: 640px) {
+    .ct-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+    }
+
+    /* Кегли имени, меты и числа здесь НЕ переопределяются: у витрины
+       один уровень на все виды, как у лендинга. Правится только то, что
+       зависит от узости колонки. */
+    .ct-card-cta {
+        width: 100%;
+        font-size: var(--fs-xs);
+        text-align: center;
+        justify-content: center;
+    }
+
+    .ct-card-partner {
+        font-size: var(--fs-2xs);
+        padding: 2px 6px;
+        margin-left: 4px;
+    }
 }
 
 .ct-card {
@@ -204,9 +171,16 @@
     overflow: hidden;
 }
 
+/* ОТНОШЕНИЕ СТОРОН — СВОЙСТВО КАРТОЧКИ, А НЕ ЧИСЛО. Высота стояла 180 и
+   110, и отношение гуляло от 1.55 до 3.27 — на планшете фотография была
+   полоской (замер 07.10). 4:3 объявлено ОДИН раз на корт и тренера, как
+   на лендинге (css/style.css:3740). `display: block` убирает щель
+   базовой строки: объявлено было 180, занимала 187. */
 .ct-card-img {
+    display: block;
     width: 100%;
-    height: 180px;
+    height: auto;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
 }
 
@@ -260,10 +234,14 @@
     background: rgba(204,255,0,0.1);
 }
 
+/* ПЛОТНОСТЬ Dense 12 ПО ОПИСАНИЮ `Card 29:65`, между строками 8 —
+   те же числа, что у витрины лендинга (css/style.css:3758). Ритм задаёт
+   ОДИН `gap`, а не поля у каждой строки по отдельности. */
 .ct-card-body {
-    padding: 24px;
+    padding: var(--space-3);
     display: flex;
     flex-direction: column;
+    gap: var(--space-2);
     flex-grow: 1;
 }
 
@@ -271,13 +249,20 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 8px;
 }
 
+/* ИМЯ — СТУПЕНЬ `card title` 16 С ЛЕНДИНГА, А НЕ 18. Карточка кортов
+   была на ступень крупнее эталонной по двум уровням сразу, а вес в
+   иерархии у неё тот же. Две строки с многоточием — чтобы ряд не
+   разъезжался по высоте от длины названия. */
 .ct-card-name {
-    font-size: var(--fs-md);
+    font-size: var(--fs-base);
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .ct-card-partner {
@@ -293,25 +278,30 @@
     letter-spacing: 0.03em;
 }
 
+/* Мета — 12 с межстрочным 1.4, один уровень на все виды (было 14 и 12).
+   Лайм отсюда уходит: ВНУТРИ ВИТРИНЫ ЛАЙМА НЕТ, он принадлежит одному
+   главному действию в поле зрения (правило 109:370). Покрытие — значимая
+   мета, 72 % белого: 5.33 при пороге 4.5. */
 .ct-card-type {
-    font-size: var(--fs-sm);
-    color: var(--accent);
+    font-size: var(--fs-xs);
+    line-height: 1.4;
+    color: var(--text-secondary);
     font-weight: 600;
-    margin-bottom: 8px;
 }
 
+/* ПРЕДПОЛОЖЕНИЕ, ПОМЕЧЕНО КАК ДОГАДКА: описание уходит из карточки на
+   ВСЕХ видах. На ≤768 оно и так было спрятано, а при карточке 332 на
+   десктопе занимало 90 из 250 пикселей тела — больше трети. Карточка
+   сама ссылка на страницу корта, и подробности живут там. У витрины
+   лендинга описания нет вовсе. Если скажешь вернуть — вернём двумя
+   строками с многоточием. */
 .ct-card-desc {
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-    line-height: 1.6;
-    margin-bottom: 16px;
-    flex-grow: 1;
+    display: none;
 }
 
 .ct-card-stats {
     display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
+    gap: var(--space-4);
     flex-wrap: wrap;
 }
 
@@ -319,23 +309,25 @@
     text-align: center;
 }
 
+/* Число — ступень 16, вровень с именем: два уровня, а не три. Было 18,
+   то есть крупнее имени карточки. Лайм снят по тому же правилу 109:370. */
 .ct-card-stat-num {
-    font-size: var(--fs-md);
+    font-size: var(--fs-base);
     font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
+    color: var(--text-primary);
+    line-height: var(--lh-none);
 }
 
 .ct-card-stat-label {
-    font-size: var(--fs-xs);
+    font-size: var(--fs-2xs);
     color: var(--text-muted);
     margin-top: 2px;
 }
 
 .ct-card-price {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
+    line-height: 1.4;
     color: var(--text-secondary);
-    margin-bottom: 16px;
 }
 
 .ct-card-price strong {
@@ -456,13 +448,18 @@
     width: 100%;
 }
 
-.ct-card-btn,
+/* `.ct-card-btn` («Подробнее →») снята вместе со своей разметкой:
+   карточка сама ссылка на корт, и кнопка была нажимаемым внутри
+   нажимаемого. Осталось ОДНО действие, которое карточку не повторяет, —
+   и ровно поэтому лайм на нём законен (правило 109:370). */
 .ct-card-cta {
     flex: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 0;
+    /* ЦЕЛЬ НАЖАТИЯ — СТУПЕНЬ 44, А НЕ СЛЕДСТВИЕ ПОЛЕЙ. Было 41 (замер). */
+    min-height: var(--btn-h-md);
+    padding: 0 var(--space-3);
     border-radius: var(--radius-full);
     font-family: inherit;
     font-size: var(--fs-sm);
@@ -470,17 +467,6 @@
     cursor: pointer;
     text-decoration: none;
     transition: all var(--transition-fast);
-}
-
-.ct-card-btn {
-    background: none;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-}
-
-.ct-card-btn:hover {
-    background: var(--accent);
-    color: #000;
 }
 
 .ct-card-cta {
@@ -530,57 +516,6 @@
 /* ---- DETAIL PAGE ---- */
 
 /* Back links — sticky */
-.ct-back-links {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 32px;
-    position: sticky;
-    top: var(--header-h);
-    z-index: 10;
-    background: var(--bg-primary);
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.ct-back-sep {
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-}
-
-.ct-back-link.ct-back-service {
-    flex-basis: 100%;
-    margin-bottom: 0;
-    display: none;
-}
-
-.ct-filters-wrap.stuck .ct-back-link.ct-back-service {
-    display: inline-flex;
-}
-
-.ct-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    transition: color var(--transition-fast);
-}
-
-.ct-back-link:hover {
-    color: var(--accent);
-}
-
-/* Detail header */
-.ct-detail-header {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
-    margin-bottom: 48px;
-}
-
 .ct-detail-photo {
     width: 360px;
     height: 240px;
@@ -945,9 +880,8 @@
 
 /* ---- RESPONSIVE ---- */
 @media (max-width: 992px) {
-    .ct-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    /* Правило `.ct-grid` на две колонки снято: число колонок — следствие
+       ширины карточки, `auto-fill` сам даёт 3 на 1024 и 2 на 768. */
     .ct-amenities {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -963,81 +897,13 @@
     }
 }
 
+/* ГРАНИЦА 768 ОСТАЛАСЬ ТОЛЬКО У СТРАНИЦЫ КОРТА — отдельный кусок, не
+   мерен, в этот заход не трогается. Правила витрины отсюда ушли на 640:
+   поля контейнера теперь держат крутилки `--section-y` и `--pad-x`,
+   а кнопка и метка «Партнёр» переехали в блок ≤640 выше по файлу. */
 @media (max-width: 768px) {
-    
-    .ct-container {
-        padding: 40px 16px 60px;
-    }
     .ct-map {
         height: 300px;
-    }
-    /* Две в ряд, как карточки турниров на телефоне: одна занимала 497
-       пикселей — на экран влезало полторы штуки при двадцати кортах */
-    .ct-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        max-width: none;
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .ct-card-img {
-        height: 110px;
-    }
-
-    .ct-card-body {
-        padding: 12px;
-    }
-
-    .ct-card-name {
-        font-size: var(--fs-sm);
-        line-height: 1.25;
-        /* Длинное название не обрезаем многоточием, но дальше двух строк
-           не пускаем — иначе карточки в ряду разъедутся по высоте */
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .ct-card-type {
-        font-size: var(--fs-xs);
-        margin-bottom: 6px;
-    }
-
-    /* Описание на узкой карточке нечитаемо: название, покрытие и число
-       кортов уже всё сказали, подробности — на странице корта */
-    .ct-card-desc,
-    .ct-card-price {
-        display: none;
-    }
-
-    .ct-card-stats {
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-
-    .ct-card-stat-num {
-        font-size: var(--fs-base);
-    }
-
-    .ct-card-stat-label {
-        font-size: var(--fs-2xs);
-    }
-
-    .ct-card-btn,
-    .ct-card-cta {
-        width: 100%;
-        padding: 8px 10px;
-        font-size: var(--fs-xs);
-        text-align: center;
-        justify-content: center;
-    }
-
-    .ct-card-partner {
-        font-size: var(--fs-2xs);
-        padding: 2px 6px;
-        margin-left: 4px;
     }
     .ct-detail-header {
         flex-direction: column;
@@ -1099,13 +965,9 @@
         font-size: var(--fs-xl);
     }
 
-    /* Страница корта на телефоне — по общей шкале размеров.
-       Название шло 30-м кеглем и занимало три строки, описание —
-       шестнадцатым, плашка про скидки высотой в треть экрана */
-    .ct-hero-title {
-        font-size: clamp(1.35rem, 5.8vw, 1.7rem);
-        line-height: 1.2;
-    }
+    /* Кегль заголовка обложки отсюда убран: его держит `--fs-hero` в
+       tokens.css, и своё объявление спорило бы с общей крутилкой.
+       Компонент обложки один на список кортов и на страницу корта. */
 
     .ct-detail-stat-combined {
         padding: 12px 16px;
@@ -1143,43 +1005,13 @@
     .ct-gallery-img {
         height: 200px;
     }
-    .ct-search-input {
-        padding: 12px 16px 12px 44px;
-        font-size: var(--fs-sm);
-    }
-    .ct-filters-wrap {
-        gap: 10px;
-        padding: 10px 12px;
-    }
-    .ct-filters-row {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .ct-filter-divider {
-        display: none;
-    }
-    .ct-filter-chips {
-        flex-wrap: wrap;
-    }
 }
 
+/* ГРАНИЦА 375 ОСТАЛАСЬ ТОЛЬКО У СТРАНИЦЫ КОРТА — отдельный кусок, он не
+   мерен и в этот заход не трогается. Всё, что принадлежало витрине
+   (поля тела, кегль имени, высота фото, поля контейнера), отсюда снято:
+   у витрины ОДИН уровень на все виды, как у лендинга. */
 @media (max-width: 375px) {
-    
-    .ct-hero-title {
-        font-size: var(--fs-xl);
-    }
-    .ct-container {
-        padding: 32px 12px 48px;
-    }
-    .ct-card-body {
-        padding: 16px;
-    }
-    .ct-card-name {
-        font-size: var(--fs-base);
-    }
-    .ct-card-img {
-        height: 150px;
-    }
     .ct-detail-info h1 {
         font-size: var(--fs-lg);
     }
@@ -1207,62 +1039,25 @@
     }
 }
 
-/* === PAGINATION === */
+/* === ПОЛОСА СТРАНИЦ ===
+   Своих кнопок у кортов больше нет: полоса — общий компонент, он лежит в
+   `css/style.css` вместе со своим скриптом `js/polosa-stranic.js`.
+   Пять классов (`.ct-pagination`, `.ct-page-btn`, `-num`, `-prev`,
+   `-next`) снесены: проверено по всему дереву — после перехода на общую
+   полосу ни один из них не встречается ни в одной разметке и ни в одном
+   скрипте. Кнопки были 40 × 40 мимо ступеней 28 · 36 · 44 · 52.
+   Остаётся только обёртка секции: у кортов она своя по ширине. */
 .ct-pagination-section {
-    max-width: var(--container-narrow);
+    /* Полоса идёт по витрине, а не по умолчанию компонента: сетка кортов
+       живёт в широкой коробке, и полоса обязана стоять над её краями. */
+    --polosa-shirina: 100%;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 0 24px var(--space-xl);
+    padding: 0 var(--pad-x) var(--space-xl);
 }
 
 .ct-pagination-section:empty {
     padding: 0;
-}
-
-.ct-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-}
-
-.ct-page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    height: 40px;
-    padding: 0 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
-    font-size: var(--fs-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.ct-page-btn:hover:not(:disabled) {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.ct-page-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #000;
-    font-weight: 700;
-}
-
-.ct-page-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.ct-page-prev,
-.ct-page-next {
-    background: transparent;
 }
 
 /* === DISCOUNT / VOUCHER === */
