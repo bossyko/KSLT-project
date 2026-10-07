@@ -347,7 +347,14 @@
                     el.textContent = formatPrize(totalPrize);
                     if (ячейка) ячейка.style.display = '';
                 } else if (ячейка) {
-                    ячейка.style.display = 'none';
+                    /* УБИРАЕТСЯ ИЗ РАЗМЕТКИ, А НЕ ПРЯЧЕТСЯ — то же, что на
+                       странице категории (js/tournaments-overlay.js:147).
+                       `display: none` оставлял слот в дереве, а колонки
+                       сетки считает `:has(> :nth-child(4):last-child)`
+                       (css/style.css:11032) по ДЕТЯМ: четыре дорожки под три
+                       числа, и на 390 группа стояла центром 151 при центре
+                       обложки 195 — сдвиг влево на 44. */
+                    ячейка.remove();
                 }
             }
 

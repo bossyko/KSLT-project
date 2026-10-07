@@ -11036,6 +11036,24 @@ input:-internal-autofill-previewed {
         grid-template-columns: repeat(4, 1fr);
     }
 
+    /* ДВА ПОКАЗАТЕЛЯ — ПАРОЙ ПО ЦЕНТРУ, А НЕ ПО ПОЛОВИНАМ ОБЛОЖКИ.
+       Равные дорожки `1fr 1fr` разводили два числа к краям: на 667
+       пикселях между ними стояло 212, а оптический центр пары промахивался
+       мимо центра обложки на 12 — числа разной ширины, дорожки одинаковой.
+       Дорожки по содержимому плюс `justify-content: center` сажают пару
+       ровно в центр на любой ширине, а зазор берётся со шкалы.
+       Пять показателей лендинга под это правило не попадают — у них
+       второй ребёнок не последний, и база `1fr 1fr` остаётся их. */
+    .hero-stats:has(> :nth-child(2):last-child),
+    .tournament-hero .tournament-hero-stats:has(> :nth-child(2):last-child),
+    .to-hero .tournament-hero-stats:has(> :nth-child(2):last-child),
+    .td-hero .td-hero-stats:has(> :nth-child(2):last-child),
+    .bo-hero .bo-hero-stats:has(> :nth-child(2):last-child) {
+        grid-template-columns: repeat(2, auto);
+        justify-content: center;
+        column-gap: var(--space-lg);
+    }
+
     .hero-stats:has(> :only-child),
     .tournament-hero .tournament-hero-stats:has(> :only-child),
     .to-hero .tournament-hero-stats:has(> :only-child),
