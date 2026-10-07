@@ -94,8 +94,8 @@ const ОТКАТЫ = [
  'цель нажатия кнопки 44 — телефон'],
 
 ['вернуть первому ряду высоту 380', 'css/style.css',
- '.tournaments-grid > .tc:nth-child(-n+3) {\n    height: 320px;\n}',
- '.tournaments-grid > .tc:nth-child(-n+3) {\n    height: 380px;\n}',
+ '.tournaments-grid > .tc:nth-child(-n+3) {\n    height: auto;\n    min-height: 320px;\n}',
+ '.tournaments-grid > .tc:nth-child(-n+3) {\n    height: auto;\n    min-height: 380px;\n}',
  'высота первого ряда 320'],
 
 ['снять с шапки раздела общую высоту', 'css/style.css',

@@ -49,7 +49,9 @@ const КУСКИ = [
     ['кнопка «Снять»',     'check-knopka-snyat.js',  'check-knopka-snyat-otkat.js'],
     ['место в рейтинге',   'check-mesto-v-reytinge.js','check-mesto-v-reytinge-otkat.js'],
     ['метка группы',       'check-metka-gruppy.js',    'check-metka-gruppy-otkat.js'],
-    ['прогноз выключен',   'check-prognoz-vyklyuchen.js','check-prognoz-vyklyuchen-otkat.js']
+    ['прогноз выключен',   'check-prognoz-vyklyuchen.js','check-prognoz-vyklyuchen-otkat.js'],
+    ['цифры обложки',      'check-cifry-oblozhki.js',  'check-cifry-oblozhki-otkat.js'],
+    ['телефон раздела',    'check-telefon-razdela.js', 'check-telefon-razdela-otkat.js']
 ];
 
 function прогнать(файл) {

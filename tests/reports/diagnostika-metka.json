@@ -1,0 +1,55 @@
+{
+  "турнир": "test-metka",
+  "когда": "2026-10-06T17:58:51.657Z",
+  "база": {
+    "турнир": {
+      "id": "test-metka",
+      "title": "Тестовый турнир: метка группы",
+      "status": "ongoing",
+      "bracket_type": "round_robin",
+      "group_count": 2,
+      "qualifiers_per_group": 1,
+      "manual_group_places": {}
+    },
+    "матчейВсего": 1,
+    "групповых": 0,
+    "сыграноГрупповых": 0,
+    "сеточных": 1,
+    "поГруппам": {},
+    "сетка": [
+      {
+        "круг": "F",
+        "номер": 1,
+        "состояние": "upcoming",
+        "есть1": true,
+        "есть2": true
+      }
+    ]
+  },
+  "сайт": {
+    "клетокИгрока": 2,
+    "плашекМетки": 0,
+    "таблицГруппы": 0,
+    "сетокГрупп": 1,
+    "модульГрупп": true,
+    "модульПравил": true,
+    "метки": [
+      {
+        "имя": "Яков Первый",
+        "метка": null
+      },
+      {
+        "имя": "Антон Равный",
+        "метка": null
+      }
+    ],
+    "первыеСтрокиСетки": "<h3 style=\"color:var(--accent);margin-bottom:16px;font-size:1.1rem;\">Групповой этап</h3><div class=\"td-groups-grid\"></div><h3 style=\"color:var(--accent);margin-bottom:16px;font-size:1.1rem;\">Плей-офф</h3><div class=\"td-bracket-scroll\"><div class=\"td-bracket\"><div class=\"td-bracket-round\"><div class=\"td-round-title\">Финал</div><div class=\"td-bracket-matches\"><div class=\"td-match upcoming\" data-p1=\""
+  },
+  "админка": {
+    "строкИгрока": 0,
+    "плашекМетки": 0,
+    "плашекСТекстом": 0,
+    "блоковГруппы": 0,
+    "метки": []
+  }
+}

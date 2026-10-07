@@ -1,0 +1,108 @@
+{
+  "адресКлиента": "https://itlanqwcwygxchitaatt.supabase.co",
+  "адресВнутри": "https://itlanqwcwygxchitaatt.supabase.co",
+  "поИдСколько": 7,
+  "поИдОшибка": null,
+  "поИдСтроки": [
+    {
+      "хвост": "01",
+      "т": "test-itogi",
+      "г": null,
+      "к": "F",
+      "с": "completed"
+    },
+    {
+      "хвост": "02",
+      "т": "test-itogi",
+      "г": null,
+      "к": "3RD",
+      "с": "completed"
+    },
+    {
+      "хвост": "03",
+      "т": "test-itogi-fic",
+      "г": null,
+      "к": "F",
+      "с": "completed"
+    },
+    {
+      "хвост": "04",
+      "т": "test-itogi-fic",
+      "г": null,
+      "к": "3RD",
+      "с": "completed"
+    },
+    {
+      "хвост": "05",
+      "т": "test-itogi-fic",
+      "г": null,
+      "к": "F5",
+      "с": "completed"
+    },
+    {
+      "хвост": "06",
+      "т": "test-itogi-fic",
+      "г": null,
+      "к": "F7",
+      "с": "completed"
+    },
+    {
+      "хвост": "07",
+      "т": "test-metka",
+      "г": null,
+      "к": "F",
+      "с": "upcoming"
+    }
+  ],
+  "видимыеГрупповые": [
+    {
+      "т": "tsikl-odinochka",
+      "г": 4,
+      "к": "G4",
+      "с": "completed",
+      "когда": true
+    },
+    {
+      "т": "tsikl-odinochka",
+      "г": 6,
+      "к": "G6",
+      "с": "completed",
+      "когда": true
+    },
+    {
+      "т": "tsikl-odinochka",
+      "г": 3,
+      "к": "G3",
+      "с": "completed",
+      "когда": true
+    },
+    {
+      "т": "tsikl-odinochka",
+      "г": 3,
+      "к": "G3",
+      "с": "completed",
+      "когда": true
+    },
+    {
+      "т": "tsikl-odinochka",
+      "г": 7,
+      "к": "G7",
+      "с": "completed",
+      "когда": true
+    }
+  ],
+  "вошёл": false,
+  "почта": null,
+  "своиСколько": 1,
+  "своиОшибка": null,
+  "своиСтроки": [
+    {
+      "г": null,
+      "с": "upcoming"
+    }
+  ],
+  "завершённыхВидно": 5,
+  "завершённыхОшибка": null,
+  "групповыхВидно": 5,
+  "групповыхОшибка": null
+}

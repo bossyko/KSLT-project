@@ -47,14 +47,14 @@ const ОТКАТЫ = [
 
   [CSS, `    min-height: var(--to-featured-h, 380px);`,
         `    min-height: var(--to-featured-h);`,
-   'у соседа остаётся запасное значение, если переменной нет'],
+   'у соседа остаётся запасное значение везде, где переменную ЧИТАЮТ'],
 
-  [CSS, `    grid-template-rows: repeat(3, var(--to-slot));`,
+  [CSS, `    grid-template-rows: repeat(3, minmax(var(--to-slot), auto));`,
         `    grid-auto-rows: var(--to-slot);`,
-   'столб — сетка с ПОСТОЯННЫМ числом рядов, а не список переменной длины'],
+   'столб — сетка с ПОСТОЯННЫМ числом рядов, а ступень слота — их ПОЛ'],
 
-  [CSS, `        grid-template-rows: repeat(2, var(--to-slot));`,
-        `        grid-template-rows: repeat(3, var(--to-slot));`,
+  [CSS, `        grid-template-rows: repeat(2, minmax(var(--to-slot), auto));`,
+        `        grid-template-rows: repeat(3, minmax(var(--to-slot), auto));`,
    'на планшете рядов ДВА — целые ряды по два, а не три с хвостом'],
 
   [CSS, `    .to-categories .to-card-grid {\n        --to-featured-h: 320px;\n    }`,
@@ -65,9 +65,11 @@ const ОТКАТЫ = [
         `.to-categories .to-side-stack .to-compact {\n    min-height: 0;`,
    'высота боковой строки — свойство слота, а не содержимого'],
 
-  [CSS, `    --to-thumb: 120px;`,
-        `    --to-thumb-unused: 120px;`,
-   'ширина миниатюры задана ОДИН раз переменной'],
+  [CSS, `    --to-thumb: 120px;
+    /* Колонка «статус над датой»: 13 ступеней по 8 */
+    --to-meta: 104px;`,
+        `    --to-meta: 104px;`,
+   'ширина миниатюры задана ОДИН раз переменной — в самом компоненте'],
 
   /* ── число слотов ──────────────────────────────────────────────────── */
   [JSФ, `    function слотов() {`,
@@ -225,7 +227,7 @@ const ОТКАТЫ = [
         `    container-type: normal;`,
    'карточка перестраивается по СВОЕЙ ширине, а не по ширине окна'],
 
-  [CSS, `@container (max-width: 480px) {`,
+  [CSS, `@container (max-width: 340px) {`,
         `@media (max-width: 1100px) {`,
    'третьей точки останова по ширине не завелось'],
 
