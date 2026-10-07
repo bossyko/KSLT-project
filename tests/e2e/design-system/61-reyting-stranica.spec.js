@@ -440,16 +440,24 @@ test.describe('полоса страниц рейтинга', () => {
         await page.waitForTimeout(1800);
 
         const r = await page.evaluate(() => {
+            const полоса = document.querySelector('.pl-pagination');
+            if (!полоса) return { нет: true };
             const кнопки = [...document.querySelectorAll('.pl-page-btn.pl-page-num')];
-            if (!кнопки.length) return { нет: true };
-            const s = getComputedStyle(кнопки[0]);
+            const любая = кнопки[0] || document.querySelector('.pl-page-btn');
+            const s = любая ? getComputedStyle(любая) : null;
+            const слой = любая ? getComputedStyle(любая, '::after') : null;
             return {
+                сжатая: !кнопки.length && !!document.querySelector('.pl-page-now'),
+                счётчик: (document.querySelector('.pl-page-count') || {}).textContent || '',
                 номеров: кнопки.length,
-                первая: кнопки[0].textContent.trim(),
-                последняя: кнопки[кнопки.length - 1].textContent.trim(),
+                первая: кнопки.length ? кнопки[0].textContent.trim() : null,
+                последняя: кнопки.length ? кнопки[кнопки.length - 1].textContent.trim() : null,
                 многоточий: document.querySelectorAll('.pl-page-gap').length,
-                высота: Math.round(parseFloat(s.height)),
-                ширина: Math.round(parseFloat(s.minWidth)),
+                высота: s ? Math.round(parseFloat(s.height)) : null,
+                ширина: s ? Math.round(parseFloat(s.minWidth)) : null,
+                слойЦели: слой && слой.content !== 'none'
+                    ? Math.round(parseFloat(слой.height) || 0) : 0,
+                перелив: полоса.scrollWidth - полоса.clientWidth,
                 строк: document.querySelectorAll('.pl-cat-row:not(.pl-row-header)').length,
             };
         });
@@ -461,15 +469,35 @@ test.describe('полоса страниц рейтинга', () => {
             'отрисовалась, либо список обрезан раньше неё. Строк на экране: ' +
             ((r && r.строк) || 0)).toBeTruthy();
 
-        expect(r.номеров, 'номеров страниц ' + r.номеров + ' — окно должно показывать ' +
-            'не больше семи: первую, последнюю, текущую и по соседу с каждой стороны')
-            .toBeLessThanOrEqual(7);
-        expect(r.первая, 'первая страница пропала из окна').toBe('1');
-        expect(Number(r.последняя), 'последняя страница пропала из окна')
-            .toBeGreaterThanOrEqual(Number(r.первая));
+        /* СЧЁТЧИК ОБЯЗАТЕЛЕН НА ЛЮБОМ ВИДЕ: человек должен видеть, сколько
+           всего строк, а не только кнопки страниц. */
+        expect(r.счётчик, 'счётчика строк в полосе нет').toMatch(/\d/);
+
+        if (r.сжатая) {
+            /* УЗКИЙ ВИД НЕСЁТ СЖАТУЮ ФОРМУ, А НЕ УЗКОЕ ОКНО: сорок номеров
+               не влезают в ряд 343 ни при каком окне. */
+            expect(r.номеров, 'на узком виде номеров быть не должно — только ' +
+                '«страница N из M» между стрелками').toBe(0);
+        } else {
+            expect(r.номеров, 'номеров страниц ' + r.номеров + ' — окно должно показывать ' +
+                'не больше семи: первую, последнюю, текущую и по соседу с каждой стороны')
+                .toBeLessThanOrEqual(7);
+            expect(r.первая, 'первая страница пропала из окна').toBe('1');
+            expect(Number(r.последняя), 'последняя страница пропала из окна')
+                .toBeGreaterThanOrEqual(Number(r.первая));
+        }
+
         expect(ШКАЛА_КНОПОК, 'кнопка страницы ' + r.высота + ' мимо шкалы кнопок')
             .toContain(r.высота);
-        expect(r.ширина, 'кнопка страницы уже цели нажатия 44').toBeGreaterThanOrEqual(44);
+
+        /* КНОПКА 36 ЗАКОННА, ЕСЛИ У НЕЁ ЕСТЬ ПРОЗРАЧНЫЙ СЛОЙ ЦЕЛИ 44 —
+           принято Костей 04.10. Размер 36 и радиус 8 берутся из компонента
+           `Pagination item 31:43`; цель даёт слой. */
+        expect(Math.max(r.ширина, r.слойЦели),
+            'кнопка страницы ' + r.ширина + ' и слой цели ' + r.слойЦели +
+            ' — попадание меньше 44').toBeGreaterThanOrEqual(44);
+
+        expect(r.перелив, 'полоса страниц шире своего ряда на ' + r.перелив).toBe(0);
     });
 });
 
