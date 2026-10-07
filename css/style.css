@@ -5418,6 +5418,167 @@ h2 {
 
 
 /* ========================================
+   ПОЛОСА СТРАНИЦ — ОДНА НА ВЕСЬ САЙТ
+   Переехала из css/players.css 07.10: её попросили корты, а определение
+   должно остаться одним. Собрана по `Pagination row 115:171` и
+   `Pagination item 31:43`; все причины — в комментариях ниже, как были.
+   ======================================== */
+
+.pl-pagination-section {
+    padding: 0 var(--pad-x) var(--section-y);
+}
+
+.pl-pagination-section:empty {
+    padding: 0;
+}
+
+/* ПОЛОСА СТРАНИЦ: СЧЁТЧИК СЛЕВА, СТРАНИЦЫ СПРАВА — как в компоненте
+   `Pagination row 115:171` и как требует отраслевое правило: «always present
+   a clear indicator of how many results have been returned» (Elastic EUI).
+   Счётчика здесь не было вовсе.
+   Ширина — та же колонка, что у таблицы: полоса принадлежит таблице, а не
+   странице, и её края обязаны совпадать с краями таблицы. */
+.pl-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    /* ШИРИНА ПОЛОСЫ — ШИРИНА ЕЁ ВИТРИНЫ, А НЕ ЧИСЛО. У рейтинга витрина
+       это таблица в 1100, у кортов — сетка карточек по широкой коробке.
+       Замер 07.10 после переезда: витрина 1337, полоса 1100 — счётчик
+       слева и кнопки справа висели уже списка, который считают.
+       Число остаётся умолчанием, раздел называет своё. */
+    max-width: var(--polosa-shirina, 1100px);
+    margin-inline: auto;
+}
+
+.pl-pagination-pages {
+    display: flex;
+    align-items: center;
+    /* Шаг 6 на шкале отсутствует (8 · 12 · 16 · 24 · 32 · 40), и ровно 8
+       назван в описании компонента `Pagination row 115:171`. */
+    gap: var(--space-2);
+}
+
+/* Счётчик и «страница N из M» — один уровень текста: оба говорят, где ты в
+   списке, и оба тихие рядом с кнопками */
+.pl-page-count,
+.pl-page-now {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-none);
+    white-space: nowrap;
+}
+
+.pl-page-now {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-2);
+    color: var(--text-secondary);
+    font-weight: var(--fw-medium);
+}
+
+@media (max-width: 640px) {
+
+    /* НА ТЕЛЕФОНЕ ИМЯ МЕЛЬЧЕ, И ПОЛЕ 10 УЖЕ НЕ ДОТЯГИВАЕТ. Замер: строка
+       имени 21 вместо 24, 21 + 20 = 41 при норме 44. Поле 12 даёт 45.
+       Число считается от строки, а не берётся на глаз. */
+    .pl-player-name {
+        padding-block: 12px;
+        margin-block: -12px;
+    }
+
+
+    /* На телефоне счётчик уходит под кнопки: ряд из счётчика, двух стрелок и
+       «20 из 40» просит 343 ровно под обрез, и длинное число его ломает */
+    .pl-pagination {
+        flex-direction: column-reverse;
+        gap: var(--space-2);
+    }
+}
+
+/* КНОПКА СТРАНИЦЫ — СТУПЕНЬ ШКАЛЫ И ЦЕЛЬ НАЖАТИЯ.
+   Было 40 × 40 — такой ступени на шкале кнопок нет (28 · 36 · 44 · 52), и
+   это меньше цели нажатия 44. Ниже 480 стояло второе определение на 36 —
+   ещё и по запрещённой ширине. Теперь одно число на все виды: 44. */
+.pl-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* РАЗМЕР И РАДИУС ИЗ КОМПОНЕНТА `Pagination item 31:43`: «36x36
+       (control/btn-h-sm), radius/sm. Active fills with accent/default».
+       Здесь стояли 44 и радиус 12 — моё число, поставленное ради цели
+       нажатия. Цель остаётся: КНОПКА 36 ЗАКОННА, ЕСЛИ У НЕЁ ЕСТЬ ПРОЗРАЧНЫЙ
+       СЛОЙ ЦЕЛИ 44 (принято Костей 04.10) — слой ниже. Тем же приёмом живут
+       пилюли разрядов и «Показать всех» на этой же странице. */
+    min-width: var(--btn-h-sm);
+    height: var(--btn-h-sm);
+    padding: 0 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Слой цели нажатия: коробка 36, попадание 44. Слой прозрачный и ничего не
+   рисует; у `.pl-pagination` нет `overflow`, так что он не обрезается. */
+.pl-page-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--btn-h-md);
+}
+
+/* Многоточие между далёкими страницами: не кнопка и нажатия не просит */
+.pl-page-gap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: var(--btn-h-sm);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-none);
+    user-select: none;
+}
+
+.pl-page-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pl-page-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: var(--fw-bold);
+}
+
+.pl-page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pl-page-prev,
+.pl-page-next {
+    background: transparent;
+}
+
+
+
+/* ========================================
    ВЫПАДАЮЩИЙ ФИЛЬТР В ПОЛОСЕ — один на весь сайт
    Кнопка выглядит как чип, по нажатию — список значений со счётчиками.
    Пользуются корты (город, покрытие), тренеры (возраст, занятия,

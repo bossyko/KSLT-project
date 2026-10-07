@@ -16,7 +16,9 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/style.css', 'css/podium.css', 'css/players.css',
-               'js/home-rankings.js', 'js/players.js', 'js/script.js'];
+               'js/home-rankings.js', 'js/players.js', 'js/script.js',
+               /* полоса страниц переехала в общий файл 07.10 */
+               'js/polosa-stranic.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-reyting.js'), 'utf8');
@@ -214,34 +216,42 @@ const ОТКАТЫ = [
 ['вернуть категории свою копию полосы страниц', 'js/players.js',
  '        полосаСтраниц(total, page, CAT_PER_PAGE);',
  '        var x = 1;',
- 'полоса страниц — одно определение на два экрана'],
+ 'полоса страниц — одно определение на весь сайт'],
 
-['печатать все номера страниц подряд', 'js/players.js',
+/* Вторая копия разметки — ровно та беда, от которой переезд и спасал */
+['завести у кортов вторую копию разметки полосы', 'js/polosa-stranic.js',
+ "        html += '<button class=\"pl-page-btn pl-page-prev\" aria-label=\"' +",
+ "        var копия = '<button class=\"pl-page-btn pl-page-prev\">';\n" +
+ "        html += '<button class=\"pl-page-btn pl-page-prev\" aria-label=\"' +",
+ 'полоса страниц — одно определение на весь сайт'],
+
+/* Полоса страниц живёт в общем файле с 07.10 — откаты идут туда */
+['печатать все номера страниц подряд', 'js/polosa-stranic.js',
  '            if (n === 1 || n === всего || Math.abs(n - page) <= соседей) номера.push(n);',
  '            номера.push(n);',
  'у полосы страниц две формы: окно и сжатая, и счётчик всегда'],
 
-['снять с узкого вида сжатую форму полосы страниц', 'js/players.js',
+['снять с узкого вида сжатую форму полосы страниц', 'js/polosa-stranic.js',
  '        if (!узкий) номера.forEach(function (n) {',
  '        номера.forEach(function (n) {',
  'у полосы страниц две формы: окно и сжатая, и счётчик всегда'],
 
-['снять счётчик строк с полосы страниц', 'js/players.js',
+['снять счётчик строк с полосы страниц', 'js/polosa-stranic.js',
  "html += '<span class=\"pl-page-count\">' + первый",
  "html += '<span class=\"net-schyotchika\">' + первый",
  'у полосы страниц две формы: окно и сжатая, и счётчик всегда'],
 
-['вернуть кнопке страницы размер 40', 'css/players.css',
+['вернуть кнопке страницы размер 40', 'css/style.css',
  '    min-width: var(--btn-h-sm);\n    height: var(--btn-h-sm);',
  '    min-width: 40px;\n    height: 40px;',
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
-['отпустить слою цели нажатия высоту', 'css/players.css',
+['отпустить слою цели нажатия высоту', 'css/style.css',
  '    transform: translateY(-50%);\n    height: var(--btn-h-md);\n}\n\n/* Многоточие',
  '    transform: translateY(-50%);\n    height: var(--btn-h-sm);\n}\n\n/* Многоточие',
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
-['вернуть кнопке страницы радиус 12', 'css/players.css',
+['вернуть кнопке страницы радиус 12', 'css/style.css',
  '    border-radius: var(--radius-sm);\n    color: var(--text-secondary);\n    font-family: \'Inter\', sans-serif;',
  '    border-radius: var(--radius-md);\n    color: var(--text-secondary);\n    font-family: \'Inter\', sans-serif;',
  'кнопка страницы — ступень шкалы и цель нажатия'],
@@ -362,9 +372,9 @@ const ОТКАТЫ = [
  '    width: 100%;\n    margin-inline: auto;\n    border-radius: var(--radius-lg);',
  'таблица рейтинга живёт в колонке, а не во всю ширину окна'],
 
-['развести ширину полосы страниц и ширину таблицы', 'css/players.css',
- '    width: 100%;\n    max-width: 1100px;\n    margin-inline: auto;\n}\n\n.pl-pagination-pages {',
- '    width: 100%;\n    margin-inline: auto;\n}\n\n.pl-pagination-pages {',
+['развести ширину полосы страниц и ширину таблицы', 'css/style.css',
+ '    max-width: var(--polosa-shirina, 1100px);',
+ '    max-width: none;',
  'полоса страниц стоит в той же колонке, что таблица'],
 
 ['снять с имени игрока цель нажатия', 'css/players.css',
