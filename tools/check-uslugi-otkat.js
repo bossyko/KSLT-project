@@ -171,6 +171,64 @@ const ОТКАТЫ = [
   [EN, `services.css?v=`, `services.css?v=1`,
    'страница подключает свои файлы одной версией на три языка'],
 
+  /* ── витрина игроков и скорость ленты, 07.10 ───────────────────────── */
+
+  [CSS, `        grid-template-columns: repeat(2, minmax(0, 1fr));`,
+         `        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));`,
+   'на телефоне витрина игроков — ДВЕ в ряд'],
+
+  /* Откат возвращает ровно прежнюю ошибку: телефонное правило стоит ВЫШЕ
+     объявлений компонента. Переименование тут ничего бы не доказало —
+     правило про ПОРЯДОК, значит и откат должен двигать блок. */
+  [CSS, `.sv-player {
+    position: relative;`,
+         `@media (max-width: 640px) {
+    .sv-players-box {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.sv-player {
+    position: relative;`,
+   'блок телефона стоит ПОСЛЕ объявлений компонента — порядок решает'],
+
+  [CSS, `        scroll-snap-type: x mandatory;`, `        scroll-snap-type: none;`,
+   'витрина игроков лёжа — полоса с прилипанием, как новости лендинга'],
+
+  [CSS, `    .sv-players-box[data-vidno] > .sv-player:nth-child(n) {
+        display: flex;`,
+         `    .sv-players-box[data-vidno] > .sv-player:nth-child(n) {
+        display: grid;`,
+   'в ленте лёжа показываются ВСЕ — цепкость та же, побеждает порядком'],
+
+  [CSS, `.sv-players-box[data-vidno="6"] > .sv-player:nth-child(n+7),`,
+         `.sv-players-box[data-vidno="6"] > .sv-player:nth-child(n+8),`,
+   'потолок витрины — ровно два ряда при любом числе колонок'],
+
+  [JS, `                box.setAttribute('data-vidno', String(колонок * 2));`,
+        `                box.setAttribute('data-vidno', String(колонок));`,
+   'колонки считает js и пишет их числом, а не числом карточек'],
+
+  [JS, `                new ResizeObserver(пересчитать).observe(box);`,
+        `                window.addEventListener('resize', пересчитать);`,
+   'пересчёт висит на ResizeObserver, а не на resize окна'],
+
+  [CSS, `    animation: svScroll calc(var(--sv-shag) * var(--sv-karto4ek)) linear infinite;`,
+         `    animation: svScroll 90s linear infinite;`,
+   'скорость ленты — время на КАРТОЧКУ, а не время на ленту'],
+
+  [CSS, `    .sv-carousel {
+        --sv-shag: 11s;
+    }`,
+         `    .sv-carousel {
+        --sv-shag: 9s;
+    }`,
+   'узкие виды едут 11 с на карточку, телефон лёжа — снова 9'],
+
+  [JS, `                car.style.setProperty('--sv-karto4ek', String(count));`,
+        `                car.style.animationDuration = (count * 12) + 's';`,
+   'js сообщает ленте только число карточек ОДНОГО прохода'],
+
 ];
 
 function прогон() {
