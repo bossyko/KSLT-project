@@ -51,7 +51,8 @@ const КУСКИ = [
     ['метка группы',       'check-metka-gruppy.js',    'check-metka-gruppy-otkat.js'],
     ['прогноз выключен',   'check-prognoz-vyklyuchen.js','check-prognoz-vyklyuchen-otkat.js'],
     ['цифры обложки',      'check-cifry-oblozhki.js',  'check-cifry-oblozhki-otkat.js'],
-    ['телефон раздела',    'check-telefon-razdela.js', 'check-telefon-razdela-otkat.js']
+    ['телефон раздела',    'check-telefon-razdela.js', 'check-telefon-razdela-otkat.js'],
+    ['обзорная «Услуги»',  'check-uslugi.js',          'check-uslugi-otkat.js']
 ];
 
 function прогнать(файл) {
