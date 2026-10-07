@@ -113,6 +113,7 @@
             actions: 'Challenge', ntrp: 'NTRP', online: 'Online',
             message: 'Message', challenge: 'Challenge',
             prevPage: '\u2190 Back', nextPage: 'Next \u2192',
+            shownOf: 'of', pageOf: 'of',
             viewAll: 'Show all',
             noResults: 'No players found',
             guestTitle: 'Sign up for full access',
@@ -132,6 +133,7 @@
             actions: 'Чакыруу', ntrp: 'NTRP', online: 'Онлайн',
             message: 'Жазуу', challenge: 'Чакыруу',
             prevPage: '\u2190 Артка', nextPage: 'Кийинки \u2192',
+            shownOf: 'ичинен', pageOf: 'ичинен',
             viewAll: 'Баарын көрсөтүү',
             noResults: 'Оюнчулар табылган жок',
             guestTitle: 'Толук кирүү үчүн катталыңыз',
@@ -151,6 +153,7 @@
             actions: 'Вызов', ntrp: 'NTRP', online: 'Онлайн',
             message: 'Написать', challenge: 'Вызов',
             prevPage: '\u2190 Назад', nextPage: 'Далее \u2192',
+            shownOf: 'из', pageOf: 'из',
             viewAll: 'Показать всех',
             noResults: 'Игроки не найдены',
             guestTitle: 'Зарегистрируйтесь для полного доступа',
@@ -763,7 +766,7 @@
            последняя) просят 276 из 343. На всех остальных видах окно
            прежнее. */
         var узкий = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-        var соседей = узкий ? 0 : 1;
+        var соседей = 1;
         var номера = [];
         for (var n = 1; n <= всего; n++) {
             if (n === 1 || n === всего || Math.abs(n - page) <= соседей) номера.push(n);
@@ -780,13 +783,33 @@
                 '<path d="' + (влево ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6') + '"/></svg>';
         };
 
+        /* СЧЁТЧИК ОБЯЗАТЕЛЕН, А НЕ УКРАШЕНИЕ. Правило отрасли, а не мой вкус:
+           Elastic EUI, «Always present a clear indicator of how many results
+           have been returned». У нас его не было вовсе: человек видел кнопки
+           страниц и не знал, сколько всего строк. Счётчик слева, страницы
+           справа — ровно так устроен и компонент `Pagination row 115:171`. */
+        var первый = (page - 1) * шаг + 1;
+        var последний = Math.min(page * шаг, total);
+
+        /* НА УЗКОМ ВИДЕ — СЖАТАЯ ФОРМА, А НЕ УЗКОЕ ОКНО. Та же EUI: numbered
+           для малых наборов, compressed для больших. Сорок номеров в ряд 343
+           не влезают ни при каком окне; «20 из 40» между стрелками влезает
+           всегда и говорит больше, чем три номера с многоточиями. */
         var html = '<div class="pl-pagination">';
+        html += '<span class="pl-page-count">' + первый + '\u2013' + последний +
+            ' ' + labels.shownOf + ' ' + total + '</span>';
+        html += '<div class="pl-pagination-pages">';
         html += '<button class="pl-page-btn pl-page-prev" aria-label="' +
             esc(labels.prevPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
             (page === 1 ? ' disabled' : '') + '>' + шеврон(true) + '</button>';
 
+        if (узкий) {
+            html += '<span class="pl-page-now">' + page + ' ' + labels.pageOf +
+                ' ' + всего + '</span>';
+        }
+
         var прошлый = 0;
-        номера.forEach(function (n) {
+        if (!узкий) номера.forEach(function (n) {
             if (прошлый && n - прошлый > 1) {
                 html += '<span class="pl-page-gap" aria-hidden="true">…</span>';
             }
@@ -799,7 +822,7 @@
         html += '<button class="pl-page-btn pl-page-next" aria-label="' +
             esc(labels.nextPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
             (page === всего ? ' disabled' : '') + '>' + шеврон(false) + '</button>';
-        html += '</div>';
+        html += '</div></div>';
 
         container.innerHTML = html;
     }

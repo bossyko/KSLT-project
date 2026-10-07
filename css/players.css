@@ -990,13 +990,57 @@
     padding: 0;
 }
 
+/* ПОЛОСА СТРАНИЦ: СЧЁТЧИК СЛЕВА, СТРАНИЦЫ СПРАВА — как в компоненте
+   `Pagination row 115:171` и как требует отраслевое правило: «always present
+   a clear indicator of how many results have been returned» (Elastic EUI).
+   Счётчика здесь не было вовсе.
+   Ширина — та же колонка, что у таблицы: полоса принадлежит таблице, а не
+   странице, и её края обязаны совпадать с краями таблицы. */
 .pl-pagination {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: 1100px;
+    margin-inline: auto;
+}
+
+.pl-pagination-pages {
+    display: flex;
     align-items: center;
     /* Шаг 6 на шкале отсутствует (8 · 12 · 16 · 24 · 32 · 40), и ровно 8
        назван в описании компонента `Pagination row 115:171`. */
     gap: var(--space-2);
+}
+
+/* Счётчик и «страница N из M» — один уровень текста: оба говорят, где ты в
+   списке, и оба тихие рядом с кнопками */
+.pl-page-count,
+.pl-page-now {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-none);
+    white-space: nowrap;
+}
+
+.pl-page-now {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-2);
+    color: var(--text-secondary);
+    font-weight: var(--fw-medium);
+}
+
+@media (max-width: 640px) {
+
+    /* На телефоне счётчик уходит под кнопки: ряд из счётчика, двух стрелок и
+       «20 из 40» просит 343 ровно под обрез, и длинное число его ломает */
+    .pl-pagination {
+        flex-direction: column-reverse;
+        gap: var(--space-2);
+    }
 }
 
 /* КНОПКА СТРАНИЦЫ — СТУПЕНЬ ШКАЛЫ И ЦЕЛЬ НАЖАТИЯ.

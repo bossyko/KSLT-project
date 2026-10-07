@@ -219,12 +219,17 @@ const ОТКАТЫ = [
 ['печатать все номера страниц подряд', 'js/players.js',
  '            if (n === 1 || n === всего || Math.abs(n - page) <= соседей) номера.push(n);',
  '            номера.push(n);',
- 'страниц показывается окно, а не все подряд'],
+ 'у полосы страниц две формы: окно и сжатая, и счётчик всегда'],
 
-['уравнять окно страниц на узком и широком виде', 'js/players.js',
- '        var соседей = узкий ? 0 : 1;',
- '        var соседей = 1;',
- 'страниц показывается окно, а не все подряд'],
+['снять с узкого вида сжатую форму полосы страниц', 'js/players.js',
+ '        if (!узкий) номера.forEach(function (n) {',
+ '        номера.forEach(function (n) {',
+ 'у полосы страниц две формы: окно и сжатая, и счётчик всегда'],
+
+['снять счётчик строк с полосы страниц', 'js/players.js',
+ "html += '<span class=\"pl-page-count\">' + первый",
+ "html += '<span class=\"net-schyotchika\">' + первый",
+ 'у полосы страниц две формы: окно и сжатая, и счётчик всегда'],
 
 ['вернуть кнопке страницы размер 40', 'css/players.css',
  '    min-width: var(--btn-h-sm);\n    height: var(--btn-h-sm);',
@@ -353,9 +358,14 @@ const ОТКАТЫ = [
  'чип пола — ступень шкалы и кегль со шкалы'],
 
 ['растянуть таблицу рейтинга на всю ширину', 'css/players.css',
- '    max-width: 1100px;\n    margin-inline: auto;',
- '    margin-inline: auto;',
- 'таблица рейтинга живёт в колонке, а не во всю ширину окна']
+ '    width: 100%;\n    max-width: 1100px;\n    margin-inline: auto;\n    border-radius: var(--radius-lg);',
+ '    width: 100%;\n    margin-inline: auto;\n    border-radius: var(--radius-lg);',
+ 'таблица рейтинга живёт в колонке, а не во всю ширину окна'],
+
+['развести ширину полосы страниц и ширину таблицы', 'css/players.css',
+ '    width: 100%;\n    max-width: 1100px;\n    margin-inline: auto;\n}\n\n.pl-pagination-pages {',
+ '    width: 100%;\n    margin-inline: auto;\n}\n\n.pl-pagination-pages {',
+ 'полоса страниц стоит в той же колонке, что таблица']
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'reyting-otkat-'));
