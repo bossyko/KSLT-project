@@ -6228,8 +6228,19 @@ h2 {
     font-weight: var(--fw-semibold);
 }
 
+/* 07.10 · ВЫСОТУ КНОПКИ ДЕРЖИТ СТУПЕНЬ, А НЕ ПОЛЯ. Прогон 07.10 поймал
+   `кнопка записи 41` у карточки в блоке «Предстоящие»: высоты у кнопки не
+   было вовсе — её давали поля, а в колонке с нехваткой места флекс имеет
+   право сжать такой элемент. 41 — не ступень шкалы кнопок и меньше цели
+   нажатия 44. Ступень ставится явно, и сжатие запрещено.
+   Та же беда уже записана правилом: «`flex-basis: 0%` ПЕРЕБИВАЕТ `height`». */
 .tc-btn {
     align-self: flex-start;
+    flex-shrink: 0;
+    min-height: var(--btn-h-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 6px;
     padding: 10px 22px;
     border-radius: var(--radius-full);
