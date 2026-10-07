@@ -32,11 +32,25 @@ const ЯЗЫКИ = [
 
 const ШКАЛА_КЕГЛЕЙ = [11, 12, 14, 16, 18, 21, 26, 32, 40];
 
+/**
+ * ЖДАТЬ НАДО ОСТАНОВКИ ВЕЛИЧИНЫ, А НЕ ИСТЕЧЕНИЯ ВРЕМЕНИ. Первый прогон
+ * 07.10 дал две мигающие пробы: ленты и карточки игроков приезжают из
+ * базы, и замер попадал в середину отрисовки. Ждём, пока число карточек
+ * перестанет меняться два замера подряд, и пока сядут шрифты — от них
+ * зависит, обрезано имя или нет.
+ */
 async function открыть(page, адрес) {
     await page.goto(адрес);
     await page.waitForFunction(
         () => document.querySelector('.sv-hero h1') !== null, null, { timeout: 20000 });
-    await page.waitForTimeout(1500);
+    await page.waitForFunction(() => {
+        const n = document.querySelectorAll('.sv-compact, .sv-player, .sv-featured').length;
+        const было = window.__скольколо;
+        window.__скольколо = n;
+        return n > 0 && n === было;
+    }, null, { timeout: 20000, polling: 400 });
+    await page.evaluate(() => document.fonts && document.fonts.ready);
+    await page.waitForTimeout(400);
 }
 
 for (const Я of ЯЗЫКИ) {
@@ -154,31 +168,76 @@ test.describe('услуги · ' + Я.имя, () => {
     test('«Корты» и «Тренеры» дают ОДИНАКОВЫЕ карточки', async ({ page }) => {
         await открыть(page, Я.адрес);
         const з = await page.evaluate(() => {
-            const сетки = [...document.querySelectorAll('.sv-card-grid')];
             const р = e => e ? { ш: Math.round(e.getBoundingClientRect().width),
                                  в: Math.round(e.getBoundingClientRect().height) } : null;
-            return сетки.map(g => ({
+            const сетки = [...document.querySelectorAll('.sv-card-grid')];
+            const данные = сетки.map(g => ({
                 главная: р(g.querySelector('.sv-featured')),
                 лента: р(g.querySelector('.sv-compact')),
-                тип: g.querySelector('.sv-carousel')
-                    ? g.querySelector('.sv-carousel').dataset.type : null,
             }));
+
+            /* РАВЕНСТВО ПРОВЕРЯЕТСЯ ПО КОМПОНЕНТУ, А НЕ ПО ЧИСЛУ ДАННЫХ.
+               Первый прогон 07.10 упал тем, что в тестовой базе тренеров
+               НЕТ ВОВСЕ: вторая колонка показывает пустое состояние, и
+               сравнивать было нечего. Но вопрос Кости — про компонент:
+               «Корты и Тренеры должны быть идентичны». Поэтому в живую
+               ленту кладутся ТРИ пробные карточки — тренер с длинным
+               именем, тренер с коротким и корт — и меряются ОНИ. Такая
+               проверка не зависит от того, сколько тренеров завели. */
+            const лента = document.querySelector('.sv-carousel');
+            let пробы = null;
+            if (лента) {
+                const мк = (имя, портрет) => {
+                    const a = document.createElement('a');
+                    a.className = 'sv-compact';
+                    a.dataset.proba = '1';
+                    a.innerHTML = '<div class="sv-compact-img-wrap">' +
+                        '<img class="' + (портрет ? 'sv-compact-avatar' : 'sv-compact-photo') +
+                        '" src="../images/heroes/services.jpg" alt="">' +
+                        '</div><h4>' + имя + '</h4>' +
+                        '<div class="sv-compact-sub">подпись</div>' +
+                        '<div class="sv-compact-price">1200</div>';
+                    лента.appendChild(a);
+                    return a;
+                };
+                const былТип = лента.dataset.type;
+                лента.dataset.type = 'coaches';
+                const д = мк('Лазаренко-Мифтахутдинов Константин', true);
+                const к = мк('Ли О', true);
+                const кт = мк('Ак-Кеме', false);
+                void лента.offsetHeight;
+                пробы = { длинный: р(д), короткий: р(к), корт: р(кт) };
+                лента.dataset.type = былТип;
+                [д, к, кт].forEach(e => e.remove());
+            }
+            return { данные, пробы, витрин: сетки.length };
         });
-        expect(з.length, 'ПОРОГ: витрин на странице нет').toBeGreaterThanOrEqual(2);
-        const главные = з.map(x => x.главная).filter(Boolean);
-        expect(главные.length, 'ПОРОГ: главных карточек нет').toBeGreaterThanOrEqual(2);
-        // ОДИН КОМПОНЕНТ НА ДВЕ ВИТРИНЫ — проверяется числами
-        for (const г of главные) {
-            expect(г.ш, 'главные карточки разной ширины').toBe(главные[0].ш);
-            expect(г.в, 'главные карточки разной высоты').toBe(главные[0].в);
+
+        expect(з.витрин, 'ПОРОГ: витрин на странице нет вовсе').toBeGreaterThan(0);
+
+        // Если данных хватило на обе витрины — сравниваем их самих
+        const главные = з.данные.map(x => x.главная).filter(Boolean);
+        if (главные.length >= 2) {
+            for (const г of главные) {
+                expect(г.ш, 'главные карточки разной ширины').toBe(главные[0].ш);
+                expect(г.в, 'главные карточки разной высоты').toBe(главные[0].в);
+            }
         }
-        const ленты = з.map(x => x.лента).filter(Boolean);
+        const ленты = з.данные.map(x => x.лента).filter(Boolean);
         if (ленты.length >= 2) {
             for (const л of ленты) {
                 expect(л.ш, 'карточки лент разной ширины').toBe(ленты[0].ш);
                 expect(л.в, 'карточки лент разной высоты').toBe(ленты[0].в);
             }
         }
+
+        // А компонент проверяется всегда, сколько бы ни было данных
+        expect(з.пробы, 'ПОРОГ: ленты нет — компонент не проверен').not.toBeNull();
+        const п = з.пробы;
+        expect(п.длинный.ш, 'карточка тренера шире карточки корта').toBe(п.корт.ш);
+        expect(п.короткий.ш, 'короткое имя сузило карточку').toBe(п.корт.ш);
+        expect(п.длинный.в, 'длинное имя подняло карточку тренера над кортом').toBe(п.корт.в);
+        expect(п.короткий.в, 'короткое имя опустило карточку ниже соседей').toBe(п.корт.в);
     });
 
     test('поиск игрока считает колонки шириной карточки, а не числом', async ({ page }) => {
