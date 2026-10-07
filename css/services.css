@@ -113,10 +113,16 @@
     color: var(--accent);
 }
 
+/* ЦЕЛЬ НАЖАТИЯ — НАСТОЯЩЕЙ ВЫСОТОЙ, А МЕСТО В ПОТОКЕ ОСТАЁТСЯ ПРЕЖНИМ.
+   Замер 06.10: ссылка отдавала 21 при норме 44, и таких на странице три.
+   Поле растит коробку до 45, отрицательная отбивка возвращает строку на
+   место — заголовок колонки не едет. */
 .sv-view-all {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    padding-block: var(--space-3);
+    margin-block: calc(-1 * var(--space-3));
     font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--accent);
@@ -626,14 +632,15 @@
     }
 }
 
-@media (max-width: 768px) {
-    
+/* ГРАНИЦА 768 СВЕДЕНА К 992 — ширины в медиа только 640 и 992.
+   Единственный вид, который от этого менялся, — телефон лёжа 844: он стоял
+   в двух колонках и ушёл бы в одну. Он возвращается себе ниже, по ВЫСОТЕ И
+   ПОВОРОТУ, а не новой шириной.
+   Кегли обложки из этого блока убраны: их держит `--fs-hero` в tokens.css,
+   и своё объявление спорило бы с общей крутилкой. */
+@media (max-width: 992px) {
 
-    .sv-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-        .sv-columns {
+    .sv-columns {
         grid-template-columns: 1fr;
         padding: var(--section-y-sm) var(--pad-x);
     }
@@ -669,19 +676,13 @@
     }
 }
 
-@media (max-width: 480px) {
-    
+/* ГРАНИЦЫ 480 И 375 СВЕДЕНЫ К 640. Из них убрано всё, что теперь держат
+   крутилки обложки, и лестница колонки собрана в одну ступень: заголовок
+   18, имя карточки 16 — шаг между ними сохраняется и на телефоне. */
+@media (max-width: 640px) {
 
-    .sv-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-    .sv-hero p {
-        font-size: var(--fs-sm);
-    }
-
-        .sv-column-title {
-        font-size: var(--fs-lg);
+    .sv-column-title {
+        font-size: var(--fs-md);
     }
 
     .sv-featured {
@@ -709,16 +710,11 @@
     .sv-compact h4 {
         font-size: var(--fs-sm);
     }
-}
 
-@media (max-width: 375px) {
-    .sv-column-title {
-        font-size: var(--fs-md);
-    }
-
-    .sv-featured-link {
-        padding: 8px 20px;
-        font-size: var(--fs-xs);
+    /* Третья строка имени — только там, где колонка узкая. Замер 06.10:
+       на телефоне обрезано 5 имён из 10 при двух строках */
+    .sv-player-name {
+        -webkit-line-clamp: 3;
     }
 }
 
@@ -755,18 +751,14 @@
     padding: 0;
 }
 
-/* Узкие экраны — ниже базового правила, а не выше: при равном весе
-   побеждает то, что идёт последним, и пять колонок перебивали две —
-   карточка на телефоне сжималась до 51 пикселя */
-@media (max-width: 1100px) {
-    .sv-players-box { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (max-width: 700px) {
+/* ГРАНИЦЫ 1100 И 700 СНЯТЫ ЦЕЛИКОМ: число колонок — следствие ширины
+   карточки, а не экрана. `auto-fit` с минимумом 220 сам даёт 5 · 4 · 3 · 2
+   на наших пяти видах — замерено. Два правила мимо системы ушли, а
+   поведение осталось тем же. */
+@media (max-width: 640px) {
     .sv-players-box {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-        padding: 12px;
+        gap: var(--space-3);
+        padding: var(--space-3);
     }
 }
 
@@ -796,10 +788,24 @@
 }
 
 /* Категория — главное, что человек читает: он ищет ровню */
+/* Ряд вместо двух углов: NTRP слева, разряд справа, и между ними зазор,
+   который не даёт им встретиться. Пустая левая клетка держит разряд
+   справа у тех, у кого NTRP нет */
+.sv-player-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+    min-height: 32px;
+}
+
+.sv-player-ntrp-net {
+    visibility: hidden;
+}
+
 .sv-player-cat {
-    position: absolute;
-    top: 10px;
-    right: 12px;
+    text-align: right;
     font-size: var(--fs-2xs);
     font-weight: 800;
     letter-spacing: 1px;
@@ -809,9 +815,6 @@
 
 /* Рейтинг — то, по чему ищут ровню: крупно и слева, напротив категории */
 .sv-player-ntrp {
-    position: absolute;
-    top: 10px;
-    left: 14px;
     font-size: var(--fs-md);
     font-weight: 800;
     line-height: 1;
@@ -824,7 +827,8 @@
     font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 1px;
-    color: var(--text-dim);
+    /* 3.21 при норме 4.5 — тихий текст не получает скидки у WCAG */
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
@@ -875,7 +879,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     overflow-wrap: anywhere;
-    line-height: 1.25;
+    line-height: var(--lh-snug);
 }
 
 .sv-player-gender {
@@ -892,7 +896,8 @@
 /* Когда человек заходил в последний раз: по этому решают, писать ли */
 .sv-player-seen {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    /* было --text-dim: 3.21 при норме 4.5 */
+    color: var(--text-muted);
     margin-bottom: 12px;
 }
 
@@ -927,7 +932,7 @@
 /* На телефоне и планшете однострочная подпись обрезалась почти вдвое: от
    «ТЕСТ второй категории — Tour мужской одиночный» оставалось меньше
    половины. Даём две строки, многоточие остаётся */
-@media (max-width: 1024px) {
+@media (max-width: 992px) {
     .sv-compact h4 {
         white-space: normal;
         display: -webkit-box;
@@ -935,4 +940,99 @@
         -webkit-box-orient: vertical;
         line-height: 1.25;
     }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   ТЕЛЕФОН ЛЁЖА: ДВЕ КОЛОНКИ ОСТАЮТСЯ.
+   Граница 768 сведена к 992, и 844 в ширину попал бы в одну колонку.
+   Вид делится ВЫСОТОЙ И ПОВОРОТОМ — ширин в медиа по-прежнему две.
+   ───────────────────────────────────────────────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+    .sv-columns {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   ДВИЖЕНИЕ — С РАЗРЕШЕНИЯ, А НЕ ПО УМОЛЧАНИЮ.
+   Две бесконечные ленты ехали всегда: у страницы было НОЛЬ правил
+   `prefers-reduced-motion` на 898 строк. Тот же приём, что на лендинге.
+   ───────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .sv-carousel,
+    .sv-carousel-track {
+        animation: none !important;
+    }
+
+    .sv-compact,
+    .sv-player,
+    .sv-featured,
+    .sv-view-all,
+    .sv-view-all svg,
+    .sv-featured-link,
+    .sv-player-btn {
+        transition: none !important;
+    }
+
+    .sv-compact:hover,
+    .sv-player:hover,
+    .sv-featured:hover {
+        transform: none !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   КОЛЬЦО ФОКУСА — СВОЁ, А НЕ ТОЛЬКО ОБЩЕЕ.
+   Глобальное правило живёт в css/style.css, но на тёмной карточке оно
+   теряется: кольцо берёт акцент и отступ, как на лендинге.
+   ───────────────────────────────────────────────────────────────────── */
+.sv-compact:focus-visible,
+.sv-player:focus-visible,
+.sv-featured:focus-visible,
+.sv-view-all:focus-visible,
+.sv-featured-link:focus-visible,
+.sv-player-btn:focus-visible,
+.sv-carousel-arrow:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   КАРТОЧКА — ССЫЛКА, И ЭТО ВИДНО ДЕРЕВУ ДОСТУПНОСТИ.
+   Замер 06.10: на странице 57 нажимаемых мест и 15 фокусируемых. 42
+   карточки были `div` с обработчиком: ни с клавиатуры, ни в новую вкладку.
+   ───────────────────────────────────────────────────────────────────── */
+.sv-compact {
+    color: inherit;
+}
+
+/* Второй проход ленты — только для глаза. `display: contents` растворяет
+   обёртку: её карточки остаются детьми той же ленты, и раскладка не
+   меняется, а `aria-hidden` на обёртке убирает из оглавления 16 лишних
+   заголовков */
+.sv-carousel-pass {
+    display: contents;
+}
+
+/* Клон не берётся клавиатурой: иначе обход шёл бы по карточкам дважды */
+.sv-carousel-pass[aria-hidden="true"] .sv-compact {
+    pointer-events: none;
+}
+
+/* СЛОЙ-ССЫЛКА КАРТОЧКИ ИГРОКА. Лежит ПОД содержимым (z-index 0), поэтому
+   кнопка «Предложить игру» остаётся нажимаемой, а вся карточка — ссылкой */
+.sv-player > * {
+    position: relative;
+    z-index: 1;
+}
+
+.sv-player > .sv-player-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    text-decoration: none;
 }

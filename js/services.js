@@ -411,8 +411,15 @@
     function renderCarousel(items, type) {
         var html = '<div class="sv-carousel-wrap" data-type="' + type + '">';
         html += '<div class="sv-carousel" data-type="' + type + '">';
-        // Render items twice for seamless infinite loop
+        /* КЛОН — ТОЛЬКО ДЛЯ ГЛАЗА. Лента едет бесконечно за счёт второго
+           прохода тех же карточек. Замер 06.10: в оглавлении страницы
+           оказывалось 16 ЛИШНИХ заголовков, а диктор читал каждый корт
+           дважды. Второй проход уходит из дерева доступности целиком;
+           `display: contents` оставляет его карточки детьми той же ленты,
+           поэтому раскладка не меняется. */
         for (var pass = 0; pass < 2; pass++) {
+            html += '<div class="sv-carousel-pass"' +
+                (pass ? ' aria-hidden="true"' : '') + '>';
             for (var i = 0; i < items.length; i++) {
                 if (type === 'courts') {
                     html += renderCompactCourt(items[i], i + 1);
@@ -422,6 +429,7 @@
                     html += renderCompactPartner(items[i], i + 1);
                 }
             }
+            html += '</div>';
         }
         html += '</div>';
         html += '</div>';
@@ -499,7 +507,11 @@
 
         var discountSm = c._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + c._maxDiscount + '%</span>' : '';
 
-        return '<div class="sv-compact" data-type="courts" data-idx="' + idx + '">' +
+        /* КАРТОЧКА — ССЫЛКА, А НЕ `div` С ОБРАБОТЧИКОМ. Замер 06.10: на
+           странице 57 нажимаемых мест и 15 фокусируемых — 42 карточки
+           нельзя было ни взять с клавиатуры, ни открыть в новой вкладке. */
+        return '<a class="sv-compact" href="' + courtPage + '?id=' + c.id + '"' +
+            ' data-type="courts" data-idx="' + idx + '">' +
             '<div class="sv-compact-img-wrap">' +
                 (photo
                     ? '<img class="sv-compact-photo" src="' + photo + '" alt="" loading="lazy">'
@@ -509,7 +521,7 @@
             '<h4>' + name + '</h4>' +
             (addr ? '<div class="sv-compact-sub">' + pinSvg + ' ' + addr + '</div>' : '') +
             (price ? '<div class="sv-compact-price">' + price + '</div>' : '') +
-        '</div>';
+        '</a>';
     }
 
     // --- Compact Coach (card for carousel) ---
@@ -520,7 +532,8 @@
         var photo = ch.photo || COACH_PHOTO;
         var discountSm = ch._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + ch._maxDiscount + '%</span>' : '';
 
-        return '<div class="sv-compact" data-type="coaches" data-idx="' + idx + '">' +
+        return '<a class="sv-compact" href="' + coachPage + '?id=' + ch.id + '"' +
+            ' data-type="coaches" data-idx="' + idx + '">' +
             '<div class="sv-compact-img-wrap">' +
                 (photo
                     ? '<img class="sv-compact-avatar" src="' + photo + '" alt="" loading="lazy">'
@@ -530,7 +543,7 @@
             '<h4>' + name + '</h4>' +
             (spec ? '<div class="sv-compact-sub">' + spec + '</div>' : '') +
             (price ? '<div class="sv-compact-price">' + price + '</div>' : '') +
-        '</div>';
+        '</a>';
     }
 
     // --- Partner helpers ---
@@ -615,10 +628,24 @@
         var playLevel = levelLabel(p.play_level);
         var seen = lastSeenLabel(p.last_seen);
 
+        /* ДВА ЭЛЕМЕНТА, КОТОРЫЕ ДЕЛЯТ ОДНУ СТРОКУ, ДОЛЖНЫ ЕЁ И ДЕЛИТЬ.
+           NTRP и разряд стояли двумя `absolute` в двух верхних углах и
+           встречались посередине: замер 06.10 — на телефоне 6 карточек из
+           10 с нахлёстом до 57 пикселей, на десктопе 2 из 10 по 12.
+           Ряд не наезжает никогда: при нехватке места он переносит. */
+        /* СЛОЙ-ССЫЛКА НА ВСЮ КАРТОЧКУ — тот же приём, что у полосы турнира
+           (js/tournament-featured.js). Обернуть карточку ссылкой нельзя:
+           внутри живёт кнопка «Предложить игру», а кнопка внутри ссылки —
+           недопустимая разметка. Слой лежит прямым ребёнком, растянут на
+           карточку и стоит ПОД содержимым: кнопка остаётся нажимаемой. */
         return '<div class="sv-player" data-type="partners" data-idx="' + idx + '">' +
-            '<span class="sv-player-cat">' + level + '</span>' +
+            '<a class="sv-player-cover" href="' + partnersPage + '" aria-label="' +
+                name.replace(/"/g, '&quot;') + '"></a>' +
+            '<div class="sv-player-top">' +
             (p.ntrp_singles ? '<span class="sv-player-ntrp">' + p.ntrp_singles +
-                '<small>NTRP</small></span>' : '') +
+                '<small>NTRP</small></span>' : '<span class="sv-player-ntrp sv-player-ntrp-net"></span>') +
+            '<span class="sv-player-cat">' + level + '</span>' +
+            '</div>' +
             '<div class="sv-player-ava-wrap">' +
                 avatarHtml +
                 (online ? '<span class="sv-player-dot" title="' + L.online + '"></span>' : '') +
@@ -704,27 +731,17 @@
             // оставался на той же странице, гадая, что произошло
             // Игрок: и карточка, и кнопка ведут на страницу поиска игрока,
             // там уже можно предложить игру
-            var player = e.target.closest('.sv-player');
-            if (player) {
+            /* ПЕРЕХВАТА БОЛЬШЕ НЕТ. Раньше здесь стоял `preventDefault` и
+               переход через `location.href`: он открывал ту же страницу,
+               но убивал Ctrl+клик и среднюю кнопку — открыть карточку в
+               новой вкладке было нельзя. Теперь карточка сама ссылка
+               (ленты) или несёт слой-ссылку (игрок), и браузер делает всё
+               сам. Кнопка «Предложить игру» — единственное, что осталось
+               обработчику. */
+            var btn = e.target.closest('.sv-player-btn');
+            if (btn) {
                 e.preventDefault();
                 window.location.href = partnersPage;
-                return;
-            }
-
-            var compact = e.target.closest('.sv-compact');
-            if (compact) {
-                e.preventDefault();
-                var type = compact.dataset.type;
-                var idx = parseInt(compact.dataset.idx, 10);
-                if (!type || isNaN(idx)) return;
-
-                var items = type === 'courts' ? _courts : (type === 'coaches' ? _coaches : _partners);
-                var item = items[idx];
-                if (!item) return;
-
-                if (type === 'courts') window.location.href = courtPage + '?id=' + item.id;
-                else if (type === 'coaches') window.location.href = coachPage + '?id=' + item.id;
-                else window.location.href = partnersPage;
             }
         });
     }
