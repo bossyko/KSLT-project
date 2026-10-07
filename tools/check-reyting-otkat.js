@@ -182,11 +182,11 @@ const ОТКАТЫ = [
  'колонок в ряду столько же, сколько ячеек в шапке'],
 
 ['развести шапки обзорной и разряда по разным наборам ячеек', 'js/players.js',
- `pl-row pl-row-header pl-cat-row">' +
+ `pl-row pl-row-header pl-cat-row" role="row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +`,
- `pl-row pl-row-header pl-cat-row">' +
+ `pl-row pl-row-header pl-cat-row" role="row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +`,
  'колонок в ряду столько же, сколько ячеек в шапке'],
@@ -365,7 +365,37 @@ const ОТКАТЫ = [
 ['развести ширину полосы страниц и ширину таблицы', 'css/players.css',
  '    width: 100%;\n    max-width: 1100px;\n    margin-inline: auto;\n}\n\n.pl-pagination-pages {',
  '    width: 100%;\n    margin-inline: auto;\n}\n\n.pl-pagination-pages {',
- 'полоса страниц стоит в той же колонке, что таблица']
+ 'полоса страниц стоит в той же колонке, что таблица'],
+
+['снять с имени игрока цель нажатия', 'css/players.css',
+ '    padding-block: 10px;\n    margin-block: -10px;',
+ '    padding-block: 0;\n    margin-block: -10px;',
+ 'у имени игрока есть цель нажатия, и она настоящая'],
+
+['вернуть имени игрока срезаемый слой вместо поля', 'css/players.css',
+ '.pl-player-name:hover {',
+ '.pl-player-name::after { content: \'\'; height: var(--btn-h-md); }\n\n.pl-player-name:hover {',
+ 'у имени игрока есть цель нажатия, и она настоящая'],
+
+['вернуть въезд рядов при выключенном движении', 'css/players.css',
+ '    .pl-animate {\n        opacity: 1;\n        transform: none;\n        transition: none;\n    }',
+ '    .pl-animate {\n        opacity: 1;\n    }',
+ 'движение страницы спрашивает разрешения'],
+
+['снять с таблицы роли', 'js/players.js',
+ "                    ячейки[c].setAttribute('role', шапка ? 'columnheader' : 'cell');",
+ "                    void ячейки[c];",
+ 'таблица называет себя таблицей, и у неё есть заголовок'],
+
+['снять заголовок таблицы на разряде', 'js/players.js',
+ "        var html = '<h2 class=\"pl-sr-only\">' + labels.player + ' — ' + esc(cat.name) + '</h2>';",
+ "        var html = '';",
+ 'таблица называет себя таблицей, и у неё есть заголовок'],
+
+['снять признак выбора с чипов и пилюль', 'js/players.js',
+ ' aria-pressed="\' + (currentGender === \'men\') + \'"',
+ '',
+ 'выбранный чип и пилюля говорят о себе, а не только красятся'],
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'reyting-otkat-'));

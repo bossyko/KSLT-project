@@ -520,8 +520,8 @@
            Рейтинг ведётся только в одиночном разряде: парные и микст очков не
            начисляют, поэтому переключателя разрядов здесь нет и не было. */
         var html = '<div class="pl-gender-tabs">' +
-            '<button class="pl-gender-tab' + (currentGender === 'men' ? ' active' : '') + '" data-gender="men">' + labels.men + '</button>' +
-            '<button class="pl-gender-tab' + (currentGender === 'women' ? ' active' : '') + '" data-gender="women">' + labels.women + '</button>' +
+            '<button class="pl-gender-tab' + (currentGender === 'men' ? ' active' : '') + '" data-gender="men" aria-pressed="' + (currentGender === 'men') + '">' + labels.men + '</button>' +
+            '<button class="pl-gender-tab' + (currentGender === 'women' ? ' active' : '') + '" data-gender="women" aria-pressed="' + (currentGender === 'women') + '">' + labels.women + '</button>' +
         '</div>';
 
         /* РАСКЛАДКА ОБЗОРНОЙ НЕ ТРОГАЕТСЯ. 06.10 я снял отсюда поиск и чипы
@@ -539,7 +539,7 @@
         html += '<div class="pl-category-pills" id="categoryPills">';
         var cats = currentGender === 'men' ? menCats : womenCats;
         for (var i = 0; i < cats.length; i++) {
-            html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '">' + cats[i].name + '</button>';
+            html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '" aria-pressed="' + (cats[i].key === currentTab) + '">' + cats[i].name + '</button>';
         }
         html += '</div>';
         var playersPage = isEnPage() ? 'players-en.html' : (isKgPage() ? 'players-kg.html' : 'players.html');
@@ -593,10 +593,18 @@
            нужна на рейтингах». Колонка действий живёт только у вошедшего и
            только здесь, поэтому она не в общем наборе, а пристраивается
            классом: восемь колонок объявлены один раз, девятая дописывается. */
-        var html = '<div class="pl-table' + (logged ? ' pl-table-actions' : '') + '">';
+        /* ТАБЛИЦА НАЗЫВАЕТ СЕБЯ ТАБЛИЦЕЙ. Она собрана на сетке из `div` и
+           `span`: глазами таблица, для диктора — набор строк текста без
+           колонок. Роли расставлены по всей цепочке, иначе ARIA ломается
+           на полпути: table → row → columnheader/cell.
+           ЗАГОЛОВОК ДЛЯ ДИКТОРА: иерархия страницы шла H1 → H3, и у
+           главного на странице не было заголовка вовсе. */
+        var html = '<h2 class="pl-sr-only">' + labels.player + ' — ' +
+            (categoriesData[tab] ? esc(categoriesData[tab].name) : '') + '</h2>';
+        html += '<div class="pl-table' + (logged ? ' pl-table-actions' : '') + '" role="table">';
 
         // Header
-        html += '<div class="pl-row pl-row-header">' +
+        html += '<div class="pl-row pl-row-header" role="row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +
@@ -722,6 +730,7 @@
         }
 
         container.innerHTML = html;
+        ролиТаблицы(container);
 
         initScrollAnimations();
     }
@@ -827,6 +836,28 @@
         container.innerHTML = html;
     }
 
+    /* РОЛИ РАССТАВЛЯЮТСЯ ОДНИМ МЕСТОМ, А НЕ ПРИПИСЫВАЮТСЯ К КАЖДОЙ ЯЧЕЙКЕ.
+       Цепочка ARIA рвётся, если пропустить хоть одно звено: table → row →
+       columnheader / cell. Ячеек в двух отрисовщиках больше тридцати, и
+       приписывать роль каждой руками — тридцать мест, где её забудут.
+       Здесь одно определение на оба экрана. */
+    function ролиТаблицы(container) {
+        if (!container) return;
+        var таблицы = container.querySelectorAll('.pl-table');
+        for (var t = 0; t < таблицы.length; t++) {
+            таблицы[t].setAttribute('role', 'table');
+            var ряды = таблицы[t].querySelectorAll('.pl-row');
+            for (var r = 0; r < ряды.length; r++) {
+                var шапка = ряды[r].classList.contains('pl-row-header');
+                ряды[r].setAttribute('role', 'row');
+                var ячейки = ряды[r].children;
+                for (var c = 0; c < ячейки.length; c++) {
+                    ячейки[c].setAttribute('role', шапка ? 'columnheader' : 'cell');
+                }
+            }
+        }
+    }
+
     function renderPagination(total, page) {
         полосаСтраниц(total, page, PER_PAGE);
     }
@@ -902,10 +933,13 @@
             filtersEl.innerHTML =
                 // Переключатель пола показываем только там, где есть обе
                 // половины: женских Pro-Masters и Challengers у клуба нет
+                /* СОСТОЯНИЕ ГОВОРИТСЯ, А НЕ ТОЛЬКО КРАСИТСЯ: выбранный чип
+                   отличался только заливкой, и диктор читал два одинаковых
+                   «Мужчины · Женщины» без признака выбора. */
                 (hasWomenHalf ? '<div class="pl-gender-tabs">' +
-                    '<button class="pl-gender-tab' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men">' +
+                    '<button class="pl-gender-tab' + (cat.gender === 'men' ? ' active' : '') + '" data-gender="men" aria-pressed="' + (cat.gender === 'men') + '">' +
                         (isEnPage() ? 'Men' : (isKgPage() ? 'Эркектер' : 'Мужчины')) + '</button>' +
-                    '<button class="pl-gender-tab' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women">' +
+                    '<button class="pl-gender-tab' + (cat.gender === 'women' ? ' active' : '') + '" data-gender="women" aria-pressed="' + (cat.gender === 'women') + '">' +
                         (isEnPage() ? 'Women' : (isKgPage() ? 'Аялдар' : 'Женщины')) + '</button>' +
                 '</div>' : '') +
                 '<div class="pl-category-row">' +
@@ -1033,7 +1067,7 @@
         var clearRows = catSearchQuery ? GUEST_SEARCH_VISIBLE : GUEST_CAT_VISIBLE;
         var totalVisible = isGuest ? Math.min(pageItems.length, clearRows + GUEST_CAT_BLURRED) : pageItems.length;
 
-        var headerRow = '<div class="pl-row pl-row-header pl-cat-row">' +
+        var headerRow = '<div class="pl-row pl-row-header pl-cat-row" role="row">' +
             '<span class="pl-col-rank">' + labels.rank + '</span>' +
             '<span class="pl-col-player">' + labels.player + '</span>' +
             '<span class="pl-col-country">' + labels.country + '</span>' +
@@ -1045,10 +1079,11 @@
             '<span class="pl-col-change">' + labels.change + '</span>' +
         '</div>';
 
-        var html = '<div class="pl-cat-table-wrap">';
+        var html = '<h2 class="pl-sr-only">' + labels.player + ' — ' + esc(cat.name) + '</h2>';
+        html += '<div class="pl-cat-table-wrap">';
 
         // Table with header as first row (no separate sticky wrapper)
-        html += '<div class="pl-table pl-cat-table-body">';
+        html += '<div class="pl-table pl-cat-table-body" role="table">';
         html += headerRow;
 
         // Rows
@@ -1139,6 +1174,7 @@
         html += '</div>'; // close pl-cat-table-wrap
 
         container.innerHTML = html;
+        ролиТаблицы(container);
 
         // Clickable rows for non-guests
         if (!isGuest) {
