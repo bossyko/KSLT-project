@@ -88,6 +88,10 @@
         priceCurrency: 'сом/саат',
         detailsBtn: 'Толугураак',
         bookBtn: 'KSLT арзандатуу',
+        shownOf: 'ичинен',
+        pageOf: 'ичинен',
+        prevPage: '\u2190 Артка',
+        nextPage: 'Кийинки \u2192',
         bioTitle: 'Машыктыруучу жөнүндө',
         achievementsTitle: 'Жетишкендиктер',
         scheduleTitle: 'Тартип',
@@ -141,6 +145,10 @@
         priceCurrency: "сом/час",
         detailsBtn: "Подробнее",
         bookBtn: "Скидка KSLT",
+        shownOf: "из",
+        pageOf: "из",
+        prevPage: "\u2190 Назад",
+        nextPage: "Далее \u2192",
         bioTitle: "О тренере",
         achievementsTitle: "Достижения",
         scheduleTitle: "Расписание",
@@ -196,7 +204,12 @@
 
     var _accessLevel = 'guest';
     var _toastTimer = null;
-    var PER_PAGE = 20;
+    /* ШАГ СТРАНИЦЫ — КОЛОНОК × РЯДОВ, А НЕ ЧИСЛО. То же решение, что на
+       кортах 07.10: рядов держит css (`--co-ryadov`, 4 и 3 на границе
+       992), колонок считает браузер — их у `auto-fill` 4 · 3 · 2 внутри
+       одной границы, числом не описать. */
+    var PER_PAGE = 16;
+    var _шагИдёт = false;
     var _currentPage = 1;
     // Три признака выбираются независимо: возраст, форма занятий, уровень.
     // Раньше был один фильтр на всё — семь чипов в три строки, и выбрать
@@ -345,6 +358,7 @@
         initSearchInput();
         initFilterClicks();
         initPaginationClicks();
+        следитьЗаШагом();
         initCtaClicks();
         initScrollAnimations();
         detectAccess();
@@ -493,8 +507,10 @@
         var authLink = isEn ? 'auth-en.html?redirect=coaches' : (isKg ? 'auth-kg.html?redirect=coaches' : 'auth.html?redirect=coaches');
         var html = '<div class="co-grid">';
         pageItems.forEach(function(c) {
+            /* «Подробнее →» снято: карточка САМА ссылка на тренера, и
+               кнопка была нажимаемым внутри нажимаемого. Остаётся одно
+               действие, которое карточку не повторяет. */
             var contactHtml = '<div class="co-card-actions">' +
-                '<span class="co-card-btn">' + L.detailsBtn + ' →</span>' +
                 '<span class="co-card-cta" data-id="' + c.id + '">' + L.bookBtn + '</span>' +
             '</div>';
 
@@ -517,18 +533,59 @@
                     '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="co-card-photo">' +
                     promoBadge +
                 '</div>' +
-                '<div class="co-card-name">' + esc(c.name) + '</div>' +
-                (c.specialization ? '<div class="co-card-spec">' + c.specialization + '</div>' : '') +
-                (c.shortDesc ? '<div class="co-card-desc">' + c.shortDesc + '</div>' : '') +
-                (statsHtml ? '<div class="co-card-stats">' + statsHtml + '</div>' : '') +
-                (c.price ? '<div class="co-card-price">' + L.priceFrom + ' <strong>' + c.price + '</strong> ' + L.priceCurrency + '</div>' : '') +
-                contactHtml +
+                /* Тело карточки отдельной коробкой — как у кортов и у
+                   витрины лендинга: фотография во всю ширину, текст в
+                   своих полях, и ритм задаёт один `gap`. */
+                '<div class="co-card-body">' +
+                    '<div class="co-card-name">' + esc(c.name) + '</div>' +
+                    (c.specialization ? '<div class="co-card-spec">' + c.specialization + '</div>' : '') +
+                    (c.shortDesc ? '<div class="co-card-desc">' + c.shortDesc + '</div>' : '') +
+                    (statsHtml ? '<div class="co-card-stats">' + statsHtml + '</div>' : '') +
+                    (c.price ? '<div class="co-card-price">' + L.priceFrom + ' <strong>' + c.price + '</strong> ' + L.priceCurrency + '</div>' : '') +
+                    contactHtml +
+                '</div>' +
             '</a>';
         });
         html += '</div>';
         container.innerHTML = html;
+        /* ШАГ ИЗВЕСТЕН ТОЛЬКО ПОСЛЕ РАСКЛАДКИ: колонки у `auto-fill`
+           считает браузер. Сторож держит ровно один повтор. */
+        if (!_шагИдёт && пересчитатьШаг()) {
+            _шагИдёт = true;
+            var всего = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+            if (_currentPage > всего) _currentPage = всего;
+            renderGrid();
+            _шагИдёт = false;
+            return;
+        }
+
         renderPagination(filtered.length, _currentPage);
         initScrollAnimations();
+    }
+
+    /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
+       считается из живой сетки, а не из ширины окна. */
+    function пересчитатьШаг() {
+        var grid = document.querySelector('.co-grid');
+        if (!grid) return false;
+        var cs = window.getComputedStyle(grid);
+        var колонок = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
+        var рядов = parseInt(cs.getPropertyValue('--co-ryadov'), 10);
+        if (!колонок || !рядов) return false;
+        var шаг = колонок * рядов;
+        if (шаг === PER_PAGE) return false;
+        PER_PAGE = шаг;
+        return true;
+    }
+
+    /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
+       поворота, и от появления полосы прокрутки. */
+    function следитьЗаШагом() {
+        var коробка = document.getElementById('coachesGrid');
+        if (!коробка || !window.ResizeObserver) return;
+        new ResizeObserver(function () {
+            if (пересчитатьШаг()) renderGrid();
+        }).observe(коробка);
     }
 
     // ---- PAGINATION ----
@@ -536,32 +593,21 @@
         var container = document.getElementById('coachesPagination');
         if (!container) return;
 
-        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (totalPages <= 1) {
-            container.innerHTML = '';
-            return;
-        }
-
-        var prevLabel = isEn ? '\u2190 Back' : (isKg ? '\u2190 Артка' : '\u2190 Назад');
-        var nextLabel = isEn ? 'Next \u2192' : (isKg ? 'Кийинки \u2192' : 'Далее \u2192');
-        var html = '<div class="co-pagination">';
-        html += '<button class="co-page-btn co-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
-        for (var p = 1; p <= totalPages; p++) {
-            html += '<button class="co-page-btn co-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
-        }
-        html += '<button class="co-page-btn co-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + nextLabel + '</button>';
-        html += '</div>';
-        container.innerHTML = html;
+        /* ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ, `js/polosa-stranic.js`.
+           Своя была третьей копией одного понятия: слова вместо шевронов,
+           все номера подряд без окна и без счётчика строк. */
+        if (!window.KSLT_полосаСтраниц) { container.innerHTML = ''; return; }
+        window.KSLT_полосаСтраниц(container, total, page, PER_PAGE, L);
     }
 
     function initPaginationClicks() {
         document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.co-page-btn');
+            var btn = e.target.closest('.pl-page-btn');
             if (!btn || btn.disabled) return;
 
-            if (btn.classList.contains('co-page-prev')) {
+            if (btn.classList.contains('pl-page-prev')) {
                 _currentPage = Math.max(1, _currentPage - 1);
-            } else if (btn.classList.contains('co-page-next')) {
+            } else if (btn.classList.contains('pl-page-next')) {
                 _currentPage++;
             } else if (btn.dataset.page) {
                 _currentPage = parseInt(btn.dataset.page);
