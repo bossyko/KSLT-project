@@ -9,11 +9,17 @@
    приведена к общей для карточек — 300 пикселей */
 /* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
    один сайт, шапки разделов должны читаться одинаково */
+/* ОБЛОЖКА СТОИТ НА ОБЩИХ КРУТИЛКАХ РАЗДЕЛА — решение Кости 04.10.
+   Замер 07.10: пол 460 · 460 · 358.4 · 253.2 · 460. Третий набор своих
+   чисел на сайте, и на узких видах он был ДОЛЯМИ ВЫСОТЫ ОКНА (35vh и
+   30vh) — обложка меняла размер от того, какой у человека телефон.
+   В общее правило `css/style.css:5399` страница не попадала: там стоит
+   `.pt-hero.pt-hero`, а разметка даёт класс один раз. */
 .pt-hero {
     position: relative;
-    padding: var(--section-y) var(--pad-x) var(--section-y);
+    padding: var(--oblozhka-vozduh) var(--pad-x) var(--oblozhka-vozduh-niz);
     text-align: center;
-    min-height: 460px;
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -50,12 +56,14 @@
     z-index: 2;
 }
 
+/* Кегль — ступень шкалы. Было 49.6 · 45.1 · 26 · 26 · 37.1: на 768 и 390
+   пара «заголовок + подзаголовок» схлопывалась в одно число. */
 .pt-hero h1 {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
-    font-weight: 800;
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-extrabold);
     color: var(--text-primary);
-    margin-bottom: 18px;
-    line-height: 1.1;
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-tight);
 }
 
 .pt-hero h1 span {
@@ -63,96 +71,62 @@
 }
 
 .pt-hero p {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
-    font-weight: 600;
+    font-size: var(--fs-hero-sub);
+    font-weight: var(--fw-semibold);
     color: var(--text-secondary);
     max-width: 720px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: var(--lh-normal);
 }
 
 /* ========================================
    FILTERS
    ======================================== */
 
-.pt-filters {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    position: sticky;
-    top: var(--header-h);
-    z-index: 90;
-    background: var(--bg-primary);
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.pt-search-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-}
-
-.pt-search-icon {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.pt-search {
-    width: 100%;
-    padding: 14px 20px 14px 50px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50px;
-    color: var(--text-primary);
-    font-size: var(--fs-sm);
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-    box-sizing: border-box;
-}
-
-.pt-search::placeholder {
-    color: var(--text-muted);
-}
-
-.pt-search:focus {
-    border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.pt-filter-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-}
-
-
-.pt-filter-count {
-    font-size: var(--fs-xs);
-    opacity: 0.7;
-    margin-left: 4px;
-}
+/* СВОЕЙ ПОЛОСЫ ФИЛЬТРОВ У ЭТОЙ СТРАНИЦЫ НЕТ. Разметка берёт общие
+   `trn-filters`, `trn-back`, `trn-search-wrap`, `trn-chips`
+   (js/partners.js:319), а выпадашки — общий компонент `.f-dd`.
+   Здесь лежала вторая копия: `.pt-filters`, `.pt-search-wrap`,
+   `.pt-search-icon`, `.pt-search` с двумя состояниями, `.pt-filter-row`,
+   `.pt-filter-count` — и поле поиска в ней было на 480. МЁРТВЫМ КОД
+   НАЗВАН ПОСЛЕ ПРОВЕРКИ: ни одного из них нет ни в одной разметке и ни в
+   одном скрипте (проверено по всему дереву 07.10). */
 
 /* ========================================
    GRID
    ======================================== */
 
+/* ВИТРИНА ИДЁТ ПО ШИРОКОЙ КОРОБКЕ (правило 07.10). Коробки не было
+   вовсе: на 1440 карточки шли во всю ширину окна. */
 .pt-grid-wrap {
+    max-width: var(--container-max);
+    margin: 0 auto;
     padding: var(--section-y-sm) var(--pad-x) var(--section-y);
 }
 
+/* ЧИСЛО КОЛОНОК — СЛЕДСТВИЕ ШИРИНЫ КАРТОЧКИ, А НЕ ГРАНИЦЫ ЭКРАНА, и
+   рядов на странице четыре на широких, три на узких. Оба правила
+   выведены на «Услугах» и «Кортах» 07.10. Четыре в ряд числом давали на
+   1024 карточку 227 — ровно тот случай, из-за которого на кортах четыре
+   ставятся только на десктопе. */
 .pt-grid {
+    --pt-ryadov: 4;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-6);
+}
+
+@media (max-width: 992px) {
+    .pt-grid { --pt-ryadov: 3; }
+}
+
+/* ДВЕ В РЯД НА ТЕЛЕФОНЕ — своим минимумом: при 300 экран 390 давал бы
+   одну колонку. Граница 640: ширин в медиа две. */
+@media (max-width: 640px) {
+    .pt-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+    }
 }
 
 /* ========================================
@@ -276,10 +250,12 @@
    имя под фотографией стояло на 6 пикселей ниже, чем имя под инициалами.
    Разница не в размере: <img> строчный, и под ним оставался зазор базовой
    линии. Заглушка рядом — flex, у неё зазора нет. */
+/* СТУПЕНЬ `Avatar 29:82`: 24 · 32 · 40 · 56 · 80. Стояло 72 на широких и
+   60 на телефоне — ни одна не ступень (замер 07.10). */
 .pt-avatar {
     display: block;
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--border-subtle);
@@ -291,8 +267,8 @@
    аватар рейтинга → плашка новости → подписи значков → заголовок колонки →
    кольцо пьедестала → инициалы партнёра. */
 .pt-avatar-placeholder {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: var(--bg-elevated);
     display: flex;
@@ -684,102 +660,32 @@
    RESPONSIVE
    ======================================== */
 
-@media (max-width: 992px) {
-    .pt-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .pt-hero {
-        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
-        min-height: 35vh;
-    }
-
-    .pt-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-        .pt-filters {
-        padding: 12px var(--pad-x);
-    }
-
-    .pt-grid-wrap {
-        padding: var(--space-md) var(--pad-x) var(--section-y-sm);
-    }
-
-    .pt-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .pt-hero {
-        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
-        min-height: 30vh;
-    }
-
-    .pt-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-    .pt-hero p {
-        font-size: var(--fs-sm);
-    }
-
-        .pt-filters {
-        gap: 12px;
-        padding: 10px 16px;
-    }
-
-    .pt-filter-row {
-        gap: 8px;
-    }
-
-    /* Две в ряд — как карточки кортов, тренеров и турниров на телефоне.
-       Одна в ряд растягивала карточку на весь экран */
-    .pt-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
+/* ГРАНИЦЫ 992 · 768 · 480 СВЕДЕНЫ К 640 И 992. Отсюда ушло всё, что
+   теперь держат крутилки и сетка: пол обложки долями высоты окна (35vh и
+   30vh), кегли заголовка и подзаголовка, число колонок, поля витрины и
+   правила мёртвой полосы фильтров. Осталось только то, что зависит от
+   узости карточки, и оно переехало на 640. */
+@media (max-width: 640px) {
     .pt-card {
-        padding: var(--space-md);
+        padding: var(--space-3);
     }
 
     /* 24.09: половинки `#players ...` отсюда убраны. Они появились, когда
        блок «Давай сыграем» на главной не имел своего объявления и ловил
        размеры отсюда. Теперь он объявлен целиком в style.css по шкале
        640/992, а этот файл отвечает только за страницу «Найти партнёра». */
+    /* Ступень `Avatar 29:82`, соседняя снизу: 56, а не 60 */
     .pt-avatar, .pt-avatar-placeholder {
-        width: 60px;
-        height: 60px;
+        width: 56px;
+        height: 56px;
         font-size: var(--fs-md);
     }
 
-    .pt-card {
-        padding: 16px 12px;
-    }
-
-    /* Размеры по общей шкале для телефона: имя было 16-м кеглем при
-       карточке в 171 пиксель и занимало всю ширину */
-    /* Межстрочный убран 24.09: он был единственным уровнем, у которого
-       на телефоне менялась не только ступень кегля, но и плотность —
-       14 / 17.5 против 16 / 24 на всех остальных видах. У названия
-       карточки один межстрочный на все виды, 1.5, и он стоит в базовом
-       правиле .pt-name. */
-    .pt-name {
-        font-size: var(--fs-sm);
-    }
-
-    .pt-badge {
-        font-size: var(--fs-2xs);
-        padding: 3px 8px;
-    }
-
-    .pt-status {
-        font-size: var(--fs-2xs);
-    }
+    /* У ВИТРИНЫ ОДИН УРОВЕНЬ ТЕКСТА НА ВСЕ ВИДЫ — правило 07.10, то же,
+       что у кортов и тренеров. Здесь стояла своя телефонная лестница:
+       имя 14 при 16 на остальных видах, бейдж и статус 11 при 12. Кегли
+       сняты; при двух колонках на 390 карточка 174, и имя 16 в неё
+       помещается — замерено. */
 
     /* Кегль, поля и место метки сняты 24.09: это компонент Badge Info
        Subtle, 11 / 500 / высота 24, один и тот же на всех видах, и стоит
@@ -793,62 +699,24 @@
     }
 }
 
-/* === PAGINATION === */
+/* === ПОЛОСА СТРАНИЦ ===
+   Своих кнопок у этой страницы больше нет: полоса — общий компонент,
+   он лежит в `css/style.css` вместе со скриптом `js/polosa-stranic.js`.
+   Снесены `.pt-pagination`, `.pt-page-btn` с тремя состояниями,
+   `.pt-page-prev`, `.pt-page-next` — четвёртая копия одного понятия, и
+   кнопки в ней были 40 × 40 мимо ступеней 28 · 36 · 44 · 52.
+   Остаётся обёртка секции: её ширина своя. */
 .pt-pagination-section {
-    max-width: var(--container-narrow);
+    /* Полоса идёт по витрине, а не по умолчанию компонента */
+    --polosa-shirina: 100%;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 0 24px var(--space-xl);
+    padding: 0 var(--pad-x) var(--space-xl);
 }
 
 .pt-pagination-section:empty {
     padding: 0;
 }
 
-.pt-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-}
-
-.pt-page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    height: 40px;
-    padding: 0 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
-    font-size: var(--fs-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.pt-page-btn:hover:not(:disabled) {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.pt-page-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #000;
-    font-weight: 700;
-}
-
-.pt-page-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.pt-page-prev,
-.pt-page-next {
-    background: transparent;
-}
 
 /* === SPONSORS === */

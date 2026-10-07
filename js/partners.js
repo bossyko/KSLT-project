@@ -22,6 +22,10 @@
         guestBtn: 'Sign Up',
         guestHidden: 'more players',
         searchPlaceholder: 'Search by name...',
+        shownOf: 'of',
+        pageOf: 'of',
+        prevPage: '\u2190 Back',
+        nextPage: 'Next \u2192',
         empty: 'No partners found',
         emptyFiltered: 'No partners match the selected filter',
         levelBeginner: 'Beginner',
@@ -61,6 +65,10 @@
         guestBtn: 'Каттоо',
         guestHidden: 'оюнчу жашырылган',
         searchPlaceholder: 'Аты боюнча издөө...',
+        shownOf: 'ичинен',
+        pageOf: 'ичинен',
+        prevPage: '\u2190 Артка',
+        nextPage: 'Кийинки \u2192',
         empty: 'Өнөктөштөр табылган жок',
         emptyFiltered: 'Тандалган чыпка боюнча өнөктөштөр жок',
         levelBeginner: 'Башталгыч',
@@ -100,6 +108,10 @@
         guestBtn: 'Регистрация',
         guestHidden: 'игроков скрыто',
         searchPlaceholder: 'Поиск по имени...',
+        shownOf: 'из',
+        pageOf: 'из',
+        prevPage: '\u2190 Назад',
+        nextPage: 'Далее \u2192',
         empty: 'Партнёры не найдены',
         emptyFiltered: 'Нет партнёров по выбранному фильтру',
         levelBeginner: 'Начинающий',
@@ -138,7 +150,12 @@
     var ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
     var GUEST_VISIBLE = 8;
     var GUEST_BLURRED = 4;
-    var PER_PAGE = 20;
+    /* ШАГ СТРАНИЦЫ — КОЛОНОК × РЯДОВ, А НЕ ЧИСЛО. То же решение, что на
+       кортах и тренерах 07.10: рядов держит css (`--pt-ryadov`, 4 и 3 на
+       границе 992), колонок считает браузер — их у `auto-fill` 4 · 3 · 2
+       внутри одной границы, числом не описать. */
+    var PER_PAGE = 16;
+    var _шагИдёт = false;
     var _currentPage = 1;
 
     var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
@@ -154,6 +171,7 @@
         renderHero();
         renderFilters();
         initPaginationClicks();
+        следитьЗаШагом();
         await detectAccess();
         await loadPartners();
     }
@@ -513,6 +531,14 @@
         }
 
         el.innerHTML = html;
+
+        /* ШАГ ИЗВЕСТЕН ТОЛЬКО ПОСЛЕ РАСКЛАДКИ: колонки у `auto-fill`
+           считает браузер. Сторож держит ровно один повтор. */
+        if (!_шагИдёт && пересчитатьШаг()) {
+            _шагИдёт = true;
+            renderGrid();
+            _шагИдёт = false;
+        }
     }
 
     // ---- Render single card ----
@@ -558,37 +584,51 @@
         return html;
     }
 
+    /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
+       считается из живой сетки, а не из ширины окна. */
+    function пересчитатьШаг() {
+        var grid = document.querySelector('.pt-grid');
+        if (!grid) return false;
+        var cs = window.getComputedStyle(grid);
+        var колонок = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
+        var рядов = parseInt(cs.getPropertyValue('--pt-ryadov'), 10);
+        if (!колонок || !рядов) return false;
+        var шаг = колонок * рядов;
+        if (шаг === PER_PAGE) return false;
+        PER_PAGE = шаг;
+        return true;
+    }
+
+    /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
+       поворота, и от появления полосы прокрутки. */
+    function следитьЗаШагом() {
+        var коробка = document.getElementById('ptGrid');
+        if (!коробка || !window.ResizeObserver) return;
+        new ResizeObserver(function () {
+            if (пересчитатьШаг()) renderGrid();
+        }).observe(коробка);
+    }
+
     // ---- PAGINATION ----
     function renderPagination(total, page) {
         var container = document.getElementById('ptPagination');
         if (!container) return;
 
-        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (totalPages <= 1) {
-            container.innerHTML = '';
-            return;
-        }
-
-        var prevLabel = isEn ? '\u2190 Back' : (isKg ? '\u2190 Артка' : '\u2190 Назад');
-        var nextLabel = isEn ? 'Next \u2192' : (isKg ? 'Кийинки \u2192' : 'Далее \u2192');
-        var html = '<div class="pt-pagination">';
-        html += '<button class="pt-page-btn pt-page-prev"' + (page === 1 ? ' disabled' : '') + '>' + prevLabel + '</button>';
-        for (var p = 1; p <= totalPages; p++) {
-            html += '<button class="pt-page-btn pt-page-num' + (p === page ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
-        }
-        html += '<button class="pt-page-btn pt-page-next"' + (page === totalPages ? ' disabled' : '') + '>' + nextLabel + '</button>';
-        html += '</div>';
-        container.innerHTML = html;
+        /* ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ, `js/polosa-stranic.js`.
+           Своя была ЧЕТВЁРТОЙ копией одного понятия: слова вместо
+           шевронов, все номера подряд без окна, без счётчика строк. */
+        if (!window.KSLT_полосаСтраниц) { container.innerHTML = ''; return; }
+        window.KSLT_полосаСтраниц(container, total, page, PER_PAGE, L);
     }
 
     function initPaginationClicks() {
         document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.pt-page-btn');
+            var btn = e.target.closest('.pl-page-btn');
             if (!btn || btn.disabled) return;
 
-            if (btn.classList.contains('pt-page-prev')) {
+            if (btn.classList.contains('pl-page-prev')) {
                 _currentPage = Math.max(1, _currentPage - 1);
-            } else if (btn.classList.contains('pt-page-next')) {
+            } else if (btn.classList.contains('pl-page-next')) {
                 _currentPage++;
             } else if (btn.dataset.page) {
                 _currentPage = parseInt(btn.dataset.page);
