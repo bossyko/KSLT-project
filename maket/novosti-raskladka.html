@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>КСЛТ — стенд раскладки новостей</title>
+<style>
+  body { margin: 0; background: #0A0A0A; color: #fff; font: 12px/1.4 Inter, system-ui, sans-serif; }
+  h2 { font-size: 13px; margin: 16px 12px 6px; color: #CFFF4F; font-weight: 600; }
+  .вид { margin: 0 12px 18px; border: 1px solid #2A2A2A; border-radius: 10px; overflow: hidden; }
+  .рамка { transform-origin: 0 0; border: 0; display: block; }
+  /* Стенд показывает ВИДЫ ЗАГРУЗКОЙ на нужной ширине, а не сжатием окна:
+     кадр создаётся шириной 1440 / 768 / 390 и только потом уменьшается
+     трансформацией — раскладка считается по настоящей ширине. */
+</style>
+<div id="всё"></div>
+<script>
+  var ВИДЫ = [
+    [1440, 1500, 0.38, 'десктоп'],
+    [1024, 1500, 0.42, 'планшет лёжа'],
+    [768, 1600, 0.45, 'планшет стоя'],
+    [844, 1200, 0.45, 'телефон лёжа'],
+    [390, 1700, 0.45, 'телефон стоя']
+  ];
+  var корень = document.getElementById('всё');
+  ВИДЫ.forEach(function (в) {
+    var ш = в[0], вы = в[1], м = в[2];
+    var h2 = document.createElement('h2');
+    h2.textContent = 'Новости — ' + (в[3] || '') + ' ' + ш + ' (уменьшено ×' + м + ')';
+    корень.appendChild(h2);
+    var короб = document.createElement('div');
+    короб.className = 'вид';
+    короб.style.width = Math.round(ш * м) + 'px';
+    короб.style.height = Math.round(вы * м) + 'px';
+    var f = document.createElement('iframe');
+    f.className = 'рамка';
+    f.width = ш; f.height = вы;
+    f.style.transform = 'scale(' + м + ')';
+    f.src = '../pages/news.html?стенд=' + Date.now();
+    короб.appendChild(f);
+    корень.appendChild(короб);
+  });
+</script>

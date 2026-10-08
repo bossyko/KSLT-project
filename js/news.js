@@ -109,6 +109,12 @@ function mapDbArticle(row) {
         tags: [],
         reactions: { tennis: 0, fire: 0, clap: 0 },
         reactions_config: row.reactions_config || null,
+        /* ПЕРЕВЕДЕНА ИЛИ НЕТ — решение Кости 08.10. Новости из бота приходят
+           по-русски и ведут на чужую страницу, переводить их нечем: заголовок
+           по-английски над русской заметкой человека только запутает. Поэтому
+           на английской и киргизской версиях показываем ТОЛЬКО то, что
+           переведено в админке. Признак — непустой заголовок на этом языке. */
+        переведена: isEn ? !!row.title_en : (isKg ? !!row.title_kg : true),
         relatedSlugs: [],
         _publishedAt: row.published_at || row.created_at || ''
     };
@@ -232,8 +238,15 @@ function initFromStatic(slug) {
 // HELPERS
 // ========================================
 
-function getLabels() {
-    return typeof window.newsLabels !== 'undefined' ? window.newsLabels : {
+/* ПОДПИСИ НА ТРЁХ ЯЗЫКАХ — 08.10. До этого дня `window.newsLabels` не
+   задавалась НИГДЕ, и getLabels() всегда отдавала русский запасной словарь:
+   ЗАМЕРЕНО в браузере 07.10 — на news-en.html и news-kg.html поиск, фильтр,
+   мета и даже заголовок вкладки были русскими. Язык берётся из адреса
+   страницы, а не из пары флагов — правило 06.10.
+   КИРГИЗСКИЙ НЕ ПРОВЕРЕН НОСИТЕЛЕМ: ложится в тот же долг, что и 39 строк в
+   docs/kslt-teksty-na-podtverzhdenie.xlsx. */
+var ПОДПИСИ = {
+    ru: {
         backToNews: "Назад к новостям",
         openPoster: "Афиша целиком",
         readTime: "мин чтения",
@@ -254,8 +267,83 @@ function getLabels() {
         readMore: "Читать",
         allArticles: "Все статьи",
         filterAll: "Все",
-        searchPlaceholder: "Поиск новости..."
-    };
+        searchPlaceholder: "Поиск новости...",
+        shownOf: "из",
+        pageOf: "из",
+        prevPage: "\u2190 Назад",
+        nextPage: "Вперёд \u2192",
+        emptySearch: "Ничего не нашлось",
+        emptySearchHint: "Проверьте написание или очистите поиск",
+        emptyCategory: "В этой категории пока пусто",
+        emptyCategoryHint: "Выберите другую категорию"
+    },
+    en: {
+        backToNews: "Back to news",
+        openPoster: "Full poster",
+        readTime: "min read",
+        relatedTitle: "Related articles",
+        reactionsTitle: "Rate this article",
+        tagsTitle: "Tags",
+        notFoundTitle: "Article not found",
+        notFoundText: "This article does not exist or has been removed.",
+        notFoundBtn: "Go home",
+        pollVote: "Vote",
+        pollVoted: "Thanks for voting!",
+        pollTotal: "votes",
+        sponsorsTitle: "Partners and sponsors",
+        sponsorsGeneral: "General sponsor",
+        newsListTitle: "News",
+        newsListSubtitle: "Latest news from the world of tennis",
+        featuredLabel: "Top story",
+        readMore: "Read",
+        allArticles: "All articles",
+        filterAll: "All",
+        searchPlaceholder: "Search news...",
+        shownOf: "of",
+        pageOf: "of",
+        prevPage: "\u2190 Back",
+        nextPage: "Next \u2192",
+        emptySearch: "Nothing found",
+        emptySearchHint: "Check the spelling or clear the search",
+        emptyCategory: "Nothing in this category yet",
+        emptyCategoryHint: "Pick another category"
+    },
+    kg: {
+        backToNews: "Жаңылыктарга кайтуу",
+        openPoster: "Афишаны толук көрүү",
+        readTime: "мүнөт окуу",
+        relatedTitle: "Окшош макалалар",
+        reactionsTitle: "Макаланы баалаңыз",
+        tagsTitle: "Тегдер",
+        notFoundTitle: "Макала табылган жок",
+        notFoundText: "Суралган макала жок же өчүрүлгөн.",
+        notFoundBtn: "Башкы бетке",
+        pollVote: "Добуш берүү",
+        pollVoted: "Добушуңуз кабыл алынды!",
+        pollTotal: "добуш",
+        sponsorsTitle: "Өнөктөштөр жана демөөрчүлөр",
+        sponsorsGeneral: "Башкы демөөрчү",
+        newsListTitle: "Жаңылыктар",
+        newsListSubtitle: "Теннис дүйнөсүнөн акыркы жаңылыктар",
+        featuredLabel: "Башкы жаңылык",
+        readMore: "Окуу",
+        allArticles: "Бардык макалалар",
+        filterAll: "Баары",
+        searchPlaceholder: "Жаңылык издөө...",
+        shownOf: "ичинен",
+        pageOf: "ичинен",
+        prevPage: "\u2190 Артка",
+        nextPage: "Алдыга \u2192",
+        emptySearch: "Эч нерсе табылган жок",
+        emptySearchHint: "Жазылышын текшериңиз же издөөнү тазалаңыз",
+        emptyCategory: "Бул категорияда азырынча эч нерсе жок",
+        emptyCategoryHint: "Башка категорияны тандаңыз"
+    }
+};
+
+function getLabels() {
+    if (typeof window.newsLabels !== 'undefined') return window.newsLabels;
+    return isEnPage() ? ПОДПИСИ.en : (isKgPage() ? ПОДПИСИ.kg : ПОДПИСИ.ru);
 }
 
 function calculateReadTime(article) {
@@ -1177,9 +1265,11 @@ function incrementViewCount(newsId) {
 function renderNewsList() {
     var labels = getLabels();
     var basePage = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
-    // Семь на страницу — ровно под сетку: главная карточка, три сбоку и три
-    // в нижнем ряду. При шести нижний ряд оставался с пустым местом.
-    var PER_PAGE = 7;
+    /* ШАГ СТРАНИЦЫ — КОЛОНОК × РЯДОВ, А НЕ ЧИСЛО. Раскладка 07.10: крупная
+       на два ряда плюс четыре боковые 2 × 2, и ряд из четырёх снизу —
+       девять на широком виде. На узких колонок меньше (а на телефоне она
+       одна), поэтому число приходит из живой сетки крутилкой --novostey. */
+    var PER_PAGE = 9;
 
     document.title = 'KSLT — ' + labels.newsListTitle;
 
@@ -1195,6 +1285,9 @@ function renderNewsList() {
 
     var allArticles = Object.keys(newsArticleData).map(function(key) {
         return newsArticleData[key];
+    }).filter(function (a) {
+        /* На своём языке — всё, на чужом — только переведённое (см. выше) */
+        return a.переведена !== false;
     });
 
     // Sort by date (newest first)
@@ -1303,11 +1396,30 @@ function renderNewsList() {
 
     // Список живёт в той же секции, что и сообщение «ничего не найдено», а у неё
     // отступы под пустой экран — 128 точек сверху и снизу. Для списка они лишние.
-    notFound.classList.add('news-list-mode');
+    /* СПИСОК ЖИВЁТ В СВОЕЙ СЕКЦИИ — 07.10. Он рисовался ВНУТРИ секции
+       «ничего не найдено», и брал её свойства: замер стенда показал, что
+       у крупной карточки заголовок, дата и подзаголовок стояли ПО ЦЕНТРУ и
+       заголовок шёл КАПСОМ — всё это правила пустого экрана, а не карточки.
+       И пустому состоянию было негде появиться: его контейнер занят
+       списком, поэтому фильтр без результатов молчал. Теперь секции две. */
+    var список = document.getElementById('newsList');
+    if (!список) {
+        список = document.createElement('section');
+        список.className = 'news-list';
+        список.id = 'newsList';
+        notFound.parentNode.insertBefore(список, notFound);
+    }
+    notFound.style.display = 'none';
+    notFound.innerHTML = '';
 
-    notFound.innerHTML =
+    список.innerHTML =
         '<div class="news-list-page">' +
-            '<div class="news-bento" id="newsBento"></div>' +
+            /* ДВА КЛАССА, И ЭТО НЕ СЛУЧАЙНОСТЬ: `tournaments-grid` несёт
+               ПРАВИЛА КАРТОЧКИ (кегли телефона, отступы тела, высота
+               афиши), `news-grid` — СВОЮ раскладку и число строк в
+               заголовке: на телефоне у списка их три, а не две. Так карточка остаётся одним компонентом без
+               единой копии чисел, а бенто живёт отдельно. */
+            '<div class="tournaments-grid news-grid" id="newsBento"></div>' +
             '<div class="news-pagination" id="newsPagination"></div>' +
         '</div>';
 
@@ -1355,55 +1467,93 @@ function renderNewsList() {
         pageItems.forEach(function(article, i) {
             var readTime = calculateReadTime(article);
             var isLarge = естьКрупная && i === 0;
-            var cardClass = isLarge ? 'news-bento-card news-bento-large' : 'news-bento-card';
 
             var внешняя = !!article.sourceUrl;
             var адрес = внешняя ? article.sourceUrl : (basePage + '?slug=' + article.slug);
             var наружу = внешняя ? ' target="_blank" rel="noopener"' : '';
 
-            html += '<a href="' + esc(адрес) + '"' + наружу + ' class="' + cardClass +
+            /* КАРТОЧКА — КОМПОНЕНТ .tc ЦЕЛИКОМ, слово Кости 07.10: размеры,
+               лестница и зазоры берутся с карточки турнира лендинга, своего
+               не рисуем ничего. Соответствие полей: дата → .tc-date,
+               заголовок → .tc-title, подзаголовок → .tc-desc (только у
+               крупной, как у турнира), время чтения → .tc-meta,
+               категория → .tc-badge. Кнопки у новости нет: карточка и есть
+               ссылка, а кнопка внутри ссылки — недопустимая разметка. */
+            var афиша = esc(article.cardImage || article.heroImage || '');
+            html += '<a href="' + esc(адрес) + '"' + наружу + ' class="tc' + (isLarge ? ' tc-featured' : '') +
                     (внешняя ? ' news-outside' : '') + '">' +
-                '<div class="news-bento-img' + (article.ownCover ? ' news-own-cover' : '') + '">' +
-                    '<img src="' + esc(article.cardImage || article.heroImage) + '" alt="' + esc(article.title) + '" loading="lazy">' +
-                    '<div class="news-bento-img-overlay"></div>' +
+                '<div class="tc-image"' + (афиша ? ' style="--tc-poster:url(&quot;' + афиша + '&quot;)"' : '') + '>' +
+                    (афиша ? '<img src="' + афиша + '" alt="" loading="lazy">' : '<div class="tc-noimage">\uD83C\uDFBE</div>') +
+                    '<span class="tc-badge">' + esc(article.categoryLabel || '') + '</span>' +
                 '</div>' +
-                '<div class="news-bento-content">' +
-                    '<span class="news-category-badge news-category-' + article.category + '">' + article.categoryLabel + '</span>' +
-                    (isLarge ? '<h2>' + article.title + '</h2>' : '<h3>' + article.title + '</h3>') +
-                    '<p>' + article.subtitle + '</p>' +
-                    '<div class="news-bento-meta">' +
-                        '<span>' + article.date + '</span>' +
-                        '<span class="news-bento-dot"></span>' +
-                        '<span>' + readTime + ' ' + labels.readTime + '</span>' +
-                    '</div>' +
+                '<div class="tc-body">' +
+                    '<span class="tc-date">' + esc(article.date || '') + '</span>' +
+                    (isLarge ? '<h2 class="tc-title">' : '<h3 class="tc-title">') + esc(article.title || '') +
+                    (isLarge ? '</h2>' : '</h3>') +
+                    (isLarge && article.subtitle ? '<p class="tc-desc">' + esc(article.subtitle) + '</p>' : '') +
+                    '<div class="tc-meta"><span>' + readTime + ' ' + esc(labels.readTime) + '</span></div>' +
                 '</div>' +
             '</a>';
         });
 
         document.getElementById('newsBento').innerHTML = html;
 
-        // Pagination
-        if (totalPages <= 1) {
-            document.getElementById('newsPagination').innerHTML = '';
-            return;
+        /* ПУСТО ДОЛЖНО ГОВОРИТЬ. Два случая и две разные фразы: ничего не
+           нашлось по запросу — и в категории пусто. Молчащий экран человек
+           читает как поломку. */
+        var пусто = document.getElementById('newsEmpty');
+        if (!pageItems.length) {
+            if (!пусто) {
+                пусто = document.createElement('div');
+                пусто.className = 'news-empty';
+                пусто.id = 'newsEmpty';
+                document.getElementById('newsBento').parentNode.appendChild(пусто);
+            }
+            пусто.innerHTML = '<p class="news-empty-title">' +
+                esc(searchQuery ? (labels.emptySearch || 'Ничего не нашлось') : (labels.emptyCategory || 'В этой категории пока пусто')) +
+                '</p><p class="news-empty-hint">' +
+                esc(searchQuery ? (labels.emptySearchHint || 'Проверьте написание или очистите поиск')
+                                : (labels.emptyCategoryHint || 'Выберите другую категорию')) + '</p>';
+            пусто.style.display = '';
+        } else if (пусто) {
+            пусто.style.display = 'none';
         }
 
-        var pagHtml = '<button class="news-page-btn news-page-prev" ' + (currentPage === 1 ? 'disabled' : '') + '>' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>' +
-        '</button>';
+        /* ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ. Здесь лежала ПЯТАЯ копия на
+           сайте: .pl-page-btn / -prev / -next / -num, все номера подряд
+           без окна и без счётчика строк. Теперь её рисует
+           js/polosa-stranic.js — тот же, что у рейтинга, кортов, тренеров
+           и поиска игрока: шевроны, окно номеров, счётчик, кнопки 36 с
+           целью 44, сжатая форма ниже 640. */
+        var полоса = document.getElementById('newsPagination');
+        if (!полоса) return;
+        if (!window.KSLT_полосаСтраниц) { полоса.innerHTML = ''; return; }
+        window.KSLT_полосаСтраниц(полоса, filtered.length, currentPage, PER_PAGE, labels);
+    }
 
-        for (var p = 1; p <= totalPages; p++) {
-            pagHtml += '<button class="news-page-btn news-page-num' + (p === currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
-        }
-
-        pagHtml += '<button class="news-page-btn news-page-next" ' + (currentPage === totalPages ? 'disabled' : '') + '>' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>' +
-        '</button>';
-
-        document.getElementById('newsPagination').innerHTML = pagHtml;
+    /* ШАГ ЧИТАЕТСЯ ИЗ ЖИВОЙ СЕТКИ, а не из ширины окна: правило 07.10,
+       то же, что у кортов, тренеров и поиска игрока. Повтор отрисовки один
+       и у него сторож. */
+    var _шагИдёт = false;
+    function пересчитатьШаг() {
+        var сетка = document.querySelector('.news-grid');
+        if (!сетка) return false;
+        var н = parseInt(window.getComputedStyle(сетка).getPropertyValue('--novostey'), 10);
+        if (!н || н === PER_PAGE) return false;
+        PER_PAGE = н;
+        return true;
+    }
+    function следитьЗаШагом() {
+        var сетка = document.querySelector('.news-grid');
+        if (!сетка || typeof ResizeObserver === 'undefined') return;
+        new ResizeObserver(function () {
+            if (!_шагИдёт && пересчитатьШаг()) { _шагИдёт = true; renderGrid(); _шагИдёт = false; }
+        }).observe(сетка);
     }
 
     renderGrid();
+    if (!_шагИдёт && пересчитатьШаг()) { _шагИдёт = true; renderGrid(); _шагИдёт = false; }
+    следитьЗаШагом();
 
     // === EVENT LISTENERS ===
     // Search
@@ -1445,12 +1595,12 @@ function renderNewsList() {
 
     // Pagination
     document.getElementById('newsPagination').addEventListener('click', function(e) {
-        var btn = e.target.closest('.news-page-btn');
+        var btn = e.target.closest('.pl-page-btn');
         if (!btn || btn.disabled) return;
 
-        if (btn.classList.contains('news-page-prev')) {
+        if (btn.classList.contains('pl-page-prev')) {
             currentPage = Math.max(1, currentPage - 1);
-        } else if (btn.classList.contains('news-page-next')) {
+        } else if (btn.classList.contains('pl-page-next')) {
             currentPage++;
         } else if (btn.dataset.page) {
             currentPage = parseInt(btn.dataset.page);
