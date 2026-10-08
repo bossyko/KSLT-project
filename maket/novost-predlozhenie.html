@@ -1,0 +1,186 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>КСЛТ — страница новости: сейчас и предложение</title>
+<link rel="stylesheet" href="../css/tokens.css?v=25">
+<link rel="stylesheet" href="../css/style.css?v=400">
+<link rel="stylesheet" href="../css/news.css?v=58">
+<style>
+  /* СТЕНД, А НЕ СТРАНИЦА. Здесь только то, что нужно, чтобы показать
+     ПРЕДЛОЖЕНИЕ рядом с тем, что оно закрывает. Ни одно правило отсюда
+     в продукт не едет: продукт правится после «да». */
+  body { margin: 0; background: #0A0A0A; color: #fff;
+         font: 14px/1.5 Inter, system-ui, sans-serif; }
+  .шапка { padding: 24px 32px 8px; }
+  .шапка h1 { font-size: 21px; margin: 0 0 8px; }
+  .шапка p { margin: 0; color: #8A8A8A; font-size: 12px; max-width: 80ch; }
+  .пара { display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+          padding: 16px 32px 40px; align-items: start; }
+  .колонка > h2 { font-size: 12px; letter-spacing: .5px; text-transform: uppercase;
+                  color: #8A8A8A; margin: 0 0 12px; font-weight: 600; }
+  .колонка.стало > h2 { color: #CFFF4F; }
+  .коробка { border: 1px solid #2A2A2A; border-radius: 12px; overflow: hidden;
+             background: #111; }
+  .подпись { padding: 8px 12px; font-size: 11px; color: #8A8A8A;
+             border-top: 1px solid #2A2A2A; }
+  .подпись b { color: #CFFF4F; font-weight: 600; }
+
+  /* 1 · ОБЛОЖКА */
+  .обл { position: relative; display: flex; align-items: center; justify-content: center;
+         overflow: hidden; background: #1a1a1a; }
+  .обл img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; }
+  .обл .внутри { position: relative; padding: 24px; text-align: center; }
+  .обл h3 { margin: 8px 0; color: #fff; }
+  .обл .мета { font-size: 12px; color: rgba(255,255,255,.72); }
+  .сейчас-обл { height: 360px; }           /* доля окна, как в коде */
+  .сейчас-обл h3 { font-size: 48px; line-height: 1.1; font-weight: 800; }
+  .стало-обл  { min-height: 0; height: auto; }
+  .стало-обл h3 { font-size: 40px; line-height: 1.1; font-weight: 800; }
+  .экран { border-top: 1px dashed #FF9F43; font-size: 10px; color: #FF9F43;
+           padding: 2px 6px; }
+
+  /* 2 · ГАЛЕРЕЯ */
+  /* ПОДЛОЖКА УЖЕ ЕСТЬ И ОНА КАРТОЧНАЯ: `.news-carousel-stage` стоит на
+     --bg-card #111111 с рамкой 8% белого и радиусом 16 — это Card 29:65.
+     Она не «чёрный ящик», её просто почти не видно: #111111 на фоне
+     #0A0A0A даёт 1.048, то есть неразличимо. Отсюда и ощущение чёрных
+     крыльев по бокам портретного кадра. Здесь три варианта рядом. */
+  .вар { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 16px; }
+  .вар > div > h3 { font-size: 11px; color: #8A8A8A; margin: 0 0 8px; font-weight: 600;
+                    text-transform: uppercase; letter-spacing: .4px; }
+  .сцена { display: flex; align-items: center; justify-content: center;
+           border-radius: 16px; overflow: hidden; }
+  .сцена img { display: block; max-height: 260px; width: auto; }
+  .сцена.как-сейчас { background: #111111; border: 1px solid rgba(255,255,255,.08); }
+  .сцена.ступень-выше { background: #1E1E1E; border: 1px solid rgba(255,255,255,.08); }
+  .сцена.без-подложки { background: transparent; border: 0; }
+  .кч { font-size: 10px; color: #8A8A8A; margin-top: 6px; }
+  .кч b { color: #CFFF4F; }
+  .лента { display: flex; gap: 8px; margin-top: 12px; }
+  .лента span { display: block; border-radius: 6px; overflow: hidden; border: 2px solid transparent; }
+  .лента span.акт { border-color: #CFFF4F; }
+  .лента img { display: block; object-fit: cover; }
+  .сейчас .лента img { width: 88px; height: 64px; }
+  .стало  .лента img { width: 48px; height: 64px; }
+
+  /* 3 · СПИСОК ПОБЕДИТЕЛЕЙ */
+  .спис { padding: 16px; font-size: 16px; line-height: 1.8; }
+  .спис .кат { font-weight: 700; margin: 12px 0 4px; }
+  .стало .спис { columns: 2; column-gap: 32px; line-height: 1.5; }
+  .стало .спис .кат { break-inside: avoid; break-after: avoid; column-span: none; }
+  .стало .спис p { break-inside: avoid; margin: 0; }
+  .сейчас .спис p { margin: 0; }
+</style>
+
+<div class="шапка">
+  <h1>Страница новости — что меняем и что это закрывает</h1>
+  <p>Слева то, что в продукте сейчас; справа предложение. Числа под каждой парой — замеренные,
+     не нарисованные. Стенд ничего не правит в продукте.</p>
+</div>
+
+<!-- 1 · ОБЛОЖКА -->
+<div class="пара">
+  <div class="колонка сейчас">
+    <h2>1 · Обложка сейчас</h2>
+    <div class="коробка">
+      <div class="обл сейчас-обл">
+        <img src="../images/placeholder-news.jpg" alt="" onerror="this.style.display='none'">
+        <div class="внутри">
+          <span class="news-category-badge">РЕЗУЛЬТАТЫ</span>
+          <h3>Завершение и итоги ТБШ 2026</h3>
+          <div class="мета">5 сентября 2026 · KSLT Media · 1 мин чтения</div>
+        </div>
+      </div>
+      <div class="экран">↑ столько видно на десктопе, дальше — прокрутка</div>
+      <div class="подпись">замер: <b>923 · 864 · 900 · 880 · 422</b> при окнах 900 · 768 · 1024 · 390 · 844.
+        Заголовок <b>48 · 46 · 38 · 26 · 21</b> — плавающий кегль.</div>
+    </div>
+  </div>
+  <div class="колонка стало">
+    <h2>1 · Обложка предложение</h2>
+    <div class="коробка">
+      <div class="обл стало-обл">
+        <img src="../images/placeholder-news.jpg" alt="" onerror="this.style.display='none'">
+        <div class="внутри">
+          <span class="news-category-badge">РЕЗУЛЬТАТЫ</span>
+          <h3>Завершение и итоги ТБШ 2026</h3>
+          <div class="мета">5 сентября 2026 · KSLT Media · 1 мин чтения</div>
+        </div>
+      </div>
+      <div class="подпись">пола нет, высота по содержимому, потолок долей окна.
+        Заголовок на ступенях <b>40 · 40 · 32 · 26 · 32</b>.
+        Значок приведён к <b>Badge 27:53</b>: 24 высотой, 11 Medium.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 · ГАЛЕРЕЯ -->
+<div class="пара" style="grid-template-columns:1fr">
+  <div class="колонка стало">
+    <h2>2 · Подложка галереи — три варианта на живом кадре</h2>
+    <div class="коробка">
+      <div class="вар">
+        <div>
+          <h3>как сейчас · bg-card #111111</h3>
+          <div class="сцена как-сейчас"><img src="https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/news-1788921230060-avavgy5b.jpg" alt=""></div>
+          <div class="кч">к фону страницы <b>1.048</b> — подложки практически не видно,
+            поля по бокам читаются как чёрные крылья</div>
+        </div>
+        <div>
+          <h3>ступень выше · bg-elevated #1E1E1E</h3>
+          <div class="сцена ступень-выше"><img src="https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/news-1788921230060-avavgy5b.jpg" alt=""></div>
+          <div class="кч">к фону <b>1.188</b> — подложка читается карточкой,
+            поля становятся полями карточки, а не пустотой</div>
+        </div>
+        <div>
+          <h3>без подложки · кадр на фоне</h3>
+          <div class="сцена без-подложки"><img src="https://qqkzszesviukopgjbead.supabase.co/storage/v1/object/public/news/news-1788921230060-avavgy5b.jpg" alt=""></div>
+          <div class="кч">границы блока нет вовсе, фотография стоит сама,
+            как в книге</div>
+        </div>
+      </div>
+      <div class="подпись">серый прямоугольник в прошлой версии стенда был
+        <b>заглушкой вместо фотографии</b>, а не подложкой — моя вина.
+        Высота кадра ограничена, ширина следует за отношением; потолок <b>90vh</b> из
+        <b>Modal 26:143</b>. Движение <b>выключено</b> — слово Кости 08.10.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 · СПИСОК ПОБЕДИТЕЛЕЙ -->
+<div class="пара">
+  <div class="колонка сейчас">
+    <h2>3 · Список победителей сейчас</h2>
+    <div class="коробка">
+      <div class="спис" id="спис1"></div>
+      <div class="подпись">58 абзацев, тегов списка <b>ноль</b>, строка 28,
+        содержимое ~140 при колонке 837 → в высоту <b>1624</b>.</div>
+    </div>
+  </div>
+  <div class="колонка стало">
+    <h2>3 · Список победителей предложение</h2>
+    <div class="коробка">
+      <div class="спис" id="спис2"></div>
+      <div class="подпись">настоящий список в две колонки на широких, одна на 640.
+        Заголовок категории на всю ширину и не рвётся. Посчитано: около <b>820</b>, вдвое короче.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Содержимое крайнее, а не удобное: портретный кадр и длинный список. */
+  /* Кадры и ленты рисуются разметкой выше — скрипту тут делать нечего. */
+
+  var ДАННЫЕ = [
+    ['🌺 Женская категория FUTURES', ['🥇 Канышай Бадретдинова','🥈 Айдай Акматалиева','🥉 Каныкей Турсунбаева','V🥇 Асель Ашимова','IX 🥇 Нармина Ахматова','XVII🥇 Бурул Ракишева']],
+    ['🌺 Женская категория TOUR', ['🥇 Адель Джайлоева','🥈 Анастасия Аджибекова','🥉 Наталия Цурбан','V🥇 Амина Курбанова','IX 🥇 Назгуль Керималиева','XVII🥇 Айжан Темиралиева']],
+    ['🌺 Женская категория MASTERS', ['🥇 Анастасия Трофимушкина','🥈 Чолпон Макенова','🥉 Айгерим Садыкова','V🥇 Жылдыз Орозова']]
+  ];
+  function список(id) {
+    var c = document.getElementById(id);
+    ДАННЫЕ.forEach(function (г) {
+      var h = document.createElement('p'); h.className = 'кат'; h.textContent = г[0]; c.appendChild(h);
+      г[1].forEach(function (и) { var p = document.createElement('p'); p.textContent = и; c.appendChild(p); });
+    });
+  }
+  список('спис1'); список('спис2');
+</script>
