@@ -1013,6 +1013,25 @@
      * @param {string} html
      * @returns {string}
      */
+    /**
+     * ЧИСТКА СРЕЗАЛА НАШИ ЖЕ КЛАССЫ — найдено чтением 08.10.
+     *
+     * Редактор ставит кадру `news-video news-video-ig`, а сохранение тут же
+     * выбрасывало `class="..."` целиком — вместе с ним. В базе лежат голые
+     * iframe, и правило вертикального кадра не применялось НИКОГДА:
+     * инстаграмовский ролик 9:16 показывался в коробке 16:9, с полосой
+     * прокрутки внутри. БЕДА РОДИЛАСЬ РОВНО НА ШВЕ.
+     *
+     * Оставляем только СВОИ классы — те, что начинаются на `news-`. Всё
+     * чужое (вставка из Word, Google Docs, сайтов) по-прежнему уходит.
+     */
+    function оставитьСвоиКлассы(h) {
+        return String(h).replace(/\s*class="([^"]*)"/gi, function(всё, классы) {
+            var свои = классы.split(/\s+/).filter(function(к) { return /^news-/.test(к); });
+            return свои.length ? ' class="' + свои.join(' ') + '"' : '';
+        });
+    }
+
     function cleanNewsHtml(html) {
         if (!html) return '';
         var h = String(html).trim();
@@ -1027,7 +1046,7 @@
         }
 
         h = h.replace(/\s*style="[^"]*"/gi, '');
-        h = h.replace(/\s*class="[^"]*"/gi, '');
+        h = оставитьСвоиКлассы(h);
         h = h.replace(/<\/?span[^>]*>/gi, '');
         h = h.replace(/<\/?(?:strong|b)[^>]*>/gi, '');
         h = h.replace(/<\/?font[^>]*>/gi, '');
@@ -1058,7 +1077,7 @@
         if (!/<[a-z][\s\S]*>/i.test(h)) return cleanNewsHtml(h);
 
         h = h.replace(/\s*style="[^"]*"/gi, '');
-        h = h.replace(/\s*class="[^"]*"/gi, '');
+        h = оставитьСвоиКлассы(h);
         h = h.replace(/<\/?span[^>]*>/gi, '');
         h = h.replace(/<\/?font[^>]*>/gi, '');
         h = h.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>');
@@ -1189,6 +1208,7 @@
     };
 
     A.esc = esc;
+    A.оставитьСвоиКлассы = оставитьСвоиКлассы;
     A.cleanNewsHtmlOnSave = cleanNewsHtmlOnSave;
     A.cleanNewsHtml = cleanNewsHtml;
     A.sel = sel;

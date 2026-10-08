@@ -69,7 +69,11 @@ test.describe('Админка «Новости»: форма статьи', () =
     });
 
     test('у пары коробов одна высота, и ряд не вылезает за колонку', async ({ page }) => {
-        const шапка = await page.locator('.ad-afisha-pane--novost-hero img').boundingBox();
+        /* МЕРЯЕМ РАМКУ, А НЕ КАРТИНКУ. У шапки картинка приближена на 1.1 и
+           обрезана рамкой: boundingBox отдаёт ПРЕОБРАЗОВАННУЮ коробку — 176
+           при высоте короба 160. Первый прогон упал ровно на этом, и упал
+           на приборе, а не на продукте. Человек видит рамку. */
+        const шапка = await page.locator('.ad-afisha-pane--novost-hero .ad-afisha-ramka').boundingBox();
         const карточка = await page.locator('.ad-afisha-pane--novost-card img').boundingBox();
         expect(Math.abs(шапка.height - карточка.height)).toBeLessThanOrEqual(1);
 

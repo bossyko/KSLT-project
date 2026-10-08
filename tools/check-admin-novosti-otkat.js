@@ -22,6 +22,7 @@ const NJS = 'js/admin/sections/news.js';
 const EJS = 'js/admin/core/editor.js';
 const CJS = 'js/admin/core/constants.js';
 const HTM = 'pages/admin.html';
+const UJS = 'js/admin/core/utils.js';
 
 const ОТКАТЫ = [
 
@@ -99,9 +100,10 @@ const ОТКАТЫ = [
         `        container.innerHTML = '<div class="ad-news-preview-wrap">' +`,
    'предпросмотр несёт классы страницы, а не свои'],
 
-  [HTM, `    <link rel="stylesheet" href="../css/news.css?v=69">
-`,
-        ``,
+  /* ЯКОРЬ БЕЗ НОМЕРА ВЕРСИИ: с номером откат умер на первой же правке
+     css — версия поднялась, и якорь перестал находиться. */
+  [HTM, `"../css/news.css`,
+        `"../css/news-ne-podklyuchen.css`,
    'стили статьи подключены в админку и идут ПОСЛЕ admin.css'],
 
   [ADM, `.ad-afisha-ramka {`,
@@ -171,6 +173,23 @@ const ОТКАТЫ = [
   [EJS, `                A.showToast('Не разобрал ссылку. Нужна ссылка на ОДНУ публикацию: ' +`,
         `                alert('Не разобрал ссылку. Нужна ссылка на ОДНУ публикацию: ' +`,
    'редактор не зовёт системные окна браузера'],
+
+  /* Откат возвращает ПРЕЖНЕЕ ПОВЕДЕНИЕ — чистку, срезающую классы целиком.
+     Якорь без обратных косых: в шаблонной строке `\\s` превращается в `s`,
+     и первый вариант этого отката не нашёл ровно поэтому. */
+  [UJS, `        h = оставитьСвоиКлассы(h);
+        h = h.replace(/<\\/?span[^>]*>/gi, '');
+        h = h.replace(/<\\/?font[^>]*>/gi, '');
+        h = h.replace(/<div>/gi, '<p>').replace(/<\\/div>/gi, '</p>');`,
+        `        h = h.replace(/\\s*class="[^"]*"/gi, '');
+        h = h.replace(/<\\/?span[^>]*>/gi, '');
+        h = h.replace(/<\\/?font[^>]*>/gi, '');
+        h = h.replace(/<div>/gi, '<p>').replace(/<\\/div>/gi, '</p>');`,
+   'чистка при сохранении не срезает НАШИ классы'],
+
+  [NJS, `    if (window.KSLT_VIDEO) window.KSLT_VIDEO.починитьКадры(container);`,
+        `    /* кадры не чиним */`,
+   'разбор ссылки на видео — одно определение на обе стороны'],
 
   [NJS, `data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg"><span aria-hidden="true">&#127760;</span>`,
         `data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg">&#127760; <span>`,

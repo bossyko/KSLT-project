@@ -205,27 +205,14 @@
         });
     }
 
+    /**
+     * РАЗБОР ССЫЛКИ ЖИВЁТ В `js/kslt-video.js` — одно определение на одно
+     * понятие: тем же разбором страница новости чинит кадры, сохранённые
+     * раньше. Здесь осталась только обёртка на случай, если общий файл не
+     * подключился: тогда редактор честно скажет «не разобрал ссылку».
+     */
     function toEmbed(url) {
-        var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
-        if (yt) return '<iframe class="news-video news-video-yt" src="https://www.youtube.com/embed/' + yt[1] +
-                       '" frameborder="0" allowfullscreen title="Видео на YouTube"></iframe>';
-        var vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-        if (vm) return '<iframe class="news-video news-video-vm" src="https://player.vimeo.com/video/' + vm[1] +
-                       '" frameborder="0" allowfullscreen title="Видео на Vimeo"></iframe>';
-        /* ИМЯ АККАУНТА В АДРЕСЕ НЕОБЯЗАТЕЛЬНО, А КНОПКА «ПОДЕЛИТЬСЯ» ЕГО
-           СТАВИТ. Проверено живой ссылкой 08.10: инстаграм отдаёт
-           `instagram.com/kslt_tennis.kg/reel/DeGhCRWI39u/`, и прежний разбор
-           её НЕ ПРИНИМАЛ — редактор отвечал «не разобрал ссылку» ровно на
-           тот адрес, который даёт сам инстаграм. Заодно принимаются `reels`
-           и `tv`: это те же посты, только другим словом. */
-        var ig = url.match(/instagram\.com\/(?:[\w.]+\/)?(reel|reels|p|tv)\/([\w-]+)/);
-        if (ig) {
-            var вид = ig[1] === 'reels' ? 'reel' : ig[1];
-            return '<iframe class="news-video news-video-ig" src="https://www.instagram.com/' +
-                   вид + '/' + ig[2] + '/embed" frameborder="0" allowfullscreen ' +
-                   'title="Публикация в Instagram"></iframe>';
-        }
-        return '';
+        return window.KSLT_VIDEO ? window.KSLT_VIDEO.кадр(url) : '';
     }
 
     /**
@@ -236,7 +223,9 @@
         if (!html) return '';
         var h = String(html);
         h = h.replace(/\s*style="[^"]*"/gi, '');
-        h = h.replace(/\s*class="[^"]*"/gi, '');
+        /* Свои классы остаются: `news-video-ig` ставит сам редактор, и
+           срезать его значило бы сломать вертикальный кадр (см. utils.js) */
+        h = A.оставитьСвоиКлассы ? A.оставитьСвоиКлассы(h) : h;
         h = h.replace(/<\/?span[^>]*>/gi, '');
         h = h.replace(/<\/?font[^>]*>/gi, '');
         h = h.replace(/&nbsp;/g, ' ');
