@@ -130,6 +130,7 @@
         Array.prototype.forEach.call(area.querySelectorAll('figure'), function(короб) {
             if (!короб.querySelector('img, iframe')) return;
             короб.classList.add('ad-editor-media');
+            короб.classList.toggle('ad-editor-media--video', !!короб.querySelector('iframe'));
             короб.setAttribute('contenteditable', 'false');
             /* Любая кнопка, а не только своя по классу: класс срезает
                чистка, и по классу короб каждый раз выглядел бы «без кнопки» */

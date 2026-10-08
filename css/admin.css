@@ -2326,10 +2326,62 @@ input[type="date"]::-webkit-datetime-edit {
    оставался в тексте (чтение базы 08.10: два ролика в одном коробе).
    Теперь у каждого куска своя кнопка снятия, а поверх кадра — щит:
    в редакторе ролик не смотрят, его смотрят в предпросмотре. */
+/* ВСТАВЛЕННЫЙ КУСОК В РЕДАКТОРЕ — ПЛИТКА, А НЕ ПОЛОСА ВО ВСЮ ШИРИНУ.
+   Слово Кости 08.10: «в описании вставленные фото и видео... много места
+   так занимает». ЗАМЕР: ролик занимал около 500 высоты, снимок около 250 —
+   пять кусков давали больше двух тысяч пикселей прокрутки, и текст уезжал
+   из глаз. Стало 112 на кусок, пять штук — одна строка.
+   ПОЧЕМУ ПЛИТКИ, А НЕ КАРУСЕЛЬ: карусель прячет всё, кроме одного кадра, а
+   редактору важен ПОРЯДОК — между кусками ставят курсор и пишут текст.
+   Так же показывают вставленное Notion, Ghost и Gutenberg.
+   Ролик в редакторе не смотрят, его смотрят в предпросмотре: кадр скрыт,
+   на его месте — значок. */
 .ad-editor-media {
     position: relative;
+    display: inline-block;
+    vertical-align: top;
+    width: 150px;
+    height: 112px;
+    margin: var(--space-2) var(--space-2) 0 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+
+.ad-editor-media img {
     display: block;
-    margin: var(--space-3) 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ad-editor-media iframe { display: none; }
+
+/* Плитка ролика: значок вместо кадра — и видно, что это видео */
+.ad-editor-media--video::before {
+    content: '\25B6';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs-xl);
+    color: var(--text-secondary);
+}
+
+.ad-editor-media--video::after {
+    content: 'Видео';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--space-1) var(--space-2);
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--text-secondary);
+    font-size: var(--fs-2xs);
+    line-height: var(--lh-snug);
+    text-align: center;
 }
 
 .ad-editor-media-shchit {
@@ -2341,8 +2393,9 @@ input[type="date"]::-webkit-datetime-edit {
 
 .ad-editor-media-remove {
     position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
+    /* На плитке 150 × 112 угол дороже: отступ ступенью ниже */
+    top: var(--space-1);
+    right: var(--space-1);
     z-index: 2;
     width: 28px;
     height: 28px;
@@ -6481,31 +6534,14 @@ select.ad-field-input {
 }
 .ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; }
 
-/* Фото внутри редактора показываем некрупно: это черновик, а не витрина */
-/* Снимки в редакторе идут в строку, а не столбиком: несколько фотографий
-   подряд — это ряд, а не вертикальная лента на весь экран. Подписи и текст
-   внутри figure остаются в полную ширину. */
-.ad-editor-area figure:has(> img),
-.ad-news-preview-body figure:has(> img) {
-    display: inline-block;
-    width: calc(33.333% - 10px);
-    margin: 5px;
-    vertical-align: top;
-}
-.ad-editor-area figure:has(> img) img,
-.ad-news-preview-body figure:has(> img) img {
-    width: 100%;
-    max-width: none;
-    height: auto;
-}
-
-.ad-editor-area figure { margin: 12px 0; }
-.ad-editor-area figure img {
-    max-width: 260px;
-    max-height: 180px;
-    border-radius: 8px;
-    display: block;
-}
+/* ДВА ОПРЕДЕЛЕНИЯ ОДНОГО ПОНЯТИЯ СВЕДЕНЫ 08.10. Здесь жило второе правило
+   про вставленный снимок в редакторе — «треть ширины, поля 5 и 10», числа
+   мимо шкалы, — и оно перебивало плитку `.ad-editor-media` своей
+   специфичностью: замер дал 248 вместо 150. Размер вставленного куска
+   задаёт ОДНО правило — `.ad-editor-media` выше по файлу.
+   Для предпросмотра эти правила больше не нужны вовсе: он рисует ленту
+   кадров, и одиночных figure в нём нет. */
+.ad-news-preview-body figure:has(> img) img { max-width: 100%; }
 .ad-editor-area figure iframe {
     width: 320px;
     height: 180px;
