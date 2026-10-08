@@ -26,15 +26,45 @@
     overflow: hidden;
 }
 
+/* У ОБЛОЖКИ СТАТЬИ НЕТ ПОЛА — ТОЛЬКО ПОТОЛОК (08.10).
+   ЗАМЕР высоты обложки против высоты окна ДО правки: 923/900 · 864/768 ·
+   900/1024 · 880/390 · 422/844 — на телефоне лёжа шапка была вдвое выше
+   экрана, а у ПУСТОЙ статьи 721 при теле 196, то есть в 3.7 раза выше самой
+   новости; таких статей 27 из 31.
+   У РАЗДЕЛОВ РОВНО НАОБОРОТ: там стоит ПОЛ (--oblozhka-pol), потому что
+   обложка несёт название раздела и цифры и схлопнуться ей нельзя. Здесь
+   товар — текст новости, и обложка обязана уместиться вместе с заголовком в
+   один экран. Высота идёт ПО СОДЕРЖИМОМУ (отношение кадра), сверху её
+   держит потолок долями окна.
+   420 — прежнее число этого места, оно осталось верхней границей на широком
+   экране; доля окна забирает узкие и низкие виды. */
+.news-statya-hero {
+    --oblozhka-potolok: min(46vh, 420px);
+}
+
+/* НА НИЗКОМ ГОРИЗОНТАЛЬНОМ ЭКРАНЕ ПОТОЛОК НИЖЕ. ЗАМЕР после правки на
+   844 × 390: верх заголовка 401 при экране 390 — обложка 46vh = 179
+   съедала его вместе с шапкой и полосой возврата, и обещание «заголовок
+   виден без прокрутки» не выполнялось ровно на одном виде из пяти.
+   Делим ВЫСОТОЙ И ПОВОРОТОМ, а не новой шириной: ширины в медиа только
+   640 и 992. Тот же приём, которым у обложек разделов снят пол
+   (css/tokens.css:619). */
+@media (max-height: 500px) and (orientation: landscape) {
+    .news-statya-hero { --oblozhka-potolok: 30vh; }
+}
+
 .news-hero-bg {
     position: relative;
-    height: 420px;
     overflow: hidden;
 }
 
-.news-hero-bg img {
+/* Потолок режет только то, что в него не влезло, и режет ПО ЦЕНТРУ
+   (object-fit), а не по нижнему краю, как это делала коробка с фиксом. */
+.news-statya-hero .news-hero-bg img {
+    display: block;
     width: 100%;
-    height: 100%;
+    height: auto;
+    max-height: var(--oblozhka-potolok);
     object-fit: cover;
     transform: scale(1.1);
     will-change: transform;
@@ -52,13 +82,16 @@
    незаметна, поэтому она подписана, а не спрятана в клик по картинке. */
 .news-hero-zoom {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: var(--space-4);
+    right: var(--space-4);
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 8px 14px;
+    gap: var(--space-2);
+    /* ВЫСОТУ ДЕРЖИТ СТУПЕНЬ, А НЕ ПОЛЯ — описание Button 17:82 говорит это
+       прямым текстом. ЗАМЕР 08.10 давал 146 x 33 при цели нажатия 44. */
+    height: 44px;
+    padding: 0 var(--space-4);
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 999px;
     background: rgba(10, 10, 10, 0.55);
@@ -78,15 +111,34 @@
 }
 
 @media (max-width: 640px) {
-    /* На узком экране подпись съедает место, значка достаточно */
-    .news-hero-zoom { top: 14px; right: 14px; padding: 9px; }
+    /* На узком экране подпись съедает место, значка достаточно. Цель
+       нажатия остаётся 44 x 44 — ступень, а не остаток полей. */
+    .news-hero-zoom { top: var(--space-3); right: var(--space-3); width: 44px; padding: 0; justify-content: center; }
     .news-hero-zoom span { display: none; }
+}
+
+/* МЕРА СТРОКИ — 80ch, решение 05.10. ЗАМЕР колонки ДО правки: 837 · 855 ·
+   734 · 807 · 358, то есть на 1024 колонка была ШИРЕ десктопной, а 855 при
+   кегле 16 — около 107 знаков в строке. Колонка объявлена ОДИН раз и здесь:
+   заголовок обложки, тело статьи, теги, оценка и похожие статьи стоят на
+   одной мере, иначе они разъезжаются по левому краю.
+   «Похожие статьи» на эту меру НЕ встают: это витрина, и её ширину задаёт
+   ширина карточки, а не мера строки (правило 07.10). */
+.news-article-page {
+    /* МЕРА СЧИТАЕТСЯ ПО КОРОБКЕ СОДЕРЖИМОГО. Первый заход поставил
+       min(80ch, 100%) на коробку С ПОЛЯМИ, и ЗАМЕР тут же показал прежнюю
+       беду в новом виде: 744 · 762 · 700 · 326 · 770 — на 1024 колонка
+       СНОВА оказалась шире десктопной, потому что --gutter сам сжимается
+       вместе с окном и отъедал от меры разное число пикселей.
+       Поля прибавлены к пределу, и тогда содержимое ровно 80ch на всех
+       широких видах, а на узких его забирает 100%. */
+    --statya-kolonka: min(calc(80ch + 2 * var(--gutter)), 100%);
 }
 
 .news-hero-content {
     position: relative;
     z-index: 1;
-    max-width: 900px;
+    max-width: var(--statya-kolonka);
     width: 100%;
     margin: 0 auto;
     /* Небольшой отступ снизу: дальше идёт ещё отступ самой статьи, и вместе
@@ -96,15 +148,20 @@
 
 /* Ссылка «Назад к новостям» переехала в общую полосу .kslt-back-wrap */
 
+/* ЗНАЧОК — ЭТО Badge 27:53, А НЕ СВОЙ ПРЯМОУГОЛЬНИК. ЗАМЕР 08.10 давал
+   113 x 26, кегль 12 вес 600, поля 4/14; описание компонента требует высоту
+   24, поля 0/8 и 11 Medium. Совпали только разрядка и капс. */
 .news-category-badge {
-    display: inline-block;
-    padding: 4px 14px;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 var(--space-2);
     border-radius: var(--radius-full);
-    font-size: var(--fs-xs);
-    font-weight: 600;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-3);
 }
 
 .news-category-results {
@@ -165,18 +222,26 @@
     height: 26px;
 }
 
-.news-hero h1 {
-    font-size: clamp(1.8rem, 4.5vw, 3rem);
-    font-weight: 800;
+/* СТУПЕНИ, А НЕ ПЛАВАЮЩИЙ КЕГЛЬ. Стояло clamp(1.8rem, 4.5vw, 3rem), и
+   ЗАМЕР давал 48 · 46 · 38 · 26 · 21 — четыре числа из пяти мимо шкалы
+   11·12·14·16·18·21·26·32·40. Крутилка --fs-hero даёт 40 · 40 · 32 · 26 · 32
+   — ту же лестницу, что у шести приведённых разделов. Вес и межстрочный
+   тоже крутилками: 800 и 1.1 числом были вторым определением того же. */
+.news-statya-hero h1 {
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-extrabold);
     color: var(--text-primary);
-    line-height: 1.1;
-    margin-bottom: var(--space-xs);
+    line-height: var(--lh-tight);
+    margin-bottom: var(--space-2);
 }
 
+/* ПАРА «ЗАГОЛОВОК + ПОДЗАГОЛОВОК» ЕДЕТ ОДНОЙ ГРАНИЦЕЙ: подзаголовок стоит
+   на своей крутилке того же семейства (21 · 21 · 18 · 16 · 18), и ступень
+   между ним и заголовком сохраняется на каждом виде. */
 .news-subtitle {
-    font-size: var(--fs-md);
+    font-size: var(--fs-hero-sub);
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: var(--lh-snug);
     margin-bottom: var(--space-md);
 }
 
@@ -189,7 +254,7 @@
 .news-meta-item {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: var(--space-1);
     color: var(--text-muted);
     font-size: var(--fs-sm);
 }
@@ -201,7 +266,7 @@
 
 /* === ARTICLE BODY === */
 .news-article-body {
-    max-width: 900px;
+    max-width: var(--statya-kolonka);
     margin: 0 auto;
     padding: var(--section-y-sm) var(--gutter) var(--section-y);
 }
@@ -209,7 +274,7 @@
 /* Paragraph */
 .news-paragraph {
     font-size: var(--fs-md);
-    line-height: 1.8;
+    line-height: var(--lh-relaxed);
     color: var(--text-secondary);
     margin-bottom: var(--space-md);
 }
@@ -223,12 +288,12 @@
 
 h2.news-heading {
     font-size: var(--fs-xl);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
 }
 
 h3.news-heading {
     font-size: var(--fs-lg);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 /* Image / Figure */
@@ -257,29 +322,31 @@ h3.news-heading {
 .news-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
+    align-items: start;
+    gap: var(--space-3);
     margin: var(--space-lg) 0;
 }
+/* КОРОБ ДЕРЖИТ ФОРМУ КАДРА, А НЕ ЛАНДШАФТ ПО ПРИВЫЧКЕ. Стояло 4:3 с
+   object-fit: cover, а все снимки с турниров — портрет 3:4: срезался верх и
+   низ, то есть лица. Коробки нет вовсе — её задаёт сам снимок. */
 .news-gallery-item {
     border-radius: var(--radius-md);
     overflow: hidden;
-    aspect-ratio: 4 / 3;
     display: block;
 }
 .news-gallery-item img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
     display: block;
     transition: transform 0.3s ease;
 }
 .news-gallery-item:hover img {
     transform: scale(1.05);
 }
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .news-gallery {
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        gap: var(--space-2);
     }
 }
 
@@ -299,12 +366,12 @@ h3.news-heading {
 .news-quote-icon {
     color: var(--accent);
     opacity: 0.3;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .news-quote-body p {
     font-size: var(--fs-base);
-    line-height: 1.7;
+    line-height: var(--lh-relaxed);
     color: var(--text-secondary);
     font-style: italic;
 }
@@ -312,7 +379,7 @@ h3.news-heading {
 .news-quote-author {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-3);
     margin-top: var(--space-sm);
 }
 
@@ -325,7 +392,7 @@ h3.news-heading {
 
 .news-quote-author span {
     font-size: var(--fs-sm);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     color: var(--text-primary);
 }
 
@@ -351,9 +418,9 @@ h3.news-heading {
 .news-stat-value {
     display: block;
     font-size: var(--fs-xl);
-    font-weight: 800;
+    font-weight: var(--fw-extrabold);
     color: var(--accent);
-    line-height: 1.2;
+    line-height: var(--lh-tight);
 }
 
 .news-stat-label {
@@ -362,24 +429,28 @@ h3.news-heading {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-top: 4px;
+    margin-top: var(--space-1);
 }
 
-/* List */
-.news-list {
+/* ДВА ОПРЕДЕЛЕНИЯ НА ОДНО ИМЯ — БЕДА РОДИЛАСЬ РОВНО НА ШВЕ: класс
+   .news-list носила И эта вставка в тексте статьи, И секция страницы
+   списка (ниже, витрина). Секции доставались отступы вставки, вставке —
+   отступы секции. Вставка переименована: имя .news-list осталось у витрины,
+   она старше и шире. */
+.news-tekst-spisok {
     margin: var(--space-md) 0;
     padding-left: var(--space-md);
 }
 
-.news-list li {
+.news-tekst-spisok li {
     font-size: var(--fs-base);
-    line-height: 1.8;
+    line-height: var(--lh-normal);
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     position: relative;
 }
 
-.news-list li::marker {
+.news-tekst-spisok li::marker {
     color: var(--accent);
 }
 
@@ -394,7 +465,7 @@ h3.news-heading {
 
 .news-poll-question {
     font-size: var(--fs-md);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: var(--text-primary);
     margin-bottom: var(--space-md);
 }
@@ -402,22 +473,22 @@ h3.news-heading {
 .news-poll-options {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
 .news-poll-option {
     display: block;
     width: 100%;
-    padding: 12px 16px;
+    padding: var(--space-3) var(--space-4);
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     font-size: var(--fs-base);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: border-color 0.2s, background 0.2s;
     text-align: left;
 }
 
@@ -430,7 +501,7 @@ h3.news-heading {
 .news-poll-results {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--space-3);
 }
 
 .news-poll-result-item {
@@ -439,14 +510,14 @@ h3.news-heading {
 
 .news-poll-result-item.voted .news-poll-result-label {
     color: var(--accent);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .news-poll-result-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .news-poll-result-label {
@@ -456,7 +527,7 @@ h3.news-heading {
 
 .news-poll-result-pct {
     font-size: var(--fs-sm);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: var(--text-primary);
 }
 
@@ -482,19 +553,19 @@ h3.news-heading {
     font-size: var(--fs-xs);
     color: var(--text-muted);
     text-align: center;
-    margin-top: 8px;
+    margin-top: var(--space-2);
 }
 
 /* === TAGS === */
 .news-tags {
-    max-width: 900px;
+    max-width: var(--statya-kolonka);
     margin: 0 auto;
     padding: 0 var(--gutter) var(--section-y-sm);
 }
 
 .news-section-title {
     font-size: var(--fs-md);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: var(--text-primary);
     margin-bottom: var(--space-md);
 }
@@ -502,20 +573,23 @@ h3.news-heading {
 .news-tags-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
+/* Высота — ступень кнопок xs 28, а не остаток полей 6 + 6 */
 .news-tag {
-    display: inline-block;
-    padding: 6px 16px;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 var(--space-4);
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
     text-decoration: none;
-    transition: all 0.2s;
+    transition: border-color 0.2s, color 0.2s;
 }
 
 .news-tag:hover {
@@ -525,7 +599,7 @@ h3.news-heading {
 
 /* === REACTIONS === */
 .news-reactions {
-    max-width: 900px;
+    max-width: var(--statya-kolonka);
     margin: 0 auto;
     padding: 0 var(--gutter) var(--section-y-sm);
     text-align: center;
@@ -538,22 +612,30 @@ h3.news-heading {
 .news-reactions-list {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
+/* ЕДИНСТВЕННЫЙ НАСТОЯЩИЙ ПРОВАЛ КОНТРАСТА НА СТРАНИЦЕ: у <button> свой
+   цвет текста от браузера — buttontext, то есть чёрный, и ЗАМЕР 08.10 дал
+   rgb(0,0,0) на #111111 = 1.11 при норме 4.5. Цвет берётся из токена, и
+   тогда всё, что внутри кнопки не красится само, читается.
+   Высоту даёт ступень, а не поля. `transition: all` убран: он анимировал и
+   то, что анимировать нельзя. */
 .news-reaction-btn {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 12px 20px;
+    gap: var(--space-2);
+    min-height: 52px;
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-secondary);
+    font-family: inherit;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: all 0.2s;
-    min-width: 70px;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .news-reaction-btn:hover {
@@ -573,10 +655,10 @@ h3.news-heading {
 .news-reaction-check {
     font-size: var(--fs-2xs);
     color: var(--accent);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     position: absolute;
-    top: 4px;
-    right: 6px;
+    top: var(--space-1);
+    right: var(--space-1);
 }
 
 .news-reaction-emoji {
@@ -586,7 +668,8 @@ h3.news-heading {
 
 .news-reaction-count {
     font-size: var(--fs-sm);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-none);
     color: var(--text-secondary);
 }
 
@@ -619,14 +702,14 @@ h3.news-heading {
     justify-content: center;
     opacity: 0;
     transition: opacity 0.25s ease;
-    padding: 20px;
+    padding: var(--space-5);
 }
 .news-guest-overlay.visible { opacity: 1; }
 .news-guest-modal {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: 16px;
-    padding: 32px 28px;
+    padding: var(--space-8) var(--space-6);
     max-width: 380px;
     width: 100%;
     text-align: center;
@@ -655,23 +738,27 @@ h3.news-heading {
 }
 .news-guest-modal-title {
     font-size: var(--fs-lg);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: #fff;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 .news-guest-modal-text {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    margin-bottom: 20px;
-    line-height: 1.5;
+    margin-bottom: var(--space-5);
+    line-height: var(--lh-normal);
 }
+/* Высота — ступень кнопок md 44, а не поля 12 + 12 */
 .news-guest-modal-btn {
-    display: inline-block;
-    padding: 12px 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 var(--space-8);
     background: var(--accent);
     color: #000;
-    font-weight: 700;
-    border-radius: 8px;
+    font-weight: var(--fw-bold);
+    border-radius: var(--radius-sm);
     text-decoration: none;
     transition: opacity 0.2s;
 }
@@ -730,7 +817,7 @@ body.news-article-page .section-sponsors-compact {
     border-radius: var(--radius-lg);
     overflow: hidden;
     text-decoration: none;
-    transition: all 0.3s;
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .news-related-card:hover {
@@ -739,8 +826,10 @@ body.news-article-page .section-sponsors-compact {
     box-shadow: var(--shadow-lg);
 }
 
+/* 180 и 200 на узком виде — два числа мимо шкалы на одно понятие. Короб
+   держит ОТНОШЕНИЕ, и тогда он один на все виды. */
 .news-related-img {
-    height: 180px;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
 }
 
@@ -759,23 +848,28 @@ body.news-article-page .section-sponsors-compact {
     padding: var(--space-md);
 }
 
+/* Высота значка — ступень Badge 27:53, поля 0/8 */
+/* ОДНО ПОНЯТИЕ — ОДИН ВЕС: значок категории в шапке статьи и значок на
+   карточке похожей статьи стояли 500 и 600. Badge 27:53 говорит 11 Medium. */
 .news-related-category {
-    display: inline-block;
-    padding: 2px 10px;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 var(--space-2);
     border-radius: var(--radius-full);
     font-size: var(--fs-2xs);
-    font-weight: 600;
+    font-weight: var(--fw-medium);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .news-related-info h3 {
     font-size: var(--fs-base);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: var(--text-primary);
-    line-height: 1.3;
-    margin-bottom: 8px;
+    line-height: var(--lh-snug);
+    margin-bottom: var(--space-2);
 }
 
 .news-related-date {
@@ -893,7 +987,7 @@ body.news-article-page .section-sponsors-compact {
 
 .news-not-found h1 {
     font-size: var(--fs-2xl);
-    font-weight: 800;
+    font-weight: var(--fw-extrabold);
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
 }
@@ -908,14 +1002,15 @@ body.news-article-page .section-sponsors-compact {
 .news-not-found-btn {
     display: inline-flex;
     align-items: center;
-    padding: 14px 36px;
+    height: 44px;
+    padding: 0 var(--space-8);
     background: var(--accent);
     color: #000;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     font-size: var(--fs-base);
     border-radius: var(--radius-full);
     text-decoration: none;
-    transition: all 0.2s;
+    transition: background 0.2s, transform 0.2s;
 }
 
 .news-not-found-btn:hover {
@@ -942,15 +1037,19 @@ body.news-article-page .section-sponsors-compact {
     }
 }
 
-@media (max-width: 768px) {
-    /* Обложка отдельной новости: высота по содержимому. Жёсткие 55vh
-       обрезали всё, что ниже картинки, — заголовок и дату статьи просто
-       не было видно, страница открывалась «без обложки» */
-    .news-hero:not(:has(.news-hero-content-list)) {
-        height: auto;
-        overflow: visible;
-    }
-
+/* ГРАНИЦ ДВЕ — 640 И 992, ТРЕТЬЕЙ НЕ ЗАВОДИТСЯ.
+   Было три чужих: 768, 480 и 375. Они пришли сюда до правила о сетке и
+   уцелели 08.10 только потому, что страница новости была отдельным куском.
+   Что куда уехало:
+   · доля высоты окна (50vh) и три кегля заголовка — СНЯТЫ ВОВСЕ: высоту
+     держит потолок обложки, кегль — крутилка --fs-hero;
+   · подзаголовок — снят: его держит --fs-hero-sub;
+   · .news-article-container — снят как мёртвый: класса нет ни в одном html
+     и ни в одном js, проверено поиском по продукту;
+   · кегль абзаца 14 на 375 — снят: тело статьи читают подряд, и ниже 16
+     Safari на iOS зумит страницу;
+   · остальное сведено в 640. */
+@media (max-width: 640px) {
     .news-hero-content {
         padding: 0 var(--pad-x) var(--section-y-sm);
     }
@@ -971,17 +1070,6 @@ body.news-article-page .section-sponsors-compact {
         padding: var(--section-y-sm) var(--pad-x);
     }
 
-    /* 08.10: кегль узких видов принадлежит обложке ОТДЕЛЬНОЙ НОВОСТИ.
-       Обложка списка стоит на общей крутилке --fs-hero, и её это правило
-       перебивало — ЗАМЕР дал 21 при ступени 26. */
-    .news-hero:not(:has(.news-hero-content-list)) h1 {
-        font-size: var(--fs-xl);
-    }
-
-    .news-subtitle {
-        font-size: var(--fs-base);
-    }
-
     .news-hero-meta {
         flex-direction: column;
         gap: var(--space-xs);
@@ -991,49 +1079,21 @@ body.news-article-page .section-sponsors-compact {
         grid-template-columns: 1fr;
     }
 
-    .news-related-img {
-        height: 200px;
-    }
-
-    /* Disable parallax on mobile */
-    .news-hero-bg img {
+    /* Движения обложки на телефоне нет: прокрутка там и есть движение */
+    .news-statya-hero .news-hero-bg img {
         transform: none !important;
     }
 
     .news-stats {
-        gap: 8px;
+        gap: var(--space-2);
     }
 
     .news-stat-item {
-        min-width: 70px;
+        min-width: var(--space-16);
     }
 
     .news-stat-value {
         font-size: var(--fs-md);
-    }
-}
-
-@media (max-width: 480px) {
-
-    /* 08.10: кегль обложки списка снят — ЗАМЕР дал 21 на телефоне при
-       ступени 26. Его держит общая крутилка --fs-hero (40 · 40 · 32 · 26 ·
-       32), как у «Услуг», «Кортов», «Тренеров» и «Поиска игрока». */
-
-            /* Article page */
-    /* 08.10: ДОЛЯ ВЫСОТЫ ОКНА ПРИНАДЛЕЖИТ ОБЛОЖКЕ ОТДЕЛЬНОЙ НОВОСТИ.
-       Без оговорки правило доставало и обложку СПИСКА: замер на 390×844
-       дал 422 вместо 275 (50vh), и пол раздела переставал что-то значить.
-       Тот же дефект 07.10 нашёлся у «Поиска игрока» (style.css:11863). */
-    .news-hero:not(:has(.news-hero-content-list)) {
-        height: 50vh;
-    }
-
-    .news-hero:not(:has(.news-hero-content-list)) h1 {
-        font-size: var(--fs-lg);
-    }
-
-    .news-paragraph {
-        font-size: var(--fs-base);
     }
 
     h2.news-heading {
@@ -1045,12 +1105,11 @@ body.news-article-page .section-sponsors-compact {
     }
 
     .news-reactions-list {
-        gap: 10px;
+        gap: var(--space-3);
     }
 
     .news-reaction-btn {
-        padding: 10px 14px;
-        min-width: 60px;
+        padding: var(--space-3);
     }
 
     .news-reaction-emoji {
@@ -1062,22 +1121,10 @@ body.news-article-page .section-sponsors-compact {
     }
 
     .news-not-found-btn {
-        padding: 12px 28px;
         width: 100%;
         justify-content: center;
-        max-width: 250px;
-    }
-}
-
-@media (max-width: 375px) {
-    .news-hero:not(:has(.news-hero-content-list)) h1 {
-        font-size: var(--fs-md);
-    }
-    .news-article-container {
-        padding: 0 12px 48px;
-    }
-    .news-paragraph {
-        font-size: var(--fs-sm);
+        /* 320 — ширина из Search field 50:67, а не подгонка под телефон */
+        max-width: 320px;
     }
 }
 
@@ -1097,21 +1144,23 @@ body.news-article-page .section-sponsors-compact {
     -moz-osx-font-smoothing: auto;
 }
 
+/* МЕЖСТРОЧНЫЙ ИЗ ЛЕСТНИЦЫ: 1.8, 1.75 и 1.7 — три числа на один уровень, и
+   ни одного на ступени 1 · 1.1 · 1.3 · 1.5 · 1.65. Абзац — relaxed 1.65,
+   строка списка — normal 1.5: список читают глазом вниз, а не подряд. */
 .news-html {
     font-size: var(--fs-base);
-    line-height: 1.8;
+    line-height: var(--lh-relaxed);
 }
 
-.news-html p { margin: 0 0 var(--space-sm); line-height: 1.75; }
+.news-html p { margin: 0 0 var(--space-sm); line-height: var(--lh-relaxed); }
 .news-html h3 { margin: var(--space-md) 0 var(--space-xs); font-size: var(--fs-lg); }
 .news-html ul,
-.news-html ol { margin: 0 0 var(--space-sm); padding-left: 24px; }
-.news-html li { margin-bottom: 6px; line-height: 1.7; }
+.news-html ol { margin: 0 0 var(--space-sm); padding-left: var(--space-6); }
+.news-html li { margin-bottom: var(--space-2); line-height: var(--lh-normal); }
 .news-html a { color: var(--accent); }
 
 /* Фото и видео, вставленные внутрь текста */
 .news-html figure { margin: var(--space-md) 0; }
-.news-html figure img { width: 100%; height: auto; border-radius: var(--radius-md); display: block; }
 .news-html figure iframe {
     width: 100%;
     aspect-ratio: 16 / 9;
@@ -1128,7 +1177,7 @@ body.news-article-page .section-sponsors-compact {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: var(--space-10);
     background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -1159,8 +1208,8 @@ body.news-article-page .section-sponsors-compact {
 .news-viewer-nav:hover { background: rgba(255, 255, 255, 0.18); }
 
 .news-viewer-close {
-    top: 20px;
-    right: 24px;
+    top: var(--space-6);
+    right: var(--space-6);
     width: 44px;
     height: 44px;
     font-size: var(--fs-xl);
@@ -1172,16 +1221,18 @@ body.news-article-page .section-sponsors-compact {
     transform: translateY(-50%);
     width: 52px;
     height: 52px;
+    /* 52 — ступень кнопок, цель нажатия с запасом: просмотрщик листают
+       пальцем по краю экрана */
     font-size: var(--fs-2xl);
     line-height: 1;
 }
 
-.news-viewer-prev { left: 24px; }
-.news-viewer-next { right: 24px; }
+.news-viewer-prev { left: var(--space-6); }
+.news-viewer-next { right: var(--space-6); }
 
 .news-viewer-count {
     position: absolute;
-    bottom: 24px;
+    bottom: var(--space-6);
     left: 0;
     right: 0;
     text-align: center;
@@ -1190,42 +1241,92 @@ body.news-article-page .section-sponsors-compact {
 }
 
 /* Фото внутри текста: вписываем целиком, не обрезая — на снимках с турниров
-   по краям стоят люди, и кадрирование отрезает их. Крупный вид — по нажатию. */
+   по краям стоят люди, и кадрирование отрезает их. Крупный вид — по нажатию.
+   ОДНО ОПРЕДЕЛЕНИЕ: ниже стояло второе, через :has, и оно побеждало весом —
+   width: 100% перебивал width: auto, и снимок всё-таки растягивался во всю
+   колонку вопреки этому самому замечанию. Потолок — долей окна, 520 осталось
+   верхней границей широкого экрана. */
 .news-html figure img {
-    max-height: 520px;
+    display: block;
     width: auto;
     max-width: 100%;
+    height: auto;
+    max-height: min(64vh, 520px);
     margin: 0 auto;
-    object-fit: contain;
+    border-radius: var(--radius-md);
     cursor: zoom-in;
 }
 
 @media (max-width: 640px) {
-    .news-viewer { padding: 16px; }
-    .news-viewer-nav { width: 42px; height: 42px; font-size: var(--fs-xl); }
-    .news-viewer-prev { left: 8px; }
-    .news-viewer-next { right: 8px; }
+    /* 42 было мимо шкалы И ниже цели нажатия 44. Ступень вниз — 44, а не 42:
+       палец на телефоне не меньше, чем на десктопе. */
+    .news-viewer { padding: var(--space-4); }
+    .news-viewer-nav { width: 44px; height: 44px; font-size: var(--fs-xl); }
+    .news-viewer-prev { left: var(--space-2); }
+    .news-viewer-next { right: var(--space-2); }
 }
 
 /* ---- Лента снимков: больше двух фотографий ---- */
+/* КОРОБКА БЕРЁТ ОТНОШЕНИЕ ПЕРВОГО КАДРА, А НЕ ЛАНДШАФТ ПО ПРИВЫЧКЕ.
+   ЗАМЕР 08.10: все 15 фотографий статьи — портрет 0.75 (3:4), а коробка
+   была 834 x 560; ПОСЧИТАНО из этих чисел — видно 420 x 560, по бокам 414
+   пустых пикселей, ровно половина ширины. Снимки с турниров делают на
+   телефон, поэтому портрет будет всегда.
+   Отношение приходит крутилкой --kadr-shirina-k (ширина/высота первого
+   кадра, её ставит js/news.js); 1.3333 — запасное, пока кадр не загрузился.
+   Высоту держит потолок долями окна, ширина следует за отношением — и тогда
+   крыльев нет вовсе, а кадр другой формы лежит на подложке по центру.
+   ПОДЛОЖКА — РЕШЕНИЕ КОСТИ 08.10: ступень выше --bg-card, то есть
+   --bg-elevated. #111111 на фоне #0A0A0A даёт 1.048 — поверхность есть в
+   коде, а на экране её нет, и поля читались дырой, а не полями карточки. */
 .news-carousel {
+    --galereya-potolok: min(70vh, 560px);
     margin: var(--space-lg) 0;
 }
 
 .news-carousel-stage {
     position: relative;
-    background: var(--bg-card);
+    width: min(100%, calc(var(--galereya-potolok) * var(--kadr-shirina-k, 1.3333)));
+    aspect-ratio: var(--kadr-shirina-k, 1.3333);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
-.news-carousel-main {
+/* КАДР — КНОПКА, А НЕ КАРТИНКА: окно открывается и с клавиатуры, и фокус
+   после закрытия возвращается сюда, а не в тело страницы. Кнопка — только
+   обёртка: своей краски, полей и рамки у неё нет. */
+.news-carousel-kadr {
     width: 100%;
-    max-height: 560px;
-    object-fit: contain;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
     display: block;
     cursor: zoom-in;
+}
+
+.news-carousel-kadr:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.news-carousel-main {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Снимок в тексте тоже нажимается с клавиатуры — у него role="button" */
+.news-html figure img:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .news-carousel-nav {
@@ -1249,14 +1350,14 @@ body.news-article-page .section-sponsors-compact {
 }
 
 .news-carousel-nav:hover { background: rgba(0, 0, 0, 0.8); }
-.news-carousel-prev { left: 12px; }
-.news-carousel-next { right: 12px; }
+.news-carousel-prev { left: var(--space-3); }
+.news-carousel-next { right: var(--space-3); }
 
 .news-carousel-count {
     position: absolute;
-    right: 14px;
-    bottom: 12px;
-    padding: 4px 10px;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    padding: var(--space-1) var(--space-3);
     font-size: var(--fs-xs);
     color: rgba(255, 255, 255, 0.85);
     background: rgba(0, 0, 0, 0.55);
@@ -1266,15 +1367,22 @@ body.news-article-page .section-sponsors-compact {
 .news-carousel-thumbs {
     display: flex;
     justify-content: center;     /* пока лента короче ширины — держим по центру */
-    gap: 8px;
-    margin-top: 10px;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: var(--space-1);
 }
 
+/* МИНИАТЮРА БЕРЁТ ТО ЖЕ ОТНОШЕНИЕ, ЧТО ГЛАВНЫЙ КАДР. Стояло 88 x 64 с
+   object-fit: cover — у портретного кадра срезался верх и низ, то есть лица,
+   и ни 88, ни 64 не стояли на шкале.
+   Высота 64 объявлена здесь нарочно и одна на все виды: при портрете 3:4
+   она даёт ширину 48, и обе стороны остаются не меньше цели нажатия 44.
+   Прежняя ступень вниз (68 x 50) давала ширину 37 — палец мимо. */
 .news-carousel-thumb {
-    flex: 0 0 88px;
+    flex: 0 0 auto;
     height: 64px;
+    aspect-ratio: var(--kadr-shirina-k, 1.3333);
     padding: 0;
     border: 2px solid transparent;
     border-radius: var(--radius-md);
@@ -1289,10 +1397,8 @@ body.news-article-page .section-sponsors-compact {
 .news-carousel-thumb:hover { opacity: 0.85; }
 .news-carousel-thumb.active { opacity: 1; border-color: var(--accent); }
 
-@media (max-width: 640px) {
-    .news-carousel-nav { width: 36px; height: 36px; font-size: var(--fs-lg); }
-    .news-carousel-thumb { flex-basis: 68px; height: 50px; }
-}
+/* Стрелки остаются 44 x 44 на всех видах: описание Icon button 40:93 прямо
+   говорит, что под палец годится только lg 44. Было 36 на узком виде. */
 
 /* Карточка мировой новости уводит на сайт источника, а не на нашу страницу:
    наполнить свою нечем — чужой текст мы не перепечатываем. Стрелка
@@ -1302,28 +1408,18 @@ body.news-article-page .section-sponsors-compact {
 .news-outside .news-related-info h3::after {
     content: ' \2197';
     color: var(--accent);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     white-space: nowrap;
 }
 
 /* === СНИМКИ В ТЕКСТЕ === */
-/* Несколько снимков подряд собираются в галерею — крупный кадр и лента
-   миниатюр, это делает news.js. Здесь остаётся одиночный снимок: он идёт
-   во всю ширину колонки, как и раньше. */
-.news-html figure:has(> img) img {
-    width: 100%;
-    height: auto;
-    border-radius: 12px;
-    display: block;
-}
-
 /* === ЛЕНТА МИНИАТЮР: ЛИСТАНИЕ === */
 /* Когда снимков много, лента шире экрана. Стрелки по краям листают её; если
    всё помещается, они прячутся и не мешают. */
 .news-thumbs-row {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-2);
 }
 .news-thumbs-row .news-carousel-thumbs {
     flex: 1 1 auto;
@@ -1344,7 +1440,7 @@ body.news-article-page .section-sponsors-compact {
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background 0.2s, opacity 0.2s;
 }
@@ -1352,6 +1448,63 @@ body.news-article-page .section-sponsors-compact {
 .news-thumbs-nav:disabled { opacity: 0.3; cursor: default; }
 
 .news-thumbs-row.news-thumbs-fits .news-thumbs-nav { display: none; }
+
+/* ========================================================================
+   СПИСОК ПОБЕДИТЕЛЕЙ
+
+   ЗАМЕР 08.10 на «Завершение и итоги ТБШ 2026»: 58 отдельных абзацев,
+   каждый короче 60 знаков, у каждого в начале значок места; тегов <ul> и
+   <ol> — НОЛЬ. Строка занимала 28 в высоту при содержимом около 140 из 837
+   ширины колонки, и весь список уходил вниз на 1624.
+   Разметку восстанавливает js (собратьПобедителей). Здесь — раскладка: две
+   колонки на широких видах, одна на 640, заголовок категории на всю ширину
+   и не разорванный между колонками.
+   ПОЧЕМУ ЗАГОЛОВОК НА ВСЮ ШИРИНУ: иначе он садится в низ колонки, а его
+   шесть строк уезжают в следующую — читатель видит категорию без имён и
+   имена без категории.
+   ======================================================================== */
+.news-pobediteli {
+    columns: 2;
+    column-gap: var(--space-6);
+    margin: 0 0 var(--space-4);
+}
+
+/* ВЕС: .news-html h3 (0,1,1) перебивает одноклассовое имя, и ЗАМЕР дал
+   кегль 21 от него, а вес 600 — отсюда: один уровень, два владельца.
+   Родитель в селекторе уравнивает вес, и уровень объявлен здесь целиком.
+   21 — тот же h3 статьи: заголовок категории и есть подзаголовок в тексте. */
+.news-html .news-pobediteli-gruppa {
+    column-span: all;
+    font-size: var(--fs-lg);
+    margin: var(--space-4) 0 var(--space-3);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+}
+
+.news-html .news-pobediteli-gruppa:first-child { margin-top: 0; }
+
+/* ВЕС ПРАВИЛА РЕШАЕТ, А НЕ НАМЕРЕНИЕ: .news-html ul (0,1,1) перебивает
+   одноклассовое имя, и `padding: 0` не доезжал — ЗАМЕР дал отступ 24 от
+   общего правила тела статьи. Отступ оставляем (имена стоят под своей
+   категорией), но объявляем его ЗДЕСЬ и один раз. */
+.news-html .news-pobediteli-spisok {
+    margin: 0;
+    padding-left: var(--space-6);
+    list-style: none;
+}
+
+.news-pobediteli-spisok li {
+    /* Строка не разрывается между колонками: имя и место — одно целое */
+    break-inside: avoid;
+    margin: 0 0 var(--space-2);
+    line-height: var(--lh-normal);
+}
+
+@media (max-width: 640px) {
+    /* ГРАНИЦА ОДНОЙ КОЛОНКИ — 640, А НЕ 480: правило файла-сетки */
+    .news-pobediteli { columns: 1; }
+}
 
 /* ========================================================================
    ВИТРИНА НОВОСТЕЙ — 07.10, ПРОБА ДО СОГЛАСИЯ

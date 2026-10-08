@@ -154,6 +154,20 @@ async function initFromSupabase(client, slug) {
 
             var article = mapDbArticle(result.data);
 
+            /* ЯЗЫКОВОЙ ШОВ. ЗАМЕР 08.10: список честно прячет непереведённое
+               (ru 35 · en 22 · kg 16), а СТРАНИЦА не прятала — ссылка вида
+               news-en.html?slug=... открывала статью целиком по-русски, без
+               единого слова о том, что перевода нет.
+               Прятать её нельзя: ссылка приходит извне, и «страница не
+               найдена» на существующую статью — вранье. Поэтому на чужом
+               языке страница показывает пустое состояние (Empty state
+               37:53, его описание требует «always say what will appear
+               here») и кнопку на русскую версию. */
+            if (article.переведена === false) {
+                renderNetPerevoda(article);
+                return;
+            }
+
             // Fetch 3 related articles (latest, excluding current)
             var relResult = await client.from('news')
                 .select('*')
@@ -275,7 +289,11 @@ var ПОДПИСИ = {
         emptySearch: "Ничего не нашлось",
         emptySearchHint: "Проверьте написание или очистите поиск",
         emptyCategory: "В этой категории пока пусто",
-        emptyCategoryHint: "Выберите другую категорию"
+        emptyCategoryHint: "Выберите другую категорию",
+        viewerTitle: "Просмотр фотографии",
+        noTranslationTitle: "Этой новости нет на этом языке",
+        noTranslationText: "Здесь появится перевод, когда редакция его опубликует. Пока новость есть только по-русски.",
+        noTranslationBtn: "Читать по-русски"
     },
     en: {
         backToNews: "Back to news",
@@ -306,7 +324,11 @@ var ПОДПИСИ = {
         emptySearch: "Nothing found",
         emptySearchHint: "Check the spelling or clear the search",
         emptyCategory: "Nothing in this category yet",
-        emptyCategoryHint: "Pick another category"
+        emptyCategoryHint: "Pick another category",
+        viewerTitle: "Photo viewer",
+        noTranslationTitle: "This story is not available in English",
+        noTranslationText: "The translation will appear here once the editors publish it. For now the story exists in Russian only.",
+        noTranslationBtn: "Read in Russian"
     },
     kg: {
         backToNews: "Жаңылыктарга кайтуу",
@@ -337,7 +359,11 @@ var ПОДПИСИ = {
         emptySearch: "Эч нерсе табылган жок",
         emptySearchHint: "Жазылышын текшериңиз же издөөнү тазалаңыз",
         emptyCategory: "Бул категорияда азырынча эч нерсе жок",
-        emptyCategoryHint: "Башка категорияны тандаңыз"
+        emptyCategoryHint: "Башка категорияны тандаңыз",
+        viewerTitle: "Сүрөттү көрүү",
+        noTranslationTitle: "Бул жаңылык кыргызча жок",
+        noTranslationText: "Котормо жарыялангандан кийин ушул жерде чыгат. Азырынча жаңылык орусча гана бар.",
+        noTranslationBtn: "Орусча окуу"
     }
 };
 
@@ -454,6 +480,13 @@ function renderHero(article, readTime) {
     var labels = getLabels();
     var backUrl = isEnPage() ? 'news-en.html' : (isKgPage() ? 'news-kg.html' : 'news.html');
 
+    /* ОБЛОЖКА СТАТЬИ НОСИТ СВОЁ ИМЯ. Класс .news-hero общий со списком, и
+       правила статьи доставали обложку списка: 08.10 это стоило нам доли
+       высоты окна (50vh) и трёх кеглей заголовка, которые ловились
+       оговоркой :not(:has(.news-hero-content-list)). Оговорка — не имя:
+       список метит себя сам (news-hero-list), теперь метит и статья. */
+    container.classList.add('news-statya-hero');
+
     // Возврат к списку — отдельной полосой у края страницы, как на страницах
     // услуг и турниров. Раньше ссылка стояла в одной колонке с заголовком
     // и налезала на плашку категории.
@@ -554,7 +587,12 @@ function renderContent(article) {
             html += '<div class="news-carousel news-animate">' +
                 '<div class="news-carousel-stage">' +
                     '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
-                    '<img class="news-carousel-main" src="' + esc(article.gallery[0]) + '" alt="" data-index="0">' +
+                    /* КАДР — КНОПКА. Картинка фокус не берёт: окно нельзя было
+                       открыть с клавиатуры вовсе, а после закрытия фокус
+                       уходил в тело страницы, а не туда, откуда пришёл. */
+                    '<button type="button" class="news-carousel-kadr" aria-label="' + getLabels().viewerTitle + '">' +
+                        '<img class="news-carousel-main" src="' + esc(article.gallery[0]) + '" alt="" data-index="0">' +
+                    '</button>' +
                     '<button class="news-carousel-nav news-carousel-next" aria-label="Следующее">&#8250;</button>' +
                     '<div class="news-carousel-count">1 / ' + article.gallery.length + '</div>' +
                 '</div>' +
@@ -584,8 +622,89 @@ function renderContent(article) {
 
     container.innerHTML = html;
     собратьСнимкиВГалерею(container);
+    собратьПобедителей(container);
+    открытьСКлавиатуры(container);
     initCarousel(container, article.gallery || []);
     initPhotoViewer(container, article.gallery || []);
+}
+
+/* Значки места: золото, серебро, бронза, медаль, кубок. Строка победителя
+   начинается с одного из них — так набирают в админке. */
+var ЗНАЧОК_МЕСТА = /[\u{1F947}-\u{1F949}\u{1F3C5}\u{1F3C6}]/u;
+var ДЛИНА_СТРОКИ_СПИСКА = 60;
+
+/**
+ * СПИСОК ПОБЕДИТЕЛЕЙ — ЭТО НЕ СПИСОК, А ПЯТЬДЕСЯТ ВОСЕМЬ АБЗАЦЕВ.
+ *
+ * ЗАМЕР 08.10 на «Завершение и итоги ТБШ 2026»: 58 отдельных <p>, каждый
+ * короче 60 знаков, у каждого в начале значок места; тегов <ul> и <ol> —
+ * ноль. Строка занимала 28 в высоту при содержимом около 140 из 837 ширины
+ * колонки, и весь список уходил вниз на 1624.
+ *
+ * Пока редактор админки не умеет списков, разметку восстанавливаем здесь:
+ * подряд идущие короткие абзацы со значком места становятся настоящим <ul>,
+ * а короткая строка БЕЗ значка внутри того же хода — заголовком категории
+ * («Женская категория FUTURES»).
+ *
+ * ЭТО ЭВРИСТИКА, А НЕ ПРАВИЛО. Длинная строка со значком в список не
+ * попадёт, и ход, где медалей меньше трёх, не считается списком вовсе —
+ * иначе два коротких абзаца подряд превратились бы в список на каждой
+ * статье сайта. За порогами следит сторож в прувере. Отдельной строкой
+ * просим завести список в админке: тогда это место уйдёт целиком.
+ */
+function собратьПобедителей(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('.news-html'), function (тело) {
+        var дети = Array.prototype.slice.call(тело.children);
+        var ход = [];
+
+        function медаль(p) { return ЗНАЧОК_МЕСТА.test(p.textContent); }
+
+        function закрыть() {
+            /* Края хода без медали в список не входят: это обычные короткие
+               абзацы, которые просто оказались рядом. Один такой перед
+               первой медалью оставляем — это и есть заголовок категории. */
+            while (ход.length && !медаль(ход[ход.length - 1])) ход.pop();
+            while (ход.length > 1 && !медаль(ход[0]) && !медаль(ход[1])) ход.shift();
+
+            if (ход.filter(медаль).length < 3) { ход = []; return; }
+
+            var блок = document.createElement('div');
+            блок.className = 'news-pobediteli';
+            var список = null;
+
+            ход.forEach(function (p) {
+                if (медаль(p)) {
+                    if (!список) {
+                        список = document.createElement('ul');
+                        список.className = 'news-pobediteli-spisok';
+                        блок.appendChild(список);
+                    }
+                    var строка = document.createElement('li');
+                    строка.innerHTML = p.innerHTML.trim();
+                    список.appendChild(строка);
+                } else {
+                    var заголовок = document.createElement('h3');
+                    заголовок.className = 'news-pobediteli-gruppa';
+                    заголовок.innerHTML = p.innerHTML.trim();
+                    блок.appendChild(заголовок);
+                    список = null;
+                }
+            });
+
+            ход[0].parentNode.insertBefore(блок, ход[0]);
+            ход.forEach(function (p) { p.remove(); });
+            ход = [];
+        }
+
+        дети.forEach(function (эл) {
+            var коротко = эл.tagName === 'P' &&
+                          эл.textContent.trim().length <= ДЛИНА_СТРОКИ_СПИСКА &&
+                          !эл.querySelector('img, iframe');
+            if (коротко) { ход.push(эл); return; }
+            закрыть();
+        });
+        закрыть();
+    });
 }
 
 /** Лента снимков: стрелки, миниатюры, счётчик. Крупный кадр открывает просмотр. */
@@ -610,7 +729,9 @@ function собратьСнимкиВГалерею(root) {
             блок.innerHTML =
                 '<div class="news-carousel-stage">' +
                     '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
-                    '<img class="news-carousel-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
+                    '<button type="button" class="news-carousel-kadr" aria-label="' + getLabels().viewerTitle + '">' +
+                        '<img class="news-carousel-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
+                    '</button>' +
                     '<button class="news-carousel-nav news-carousel-next" aria-label="Следующее">&#8250;</button>' +
                     '<div class="news-carousel-count">1 / ' + адреса.length + '</div>' +
                 '</div>' +
@@ -636,6 +757,22 @@ function собратьСнимкиВГалерею(root) {
     });
 }
 
+/**
+ * Одиночный снимок в тексте тоже открывается с клавиатуры.
+ *
+ * ОБХОД 08.10: мышью снимок открывался, а Tab по нему не проходил вовсе —
+ * <img> фокус не берёт. Галерея из двух кадров была устроена ссылками и
+ * потому работала, а одиночный снимок — нет: ОДНО ПОНЯТИЕ, ДВА ПОВЕДЕНИЯ.
+ */
+function открытьСКлавиатуры(root) {
+    var подпись = getLabels().viewerTitle;
+    Array.prototype.forEach.call(root.querySelectorAll('.news-html figure img'), function (кадр) {
+        кадр.setAttribute('tabindex', '0');
+        кадр.setAttribute('role', 'button');
+        кадр.setAttribute('aria-label', подпись);
+    });
+}
+
 function initCarousel(root, photos) {
     // Каруселей на странице может быть несколько: галерея новости и наборы
     // снимков внутри текста. Заводим каждую по её собственным адресам.
@@ -645,8 +782,33 @@ function initCarousel(root, photos) {
     });
 }
 
+/**
+ * КОРОБКА БЕРЁТ ОТНОШЕНИЕ ПЕРВОГО КАДРА.
+ *
+ * ЗАМЕР 08.10: все 15 фотографий статьи — портрет 0.75 (3:4), а коробка
+ * стояла ландшафтная, 834 x 560. ПОСЧИТАНО из этих чисел: видно 420 x 560,
+ * по бокам 414 пустых пикселей — ровно половина ширины. Снимки с турниров
+ * делают на телефон, поэтому портрет будет всегда.
+ *
+ * Отношение снимаем у ПЕРВОГО кадра и больше не меняем: если брать его у
+ * текущего, коробка прыгала бы на каждом листании. Кадр другой формы лежит
+ * на подложке по центру — за этим и подняли подложку до --bg-elevated.
+ */
+function отношениеКоробки(wrap, адрес) {
+    if (!адрес) return;
+    var пробник = new Image();
+    пробник.onload = function () {
+        if (!пробник.naturalWidth || !пробник.naturalHeight) return;
+        wrap.style.setProperty('--kadr-shirina-k',
+            (пробник.naturalWidth / пробник.naturalHeight).toFixed(4));
+    };
+    пробник.src = адрес;
+}
+
 function завестиКарусель(wrap, photos) {
     if (!wrap || photos.length < 2) return;
+
+    отношениеКоробки(wrap, photos[0]);
 
     var main = wrap.querySelector('.news-carousel-main');
     var count = wrap.querySelector('.news-carousel-count');
@@ -735,8 +897,22 @@ function initPhotoViewer(root, gallery) {
         return el.tagName === 'IMG' ? el.src : el.getAttribute('href');
     }
 
+    /* Enter и пробел делают то же, что нажатие: у кадра есть role="button",
+       и клавиатура обязана вести себя как кнопка, а не как картинка. */
+    root.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var кадр = e.target.closest(IN_TEXT);
+        if (!кадр || кадр.tagName !== 'IMG') return;
+        e.preventDefault();
+        кадр.click();
+    });
+
     root.addEventListener('click', function(e) {
-        var main = e.target.closest('.news-carousel-main');
+        /* Нажать могли и по кнопке кадра, и по самой картинке внутри неё:
+           с клавиатуры цель — кнопка, мышью — чаще картинка. */
+        var кнопка = e.target.closest('.news-carousel-kadr');
+        var main = кнопка ? кнопка.querySelector('.news-carousel-main')
+                          : e.target.closest('.news-carousel-main');
         if (main) {
             var wrap = main.closest('.news-carousel');
             var свои = (wrap && wrap.dataset.photos) ? JSON.parse(wrap.dataset.photos) : gallery;
@@ -756,10 +932,26 @@ function initPhotoViewer(root, gallery) {
     });
 }
 
-/** Открывает снимок поверх страницы. Стрелки листают, Esc и клик по фону закрывают. */
+/**
+ * Открывает снимок поверх страницы. Стрелки листают, Esc и клик по фону
+ * закрывают.
+ *
+ * ПРОСМОТРЩИК НЕ ПРЕДСТАВЛЯЛСЯ ДИКТОРУ. ОБХОД 08.10: у .news-viewer не было
+ * ни role="dialog", ни aria-modal, фокус не въезжал в окно и не возвращался
+ * на кнопку после закрытия, ловушки Tab не было — Tab уводил на ссылки
+ * страницы под накладкой. Esc работал, кнопки были подписаны.
+ * Правило взято у Modal 26:143: окно объявляет себя окном, забирает фокус
+ * и отдаёт его обратно тому, кто его открыл.
+ */
 function openPhotoViewer(urls, index) {
+        var labels = getLabels();
+        var ктоОткрыл = document.activeElement;
+
         var overlay = document.createElement('div');
         overlay.className = 'news-viewer';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', labels.viewerTitle);
         overlay.innerHTML =
             '<button class="news-viewer-close" aria-label="Закрыть">&times;</button>' +
             '<button class="news-viewer-nav news-viewer-prev" aria-label="Предыдущее">&#8249;</button>' +
@@ -784,11 +976,31 @@ function openPhotoViewer(urls, index) {
             overlay.remove();
             document.body.style.overflow = '';
             document.removeEventListener('keydown', onKey);
+            /* ФОКУС ВОЗВРАЩАЕТСЯ ТОМУ, КТО ОТКРЫЛ ОКНО. Иначе он уезжает в
+               начало страницы, и читатель на клавиатуре теряет место. */
+            if (ктоОткрыл && typeof ктоОткрыл.focus === 'function') ктоОткрыл.focus();
+        }
+        /** Кнопки окна в порядке обхода. Пересчитывается: стрелки прячутся. */
+        function кнопки() {
+            return Array.prototype.filter.call(
+                overlay.querySelectorAll('button'),
+                function (b) { return b.offsetParent !== null; });
         }
         function onKey(e) {
-            if (e.key === 'Escape') close();
-            if (e.key === 'ArrowRight') show(index + 1);
-            if (e.key === 'ArrowLeft') show(index - 1);
+            if (e.key === 'Escape') { close(); return; }
+            if (e.key === 'ArrowRight') { show(index + 1); return; }
+            if (e.key === 'ArrowLeft') { show(index - 1); return; }
+            /* ЛОВУШКА TAB: пока окно открыто, обход идёт по его кнопкам и не
+               выходит на страницу под накладкой. */
+            if (e.key !== 'Tab') return;
+            var свои = кнопки();
+            if (!свои.length) return;
+            var i = свои.indexOf(document.activeElement);
+            e.preventDefault();
+            var шаг = e.shiftKey ? -1 : 1;
+            var след = (i === -1 ? (e.shiftKey ? свои.length - 1 : 0)
+                                 : (i + шаг + свои.length) % свои.length);
+            свои[след].focus();
         }
 
         overlay.querySelector('.news-viewer-close').addEventListener('click', close);
@@ -797,6 +1009,8 @@ function openPhotoViewer(urls, index) {
         overlay.addEventListener('click', function(e) { if (e.target === overlay || e.target === img) close(); });
         document.addEventListener('keydown', onKey);
         show(index);
+        var закрыть = overlay.querySelector('.news-viewer-close');
+        if (закрыть) закрыть.focus();
 }
 
 function renderBlock(block, index) {
@@ -847,7 +1061,7 @@ function renderBlock(block, index) {
             return statsHtml;
 
         case 'list':
-            var listHtml = '<ul class="news-list news-animate" style="' + style + '">';
+            var listHtml = '<ul class="news-tekst-spisok news-animate" style="' + style + '">';
             block.items.forEach(function(item) {
                 listHtml += '<li>' + item + '</li>';
             });
@@ -1613,6 +1827,29 @@ function renderNewsList() {
 // ========================================
 // NOT FOUND
 // ========================================
+
+/** Статья есть, но не на этом языке. Пустое состояние, а не «не найдено». */
+function renderNetPerevoda(article) {
+    var labels = getLabels();
+    var ruUrl = 'news.html?slug=' + encodeURIComponent(article.slug);
+
+    document.title = 'KSLT — ' + labels.noTranslationTitle;
+
+    ['newsHero', 'newsArticleBody', 'newsTags', 'newsReactions', 'newsRelated']
+        .forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+    var место = document.getElementById('newsNotFound');
+    if (!место) return;
+    место.style.display = 'flex';
+    место.innerHTML =
+        '<div class="news-not-found-icon">&#127760;</div>' +
+        '<h1>' + labels.noTranslationTitle + '</h1>' +
+        '<p>' + labels.noTranslationText + '</p>' +
+        '<a href="' + ruUrl + '" class="news-not-found-btn">' + labels.noTranslationBtn + '</a>';
+}
 
 function renderNotFound() {
     var labels = getLabels();
