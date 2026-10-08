@@ -84,7 +84,14 @@
                     showToast(result.error.message, 'error');
                 } else {
                     showToast(isEn ? 'Deleted ' + ids.length + ' items' : 'Удалено: ' + ids.length, 'success');
-                    opts.reloadFn();
+                    /* ВЫБОР ПЕРЕЖИВАЛ УДАЛЕНИЕ. Полоса «Удалить выбранные (1)»
+                       живёт ВНЕ таблицы, и перерисовка списка её не трогала:
+                       строки уже не было, а счётчик стоял — до перезагрузки
+                       страницы. Костя увидел это глазами 08.10. Снимаем выбор
+                       сами и ждём, пока список перерисуется. */
+                    checkAll.checked = false;
+                    await opts.reloadFn();
+                    updateBulkUI();
                 }
             });
         });
@@ -1041,6 +1048,10 @@
             .replace(/<button[\s\S]*?<\/button>/gi, '')
             .replace(/<span[^>]*class="ad-editor-media-shchit"[^>]*>\s*<\/span>/gi, '')
             .replace(/<span><\/span>/gi, '')
+            /* Ряд плиток — обёртка редактора, в тексте новости её нет.
+               Разворачиваем ПОСЛЕ кнопок и щитов: внутри не остаётся ни
+               одного вложенного span, и замена безопасна. */
+            .replace(/<span class="ad-editor-lenta"[^>]*>([\s\S]*?)<\/span>/gi, '$1')
             .replace(/\s*contenteditable="[^"]*"/gi, '')
             .replace(/\s*class="ad-editor-media"/gi, '');
     }

@@ -153,7 +153,10 @@ test.describe('Админка «Новости»: форма статьи', () =
     test('галерея предпросмотра — компонент страницы, своей вёрстки нет', async ({ page }) => {
         await expect(page.locator('#adNewsPreview .news-carousel')).toHaveCount(1);
         await expect(page.locator('#adNewsPreview .news-thumbs-row')).toHaveCount(1);
-        await expect(page.locator('#adNewsPreview .news-carousel-thumb')).toHaveCount(2);
+        /* Кадров в стенде ТРИ: ролик и два снимка — проба упала ровно на
+           этом числе, когда ролик в стенд добавили. ПРИБОР ОБНОВЛЯЕТСЯ
+           ВМЕСТЕ СО СТЕНДОМ. */
+        await expect(page.locator('#adNewsPreview .news-carousel-thumb')).toHaveCount(3);
         const своя = await page.evaluate(() =>
             document.querySelectorAll('[class*="ad-prev-"]').length);
         expect(своя).toBe(0);

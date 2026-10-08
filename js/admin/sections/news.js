@@ -538,7 +538,11 @@
             loadAndEditNews(row.dataset.newsId);
         });
 
-        A.setupBulkDelete({ tableId: 'adNewsTable', tableName: 'news', reloadFn: loadNewsList });
+        /* Перерисовываем И список, И цифры наверху: после удаления там
+           оставалось прежнее «32 опубликовано · 1 черновик», и раздел
+           рассказывал о том, чего уже нет. */
+        A.setupBulkDelete({ tableId: 'adNewsTable', tableName: 'news',
+            reloadFn: async function() { await loadNewsList(); await loadNewsStats(); } });
     }
 
     async function loadAndEditNews(id) {

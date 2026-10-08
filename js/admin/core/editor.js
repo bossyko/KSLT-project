@@ -115,6 +115,76 @@
 
         area.addEventListener('input', function() { снабдитьМедиа(area); });
         снабдитьМедиа(area);
+
+        /* Стрелки ленты: нажатие не должно уводить курсор из текста */
+        area.addEventListener('click', function(e) {
+            var шаг = e.target.closest('.ad-editor-lenta-nav');
+            if (!шаг) return;
+            e.preventDefault();
+            var ряд = шаг.parentNode;
+            ряд.scrollBy({ left: (шаг.dataset.storona === 'vpered' ? 1 : -1) *
+                Math.round(ряд.clientWidth * 0.8), behavior: 'smooth' });
+        });
+    }
+
+    /**
+     * ВСТАВЛЕННЫЕ КУСКИ ИДУТ ОДНИМ РЯДОМ — слово Кости 08.10: «сделать всё в
+     * один ряд и миниатюры, без показа большого окна; если не помещается,
+     * тогда включаются стрелки назад-вперёд».
+     *
+     * Подряд идущие плитки заворачиваются в ряд с горизонтальной прокруткой.
+     * Обёртка СЛУЖЕБНАЯ: в базу она не уезжает — её разворачивает чистка
+     * при сохранении, как и кнопки со щитами.
+     */
+    function собратьВЛенту(area) {
+        /* Старые обёртки разворачиваем: состав кусков мог поменяться */
+        Array.prototype.forEach.call(area.querySelectorAll('.ad-editor-lenta'), function(ряд) {
+            Array.prototype.forEach.call(ряд.querySelectorAll('.ad-editor-lenta-nav'),
+                function(к) { к.remove(); });
+            while (ряд.firstChild) ряд.parentNode.insertBefore(ряд.firstChild, ряд);
+            ряд.remove();
+        });
+
+        var дети = Array.prototype.slice.call(area.childNodes);
+        var набор = [];
+
+        function закрыть() {
+            if (!набор.length) return;
+            var ряд = document.createElement('span');
+            ряд.className = 'ad-editor-lenta';
+            ряд.setAttribute('contenteditable', 'false');
+            набор[0].parentNode.insertBefore(ряд, набор[0]);
+            набор.forEach(function(п) { ряд.appendChild(п); });
+            ['nazad', 'vpered'].forEach(function(сторона) {
+                var к = document.createElement('button');
+                к.type = 'button';
+                к.className = 'ad-editor-lenta-nav ad-editor-lenta-nav--' + сторона;
+                к.dataset.storona = сторона;
+                к.setAttribute('contenteditable', 'false');
+                к.innerHTML = сторона === 'nazad' ? '&#8249;' : '&#8250;';
+                ряд.appendChild(к);
+            });
+            обновитьЛенту(ряд);
+            ряд.addEventListener('scroll', function() { обновитьЛенту(ряд); });
+            набор = [];
+        }
+
+        дети.forEach(function(узел) {
+            if (узел.nodeType === 1 && узел.classList.contains('ad-editor-media')) {
+                набор.push(узел);
+                return;
+            }
+            /* Пустой текст между плитками ряд не рвёт */
+            if (узел.nodeType === 3 && !узел.textContent.trim()) return;
+            закрыть();
+        });
+        закрыть();
+    }
+
+    /** Стрелки видны, только если ряд не помещается — как у ленты миниатюр. */
+    function обновитьЛенту(ряд) {
+        ряд.classList.toggle('ad-editor-lenta--vlezaet',
+            ряд.scrollWidth <= ряд.clientWidth + 1);
     }
 
     /**
@@ -150,6 +220,7 @@
                 короб.appendChild(щит);
             }
         });
+        собратьВЛенту(area);
     }
 
     var savedRange = null;
