@@ -1213,6 +1213,27 @@ body.news-article-page .section-sponsors-compact {
    РЕШЕНИЕ КОСТИ «а»: своего скрипта инстаграма на страницы не ставим, а
    коробке даём форму кадра и обрезаем лишнее намеренно — нам нужен кадр, а
    не чужой интерфейс. Числа коробки сняты замером на живом встраивании. */
+/* ЧУЖОЙ ИНТЕРФЕЙС РЕЖЕТСЯ НАМЕРЕННО — слово Кости 08.10: «надо будет
+   обрезать, чтобы не показывало нижнюю часть и верхнюю часть тоже».
+   Сверху инстаграм рисует полосу с именем аккаунта и кнопкой «View
+   profile», снизу — лайки, поле комментария и пустой хвост. Нам нужен
+   КАДР, а не чужой интерфейс. Коробке даём форму ролика (9:16), а сам
+   кадр внутри сдвигаем вверх на высоту шапки и растим на шапку плюс низ —
+   лишнее уезжает за край.
+   ЧИСЛА СНЯТЫ ЗАМЕРОМ живого встраивания при ширине 400: шапка 54,
+   низ 240 (полоса значков, «178 likes», поле комментария и хвост). */
+:root,
+.news-article-page {
+    --ig-shapka: 54px;
+    --ig-niz: 240px;
+    /* ФОРМА САМОГО РОЛИКА — ЕДИНСТВЕННОЕ ЧИСЛО, КОТОРОЕ ЗАМЕРИТЬ НЕЧЕМ:
+       кадр чужой, внутрь не заглянуть. ПОСЧИТАНО по снимку живого
+       встраивания: при ширине 313 видео занимало 375 — отношение 0.835,
+       то есть инстаграмовские 4:5 с небольшим запасом. Ставим 4/5 и режем
+       по нему; это крутилка, и подкручивается она одним числом. */
+    --ig-kadr: 4 / 5;
+}
+
 .news-html figure:has(> .news-video-ig) {
     overflow: hidden;
     border-radius: var(--radius-md);
@@ -1220,7 +1241,16 @@ body.news-article-page .section-sponsors-compact {
     margin-inline: auto;
 }
 
+.news-html figure:has(> .news-video-ig) {
+    position: relative;
+    /* Видно ровно ролик, без чужой шапки и без лайков */
+    aspect-ratio: var(--ig-kadr);
+}
+
 .news-html figure .news-video-ig {
+    position: absolute;
+    left: 0;
+    top: calc(-1 * var(--ig-shapka));
     width: 100%;
     /* ОТНОШЕНИЕ, А НЕ ЧИСЛО. Стояла высота 560 при ширине 400 — инстаграм
        рисует вертикальный ролик 9:16 плюс свою шапку с именем аккаунта и
@@ -1228,11 +1258,82 @@ body.news-article-page .section-sponsors-compact {
        прокрутки (замер 08.10 — Костя увидел её глазами). 400 × 820:
        видео 9:16 даёт 711, шапка 54, низ 55. От ширины теперь считается
        высота, поэтому на телефоне кадр сжимается целиком, а не режется. */
-    aspect-ratio: 400 / 820;
-    height: auto;
+    /* Высота — видимая часть плюс то, что срезаем сверху и снизу */
+    height: calc(100% + var(--ig-shapka) + var(--ig-niz));
+    aspect-ratio: auto;
     max-height: none;
     border-radius: 0;
 }
+
+/* ---- Видео в общей ленте со снимками ---- */
+/* СЛОВО КОСТИ 08.10: «можно будет все видео тоже в одну карусель к фото, а
+   не отдельно». Короб видео стоит В ТОЙ ЖЕ сцене, что и крупный снимок, и
+   переключение меняет видимость, а не разметку: иначе каждый шаг ленты
+   перезагружал бы чужой проигрыватель. */
+.news-carousel-video {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* РОЛИК ВПИСЫВАЕТСЯ В КОРОБКУ, А НЕ РАСТЯГИВАЕТ ЕЁ. Отношение коробки
+   снято с ПЕРВОГО кадра ленты (решение 08.10: иначе она прыгала бы на
+   каждом листании), а в одной ленте теперь стоят и портретный снимок, и
+   вертикальный ролик. Рамка берёт всю высоту и свою ширину по форме
+   ролика; внутри неё кадр сдвинут вверх на чужую шапку. */
+.news-carousel-ramka {
+    position: relative;
+    display: block;
+    height: 100%;
+    aspect-ratio: var(--ig-kadr);
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.news-carousel-ramka iframe {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    border: 0;
+}
+
+.news-carousel-ramka .news-video-ig {
+    top: calc(-1 * var(--ig-shapka));
+    height: calc(100% + var(--ig-shapka) + var(--ig-niz));
+}
+
+/* У YouTube и Vimeo своего интерфейса в кадре нет — режем только форму */
+.news-carousel-ramka:has(> .news-video-yt),
+.news-carousel-ramka:has(> .news-video-vm) { aspect-ratio: 16 / 9; }
+
+.news-carousel-ramka .news-video-yt,
+.news-carousel-ramka .news-video-vm {
+    top: 0;
+    height: 100%;
+}
+
+/* У ВИДЕО МИНИАТЮРЫ НЕТ, И ЭТО РЕШЕНИЕ: кадр инстаграма закрыт, картинку
+   оттуда не достать без их ключа. Плитка со знаком «играть» честнее чужого
+   снимка, выданного за кадр ролика. */
+.news-carousel-thumb--video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+}
+
+.news-carousel-igrat {
+    font-size: var(--fs-lg);
+    line-height: var(--lh-none);
+    color: var(--text-secondary);
+}
+
+.news-carousel-thumb--video.active .news-carousel-igrat { color: var(--accent); }
 
 /* ---- Просмотр фотографии поверх страницы ---- */
 .news-viewer {

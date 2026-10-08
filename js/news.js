@@ -725,39 +725,83 @@ function собратьПобедителей(root) {
 function собратьСнимкиВГалерею(root) {
     root.querySelectorAll('.news-html').forEach(function(тело) {
         var дети = Array.prototype.slice.call(тело.children);
-        var набор = [];
+        var набор = [];     // кадры группы: фигуры со снимком или с видео
+        var пустые = [];    // пустые абзацы ВНУТРИ группы — их же и уберём
+
+        /** Что в этой фигуре: снимок, видео или ничего из этого. */
+        function чтоВФигуре(эл) {
+            if (!эл || эл.tagName !== 'FIGURE') return null;
+            var видео = эл.querySelector('iframe[src]');
+            if (видео) {
+                var вид = window.KSLT_VIDEO ? window.KSLT_VIDEO.вид(видео.getAttribute('src')) : '';
+                return { вид: 'видео', тип: вид || 'yt', адрес: видео.src };
+            }
+            var снимок = эл.querySelector('img');
+            if (снимок && !эл.textContent.trim()) return { вид: 'фото', адрес: снимок.src };
+            return null;
+        }
+
+        /** Пустой абзац: редактор ставит `<p><br></p>` после КАЖДОЙ вставки. */
+        function пустойАбзац(эл) {
+            return эл.tagName === 'P' && !эл.textContent.trim() && !эл.querySelector('img, iframe');
+        }
 
         function закрыть() {
-            if (набор.length < 2) { набор = []; return; }
-            var адреса = набор.map(function(f) { return f.querySelector('img').src; });
+            if (набор.length < 2) { набор = []; пустые = []; return; }
+            var кадры = набор.map(function(п) { return п.данные; });
+            var фото = кадры.filter(function(к) { return к.вид === 'фото'; })
+                            .map(function(к) { return к.адрес; });
             var блок = document.createElement('div');
             блок.className = 'news-carousel';
-            блок.dataset.photos = JSON.stringify(адреса);
+            блок.dataset.kadry = JSON.stringify(кадры);
+            /* Смотрелка листает только СНИМКИ: видео на весь экран открывает
+               не она, а сам проигрыватель. */
+            блок.dataset.photos = JSON.stringify(фото);
+            var первый = кадры[0];
             блок.innerHTML =
                 '<div class="news-carousel-stage">' +
                     '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
                     '<button type="button" class="news-carousel-kadr" aria-label="' + getLabels().viewerTitle + '">' +
-                        '<img class="news-carousel-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
+                        '<img class="news-carousel-main" src="' + esc(первый.вид === 'фото' ? первый.адрес : '') + '" alt="" data-index="0">' +
                     '</button>' +
+                    /* Короб видео стоит рядом с кадром, а не вместо него:
+                       переключение меняет видимость, а не разметку — иначе
+                       при каждом шаге пересоздавался бы проигрыватель. */
+                    '<div class="news-carousel-video" hidden></div>' +
                     '<button class="news-carousel-nav news-carousel-next" aria-label="Следующее">&#8250;</button>' +
-                    '<div class="news-carousel-count">1 / ' + адреса.length + '</div>' +
+                    '<div class="news-carousel-count">1 / ' + кадры.length + '</div>' +
                 '</div>' +
                 '<div class="news-carousel-thumbs">' +
-                    адреса.map(function(url, i) {
-                        return '<button class="news-carousel-thumb' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
-                            '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+                    кадры.map(function(к, i) {
+                        var активна = i === 0 ? ' active' : '';
+                        if (к.вид === 'видео') {
+                            /* У ВИДЕО МИНИАТЮРЫ НЕТ, И ЭТО НЕ ЛЕНЬ: кадр
+                               инстаграма закрыт, картинку оттуда не достать
+                               без их ключа. Плитка со знаком «играть» честнее
+                               чужого снимка, выданного за кадр ролика. */
+                            return '<button class="news-carousel-thumb news-carousel-thumb--video' + активна +
+                                '" data-index="' + i + '" aria-label="Видео ' + (i + 1) + '">' +
+                                '<span class="news-carousel-igrat">&#9654;</span></button>';
+                        }
+                        return '<button class="news-carousel-thumb' + активна + '" data-index="' + i + '">' +
+                            '<img src="' + esc(к.адрес) + '" alt="" loading="lazy">' +
                         '</button>';
                     }).join('') +
                 '</div>';
-            набор[0].parentNode.insertBefore(блок, набор[0]);
-            набор.forEach(function(f) { f.remove(); });
-            набор = [];
+            набор[0].эл.parentNode.insertBefore(блок, набор[0].эл);
+            набор.forEach(function(п) { п.эл.remove(); });
+            пустые.forEach(function(п) { п.remove(); });
+            набор = []; пустые = [];
         }
 
         дети.forEach(function(эл) {
-            var этоСнимок = эл.tagName === 'FIGURE' && эл.querySelector('img') &&
-                            !эл.textContent.trim();
-            if (этоСнимок) { набор.push(эл); return; }
+            var данные = чтоВФигуре(эл);
+            if (данные) { набор.push({ эл: эл, данные: данные }); return; }
+            /* ПУСТОЙ АБЗАЦ ГРУППУ НЕ РАЗРЫВАЕТ. Редактор вставляет его после
+               каждой фотографии и каждого видео (editor.js), и из-за него
+               видео оказывалось «отдельно от фотографий» — замер 08.10
+               показал в тексте: FIGURE · FIGURE · P · карусель. */
+            if (набор.length && пустойАбзац(эл)) { пустые.push(эл); return; }
             закрыть();
         });
         закрыть();
@@ -784,8 +828,14 @@ function initCarousel(root, photos) {
     // Каруселей на странице может быть несколько: галерея новости и наборы
     // снимков внутри текста. Заводим каждую по её собственным адресам.
     Array.prototype.forEach.call(root.querySelectorAll('.news-carousel'), function(wrap) {
-        var свои = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : photos;
-        завестиКарусель(wrap, свои || []);
+        /* Кадры могут быть РАЗНЫЕ: снимки и видео. Старая запись (только
+           адреса снимков) понимается по-прежнему — приводим её к общему виду. */
+        var кадры = wrap.dataset.kadry ? JSON.parse(wrap.dataset.kadry) : null;
+        if (!кадры) {
+            var адреса = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : (photos || []);
+            кадры = адреса.map(function(а) { return { вид: 'фото', адрес: а }; });
+        }
+        завестиКарусель(wrap, кадры);
     });
 }
 
@@ -801,7 +851,22 @@ function initCarousel(root, photos) {
  * текущего, коробка прыгала бы на каждом листании. Кадр другой формы лежит
  * на подложке по центру — за этим и подняли подложку до --bg-elevated.
  */
-function отношениеКоробки(wrap, адрес) {
+function отношениеКоробки(wrap, кадр) {
+    if (!кадр) return;
+    /* Старая запись — просто адрес снимка. Новая — кадр ленты со своим видом. */
+    var вид = typeof кадр === 'string' ? 'фото' : кадр.вид;
+    var адрес = typeof кадр === 'string' ? кадр : кадр.адрес;
+
+    if (вид === 'видео') {
+        /* У РОЛИКА ОТНОШЕНИЕ ИЗВЕСТНО ЗАРАНЕЕ, И ЗАМЕРИТЬ ЕГО НЕЧЕМ: кадр
+           чужой, в него не заглянуть. Инстаграм ставит вертикальную рамку
+           9:16, YouTube и Vimeo — горизонтальную 16:9. */
+        /* 4/5 — форма кадра инстаграма без его шапки и лайков (см.
+           --ig-kadr в css/news.css, посчитано по снимку живого кадра) */
+        wrap.style.setProperty('--kadr-shirina-k',
+            (кадр.тип === 'ig' ? (4 / 5) : (16 / 9)).toFixed(4));
+        return;
+    }
     if (!адрес) return;
     var пробник = new Image();
     пробник.onload = function () {
@@ -812,21 +877,63 @@ function отношениеКоробки(wrap, адрес) {
     пробник.src = адрес;
 }
 
-function завестиКарусель(wrap, photos) {
-    if (!wrap || photos.length < 2) return;
 
-    отношениеКоробки(wrap, photos[0]);
+function завестиКарусель(wrap, кадры) {
+    if (!wrap || !кадры || кадры.length < 2) return;
+
+    отношениеКоробки(wrap, кадры[0]);
 
     var main = wrap.querySelector('.news-carousel-main');
+    var короб = wrap.querySelector('.news-carousel-video');
+    var кадрКнопка = wrap.querySelector('.news-carousel-kadr');
     var count = wrap.querySelector('.news-carousel-count');
     var thumbs = Array.prototype.slice.call(wrap.querySelectorAll('.news-carousel-thumb'));
     var index = 0;
 
-    function show(i) {
-        index = (i + photos.length) % photos.length;
-        main.src = photos[index];
+    /* Проигрыватель заводится при ПЕРВОМ показе и остаётся жить: иначе
+       каждый шаг ленты перезагружал бы кадр с чужого сайта. */
+    function показатьВидео(кадр) {
+        if (!короб) return;
+        var свой = короб.querySelector('.news-carousel-ramka:has(> iframe[data-adres="' + кадр.адрес + '"])');
+        if (!свой) {
+            var рамка = document.createElement('span');
+            рамка.className = 'news-carousel-ramka';
+            свой = document.createElement('iframe');
+            свой.className = 'news-video news-video-' + (кадр.тип || 'yt');
+            свой.src = кадр.адрес;
+            свой.setAttribute('frameborder', '0');
+            свой.setAttribute('allowfullscreen', '');
+            свой.setAttribute('title', getLabels().viewerTitle || 'Видео');
+            свой.dataset.adres = кадр.адрес;
+            рамка.appendChild(свой);
+            короб.appendChild(рамка);
+            /* Дальше работаем с РАМКОЙ: прятать и показывать надо её, а не
+               кадр внутри — иначе рамка остаётся скрытой и даёт нули. */
+            свой = рамка;
+        }
+        Array.prototype.forEach.call(короб.children, function(э) {
+            э.hidden = э !== свой;
+        });
+        свой.hidden = false;
+        короб.hidden = false;
+        if (кадрКнопка) кадрКнопка.hidden = true;
+    }
+
+    function показатьСнимок(кадр) {
+        main.src = кадр.адрес;
         main.dataset.index = index;
-        count.textContent = (index + 1) + ' / ' + photos.length;
+        if (кадрКнопка) кадрКнопка.hidden = false;
+        if (короб) короб.hidden = true;
+    }
+
+    function show(i) {
+        index = (i + кадры.length) % кадры.length;
+        var кадр = кадры[index];
+        if (кадр.вид === 'видео') показатьВидео(кадр); else показатьСнимок(кадр);
+        /* ОТНОШЕНИЕ КОРОБКИ НЕ ТРОГАЕМ: оно снято с ПЕРВОГО кадра (решение
+           08.10), иначе коробка прыгала бы на каждом листании. Ролик
+           вписывается внутрь неё своей рамкой, а не растягивает её. */
+        count.textContent = (index + 1) + ' / ' + кадры.length;
         thumbs.forEach(function(t, n) { t.classList.toggle('active', n === index); });
         var active = thumbs[index];
         if (active) active.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
@@ -838,6 +945,7 @@ function завестиКарусель(wrap, photos) {
         t.addEventListener('click', function() { show(Number(t.dataset.index)); });
     });
 
+    show(0);
     листалкаМиниатюр(wrap);
 }
 
