@@ -114,9 +114,25 @@
         if (b.cmd === 'insertPhoto') { insertPhoto(area); return; }
         if (b.cmd === 'insertVideo') { insertVideo(area); return; }
         if (b.cmd === 'createLink') {
-            var url = prompt('Адрес ссылки:', 'https://');
-            if (!url) return;
-            document.execCommand('createLink', false, url);
+            /* СВОЯ ОБОЛОЧКА, А НЕ `prompt()`. Системное окно браузера — чужое
+               по виду, не нашей тёмной темы, не переводится и не знает нашей
+               ловушки Tab. В админке оболочка окна одна на всех с 04.10
+               («ОКНО СТРОИТ ОДНА ОБОЛОЧКА», 21 правило), и у неё уже есть
+               спрос с полем — A.showPromptAsync. Поле ОДНО, значит по
+               описанию Modal 26:143 это ширина sm 400. */
+            var где = savedRange;
+            A.showPromptAsync({
+                title: 'Ссылка',
+                text: 'Куда ведёт выделенный текст',
+                placeholder: 'https://',
+                value: 'https://',
+                okLabel: 'Вставить'
+            }).then(function(url) {
+                if (!url || url === 'https://') return;
+                restore(area, где);
+                document.execCommand('createLink', false, url);
+                area.dispatchEvent(new Event('input'));
+            });
             return;
         }
         if (b.cmd === 'formatBlock') {
@@ -165,26 +181,50 @@
      * дольше самой новости. YouTube и Vimeo отдают его сами.
      */
     function insertVideo(area) {
-        var url = prompt('Ссылка на видео (YouTube, Vimeo, Instagram):', 'https://');
-        if (!url) return;
-        var embed = toEmbed(url.trim());
-        if (!embed) {
-            alert('Не разобрал ссылку. Поддерживаются YouTube, Vimeo и Instagram.');
-            return;
-        }
-        restore(area, savedRange);
-        document.execCommand('insertHTML', false,
-            '<figure>' + embed + '</figure><p><br></p>');
-        area.dispatchEvent(new Event('input'));
+        var где = savedRange;
+        A.showPromptAsync({
+            title: 'Видео',
+            text: 'YouTube, Vimeo или Instagram — ссылка на одну публикацию',
+            placeholder: 'https://',
+            value: 'https://',
+            okLabel: 'Вставить'
+        }).then(function(url) {
+            if (!url || url === 'https://') return;
+            var embed = toEmbed(url.trim());
+            if (!embed) {
+                /* Ошибку показываем тостом админки, а не `alert`-ом: тост
+                   не перехватывает управление и не ломает ввод. */
+                A.showToast('Не разобрал ссылку. Нужна ссылка на ОДНУ публикацию: ' +
+                            'youtube.com/watch, youtu.be, vimeo.com или instagram.com/reel', 'error');
+                return;
+            }
+            restore(area, где);
+            document.execCommand('insertHTML', false,
+                '<figure class="news-video-figure">' + embed + '</figure><p><br></p>');
+            area.dispatchEvent(new Event('input'));
+        });
     }
 
     function toEmbed(url) {
         var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
-        if (yt) return '<iframe src="https://www.youtube.com/embed/' + yt[1] + '" frameborder="0" allowfullscreen></iframe>';
+        if (yt) return '<iframe class="news-video news-video-yt" src="https://www.youtube.com/embed/' + yt[1] +
+                       '" frameborder="0" allowfullscreen title="Видео на YouTube"></iframe>';
         var vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-        if (vm) return '<iframe src="https://player.vimeo.com/video/' + vm[1] + '" frameborder="0" allowfullscreen></iframe>';
-        var ig = url.match(/instagram\.com\/(reel|p)\/([\w-]+)/);
-        if (ig) return '<iframe src="https://www.instagram.com/' + ig[1] + '/' + ig[2] + '/embed" frameborder="0" allowfullscreen></iframe>';
+        if (vm) return '<iframe class="news-video news-video-vm" src="https://player.vimeo.com/video/' + vm[1] +
+                       '" frameborder="0" allowfullscreen title="Видео на Vimeo"></iframe>';
+        /* ИМЯ АККАУНТА В АДРЕСЕ НЕОБЯЗАТЕЛЬНО, А КНОПКА «ПОДЕЛИТЬСЯ» ЕГО
+           СТАВИТ. Проверено живой ссылкой 08.10: инстаграм отдаёт
+           `instagram.com/kslt_tennis.kg/reel/DeGhCRWI39u/`, и прежний разбор
+           её НЕ ПРИНИМАЛ — редактор отвечал «не разобрал ссылку» ровно на
+           тот адрес, который даёт сам инстаграм. Заодно принимаются `reels`
+           и `tv`: это те же посты, только другим словом. */
+        var ig = url.match(/instagram\.com\/(?:[\w.]+\/)?(reel|reels|p|tv)\/([\w-]+)/);
+        if (ig) {
+            var вид = ig[1] === 'reels' ? 'reel' : ig[1];
+            return '<iframe class="news-video news-video-ig" src="https://www.instagram.com/' +
+                   вид + '/' + ig[2] + '/embed" frameborder="0" allowfullscreen ' +
+                   'title="Публикация в Instagram"></iframe>';
+        }
         return '';
     }
 
