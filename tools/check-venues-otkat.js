@@ -55,9 +55,13 @@ const ОТКАТЫ = [
    '@media (max-height: 500px) {\n    .courts-grid.vn-four,',
    'слой поворота стоит ПОСЛЕ телефона и планшета'],
 
+  /* 07.10: якорь был одной строкой свойства, и как только отношение 4:3
+     появилось у афиши турнира (css/style.css:6207), он стал встречаться
+     ДВАЖДЫ и откат перестал доказывать своё правило. ЯКОРЬ ДЕРЖИТСЯ НА
+     СОДЕРЖИМОМ СВОЕГО БЛОКА — смотрим в блок витрины, а не в файл. */
   ['css/style.css',
-   '    aspect-ratio: 4 / 3;',
-   '    height: 168px;',
+   '.vn-four .court-card img,\n.vn-four .coach-photo {\n    width: 100%;\n    height: auto;\n    aspect-ratio: 4 / 3;',
+   '.vn-four .court-card img,\n.vn-four .coach-photo {\n    width: 100%;\n    height: 168px;',
    'отношение сторон объявлено ОДИН раз и общее у корта и тренера'],
 
   ['css/style.css',
