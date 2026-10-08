@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<title>КСЛТ — стенд списка новостей в админке</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Список рисует НАСТОЯЩИЙ модуль админки
+  (js/admin/sections/news.js) теми же файлами стилей, что и сама админка.
+  Разметка сюда НЕ КОПИРУЕТСЯ.
+
+  БАЗЫ ЗДЕСЬ НЕТ И ВХОДА ТОЖЕ: `A.client` подменён заглушкой. Писать ей
+  нечем — методов insert/update/delete у неё нет вовсе, намеренно.
+
+  СОДЕРЖИМОЕ КРАЙНЕЕ, А НЕ УДОБНОЕ: самое длинное название в двадцати
+  строках переносится, у одной статьи нет обложки, у другой нет автора,
+  у третьей все три счётчика нули, одна висит черновиком.
+
+  СТОЯЩЕЕ УСЛОВИЕ: АДМИНКА — ДЕСКТОП И ПЛАНШЕТ, ТОЛЬКО РУССКИЙ.
+  Виды: 1512 · 1024 · 768. Телефона у неё нет.
+
+  ВИД МЕРЯЕТСЯ ЗАГРУЗКОЙ НА НУЖНОЙ ШИРИНЕ, а не сжатием окна.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=25">
+<link rel="stylesheet" href="../css/style.css?v=400">
+<link rel="stylesheet" href="../css/admin.css?v=230">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  /* style.css гасит `body` до нуля и зажигает его скриптом загрузки
+     страницы, которого у стенда нет: замеры шли верные, а снимок был
+     чёрный. Стенд зажигает сам. */
+  body { opacity: 1 !important; }
+  body { font-family: var(--font-primary); }
+  #ad-content { padding: var(--space-6); }
+</style>
+</head>
+<body class="ad-page">
+
+<div id="ad-content" data-stend="список новостей"></div>
+
+<script src="../js/tournament-status.js?v=1"></script>
+<script src="../js/admin/core/constants.js?v=145"></script>
+<script src="../js/admin/core/utils.js?v=41"></script>
+<script src="../js/admin/core/cover-crop.js?v=3"></script>
+<script src="../js/kslt-video.js?v=3"></script>
+<script src="../js/kslt-lenta.js?v=3"></script>
+<script src="../js/admin/core/editor.js?v=11"></script>
+<script src="../js/admin/core/layout.js?v=12"></script>
+<script src="../js/admin/sections/news.js?v=32"></script>
+<script>
+(function() {
+    'use strict';
+    var A = window.KSLT_ADMIN;
+
+    /* Миниатюру рисуем сами: в прогоне картинки с сети закрыты, а
+       СЛОМАННОЕ ИЗОБРАЖЕНИЕ ДАЁТ ЧУЖУЮ ГЕОМЕТРИЮ. */
+    var КАДР = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">' +
+        '<rect width="1280" height="720" fill="#2b3a4a"/>' +
+        '<circle cx="640" cy="360" r="220" fill="#cf0"/></svg>');
+
+    var ДЛИННОЕ = 'Завершение и итоги Турнира Большого Шлема КСЛТ 2026 ' +
+                  'в четырёх категориях с рекордным числом участников';
+
+    var КАТЕГОРИИ = ['results', 'announcement', 'interview', 'world'];
+    var СПИСОК = [];
+    for (var i = 0; i < 20; i++) {
+        СПИСОК.push({
+            id: 'stend-' + i,
+            title: i === 0 ? ДЛИННОЕ : 'Новость номер ' + (i + 1) + ' про турнир',
+            image: i === 1 ? null : КАДР,
+            category: КАТЕГОРИИ[i % 4],
+            executor: i === 2 ? null : 'KSLT Media',
+            published_at: i % 5 === 3 ? null : '2026-09-' + String(5 + (i % 20)).padStart(2, '0'),
+            created_at: '2026-09-' + String(1 + (i % 20)).padStart(2, '0') + 'T10:00:00Z',
+            view_count: i === 4 ? 0 : (i + 1) * 137
+        });
+    }
+
+    /* Заглушка базы. `from().select().order()` — ждущий объект: модуль
+       делает `await query`, а не `await query.then()`. */
+    function запрос(данные) {
+        var о = {
+            order: function() { return о; },
+            ilike: function() { return о; },
+            then: function(f) { return Promise.resolve({ data: данные }).then(f); }
+        };
+        return о;
+    }
+
+    A.client = {
+        rpc: function(имя) {
+            if (имя === 'get_news_stats') {
+                return Promise.resolve({ data: [{
+                    published_count: 16, draft_count: 4,
+                    last_published: '2026-09-24', last_draft: '2026-09-21'
+                }] });
+            }
+            if (имя === 'get_top_news') {
+                return Promise.resolve({ data: [
+                    { title: ДЛИННОЕ, score: 1241 },
+                    { title: 'Новость номер 7 про турнир', score: 884 },
+                    { title: 'Новость номер 3 про турнир', score: 512 }
+                ] });
+            }
+            if (имя === 'get_news_engagement') {
+                return Promise.resolve({ data: СПИСОК.map(function(a, k) {
+                    return { news_id: a.id, total_reactions: k === 4 ? 0 : k * 3,
+                             total_votes: k === 4 ? 0 : k };
+                }) });
+            }
+            return Promise.resolve({ data: [] });
+        },
+        from: function() {
+            return { select: function() { return запрос(СПИСОК); } };
+        }
+    };
+
+    A.renderNewsList().then(function() {
+        document.body.dataset.stendGotov = '1';
+    });
+})();
+</script>
+</body>
+</html>
