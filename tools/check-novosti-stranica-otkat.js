@@ -52,13 +52,14 @@ const ОТКАТЫ = [
   [СТИ, `    .news-hero-list.news-hero-list,`, `    .news-hero-list.news-hero-list-было,`,
    'обложка списка входит в общий список обложек разделов'],
 
-  [CSS, `    .news-hero:not(:has(.news-hero-content-list)) {
-        height: 50vh;
-    }`,
-         `    .news-hero {
-        height: 50vh;
-    }`,
-   'доля высоты окна принадлежит обложке ОТДЕЛЬНОЙ новости'],
+  [JS, `    container.classList.add('news-statya-hero');`,
+       `    /* откат: имени нет, остаётся общий класс */`,
+   'обложка статьи метит себя именем, а не оговоркой к общему классу'],
+
+  [CSS, `.news-pagination:empty { padding: 0; }`,
+         `.news-pagination:empty { padding: 0; }
+@media (max-width: 480px) { .news-carousel { margin: 0; } }`,
+   'границ в файле две — 640 и 992, третьей не заводится'],
 
   [JS, `' class="tc' + (isLarge ? ' tc-featured' : '')`,
        `' class="nc' + (isLarge ? ' nc-featured' : '')`,
@@ -111,15 +112,6 @@ const ОТКАТЫ = [
          `.news-list-page {
     max-width: var(--container-narrow);`,
    'витрина идёт по ширине общего ящика'],
-
-  [CSS, `    .news-paragraph {
-        font-size: var(--fs-sm);
-    }`,
-         `    .news-paragraph {
-        font-size: var(--fs-sm);
-    }
-    .news-grid { gap: 10px; }`,
-   'правила СПИСКА живут только на границах 640 и 992'],
 
   [CSS, `    --novostey: 9;`, `    --novostey-было: 9;`,
    'шаг страницы читается из живой сетки крутилкой'],
