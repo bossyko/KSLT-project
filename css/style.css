@@ -8742,6 +8742,12 @@ body.nav-open {
 }
 
 .kslt-back {
+    /* ЦЕЛЬ НАЖАТИЯ — ПРОЗРАЧНЫМ СЛОЕМ (приём принят 04.10). ЗАМЕР 08.10 на
+       странице новости: 142 x 21 при норме 44. Высоту самой ссылке давать
+       нельзя — она стоит в одном ряду с разделителями и крошками, и полоса
+       поехала бы на всех страницах, где эта ссылка есть. Слой цели не знает
+       высоты элемента и ничего не сдвигает. */
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -8750,6 +8756,16 @@ body.nav-open {
     font-size: var(--fs-sm);
     font-weight: 600;
     transition: color var(--transition-fast);
+}
+
+.kslt-back::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
 }
 
 .kslt-back:hover {
