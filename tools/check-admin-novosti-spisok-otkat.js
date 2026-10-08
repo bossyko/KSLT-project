@@ -126,6 +126,14 @@ const ОТКАТЫ = [
 }`,
    'у шапки колонки есть прозрачный слой цели 44'],
 
+  [UJS, `                    btnWrap.style.display = 'none';`,
+        `                    btnWrap.style.display = '';`,
+   'полоса выбора гаснет по событию, а не по пересчёту DOM'],
+
+  [TJS, `reloadFn: loadTournamentsList });`,
+        `reloadFn: function() { loadTournamentsList(); } });`,
+   'ни одна обёртка `reloadFn` не прячет промис'],
+
   [UJS, `            checkAll.indeterminate = count > 0 && count < total.length;`,
         `            checkAll.indeterminate = false;`,
    'неполный выбор отличим от пустого'],

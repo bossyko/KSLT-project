@@ -14203,17 +14203,33 @@
             };
         }
 
-        // --- Save Draft ---
-        document.getElementById('adTrnNewsSave').addEventListener('click', async function() {
-            var btn = this;
-            btn.disabled = true;
-            btn.textContent = '💾 ...';
+        /* У ВКЛАДКИ «НОВОСТИ» СВОЙ СТОРОЖ, И ОН СОХРАНЯЕТ НОВОСТЬ.
+           Своего у неё не было вовсе: сторож черновика на всю админку
+           ставила только форма турнира, и окно «Несохранённые изменения»
+           на этой вкладке предлагало сохранить ТУРНИР, а не статью.
+           Костя 08.10: «делаю изменения и потом хочу сохранить — не
+           работает». Оно и не могло: сохранялось не то.
+           Грязь считается по вводу в саму панель — один слушатель на всё,
+           а не по полю на каждое. */
+        var новостьГрязная = false;
+        var панельНовости = document.getElementById('adBrkNewsPanel');
+        if (панельНовости) {
+            панельНовости.addEventListener('input', function() { новостьГрязная = true; });
+        }
+
+        /** Сохранение черновика. Вынесено из обработчика кнопки: его зовёт
+         *  и кнопка, и сторож при уходе — а значит кнопки может не быть. */
+        async function сохранитьЧерновикНовости(послеСохранения) {
+            var btn = document.getElementById('adTrnNewsSave');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '💾 ...';
+            }
             try {
                 var data = collectNewsData(false);
                 if (!data.title) {
                     A.showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
-                    btn.disabled = false;
-                    btn.textContent = '💾 ' + L.trnNewsSaveDraft;
+                    вернутьКнопку();
                     return;
                 }
                 var result;
@@ -14229,12 +14245,41 @@
                 A.showToast(L.saved, 'success');
                 var statusEl = document.getElementById('adNewsStatus');
                 if (statusEl) statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--draft">📝 ' + L.trnNewsDraft + '</span>';
+                /* Сохранили — терять больше нечего, и уходить можно */
+                новостьГрязная = false;
+                вернутьКнопку();
+                if (послеСохранения) послеСохранения();
+                return;
             } catch (e) {
                 A.showToast(e.message || 'Error', 'error');
             }
-            btn.disabled = false;
-            btn.textContent = '💾 ' + L.trnNewsSaveDraft;
+            вернутьКнопку();
+
+            function вернутьКнопку() {
+                var б = document.getElementById('adTrnNewsSave');
+                if (!б) return;
+                б.disabled = false;
+                б.textContent = '💾 ' + L.trnNewsSaveDraft;
+            }
+        }
+
+        document.getElementById('adTrnNewsSave').addEventListener('click', function() {
+            сохранитьЧерновикНовости();
         });
+
+        /* Тот же сторож, что у формы турнира, но свой и про СТАТЬЮ. Экран
+           его больше не переживает: `switchTab` снимает сторожа, а ставит
+           его тот, кому есть что терять (layout.js) */
+        A.стеречьЧерновик(
+            function() { return новостьГрязная; },
+            function(уйти) {
+                A.showConfirm(L.unsavedChanges, L.unsavedChangesText,
+                    function() { return сохранитьЧерновикНовости(уйти); },
+                    L.unsavedSaveBtn,
+                    null,
+                    { label: L.unsavedLeaveBtn, action: function() { новостьГрязная = false; уйти(); } });
+            }
+        );
 
         // --- Publish ---
         document.getElementById('adTrnNewsPublish').addEventListener('click', async function() {

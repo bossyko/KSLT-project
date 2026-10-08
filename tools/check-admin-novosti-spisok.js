@@ -43,6 +43,11 @@ const NJS = безКом(чит('js/admin/sections/news.js'));
 const TJS = безКом(чит('js/admin/sections/tournaments.js'));
 const UJS = безКом(чит('js/admin/core/utils.js'));
 const СТЕНД = чит('maket/stend-admin-novosti-spisok.html');
+/* Полоса массового удаления — ОДИН компонент на семь разделов, и
+   обещание у него общее. Стережём все его вызовы, а не только свой. */
+const РАЗДЕЛЫ = ['courts', 'coaches', 'players', 'tournaments', 'sponsors', 'users', 'news']
+    .map(и => { try { return безКом(чит('js/admin/sections/' + и + '.js')); } catch (e) { return ''; } })
+    .join('\n');
 
 const ошибки = [];
 let ВСЕГО = 0;
@@ -146,6 +151,19 @@ const блок = (текст, якорь) => {
     /position:\s*relative/.test(блок(ADM, '.ad-col-header {')),
     'Шапка 40 высотой при кегле 11 — по ней сортируют и фильтруют,\n' +
     '          значит это цель нажатия, а не подпись.');
+
+правило('полоса выбора гаснет по событию, а не по пересчёту DOM',
+    /btnWrap\.style\.display = 'none';/.test(блок(UJS, 'showConfirm(opts.confirmMsg')) &&
+    /Promise\.resolve\(opts\.reloadFn\(\)\)/.test(UJS),
+    'Считать галочки после удаления нечего: удалили всё выбранное.\n' +
+    '          Пересчёт зависел от того, вернёт ли чужая `reloadFn` промис.');
+
+правило('ни одна обёртка `reloadFn` не прячет промис',
+    !/reloadFn: function\s*\(\)\s*\{\s*[a-zA-Z]+\([^)]*\);\s*\}/.test(РАЗДЕЛЫ),
+    'ОБЁРТКА БЕЗ `return` ПРОГЛАТЫВАЕТ ПРОМИС. У турниров стояло\n' +
+    '          `function() { loadTournamentsList(); }`, и полоса «Удалить\n' +
+    '          выбранные (2)» оставалась после удаления — молча и только\n' +
+    '          в этом одном разделе из семи. Костя увидел глазами 08.10.');
 
 правило('неполный выбор отличим от пустого',
     /checkAll\.indeterminate = count > 0 && count < total\.length/.test(UJS) &&

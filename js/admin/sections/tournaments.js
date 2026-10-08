@@ -555,7 +555,13 @@
             loadAndEditTournament(row.dataset.trnId);
         };
 
-        A.setupBulkDelete({ tableId: 'adTrnTable', tableName: 'tournaments', reloadFn: function() { loadTournamentsList(); } });
+        /* ОБЁРТКА БЕЗ `return` ПРОГЛАТЫВАЕТ ПРОМИС. Стояло
+           `function() { loadTournamentsList(); }` — и полоса «Удалить
+           выбранные (2)» оставалась после удаления: компонент ждал
+           перерисовки, получал `undefined`, возвращался сразу и считал
+           галочки по старому DOM. Костя увидел это глазами 08.10, ночь.
+           Передаём саму функцию: она `async`, промис у неё есть. */
+        A.setupBulkDelete({ tableId: 'adTrnTable', tableName: 'tournaments', reloadFn: loadTournamentsList });
     }
 
     // ---- Tournament Pagination ----
@@ -2206,7 +2212,19 @@ function обновитьРасклад() {
      *        Без него форма перерисовывается на месте, как и раньше.
      */
     async function saveTournamentHandler(послеСохранения) {
+        /* КНОПКИ МОЖЕТ НЕ БЫТЬ ВОВСЕ. Обработчик зовётся не только своей
+           кнопкой: его зовёт сторож черновика, а тот переживал экран, на
+           котором был заведён. Падение было на первой же строке и уносило
+           с собой всё сохранение. Экран сторож больше не переживает
+           (layout.js, switchTab), но обработчик обязан быть целым и сам:
+           ОДНА ЗАЩИТА НЕ ОТМЕНЯЕТ ДРУГОЙ. */
         var saveBtn = document.getElementById('adTrnSave');
+        if (!saveBtn) {
+            /* Формы на экране нет — сохранять нечего. Но тот, кто нас звал,
+               ждёт ухода: не позвать его — значит запереть человека в окне */
+            if (послеСохранения) послеСохранения();
+            return;
+        }
         saveBtn.disabled = true;
         saveBtn.textContent = L.saving;
 
