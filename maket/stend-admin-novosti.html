@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<title>КСЛТ — стенд формы новости в админке</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Форму рисует НАСТОЯЩИЙ модуль админки
+  (js/admin/sections/news.js) теми же файлами стилей, что и сама админка.
+  Разметка сюда НЕ КОПИРУЕТСЯ: скопированный стенд остаётся зелёным после
+  того, как админку поменяли, и доказывает только сам себя.
+
+  БАЗЫ ЗДЕСЬ НЕТ И ВХОДА ТОЖЕ. `A.client` подменён заглушкой, которая
+  отдаёт одну и ту же статью: прогон не ест квоту и не зависит от того, что
+  лежит в тестовой базе. Ни одна кнопка, пишущая в базу, не нажимается.
+  Автосохранение молчит: оно уходит сразу, пока заголовок пуст, а стенд
+  заголовок не трогает.
+
+  СТОЯЩЕЕ УСЛОВИЕ: АДМИНКА — ДЕСКТОП И ПЛАНШЕТ, ТОЛЬКО РУССКИЙ.
+  Виды: 1512 · 1024 · 768. Телефона у неё нет.
+
+  ВИД МЕРЯЕТСЯ ЗАГРУЗКОЙ НА НУЖНОЙ ШИРИНЕ, а не сжатием окна.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=25">
+<link rel="stylesheet" href="../css/style.css?v=400">
+<link rel="stylesheet" href="../css/admin.css?v=223">
+<!-- Стили статьи: предпросмотр новости рисует настоящую страницу -->
+<link rel="stylesheet" href="../css/news.css?v=69">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); }
+  #ad-content { padding: var(--space-6); }
+</style>
+</head>
+<body class="ad-page">
+
+<div id="ad-content" data-stend="форма новости"></div>
+
+<!-- Подписи статусов живут здесь: constants.js зовёт KSLT_STATUS.подписи -->
+<script src="../js/tournament-status.js?v=1"></script>
+<script src="../js/admin/core/constants.js?v=145"></script>
+<script src="../js/admin/core/utils.js?v=36"></script>
+<script src="../js/admin/core/cover-crop.js?v=3"></script>
+<script src="../js/admin/core/editor.js?v=4"></script>
+<script src="../js/admin/core/layout.js?v=12"></script>
+<script src="../js/admin/sections/news.js?v=27"></script>
+<script>
+(function() {
+    'use strict';
+    var A = window.KSLT_ADMIN;
+
+    /* Кадр 16:9 рисуем сами: в прогоне картинки с сети закрыты, а СЛОМАННОЕ
+       ИЗОБРАЖЕНИЕ ДАЁТ ЧУЖУЮ ГЕОМЕТРИЮ — Chrome меряет его по строке alt. */
+    var КАДР = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">' +
+        '<rect width="1280" height="720" fill="#2b3a4a"/>' +
+        '<circle cx="640" cy="360" r="220" fill="#cf0"/></svg>');
+
+    /* СОДЕРЖИМОЕ КРАЙНЕЕ, А НЕ УДОБНОЕ: длинный подзаголовок, два снимка
+       подряд (из них собирается галерея) и список. */
+    var СТАТЬЯ = {
+        id: 'stend',
+        slug: 'stend-admin-novosti',
+        title: 'Завершение и итоги ТБШ 2026',
+        title_en: '', title_kg: '',
+        excerpt: 'Турнир Большого Шлема КСЛТ прошёл в четырёх категориях и собрал ' +
+                 'рекордные сто двадцать участников из шести городов страны.',
+        excerpt_en: '', excerpt_kg: '',
+        content: '<p>Первый абзац текста новости — по нему снимается мера строки ' +
+                 'и межстрочный, и он же показывает, что предпросмотр идёт ' +
+                 'типографикой страницы, а не админки.</p>' +
+                 '<figure><img src="' + КАДР + '" alt=""></figure>' +
+                 '<figure><img src="' + КАДР + '" alt=""></figure>' +
+                 '<p>Абзац после галереи.</p>',
+        content_en: '', content_kg: '',
+        image: КАДР,
+        image_original: КАДР,
+        gallery: [],
+        content_images: [],
+        poll: null,
+        reactions_config: null,
+        category: 'results',
+        author: 'KSLT Media',
+        executor: 'KSLT Media',
+        published_at: '2026-09-05',
+        updated_at: '2026-09-05T10:00:00Z'
+    };
+
+    /* Заглушка базы: один ответ на любой запрос. Писать ей нечем — метода
+       insert у неё нет вовсе, и это намеренно. */
+    A.client = {
+        /* Счётчики откликов форма берёт запросом rpc. Данных у стенда нет —
+           отдаём пусто: блок «Вовлечённость» у черновика и так скрыт */
+        rpc: function() { return Promise.resolve({ data: [] }); },
+        from: function() {
+            return { select: function() { return { eq: function() {
+                return { single: function() { return Promise.resolve({ data: СТАТЬЯ }); } };
+            } }; } };
+        }
+    };
+
+    A.loadAndEditNews('stend').then(function() {
+        document.body.dataset.stendGotov = '1';
+    });
+})();
+</script>
+</body>
+</html>
