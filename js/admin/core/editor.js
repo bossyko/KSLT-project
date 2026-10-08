@@ -131,7 +131,9 @@
             if (!короб.querySelector('img, iframe')) return;
             короб.classList.add('ad-editor-media');
             короб.setAttribute('contenteditable', 'false');
-            if (!короб.querySelector('.ad-editor-media-remove')) {
+            /* Любая кнопка, а не только своя по классу: класс срезает
+               чистка, и по классу короб каждый раз выглядел бы «без кнопки» */
+            if (!короб.querySelector('button')) {
                 var кн = document.createElement('button');
                 кн.type = 'button';
                 кн.className = 'ad-editor-media-remove';
@@ -140,7 +142,7 @@
                 кн.innerHTML = '&times;';
                 короб.appendChild(кн);
             }
-            if (короб.querySelector('iframe') && !короб.querySelector('.ad-editor-media-shchit')) {
+            if (короб.querySelector('iframe') && !короб.querySelector('span')) {
                 var щит = document.createElement('span');
                 щит.className = 'ad-editor-media-shchit';
                 щит.setAttribute('contenteditable', 'false');
@@ -278,6 +280,12 @@
         if (!html) return '';
         var h = String(html);
         h = h.replace(/\s*style="[^"]*"/gi, '');
+        /* СЛУЖЕБНОЕ СНИМАЕТСЯ ЗДЕСЬ ЖЕ. Эта чистка кормит скрытое поле, а
+           его читает ПРЕДПРОСМОТР: 08.10 кнопка снятия уехала туда вместе с
+           разметкой, и фотографии выпали из ленты — у фигуры появился текст
+           «×», а снимком считалась только фигура БЕЗ текста. Костя увидел
+           это глазами: «а теперь фото зачем ты выкинул из общей карусели». */
+        h = A.убратьСлужебное ? A.убратьСлужебное(h) : h;
         /* Свои классы остаются: `news-video-ig` ставит сам редактор, и
            срезать его значило бы сломать вертикальный кадр (см. utils.js) */
         h = A.оставитьСвоиКлассы ? A.оставитьСвоиКлассы(h) : h;

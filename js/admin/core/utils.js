@@ -1032,8 +1032,15 @@
      */
     function убратьСлужебное(h) {
         return String(h)
-            .replace(/<button[^>]*class="ad-editor-media-remove"[^>]*>[\s\S]*?<\/button>/gi, '')
+            /* ПО ПРИЗНАКУ, А НЕ ПО КЛАССУ. Класс срезает соседняя чистка, и
+               если искать по нему, то после первого же круга кнопка теряет
+               класс, перестаёт находиться — а редактор, не видя её, рисует
+               ВТОРУЮ. Замер 08.10: в редакторе оказалось ДЕСЯТЬ кнопок на
+               пять кусков. В тексте новости кнопок не бывает вовсе, поэтому
+               снимаем их все. */
+            .replace(/<button[\s\S]*?<\/button>/gi, '')
             .replace(/<span[^>]*class="ad-editor-media-shchit"[^>]*>\s*<\/span>/gi, '')
+            .replace(/<span><\/span>/gi, '')
             .replace(/\s*contenteditable="[^"]*"/gi, '')
             .replace(/\s*class="ad-editor-media"/gi, '');
     }
