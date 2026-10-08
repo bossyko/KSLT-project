@@ -159,6 +159,44 @@ test.describe('Админка «Новости»: форма статьи', () =
         expect(своя).toBe(0);
     });
 
+    test('лента одна: ролик и снимки стоят вместе, пустой абзац её не рвёт', async ({ page }) => {
+        await expect(page.locator('#adNewsPreview .news-carousel')).toHaveCount(1);
+        await expect(page.locator('#adNewsPreview .news-carousel-thumb')).toHaveCount(3);
+        await expect(page.locator('#adNewsPreview .news-carousel-thumb--video')).toHaveCount(1);
+        /* Ни одной фигуры в обход ленты: ровно это Костя увидел глазами —
+           «а теперь фото зачем ты выкинул из общей карусели». */
+        await expect(page.locator('#adNewsPreview .news-html > figure')).toHaveCount(0);
+    });
+
+    test('служебная кнопка редактора не уезжает в предпросмотр', async ({ page }) => {
+        const кнопок = await page.evaluate(() => {
+            const п = document.getElementById('adNewsPreview');
+            return п.querySelectorAll('button:not([class*="news-"])').length;
+        });
+        expect(кнопок).toBe(0);
+    });
+
+    test('у каждого вставленного куска в редакторе ровно одна кнопка снятия', async ({ page }) => {
+        const счёт = await page.evaluate(() => {
+            const область = document.querySelector('.ad-lang-panel.active .ad-editor-area');
+            const коробки = [...область.querySelectorAll('figure')];
+            return coробкиСчёт(коробки);
+            function coробкиСчёт(к) {
+                return { кусков: к.length, кнопок: к.map(ф => ф.querySelectorAll('button').length) };
+            }
+        });
+        expect(счёт.кусков).toBeGreaterThan(0);
+        счёт.кнопок.forEach(n => expect(n).toBe(1));
+    });
+
+    test('уходя с ролика, рамку сносим — звук не переживает кадр', async ({ page }) => {
+        const лента = page.locator('#adNewsPreview .news-carousel');
+        await expect(лента.locator('.news-carousel-ramka')).toHaveCount(1);
+        await лента.locator('.news-carousel-thumb').nth(1).click();
+        await expect(лента.locator('.news-carousel-ramka')).toHaveCount(0);
+        await expect(лента.locator('iframe')).toHaveCount(0);
+    });
+
     test('у подзаголовка есть предел 240 и живой счётчик остатка', async ({ page }) => {
         await expect(page.locator('#adNewsExcerpt')).toHaveAttribute('maxlength', '240');
         await expect(page.locator('#adNewsExcerptSchet')).toContainText('осталось');

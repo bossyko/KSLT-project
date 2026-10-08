@@ -23,6 +23,8 @@ const EJS = 'js/admin/core/editor.js';
 const CJS = 'js/admin/core/constants.js';
 const HTM = 'pages/admin.html';
 const UJS = 'js/admin/core/utils.js';
+const LJS = 'js/kslt-lenta.js';
+const VJS = 'js/kslt-video.js';
 
 const ОТКАТЫ = [
 
@@ -190,6 +192,39 @@ const ОТКАТЫ = [
   [NJS, `    if (window.KSLT_VIDEO) window.KSLT_VIDEO.починитьКадры(container);`,
         `    /* кадры не чиним */`,
    'разбор ссылки на видео — одно определение на обе стороны'],
+
+  [EJS, `            короб.remove();`,
+        `            /* откат: кусок не снимается */`,
+   'у вставленного куска есть кнопка снятия'],
+
+  [EJS, `!короб.querySelector('button')`,
+        `!короб.querySelector('.ad-editor-media-remove')`,
+   'кнопка ищется по признаку, а не по классу — иначе их становится две'],
+
+  /* Якорь без обратных косых: в шаблонной строке они съедаются */
+  [UJS, `.replace(/<button`,
+        `.replace(/<knopka`,
+   'служебное не уезжает в текст новости'],
+
+  [LJS, `короб.innerHTML = '';`,
+        `короб.hidden = true;`,
+   'звук не переживает кадр: уходя с ролика, рамку сносим'],
+
+  [NJS, `window.KSLT_LENTA.собрать(container, L.viewerTitle || 'Открыть');`,
+        `собратьГалереиВПредпросмотре(container);`,
+   'лента кадров — одно определение на страницу и на предпросмотр'],
+
+  [LJS, `пустые.push(эл);`,
+        `закрыть();`,
+   'пустой абзац не разрывает ленту'],
+
+  [VJS, `медиа.length < 2`,
+        `медиа.length < 99`,
+   'один короб — один кусок: кадры разносятся по своим фигурам'],
+
+  [HTM, ` https://www.instagram.com`,
+        ``,
+   'CSP админки пускает кадры видео — иначе предпросмотр их не покажет'],
 
   [NJS, `data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg"><span aria-hidden="true">&#127760;</span>`,
         `data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg">&#127760; <span>`,
