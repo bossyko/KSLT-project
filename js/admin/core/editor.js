@@ -116,6 +116,32 @@
         area.addEventListener('input', function() { снабдитьМедиа(area); });
         снабдитьМедиа(area);
 
+        /* ENTER ВНУТРИ РЯДА РВАЛ РАЗМЕТКУ — поймал Костя: «нажимаю интер и
+           всё ломается». Ряд живёт ВНУТРИ редактируемой области, и браузер
+           вправе разрезать его пополам, разложив плитки по двум кускам.
+           Перехватываем: новый абзац ставим ПОСЛЕ ряда и уводим туда
+           курсор — ряд остаётся целым. Так ведут себя атомарные блоки в
+           Notion и Gutenberg: курсор не «внутри» картинки, а рядом с ней. */
+        area.addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter') return;
+            var выд = window.getSelection();
+            if (!выд || !выд.rangeCount) return;
+            var узел = выд.getRangeAt(0).startContainer;
+            var эл = узел.nodeType === 1 ? узел : узел.parentElement;
+            var ряд = эл && эл.closest ? эл.closest('.ad-editor-lenta') : null;
+            if (!ряд) return;
+            e.preventDefault();
+            var абзац = document.createElement('p');
+            абзац.innerHTML = '<br>';
+            ряд.parentNode.insertBefore(абзац, ряд.nextSibling);
+            var диапазон = document.createRange();
+            диапазон.setStart(абзац, 0);
+            диапазон.collapse(true);
+            выд.removeAllRanges();
+            выд.addRange(диапазон);
+            area.dispatchEvent(new Event('input'));
+        });
+
         /* Стрелки ленты: нажатие не должно уводить курсор из текста */
         area.addEventListener('click', function(e) {
             var шаг = e.target.closest('.ad-editor-lenta-nav');
@@ -174,8 +200,12 @@
                 набор.push(узел);
                 return;
             }
-            /* Пустой текст между плитками ряд не рвёт */
+            /* Пустой текст и пустой блок между плитками ряд не рвут:
+               Enter оставляет после себя `<div><br></div>`, и из-за него
+               пять кусков разваливались на две группы */
             if (узел.nodeType === 3 && !узел.textContent.trim()) return;
+            if (узел.nodeType === 1 && !узел.textContent.trim() &&
+                !узел.querySelector('img, iframe')) return;
             закрыть();
         });
         закрыть();
