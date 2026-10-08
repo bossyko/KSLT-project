@@ -16,6 +16,21 @@
     var L = A.L;
     var isEn = A.isEn;
 
+    /**
+     * ПРЕДЕЛ «КРАТКОГО ОПИСАНИЯ» — 240 ЗНАКОВ.
+     *
+     * ПОСЧИТАНО из лестницы страницы: подзаголовок стоит на крутилке
+     * --fs-hero-sub (21 на широких видах) с межстрочным 1.3 в колонке 807 —
+     * три строки выходят около 240 знаков. Три, а не пять: столько занимает
+     * лид у Ghost и Apple News, и ровно столько помещается в шапку, не
+     * отодвигая мету за первый экран.
+     *
+     * ЗАЧЕМ ВООБЩЕ: замер 08.10 нашёл 680 знаков в одной статье — девять
+     * строк, 300 из 977 высоты шапки. Шапка выросла ростом не в обложку, а
+     * в подзаголовок, и две новости перестали быть похожими друг на друга.
+     */
+    var ПРЕДЕЛ_ОПИСАНИЯ = 240;
+
     var newsEditingId = null;
     var newsEditingPublishedAt = null;
     var newsImageFile = null;
@@ -640,6 +655,11 @@
             '</div>' +
 
             // Excerpt
+            /* ПРЕДЕЛ И СЧЁТЧИК. ЗАМЕР 08.10: у шести текстовых полей формы
+               `maxlength` не было ни у одного, и в «краткое описание» одной
+               статьи легло 680 знаков — на странице это девять строк,
+               300 из 977 высоты шапки. ПОСЧИТАНО: три строки по колонке 807
+               при кегле 21 и межстрочном 1.3 — около 240 знаков. */
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.newsExcerpt + '</div>' +
                 '<div class="ad-lang-tabs">' +
@@ -649,19 +669,20 @@
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerpt" placeholder="' + L.newsExcerpt + ' (RU)">' + A.esc(article ? article.excerpt : '') + '</textarea>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerpt" maxlength="' + ПРЕДЕЛ_ОПИСАНИЯ + '" placeholder="' + L.newsExcerpt + ' (RU)">' + A.esc(article ? article.excerpt : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptEn" placeholder="' + L.newsExcerpt + ' (EN)">' + A.esc(article ? article.excerpt_en : '') + '</textarea>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptEn" maxlength="' + ПРЕДЕЛ_ОПИСАНИЯ + '" placeholder="' + L.newsExcerpt + ' (EN)">' + A.esc(article ? article.excerpt_en : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="kg">' +
                     '<div class="ad-field">' +
-                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptKg" placeholder="' + L.newsExcerpt + ' (KG)">' + A.esc(article ? article.excerpt_kg : '') + '</textarea>' +
+                        '<textarea class="ad-field-input ad-field-textarea" id="adNewsExcerptKg" maxlength="' + ПРЕДЕЛ_ОПИСАНИЯ + '" placeholder="' + L.newsExcerpt + ' (KG)">' + A.esc(article ? article.excerpt_kg : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
+                '<div class="ad-field-hint ad-schet" id="adNewsExcerptSchet"></div>' +
                 '<button type="button" class="ad-btn-translate-all" data-ru="adNewsExcerpt" data-en="adNewsExcerptEn" data-kg="adNewsExcerptKg">&#127760; ' + L.translateAllBtn + '</button>' +
             '</div>' +
 
@@ -834,6 +855,34 @@
         });
 
         // Визуальный редактор поверх полей с текстом — менеджер не видит тегов
+        /* СЧЁТЧИК ПОКАЗЫВАЕТ ОСТАТОК, А НЕ НАБРАННОЕ: предел виден до того,
+           как в него упрёшься. Считает по видимому языку — у каждого свой
+           текст и свой остаток. */
+        (function() {
+            var счёт = document.getElementById('adNewsExcerptSchet');
+            if (!счёт) return;
+            var поля = ['adNewsExcerpt', 'adNewsExcerptEn', 'adNewsExcerptKg']
+                .map(function(id) { return document.getElementById(id); })
+                .filter(Boolean);
+            if (!поля.length) return;
+            function видимое() {
+                for (var i = 0; i < поля.length; i++) {
+                    if (поля[i].offsetParent) return поля[i];
+                }
+                return поля[0];
+            }
+            function показать() {
+                var осталось = ПРЕДЕЛ_ОПИСАНИЯ - (видимое().value || '').length;
+                счёт.textContent = 'осталось ' + осталось + ' из ' + ПРЕДЕЛ_ОПИСАНИЯ;
+            }
+            поля.forEach(function(т) { т.addEventListener('input', показать); });
+            var карта = поля[0].closest('.ad-form-card');
+            if (карта) карта.addEventListener('click', function(e) {
+                if (e.target.closest('.ad-lang-tab')) setTimeout(показать, 0);
+            });
+            показать();
+        })();
+
         ['adNewsContent', 'adNewsContentEn', 'adNewsContentKg'].forEach(function(id) {
             if (A.attachEditor) A.attachEditor(id);
         });
