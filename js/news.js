@@ -510,6 +510,7 @@ function renderHero(article, readTime) {
     container.innerHTML =
         '<div class="news-hero-bg' + (article.ownCover ? ' news-own-cover' : '') + '">' +
             '<img src="' + esc(article.heroImage) + '" alt="">' +
+            (article.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
             '<div class="news-hero-overlay"></div>' +
             (article.imageOriginal
                 ? '<button type="button" class="news-hero-zoom" aria-label="' + labels.openPoster + '">' +
@@ -1430,6 +1431,7 @@ function renderRelated(article) {
                 ' class="news-related-card' + (relВнешняя ? ' news-outside' : '') + '">' +
             '<div class="news-related-img' + (rel.ownCover ? ' news-own-cover' : '') + '">' +
                 '<img src="' + esc(rel.heroImage) + '" alt="' + esc(rel.title) + '" loading="lazy">' +
+                (rel.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
             '</div>' +
             '<div class="news-related-info">' +
                 '<span class="news-related-category news-category-' + rel.category + '">' + rel.categoryLabel + '</span>' +
@@ -1696,8 +1698,13 @@ function renderNewsList() {
             var афиша = esc(article.cardImage || article.heroImage || '');
             html += '<a href="' + esc(адрес) + '"' + наружу + ' class="tc' + (isLarge ? ' tc-featured' : '') +
                     (внешняя ? ' news-outside' : '') + '">' +
-                '<div class="tc-image"' + (афиша ? ' style="--tc-poster:url(&quot;' + афиша + '&quot;)"' : '') + '>' +
+                /* ЗНАК НАШЕЙ ПОДМЕНЫ — И НА ВИТРИНЕ ТОЖЕ. До 08.10 он стоял
+                   только в шапке статьи и на карточке «похожей», а на витрине
+                   списка его не было вовсе — при том, что кадр там такая же
+                   наша подмена (js/news-covers.js). */
+                '<div class="tc-image' + (article.ownCover ? ' news-own-cover' : '') + '"' + (афиша ? ' style="--tc-poster:url(&quot;' + афиша + '&quot;)"' : '') + '>' +
                     (афиша ? '<img src="' + афиша + '" alt="" loading="lazy">' : '<div class="tc-noimage">\uD83C\uDFBE</div>') +
+                    (article.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
                     '<span class="tc-badge">' + esc(article.categoryLabel || '') + '</span>' +
                 '</div>' +
                 '<div class="tc-body">' +

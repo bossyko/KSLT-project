@@ -96,7 +96,8 @@ const ОБЛ = блок(CSS, '.news-hero-list {');
 
 правило('карточку новости рисует общий компонент .tc',
     /class="tc' \+ \(isLarge \? ' tc-featured' : ''\)/.test(JS) &&
-    /'<div class="tc-image"'/.test(JS) && /class="tc-body"/.test(JS),
+    /'<div class="tc-image' \+ \(article\.ownCover \? ' news-own-cover' : ''\)/.test(JS) &&
+    /class="tc-body"/.test(JS),
     'Слово Кости: своей карточки у новостей нет.');
 
 правило('своей вёрстки карточки (бенто) в коде не осталось',

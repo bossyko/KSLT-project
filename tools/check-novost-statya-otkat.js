@@ -75,6 +75,10 @@ const ОТКАТЫ = [
     max-width: 900px;`,
    'мера объявлена один раз и достаётся всем, кто её несёт'],
 
+  [JS, `                    (article.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +`,
+       `                    /* откат: на витрине знака нет */`,
+   'знак нашей подмены стоит ВО ВСЕХ ТРЁХ местах и одним способом'],
+
   [CSS, `.news-own-cover {
     position: relative;
 }`,
