@@ -1543,6 +1543,8 @@ body.ad-page {
 .ad-btn-translate-all,
 .ad-tab,
 .ad-image-upload-remove,
+/* 08.10: кнопка снятия вставленного куска в редакторе новости */
+.ad-editor-media-remove,
 .ad-mobile-tab,
 .ad-reg-menu-btn,
 .ad-reg-act-vynos,
@@ -1598,6 +1600,7 @@ body.ad-page {
 .ad-btn-translate-all::after,
 .ad-tab::after,
 .ad-image-upload-remove::after,
+.ad-editor-media-remove::after,
 .ad-mobile-tab::after,
 .ad-reg-menu-btn::after,
 .ad-reg-act-vynos::after,
@@ -1620,6 +1623,7 @@ body.ad-page {
 .ad-btn-translate-all:focus-visible,
 .ad-tab:focus-visible,
 .ad-image-upload-remove:focus-visible,
+.ad-editor-media-remove:focus-visible,
 .ad-mobile-tab:focus-visible,
 .ad-reg-menu-btn:focus-visible,
 .ad-reg-act-vynos:focus-visible,
@@ -2316,6 +2320,55 @@ input[type="date"]::-webkit-datetime-edit {
 
 /* ЗАМЕР 08.10: контраст 3.21 при норме 4.5 — единственный провал формы.
    `--text-dim` уходит из текста по решению 06.10: тихих уровней три. */
+/* ---- Вставленный кусок в редакторе: снимок или ролик ---- */
+/* ВИДЕО НЕЛЬЗЯ БЫЛО УДАЛИТЬ: нажатие по чужому кадру уходит ВНУТРЬ него,
+   курсор в редактор не встаёт, выделять нечего — и «удалённый» ролик
+   оставался в тексте (чтение базы 08.10: два ролика в одном коробе).
+   Теперь у каждого куска своя кнопка снятия, а поверх кадра — щит:
+   в редакторе ролик не смотрят, его смотрят в предпросмотре. */
+.ad-editor-media {
+    position: relative;
+    display: block;
+    margin: var(--space-3) 0;
+}
+
+.ad-editor-media-shchit {
+    position: absolute;
+    inset: 0;
+    display: block;
+    cursor: default;
+}
+
+.ad-editor-media-remove {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 2;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-family: inherit;
+    font-size: var(--fs-base);
+    /* Высота задана кругом 28 — строке остаётся не быть выше него */
+    line-height: var(--lh-none);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.ad-editor-media-remove:hover { background: rgba(255, 59, 48, 0.85); }
+
+.ad-editor-media-remove:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* Перебор предела: подзаголовок длиннее, чем влезает в шапку новости.
    Цвет тревоги берём у системы, а не числом */
 .ad-schet-perebor {

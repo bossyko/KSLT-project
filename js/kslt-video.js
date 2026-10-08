@@ -65,6 +65,30 @@
     function починитьКадры(корень) {
         if (!корень) return 0;
         var починено = 0;
+
+        /* ОДИН КОРОБ — ОДИН КАДР. ЧТЕНИЕ БАЗЫ 08.10 (новость `proba`):
+           ДВА `<iframe>` лежали внутри ОДНОГО `<figure>` — старый ролик и
+           новый. Редактор вставляет кадр туда, где стоит курсор, и если он
+           стоял внутри короба, второй кадр оказывается соседом первого.
+           Лента брала у короба ПЕРВЫЙ кадр, и новое видео не показывалось
+           нигде: ни на странице, ни в предпросмотре. Разносим по своим
+           коробам — после этого каждый кадр виден и каждый листается. */
+        Array.prototype.forEach.call(корень.querySelectorAll('figure'), function(короб) {
+            var медиа = короб.querySelectorAll('iframe[src], img');
+            if (медиа.length < 2) return;
+            /* Порядок держим указателем: вставлять каждый «сразу после
+               короба» значило бы развернуть их задом наперёд. */
+            var последний = короб;
+            Array.prototype.slice.call(медиа, 1).forEach(function(лишний) {
+                var свой = document.createElement('figure');
+                свой.className = короб.className;
+                свой.appendChild(лишний);
+                последний.parentNode.insertBefore(свой, последний.nextSibling);
+                последний = свой;
+                починено++;
+            });
+        });
+
         Array.prototype.forEach.call(корень.querySelectorAll('iframe[src]'), function(кадр) {
             var в = вид(кадр.getAttribute('src'));
             if (!в) return;

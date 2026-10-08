@@ -1408,7 +1408,18 @@
            иначе предпросмотр показывает вертикальный ролик горизонтальной
            коробкой, то есть снова расходится с сайтом */
         if (window.KSLT_VIDEO) window.KSLT_VIDEO.починитьКадры(container);
-        собратьГалереиВПредпросмотре(container);
+        /* ЛЕНТУ СОБИРАЕТ ОБЩИЙ МОДУЛЬ — тот же, что на странице новости
+           (js/kslt-lenta.js). Своя сборка показывала одни снимки, и видео
+           в предпросмотре стояло отдельно: Костя увидел это глазами 08.10. */
+        if (window.KSLT_LENTA) {
+            window.KSLT_LENTA.собрать(container, L.viewerTitle || 'Открыть');
+            Array.prototype.forEach.call(container.querySelectorAll('.news-carousel'), function(лента) {
+                var кадры = лента.dataset.kadry ? JSON.parse(лента.dataset.kadry) : [];
+                window.KSLT_LENTA.завести(лента, кадры, L.viewerTitle || 'Открыть');
+            });
+        } else {
+            собратьГалереиВПредпросмотре(container);
+        }
     }
 
     /**

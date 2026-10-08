@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none' frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.instagram.com;">
 <title>КСЛТ — стенд формы новости в админке</title>
 <!--
   ПРИБОР, А НЕ КАРТИНКА. Форму рисует НАСТОЯЩИЙ модуль админки
@@ -24,7 +24,7 @@
 -->
 <link rel="stylesheet" href="../css/tokens.css?v=25">
 <link rel="stylesheet" href="../css/style.css?v=400">
-<link rel="stylesheet" href="../css/admin.css?v=225">
+<link rel="stylesheet" href="../css/admin.css?v=226">
 <!-- Стили статьи: предпросмотр новости рисует настоящую страницу -->
 <link rel="stylesheet" href="../css/news.css?v=73">
 <style>
@@ -40,12 +40,13 @@
 <!-- Подписи статусов живут здесь: constants.js зовёт KSLT_STATUS.подписи -->
 <script src="../js/tournament-status.js?v=1"></script>
 <script src="../js/admin/core/constants.js?v=145"></script>
-<script src="../js/admin/core/utils.js?v=37"></script>
+<script src="../js/admin/core/utils.js?v=38"></script>
 <script src="../js/admin/core/cover-crop.js?v=3"></script>
-<script src="../js/kslt-video.js?v=2"></script>
-<script src="../js/admin/core/editor.js?v=5"></script>
+<script src="../js/kslt-video.js?v=3"></script>
+<script src="../js/kslt-lenta.js?v=1"></script>
+<script src="../js/admin/core/editor.js?v=6"></script>
 <script src="../js/admin/core/layout.js?v=12"></script>
-<script src="../js/admin/sections/news.js?v=29"></script>
+<script src="../js/admin/sections/news.js?v=30"></script>
 <script>
 (function() {
     'use strict';

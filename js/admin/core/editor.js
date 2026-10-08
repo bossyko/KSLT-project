@@ -91,6 +91,61 @@
         // Кнопка перевода пишет прямо в поле — подхватываем и показываем
         textarea.addEventListener('change', function() {
             if (textarea.value !== area.innerHTML) area.innerHTML = textarea.value || '';
+            снабдитьМедиа(area);
+        });
+
+        /* ВСТАВЛЕННОЕ ВИДЕО НЕЛЬЗЯ БЫЛО УДАЛИТЬ — слово Кости 08.10, и
+           чтение базы это подтвердило: в одной новости внутри ОДНОГО
+           `<figure>` лежали два ролика. Старый «удалили», а он остался.
+           ПРИЧИНА: кадр — чужой `<iframe>`, нажатие по нему уходит ВНУТРЬ
+           кадра, курсор в редактор не встаёт, выделить и нажать Delete
+           нечего. Поэтому каждому вставленному куску даём свою кнопку
+           снятия, а поверх кадра кладём щит: в редакторе ролик не смотрят,
+           его смотрят в предпросмотре. */
+        area.addEventListener('click', function(e) {
+            var крестик = e.target.closest('.ad-editor-media-remove');
+            if (!крестик) return;
+            e.preventDefault();
+            var короб = крестик.closest('figure');
+            if (!короб) return;
+            короб.remove();
+            area.dispatchEvent(new Event('input'));
+            снабдитьМедиа(area);
+        });
+
+        area.addEventListener('input', function() { снабдитьМедиа(area); });
+        снабдитьМедиа(area);
+    }
+
+    /**
+     * Кнопка снятия у каждого вставленного куска — снимка и ролика.
+     * Щит поверх кадра нужен только ролику: у снимка нажатие и так
+     * попадает в редактор.
+     */
+    function снабдитьМедиа(area) {
+        /* ОДИН КОРОБ — ОДИН КУСОК: если два кадра оказались в одном коробе
+           (а так и было в базе), крестик был бы один на оба. Разнос — тот
+           же, что на странице: js/kslt-video.js, одно определение. */
+        if (window.KSLT_VIDEO) window.KSLT_VIDEO.починитьКадры(area);
+        Array.prototype.forEach.call(area.querySelectorAll('figure'), function(короб) {
+            if (!короб.querySelector('img, iframe')) return;
+            короб.classList.add('ad-editor-media');
+            короб.setAttribute('contenteditable', 'false');
+            if (!короб.querySelector('.ad-editor-media-remove')) {
+                var кн = document.createElement('button');
+                кн.type = 'button';
+                кн.className = 'ad-editor-media-remove';
+                кн.title = 'Убрать';
+                кн.setAttribute('contenteditable', 'false');
+                кн.innerHTML = '&times;';
+                короб.appendChild(кн);
+            }
+            if (короб.querySelector('iframe') && !короб.querySelector('.ad-editor-media-shchit')) {
+                var щит = document.createElement('span');
+                щит.className = 'ad-editor-media-shchit';
+                щит.setAttribute('contenteditable', 'false');
+                короб.appendChild(щит);
+            }
         });
     }
 

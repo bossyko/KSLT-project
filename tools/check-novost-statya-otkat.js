@@ -20,6 +20,7 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-novost-statya-'));
 const CSS = 'css/news.css';
 const СТИ = 'css/style.css';
 const JS  = 'js/news.js';
+const ЛЕНТА = 'js/kslt-lenta.js';
 
 const ОТКАТЫ = [
 
@@ -103,7 +104,7 @@ const ОТКАТЫ = [
          `    width: 100%;`,
    'коробка галереи берёт отношение первого кадра'],
 
-  [JS, `    отношениеКоробки(wrap, кадры[0]);`,
+  [ЛЕНТА, `    отношениеКоробки(wrap, кадры[0]);`,
        `    /* откат: отношение не снимаем */`,
    'отношение снимается с ПЕРВОГО кадра, и его ставит js'],
 
@@ -130,7 +131,7 @@ const ОТКАТЫ = [
 @media (max-width: 640px) { .news-carousel-nav { width: 36px; height: 36px; } }`,
    'стрелки карусели — 44 на всех видах'],
 
-  [JS, `    листалкаМиниатюр(wrap);`,
+  [ЛЕНТА, `    листалкаМиниатюр(wrap);`,
        `    листалкаМиниатюр(wrap);
     setInterval(function () { show(index + 1); }, 9000);`,
    'движения в карусели нет вовсе'],

@@ -1025,6 +1025,19 @@
      * Оставляем только СВОИ классы — те, что начинаются на `news-`. Всё
      * чужое (вставка из Word, Google Docs, сайтов) по-прежнему уходит.
      */
+    /**
+     * Служебное из редактора в базу не уезжает: кнопка снятия и щит поверх
+     * кадра живут только в редакторе. Без этого они попали бы в текст
+     * новости и вылезли бы на сайте.
+     */
+    function убратьСлужебное(h) {
+        return String(h)
+            .replace(/<button[^>]*class="ad-editor-media-remove"[^>]*>[\s\S]*?<\/button>/gi, '')
+            .replace(/<span[^>]*class="ad-editor-media-shchit"[^>]*>\s*<\/span>/gi, '')
+            .replace(/\s*contenteditable="[^"]*"/gi, '')
+            .replace(/\s*class="ad-editor-media"/gi, '');
+    }
+
     function оставитьСвоиКлассы(h) {
         return String(h).replace(/\s*class="([^"]*)"/gi, function(всё, классы) {
             var свои = классы.split(/\s+/).filter(function(к) { return /^news-/.test(к); });
@@ -1046,6 +1059,7 @@
         }
 
         h = h.replace(/\s*style="[^"]*"/gi, '');
+        h = убратьСлужебное(h);
         h = оставитьСвоиКлассы(h);
         h = h.replace(/<\/?span[^>]*>/gi, '');
         h = h.replace(/<\/?(?:strong|b)[^>]*>/gi, '');
@@ -1077,6 +1091,7 @@
         if (!/<[a-z][\s\S]*>/i.test(h)) return cleanNewsHtml(h);
 
         h = h.replace(/\s*style="[^"]*"/gi, '');
+        h = убратьСлужебное(h);
         h = оставитьСвоиКлассы(h);
         h = h.replace(/<\/?span[^>]*>/gi, '');
         h = h.replace(/<\/?font[^>]*>/gi, '');
@@ -1209,6 +1224,7 @@
 
     A.esc = esc;
     A.оставитьСвоиКлассы = оставитьСвоиКлассы;
+    A.убратьСлужебное = убратьСлужебное;
     A.cleanNewsHtmlOnSave = cleanNewsHtmlOnSave;
     A.cleanNewsHtml = cleanNewsHtml;
     A.sel = sel;
