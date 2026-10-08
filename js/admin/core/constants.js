@@ -219,6 +219,12 @@
         trnVenueAdded: 'Court created and set for the tournament',
         trnImgCapPage: 'Top of the tournament page',
         trnImgCapCard: 'Card in the list',
+        newsPublication: 'Publication',
+        newsMetaLine: 'The line under the title',
+        newsMetaLineHint: 'Filled in automatically: date, author and reading time',
+        newsImgCapHero: 'Top of the news page',
+        newsImgCapCard: 'Card in the list',
+        newsImgReplace: 'Replace cover',
         noTournaments: 'No tournaments yet',
         noTournamentsText: 'Click "Add Tournament" to create your first tournament',
         trnDeleteConfirm: 'Delete this tournament?',
@@ -1831,6 +1837,17 @@
         trnVenueAdded: 'Корт создан и подставлен в турнир',
         trnImgCapPage: 'Вверху страницы турнира',
         trnImgCapCard: 'Карточка в списке',
+        /* Обложка новости живёт на сайте в ДВУХ формах, и обе режут по-разному.
+           ЗАМЕР 08.10 по пяти видам: коробка шапки 1400×420 (3.33) · 979×353
+           (2.77) · 734×413 (1.78) · 358×201 (1.78) · 807×117 (6.90 — телефон
+           лёжа), плюс scale(1.1). Карточка списка не режет вовсе:
+           object-fit: contain (css/style.css:6228). */
+        newsPublication: 'Публикация',
+        newsMetaLine: 'Строка под заголовком',
+        newsMetaLineHint: 'Считается сама: дата публикации, автор и время чтения',
+        newsImgCapHero: 'Вверху страницы новости',
+        newsImgCapCard: 'Карточка в списке',
+        newsImgReplace: 'Заменить обложку',
         noTournaments: 'Турниров пока нет',
         noTournamentsText: 'Нажмите "Добавить турнир" чтобы создать первый турнир',
         trnDeleteConfirm: 'Удалить этот турнир?',

@@ -575,13 +575,8 @@
         var title = article ? L.editNews : L.addNews;
 
         var imagePreviewHtml = newsImageUrl
-            ? '<img src="' + A.esc(newsImageUrl) + '" class="ad-image-upload-preview" id="adNewsImgPreview">' +
-              '<button type="button" class="ad-image-upload-remove" id="adNewsImgRemove">&times;</button>'
-            : '<div class="ad-image-upload-placeholder">' +
-                  '<div class="ad-image-upload-icon">🖼</div>' +
-                  '<div>' + L.uploadImage + '</div>' +
-                  '<div class="ad-field-hint">' + L.uploadHint + '</div>' +
-              '</div>';
+            ? oblozhkaSplitHtml(newsImageUrl)
+            : oblozhkaPustoHtml();
 
         var hasImageClass = newsImageUrl ? ' has-image' : '';
 
@@ -591,10 +586,17 @@
                 '<button class="ad-btn ad-btn-secondary" id="adNewsBack">' + L.back + '</button>' +
             '</div>' +
 
+            /* ПОРЯДОК БЛОКОВ = ПОРЯДОК СТРАНИЦЫ. Было: обложка, строка меты,
+               цифры, заголовок, подзаголовок, текст, предпросмотр, и только
+               восьмым блоком — КАТЕГОРИЯ, от которой зависит, в каком разделе
+               новость вообще появится. Теперь форма идёт так же, как читается
+               страница: обложка → категория и дата → заголовок → подзаголовок →
+               строка под ними → текст. Цифры прочтения уехали вниз: они не
+               орган управления, а итог, и у черновика их нет вовсе. */
             // Image
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.newsImage + '</div>' +
-                '<div class="ad-image-upload' + hasImageClass + '" id="adNewsImgZone">' +
+                '<div class="ad-image-upload ad-afisha-zone' + hasImageClass + '" id="adNewsImgZone">' +
                     imagePreviewHtml +
                 '</div>' +
                 '<input type="file" accept="image/jpeg,image/png" id="adNewsImgInput" style="display:none">' +
@@ -604,23 +606,35 @@
                 '</div>' +
             '</div>' +
 
-            // Meta preview
-            '<div class="ad-form-card ad-news-meta-preview">' +
-                '<div class="ad-news-meta-row">' +
-                    '<span>\uD83D\uDCC5 <span id="adMetaDate">\u2014</span></span>' +
-                    '<span>\uD83D\uDC64 <span id="adMetaAuthor">KSLT Media</span></span>' +
-                    '<span>\u23F1 <span id="adMetaReadTime">0</span> ' + L.metaReadTime + '</span>' +
+            // Meta: category, author, executor, date
+            /* КАТЕГОРИЯ РЕШАЕТ, В КАКОМ РАЗДЕЛЕ НОВОСТЬ ВООБЩЕ ПОЯВИТСЯ, а
+               блок стоял восьмым и без имени */
+            '<div class="ad-form-card">' +
+                '<div class="ad-form-card-title">' + L.newsPublication + '</div>' +
+                '<div class="ad-field-row-4 ad-field-row">' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.newsCategory + '</label>' +
+                        '<select class="ad-field-input" id="adNewsCat">' +
+                            '<option value="">' + L.selectCategory + '</option>' +
+                            '<option value="results"' + A.sel(article, 'category', 'results') + '>' + A.CATEGORIES.results + '</option>' +
+                            '<option value="interview"' + A.sel(article, 'category', 'interview') + '>' + A.CATEGORIES.interview + '</option>' +
+                            '<option value="announcement"' + A.sel(article, 'category', 'announcement') + '>' + A.CATEGORIES.announcement + '</option>' +
+                            '<option value="world"' + A.sel(article, 'category', 'world') + '>' + A.CATEGORIES.world + '</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.newsAuthor + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adNewsAuthor" value="' + A.esc(article ? article.author : 'KSLT Media') + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.newsExecutor + '</label>' +
+                        '<input type="text" class="ad-field-input" id="adNewsExecutor" value="' + A.esc(article ? (article.executor || '') : (localStorage.getItem('kslt_name') || '')) + '">' +
+                    '</div>' +
+                    '<div class="ad-field">' +
+                        '<label class="ad-field-label">' + L.newsPublishedAt + '</label>' +
+                        '<input type="date" class="ad-field-input" id="adNewsPubDate" value="' + (article && article.published_at ? article.published_at.substring(0, 10) : '') + '">' +
+                    '</div>' +
                 '</div>' +
-            '</div>' +
-
-            // Engagement (shown only for published articles)
-            '<div class="ad-form-card" id="adNewsEngagement" style="display:none">' +
-                '<div class="ad-form-card-title">' + L.engagement + '</div>' +
-                '<div class="ad-engagement-stats">' +
-                    '<div class="ad-engagement-item">&#128065; <span id="adEngViews">0</span></div>' +
-                    '<div id="adEngReactions" style="display:contents"></div>' +
-                '</div>' +
-                '<div id="adNewsPollStats"></div>' +
             '</div>' +
 
             // Title + Slug
@@ -646,7 +660,7 @@
                         '<input type="text" class="ad-field-input" id="adNewsTitleKg" placeholder="' + L.newsTitle + ' (KG)" value="' + A.esc(article ? article.title_kg : '') + '">' +
                     '</div>' +
                 '</div>' +
-                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg">&#127760; ' + L.translateAllBtn + '</button>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsTitle" data-en="adNewsTitleEn" data-kg="adNewsTitleKg"><span aria-hidden="true">&#127760;</span><span>' + L.translateAllBtn + '</span></button>' +
                 '<div class="ad-field">' +
                     '<label class="ad-field-label">' + L.newsSlug + '</label>' +
                     '<input type="text" class="ad-field-input" id="adNewsSlug" placeholder="my-article-slug" value="' + A.esc(article ? article.slug : '') + '">' +
@@ -683,7 +697,21 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ad-field-hint ad-schet" id="adNewsExcerptSchet"></div>' +
-                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsExcerpt" data-en="adNewsExcerptEn" data-kg="adNewsExcerptKg">&#127760; ' + L.translateAllBtn + '</button>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsExcerpt" data-en="adNewsExcerptEn" data-kg="adNewsExcerptKg"><span aria-hidden="true">&#127760;</span><span>' + L.translateAllBtn + '</span></button>' +
+            '</div>' +
+
+            // Meta preview
+            /* БЛОК БЕЗ ИМЕНИ — ЭТО БЛОК, КОТОРЫЙ НЕ ЗНАЮТ, ЗАЧЕМ ЧИТАТЬ.
+               Полоска стояла второй сверху и ничего о себе не говорила:
+               три значка и числа, которые ничем не правятся */
+            '<div class="ad-form-card ad-news-meta-preview">' +
+                '<div class="ad-form-card-title">' + L.newsMetaLine + '</div>' +
+                '<div class="ad-field-hint">' + L.newsMetaLineHint + '</div>' +
+                '<div class="ad-news-meta-row">' +
+                    '<span>\uD83D\uDCC5 <span id="adMetaDate">\u2014</span></span>' +
+                    '<span>\uD83D\uDC64 <span id="adMetaAuthor">KSLT Media</span></span>' +
+                    '<span>\u23F1 <span id="adMetaReadTime">0</span> ' + L.metaReadTime + '</span>' +
+                '</div>' +
             '</div>' +
 
             // Content
@@ -709,7 +737,7 @@
                         '<textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adNewsContentKg" placeholder="' + L.newsContent + ' (KG)">' + A.esc(article ? article.content_kg : '') + '</textarea>' +
                     '</div>' +
                 '</div>' +
-                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsContent" data-en="adNewsContentEn" data-kg="adNewsContentKg">&#127760; ' + L.translateAllBtn + '</button>' +
+                '<button type="button" class="ad-btn-translate-all" data-ru="adNewsContent" data-en="adNewsContentEn" data-kg="adNewsContentKg"><span aria-hidden="true">&#127760;</span><span>' + L.translateAllBtn + '</span></button>' +
             '</div>' +
 
             // Content Preview (WYSIWYG with inline photos)
@@ -717,34 +745,6 @@
                 '<div class="ad-form-card-title">' + L.contentPreview + '</div>' +
                 '<div id="adNewsPreview"></div>' +
                 '<input type="file" accept="image/jpeg,image/png" id="adNewsContentImgInput" style="display:none">' +
-            '</div>' +
-
-            // Meta: category, author, executor, date
-            '<div class="ad-form-card">' +
-                '<div class="ad-field-row-4 ad-field-row">' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.newsCategory + '</label>' +
-                        '<select class="ad-field-input" id="adNewsCat">' +
-                            '<option value="">' + L.selectCategory + '</option>' +
-                            '<option value="results"' + A.sel(article, 'category', 'results') + '>' + A.CATEGORIES.results + '</option>' +
-                            '<option value="interview"' + A.sel(article, 'category', 'interview') + '>' + A.CATEGORIES.interview + '</option>' +
-                            '<option value="announcement"' + A.sel(article, 'category', 'announcement') + '>' + A.CATEGORIES.announcement + '</option>' +
-                            '<option value="world"' + A.sel(article, 'category', 'world') + '>' + A.CATEGORIES.world + '</option>' +
-                        '</select>' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.newsAuthor + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adNewsAuthor" value="' + A.esc(article ? article.author : 'KSLT Media') + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.newsExecutor + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adNewsExecutor" value="' + A.esc(article ? (article.executor || '') : (localStorage.getItem('kslt_name') || '')) + '">' +
-                    '</div>' +
-                    '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.newsPublishedAt + '</label>' +
-                        '<input type="date" class="ad-field-input" id="adNewsPubDate" value="' + (article && article.published_at ? article.published_at.substring(0, 10) : '') + '">' +
-                    '</div>' +
-                '</div>' +
             '</div>' +
 
             // Poll
@@ -778,6 +778,16 @@
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsReactionsToggle">' +
                     (reactionsEnabled ? L.reactionsDisable : L.reactionsEnable) +
                 '</button>' +
+            '</div>' +
+
+            // Engagement (shown only for published articles)
+            '<div class="ad-form-card" id="adNewsEngagement" style="display:none">' +
+                '<div class="ad-form-card-title">' + L.engagement + '</div>' +
+                '<div class="ad-engagement-stats">' +
+                    '<div class="ad-engagement-item">&#128065; <span id="adEngViews">0</span></div>' +
+                    '<div id="adEngReactions" style="display:contents"></div>' +
+                '</div>' +
+                '<div id="adNewsPollStats"></div>' +
             '</div>' +
 
             // Actions
@@ -1032,6 +1042,10 @@
             if (url) {
                 newsImageFile = null;
                 newsImageUrl = url;
+                /* Ссылкой дают ОДНУ картинку: она же и исходник, иначе
+                   кнопка «открыть афишу» в шапке ведёт на прежнюю */
+                newsImageOriginalFile = null;
+                newsImageOriginalUrl = url;
                 previewNewsImage(url);
             }
         });
@@ -1270,13 +1284,64 @@
         });
     }
 
+    /* ДВА ПРЕДСТАВЛЕНИЯ ОДНОЙ ОБЛОЖКИ РЯДОМ. Механизм взят у афиши турнира
+       целиком (`afishaSplitHtml`, js/admin/sections/tournaments.js, решение
+       04.10) — классы, окно, третий короб загрузки те же. СВОИ тут только
+       пропорции и подписи, и вот почему: у ТУРНИРА режет верх страницы (16:9
+       cover), а карточка вписывает афишу целиком (3:4 contain). У НОВОСТИ
+       наоборот — режет ШАПКА, а карточка не режет вовсе.
+       ЗАМЕР 08.10, пять видов загрузкой на нужной ширине: коробка шапки
+       1400×420 (k 3.33) · 979×353 (2.77) · 734×413 (1.78) · 358×201 (1.78) ·
+       807×117 (6.90, телефон лёжа), и поверх `scale(1.1)` — ещё по 10% с
+       каждой стороны (css/news.css:63). Карточка: `object-fit: contain`
+       (css/style.css:6228), то есть обрезка 16:9 видна ЦЕЛИКОМ.
+       Показываем самый строгий ШИРОКИЙ вид — десктопные 10:3: он говорит,
+       что уцелеет наверняка. Превью, которое врёт про форму, хуже, чем его
+       отсутствие: менеджер кадрирует вслепую и узнаёт о срезанной надписи
+       уже с сайта. */
+    function oblozhkaSplitHtml(src) {
+        var s = A.esc(src);
+        return '<div class="ad-afisha-split ad-afisha-split--novost">' +
+                   '<figure class="ad-afisha-pane ad-afisha-pane--novost-hero">' +
+                       /* Рамка нужна ради `scale(1.1)`: оно режет кадр по
+                          краям, а подпись из `figure` обрезать нельзя */
+                       '<span class="ad-afisha-ramka">' +
+                           '<img src="' + s + '" class="ad-afisha-img" id="adNewsImgPreview" alt="">' +
+                       '</span>' +
+                       '<button type="button" class="ad-image-upload-remove" id="adNewsImgRemove">&times;</button>' +
+                       '<figcaption class="ad-afisha-cap">' + L.newsImgCapHero + '</figcaption>' +
+                   '</figure>' +
+                   '<figure class="ad-afisha-pane ad-afisha-pane--novost-card">' +
+                       '<img src="' + s + '" class="ad-afisha-img" id="adNewsImgPreviewCard" alt="">' +
+                       '<figcaption class="ad-afisha-cap">' + L.newsImgCapCard + '</figcaption>' +
+                   '</figure>' +
+                   /* Своего обработчика у кнопки нет: нажатие всплывает в
+                      окно, где уже висит открытие выбора файла — одно
+                      определение на одно понятие. Кнопка здесь ради
+                      клавиатуры и ради того, чтобы замена обложки была
+                      видна, а не угадывалась */
+                   '<button type="button" class="ad-afisha-drop" id="adNewsImgReplace">' +
+                       '<span class="ad-image-upload-icon">\uD83D\uDDBC</span>' +
+                       '<span>' + L.newsImgReplace + '</span>' +
+                       '<span class="ad-field-hint">' + L.uploadHint + '</span>' +
+                   '</button>' +
+               '</div>';
+    }
+
+    /* Пустое окно было написано ДВАЖДЫ — в разметке формы и в снятии */
+    function oblozhkaPustoHtml() {
+        return '<div class="ad-image-upload-placeholder">' +
+                   '<div class="ad-image-upload-icon">\uD83D\uDDBC</div>' +
+                   '<div>' + L.uploadImage + '</div>' +
+                   '<div class="ad-field-hint">' + L.uploadHint + '</div>' +
+               '</div>';
+    }
+
     function previewNewsImage(src) {
         var zone = document.getElementById('adNewsImgZone');
         if (!zone) return;
         zone.classList.add('has-image');
-        zone.innerHTML =
-            '<img src="' + A.esc(src) + '" class="ad-image-upload-preview" id="adNewsImgPreview">' +
-            '<button type="button" class="ad-image-upload-remove" id="adNewsImgRemove">&times;</button>';
+        zone.innerHTML = oblozhkaSplitHtml(src);
         setupImgRemove();
     }
 
@@ -1287,14 +1352,12 @@
                 e.stopPropagation();
                 newsImageFile = null;
                 newsImageUrl = '';
+                /* Исходник уезжает вместе с обрезкой: он больше ничей */
+                newsImageOriginalFile = null;
+                newsImageOriginalUrl = '';
                 var zone = document.getElementById('adNewsImgZone');
                 zone.classList.remove('has-image');
-                zone.innerHTML =
-                    '<div class="ad-image-upload-placeholder">' +
-                        '<div class="ad-image-upload-icon">🖼</div>' +
-                        '<div>' + L.uploadImage + '</div>' +
-                        '<div class="ad-field-hint">' + L.uploadHint + '</div>' +
-                    '</div>';
+                zone.innerHTML = oblozhkaPustoHtml();
                 document.getElementById('adNewsImgUrl').value = '';
                 document.getElementById('adNewsImgInput').value = '';
             });
@@ -1319,14 +1382,25 @@
         // прямо в текст кнопками редактора, поэтому отдельных кнопок «+ Фото»
         // под абзацами больше нет — они появлялись там, где текст ещё резался
         // на куски по пустым строкам.
-        container.innerHTML = '<div class="ad-news-preview-body">' + text + '</div>';
+        /* ПРЕДПРОСМОТР РИСУЕТ НАСТОЯЩУЮ СТРАНИЦУ, А НЕ СВОЮ ВЁРСТКУ.
+           Классы и стили берутся у статьи: `news-article-page` даёт меру
+           абзаца и крутилки видео, `news-html` — типографику текста
+           (css/news.css подключён в админку). До этого здесь жила вторая
+           вёрстка того же: свои кегли, свои отступы, своя карусель — и
+           редактор показывал не то, что увидит читатель. */
+        container.innerHTML = '<div class="news-article-page">' +
+            '<div class="news-html ad-news-preview-body">' + text + '</div>' +
+        '</div>';
         собратьГалереиВПредпросмотре(container);
     }
 
     /**
      * Предпросмотр показывает то же, что читатель. На публичной странице
      * снимки, идущие подряд, собираются в галерею — крупный кадр и лента
-     * миниатюр. Здесь делаем так же, иначе редактор и сайт расходятся.
+     * миниатюр. ТЕПЕРЬ ЭТО ОДИН КОМПОНЕНТ, А НЕ ДВА: разметка и классы
+     * взяты у страницы (`news-carousel`, `news-thumbs-row`), стиль приходит
+     * из css/news.css. Своим здесь остаётся только переключение кадров —
+     * js страницы в админку не подключён.
      */
     function собратьГалереиВПредпросмотре(корень) {
         var тело = корень.querySelector('.ad-news-preview-body');
@@ -1339,17 +1413,17 @@
             if (набор.length < 2) { набор = []; return; }
             var адреса = набор.map(function(f) { return f.querySelector('img').src; });
             var блок = document.createElement('div');
-            блок.className = 'ad-prev-carousel';
+            блок.className = 'news-carousel';
             блок.innerHTML =
-                '<div class="ad-prev-stage">' +
-                    '<button class="ad-prev-nav ad-prev-back" type="button">&#8249;</button>' +
-                    '<img class="ad-prev-main" src="' + A.esc(адреса[0]) + '" alt="">' +
-                    '<button class="ad-prev-nav ad-prev-fwd" type="button">&#8250;</button>' +
-                    '<div class="ad-prev-count">1 / ' + адреса.length + '</div>' +
+                '<div class="news-carousel-stage">' +
+                    '<button class="news-carousel-nav news-carousel-prev" type="button" aria-label="\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0435\u0435">&#8249;</button>' +
+                    '<img class="news-carousel-main" src="' + A.esc(адреса[0]) + '" alt="">' +
+                    '<button class="news-carousel-nav news-carousel-next" type="button" aria-label="\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0435">&#8250;</button>' +
+                    '<div class="news-carousel-count">1 / ' + адреса.length + '</div>' +
                 '</div>' +
-                '<div class="ad-prev-thumbs">' +
+                '<div class="news-carousel-thumbs">' +
                     адреса.map(function(url, i) {
-                        return '<button class="ad-prev-thumb' + (i === 0 ? ' active' : '') +
+                        return '<button class="news-carousel-thumb' + (i === 0 ? ' active' : '') +
                             '" type="button" data-index="' + i + '">' +
                             '<img src="' + A.esc(url) + '" alt=""></button>';
                     }).join('') +
@@ -1368,9 +1442,9 @@
         закрыть();
 
         function завести(блок, адреса) {
-            var главный = блок.querySelector('.ad-prev-main');
-            var счёт = блок.querySelector('.ad-prev-count');
-            var миниатюры = Array.prototype.slice.call(блок.querySelectorAll('.ad-prev-thumb'));
+            var главный = блок.querySelector('.news-carousel-main');
+            var счёт = блок.querySelector('.news-carousel-count');
+            var миниатюры = Array.prototype.slice.call(блок.querySelectorAll('.news-carousel-thumb'));
             var i = 0;
             function показать(n) {
                 i = (n + адреса.length) % адреса.length;
@@ -1378,8 +1452,8 @@
                 счёт.textContent = (i + 1) + ' / ' + адреса.length;
                 миниатюры.forEach(function(t, k) { t.classList.toggle('active', k === i); });
             }
-            блок.querySelector('.ad-prev-back').addEventListener('click', function() { показать(i - 1); });
-            блок.querySelector('.ad-prev-fwd').addEventListener('click', function() { показать(i + 1); });
+            блок.querySelector('.news-carousel-prev').addEventListener('click', function() { показать(i - 1); });
+            блок.querySelector('.news-carousel-next').addEventListener('click', function() { показать(i + 1); });
             миниатюры.forEach(function(t) {
                 t.addEventListener('click', function() { показать(Number(t.dataset.index)); });
             });
@@ -1389,20 +1463,20 @@
         /** Стрелки у ленты миниатюр — как на публичной странице. Появляются
          *  только тогда, когда лента не помещается по ширине. */
         function листалка(блок) {
-            var лента = блок.querySelector('.ad-prev-thumbs');
+            var лента = блок.querySelector('.news-carousel-thumbs');
             if (!лента) return;
 
             var ряд = document.createElement('div');
-            ряд.className = 'ad-prev-thumbs-row';
+            ряд.className = 'news-thumbs-row';
             лента.parentNode.insertBefore(ряд, лента);
 
             var назад = document.createElement('button');
-            назад.className = 'ad-prev-thumbs-nav';
+            назад.className = 'news-thumbs-nav news-thumbs-back';
             назад.type = 'button';
             назад.innerHTML = '&#8249;';
 
             var вперёд = document.createElement('button');
-            вперёд.className = 'ad-prev-thumbs-nav';
+            вперёд.className = 'news-thumbs-nav news-thumbs-fwd';
             вперёд.type = 'button';
             вперёд.innerHTML = '&#8250;';
 
@@ -1417,7 +1491,7 @@
             вперёд.addEventListener('click', function() { шаг(1); });
 
             function обновить() {
-                ряд.classList.toggle('ad-prev-thumbs-fits',
+                ряд.classList.toggle('news-thumbs-fits',
                     лента.scrollWidth <= лента.clientWidth + 1);
                 назад.disabled = лента.scrollLeft <= 0;
                 вперёд.disabled = лента.scrollLeft + лента.clientWidth >= лента.scrollWidth - 1;
