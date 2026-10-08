@@ -48,6 +48,10 @@
             btnWrap.style.display = count > 0 ? 'flex' : 'none';
             countEl.textContent = count;
             checkAll.checked = total.length > 0 && count === total.length;
+            /* НЕПОЛНЫЙ ВЫБОР БЫЛ НЕОТЛИЧИМ ОТ ПУСТОГО: отметишь одну строку
+               из тридцати — шапка пустая, как будто не выбрано ничего.
+               Третье состояние у галочки есть у браузера, им и пользуемся. */
+            checkAll.indeterminate = count > 0 && count < total.length;
         }
 
         // Select all

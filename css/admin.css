@@ -567,7 +567,10 @@ body.ad-page {
 
 .ad-table th {
     text-align: left;
-    padding: 10px 12px;
+    /* 12 — ступень шкалы отступов. Было 10, мимо неё. Вместе с прозрачным
+       слоем `.ad-col-header::before` даёт цель нажатия 44 (решение 04.10:
+       «кнопка 36 законна, если у неё есть прозрачный слой цели 44») */
+    padding: var(--space-3);
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -588,6 +591,18 @@ body.ad-page {
     gap: 4px;
     cursor: pointer;
     user-select: none;
+    position: relative;
+}
+/* Прозрачный слой цели: сама шапка 40 высотой при кегле 11, палец попадает
+   в 44. Решение 04.10, то же, что у кнопки 36 */
+.ad-col-header::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    height: 44px;
 }
 .ad-col-header:hover { color: var(--accent); }
 .set-del-level:hover { background: rgba(255,60,60,0.35) !important; }
@@ -722,7 +737,9 @@ body.ad-page {
 }
 
 .ad-table td {
-    padding: 10px 12px;
+    /* 8 · 12 — ступени шкалы. Было 10 × 10, мимо неё, и ряд мерился 59 на
+       1512 при 48 у компонента `Table row 132:162` */
+    padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     color: var(--text-secondary);
     vertical-align: middle;
@@ -730,6 +747,37 @@ body.ad-page {
 
 .ad-table tr:last-child td {
     border-bottom: none;
+}
+
+/* ВЫСОТА РЯДА — СВОЙСТВОМ, А НЕ СУММОЙ ПОЛЕЙ. `Table row 132:162` — 48.
+   Замерено 08.10: 59 на 1512 и 84 на 1024/768. Для таблицы `height` —
+   это минимум: ряд с переносом строки по-прежнему растёт. */
+.ad-table tbody tr {
+    height: 48px;
+}
+
+/* НАЗВАНИЕ НОВОСТИ — ОДНА СТРОКА С ОТСЕЧКОЙ. Замерено 08.10: самое
+   длинное название в списке переносилось на вторую строку и давало ряд 59
+   при 48 у компонента. Ряды разной высоты читаются хуже, а полное
+   название приходит подсказкой и открывается нажатием.
+   `max-width: 0` при `width: 100%` — то, чем клетка таблицы даётся
+   сузить ниже содержимого: без него `text-overflow` не действует вовсе,
+   клетка просто растёт. */
+/* ЧИСЛОВАЯ КЛЕТКА — КЛАССОМ, А НЕ ИНЛАЙНОМ. Стояло
+   `style="text-align:center"` прямо в разметке, и в карточке оно било
+   правило раскладки по весу: число просмотров уезжало на середину
+   широкой дорожки, за двести пикселей от значка статуса. */
+.ad-table td.ad-chislo {
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+#adNewsTable tbody td.ad-nazvanie {
+    width: 100%;
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .ad-table tr:hover td {
@@ -1724,6 +1772,36 @@ body.ad-page {
     background: var(--accent);
 }
 
+/* Галочка 18 — размер компонента `Checkbox 28:79`. Цель нажатия 44 даёт
+   прозрачный слой, решение 04.10 */
+.ad-bulk-item::before,
+.ad-bulk-all::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+}
+
+/* НЕПОЛНЫЙ ВЫБОР БЫЛ НЕОТЛИЧИМ ОТ ПУСТОГО: отметишь одну строку из
+   тридцати — шапка пустая, как будто не выбрано ничего */
+.ad-bulk-all:indeterminate {
+    background: var(--accent);
+}
+
+.ad-bulk-all:indeterminate::after {
+    content: '\2013';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+}
+
 .ad-bulk-item:checked::after,
 .ad-bulk-all:checked::after {
     content: '✓';
@@ -1904,10 +1982,21 @@ body.ad-page {
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-muted);
     border: 1px solid var(--border-subtle);
+    /* ЗНАЧОК ЖИВЁТ В ОДНУ СТРОКУ — `Badge 27:53`: высота 24, одна строка.
+       Замерено 08.10: «Мировой теннис» переносился в колонке 115, значок
+       становился 44 высотой, и ряд уезжал с 48 на 56. Каждая четвёртая
+       строка списка была выше соседних, и причина не читалась глазом. */
+    white-space: nowrap;
 }
 
 /* ---- News Image Thumbnail in Table ---- */
 .ad-table-thumb {
+    /* КАРТИНКА В СТРОКЕ СТОИТ НА БАЗОВОЙ ЛИНИИ, и под ней остаётся место
+       на выносные элементы строки. Замерено 08.10: ряд с миниатюрой-картинкой
+       54.5, ряд с пустым коробом 49 — РАЗНИЦА 5.5 НЕ ПРИНАДЛЕЖАЛА НИКОМУ
+       и не находилась ни в одном отступе. `display: block` убирает строку
+       под картинкой, и ряд встаёт на свои 48. */
+    display: block;
     width: 48px;
     height: 32px;
     border-radius: 4px;
@@ -2143,10 +2232,19 @@ input[type="date"]::-webkit-datetime-edit {
        поле выросло в высоту на 240 вместо своих 44. Костя увидел сразу:
        «в вертикальном положении кошмар».
        Та же беда, что 03.10 у вкладки раздела: `flex-basis: 0%` перебил
-       `height`. ПОРОГ ПО ШИРИНЕ ЗАДАЁТСЯ `min-width` — он знает ось. */
-    flex: 1 1 auto;
-    min-width: 240px;
-    max-width: 300px;
+       `height`. ПОРОГ ПО ШИРИНЕ ЗАДАЁТСЯ `min-width` — он знает ось.
+       08.10: `Search field 50:67` — 320 x 44, радиус 8, кегль 16.
+       Решение Кости 06.10: «поле поиска берётся из компонента целиком».
+       Стояло 240–300 и высота 47 из полей. Ширину держит `width`, а не
+       `flex-basis`: он мерит главную ось, а на 768 полоса — колонка.
+       Высота свойством, поля по вертикали сняты: однострочное поле
+       центрует текст само. */
+    flex: 0 1 auto;
+    width: 320px;
+    max-width: 100%;
+    height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .ad-filter-select {
@@ -3357,6 +3455,15 @@ select.ad-field-input {
 
     .ad-filter-row {
         flex-direction: column;
+    }
+
+    /* ПОЛОСА ИЗ ДВУХ ЭЛЕМЕНТОВ В КОЛОНКУ НЕ ЛОМАЕТСЯ. Колонка заведена
+       для полос с двумя списками по 220 и кнопкой: они на 768 не влезают.
+       У новостей в полосе поле 320 и кнопка 183 — ПОСЧИТАНО 515 при 720,
+       и вторая строка уходила в пустоту. Перенос и так разрешён
+       `flex-wrap` выше: не влезет — сам перенесёт. */
+    .ad-filter-row--dvoe {
+        flex-direction: row;
     }
 
     .ad-filter-search {
@@ -4872,25 +4979,40 @@ select.ad-field-input {
     transition: opacity 0.3s;
 }
 
-/* ---- News Stats Grid ---- */
+/* ---- Карточки аналитики раздела «Новости» ----
+   ВИД ТОТ ЖЕ, ЧТО БЫЛ, — три плитки в ряд. К компонентам приведены числа:
+   поля были 14 × 16 (14 мимо шкалы 8·12·16·24·32·40), отбивка полосы 20
+   (тоже мимо), зазор пунктов 6 и 3, ширина медали 18. Тихий текст звал
+   `--text-dim` — решение Кости 06.10: тихих уровней три, `--text-dim`
+   уходит из текста (3.19 мимо WCAG AA при кегле 11).
+   Кегли не трогались: 26 значения, 18 значка, 11 подписи — все ступени. */
 .ad-news-stats-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
+    /* `minmax(0, 1fr)`, А НЕ `1fr`. Поймано прогоном 08.10 на 1024:
+       полоса карточек вылезала за витрину. `1fr` — это `minmax(auto, 1fr)`,
+       и НИЖНЯЯ граница дорожки берётся от содержимого: карточка
+       «Популярные» с длинными названиями требовала 788 и распирала полосу,
+       а соседние ужимались. Замерено на 1512: 326 · 326 · 788 вместо
+       480 · 480 · 480 — ТО САМОЕ «карточки не равны между собой»,
+       записанное на доске 663:12. Ноль в нижней границе разрешает дорожке
+       сузиться, и названия внутри уходят в отсечку, которая у них уже
+       есть. Три карточки становятся равными — это и есть «выровнять». */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
 }
 
 .ad-news-stat-card {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 14px 16px;
+    padding: var(--space-3) var(--space-4);
     text-align: center;
 }
 
 .ad-news-stat-icon {
     font-size: var(--fs-md);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
     opacity: 0.7;
 }
 
@@ -4909,31 +5031,31 @@ select.ad-field-input {
 }
 
 .ad-news-stat-sub {
+    /* БЫЛО `--text-dim` — 3.19 при кегле 11, мимо WCAG AA */
     font-size: var(--fs-2xs);
-    color: var(--text-dim);
-    margin-top: 4px;
+    color: var(--text-muted);
+    margin-top: var(--space-1);
 }
 
-/* Popular card — left aligned with top list */
+/* Карточка «Популярные» — по левому краю, как список внутри неё */
 .ad-news-stat-card--popular {
     text-align: left;
-    padding: 12px 16px;
 }
 
 .ad-news-stat-top-list {
-    margin-top: 8px;
+    margin-top: var(--space-2);
 }
 
 .ad-news-stat-top-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 0;
+    gap: var(--space-2);
+    padding: var(--space-1) 0;
 }
 
 .ad-news-stat-top-medal {
     flex-shrink: 0;
-    width: 18px;
+    width: var(--space-6);
     text-align: center;
     font-size: var(--fs-sm);
 }
@@ -4950,27 +5072,30 @@ select.ad-field-input {
 
 .ad-news-stat-top-score {
     flex-shrink: 0;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-xs);
     font-weight: 500;
 }
 
+/* Пустое и «загружается» у списка популярных. Стояло инлайном в разметке
+   с кеглем 0.8rem — это 12.8, мимо лестницы кеглей */
+.ad-news-stat-top-pusto {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+
 @media (max-width: 992px) {
     .ad-news-stats-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .ad-news-stat-card--popular {
         grid-column: 1 / -1;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .ad-news-stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
-    .ad-news-stat-card--popular {
-        grid-column: 1 / -1;
+        gap: var(--space-2);
     }
     .ad-news-stat-value {
         font-size: var(--fs-md);

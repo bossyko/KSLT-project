@@ -110,11 +110,11 @@
                 '<div class="ad-news-stat-card ad-news-stat-card--popular">' +
                     '<div class="ad-news-stat-icon">&#128293; ' + L.newsStatPopular + '</div>' +
                     '<div class="ad-news-stat-top-list" id="adNewsStatTopList">' +
-                        '<div style="color:var(--text-dim);font-size:0.8rem;">...</div>' +
+                        '<div class="ad-news-stat-top-pusto">...</div>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
-            '<div class="ad-filter-row ad-filter-sticky">' +
+            '<div class="ad-filter-row ad-filter-row--dvoe ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adNewsSearch" placeholder="' + L.newsSearch + '" value="' + A.esc(newsSearchQuery) + '">' +
                 '<button class="ad-btn ad-btn-primary" id="adNewsAdd" style="white-space:nowrap;margin-left:auto;">+ ' + L.addNews + '</button>' +
             '</div>' +
@@ -134,7 +134,7 @@
                             colHeader('reactions', '&#128077;', false, L.thReactions) +
                             colHeader('votes', '&#128499;&#65039;', false, L.thVotes) +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
                 '<div class="ad-col-dropdown" id="adNewsColDropdown" style="display:none;"></div>' +
@@ -213,7 +213,7 @@
                 var medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
                 var rows = topRes.value.data;
                 if (rows.length === 0) {
-                    topList.innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.newsStatNoArticles + '</div>';
+                    topList.innerHTML = '<div class="ad-news-stat-top-pusto">' + L.newsStatNoArticles + '</div>';
                 } else {
                     var html = '';
                     rows.forEach(function(row, i) {
@@ -467,7 +467,7 @@
                 '<tr><td colspan="10" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📝</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noArticles + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noArticlesText + '</div>' +
+                    '<div class="ad-news-stat-top-pusto">' + L.noArticlesText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -519,14 +519,14 @@
                 '<tr data-news-id="' + a.id + '">' +
                     A.bulkCheckboxTd(a.id) +
                     '<td>' + thumbHtml + '</td>' +
-                    '<td style="font-weight:500;color:var(--text-primary);">' + (a.title || L.noData) + '</td>' +
+                    '<td class="ad-nazvanie" style="font-weight:500;color:var(--text-primary);" title="' + A.esc(a.title || L.noData) + '">' + (a.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="color:var(--text-secondary);">' + A.esc(a.executor || '\u2014') + '</td>' +
                     '<td>' + statusHtml + '</td>' +
                     '<td>' + dateStr + '</td>' +
-                    '<td style="text-align:center;color:var(--text-secondary);">' + viewsCell + '</td>' +
-                    '<td style="text-align:center;color:var(--text-secondary);">' + reactionsCell + '</td>' +
-                    '<td style="text-align:center;color:var(--text-secondary);">' + votesCell + '</td>' +
+                    '<td class="ad-chislo" title="' + A.esc(L.thViews) + '">' + viewsCell + '</td>' +
+                    '<td class="ad-chislo">' + reactionsCell + '</td>' +
+                    '<td class="ad-chislo">' + votesCell + '</td>' +
                 '</tr>';
         });
 
@@ -1001,7 +1001,7 @@
                             '<span style="color:var(--accent);font-weight:500;">' + pct + '% (' + votes[vi] + ')</span>' +
                         '</div>';
                     }
-                    pollHtml += '<div style="margin-top:8px;color:var(--text-dim);font-size:0.85rem;">' + L.totalVotes + ': ' + totalV + '</div></div>';
+                    pollHtml += '<div style="margin-top:8px;color:var(--text-muted);font-size:var(--fs-xs);">' + L.totalVotes + ': ' + totalV + '</div></div>';
                     pollStatsEl.innerHTML = pollHtml;
                 }
 
