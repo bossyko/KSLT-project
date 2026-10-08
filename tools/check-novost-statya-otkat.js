@@ -75,6 +75,14 @@ const ОТКАТЫ = [
     max-width: 900px;`,
    'мера объявлена один раз и достаётся всем, кто её несёт'],
 
+  [CSS, `.news-own-cover {
+    position: relative;
+}`,
+         `.news-own-cover {
+    display: block;
+}`,
+   'знак своей обложки отсчитывается от своего кадра'],
+
   [CSS, `    font-size: var(--fs-2xs);
     font-weight: var(--fw-medium);
     text-transform: uppercase;
