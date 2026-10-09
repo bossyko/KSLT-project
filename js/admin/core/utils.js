@@ -76,13 +76,30 @@
         });
 
         // Bulk delete
-        bulkBtn.addEventListener('click', function() {
+        bulkBtn.addEventListener('click', async function() {
             var checked = table.querySelectorAll('tbody .ad-bulk-item:checked');
             var ids = [];
             checked.forEach(function(cb) { ids.push(cb.dataset.bulkId); });
             if (ids.length === 0) return;
 
-            showConfirm(opts.confirmMsg || L.deleteSelectedConfirm, L.deleteConfirmText, async function() {
+            /* ПОЛОСА ОДНА НА ВСЮ АДМИНКУ, А ЗНАНИЕ О СУЩНОСТИ — У ЭКРАНА.
+               `доУдаления(ids)` возвращает текст предупреждения, который
+               экран собрал сам (турнир считает, сколько заявок, матчей и
+               НАЧИСЛЕНИЙ уйдёт каскадом); `послеУдаления(ids)` доделывает
+               своё — турнирам нужен пересчёт очков. Полоса о турнирах не
+               знает и знать не должна. Тот же приём, что у renderNewsForm:
+               одно устройство, входы дописывают своё.
+               Крючков нет — ведёт себя ровно как прежде: пять остальных
+               экранов не трогали. */
+            var текст = L.deleteConfirmText;
+            if (opts.доУдаления) {
+                bulkBtn.disabled = true;
+                try { текст = (await opts.доУдаления(ids)) || L.deleteConfirmText; }
+                catch (e) { текст = L.deleteConfirmText; }
+                bulkBtn.disabled = false;
+            }
+
+            showConfirm(opts.confirmMsg || L.deleteSelectedConfirm, текст, async function() {
                 var result = await A.client.from(opts.tableName).delete().in('id', ids);
                 if (result.error) {
                     showToast(result.error.message, 'error');
@@ -105,6 +122,13 @@
                     btnWrap.style.display = 'none';
                     /* И промис берём через `Promise.resolve`: обёртка, не
                        вернувшая его, больше не может обмануть ожидание */
+                    /* ДОДЕЛАТЬ СВОЁ — ДО ПЕРЕРИСОВКИ СПИСКА. Турниру здесь
+                       пересчитывают очки: сделай это после `reloadFn`, и
+                       список успеет показать рейтинг, которого уже нет. */
+                    if (opts.послеУдаления) {
+                        try { await opts.послеУдаления(ids); }
+                        catch (e) { showToast(e.message || 'Error', 'error'); }
+                    }
                     await Promise.resolve(opts.reloadFn());
                     updateBulkUI();
                 }
