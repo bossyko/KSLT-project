@@ -63,7 +63,13 @@ const КУСКИ = [
     ['вкладка «Новости» турнира', 'check-turnir-novost.js', 'check-turnir-novost-otkat.js'],
     ['голоса вызова', 'check-golosa-storony.js', 'check-golosa-storony-otkat.js'],
     ['удаление турнира', 'check-udalenie-turnira.js', 'check-udalenie-turnira-otkat.js'],
-    ['шов адреса клетки', 'check-shov-adresa.js', 'check-shov-adresa-otkat.js']
+    ['шов адреса клетки', 'check-shov-adresa.js', 'check-shov-adresa-otkat.js'],
+    /* ФАЙЛ БЫЛ, А В ПРОГОНЕ ЕГО НЕ БЫЛО. check-draw.js лежал в tools/ с
+       сентября, считал провалы и никому о них не говорил: ни строки итога,
+       ни кода выхода, ни записи здесь. Нашёл Костя вопросом «а что прувер
+       не сделал». 09.10 файлу дан код выхода, написан прувер, запись
+       заведена. */
+    ['жеребьёвка и сетки за места', 'check-draw.js', 'check-draw-otkat.js']
 ];
 
 function прогнать(файл) {
