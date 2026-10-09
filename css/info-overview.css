@@ -7,10 +7,16 @@
 /* Высота, кегли и отступы — те же, что у «Турниров» и категорий:
    один сайт, шапки разделов должны читаться одинаково */
 .io-hero {
+    /* ОБЛОЖКА РАЗДЕЛА — ОБЩИЕ КРУТИЛКИ, А НЕ СВОИ ЧИСЛА. Решение Кости
+       04.10: «обложка раздела — одна крутилка на все разделы». Здесь стояли
+       свои 460 и свой воздух `--section-y`, и замер 09.10 показал, во что
+       это обходится: 33% · 118% · 27% · 60% · 51% экрана по пяти видам —
+       на телефоне лёжа обложка была ВЫШЕ экрана. У восьми соседних
+       разделов в это время 360 и 275. */
     position: relative;
-    padding: var(--section-y) var(--pad-x) var(--section-y);
+    padding: var(--oblozhka-vozduh) var(--pad-x) var(--oblozhka-vozduh-niz);
     text-align: center;
-    min-height: 460px;
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,10 +52,13 @@
 }
 
 .io-hero h1 {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    /* Кегль заголовка обложки — крутилка `--fs-hero` (40 · 32 · 26). Свой
+       `clamp` давал 22.62 · 37.14 · 27.2 · 45.06 · 49.6 — ни одного числа
+       со шкалы, и на всех пяти видах мимо соседних разделов. */
+    font-size: var(--fs-hero);
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: 18px;
+    margin-bottom: var(--space-4);
     line-height: 1.1;
 }
 
@@ -58,7 +67,7 @@
 }
 
 .io-hero p {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-secondary);
     max-width: 720px;
@@ -128,14 +137,19 @@
 .io-featured-content p {
     font-size: var(--fs-base);
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.5;
     margin-bottom: var(--space-md);
     max-width: 600px;
 }
 
 .io-featured-link {
-    display: inline-block;
-    padding: 10px 28px;
+    /* ЦЕЛЬ НАЖАТИЯ — СТУПЕНЬ, А НЕ СУММА ПОЛЕЙ. Замер 09.10: 152 × 41 —
+       высоту давали поля 10 + строка, и до 44 не хватало трёх пикселей. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--space-8);
     background: var(--accent);
     color: #000;
     font-size: var(--fs-sm);
@@ -164,7 +178,10 @@
 .io-card {
     display: flex;
     flex-direction: column;
-    padding: var(--space-lg);
+    /* ПОЛЯ ИЗ КОМПОНЕНТА, А НЕ НА ГЛАЗ. `Card 29:65` знает две плотности:
+       Compact 16 и Regular 24. Стояло `--space-lg` — это 40, числа такого у
+       карточки нет ни в компоненте, ни на соседних страницах. */
+    padding: var(--space-md);
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -225,14 +242,8 @@
    RESPONSIVE
    ======================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     
-
-    /* Та же шкала, что на остальных страницах раздела «Инфо» */
-    .io-hero h1 {
-        font-size: clamp(1.35rem, 5.8vw, 1.7rem);
-        line-height: 1.2;
-    }
 
         .io-content {
         padding: var(--section-y-sm) var(--pad-x);
@@ -243,37 +254,36 @@
     }
 
     .io-featured-content h2 {
-        font-size: clamp(1.15rem, 5vw, 1.32rem);
-        line-height: 1.25;
+        /* Ступень 21, а не `clamp`: он давал 19.5 на телефоне и 21.12 на
+           планшете — оба мимо шкалы, и заголовок карточки не вставал ни на
+           одну ступень ни на одном виде. */
+        font-size: var(--fs-lg);
+        line-height: 1.3;
     }
 
     .io-featured-content p {
         font-size: var(--fs-sm);
-        line-height: 1.55;
+        line-height: 1.5;
     }
 
     /* Карточки раздела — компактнее: одна занимала 165 пикселей, и до
        документов приходилось прокручивать пол-экрана. Значок мельче,
        поля уже, подписи по общей шкале */
     .io-card {
-        padding: 14px;
+        /* Вторая плотность того же компонента: `Card 29:65` Compact — 16.
+           Стояло 14 — число не со шкалы отступов (8 · 12 · 16 · 24 · 32 · 40). */
+        padding: var(--space-4);
     }
 
 
     .io-card p {
-        font-size: var(--fs-xs);
-        line-height: 1.4;
-        margin-bottom: 8px;
+        font-size: var(--fs-2xs);
+        line-height: 1.3;
+        margin-bottom: var(--space-2);
     }
 
     .io-card-arrow {
         font-size: var(--fs-xs);
-    }
-
-    /* Обложка раздела — общий размер, как у остальных страниц «Инфо» */
-    .io-hero.io-hero {
-        min-height: 275px;
-        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
     }
 
     .io-grid {
@@ -281,12 +291,7 @@
     }
 }
 
-@media (max-width: 480px) {
-    .io-hero {
-        padding: var(--section-y) var(--pad-x) var(--section-y-sm);
-        min-height: 280px;
-    }
-
+@media (max-width: 640px) {
     .io-hero p {
         font-size: var(--fs-sm);
     }
@@ -309,19 +314,20 @@
     }
 }
 
-@media (max-width: 375px) {
-    .io-featured-link {
-        padding: 8px 20px;
-        font-size: var(--fs-xs);
-    }
-}
+/* ГРАНИЦ ДВЕ, А НЕ ЧЕТЫРЕ. Здесь жили 768 · 480 · 375 · 640 — четыре
+   точки останова при двух разрешённых. Правило для 375 было пятой ступенью
+   кнопки и снято целиком: кнопка стоит на ступени 44 и в уменьшении не
+   нуждается. */
 
 /* Полное название под аббревиатурой.
    Три буквы ничего не говорят человеку, попавшему на сайт впервые, — а
    «Инфо» это первая страница, куда он заходит за объяснениями. */
 .io-hero-full {
-    margin: 6px 0 0;
-    font-size: var(--fs-xl);
+    margin: var(--space-2) 0 0;
+    /* Подзаголовок обложки — та же крутилка, что у восьми соседних
+       разделов: 21 · 18 · 16. Стояло 26 на широких и 21 на узких, то есть
+       на телефоне название КСЛТ шло вровень с заголовком страницы. */
+    font-size: var(--fs-hero-sub);
     font-weight: 600;
     line-height: 1.3;
     color: #fff;
@@ -335,7 +341,7 @@
    делаем заметно мельче. Иначе две курсивные серые строки подряд почти
    одного размера слипались в один нечитаемый блок */
 .io-hero-sub {
-    margin-top: 3px;
+    margin-top: var(--space-1);
     font-size: var(--fs-sm);
     font-style: italic;
     letter-spacing: 0.2px;
@@ -356,23 +362,18 @@
     font-style: italic;
     font-size: var(--fs-base);
     max-width: 62ch;
-    margin: 20px auto 0;
+    margin: var(--space-4) auto 0;
     text-wrap: balance;
 }
 
 /* Это правило стоит ниже мобильного блока и перебивало его: на телефоне
    подпись держала 20 пикселей отступа, и обложка была выше остальных
    страниц раздела */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .io-hero-content > p {
         font-size: var(--fs-sm);
-        margin-top: 10px;
+        margin-top: var(--space-2);
     }
-}
-
-@media (max-width: 768px) {
-    .io-hero-full { font-size: var(--fs-lg); }
-    .io-hero-sub  { font-size: var(--fs-sm); }
 }
 
 /* ========================================
@@ -384,7 +385,9 @@
    отдельным списком ниже.
    ======================================== */
 
-.io-group + .io-group { margin-top: 56px; }
+/* Отбивка между группами — ступень 40. Стояло 56: числа такого на шкале
+   отступов нет. */
+.io-group + .io-group { margin-top: var(--space-10); }
 
 .io-group-title {
     font-size: var(--fs-xs);
@@ -392,7 +395,7 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--accent);
-    margin: 0 0 20px;
+    margin: 0 0 var(--space-4);
 }
 
 /* Крупная иконка водяным знаком: у каждой карточки свой силуэт, и они
@@ -437,8 +440,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 18px;
-    padding: 20px 24px;
+    gap: var(--space-4);
+    /* Поля строки — ступени шкалы (8 · 12 · 16 · 24 · 32 · 40). Стояло
+       20 × 24: вертикаль мимо шкалы. */
+    padding: var(--space-4) var(--space-6);
     border-bottom: 1px solid var(--border-subtle);
     text-decoration: none;
     color: inherit;
@@ -447,12 +452,12 @@
 .io-docrow:last-child { border-bottom: none; }
 .io-docrow:hover { background: rgba(255, 255, 255, 0.02); }
 
-.io-docrow-left { display: flex; align-items: center; gap: 14px; }
+.io-docrow-left { display: flex; align-items: center; gap: var(--space-3); }
 
 .io-doc-icon {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -467,7 +472,7 @@
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     font-weight: 400;
-    margin-top: 3px;
+    margin-top: var(--space-1);
     line-height: 1.5;
 }
 
@@ -475,7 +480,7 @@
 .io-docrow:hover .io-docrow-arrow { color: var(--accent); }
 
 @media (max-width: 640px) {
-    .io-docrow { padding: 18px 18px; }
+    .io-docrow { padding: var(--space-4); }
     .io-docrow-arrow { display: none; }
 }
 
@@ -487,19 +492,22 @@
    побеждало бы объявление, а не наша правка
    ======================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     /* Название карточки шло 16-м кеглем, как основной текст на странице */
     .io-card h3 {
         font-size: var(--fs-sm);
-        margin-top: 2px;
-        margin-bottom: 4px;
+        margin-top: var(--space-1);
+        margin-bottom: var(--space-1);
     }
 
-    /* Метка группы была мельче подписей внутри карточек — читалась как
-       подпись к подписи, хотя она над ними главная */
+    /* ЛЕСТНИЦА НЕ ПЕРЕВОРАЧИВАЕТСЯ НА УЗКОМ ВИДЕ. Здесь метка группы
+       поднималась до 14 при 12 на десктопе — уровень становился КРУПНЕЕ на
+       телефоне, чего на сайте не бывает нигде. Беда, которую чинили, была
+       не в метке: подпись внутри карточки шла вровень с ней. Метка остаётся
+       одной ступенью на всех видах (12, капс, разрядка), а подпись карточки
+       уходит на ступень ниже — ниже метки, как ей и положено. */
     .io-group-title {
-        font-size: var(--fs-sm);
-        margin: 0 0 12px;
+        margin: 0 0 var(--space-3);
     }
 
     .io-group + .io-group {
@@ -509,8 +517,8 @@
     /* Строка документа занимала 20 на 24 пикселя полей — три документа
        не помещались на экран */
     .io-docrow {
-        padding: 12px 14px;
-        gap: 12px;
+        padding: var(--space-3) var(--space-4);
+        gap: var(--space-3);
     }
 
     .io-docrow-name {
@@ -519,17 +527,77 @@
 
     .io-docrow-sub {
         font-size: var(--fs-xs);
-        line-height: 1.35;
-        margin-top: 2px;
+        line-height: 1.3;
+        margin-top: var(--space-1);
     }
 
     .io-docrow-left {
-        gap: 10px;
+        gap: var(--space-2);
     }
 
     .io-doc-icon {
         width: 32px;
         height: 32px;
         flex: 0 0 32px;
+    }
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   ФОКУС С КЛАВИАТУРЫ
+
+   Замер 09.10: во всём файле было 55 правил и НИ ОДНОГО `:focus-visible`.
+   Карточки, документы и кнопка — это ссылки: человек, который ходит по
+   странице с клавиатуры, не видел, где он находится. Обводка берётся
+   общая, как на остальных разделах.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.io-featured:focus-visible,
+.io-card:focus-visible,
+.io-docrow:focus-visible,
+.io-featured-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   МЕНЬШЕ ДВИЖЕНИЯ — ЗНАЧИТ МЕНЬШЕ ДВИЖЕНИЯ
+
+   Тринадцать правил этого файла двигают и подкрашивают при наведении, и ни
+   одно не спрашивало системную настройку. Для человека, которому движение
+   мешает физически, это не украшение.
+   ════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .io-featured,
+    .io-featured:hover,
+    .io-card,
+    .io-card:hover,
+    .io-card .io-card-icon,
+    .io-card:hover .io-card-icon,
+    .io-card-arrow,
+    .io-docrow,
+    .io-featured-link,
+    .io-featured-link:hover {
+        transition: none;
+        transform: none;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   ТЕЛЕФОН ЛЁЖА: ПОЛА НЕТ ВОВСЕ
+
+   Замер 09.10 на 844 × 390: обложка занимала 118% экрана — она была ВЫШЕ
+   окна, и страницы за ней не было видно совсем. Правило взято с обзорной
+   турниров (css/tournaments-overview.css:1900): пол снимается, воздух
+   уходит на ступень вниз, КЕГЛИ НЕ ТРОГАЮТСЯ — лестница одна на все виды,
+   меняется только воздух.
+   ════════════════════════════════════════════════════════════════════════ */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .io-hero {
+        min-height: 0;
+        --oblozhka-vozduh:     var(--section-y-sm);
+        --oblozhka-vozduh-niz: var(--space-2);
     }
 }
