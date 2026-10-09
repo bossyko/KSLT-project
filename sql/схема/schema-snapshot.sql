@@ -46,6 +46,13 @@
 -- `slepok_tbsh_uroven` — слепок прошлого куска, оставленный нарочно. Решение
 -- об удалении за Костей, само оно не уйдёт.
 --
+-- ПРАВЛЕН 09.10 ПОСЛЕ СНЯТИЯ, три места: прогон
+-- sql/схема/battle-vote-cleanup.sql убрал столбец
+-- challenge_predictions.predicted_winner_id, мост fill_prediction_side() с
+-- его сторожем и сменил форму get_battle_votes на (side, votes). Каждое
+-- изменение прочитано из базы после прогона, а не предположено. ПРАВКА
+-- ТОЧЕЧНАЯ, А НЕ ПЕРЕСЪЁМКА: остальное снято 09.10 читалкой.
+--
 -- ЧТОБЫ ПЕРЕСНЯТЬ: прогнать sql/схема/snyat-shemu.sql, отдать мне вывод — я
 -- соберу файл заново и скажу, что разошлось.
 --
@@ -106,7 +113,6 @@
 -- challenge_predictions.challenge_id : uuid NOT NULL
 -- challenge_predictions.voter_type : text NOT NULL
 -- challenge_predictions.voter_id : text NOT NULL
--- challenge_predictions.predicted_winner_id : text
 -- challenge_predictions.created_at : timestamp with time zone DEFAULT now()
 -- challenge_predictions.predicted_side : smallint
 
@@ -989,7 +995,9 @@
 -- challenge_predictions : challenge_predictions_challenge_id_fkey : FOREIGN KEY (challenge_id) REFERENCES challenges(id) ON DELETE CASCADE
 -- challenge_predictions : challenge_predictions_challenge_id_voter_type_voter_id_key : UNIQUE (challenge_id, voter_type, voter_id)
 -- challenge_predictions : challenge_predictions_pkey : PRIMARY KEY (id)
--- challenge_predictions : challenge_predictions_predicted_winner_id_fkey : FOREIGN KEY (predicted_winner_id) REFERENCES players(id)
+-- challenge_predictions : связь challenge_predictions_predicted_winner_id_fkey
+--   стояла здесь и снята 09.10 вместе со своим столбцом: DROP COLUMN уносит
+--   и ограничение. Указатели столбца не касались.
 -- challenge_predictions : challenge_predictions_side_check : CHECK ((predicted_side = ANY (ARRAY[1, 2])))
 -- challenge_predictions : challenge_predictions_voter_type_check : CHECK ((voter_type = ANY (ARRAY['site'::text, 'telegram'::text])))
 
@@ -3232,42 +3240,11 @@
 -- $function$
 --
 
--- --- fill_prediction_side() --------------------------------------
--- CREATE OR REPLACE FUNCTION public.fill_prediction_side()
---  RETURNS trigger
---  LANGUAGE plpgsql
--- AS $function$
--- DECLARE
---     c RECORD;
--- BEGIN
---     SELECT challenger_player_id, opponent_player_id INTO c
---     FROM challenges WHERE id = NEW.challenge_id;
---
---     -- Пришёл старый способ: за кого голосовали — знаем, сторону выводим
---     IF NEW.predicted_side IS NULL AND NEW.predicted_winner_id IS NOT NULL THEN
---         IF NEW.predicted_winner_id = c.challenger_player_id THEN
---             NEW.predicted_side := 1;
---         ELSIF NEW.predicted_winner_id = c.opponent_player_id THEN
---             NEW.predicted_side := 2;
---         END IF;
---     END IF;
---
---     -- Пришёл новый: сторону знаем, идентификатор проставляем для старых
---     -- экранов. У гостя баттла его нет — там колонка останется пустой
---     IF NEW.predicted_winner_id IS NULL AND NEW.predicted_side IS NOT NULL THEN
---         NEW.predicted_winner_id := CASE NEW.predicted_side
---             WHEN 1 THEN c.challenger_player_id
---             ELSE c.opponent_player_id END;
---     END IF;
---
---     IF NEW.predicted_side IS NULL THEN
---         RAISE EXCEPTION 'Голос ни за одну из сторон баттла';
---     END IF;
---
---     RETURN NEW;
--- END;
--- $function$
---
+-- --- fill_prediction_side() — СНЯТА 09.10 ---------------------------
+-- Мост между старым `predicted_winner_id` и новым `predicted_side` убран
+-- прогоном battle-vote-cleanup.sql. Сторож «голос ни за одну из сторон»
+-- переехал из правила в столбец: challenge_predictions.predicted_side
+-- стал NOT NULL. Тело прежней функции — в истории git.
 
 -- --- generate_voucher(p_entity_type text, p_entity_id text, p_service_id uuid) 
 -- CREATE OR REPLACE FUNCTION public.generate_voucher(p_entity_type text, p_entity_id text, p_service_id uuid)
@@ -3501,21 +3478,17 @@
 
 -- --- get_battle_votes(p_challenge_id uuid) -----------------------
 -- CREATE OR REPLACE FUNCTION public.get_battle_votes(p_challenge_id uuid)
---  RETURNS TABLE(side smallint, player_id text, votes bigint)
+--  RETURNS TABLE(side smallint, votes bigint)
 --  LANGUAGE sql
 --  STABLE SECURITY DEFINER
 -- AS $function$
---     SELECT cp.predicted_side AS side,
---            CASE WHEN cp.predicted_side = 1
---                 THEN c.challenger_player_id
---                 ELSE c.opponent_player_id END AS player_id,
---            count(*) AS votes
---     FROM challenge_predictions cp
---     JOIN challenges c ON c.id = cp.challenge_id
---     WHERE cp.challenge_id = p_challenge_id
---     GROUP BY cp.predicted_side, c.challenger_player_id, c.opponent_player_id;
+--     SELECT predicted_side AS side, count(*) AS votes
+--     FROM challenge_predictions
+--     WHERE challenge_id = p_challenge_id
+--     GROUP BY predicted_side;
 -- $function$
---
+-- ПРАВКА 09.10 ПОСЛЕ ПРОГОНА battle-vote-cleanup.sql, а не пересъёмка:
+-- форма прочитана из базы (pg_get_function_result) сразу после прогона.
 
 -- --- get_club_stats() --------------------------------------------
 -- CREATE OR REPLACE FUNCTION public.get_club_stats()
@@ -5928,8 +5901,8 @@
 -- ======================================================================
 
 
--- --- challenge_predictions.trg_fill_prediction_side --------------
--- CREATE TRIGGER trg_fill_prediction_side BEFORE INSERT ON public.challenge_predictions FOR EACH ROW EXECUTE FUNCTION fill_prediction_side()
+-- --- challenge_predictions.trg_fill_prediction_side — СНЯТ 09.10 ----
+-- Убран вместе с fill_prediction_side(), см. выше.
 
 -- --- challenges.trg_check_battle_pair ----------------------------
 -- CREATE TRIGGER trg_check_battle_pair BEFORE INSERT OR UPDATE ON public.challenges FOR EACH ROW EXECUTE FUNCTION check_battle_pair()
