@@ -388,10 +388,18 @@
             A.client.rpc('get_battle_votes', { p_challenge_id: c.id }).then(function(res) {
                 var cell = document.getElementById('chalVotes_' + c.id);
                 if (!cell) return;
+                /* ГОЛОС ПРИНАДЛЕЖИТ СТОРОНЕ, А НЕ ИГРОКУ. 1 — вызвавший,
+                   2 — соперник: так его пишет cast_battle_vote и так читают
+                   все остальные места (js/battles-overview.js:331,
+                   js/challenge-detail.js:285, js/battle-cards.js:153,
+                   mobile .../home.js:1275). Здесь единственное место, где
+                   читали по `player_id`, — форму с этим полем отдавала
+                   sql/схема/battle-external-players.sql, и из-за одного
+                   читателя её нельзя было убрать. Переведено 09.10. */
                 var vm = {};
-                (res.data || []).forEach(function(v) { vm[v.player_id] = parseInt(v.votes) || 0; });
-                var v1 = vm[c.challenger_player_id] || 0;
-                var v2 = vm[c.opponent_player_id] || 0;
+                (res.data || []).forEach(function(v) { vm[v.side] = parseInt(v.votes) || 0; });
+                var v1 = vm[1] || 0;
+                var v2 = vm[2] || 0;
                 cell.innerHTML = '<strong>' + v1 + '</strong> : <strong>' + v2 + '</strong>';
             });
         });

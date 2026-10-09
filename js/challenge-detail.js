@@ -1027,9 +1027,15 @@
         });
         setsHtml += '</div>';
 
-        // Prediction accuracy
-        var v1 = _votes[b.challenger_player_id] || 0;
-        var v2 = _votes[b.opponent_player_id] || 0;
+        /* ТОЧНОСТЬ ПРОГНОЗА ПОКАЗЫВАЛА НОЛЬ ВСЕГДА, И ЭТО НАШЛО ЧТЕНИЕ.
+           `_votes` наполняется по СТОРОНЕ (строки 285 и 808: `_votes[v.side]`),
+           а читалось здесь по `player_id` — ключа такого в объекте нет
+           вовсе, значит v1 и v2 были нулями, total ноль, и процент ноль при
+           любых голосах. Рядом, в renderVoting (строка 613), тот же объект
+           читается правильно — `votes[1]` и `votes[2]`: ОДНО ПОНЯТИЕ, ДВА
+           ПОВЕДЕНИЯ в одном файле. Починено 09.10. */
+        var v1 = _votes[1] || 0;
+        var v2 = _votes[2] || 0;
         var total = v1 + v2;
         var correctVotes = match.winner_id === p1 ? v1 : v2;
         var pctCorrect = total > 0 ? Math.round(correctVotes / total * 100) : 0;
