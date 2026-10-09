@@ -62,7 +62,8 @@ const КУСКИ = [
     ['админка «Новости», список', 'check-admin-novosti-spisok.js', 'check-admin-novosti-spisok-otkat.js'],
     ['вкладка «Новости» турнира', 'check-turnir-novost.js', 'check-turnir-novost-otkat.js'],
     ['голоса вызова', 'check-golosa-storony.js', 'check-golosa-storony-otkat.js'],
-    ['удаление турнира', 'check-udalenie-turnira.js', 'check-udalenie-turnira-otkat.js']
+    ['удаление турнира', 'check-udalenie-turnira.js', 'check-udalenie-turnira-otkat.js'],
+    ['шов адреса клетки', 'check-shov-adresa.js', 'check-shov-adresa-otkat.js']
 ];
 
 function прогнать(файл) {
