@@ -1,5368 +1,6362 @@
--- ЭТО СЛЕПОК СХЕМЫ. ЕГО НЕ ГОНЯТЬ В БАЗЕ.
+-- СНИМОК СХЕМЫ — ЭТО ЧТЕНИЕ, А НЕ МИГРАЦИЯ. ГОНЯТЬ НЕЧЕГО.
 --
--- Файл нужен для ЧТЕНИЯ: посмотреть, какие есть таблицы, столбцы и типы,
--- прежде чем писать запрос. Запрос, написанный по памяти, — такая же
--- выдумка, как число, которого не мерили.
+-- Весь файл — комментарий, от первой строки до последней: в нём нет ни
+-- одного исполняемого запроса. Так сделано нарочно. Прежний снимок был
+-- выгрузкой pg_dump, то есть РАБОЧИМ скриптом, и 09.10 его прогнали в живой
+-- базе: он свалился на `get_battle_votes` и откатился целиком, но до места
+-- падения успевал объявить десять функций и, совпади форма возврата, молча
+-- положил бы СТАРЫЕ тела поверх новых. ФАЙЛ, КОТОРЫЙ НЕЛЬЗЯ ЗАПУСТИТЬ, НЕ
+-- НАДО ПОМНИТЬ НЕ ЗАПУСКАТЬ.
 --
--- ПОЧЕМУ НЕ ГОНЯТЬ. Слепок снят в какой-то день и с тех дней отстал.
--- Прогон 08.10 свалился на `get_battle_votes` (строка ниже): в слепке у неё
--- форма `(player_id, votes)`, а в живой базе — `(side, player_id, votes)`
--- из sql/схема/battle-external-players.sql. `CREATE OR REPLACE FUNCTION`
--- менять тип возврата не умеет, поэтому вся сделка откатилась — на этот раз
--- повезло. Но до места падения слепок успевает объявить десять функций, и
--- если бы форма совпала, он молча положил бы СТАРЫЕ тела поверх новых.
+-- ЗАЧЕМ ОН. Чтобы перед написанием запроса посмотреть, что в базе есть и
+-- какой оно формы. ЗАПРОС, НАПИСАННЫЙ ПО ПАМЯТИ, — ТАКАЯ ЖЕ ВЫДУМКА, КАК
+-- ЧИСЛО, КОТОРОГО НЕ МЕРИЛИ.
 --
--- ЧТО ДЕЛАТЬ ВМЕСТО ПРОГОНА. Нужна правка схемы — отдельный файл в этой же
--- папке: слепок, правка, проверка чтением. Как в
--- sql/схема/galereya-v-tekst-statyi.sql.
+-- ЧЕМ СНЯТ. Чтением системного каталога постгреса — sql/схема/snyat-shemu.sql
+-- прогнал Костя, вывод разобран скриптом. Это НЕ pg_dump: здесь нет порядка
+-- создания, прав, расширений, данных и схем кроме public. Тела функций —
+-- `pg_get_functiondef`, то есть ровно то, что лежит в базе.
 --
--- Проверено 08.10 чтением базы: cast_battle_vote и get_battle_public
--- остались новыми, ничего не откатилось.
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
-
-CREATE EXTENSION IF NOT EXISTS "pg_cron" WITH SCHEMA "pg_catalog";
-
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
-
-
-
-
-
-
-COMMENT ON SCHEMA "public" IS 'standard public schema';
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE OR REPLACE FUNCTION "public"."cast_battle_vote"("p_challenge_id" "uuid", "p_player_id" "text") RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-    v_challenge RECORD;
-    v_existing TEXT;
-    v_tg_chat_id TEXT;
-    v_tg_vote TEXT;
-    v_match_dt TIMESTAMPTZ;
-BEGIN
-    -- Get challenge
-    SELECT battle_published, voting_closed,
-           COALESCE(counter_date, proposed_date) AS match_date,
-           COALESCE(counter_time, proposed_time) AS match_time
-    INTO v_challenge
-    FROM challenges WHERE id = p_challenge_id;
-
-    IF v_challenge IS NULL OR v_challenge.battle_published = false THEN
-        RETURN json_build_object('ok', false, 'error', 'not_found');
-    END IF;
-
-    IF v_challenge.voting_closed THEN
-        RETURN json_build_object('ok', false, 'error', 'voting_closed');
-    END IF;
-
-    -- Auto-close: check if match time has passed (Asia/Bishkek timezone)
-    IF v_challenge.match_date IS NOT NULL AND v_challenge.match_time IS NOT NULL THEN
-        v_match_dt := (v_challenge.match_date::text || ' ' || v_challenge.match_time)::timestamp AT TIME ZONE 'Asia/Bishkek';
-        IF NOW() >= v_match_dt THEN
-            -- Auto-close voting
-            UPDATE challenges SET voting_closed = true WHERE id = p_challenge_id;
-            RETURN json_build_object('ok', false, 'error', 'voting_closed');
-        END IF;
-    END IF;
-
-    -- Check if already voted on site (one vote only!)
-    SELECT predicted_winner_id INTO v_existing
-    FROM challenge_predictions
-    WHERE challenge_id = p_challenge_id
-      AND voter_type = 'site'
-      AND voter_id = auth.uid()::text;
-
-    IF v_existing IS NOT NULL THEN
-        RETURN json_build_object('ok', false, 'error', 'already_voted');
-    END IF;
-
-    -- Cross-check: did this user already vote via Telegram?
-    SELECT telegram_chat_id INTO v_tg_chat_id
-    FROM profiles WHERE id = auth.uid();
-
-    IF v_tg_chat_id IS NOT NULL THEN
-        SELECT predicted_winner_id INTO v_tg_vote
-        FROM challenge_predictions
-        WHERE challenge_id = p_challenge_id
-          AND voter_type = 'telegram'
-          AND voter_id = v_tg_chat_id;
-
-        IF v_tg_vote IS NOT NULL THEN
-            RETURN json_build_object('ok', false, 'error', 'already_voted_tg');
-        END IF;
-    END IF;
-
-    -- Insert vote
-    INSERT INTO challenge_predictions (challenge_id, voter_type, voter_id, predicted_winner_id)
-    VALUES (p_challenge_id, 'site', auth.uid()::text, p_player_id);
-
-    RETURN json_build_object('ok', true);
-END;
-$$;
-
-
-ALTER FUNCTION "public"."cast_battle_vote"("p_challenge_id" "uuid", "p_player_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."check_and_award_badges"("p_player_id" "text") RETURNS "text"[]
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-  DECLARE
-    new_badges TEXT[] := '{}';
-    player_rec RECORD;
-    val INTEGER;
-    badge RECORD;
-    t_id TEXT;
-    lost_set BOOLEAN;
-    m_rec RECORD;
-    sets_arr TEXT[];
-    s_item TEXT;
-    parts TEXT[];
-    p1_games INTEGER;
-    p2_games INTEGER;
-  BEGIN
-    SELECT * INTO player_rec FROM players WHERE id = p_player_id;
-    IF NOT FOUND THEN RETURN new_badges; END IF;
-
-    FOR badge IN SELECT * FROM badge_definitions WHERE condition_type != 'manual' ORDER BY sort_order LOOP
-      IF EXISTS (SELECT 1 FROM player_badges WHERE player_id = p_player_id AND badge_id = badge.id) THEN
-        CONTINUE;
-      END IF;
-
-      CASE badge.condition_type
-
-        WHEN 'matches_played' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE (player1_id = p_player_id OR player2_id = p_player_id)
-            AND status = 'completed' AND winner_id IS NOT NULL;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'wins' THEN
-          IF player_rec.wins >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'tournaments_played' THEN
-          SELECT COUNT(DISTINCT tournament_id) INTO val FROM tournament_registrations
-            WHERE player_id = p_player_id AND status IN ('approved', 'draw');
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'streak' THEN
-          val := 0;
-          IF player_rec.form IS NOT NULL AND array_length(player_rec.form, 1) > 0 THEN
-            FOR i IN 1..array_length(player_rec.form, 1) LOOP
-              IF player_rec.form[i] = 'W' THEN val := val + 1;
-              ELSE EXIT;
-              END IF;
-            END LOOP;
-          END IF;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'champion' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE winner_id = p_player_id AND status = 'completed'
-            AND round_number = 1 AND match_order = 1
-            AND tournament_id IN (
-              SELECT id FROM tournaments WHERE status = 'completed'
-            );
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'finalist' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE status = 'completed' AND round_number = 1 AND match_order = 1
-            AND (player1_id = p_player_id OR player2_id = p_player_id)
-            AND winner_id IS NOT NULL AND winner_id != p_player_id;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'champion_count' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE winner_id = p_player_id AND status = 'completed'
-            AND round_number = 1 AND match_order = 1
-            AND tournament_id IN (
-              SELECT id FROM tournaments WHERE status = 'completed'
-            );
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'no_set_loss' THEN
-          FOR t_id IN
-            SELECT m.tournament_id FROM matches m
-            WHERE m.winner_id = p_player_id AND m.status = 'completed'
-            AND m.round_number = 1 AND m.match_order = 1
-            AND m.tournament_id IN (SELECT id FROM tournaments WHERE status = 'completed')
-          LOOP
-            lost_set := false;
-            FOR m_rec IN
-              SELECT score, player1_id FROM matches
-              WHERE tournament_id = t_id
-              AND (player1_id = p_player_id OR player2_id = p_player_id)
-              AND status = 'completed' AND score IS NOT NULL AND score != 'BYE'
-            LOOP
-              sets_arr := string_to_array(m_rec.score, ' ');
-              IF sets_arr IS NOT NULL THEN
-                FOREACH s_item IN ARRAY sets_arr LOOP
-                  parts := string_to_array(s_item, '/');
-                  IF array_length(parts, 1) = 2 THEN
-                    p1_games := safe_int(parts[1]);
-                    p2_games := safe_int(parts[2]);
-                    IF p1_games IS NOT NULL AND p2_games IS NOT NULL THEN
-                      IF (m_rec.player1_id = p_player_id AND p1_games < p2_games)
-                      OR (m_rec.player1_id != p_player_id AND p2_games < p1_games) THEN
-                        lost_set := true;
-                      END IF;
-                    END IF;
-                  END IF;
-                END LOOP;
-              END IF;
-            END LOOP;
-            IF NOT lost_set THEN
-              INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-              new_badges := array_append(new_badges, badge.id);
-              EXIT;
-            END IF;
-          END LOOP;
-
-        WHEN 'upset' THEN
-          SELECT COUNT(*) INTO val FROM matches m
-            JOIN players p1 ON p1.id = m.player1_id
-            JOIN players p2 ON p2.id = m.player2_id
-            WHERE m.winner_id = p_player_id AND m.status = 'completed'
-            AND (
-              (m.player1_id = p_player_id AND p2.points - p1.points >= badge.condition_value)
-              OR (m.player2_id = p_player_id AND p1.points - p2.points >= badge.condition_value)
-            );
-          IF val > 0 THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'rank' THEN
-          SELECT COUNT(*) + 1 INTO val FROM players
-            WHERE category_id = player_rec.category_id
-            AND points > player_rec.points;
-          IF val <= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'membership' THEN
-          IF EXISTS (SELECT 1 FROM memberships
-            WHERE profile_id IN (SELECT id FROM profiles WHERE player_id = p_player_id)
-            AND status = 'active') THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'first_year' THEN
-          IF EXISTS (SELECT 1 FROM players
-            WHERE id = p_player_id
-            AND created_at < '2026-01-01'::timestamptz) THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'season_count' THEN
-          val := EXTRACT(YEAR FROM age(now(), player_rec.created_at))::int;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'domination' THEN
-          SELECT MAX(cnt) INTO val FROM (
-            SELECT COUNT(*) cnt FROM matches
-            WHERE winner_id = p_player_id AND status = 'completed'
-            GROUP BY CASE WHEN player1_id = p_player_id THEN player2_id ELSE player1_id END
-          ) sub;
-          IF COALESCE(val, 0) >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        ELSE
-          NULL;
-
-      END CASE;
-    END LOOP;
-
-    RETURN new_badges;
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."check_and_award_badges"("p_player_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."check_doubles_unique"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$
-BEGIN
-  -- If this registration has a partner_id (KSLT player as partner)
-  IF NEW.partner_id IS NOT NULL THEN
-    -- Partner must not be registered as captain in the same tournament
-    IF EXISTS (
-      SELECT 1 FROM tournament_registrations
-      WHERE tournament_id = NEW.tournament_id
-        AND player_id = NEW.partner_id
-        AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
-    ) THEN
-      RAISE EXCEPTION 'Partner already registered as captain in this tournament';
-    END IF;
-
-    -- Partner must not be listed as partner in another registration
-    IF EXISTS (
-      SELECT 1 FROM tournament_registrations
-      WHERE tournament_id = NEW.tournament_id
-        AND partner_id = NEW.partner_id
-        AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
-    ) THEN
-      RAISE EXCEPTION 'Partner already in another team in this tournament';
-    END IF;
-  END IF;
-
-  -- Captain must not be listed as partner in another registration
-  IF NEW.player_id IS NOT NULL THEN
-    IF EXISTS (
-      SELECT 1 FROM tournament_registrations
-      WHERE tournament_id = NEW.tournament_id
-        AND partner_id = NEW.player_id
-        AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
-    ) THEN
-      RAISE EXCEPTION 'Player already registered as partner in another team';
-    END IF;
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."check_doubles_unique"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."check_player_badges"("p_player_id" "text") RETURNS "text"[]
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-  DECLARE
-    new_badges TEXT[] := '{}';
-    player_rec RECORD;
-    val INTEGER;
-    badge RECORD;
-    t_id TEXT;
-    lost_set BOOLEAN;
-    m_rec RECORD;
-    sets_arr TEXT[];
-    s_item TEXT;
-    parts TEXT[];
-    p1_games INTEGER;
-    p2_games INTEGER;
-  BEGIN
-    SELECT * INTO player_rec FROM players WHERE id = p_player_id;
-    IF NOT FOUND THEN RETURN new_badges; END IF;
-
-    FOR badge IN SELECT * FROM badge_definitions WHERE condition_type != 'manual' ORDER BY sort_order LOOP
-      IF EXISTS (SELECT 1 FROM player_badges WHERE player_id = p_player_id AND badge_id = badge.id) THEN
-        CONTINUE;
-      END IF;
-
-      CASE badge.condition_type
-
-        WHEN 'matches_played' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE (player1_id = p_player_id OR player2_id = p_player_id)
-            AND status = 'completed' AND winner_id IS NOT NULL;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'wins' THEN
-          IF player_rec.wins >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'tournaments_played' THEN
-          SELECT COUNT(DISTINCT tournament_id) INTO val FROM tournament_registrations
-            WHERE player_id = p_player_id AND status IN ('approved', 'draw');
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'streak' THEN
-          val := 0;
-          IF player_rec.form IS NOT NULL AND array_length(player_rec.form, 1) > 0 THEN
-            FOR i IN 1..array_length(player_rec.form, 1) LOOP
-              IF player_rec.form[i] = 'W' THEN val := val + 1;
-              ELSE EXIT;
-              END IF;
-            END LOOP;
-          END IF;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'champion' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE winner_id = p_player_id AND status = 'completed'
-            AND round_number = 1 AND match_order = 1
-            AND tournament_id IN (
-              SELECT id FROM tournaments WHERE status = 'completed'
-            );
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'finalist' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE status = 'completed' AND round_number = 1 AND match_order = 1
-            AND (player1_id = p_player_id OR player2_id = p_player_id)
-            AND winner_id IS NOT NULL AND winner_id != p_player_id;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'champion_count' THEN
-          SELECT COUNT(*) INTO val FROM matches
-            WHERE winner_id = p_player_id AND status = 'completed'
-            AND round_number = 1 AND match_order = 1
-            AND tournament_id IN (
-              SELECT id FROM tournaments WHERE status = 'completed'
-            );
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'no_set_loss' THEN
-          FOR t_id IN
-            SELECT m.tournament_id FROM matches m
-            WHERE m.winner_id = p_player_id AND m.status = 'completed'
-            AND m.round_number = 1 AND m.match_order = 1
-            AND m.tournament_id IN (SELECT id FROM tournaments WHERE status = 'completed')
-          LOOP
-            lost_set := false;
-            FOR m_rec IN
-              SELECT score, player1_id FROM matches
-              WHERE tournament_id = t_id
-              AND (player1_id = p_player_id OR player2_id = p_player_id)
-              AND status = 'completed' AND score IS NOT NULL AND score != 'BYE'
-            LOOP
-              sets_arr := string_to_array(m_rec.score, ' ');
-              IF sets_arr IS NOT NULL THEN
-                FOREACH s_item IN ARRAY sets_arr LOOP
-                  parts := string_to_array(s_item, '/');
-                  IF array_length(parts, 1) = 2 THEN
-                    p1_games := safe_int(parts[1]);
-                    p2_games := safe_int(parts[2]);
-                    IF p1_games IS NOT NULL AND p2_games IS NOT NULL THEN
-                      IF (m_rec.player1_id = p_player_id AND p1_games < p2_games)
-                      OR (m_rec.player1_id != p_player_id AND p2_games < p1_games) THEN
-                        lost_set := true;
-                      END IF;
-                    END IF;
-                  END IF;
-                END LOOP;
-              END IF;
-            END LOOP;
-            IF NOT lost_set THEN
-              INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-              new_badges := array_append(new_badges, badge.id);
-              EXIT;
-            END IF;
-          END LOOP;
-
-        WHEN 'upset' THEN
-          SELECT COUNT(*) INTO val FROM matches m
-            JOIN players p1 ON p1.id = m.player1_id
-            JOIN players p2 ON p2.id = m.player2_id
-            WHERE m.winner_id = p_player_id AND m.status = 'completed'
-            AND (
-              (m.player1_id = p_player_id AND p2.points - p1.points >= badge.condition_value)
-              OR (m.player2_id = p_player_id AND p1.points - p2.points >= badge.condition_value)
-            );
-          IF val > 0 THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'rank' THEN
-          SELECT COUNT(*) + 1 INTO val FROM players
-            WHERE category_id = player_rec.category_id
-            AND points > player_rec.points;
-          IF val <= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'membership' THEN
-          IF EXISTS (SELECT 1 FROM memberships
-            WHERE profile_id IN (SELECT id FROM profiles WHERE player_id = p_player_id)
-            AND status = 'active') THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'first_year' THEN
-          IF EXISTS (SELECT 1 FROM players
-            WHERE id = p_player_id
-            AND created_at < '2026-01-01'::timestamptz) THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'season_count' THEN
-          val := EXTRACT(YEAR FROM age(now(), player_rec.created_at))::int;
-          IF val >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        WHEN 'domination' THEN
-          SELECT MAX(cnt) INTO val FROM (
-            SELECT COUNT(*) cnt FROM matches
-            WHERE winner_id = p_player_id AND status = 'completed'
-            GROUP BY CASE WHEN player1_id = p_player_id THEN player2_id ELSE player1_id END
-          ) sub;
-          IF COALESCE(val, 0) >= badge.condition_value THEN
-            INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
-            new_badges := array_append(new_badges, badge.id);
-          END IF;
-
-        ELSE
-          NULL;
-
-      END CASE;
-    END LOOP;
-
-    RETURN new_badges;
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."check_player_badges"("p_player_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."check_registration_available"("p_email" "text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-  v_email_taken boolean := false;
-BEGIN
-  -- Check email in auth.users
-  SELECT EXISTS(
-    SELECT 1 FROM auth.users WHERE email = lower(p_email)
-  ) INTO v_email_taken;
-
-  RETURN jsonb_build_object('email_taken', v_email_taken);
-END;
-$$;
-
-
-ALTER FUNCTION "public"."check_registration_available"("p_email" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."cleanup_expired_otp"() RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-    DELETE FROM otp_codes WHERE expires_at < now() - interval '24 hours';
-    DELETE FROM otp_blocks WHERE blocked_until < now() - interval '24 hours' AND admin_unblocked = false;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."cleanup_expired_otp"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."confirm_voucher"("p_token" "text", "p_pin" "text") RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-    v RECORD;
-    v_correct_pin TEXT;
-BEGIN
-    SELECT * INTO v
-    FROM discount_vouchers
-    WHERE qr_token = p_token;
-
-    IF v IS NULL THEN
-        RETURN json_build_object('status', 'invalid');
-    END IF;
-
-    -- Auto-expire
-    IF v.status = 'active' AND v.expires_at < NOW() THEN
-        UPDATE discount_vouchers SET status = 'expired' WHERE id = v.id;
-        RETURN json_build_object('status', 'expired');
-    END IF;
-
-    IF v.status <> 'active' THEN
-        RETURN json_build_object('status', v.status);
-    END IF;
-
-    -- Check PIN
-    IF v.entity_type = 'court' THEN
-        SELECT partner_pin INTO v_correct_pin FROM courts WHERE id = v.entity_id;
-    ELSE
-        SELECT partner_pin INTO v_correct_pin FROM coaches WHERE id = v.entity_id;
-    END IF;
-
-    IF v_correct_pin IS NULL OR p_pin <> v_correct_pin THEN
-        RETURN json_build_object('status', 'wrong_pin');
-    END IF;
-
-    -- Mark as used
-    UPDATE discount_vouchers
-    SET status = 'used', used_at = NOW()
-    WHERE id = v.id;
-
-    RETURN json_build_object('status', 'confirmed');
-END;
-$$;
-
-
-ALTER FUNCTION "public"."confirm_voucher"("p_token" "text", "p_pin" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."generate_voucher"("p_entity_type" "text", "p_entity_id" "text", "p_service_id" "uuid") RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-  DECLARE
-      v_user_id UUID;
-      v_player_name TEXT;
-      v_entity_name TEXT;
-      v_service RECORD;
-      v_existing INT;
-      v_voucher RECORD;
-      v_is_member BOOLEAN;
-  BEGIN
-      v_user_id := auth.uid();
-      IF v_user_id IS NULL THEN
-          RETURN json_build_object('error', 'not_authenticated');
-      END IF;
-
-      SELECT EXISTS (
-          SELECT 1 FROM memberships
-          WHERE profile_id = v_user_id
-            AND status = 'active'
-            AND expires_at > NOW()
-      ) INTO v_is_member;
-
-      IF NOT v_is_member THEN
-          RETURN json_build_object('error', 'not_member');
-      END IF;
-
-      SELECT COALESCE(full_name, 'Member')
-      INTO v_player_name
-      FROM profiles WHERE id = v_user_id;
-
-      SELECT * INTO v_service
-      FROM partner_services
-      WHERE id = p_service_id
-        AND entity_type = p_entity_type
-        AND entity_id = p_entity_id
-        AND is_active = true;
-
-      IF v_service IS NULL THEN
-          RETURN json_build_object('error', 'service_not_found');
-      END IF;
-
-      IF p_entity_type = 'court' THEN
-          SELECT name INTO v_entity_name FROM courts WHERE id = p_entity_id AND partner = true;
-      ELSE
-          SELECT COALESCE(last_name || ' ' || first_name, name) INTO v_entity_name
-          FROM coaches WHERE id = p_entity_id AND partner = true;
-      END IF;
-
-      IF v_entity_name IS NULL THEN
-          RETURN json_build_object('error', 'entity_not_partner');
-      END IF;
-
-      UPDATE discount_vouchers
-      SET status = 'expired'
-      WHERE profile_id = v_user_id
-        AND entity_type = p_entity_type
-        AND entity_id = p_entity_id
-        AND service_id = p_service_id
-        AND status = 'active'
-        AND expires_at < NOW();
-
-      SELECT COUNT(*) INTO v_existing
-      FROM discount_vouchers
-      WHERE profile_id = v_user_id
-        AND entity_type = p_entity_type
-        AND entity_id = p_entity_id
-        AND service_id = p_service_id
-        AND status = 'active'
-        AND expires_at > NOW();
-
-      IF v_existing > 0 THEN
-          RETURN json_build_object('error', 'active_voucher_exists');
-      END IF;
-
-      SELECT COUNT(*) INTO v_existing
-      FROM discount_vouchers
-      WHERE profile_id = v_user_id
-        AND entity_type = p_entity_type
-        AND entity_id = p_entity_id
-        AND service_id = p_service_id
-        AND created_at > NOW() - INTERVAL '24 hours'
-        AND status IN ('active', 'used');
-
-      IF v_existing > 0 THEN
-          RETURN json_build_object('error', 'daily_limit');
-      END IF;
-
-      INSERT INTO discount_vouchers (
-          profile_id, player_name, entity_type, entity_id, entity_name,
-          service_id, service_name, discount_percent
-      ) VALUES (
-          v_user_id, v_player_name, p_entity_type, p_entity_id, v_entity_name,
-          p_service_id, v_service.service_name, v_service.discount_percent
-      )
-      RETURNING * INTO v_voucher;
-
-      RETURN json_build_object(
-          'success', true,
-          'voucher', json_build_object(
-              'id', v_voucher.id,
-              'qr_token', v_voucher.qr_token,
-              'player_name', v_voucher.player_name,
-              'entity_name', v_voucher.entity_name,
-              'service_name', v_voucher.service_name,
-              'discount_percent', v_voucher.discount_percent,
-              'expires_at', v_voucher.expires_at,
-              'created_at', v_voucher.created_at
-          )
-      );
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."generate_voucher"("p_entity_type" "text", "p_entity_id" "text", "p_service_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_analytics_overview"() RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-  result JSON;
-BEGIN
-  SELECT json_build_object(
-    'courts_views', (SELECT COALESCE(SUM(view_count), 0) FROM courts),
-    'courts_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM courts),
-    'coaches_views', (SELECT COALESCE(SUM(view_count), 0) FROM coaches),
-    'coaches_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM coaches),
-    'players_views', (SELECT COALESCE(SUM(view_count), 0) FROM players),
-    'players_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM players),
-    'news_views', (SELECT COALESCE(SUM(view_count), 0) FROM news),
-    'news_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM news),
-    'tournaments_views', (SELECT COALESCE(SUM(view_count), 0) FROM tournaments),
-    'tournaments_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM tournaments),
-    'sponsors_views', (SELECT COALESCE(SUM(view_count), 0) FROM sponsors),
-    'sponsors_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM sponsors),
-    'pages_views', (SELECT COALESCE(SUM(view_count), 0) FROM page_views),
-    'site_visits', (SELECT COALESCE(view_count, 0) FROM page_views WHERE page_name = 'site_visit'),
-    'app_visits', (SELECT COALESCE(view_count, 0) FROM page_views WHERE page_name = 'app_visit')
-  ) INTO result;
-  RETURN result;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_analytics_overview"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_battle_public"("p_challenge_id" "uuid") RETURNS json
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-    SELECT row_to_json(r) FROM (
-        SELECT c.id, c.battle_title, c.status, c.voting_closed,
-               c.proposed_date, c.proposed_time, c.proposed_venue,
-               c.counter_date, c.counter_time, c.counter_venue,
-               c.challenger_player_id, c.opponent_player_id, c.match_id,
-               c.battle_published_at, c.banner_url,
-               -- Challenge-level overrides
-               c.challenger_ntrp, c.opponent_ntrp,
-               c.challenger_country, c.opponent_country,
-               c.challenger_category, c.opponent_category,
-               c.set_format,
-               -- Player data
-               p1.name AS challenger_name, p1.name_en AS challenger_name_en, p1.name_kg AS challenger_name_kg,
-               p1.photo AS challenger_photo, p1.category_id AS challenger_cat,
-               p1.wins AS challenger_wins, p1.losses AS challenger_losses,
-               p1.points AS challenger_points,
-               p1.ntrp_rating AS challenger_player_ntrp,
-               p1.country AS challenger_player_country,
-               p2.name AS opponent_name, p2.name_en AS opponent_name_en, p2.name_kg AS opponent_name_kg,
-               p2.photo AS opponent_photo, p2.category_id AS opponent_cat,
-               p2.wins AS opponent_wins, p2.losses AS opponent_losses,
-               p2.points AS opponent_points,
-               p2.ntrp_rating AS opponent_player_ntrp,
-               p2.country AS opponent_player_country,
-               -- Court map links
-               ct.google_maps_url AS court_google_maps,
-               ct.twogis_url AS court_twogis
-        FROM challenges c
-        JOIN players p1 ON p1.id = c.challenger_player_id
-        JOIN players p2 ON p2.id = c.opponent_player_id
-        LEFT JOIN courts ct ON ct.id = c.proposed_court_id
-        WHERE c.id = p_challenge_id
-          AND c.battle_published = true
-    ) r;
-$$;
-
-
-ALTER FUNCTION "public"."get_battle_public"("p_challenge_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_battle_votes"("p_challenge_id" "uuid") RETURNS TABLE("player_id" "text", "votes" bigint)
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-    SELECT predicted_winner_id AS player_id, COUNT(*) AS votes
-    FROM challenge_predictions
-    WHERE challenge_id = p_challenge_id
-    GROUP BY predicted_winner_id;
-$$;
-
-
-ALTER FUNCTION "public"."get_battle_votes"("p_challenge_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_live_by_umpire_key"("p_key" "text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-    v_match RECORD;
-    v_p1 RECORD;
-    v_p2 RECORD;
-BEGIN
-    SELECT * INTO v_match FROM live_matches WHERE umpire_key = p_key;
-    IF v_match IS NULL THEN
-        RETURN jsonb_build_object('ok', false, 'error', 'Not found');
-    END IF;
-
-    -- Get player info
-    SELECT id, name, name_en, photo INTO v_p1 FROM players WHERE id = v_match.player1_id;
-    SELECT id, name, name_en, photo INTO v_p2 FROM players WHERE id = v_match.player2_id;
-
-    RETURN jsonb_build_object(
-        'ok', true,
-        'match', jsonb_build_object(
-            'id', v_match.id,
-            'match_id', v_match.match_id,
-            'best_of', v_match.best_of,
-            'youtube_url', v_match.youtube_url,
-            'serving_player', v_match.serving_player,
-            'points_p1', v_match.points_p1,
-            'points_p2', v_match.points_p2,
-            'current_set', v_match.current_set,
-            'sets_data', v_match.sets_data,
-            'current_game_p1', v_match.current_game_p1,
-            'current_game_p2', v_match.current_game_p2,
-            'is_tiebreak', v_match.is_tiebreak,
-            'tiebreak_p1', v_match.tiebreak_p1,
-            'tiebreak_p2', v_match.tiebreak_p2,
-            'status', v_match.status,
-            'winner_player', v_match.winner_player,
-            'final_score', v_match.final_score,
-            'history', v_match.history,
-            'tournament_label', v_match.tournament_label,
-            'player1_name', COALESCE(v_match.player1_name, v_p1.name),
-            'player2_name', COALESCE(v_match.player2_name, v_p2.name),
-            'player1_name_en', v_p1.name_en,
-            'player2_name_en', v_p2.name_en,
-            'player1_photo', v_p1.photo,
-            'player2_photo', v_p2.photo
-        )
-    );
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_live_by_umpire_key"("p_key" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_loyalty_balance"("p_profile_id" "uuid") RETURNS integer
-    LANGUAGE "sql" STABLE
-    AS $$
-    SELECT COALESCE(
-        SUM(CASE WHEN type = 'earn' THEN points ELSE 0 END) -
-        SUM(CASE WHEN type IN ('redeem', 'expire') THEN points ELSE 0 END) -
-        SUM(CASE WHEN type = 'admin_adjust' AND points < 0 THEN ABS(points) ELSE 0 END) +
-        SUM(CASE WHEN type = 'admin_adjust' AND points > 0 THEN points ELSE 0 END),
-    0)
-    FROM loyalty_transactions
-    WHERE profile_id = p_profile_id;
-$$;
-
-
-ALTER FUNCTION "public"."get_loyalty_balance"("p_profile_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_my_challenges"() RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-  DECLARE
-      result JSON;
-  BEGIN
-      SELECT json_agg(row_to_json(t)) INTO result
-      FROM (
-          SELECT
-              c.id, c.status, c.proposed_date, c.proposed_time,
-              c.proposed_venue, c.counter_date, c.counter_time, c.counter_venue,
-              c.message, c.created_at, c.expires_at, c.accepted_at,
-              c.countered_at, c.match_id,
-              CASE WHEN c.challenger_id = auth.uid() THEN 'sent' ELSE 'received' END AS direction,
-              c.challenger_player_id,
-              cp.full_name AS challenger_name,
-              cp.avatar_url AS challenger_avatar,
-              c.opponent_player_id,
-              op.full_name AS opponent_name,
-              op.avatar_url AS opponent_avatar,
-              ct.name AS court_name,
-              cct.name AS counter_court_name,
-              COALESCE(m.score, c.score_draft) AS match_score,
-              m.winner_id AS match_winner_id
-          FROM challenges c
-          LEFT JOIN profiles cp ON cp.id = c.challenger_id
-          LEFT JOIN profiles op ON op.id = c.opponent_profile_id
-          LEFT JOIN courts ct ON ct.id = c.proposed_court_id
-          LEFT JOIN courts cct ON cct.id = c.counter_court_id
-          LEFT JOIN matches m ON m.id = c.match_id
-          WHERE c.challenger_id = auth.uid()
-             OR c.opponent_profile_id = auth.uid()
-          ORDER BY c.created_at DESC
-          LIMIT 50
-      ) t;
-      RETURN COALESCE(result, '[]'::json);
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."get_my_challenges"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_my_game_invites"() RETURNS TABLE("id" "uuid", "status" "text", "created_at" timestamp with time zone, "responded_at" timestamp with time zone, "direction" "text", "partner_name" "text", "partner_avatar" "text")
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    -- Отправленные
-    SELECT gi.id, gi.status, gi.created_at, gi.responded_at,
-        'sent'::TEXT, pl.name, COALESCE(pr2.avatar_url, pl.photo)
-    FROM game_invites gi
-    JOIN players pl ON pl.id = gi.receiver_player_id
-    LEFT JOIN profiles pr2 ON pr2.player_id = pl.id
-    WHERE gi.sender_id = auth.uid()
-    UNION ALL
-    -- Полученные
-    SELECT gi.id, gi.status, gi.created_at, gi.responded_at,
-        'received'::TEXT, pr_s.full_name, pr_s.avatar_url
-    FROM game_invites gi
-    JOIN profiles pr_s ON pr_s.id = gi.sender_id
-    WHERE gi.receiver_profile_id = auth.uid()
-    ORDER BY created_at DESC
-    LIMIT 20;
-$$;
-
-
-ALTER FUNCTION "public"."get_my_game_invites"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_news_engagement"("p_news_ids" "text"[]) RETURNS TABLE("news_id" "text", "total_reactions" bigint, "total_votes" bigint)
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-    SELECT
-        n.id AS news_id,
-        (SELECT COUNT(*) FROM news_reactions r WHERE r.news_id = n.id) AS total_reactions,
-        (SELECT COUNT(*) FROM news_poll_votes v WHERE v.news_id = n.id) AS total_votes
-    FROM unnest(p_news_ids) AS n(id);
-$$;
-
-
-ALTER FUNCTION "public"."get_news_engagement"("p_news_ids" "text"[]) OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_news_stats"() RETURNS TABLE("published_count" bigint, "last_published" timestamp with time zone, "draft_count" bigint, "last_draft" timestamp with time zone)
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    SELECT
-        COUNT(*) FILTER (WHERE published_at IS NOT NULL) AS published_count,
-        MAX(published_at) FILTER (WHERE published_at IS NOT NULL) AS last_published,
-        COUNT(*) FILTER (WHERE published_at IS NULL) AS draft_count,
-        MAX(created_at) FILTER (WHERE published_at IS NULL) AS last_draft
-    FROM news;
-$$;
-
-
-ALTER FUNCTION "public"."get_news_stats"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_page_view_stats"() RETURNS TABLE("page_name" "text", "view_count" integer, "updated_at" timestamp with time zone)
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    SELECT page_name, view_count, updated_at
-    FROM page_views
-    ORDER BY view_count DESC;
-$$;
-
-
-ALTER FUNCTION "public"."get_page_view_stats"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_player_avatar"("p_player_id" "text") RETURNS "text"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-  SELECT avatar_url FROM profiles
-  WHERE player_id = p_player_id LIMIT 1;
-$$;
-
-
-ALTER FUNCTION "public"."get_player_avatar"("p_player_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_player_challenges"("p_player_id" "text") RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-  DECLARE
-      result JSON;
-  BEGIN
-      SELECT json_agg(row_to_json(t)) INTO result
-      FROM (
-          SELECT
-              c.id, c.status, c.proposed_date, c.proposed_time,
-              c.proposed_venue, c.counter_date, c.counter_time, c.counter_venue,
-              c.created_at, c.accepted_at,
-              c.challenger_player_id,
-              COALESCE(cp.name, lm.player1_name) AS challenger_name,
-              COALESCE(cp.name_en, lm.player1_name) AS challenger_name_en,
-              COALESCE(cp.name_kg, lm.player1_name) AS challenger_name_kg,
-              cp.photo AS challenger_photo,
-              c.opponent_player_id,
-              COALESCE(op.name, lm.player2_name) AS opponent_name,
-              COALESCE(op.name_en, lm.player2_name) AS opponent_name_en,
-              COALESCE(op.name_kg, lm.player2_name) AS opponent_name_kg,
-              op.photo AS opponent_photo,
-              ct.name AS court_name,
-              cct.name AS counter_court_name,
-              COALESCE(m.score, c.score_draft) AS match_score,
-              m.winner_id AS match_winner_id
-          FROM challenges c
-          LEFT JOIN players cp ON cp.id = c.challenger_player_id
-          LEFT JOIN players op ON op.id = c.opponent_player_id
-          LEFT JOIN courts ct ON ct.id = c.proposed_court_id
-          LEFT JOIN courts cct ON cct.id = c.counter_court_id
-          LEFT JOIN matches m ON m.id = c.match_id
-          LEFT JOIN live_matches lm ON lm.id = c.live_match_id
-          WHERE (c.challenger_player_id = p_player_id OR c.opponent_player_id = p_player_id)
-            AND c.status IN ('accepted', 'completed')
-          ORDER BY c.created_at DESC
-          LIMIT 25
-      ) t;
-      RETURN COALESCE(result, '[]'::json);
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."get_player_challenges"("p_player_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_poll_results"("p_news_id" "text") RETURNS TABLE("option_index" integer, "count" bigint)
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-    SELECT option_index, COUNT(*) AS count
-    FROM news_poll_votes
-    WHERE news_id = p_news_id
-    GROUP BY option_index;
-$$;
-
-
-ALTER FUNCTION "public"."get_poll_results"("p_news_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_public_partners"() RETURNS TABLE("id" "text", "full_name" "text", "avatar_url" "text", "gender" "text", "last_seen" timestamp with time zone, "category_name" "text", "category_name_en" "text", "has_telegram" boolean, "play_level" "text")
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$                                                                                                                                                                  
-      SELECT pl.id, pl.name, COALESCE(pr.avatar_url, pl.photo),                                                                                                              
-          CASE WHEN c.gender = 'men' THEN 'male' ELSE 'female' END,
-          pr.last_seen, c.name, c.name_en,
-          (pr.telegram_chat_id IS NOT NULL) AS has_telegram,
-          pr.play_level
-      FROM players pl
-      LEFT JOIN categories c ON pl.category_id = c.id
-      LEFT JOIN profiles pr ON pr.player_id = pl.id
-      WHERE pl.name IS NOT NULL AND pl.name != ''
-      ORDER BY pr.last_seen DESC NULLS LAST;
-  $$;
-
-
-ALTER FUNCTION "public"."get_public_partners"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_reaction_counts"("p_news_id" "text") RETURNS TABLE("reaction_type" "text", "count" bigint)
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-    SELECT reaction_type, COUNT(*)::BIGINT AS count
-    FROM news_reactions
-    WHERE news_id = p_news_id
-    GROUP BY reaction_type;
-$$;
-
-
-ALTER FUNCTION "public"."get_reaction_counts"("p_news_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_top_news"("p_limit" integer DEFAULT 3) RETURNS TABLE("news_id" "text", "title" "text", "score" bigint)
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    SELECT
-        n.id AS news_id,
-        n.title,
-        (COALESCE(n.view_count, 0) +
-         COALESCE((SELECT COUNT(*) FROM news_reactions r WHERE r.news_id = n.id), 0) +
-         COALESCE((SELECT COUNT(*) FROM news_poll_votes v WHERE v.news_id = n.id), 0)
-        )::BIGINT AS score
-    FROM news n
-    WHERE n.published_at IS NOT NULL
-    ORDER BY score DESC
-    LIMIT p_limit;
-$$;
-
-
-ALTER FUNCTION "public"."get_top_news"("p_limit" integer) OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_tournament_stats"() RETURNS TABLE("total_count" bigint, "active_count" bigint, "completed_count" bigint, "total_views" bigint)
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    SELECT
-        COUNT(*)::BIGINT AS total_count,
-        COUNT(*) FILTER (WHERE status NOT IN ('completed','cancelled') OR status IS NULL)::BIGINT AS active_count,
-        COUNT(*) FILTER (WHERE status IN ('completed','cancelled'))::BIGINT AS completed_count,
-        COALESCE(SUM(view_count), 0)::BIGINT AS total_views
-    FROM tournaments
-    WHERE published_at IS NOT NULL;
-$$;
-
-
-ALTER FUNCTION "public"."get_tournament_stats"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_user_reactions"("p_news_id" "text", "p_user_id" "uuid") RETURNS TABLE("reaction_type" "text")
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-    SELECT reaction_type
-    FROM news_reactions
-    WHERE news_id = p_news_id AND user_id = p_user_id;
-$$;
-
-
-ALTER FUNCTION "public"."get_user_reactions"("p_news_id" "text", "p_user_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  INSERT INTO public.profiles (
-    id,
-    full_name,
-    email,
-    phone,
-    gender,
-    birth_day,
-    birth_month,
-    birth_year,
-    role,
-    created_at
-  ) VALUES (
-    NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    NEW.email,
-    NULLIF(NEW.raw_user_meta_data->>'phone', ''),
-    NULLIF(NEW.raw_user_meta_data->>'gender', ''),
-    (NEW.raw_user_meta_data->>'birth_day')::int,
-    (NEW.raw_user_meta_data->>'birth_month')::int,
-    (NEW.raw_user_meta_data->>'birth_year')::int,
-    'user',
-    NOW()
-  );
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."handle_updated_at"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."handle_updated_at"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_coach_view"("p_id" "text") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    UPDATE coaches SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-$$;
-
-
-ALTER FUNCTION "public"."increment_coach_view"("p_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_coach_view"("p_id" "text", "p_source" "text" DEFAULT 'site'::"text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  IF p_source = 'app' THEN
-    UPDATE coaches SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
-  ELSE
-    UPDATE coaches SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-  END IF;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."increment_coach_view"("p_id" "text", "p_source" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_court_view"("p_id" "text") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    UPDATE courts SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-$$;
-
-
-ALTER FUNCTION "public"."increment_court_view"("p_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_court_view"("p_id" "text", "p_source" "text" DEFAULT 'site'::"text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  IF p_source = 'app' THEN
-    UPDATE courts SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
-  ELSE
-    UPDATE courts SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-  END IF;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."increment_court_view"("p_id" "text", "p_source" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_news_view"("p_news_id" "text") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    UPDATE news SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_news_id;
-$$;
-
-
-ALTER FUNCTION "public"."increment_news_view"("p_news_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_news_view"("p_news_id" "text", "p_source" "text" DEFAULT 'site'::"text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  IF p_source = 'app' THEN
-    UPDATE news SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_news_id;
-  ELSE
-    UPDATE news SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_news_id;
-  END IF;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."increment_news_view"("p_news_id" "text", "p_source" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_page_view"("p_page_name" "text") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    INSERT INTO page_views (page_name, view_count, updated_at)
-    VALUES (p_page_name, 1, now())
-    ON CONFLICT (page_name) DO UPDATE
-    SET view_count = page_views.view_count + 1, updated_at = now();
-$$;
-
-
-ALTER FUNCTION "public"."increment_page_view"("p_page_name" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_player_view"("p_id" "text") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    UPDATE players SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-$$;
-
-
-ALTER FUNCTION "public"."increment_player_view"("p_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_player_view"("p_id" "text", "p_source" "text" DEFAULT 'site'::"text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  IF p_source = 'app' THEN
-    UPDATE players SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
-  ELSE
-    UPDATE players SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-  END IF;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."increment_player_view"("p_id" "text", "p_source" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_sponsor_view"("p_id" "uuid") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    UPDATE sponsors SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-$$;
-
-
-ALTER FUNCTION "public"."increment_sponsor_view"("p_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_sponsor_view"("p_id" "uuid", "p_source" "text" DEFAULT 'site'::"text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  IF p_source = 'app' THEN
-    UPDATE sponsors SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
-  ELSE
-    UPDATE sponsors SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
-  END IF;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."increment_sponsor_view"("p_id" "uuid", "p_source" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text") RETURNS "void"
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    UPDATE tournaments SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_tournament_id;
-$$;
-
-
-ALTER FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text", "p_source" "text" DEFAULT 'site'::"text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  IF p_source = 'app' THEN
-    UPDATE tournaments SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_tournament_id;
-  ELSE
-    UPDATE tournaments SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_tournament_id;
-  END IF;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text", "p_source" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."is_admin"() RETURNS boolean
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    SELECT EXISTS (
-        SELECT 1 FROM public.profiles
-        WHERE id = auth.uid() AND role = 'admin'
-    );
-$$;
-
-
-ALTER FUNCTION "public"."is_admin"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."is_staff"() RETURNS boolean
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-    SELECT EXISTS (
-        SELECT 1 FROM public.profiles
-        WHERE id = auth.uid() AND role IN ('admin', 'manager')
-    );
-$$;
-
-
-ALTER FUNCTION "public"."is_staff"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."log_deleted_profile"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-    v_has_mem BOOLEAN;
-BEGIN
-    SELECT EXISTS(
-        SELECT 1 FROM memberships WHERE profile_id = OLD.id AND status = 'active'
-    ) INTO v_has_mem;
-
-    INSERT INTO deleted_accounts (profile_id, full_name, email, role, phone, telegram_chat_id, player_id, had_membership)
-    VALUES (OLD.id, OLD.full_name, OLD.email, OLD.role, OLD.phone, OLD.telegram_chat_id, OLD.player_id, v_has_mem);
-
-    RETURN OLD;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."log_deleted_profile"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."recalc_all_player_points"() RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-    DECLARE
-      oldest_date DATE;
-      cur_year INT;
-      rec RECORD;
-      home_points INT;
-      doubles INT;
-    BEGIN
-      cur_year := EXTRACT(YEAR FROM NOW());
-      IF EXTRACT(MONTH FROM NOW()) >= 9 THEN
-        oldest_date := make_date(cur_year - 1, 9, 1);
-      ELSE
-        oldest_date := make_date(cur_year - 2, 9, 1);
-      END IF;
-
-      PERFORM recalc_player_categories(ARRAY(SELECT id FROM players));
-
-      FOR rec IN SELECT id, category_id FROM players LOOP
-        IF rec.category_id IS NULL THEN
-          home_points := 0;
-        ELSE
-          SELECT COALESCE(points, 0) INTO home_points
-          FROM player_categories
-          WHERE player_id = rec.id AND category_id = rec.category_id;
-          home_points := COALESCE(home_points, 0);
-        END IF;
-
-        SELECT COALESCE(SUM(points_earned), 0) INTO doubles
-        FROM rating_history
-        WHERE player_id = rec.id
-          AND is_doubles = TRUE
-          AND recorded_at >= oldest_date;
-
-        UPDATE players
-        SET points = home_points, doubles_points = doubles
-        WHERE id = rec.id;
-      END LOOP;
-    END;
-    $$;
-
-
-ALTER FUNCTION "public"."recalc_all_player_points"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."recalc_player_categories"("p_ids" "text"[]) RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-    DECLARE
-      oldest_date DATE;
-      cur_year INT;
-    BEGIN
-      cur_year := EXTRACT(YEAR FROM NOW());
-      IF EXTRACT(MONTH FROM NOW()) >= 9 THEN
-        oldest_date := make_date(cur_year - 1, 9, 1);
-      ELSE
-        oldest_date := make_date(cur_year - 2, 9, 1);
-      END IF;
-
-      DELETE FROM player_categories WHERE player_id = ANY(p_ids);
-
-      INSERT INTO player_categories (player_id, category_id, points, updated_at)
-      SELECT rh.player_id, rh.category_id, SUM(rh.points_earned), now()
-      FROM rating_history rh
-      WHERE rh.player_id = ANY(p_ids)
-        AND rh.category_id IS NOT NULL
-        AND (rh.is_doubles IS NOT TRUE)
-        AND rh.recorded_at >= oldest_date
-      GROUP BY rh.player_id, rh.category_id
-      HAVING SUM(rh.points_earned) > 0;
-
-      -- Победы и поражения в одиночных турнирах этой категории
-      UPDATE player_categories pc
-      SET wins = COALESCE(st.w, 0), losses = COALESCE(st.l, 0)
-      FROM (
-        SELECT pl.id AS player_id, t.category_id,
-               count(*) FILTER (WHERE m.winner_id = pl.id) AS w,
-               count(*) FILTER (WHERE m.winner_id IS NOT NULL AND m.winner_id <> pl.id) AS l
-        FROM players pl
-        JOIN matches m ON (m.player1_id = pl.id OR m.player2_id = pl.id)
-        JOIN tournaments t ON t.id = m.tournament_id
-        WHERE pl.id = ANY(p_ids)
-          AND t.category_id IS NOT NULL
-          AND COALESCE(t.format, 'singles') NOT IN ('doubles', 'mixed_doubles')
-        GROUP BY pl.id, t.category_id
-      ) st
-      WHERE pc.player_id = st.player_id AND pc.category_id = st.category_id;
-    END;
-    $$;
-
-
-ALTER FUNCTION "public"."recalc_player_categories"("p_ids" "text"[]) OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."recalculate_badges"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$                                                                                                                                                               
-  DECLARE
-      new_badges text[] := '{}';
-      max_points integer;
-      form_streak integer := 0;
-      i integer;
-  BEGIN
-      SELECT MAX(points) INTO max_points
-      FROM players WHERE category_id = NEW.category_id AND id != NEW.id;
-      IF NEW.points > COALESCE(max_points, 0) THEN
-          new_badges := array_append(new_badges, 'top1');
-      END IF;
-      IF NEW.form IS NOT NULL AND array_length(NEW.form, 1) >= 5 THEN
-          form_streak := 0;
-          FOR i IN 1..array_length(NEW.form, 1) LOOP
-              IF NEW.form[i] = 'W' THEN form_streak := form_streak + 1;
-              ELSE form_streak := 0; END IF;
-          END LOOP;
-          IF form_streak >= 5 THEN
-              new_badges := array_append(new_badges, 'streak');
-          END IF;
-      END IF;
-      IF NEW.created_at > NOW() - INTERVAL '30 days' THEN
-          new_badges := array_append(new_badges, 'newbie');
-      END IF;
-      IF NEW.rank_change >= 10 THEN
-          new_badges := array_append(new_badges, 'breakthrough');
-      END IF;
-      IF OLD IS NOT NULL AND OLD.badges IS NOT NULL AND 'champion' = ANY(OLD.badges) THEN
-          new_badges := array_append(new_badges, 'champion');
-      END IF;
-      NEW.badges := new_badges;
-      RETURN NEW;
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."recalculate_badges"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."registrations_guard_self_update"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  -- Отметка времени снятия ставится здесь, а не на клиенте: так её нельзя
-  -- подделать и она появляется, откуда бы заявку ни сняли
-  IF NEW.status = 'withdrawn' AND OLD.status IS DISTINCT FROM 'withdrawn' THEN
-    NEW.withdrawn_at := now();
-  ELSIF NEW.status IS DISTINCT FROM 'withdrawn' THEN
-    NEW.withdrawn_at := NULL;
-  END IF;
-
-  -- Сервер ходит под service_role: это наши Edge Functions, у них своя проверка.
-  -- Ограничиваем только браузер с пользовательским токеном.
-  IF auth.uid() IS NULL OR COALESCE(auth.role(), '') = 'service_role' THEN
-    RETURN NEW;
-  END IF;
-
-  -- Админ и менеджер правят заявку как раньше
-  IF EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager')) THEN
-    RETURN NEW;
-  END IF;
-
-  -- Игроку оставляем партнёра и снятие заявки
-  IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status <> 'withdrawn' THEN
-    RAISE EXCEPTION 'Заявку можно только снять';
-  END IF;
-
-  IF NEW.tournament_id  IS DISTINCT FROM OLD.tournament_id
-  OR NEW.player_id      IS DISTINCT FROM OLD.player_id
-  OR NEW.seed_number    IS DISTINCT FROM OLD.seed_number
-  OR NEW.draw_position  IS DISTINCT FROM OLD.draw_position
-  OR NEW.group_number   IS DISTINCT FROM OLD.group_number
-  OR NEW.registered_at  IS DISTINCT FROM OLD.registered_at
-  OR NEW.block_reason   IS DISTINCT FROM OLD.block_reason
-  OR NEW.is_external    IS DISTINCT FROM OLD.is_external THEN
-    RAISE EXCEPTION 'Эти поля меняет только организатор';
-  END IF;
-
-  -- Снимать заявку после жеребьёвки нельзя: игрок уже в сетке
-  IF NEW.status = 'withdrawn' AND OLD.status <> 'withdrawn'
-     AND (OLD.draw_position IS NOT NULL OR OLD.group_number IS NOT NULL) THEN
-    RAISE EXCEPTION 'Жеребьёвка проведена, снять заявку может только организатор';
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."registrations_guard_self_update"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."safe_int"("val" "text") RETURNS integer
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-BEGIN
-  RETURN val::integer;
-EXCEPTION WHEN OTHERS THEN
-  RETURN NULL;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."safe_int"("val" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."sync_player_name"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO 'public'
-    AS $$
-BEGIN
-    IF NEW.player_id IS NULL THEN
-        RETURN NEW;
-    END IF;
-
-    -- Имя: следует за профилем, перевод пересчитывается
-    IF NEW.full_name IS NOT NULL
-       AND btrim(NEW.full_name) <> ''
-       AND NEW.full_name IS DISTINCT FROM OLD.full_name
-    THEN
-        UPDATE players
-        SET name    = NEW.full_name,
-            name_en = translit_ru(NEW.full_name),
-            name_kg = NULL
-        WHERE id = NEW.player_id
-          AND name IS DISTINCT FROM NEW.full_name;
-    END IF;
-
-    -- Фото: список рейтинга и поиск партнёра читают карточку игрока
-    IF NEW.avatar_url IS DISTINCT FROM OLD.avatar_url THEN
-        UPDATE players
-        SET photo = NEW.avatar_url
-        WHERE id = NEW.player_id
-          AND photo IS DISTINCT FROM NEW.avatar_url;
-    END IF;
-
-    RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."sync_player_name"() OWNER TO "postgres";
-
-
-COMMENT ON FUNCTION "public"."sync_player_name"() IS 'Имя в рейтинге следует за именем в профиле: его задаёт сам игрок';
-
-
-
-CREATE OR REPLACE FUNCTION "public"."translit_ru"("src" "text") RETURNS "text"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-DECLARE
-    -- Буквы, дающие несколько латинских: их заменяем по одной
-    pairs CONSTANT TEXT[][] := ARRAY[
-        ['щ','shch'], ['ж','zh'], ['ч','ch'], ['ш','sh'], ['ц','ts'],
-        ['х','kh'],   ['ю','yu'], ['я','ya'], ['ё','e'],  ['ң','ng']
-    ];
-    out TEXT;
-    i INT;
-BEGIN
-    IF src IS NULL OR btrim(src) = '' THEN
-        RETURN NULL;
-    END IF;
-
-    out := lower(src);
-
-    FOR i IN 1 .. array_length(pairs, 1) LOOP
-        out := replace(out, pairs[i][1], pairs[i][2]);
-    END LOOP;
-
-    -- Остальные — одна к одной. Твёрдый и мягкий знаки исчезают: в конце
-    -- строки замен их пары нет, и translate такие буквы удаляет.
-    out := translate(
-        out,
-        'абвгдезийклмнопрстуфыэөүъь',
-        'abvgdeziyklmnoprstufyeou'
-    );
-
-    RETURN initcap(out);
-END;
-$$;
-
-
-ALTER FUNCTION "public"."translit_ru"("src" "text") OWNER TO "postgres";
-
-
-COMMENT ON FUNCTION "public"."translit_ru"("src" "text") IS 'Кириллица латиницей для имён. Кыргызские буквы тоже: ң, ө, ү';
-
-
-
-CREATE OR REPLACE FUNCTION "public"."trigger_check_badges"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  PERFORM check_and_award_badges(NEW.id);
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."trigger_check_badges"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."umpire_save_state"("p_key" "text", "p_state" "jsonb") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-  DECLARE
-      v_id UUID;
-      v_live RECORD;
-      v_prof1_id UUID;
-      v_prof2_id UUID;
-      v_score TEXT;
-  BEGIN
-      SELECT id INTO v_id FROM live_matches WHERE umpire_key = p_key;
-      IF v_id IS NULL THEN
-          RETURN jsonb_build_object('ok', false, 'error', 'Invalid umpire key');
-      END IF;
-
-      UPDATE live_matches SET
-          serving_player = COALESCE((p_state->>'serving_player')::int, serving_player),
-          points_p1 = COALESCE(p_state->>'points_p1', points_p1),
-          points_p2 = COALESCE(p_state->>'points_p2', points_p2),
-          current_set = COALESCE((p_state->>'current_set')::int, current_set),
-          sets_data = COALESCE(p_state->'sets_data', sets_data),
-          current_game_p1 = COALESCE((p_state->>'current_game_p1')::int, current_game_p1),
-          current_game_p2 = COALESCE((p_state->>'current_game_p2')::int, current_game_p2),
-          is_tiebreak = COALESCE((p_state->>'is_tiebreak')::boolean, is_tiebreak),
-          tiebreak_p1 = COALESCE((p_state->>'tiebreak_p1')::int, tiebreak_p1),
-          tiebreak_p2 = COALESCE((p_state->>'tiebreak_p2')::int, tiebreak_p2),
-          status = COALESCE(p_state->>'status', status),
-          winner_player = (p_state->>'winner_player')::int,
-          final_score = p_state->>'final_score',
-          history = COALESCE(p_state->'history', history),
-          started_at = CASE
-              WHEN p_state->>'status' = 'live' AND started_at IS NULL THEN now()
-              ELSE started_at
-          END,
-          completed_at = CASE
-              WHEN p_state->>'status' = 'completed' THEN now()
-              ELSE completed_at
-          END
-      WHERE id = v_id;
-
-      IF p_state->>'status' = 'completed' THEN
-          SELECT match_id, player1_id, player2_id, final_score
-          INTO v_live
-          FROM live_matches WHERE id = v_id;
-
-          v_score := COALESCE(p_state->>'final_score', v_live.final_score);
-
-          IF v_live.match_id IS NULL
-             AND (v_live.player1_id IS NOT NULL OR v_live.player2_id IS NOT NULL)
-             AND NOT EXISTS (SELECT 1 FROM challenges WHERE live_match_id = v_id)
-          THEN
-              SELECT p.id INTO v_prof1_id FROM profiles p WHERE p.player_id = v_live.player1_id LIMIT 1;
-              SELECT p.id INTO v_prof2_id FROM profiles p WHERE p.player_id = v_live.player2_id LIMIT 1;
-
-              INSERT INTO challenges (
-                  challenger_id, challenger_player_id, opponent_player_id,
-                  opponent_profile_id, proposed_date, proposed_time,
-                  status, score_draft, live_match_id,
-                  created_at, expires_at, accepted_at
-              ) VALUES (
-                  v_prof1_id, v_live.player1_id, v_live.player2_id,
-                  v_prof2_id, CURRENT_DATE,
-                  to_char(now() AT TIME ZONE 'Asia/Bishkek', 'HH24:MI'),
-                  'completed', v_score, v_id,
-                  now(), now() + interval '72 hours', now()
-              );
-          END IF;
-      END IF;
-
-      RETURN jsonb_build_object('ok', true, 'id', v_id);
-  END;
-  $$;
-
-
-ALTER FUNCTION "public"."umpire_save_state"("p_key" "text", "p_state" "jsonb") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."verify_voucher"("p_token" "text") RETURNS json
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-    v RECORD;
-BEGIN
-    SELECT * INTO v
-    FROM discount_vouchers
-    WHERE qr_token = p_token;
-
-    IF v IS NULL THEN
-        RETURN json_build_object('status', 'invalid');
-    END IF;
-
-    -- Auto-expire
-    IF v.status = 'active' AND v.expires_at < NOW() THEN
-        UPDATE discount_vouchers SET status = 'expired' WHERE id = v.id;
-        RETURN json_build_object('status', 'expired');
-    END IF;
-
-    IF v.status = 'used' THEN
-        RETURN json_build_object(
-            'status', 'already_used',
-            'used_at', v.used_at
-        );
-    END IF;
-
-    IF v.status = 'expired' THEN
-        RETURN json_build_object('status', 'expired');
-    END IF;
-
-    IF v.status = 'cancelled' THEN
-        RETURN json_build_object('status', 'invalid');
-    END IF;
-
-    -- Active voucher
-    RETURN json_build_object(
-        'status', 'valid',
-        'player_name', v.player_name,
-        'entity_type', v.entity_type,
-        'entity_name', v.entity_name,
-        'service_name', v.service_name,
-        'discount_percent', v.discount_percent,
-        'expires_at', v.expires_at,
-        'created_at', v.created_at
-    );
-END;
-$$;
-
-
-ALTER FUNCTION "public"."verify_voucher"("p_token" "text") OWNER TO "postgres";
-
-SET default_tablespace = '';
-
-SET default_table_access_method = "heap";
-
-
-CREATE TABLE IF NOT EXISTS "public"."badge_definitions" (
-    "id" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "name_en" "text",
-    "name_kg" "text",
-    "icon" "text" NOT NULL,
-    "description" "text",
-    "description_en" "text",
-    "description_kg" "text",
-    "condition_type" "text" NOT NULL,
-    "condition_value" integer DEFAULT 0,
-    "sort_order" integer DEFAULT 0
-);
-
-
-ALTER TABLE "public"."badge_definitions" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."categories" (
-    "id" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "name_en" "text",
-    "name_kg" "text",
-    "gender" "text",
-    "sort_order" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "color" "text",
-    CONSTRAINT "categories_gender_check" CHECK ((("gender" IS NULL) OR ("gender" = ANY (ARRAY['men'::"text", 'women'::"text"]))))
-);
-
-
-ALTER TABLE "public"."categories" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."challenge_predictions" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "challenge_id" "uuid" NOT NULL,
-    "voter_type" "text" NOT NULL,
-    "voter_id" "text" NOT NULL,
-    "predicted_winner_id" "text" NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "challenge_predictions_voter_type_check" CHECK (("voter_type" = ANY (ARRAY['site'::"text", 'telegram'::"text"])))
-);
-
-
-ALTER TABLE "public"."challenge_predictions" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."challenges" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "challenger_id" "uuid",
-    "challenger_player_id" "text" NOT NULL,
-    "opponent_player_id" "text" NOT NULL,
-    "opponent_profile_id" "uuid",
-    "proposed_date" "date" NOT NULL,
-    "proposed_time" "text" NOT NULL,
-    "proposed_venue" "text",
-    "proposed_court_id" "text",
-    "message" "text",
-    "counter_date" "date",
-    "counter_time" "text",
-    "counter_venue" "text",
-    "counter_court_id" "text",
-    "counter_step" "text",
-    "status" "text" DEFAULT 'active'::"text",
-    "match_id" "uuid",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "expires_at" timestamp with time zone DEFAULT ("now"() + '72:00:00'::interval),
-    "accepted_at" timestamp with time zone,
-    "countered_at" timestamp with time zone,
-    "battle_title" "text",
-    "battle_published" boolean DEFAULT false,
-    "battle_published_at" timestamp with time zone,
-    "voting_closed" boolean DEFAULT false,
-    "banner_url" "text",
-    "battle_notified_at" timestamp with time zone,
-    "score_draft" "text",
-    "live_match_id" "uuid",
-    "challenger_ntrp" numeric(4,2),
-    "opponent_ntrp" numeric(4,2),
-    "challenger_country" "text",
-    "opponent_country" "text",
-    "challenger_category" "text",
-    "opponent_category" "text",
-    "set_format" "text" DEFAULT 'standard'::"text",
-    CONSTRAINT "challenges_counter_step_check" CHECK (("counter_step" = ANY (ARRAY['date'::"text", 'time'::"text", 'venue'::"text", NULL::"text"]))),
-    CONSTRAINT "challenges_message_check" CHECK (("char_length"("message") <= 150)),
-    CONSTRAINT "challenges_status_check" CHECK (("status" = ANY (ARRAY['active'::"text", 'negotiating'::"text", 'countered'::"text", 'accepted'::"text", 'declined'::"text", 'expired'::"text", 'completed'::"text", 'cancelled'::"text"])))
-);
-
-
-ALTER TABLE "public"."challenges" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."coaches" (
-    "id" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "name_en" "text",
-    "name_kg" "text",
-    "photo" "text",
-    "specialization" "text",
-    "specialization_en" "text",
-    "experience" "text",
-    "experience_en" "text",
-    "phone" "text",
-    "email" "text",
-    "price" "text",
-    "rating" numeric(2,1),
-    "bio" "text",
-    "bio_en" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "tags" "text"[] DEFAULT '{}'::"text"[],
-    "students" integer DEFAULT 0,
-    "member_price" integer,
-    "short_desc" "text",
-    "short_desc_en" "text",
-    "achievements" "text"[] DEFAULT '{}'::"text"[],
-    "achievements_en" "text"[] DEFAULT '{}'::"text"[],
-    "court" "text",
-    "court_en" "text",
-    "telegram" "text",
-    "whatsapp" "text",
-    "partner" boolean DEFAULT false,
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    "last_name" "text",
-    "first_name" "text",
-    "patronymic" "text",
-    "position" "text",
-    "position_en" "text",
-    "last_name_en" "text",
-    "first_name_en" "text",
-    "promoted" boolean DEFAULT false,
-    "partner_pin" "text",
-    "view_count" integer DEFAULT 0,
-    "last_name_kg" "text",
-    "first_name_kg" "text",
-    "position_kg" "text",
-    "short_desc_kg" "text",
-    "bio_kg" "text",
-    "achievements_kg" "jsonb" DEFAULT '[]'::"jsonb",
-    "court_kg" "text",
-    "view_count_app" integer DEFAULT 0
-);
-
-
-ALTER TABLE "public"."coaches" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."courts" (
-    "id" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "name_en" "text",
-    "name_kg" "text",
-    "photo" "text",
-    "gallery" "text"[] DEFAULT '{}'::"text"[],
-    "rating" numeric(2,1) DEFAULT 0,
-    "address" "text",
-    "address_en" "text",
-    "lat" numeric(8,4),
-    "lng" numeric(8,4),
-    "phone" "text",
-    "short_desc" "text",
-    "short_desc_en" "text",
-    "description" "text",
-    "description_en" "text",
-    "amenities" "text"[] DEFAULT '{}'::"text"[],
-    "amenities_en" "text"[] DEFAULT '{}'::"text"[],
-    "schedule" "jsonb" DEFAULT '{}'::"jsonb",
-    "schedule_en" "jsonb" DEFAULT '{}'::"jsonb",
-    "partner" boolean DEFAULT false,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    "court_types" "jsonb" DEFAULT '[]'::"jsonb",
-    "email" "text",
-    "slogan" "text",
-    "slogan_en" "text",
-    "street" "text",
-    "street_en" "text",
-    "building" "text",
-    "district" "text",
-    "district_en" "text",
-    "city" "text" DEFAULT 'Бишкек'::"text",
-    "city_en" "text" DEFAULT 'Bishkek'::"text",
-    "postal_code" "text",
-    "google_maps_url" "text",
-    "twogis_url" "text",
-    "promoted" boolean DEFAULT false,
-    "description_kg" "text",
-    "slogan_kg" "text",
-    "street_kg" "text",
-    "district_kg" "text",
-    "city_kg" "text",
-    "partner_pin" "text",
-    "view_count" integer DEFAULT 0,
-    "additional_services" "jsonb" DEFAULT '[]'::"jsonb",
-    "view_count_app" integer DEFAULT 0
-);
-
-
-ALTER TABLE "public"."courts" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."deleted_accounts" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid" NOT NULL,
-    "full_name" "text",
-    "email" "text",
-    "role" "text" DEFAULT 'user'::"text",
-    "phone" "text",
-    "telegram_chat_id" "text",
-    "player_id" "text",
-    "had_membership" boolean DEFAULT false,
-    "deleted_at" timestamp with time zone DEFAULT "now"(),
-    "reason" "text"
-);
-
-
-ALTER TABLE "public"."deleted_accounts" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."discount_vouchers" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid" NOT NULL,
-    "player_name" "text",
-    "entity_type" "text" NOT NULL,
-    "entity_id" "text" NOT NULL,
-    "entity_name" "text" NOT NULL,
-    "service_id" "uuid",
-    "service_name" "text" NOT NULL,
-    "discount_percent" integer NOT NULL,
-    "qr_token" "text" DEFAULT "encode"("extensions"."gen_random_bytes"(16), 'hex'::"text") NOT NULL,
-    "status" "text" DEFAULT 'active'::"text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "expires_at" timestamp with time zone DEFAULT ("now"() + '7 days'::interval),
-    "used_at" timestamp with time zone,
-    "confirmed_by_ip" "text",
-    CONSTRAINT "discount_vouchers_entity_type_check" CHECK (("entity_type" = ANY (ARRAY['court'::"text", 'coach'::"text"]))),
-    CONSTRAINT "discount_vouchers_status_check" CHECK (("status" = ANY (ARRAY['active'::"text", 'used'::"text", 'expired'::"text", 'cancelled'::"text"])))
-);
-
-
-ALTER TABLE "public"."discount_vouchers" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."entity_payments" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "entity_type" "text" NOT NULL,
-    "entity_id" "text" NOT NULL,
-    "entity_name" "text" NOT NULL,
-    "amount" numeric DEFAULT 0 NOT NULL,
-    "currency" "text" DEFAULT 'KGS'::"text" NOT NULL,
-    "period_start" "date" NOT NULL,
-    "period_end" "date" NOT NULL,
-    "payment_method" "text" NOT NULL,
-    "purpose" "text" NOT NULL,
-    "note" "text",
-    "created_by" "uuid",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "entity_payments_entity_type_check" CHECK (("entity_type" = ANY (ARRAY['court'::"text", 'coach'::"text", 'player'::"text", 'club'::"text"]))),
-    CONSTRAINT "entity_payments_payment_method_check" CHECK (("payment_method" = ANY (ARRAY['cash'::"text", 'transfer'::"text", 'card'::"text"]))),
-    CONSTRAINT "entity_payments_purpose_check" CHECK (("purpose" = ANY (ARRAY['promoted'::"text", 'sponsorship'::"text", 'rental'::"text", 'other'::"text"])))
-);
-
-
-ALTER TABLE "public"."entity_payments" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."game_invites" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "sender_id" "uuid" NOT NULL,
-    "receiver_player_id" "text" NOT NULL,
-    "receiver_profile_id" "uuid",
-    "status" "text" DEFAULT 'pending'::"text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "responded_at" timestamp with time zone,
-    CONSTRAINT "game_invites_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'accepted'::"text", 'declined'::"text", 'expired'::"text"])))
-);
-
-
-ALTER TABLE "public"."game_invites" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."live_matches" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "match_id" "uuid",
-    "player1_id" "text",
-    "player2_id" "text",
-    "player1_name" "text",
-    "player2_name" "text",
-    "best_of" integer DEFAULT 3 NOT NULL,
-    "youtube_url" "text",
-    "umpire_key" "text" DEFAULT "encode"("extensions"."gen_random_bytes"(16), 'hex'::"text") NOT NULL,
-    "serving_player" integer DEFAULT 1,
-    "points_p1" "text" DEFAULT '0'::"text",
-    "points_p2" "text" DEFAULT '0'::"text",
-    "current_set" integer DEFAULT 1,
-    "sets_data" "jsonb" DEFAULT '[]'::"jsonb",
-    "current_game_p1" integer DEFAULT 0,
-    "current_game_p2" integer DEFAULT 0,
-    "is_tiebreak" boolean DEFAULT false,
-    "tiebreak_p1" integer DEFAULT 0,
-    "tiebreak_p2" integer DEFAULT 0,
-    "status" "text" DEFAULT 'warmup'::"text",
-    "winner_player" integer,
-    "final_score" "text",
-    "history" "jsonb" DEFAULT '[]'::"jsonb",
-    "tournament_label" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "started_at" timestamp with time zone,
-    "completed_at" timestamp with time zone,
-    "sponsor_logo" "text",
-    "set_format" "text" DEFAULT 'standard'::"text",
-    CONSTRAINT "live_matches_best_of_check" CHECK (("best_of" = ANY (ARRAY[1, 3, 5]))),
-    CONSTRAINT "live_matches_serving_player_check" CHECK (("serving_player" = ANY (ARRAY[1, 2]))),
-    CONSTRAINT "live_matches_set_format_check" CHECK (("set_format" = ANY (ARRAY['standard'::"text", 'short'::"text"]))),
-    CONSTRAINT "live_matches_status_check" CHECK (("status" = ANY (ARRAY['warmup'::"text", 'live'::"text", 'paused'::"text", 'completed'::"text"]))),
-    CONSTRAINT "live_matches_winner_player_check" CHECK (("winner_player" = ANY (ARRAY[1, 2])))
-);
-
-
-ALTER TABLE "public"."live_matches" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."loyalty_rewards" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "code" "text" NOT NULL,
-    "title" "text" NOT NULL,
-    "title_en" "text",
-    "cost" integer NOT NULL,
-    "active" boolean DEFAULT true,
-    "updated_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."loyalty_rewards" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."loyalty_rules" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "action" "text" NOT NULL,
-    "points" integer DEFAULT 0 NOT NULL,
-    "label" "text",
-    "label_en" "text",
-    "active" boolean DEFAULT true,
-    "updated_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."loyalty_rules" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."loyalty_transactions" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid" NOT NULL,
-    "type" "text" NOT NULL,
-    "points" integer NOT NULL,
-    "action" "text",
-    "source_id" "text",
-    "note" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "expires_at" timestamp with time zone,
-    CONSTRAINT "loyalty_transactions_type_check" CHECK (("type" = ANY (ARRAY['earn'::"text", 'redeem'::"text", 'expire'::"text", 'admin_adjust'::"text"])))
-);
-
-
-ALTER TABLE "public"."loyalty_transactions" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."matches" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "tournament_id" "text",
-    "player1_id" "text",
-    "player2_id" "text",
-    "score" "text",
-    "winner_id" "text",
-    "round" "text",
-    "played_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "match_order" integer,
-    "round_number" integer,
-    "court" integer,
-    "scheduled_time" "text",
-    "scheduled_day" "date",
-    "status" "text" DEFAULT 'upcoming'::"text",
-    "seed1" integer,
-    "seed2" integer,
-    "group_number" integer,
-    "notified_at" timestamp with time zone,
-    "match_type" "text" DEFAULT 'tournament'::"text"
-);
-
-
-ALTER TABLE "public"."matches" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."membership_requests" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid",
-    "status" "text" DEFAULT 'select_period'::"text",
-    "months" integer,
-    "amount" numeric(10,2),
-    "category_id" "text",
-    "receipt_file_id" "text",
-    "manager_message_id" bigint,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "membership_requests_status_check" CHECK (("status" = ANY (ARRAY['select_period'::"text", 'select_category'::"text", 'pending_receipt'::"text", 'pending_approval'::"text", 'approved'::"text", 'rejected'::"text"])))
-);
-
-
-ALTER TABLE "public"."membership_requests" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."memberships" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid",
-    "status" "text" DEFAULT 'active'::"text",
-    "starts_at" "date",
-    "expires_at" "date",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "created_by" "uuid",
-    "note" "text",
-    CONSTRAINT "memberships_status_check" CHECK (("status" = ANY (ARRAY['active'::"text", 'expired'::"text", 'cancelled'::"text"])))
-);
-
-
-ALTER TABLE "public"."memberships" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."news" (
-    "id" "text" NOT NULL,
-    "title" "text" NOT NULL,
-    "title_en" "text",
-    "title_kg" "text",
-    "slug" "text",
-    "content" "text",
-    "content_en" "text",
-    "excerpt" "text",
-    "excerpt_en" "text",
-    "image" "text",
-    "category" "text",
-    "author" "text",
-    "published_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "executor" "text",
-    "content_kg" "text",
-    "excerpt_kg" "text",
-    "gallery" "jsonb" DEFAULT '[]'::"jsonb",
-    "content_images" "jsonb" DEFAULT '[]'::"jsonb",
-    "poll" "jsonb",
-    "view_count" integer DEFAULT 0,
-    "tournament_id" "text",
-    "results_notified_at" timestamp with time zone,
-    "reactions_config" "jsonb",
-    "view_count_app" integer DEFAULT 0,
-    "image_original" "text"
-);
-
-
-ALTER TABLE "public"."news" OWNER TO "postgres";
-
-
-COMMENT ON COLUMN "public"."news"."image" IS 'Обложка для карточек: кадрирована 16:9 при загрузке';
-
-
-
-COMMENT ON COLUMN "public"."news"."image_original" IS 'Исходная афиша без обрезки — показывается в шапке новости';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."news_poll_votes" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "news_id" "text" NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "option_index" integer NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."news_poll_votes" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."news_reactions" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "news_id" "text" NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "reaction_type" "text" NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "news_reactions_reaction_type_check" CHECK (("reaction_type" = ANY (ARRAY['tennis'::"text", 'fire'::"text", 'clap'::"text", 'star'::"text", 'heart'::"text", 'like'::"text", 'trophy'::"text", 'muscle'::"text", 'target'::"text", 'wow'::"text"])))
-);
-
-
-ALTER TABLE "public"."news_reactions" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."notification_log" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid" NOT NULL,
-    "type" "text" DEFAULT 'system'::"text" NOT NULL,
-    "title" "text",
-    "message" "text",
-    "data" "jsonb" DEFAULT '{}'::"jsonb",
-    "is_read" boolean DEFAULT false NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
-);
-
-
-ALTER TABLE "public"."notification_log" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."otp_blocks" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "block_key" "text" NOT NULL,
-    "request_count" integer DEFAULT 1,
-    "blocked_until" timestamp with time zone,
-    "escalation" integer DEFAULT 0,
-    "admin_unblocked" boolean DEFAULT false,
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."otp_blocks" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."otp_codes" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "identifier" "text" NOT NULL,
-    "code" "text" NOT NULL,
-    "flow" "text" NOT NULL,
-    "channel" "text" NOT NULL,
-    "attempts" integer DEFAULT 0,
-    "used" boolean DEFAULT false,
-    "expires_at" timestamp with time zone NOT NULL,
-    "ip" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "otp_codes_channel_check" CHECK (("channel" = ANY (ARRAY['telegram'::"text", 'email'::"text"]))),
-    CONSTRAINT "otp_codes_flow_check" CHECK (("flow" = ANY (ARRAY['forgot_password'::"text", 'register'::"text", 'telegram_register'::"text"])))
-);
-
-
-ALTER TABLE "public"."otp_codes" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."page_views" (
-    "page_name" "text" NOT NULL,
-    "view_count" integer DEFAULT 0,
-    "updated_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."page_views" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."partner_services" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "entity_type" "text" NOT NULL,
-    "entity_id" "text" NOT NULL,
-    "service_name" "text" NOT NULL,
-    "service_name_en" "text",
-    "service_name_kg" "text",
-    "discount_percent" integer NOT NULL,
-    "is_active" boolean DEFAULT true,
-    "sort_order" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "partner_services_discount_percent_check" CHECK ((("discount_percent" >= 1) AND ("discount_percent" <= 100))),
-    CONSTRAINT "partner_services_entity_type_check" CHECK (("entity_type" = ANY (ARRAY['court'::"text", 'coach'::"text"])))
-);
-
-
-ALTER TABLE "public"."partner_services" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."payments" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid",
-    "membership_id" "uuid",
-    "amount" numeric(10,2),
-    "currency" "text" DEFAULT 'KGS'::"text",
-    "status" "text" DEFAULT 'pending'::"text",
-    "payment_method" "text",
-    "external_id" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "created_by" "uuid",
-    "note" "text",
-    CONSTRAINT "payments_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'completed'::"text", 'failed'::"text", 'refunded'::"text"])))
-);
-
-
-ALTER TABLE "public"."payments" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."player_badges" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "player_id" "text" NOT NULL,
-    "badge_id" "text" NOT NULL,
-    "earned_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."player_badges" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."player_categories" (
-    "player_id" "text" NOT NULL,
-    "category_id" "text" NOT NULL,
-    "points" integer DEFAULT 0 NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    "wins" integer DEFAULT 0 NOT NULL,
-    "losses" integer DEFAULT 0 NOT NULL
-);
-
-
-ALTER TABLE "public"."player_categories" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."player_promotions" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "player_id" "text",
-    "from_category_id" "text",
-    "to_category_id" "text",
-    "season" integer NOT NULL,
-    "status" "text" DEFAULT 'eligible'::"text",
-    "eligible_date" timestamp with time zone DEFAULT "now"(),
-    "completed_date" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."player_promotions" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."players" (
-    "id" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "name_en" "text",
-    "name_kg" "text",
-    "photo" "text",
-    "country" "text" DEFAULT '🇰🇬'::"text",
-    "category_id" "text",
-    "points" integer DEFAULT 0,
-    "wins" integer DEFAULT 0,
-    "losses" integer DEFAULT 0,
-    "rank_change" integer DEFAULT 0,
-    "form" "text"[] DEFAULT '{}'::"text"[],
-    "badges" "text"[] DEFAULT '{}'::"text"[],
-    "is_online" boolean DEFAULT false,
-    "bio" "text",
-    "bio_en" "text",
-    "phone" "text",
-    "email" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    "show_phone" boolean DEFAULT false,
-    "ntrp_rating" numeric(3,1),
-    "banned_until" timestamp without time zone,
-    "ban_reason" "text",
-    "view_count" integer DEFAULT 0,
-    "gender" character varying(10),
-    "doubles_points" integer DEFAULT 0,
-    "bio_kg" "text",
-    "doubles_wins" integer DEFAULT 0,
-    "doubles_losses" integer DEFAULT 0,
-    "doubles_rank_change" integer DEFAULT 0,
-    "doubles_form" "jsonb" DEFAULT '[]'::"jsonb",
-    "view_count_app" integer DEFAULT 0
-);
-
-
-ALTER TABLE "public"."players" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."points_rules" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "level_id" "uuid",
-    "round" "text" NOT NULL,
-    "points" integer DEFAULT 0 NOT NULL
-);
-
-
-ALTER TABLE "public"."points_rules" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."profiles" (
-    "id" "uuid" NOT NULL,
-    "email" "text",
-    "full_name" "text",
-    "avatar_url" "text",
-    "phone" "text",
-    "player_id" "text",
-    "role" "text" DEFAULT 'user'::"text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    "gender" "text",
-    "instagram" "text" DEFAULT ''::"text",
-    "telegram" "text" DEFAULT ''::"text",
-    "show_socials" boolean DEFAULT false,
-    "birth_day" integer,
-    "birth_month" integer,
-    "birth_year" integer,
-    "telegram_chat_id" bigint,
-    "last_seen" timestamp with time zone,
-    "play_level" "text",
-    "preferred_time" "text",
-    "telegram_username" "text",
-    "banned_until" timestamp without time zone,
-    "ban_reason" "text",
-    "notify_preferences" "jsonb",
-    "fcm_token" "text",
-    "phone_e164" "text" GENERATED ALWAYS AS (
-CASE
-    WHEN ("regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text") = ''::"text") THEN ''::"text"
-    WHEN ("length"("regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text")) = 9) THEN ('996'::"text" || "regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text"))
-    WHEN (("length"("regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text")) = 10) AND ("left"("regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text"), 1) = '0'::"text")) THEN ('996'::"text" || "right"("regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text"), 9))
-    ELSE "regexp_replace"(COALESCE("phone", ''::"text"), '[^0-9]'::"text", ''::"text", 'g'::"text")
-END) STORED,
-    "phone_country" "text",
-    "show_phone" boolean DEFAULT false,
-    "whatsapp_phone" "text",
-    "whatsapp_country" "text",
-    "show_whatsapp" boolean DEFAULT false,
-    "show_telegram" boolean DEFAULT false,
-    "show_instagram" boolean DEFAULT false,
-    CONSTRAINT "profiles_birth_day_check" CHECK ((("birth_day" >= 1) AND ("birth_day" <= 31))),
-    CONSTRAINT "profiles_birth_month_check" CHECK ((("birth_month" >= 1) AND ("birth_month" <= 12))),
-    CONSTRAINT "profiles_play_level_check" CHECK (("play_level" = ANY (ARRAY['beginner'::"text", 'intermediate'::"text", 'advanced'::"text"]))),
-    CONSTRAINT "profiles_preferred_time_check" CHECK (("preferred_time" = ANY (ARRAY['morning'::"text", 'afternoon'::"text", 'evening'::"text", 'weekend'::"text"]))),
-    CONSTRAINT "profiles_role_check" CHECK (("role" = ANY (ARRAY['user'::"text", 'player'::"text", 'manager'::"text", 'admin'::"text"])))
-);
-
-
-ALTER TABLE "public"."profiles" OWNER TO "postgres";
-
-
-COMMENT ON COLUMN "public"."profiles"."phone_e164" IS 'Телефон одними цифрами в международном виде. Местные номера достроены до 996. Для поиска при восстановлении доступа';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."phone_country" IS 'Страна телефона, код ISO 3166-1 alpha-2 (KG, RU, KZ). Выбирается человеком, а не выводится из номера';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."show_phone" IS 'Показывать телефон другим членам клуба на карточке игрока. Ставит сам игрок';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."whatsapp_phone" IS 'Номер WhatsApp, если отличается от основного. Пусто — используется phone';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."whatsapp_country" IS 'Страна номера WhatsApp, код ISO 3166-1 alpha-2';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."show_whatsapp" IS 'Показывать WhatsApp членам клуба. Не зависит от показа самого телефона';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."show_telegram" IS 'Показывать телеграм членам клуба';
-
-
-
-COMMENT ON COLUMN "public"."profiles"."show_instagram" IS 'Показывать инстаграм членам клуба';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."push_log" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "admin_id" "uuid",
-    "title" "text",
-    "message" "text",
-    "type" "text" DEFAULT 'system'::"text",
-    "audience" "text",
-    "recipients_count" integer DEFAULT 0,
-    "fcm_sent" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."push_log" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."rate_limits" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "limit_key" "text" NOT NULL,
-    "action" "text" NOT NULL,
-    "ip" "text",
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."rate_limits" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."rating_history" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "player_id" "text" NOT NULL,
-    "tournament_name" "text" NOT NULL,
-    "tournament_id" "text",
-    "points_earned" integer DEFAULT 0 NOT NULL,
-    "recorded_at" "date" NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "ntrp_before" numeric(4,2),
-    "ntrp_after" numeric(4,2),
-    "is_doubles" boolean DEFAULT false,
-    "category_id" "text"
-);
-
-
-ALTER TABLE "public"."rating_history" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."season_reset_log" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "run_at" timestamp with time zone DEFAULT "now"(),
-    "season" "text" NOT NULL,
-    "player_id" "text",
-    "category_id" "text",
-    "gender" "text",
-    "points_before" integer,
-    "points_after" integer,
-    "rank_before" integer,
-    "rank_after" integer,
-    "notified" boolean DEFAULT false
-);
-
-
-ALTER TABLE "public"."season_reset_log" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."sponsors" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "name" "text" NOT NULL,
-    "logo" "text",
-    "url" "text",
-    "is_hero" boolean DEFAULT false,
-    "sort_order" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "whatsapp" "text",
-    "instagram" "text",
-    "telegram" "text",
-    "email" "text",
-    "address" "text",
-    "description" "text",
-    "description_en" "text",
-    "description_kg" "text",
-    "phone" "text",
-    "view_count" integer DEFAULT 0,
-    "view_count_app" integer DEFAULT 0
-);
-
-
-ALTER TABLE "public"."sponsors" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."tournament_levels" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "name" "text" NOT NULL,
-    "name_en" "text",
-    "sort_order" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."tournament_levels" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."tournament_registrations" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "tournament_id" "text" NOT NULL,
-    "player_id" "text",
-    "seed_number" integer,
-    "draw_position" integer,
-    "status" "text" DEFAULT 'pending'::"text",
-    "registered_at" timestamp with time zone DEFAULT "now"(),
-    "group_number" integer,
-    "is_external" boolean DEFAULT false,
-    "external_name" "text",
-    "external_country" "text",
-    "external_ntrp" numeric,
-    "partner_id" "text",
-    "partner_external_name" "text",
-    "partner_external_ntrp" numeric,
-    "partner_gender" "text",
-    "block_reason" "text",
-    "withdrawn_at" timestamp with time zone,
-    CONSTRAINT "tournament_registrations_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text", 'withdrawn'::"text", 'waitlist'::"text", 'blocked'::"text", 'draw'::"text"])))
-);
-
-
-ALTER TABLE "public"."tournament_registrations" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."tournament_results" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "tournament_id" "text",
-    "player_id" "text",
-    "round_reached" "text" NOT NULL,
-    "points_earned" integer DEFAULT 0,
-    "season" integer NOT NULL,
-    "category_id" "text",
-    "is_transition" boolean DEFAULT false,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "is_doubles" boolean DEFAULT false,
-    "partner_id" "text"
-);
-
-
-ALTER TABLE "public"."tournament_results" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."tournaments" (
-    "id" "text" NOT NULL,
-    "title" "text" NOT NULL,
-    "title_en" "text",
-    "title_kg" "text",
-    "description" "text",
-    "description_en" "text",
-    "date_start" "date" NOT NULL,
-    "date_end" "date",
-    "location" "text",
-    "location_en" "text",
-    "category_id" "text" NOT NULL,
-    "status" "text" DEFAULT 'upcoming'::"text",
-    "max_participants" integer NOT NULL,
-    "prize_fund" "text",
-    "image" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "format" "text" DEFAULT 'singles'::"text",
-    "level_id" "uuid",
-    "draw_size" integer,
-    "bracket_type" "text",
-    "court_count" integer DEFAULT 2,
-    "match_duration" integer DEFAULT 90,
-    "registration_end" "date",
-    "court_id" "text",
-    "registration_start" "date",
-    "description_kg" "text",
-    "published_at" timestamp with time zone,
-    "start_time" "text",
-    "buffer_minutes" integer DEFAULT 15,
-    "group_count" integer,
-    "qualifiers_per_group" integer DEFAULT 2,
-    "notified_at" timestamp with time zone,
-    "view_count" integer DEFAULT 0,
-    "reminded_3d_at" timestamp with time zone,
-    "reminded_1d_at" timestamp with time zone,
-    "ntrp_min" numeric,
-    "ntrp_max" numeric,
-    "ntrp_combined_max" numeric,
-    "gender" "text" NOT NULL,
-    "manual_group_places" "jsonb" DEFAULT '{}'::"jsonb",
-    "reserved_spots" integer DEFAULT 0,
-    "ig_meta" "jsonb",
-    "set_format" "text" DEFAULT 'standard'::"text",
-    "view_count_app" integer DEFAULT 0,
-    CONSTRAINT "tournaments_format_check" CHECK (("format" = ANY (ARRAY['singles'::"text", 'doubles'::"text", 'mixed_doubles'::"text"]))),
-    CONSTRAINT "tournaments_gender_check" CHECK (("gender" = ANY (ARRAY['men'::"text", 'women'::"text", 'mixed'::"text"]))),
-    CONSTRAINT "tournaments_set_format_check" CHECK (("set_format" = ANY (ARRAY['standard'::"text", 'short'::"text"]))),
-    CONSTRAINT "tournaments_status_check" CHECK (("status" = ANY (ARRAY['upcoming'::"text", 'registration_open'::"text", 'registration_closed'::"text", 'ongoing'::"text", 'completed'::"text", 'cancelled'::"text"])))
-);
-
-
-ALTER TABLE "public"."tournaments" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_devices" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "profile_id" "uuid" NOT NULL,
-    "device_hash" "text" NOT NULL,
-    "user_agent" "text",
-    "last_seen" timestamp with time zone DEFAULT "now"(),
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."user_devices" OWNER TO "postgres";
-
-
-ALTER TABLE ONLY "public"."badge_definitions"
-    ADD CONSTRAINT "badge_definitions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."categories"
-    ADD CONSTRAINT "categories_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."challenge_predictions"
-    ADD CONSTRAINT "challenge_predictions_challenge_id_voter_type_voter_id_key" UNIQUE ("challenge_id", "voter_type", "voter_id");
-
-
-
-ALTER TABLE ONLY "public"."challenge_predictions"
-    ADD CONSTRAINT "challenge_predictions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."coaches"
-    ADD CONSTRAINT "coaches_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."courts"
-    ADD CONSTRAINT "courts_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."deleted_accounts"
-    ADD CONSTRAINT "deleted_accounts_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."discount_vouchers"
-    ADD CONSTRAINT "discount_vouchers_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."discount_vouchers"
-    ADD CONSTRAINT "discount_vouchers_qr_token_key" UNIQUE ("qr_token");
-
-
-
-ALTER TABLE ONLY "public"."entity_payments"
-    ADD CONSTRAINT "entity_payments_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."game_invites"
-    ADD CONSTRAINT "game_invites_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."live_matches"
-    ADD CONSTRAINT "live_matches_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."live_matches"
-    ADD CONSTRAINT "live_matches_umpire_key_key" UNIQUE ("umpire_key");
-
-
-
-ALTER TABLE ONLY "public"."loyalty_rewards"
-    ADD CONSTRAINT "loyalty_rewards_code_key" UNIQUE ("code");
-
-
-
-ALTER TABLE ONLY "public"."loyalty_rewards"
-    ADD CONSTRAINT "loyalty_rewards_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."loyalty_rules"
-    ADD CONSTRAINT "loyalty_rules_action_key" UNIQUE ("action");
-
-
-
-ALTER TABLE ONLY "public"."loyalty_rules"
-    ADD CONSTRAINT "loyalty_rules_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."loyalty_transactions"
-    ADD CONSTRAINT "loyalty_transactions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."matches"
-    ADD CONSTRAINT "matches_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."membership_requests"
-    ADD CONSTRAINT "membership_requests_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."memberships"
-    ADD CONSTRAINT "memberships_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."news"
-    ADD CONSTRAINT "news_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."news_poll_votes"
-    ADD CONSTRAINT "news_poll_votes_news_id_user_id_key" UNIQUE ("news_id", "user_id");
-
-
-
-ALTER TABLE ONLY "public"."news_poll_votes"
-    ADD CONSTRAINT "news_poll_votes_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."news_reactions"
-    ADD CONSTRAINT "news_reactions_news_id_user_id_reaction_type_key" UNIQUE ("news_id", "user_id", "reaction_type");
-
-
-
-ALTER TABLE ONLY "public"."news_reactions"
-    ADD CONSTRAINT "news_reactions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."news"
-    ADD CONSTRAINT "news_slug_key" UNIQUE ("slug");
-
-
-
-ALTER TABLE ONLY "public"."notification_log"
-    ADD CONSTRAINT "notification_log_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."otp_blocks"
-    ADD CONSTRAINT "otp_blocks_block_key_key" UNIQUE ("block_key");
-
-
-
-ALTER TABLE ONLY "public"."otp_blocks"
-    ADD CONSTRAINT "otp_blocks_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."otp_codes"
-    ADD CONSTRAINT "otp_codes_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."page_views"
-    ADD CONSTRAINT "page_views_pkey" PRIMARY KEY ("page_name");
-
-
-
-ALTER TABLE ONLY "public"."partner_services"
-    ADD CONSTRAINT "partner_services_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."payments"
-    ADD CONSTRAINT "payments_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."player_badges"
-    ADD CONSTRAINT "player_badges_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."player_badges"
-    ADD CONSTRAINT "player_badges_player_id_badge_id_key" UNIQUE ("player_id", "badge_id");
-
-
-
-ALTER TABLE ONLY "public"."player_categories"
-    ADD CONSTRAINT "player_categories_pkey" PRIMARY KEY ("player_id", "category_id");
-
-
-
-ALTER TABLE ONLY "public"."player_promotions"
-    ADD CONSTRAINT "player_promotions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."players"
-    ADD CONSTRAINT "players_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."points_rules"
-    ADD CONSTRAINT "points_rules_level_id_round_key" UNIQUE ("level_id", "round");
-
-
-
-ALTER TABLE ONLY "public"."points_rules"
-    ADD CONSTRAINT "points_rules_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."profiles"
-    ADD CONSTRAINT "profiles_phone_unique" UNIQUE ("phone");
-
-
-
-ALTER TABLE ONLY "public"."profiles"
-    ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."profiles"
-    ADD CONSTRAINT "profiles_telegram_chat_id_unique" UNIQUE ("telegram_chat_id");
-
-
-
-ALTER TABLE ONLY "public"."push_log"
-    ADD CONSTRAINT "push_log_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."rate_limits"
-    ADD CONSTRAINT "rate_limits_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."rating_history"
-    ADD CONSTRAINT "rating_history_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."season_reset_log"
-    ADD CONSTRAINT "season_reset_log_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."sponsors"
-    ADD CONSTRAINT "sponsors_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_levels"
-    ADD CONSTRAINT "tournament_levels_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_registrations"
-    ADD CONSTRAINT "tournament_registrations_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_results"
-    ADD CONSTRAINT "tournament_results_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_results"
-    ADD CONSTRAINT "tournament_results_tournament_id_player_id_key" UNIQUE ("tournament_id", "player_id");
-
-
-
-ALTER TABLE ONLY "public"."tournaments"
-    ADD CONSTRAINT "tournaments_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."user_devices"
-    ADD CONSTRAINT "user_devices_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."user_devices"
-    ADD CONSTRAINT "user_devices_profile_id_device_hash_key" UNIQUE ("profile_id", "device_hash");
-
-
-
-CREATE INDEX "idx_challenges_battle" ON "public"."challenges" USING "btree" ("battle_published") WHERE ("battle_published" = true);
-
-
-
-CREATE INDEX "idx_challenges_challenger" ON "public"."challenges" USING "btree" ("challenger_id");
-
-
-
-CREATE INDEX "idx_challenges_expires" ON "public"."challenges" USING "btree" ("expires_at") WHERE ("status" = ANY (ARRAY['active'::"text", 'negotiating'::"text", 'countered'::"text"]));
-
-
-
-CREATE UNIQUE INDEX "idx_challenges_live_match" ON "public"."challenges" USING "btree" ("live_match_id") WHERE ("live_match_id" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_challenges_opponent" ON "public"."challenges" USING "btree" ("opponent_profile_id");
-
-
-
-CREATE INDEX "idx_challenges_status" ON "public"."challenges" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_deleted_accounts_date" ON "public"."deleted_accounts" USING "btree" ("deleted_at");
-
-
-
-CREATE INDEX "idx_entity_payments_entity" ON "public"."entity_payments" USING "btree" ("entity_type", "entity_id");
-
-
-
-CREATE INDEX "idx_entity_payments_promoted" ON "public"."entity_payments" USING "btree" ("purpose", "period_start", "period_end");
-
-
-
-CREATE INDEX "idx_game_invites_receiver" ON "public"."game_invites" USING "btree" ("receiver_profile_id");
-
-
-
-CREATE INDEX "idx_game_invites_sender" ON "public"."game_invites" USING "btree" ("sender_id");
-
-
-
-CREATE INDEX "idx_game_invites_status" ON "public"."game_invites" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_live_matches_status" ON "public"."live_matches" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_live_matches_umpire_key" ON "public"."live_matches" USING "btree" ("umpire_key");
-
-
-
-CREATE INDEX "idx_loyalty_expires" ON "public"."loyalty_transactions" USING "btree" ("expires_at") WHERE ("type" = 'earn'::"text");
-
-
-
-CREATE INDEX "idx_loyalty_profile" ON "public"."loyalty_transactions" USING "btree" ("profile_id");
-
-
-
-CREATE INDEX "idx_matches_group" ON "public"."matches" USING "btree" ("group_number");
-
-
-
-CREATE INDEX "idx_matches_played_at" ON "public"."matches" USING "btree" ("played_at" DESC);
-
-
-
-CREATE INDEX "idx_matches_player1" ON "public"."matches" USING "btree" ("player1_id");
-
-
-
-CREATE INDEX "idx_matches_player2" ON "public"."matches" USING "btree" ("player2_id");
-
-
-
-CREATE INDEX "idx_matches_round" ON "public"."matches" USING "btree" ("round_number");
-
-
-
-CREATE INDEX "idx_matches_status" ON "public"."matches" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_matches_tournament" ON "public"."matches" USING "btree" ("tournament_id");
-
-
-
-CREATE INDEX "idx_membership_requests_profile" ON "public"."membership_requests" USING "btree" ("profile_id");
-
-
-
-CREATE INDEX "idx_membership_requests_status" ON "public"."membership_requests" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_memberships_profile" ON "public"."memberships" USING "btree" ("profile_id");
-
-
-
-CREATE INDEX "idx_news_poll_votes_news_id" ON "public"."news_poll_votes" USING "btree" ("news_id");
-
-
-
-CREATE INDEX "idx_news_poll_votes_user_id" ON "public"."news_poll_votes" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_news_published" ON "public"."news" USING "btree" ("published_at" DESC);
-
-
-
-CREATE INDEX "idx_news_reactions_news_id" ON "public"."news_reactions" USING "btree" ("news_id");
-
-
-
-CREATE INDEX "idx_news_reactions_user_id" ON "public"."news_reactions" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_news_slug" ON "public"."news" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_news_tournament_id" ON "public"."news" USING "btree" ("tournament_id");
-
-
-
-CREATE INDEX "idx_notification_log_profile" ON "public"."notification_log" USING "btree" ("profile_id", "is_read", "created_at" DESC);
-
-
-
-CREATE INDEX "idx_otp_blocks_key" ON "public"."otp_blocks" USING "btree" ("block_key");
-
-
-
-CREATE INDEX "idx_otp_blocks_until" ON "public"."otp_blocks" USING "btree" ("blocked_until");
-
-
-
-CREATE INDEX "idx_otp_codes_lookup" ON "public"."otp_codes" USING "btree" ("identifier", "flow", "used", "expires_at");
-
-
-
-CREATE INDEX "idx_partner_services_entity" ON "public"."partner_services" USING "btree" ("entity_type", "entity_id");
-
-
-
-CREATE INDEX "idx_payments_profile" ON "public"."payments" USING "btree" ("profile_id");
-
-
-
-CREATE INDEX "idx_player_badges_player" ON "public"."player_badges" USING "btree" ("player_id");
-
-
-
-CREATE INDEX "idx_player_categories_cat" ON "public"."player_categories" USING "btree" ("category_id", "points" DESC);
-
-
-
-CREATE INDEX "idx_player_promotions_player" ON "public"."player_promotions" USING "btree" ("player_id");
-
-
-
-CREATE INDEX "idx_player_promotions_season" ON "public"."player_promotions" USING "btree" ("season");
-
-
-
-CREATE INDEX "idx_players_category" ON "public"."players" USING "btree" ("category_id");
-
-
-
-CREATE INDEX "idx_players_points" ON "public"."players" USING "btree" ("points" DESC);
-
-
-
-CREATE INDEX "idx_predictions_challenge" ON "public"."challenge_predictions" USING "btree" ("challenge_id");
-
-
-
-CREATE INDEX "idx_profiles_email" ON "public"."profiles" USING "btree" ("email");
-
-
-
-CREATE INDEX "idx_profiles_phone_e164" ON "public"."profiles" USING "btree" ("phone_e164") WHERE ("phone_e164" <> ''::"text");
-
-
-
-CREATE INDEX "idx_rate_limits_key_time" ON "public"."rate_limits" USING "btree" ("limit_key", "created_at" DESC);
-
-
-
-CREATE INDEX "idx_rating_history_category" ON "public"."rating_history" USING "btree" ("player_id", "category_id");
-
-
-
-CREATE INDEX "idx_rating_history_date" ON "public"."rating_history" USING "btree" ("recorded_at");
-
-
-
-CREATE INDEX "idx_rating_history_player" ON "public"."rating_history" USING "btree" ("player_id");
-
-
-
-CREATE INDEX "idx_registrations_blocked" ON "public"."tournament_registrations" USING "btree" ("tournament_id") WHERE ("status" = 'blocked'::"text");
-
-
-
-CREATE INDEX "idx_registrations_player" ON "public"."tournament_registrations" USING "btree" ("player_id");
-
-
-
-CREATE INDEX "idx_registrations_status" ON "public"."tournament_registrations" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_registrations_tournament" ON "public"."tournament_registrations" USING "btree" ("tournament_id");
-
-
-
-CREATE INDEX "idx_season_reset_player" ON "public"."season_reset_log" USING "btree" ("player_id");
-
-
-
-CREATE INDEX "idx_season_reset_run" ON "public"."season_reset_log" USING "btree" ("run_at" DESC);
-
-
-
-CREATE INDEX "idx_tournament_results_category" ON "public"."tournament_results" USING "btree" ("category_id");
-
-
-
-CREATE INDEX "idx_tournament_results_player" ON "public"."tournament_results" USING "btree" ("player_id");
-
-
-
-CREATE INDEX "idx_tournament_results_season" ON "public"."tournament_results" USING "btree" ("season");
-
-
-
-CREATE INDEX "idx_tournament_results_tournament" ON "public"."tournament_results" USING "btree" ("tournament_id");
-
-
-
-CREATE INDEX "idx_tournaments_date" ON "public"."tournaments" USING "btree" ("date_start" DESC);
-
-
-
-CREATE INDEX "idx_tournaments_status" ON "public"."tournaments" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_vouchers_entity" ON "public"."discount_vouchers" USING "btree" ("entity_type", "entity_id", "status");
-
-
-
-CREATE INDEX "idx_vouchers_profile_status" ON "public"."discount_vouchers" USING "btree" ("profile_id", "status");
-
-
-
-CREATE INDEX "idx_vouchers_qr_token" ON "public"."discount_vouchers" USING "btree" ("qr_token");
-
-
-
-CREATE UNIQUE INDEX "tournament_registrations_tournament_player_unique" ON "public"."tournament_registrations" USING "btree" ("tournament_id", "player_id") WHERE ("player_id" IS NOT NULL);
-
-
-
-CREATE OR REPLACE TRIGGER "registrations_guard_self_update" BEFORE UPDATE ON "public"."tournament_registrations" FOR EACH ROW EXECUTE FUNCTION "public"."registrations_guard_self_update"();
-
-
-
-CREATE OR REPLACE TRIGGER "set_updated_at_players" BEFORE UPDATE ON "public"."players" FOR EACH ROW EXECUTE FUNCTION "public"."handle_updated_at"();
-
-
-
-CREATE OR REPLACE TRIGGER "set_updated_at_profiles" BEFORE UPDATE ON "public"."profiles" FOR EACH ROW EXECUTE FUNCTION "public"."handle_updated_at"();
-
-
-
-CREATE OR REPLACE TRIGGER "trg_check_doubles_unique" BEFORE INSERT OR UPDATE ON "public"."tournament_registrations" FOR EACH ROW EXECUTE FUNCTION "public"."check_doubles_unique"();
-
-
-
-CREATE OR REPLACE TRIGGER "trg_log_deleted_profile" BEFORE DELETE ON "public"."profiles" FOR EACH ROW EXECUTE FUNCTION "public"."log_deleted_profile"();
-
-
-
-CREATE OR REPLACE TRIGGER "trg_player_badges" AFTER UPDATE ON "public"."players" FOR EACH ROW WHEN ((("old"."wins" IS DISTINCT FROM "new"."wins") OR ("old"."losses" IS DISTINCT FROM "new"."losses") OR ("old"."form" IS DISTINCT FROM "new"."form") OR ("old"."points" IS DISTINCT FROM "new"."points"))) EXECUTE FUNCTION "public"."trigger_check_badges"();
-
-
-
-CREATE OR REPLACE TRIGGER "trg_recalculate_badges" BEFORE INSERT OR UPDATE ON "public"."players" FOR EACH ROW EXECUTE FUNCTION "public"."recalculate_badges"();
-
-
-
-CREATE OR REPLACE TRIGGER "trg_sync_player_name" AFTER UPDATE OF "full_name", "avatar_url" ON "public"."profiles" FOR EACH ROW EXECUTE FUNCTION "public"."sync_player_name"();
-
-
-
-ALTER TABLE ONLY "public"."challenge_predictions"
-    ADD CONSTRAINT "challenge_predictions_challenge_id_fkey" FOREIGN KEY ("challenge_id") REFERENCES "public"."challenges"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."challenge_predictions"
-    ADD CONSTRAINT "challenge_predictions_predicted_winner_id_fkey" FOREIGN KEY ("predicted_winner_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_challenger_id_fkey" FOREIGN KEY ("challenger_id") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_challenger_player_id_fkey" FOREIGN KEY ("challenger_player_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_counter_court_id_fkey" FOREIGN KEY ("counter_court_id") REFERENCES "public"."courts"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_live_match_id_fkey" FOREIGN KEY ("live_match_id") REFERENCES "public"."live_matches"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_match_id_fkey" FOREIGN KEY ("match_id") REFERENCES "public"."matches"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_opponent_player_id_fkey" FOREIGN KEY ("opponent_player_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_opponent_profile_id_fkey" FOREIGN KEY ("opponent_profile_id") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."challenges"
-    ADD CONSTRAINT "challenges_proposed_court_id_fkey" FOREIGN KEY ("proposed_court_id") REFERENCES "public"."courts"("id");
-
-
-
-ALTER TABLE ONLY "public"."discount_vouchers"
-    ADD CONSTRAINT "discount_vouchers_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "auth"."users"("id");
-
-
-
-ALTER TABLE ONLY "public"."discount_vouchers"
-    ADD CONSTRAINT "discount_vouchers_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "public"."partner_services"("id");
-
-
-
-ALTER TABLE ONLY "public"."entity_payments"
-    ADD CONSTRAINT "entity_payments_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "auth"."users"("id");
-
-
-
-ALTER TABLE ONLY "public"."game_invites"
-    ADD CONSTRAINT "game_invites_receiver_profile_id_fkey" FOREIGN KEY ("receiver_profile_id") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."game_invites"
-    ADD CONSTRAINT "game_invites_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."live_matches"
-    ADD CONSTRAINT "live_matches_match_id_fkey" FOREIGN KEY ("match_id") REFERENCES "public"."matches"("id") ON DELETE SET NULL;
-
-
-
-ALTER TABLE ONLY "public"."live_matches"
-    ADD CONSTRAINT "live_matches_player1_id_fkey" FOREIGN KEY ("player1_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."live_matches"
-    ADD CONSTRAINT "live_matches_player2_id_fkey" FOREIGN KEY ("player2_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."loyalty_transactions"
-    ADD CONSTRAINT "loyalty_transactions_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."matches"
-    ADD CONSTRAINT "matches_player1_id_fkey" FOREIGN KEY ("player1_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."matches"
-    ADD CONSTRAINT "matches_player2_id_fkey" FOREIGN KEY ("player2_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."matches"
-    ADD CONSTRAINT "matches_tournament_id_fkey" FOREIGN KEY ("tournament_id") REFERENCES "public"."tournaments"("id");
-
-
-
-ALTER TABLE ONLY "public"."matches"
-    ADD CONSTRAINT "matches_winner_id_fkey" FOREIGN KEY ("winner_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."membership_requests"
-    ADD CONSTRAINT "membership_requests_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."memberships"
-    ADD CONSTRAINT "memberships_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."memberships"
-    ADD CONSTRAINT "memberships_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."news_poll_votes"
-    ADD CONSTRAINT "news_poll_votes_news_id_fkey" FOREIGN KEY ("news_id") REFERENCES "public"."news"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."news_poll_votes"
-    ADD CONSTRAINT "news_poll_votes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."news_reactions"
-    ADD CONSTRAINT "news_reactions_news_id_fkey" FOREIGN KEY ("news_id") REFERENCES "public"."news"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."news_reactions"
-    ADD CONSTRAINT "news_reactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."news"
-    ADD CONSTRAINT "news_tournament_id_fkey" FOREIGN KEY ("tournament_id") REFERENCES "public"."tournaments"("id") ON DELETE SET NULL;
-
-
-
-ALTER TABLE ONLY "public"."notification_log"
-    ADD CONSTRAINT "notification_log_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."payments"
-    ADD CONSTRAINT "payments_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."payments"
-    ADD CONSTRAINT "payments_membership_id_fkey" FOREIGN KEY ("membership_id") REFERENCES "public"."memberships"("id");
-
-
-
-ALTER TABLE ONLY "public"."payments"
-    ADD CONSTRAINT "payments_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."player_badges"
-    ADD CONSTRAINT "player_badges_badge_id_fkey" FOREIGN KEY ("badge_id") REFERENCES "public"."badge_definitions"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."player_badges"
-    ADD CONSTRAINT "player_badges_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."player_categories"
-    ADD CONSTRAINT "player_categories_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."player_categories"
-    ADD CONSTRAINT "player_categories_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."player_promotions"
-    ADD CONSTRAINT "player_promotions_from_category_id_fkey" FOREIGN KEY ("from_category_id") REFERENCES "public"."categories"("id");
-
-
-
-ALTER TABLE ONLY "public"."player_promotions"
-    ADD CONSTRAINT "player_promotions_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."player_promotions"
-    ADD CONSTRAINT "player_promotions_to_category_id_fkey" FOREIGN KEY ("to_category_id") REFERENCES "public"."categories"("id");
-
-
-
-ALTER TABLE ONLY "public"."players"
-    ADD CONSTRAINT "players_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id");
-
-
-
-ALTER TABLE ONLY "public"."points_rules"
-    ADD CONSTRAINT "points_rules_level_id_fkey" FOREIGN KEY ("level_id") REFERENCES "public"."tournament_levels"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."profiles"
-    ADD CONSTRAINT "profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."profiles"
-    ADD CONSTRAINT "profiles_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."push_log"
-    ADD CONSTRAINT "push_log_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "public"."profiles"("id");
-
-
-
-ALTER TABLE ONLY "public"."rating_history"
-    ADD CONSTRAINT "rating_history_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id");
-
-
-
-ALTER TABLE ONLY "public"."rating_history"
-    ADD CONSTRAINT "rating_history_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."rating_history"
-    ADD CONSTRAINT "rating_history_tournament_id_fkey" FOREIGN KEY ("tournament_id") REFERENCES "public"."tournaments"("id") ON DELETE SET NULL;
-
-
-
-ALTER TABLE ONLY "public"."season_reset_log"
-    ADD CONSTRAINT "season_reset_log_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."tournament_registrations"
-    ADD CONSTRAINT "tournament_registrations_partner_id_fkey" FOREIGN KEY ("partner_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_registrations"
-    ADD CONSTRAINT "tournament_registrations_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."tournament_registrations"
-    ADD CONSTRAINT "tournament_registrations_tournament_id_fkey" FOREIGN KEY ("tournament_id") REFERENCES "public"."tournaments"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."tournament_results"
-    ADD CONSTRAINT "tournament_results_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_results"
-    ADD CONSTRAINT "tournament_results_partner_id_fkey" FOREIGN KEY ("partner_id") REFERENCES "public"."players"("id");
-
-
-
-ALTER TABLE ONLY "public"."tournament_results"
-    ADD CONSTRAINT "tournament_results_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."tournament_results"
-    ADD CONSTRAINT "tournament_results_tournament_id_fkey" FOREIGN KEY ("tournament_id") REFERENCES "public"."tournaments"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."tournaments"
-    ADD CONSTRAINT "tournaments_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id");
-
-
-
-ALTER TABLE ONLY "public"."tournaments"
-    ADD CONSTRAINT "tournaments_court_id_fkey" FOREIGN KEY ("court_id") REFERENCES "public"."courts"("id");
-
-
-
-ALTER TABLE ONLY "public"."tournaments"
-    ADD CONSTRAINT "tournaments_level_id_fkey" FOREIGN KEY ("level_id") REFERENCES "public"."tournament_levels"("id");
-
-
-
-ALTER TABLE ONLY "public"."user_devices"
-    ADD CONSTRAINT "user_devices_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
-
-
-
-CREATE POLICY "Admin full access categories" ON "public"."categories" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admin full access coaches" ON "public"."coaches" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admin full access matches" ON "public"."matches" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admin full access news" ON "public"."news" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admin full access players" ON "public"."players" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admin full access profiles" ON "public"."profiles" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admin full access tournaments" ON "public"."tournaments" USING ("public"."is_admin"());
-
-
-
-CREATE POLICY "Admins can read push_log" ON "public"."push_log" FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = 'admin'::"text")))));
-
-
-
-CREATE POLICY "Anyone can read page_views" ON "public"."page_views" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Anyone can read reactions" ON "public"."news_reactions" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Anyone can read votes" ON "public"."news_poll_votes" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Anyone reads player categories" ON "public"."player_categories" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Auth users insert reactions" ON "public"."news_reactions" FOR INSERT WITH CHECK (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Auth users insert vote" ON "public"."news_poll_votes" FOR INSERT WITH CHECK (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Coaches: admin write" ON "public"."coaches" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "Coaches: public read" ON "public"."coaches" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Courts editable by admins" ON "public"."courts" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = 'admin'::"text")))));
-
-
-
-CREATE POLICY "Courts visible to all" ON "public"."courts" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read" ON "public"."rating_history" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read badges" ON "public"."badge_definitions" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read categories" ON "public"."categories" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read coaches" ON "public"."coaches" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read matches" ON "public"."matches" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read news" ON "public"."news" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read player badges" ON "public"."player_badges" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read players" ON "public"."players" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Public read published news" ON "public"."news" FOR SELECT TO "anon" USING (("published_at" IS NOT NULL));
-
-
-
-CREATE POLICY "Public read tournaments" ON "public"."tournaments" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Service can insert notifications" ON "public"."notification_log" FOR INSERT WITH CHECK (true);
-
-
-
-CREATE POLICY "Service can insert push_log" ON "public"."push_log" FOR INSERT WITH CHECK (true);
-
-
-
-CREATE POLICY "Service insert notifications" ON "public"."notification_log" FOR INSERT WITH CHECK (true);
-
-
-
-CREATE POLICY "Staff can manage page_views" ON "public"."page_views" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "Staff delete" ON "public"."rating_history" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "Staff full access entity_payments" ON "public"."entity_payments" USING ("public"."is_staff"()) WITH CHECK ("public"."is_staff"());
-
-
-
-CREATE POLICY "Staff full access memberships" ON "public"."memberships" USING ("public"."is_staff"()) WITH CHECK ("public"."is_staff"());
-
-
-
-CREATE POLICY "Staff full access payments" ON "public"."payments" USING ("public"."is_staff"()) WITH CHECK ("public"."is_staff"());
-
-
-
-CREATE POLICY "Staff full access season reset" ON "public"."season_reset_log" USING ("public"."is_staff"()) WITH CHECK ("public"."is_staff"());
-
-
-
-CREATE POLICY "Staff insert" ON "public"."rating_history" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "Staff manage badges" ON "public"."player_badges" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "Staff read notifications" ON "public"."notification_log" FOR SELECT USING ("public"."is_staff"());
-
-
-
-CREATE POLICY "Staff update" ON "public"."rating_history" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "Staff writes player categories" ON "public"."player_categories" USING ("public"."is_staff"()) WITH CHECK ("public"."is_staff"());
-
-
-
-CREATE POLICY "Users can insert own profile" ON "public"."profiles" FOR INSERT WITH CHECK (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users can read own notifications" ON "public"."notification_log" FOR SELECT USING (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users can update own notifications" ON "public"."notification_log" FOR UPDATE USING (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users can update own profile" ON "public"."profiles" FOR UPDATE USING (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users can view own profile" ON "public"."profiles" FOR SELECT USING (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users delete own reactions" ON "public"."news_reactions" FOR DELETE USING (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Users insert own devices" ON "public"."user_devices" FOR INSERT WITH CHECK (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users insert own profile" ON "public"."profiles" FOR INSERT WITH CHECK (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users read own devices" ON "public"."user_devices" FOR SELECT USING (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users read own membership" ON "public"."memberships" FOR SELECT USING (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users read own payments" ON "public"."payments" FOR SELECT USING (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users read own profile" ON "public"."profiles" FOR SELECT USING (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users read own season reset" ON "public"."season_reset_log" FOR SELECT USING (("player_id" = ( SELECT "profiles"."player_id"
-   FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"()))));
-
-
-
-CREATE POLICY "Users update own devices" ON "public"."user_devices" FOR UPDATE USING (("auth"."uid"() = "profile_id"));
-
-
-
-CREATE POLICY "Users update own profile" ON "public"."profiles" FOR UPDATE USING (("auth"."uid"() = "id"));
-
-
-
-ALTER TABLE "public"."badge_definitions" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."categories" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."challenge_predictions" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."challenges" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "challenges_challenger_read" ON "public"."challenges" FOR SELECT USING (("challenger_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "challenges_completed_read" ON "public"."challenges" FOR SELECT TO "authenticated" USING (("status" = 'completed'::"text"));
-
-
-
-CREATE POLICY "challenges_insert" ON "public"."challenges" FOR INSERT WITH CHECK (("challenger_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "challenges_opponent_read" ON "public"."challenges" FOR SELECT USING (("opponent_profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "challenges_public_battles" ON "public"."challenges" FOR SELECT USING (("battle_published" = true));
-
-
-
-CREATE POLICY "challenges_staff_all" ON "public"."challenges" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-ALTER TABLE "public"."coaches" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."courts" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."deleted_accounts" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "deleted_accounts_staff_read" ON "public"."deleted_accounts" FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-ALTER TABLE "public"."discount_vouchers" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."entity_payments" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."game_invites" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."live_matches" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "live_matches_public_read" ON "public"."live_matches" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "live_matches_staff_delete" ON "public"."live_matches" FOR DELETE TO "authenticated" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "live_matches_staff_insert" ON "public"."live_matches" FOR INSERT TO "authenticated" WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "live_matches_staff_update" ON "public"."live_matches" FOR UPDATE TO "authenticated" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-ALTER TABLE "public"."loyalty_rewards" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "loyalty_rewards_staff_all" ON "public"."loyalty_rewards" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "loyalty_rewards_user_read" ON "public"."loyalty_rewards" FOR SELECT USING (("active" = true));
-
-
-
-ALTER TABLE "public"."loyalty_rules" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "loyalty_rules_staff_all" ON "public"."loyalty_rules" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "loyalty_rules_user_read" ON "public"."loyalty_rules" FOR SELECT USING (("active" = true));
-
-
-
-ALTER TABLE "public"."loyalty_transactions" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "loyalty_transactions_staff_all" ON "public"."loyalty_transactions" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "loyalty_transactions_user_read" ON "public"."loyalty_transactions" FOR SELECT USING (("profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "loyalty_transactions_user_redeem" ON "public"."loyalty_transactions" FOR INSERT WITH CHECK ((("profile_id" = "auth"."uid"()) AND ("type" = 'redeem'::"text")));
-
-
-
-CREATE POLICY "managers_update_players" ON "public"."players" FOR UPDATE TO "authenticated" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"])))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-ALTER TABLE "public"."matches" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."membership_requests" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "membership_requests_own_insert" ON "public"."membership_requests" FOR INSERT WITH CHECK (("profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "membership_requests_own_read" ON "public"."membership_requests" FOR SELECT USING (("profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "membership_requests_own_update" ON "public"."membership_requests" FOR UPDATE USING (("profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "membership_requests_staff_read" ON "public"."membership_requests" FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "membership_requests_staff_update" ON "public"."membership_requests" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-ALTER TABLE "public"."memberships" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."news" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."news_poll_votes" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."news_reactions" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."notification_log" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."otp_blocks" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."otp_codes" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."page_views" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."partner_services" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "partner_services_public_read" ON "public"."partner_services" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "partner_services_staff_delete" ON "public"."partner_services" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "partner_services_staff_insert" ON "public"."partner_services" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "partner_services_staff_update" ON "public"."partner_services" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-ALTER TABLE "public"."payments" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."player_badges" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."player_categories" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."player_promotions" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "player_promotions_admin_delete" ON "public"."player_promotions" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "player_promotions_admin_insert" ON "public"."player_promotions" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "player_promotions_admin_update" ON "public"."player_promotions" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"])))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "player_promotions_read" ON "public"."player_promotions" FOR SELECT USING (true);
-
-
-
-ALTER TABLE "public"."players" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."points_rules" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "points_rules_admin_delete" ON "public"."points_rules" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "points_rules_admin_insert" ON "public"."points_rules" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "points_rules_admin_update" ON "public"."points_rules" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"])))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "points_rules_read" ON "public"."points_rules" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "predictions_insert_auth" ON "public"."challenge_predictions" FOR INSERT TO "authenticated" WITH CHECK ((("voter_type" = 'site'::"text") AND ("voter_id" = ("auth"."uid"())::"text")));
-
-
-
-CREATE POLICY "predictions_select_all" ON "public"."challenge_predictions" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "predictions_staff_all" ON "public"."challenge_predictions" USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "predictions_update_auth" ON "public"."challenge_predictions" FOR UPDATE TO "authenticated" USING ((("voter_type" = 'site'::"text") AND ("voter_id" = ("auth"."uid"())::"text"))) WITH CHECK ((("voter_type" = 'site'::"text") AND ("voter_id" = ("auth"."uid"())::"text")));
-
-
-
-ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."push_log" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."rate_limits" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."rating_history" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "receiver_read" ON "public"."game_invites" FOR SELECT USING (("receiver_profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "registrations_admin_delete" ON "public"."tournament_registrations" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "registrations_admin_update" ON "public"."tournament_registrations" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"])))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "registrations_insert" ON "public"."tournament_registrations" FOR INSERT WITH CHECK (("auth"."uid"() IS NOT NULL));
-
-
-
-CREATE POLICY "registrations_read" ON "public"."tournament_registrations" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "registrations_self_add_partner" ON "public"."tournament_registrations" FOR UPDATE USING (("player_id" IN ( SELECT "profiles"."player_id"
-   FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())))) WITH CHECK (("player_id" IN ( SELECT "profiles"."player_id"
-   FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"()))));
-
-
-
-ALTER TABLE "public"."season_reset_log" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "sender_read" ON "public"."game_invites" FOR SELECT USING (("sender_id" = "auth"."uid"()));
-
-
-
-ALTER TABLE "public"."sponsors" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "sponsors_admin_delete" ON "public"."sponsors" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "sponsors_admin_insert" ON "public"."sponsors" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "sponsors_admin_update" ON "public"."sponsors" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "sponsors_read" ON "public"."sponsors" FOR SELECT USING (true);
-
-
-
-ALTER TABLE "public"."tournament_levels" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "tournament_levels_admin_delete" ON "public"."tournament_levels" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "tournament_levels_admin_insert" ON "public"."tournament_levels" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "tournament_levels_admin_update" ON "public"."tournament_levels" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"])))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "tournament_levels_read" ON "public"."tournament_levels" FOR SELECT USING (true);
-
-
-
-ALTER TABLE "public"."tournament_registrations" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."tournament_results" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "tournament_results_admin_delete" ON "public"."tournament_results" FOR DELETE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "tournament_results_admin_insert" ON "public"."tournament_results" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "tournament_results_admin_update" ON "public"."tournament_results" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"])))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "tournament_results_read" ON "public"."tournament_results" FOR SELECT USING (true);
-
-
-
-ALTER TABLE "public"."tournaments" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."user_devices" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "vouchers_staff_read_all" ON "public"."discount_vouchers" FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "vouchers_staff_update" ON "public"."discount_vouchers" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "public"."profiles"
-  WHERE (("profiles"."id" = "auth"."uid"()) AND ("profiles"."role" = ANY (ARRAY['admin'::"text", 'manager'::"text"]))))));
-
-
-
-CREATE POLICY "vouchers_user_insert_own" ON "public"."discount_vouchers" FOR INSERT WITH CHECK (("profile_id" = "auth"."uid"()));
-
-
-
-CREATE POLICY "vouchers_user_read_own" ON "public"."discount_vouchers" FOR SELECT USING (("profile_id" = "auth"."uid"()));
-
-
-
-
-
-ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
-
-
-
-
-
-ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."live_matches";
-
-
-
-
-
-
-
-
-
-GRANT USAGE ON SCHEMA "public" TO "postgres";
-GRANT USAGE ON SCHEMA "public" TO "anon";
-GRANT USAGE ON SCHEMA "public" TO "authenticated";
-GRANT USAGE ON SCHEMA "public" TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-GRANT ALL ON FUNCTION "public"."cast_battle_vote"("p_challenge_id" "uuid", "p_player_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."cast_battle_vote"("p_challenge_id" "uuid", "p_player_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."cast_battle_vote"("p_challenge_id" "uuid", "p_player_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."check_and_award_badges"("p_player_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."check_and_award_badges"("p_player_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."check_and_award_badges"("p_player_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."check_doubles_unique"() TO "anon";
-GRANT ALL ON FUNCTION "public"."check_doubles_unique"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."check_doubles_unique"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."check_player_badges"("p_player_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."check_player_badges"("p_player_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."check_player_badges"("p_player_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."check_registration_available"("p_email" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."check_registration_available"("p_email" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."check_registration_available"("p_email" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."cleanup_expired_otp"() TO "anon";
-GRANT ALL ON FUNCTION "public"."cleanup_expired_otp"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."cleanup_expired_otp"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."confirm_voucher"("p_token" "text", "p_pin" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."confirm_voucher"("p_token" "text", "p_pin" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."confirm_voucher"("p_token" "text", "p_pin" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."generate_voucher"("p_entity_type" "text", "p_entity_id" "text", "p_service_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."generate_voucher"("p_entity_type" "text", "p_entity_id" "text", "p_service_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."generate_voucher"("p_entity_type" "text", "p_entity_id" "text", "p_service_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_analytics_overview"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_analytics_overview"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_analytics_overview"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_battle_public"("p_challenge_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_battle_public"("p_challenge_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_battle_public"("p_challenge_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_battle_votes"("p_challenge_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_battle_votes"("p_challenge_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_battle_votes"("p_challenge_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_live_by_umpire_key"("p_key" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_live_by_umpire_key"("p_key" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_live_by_umpire_key"("p_key" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_loyalty_balance"("p_profile_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_loyalty_balance"("p_profile_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_loyalty_balance"("p_profile_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_my_challenges"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_my_challenges"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_my_challenges"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_my_game_invites"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_my_game_invites"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_my_game_invites"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_news_engagement"("p_news_ids" "text"[]) TO "anon";
-GRANT ALL ON FUNCTION "public"."get_news_engagement"("p_news_ids" "text"[]) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_news_engagement"("p_news_ids" "text"[]) TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_news_stats"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_news_stats"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_news_stats"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_page_view_stats"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_page_view_stats"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_page_view_stats"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_player_avatar"("p_player_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_player_avatar"("p_player_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_player_avatar"("p_player_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_player_challenges"("p_player_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_player_challenges"("p_player_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_player_challenges"("p_player_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_poll_results"("p_news_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_poll_results"("p_news_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_poll_results"("p_news_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_public_partners"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_public_partners"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_public_partners"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_reaction_counts"("p_news_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_reaction_counts"("p_news_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_reaction_counts"("p_news_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_top_news"("p_limit" integer) TO "anon";
-GRANT ALL ON FUNCTION "public"."get_top_news"("p_limit" integer) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_top_news"("p_limit" integer) TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_tournament_stats"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_tournament_stats"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_tournament_stats"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_user_reactions"("p_news_id" "text", "p_user_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_user_reactions"("p_news_id" "text", "p_user_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_user_reactions"("p_news_id" "text", "p_user_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."handle_updated_at"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_updated_at"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."handle_updated_at"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_coach_view"("p_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_coach_view"("p_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_coach_view"("p_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_coach_view"("p_id" "text", "p_source" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_coach_view"("p_id" "text", "p_source" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_coach_view"("p_id" "text", "p_source" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_court_view"("p_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_court_view"("p_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_court_view"("p_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_court_view"("p_id" "text", "p_source" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_court_view"("p_id" "text", "p_source" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_court_view"("p_id" "text", "p_source" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_news_view"("p_news_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_news_view"("p_news_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_news_view"("p_news_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_news_view"("p_news_id" "text", "p_source" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_news_view"("p_news_id" "text", "p_source" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_news_view"("p_news_id" "text", "p_source" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_page_view"("p_page_name" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_page_view"("p_page_name" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_page_view"("p_page_name" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_player_view"("p_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_player_view"("p_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_player_view"("p_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_player_view"("p_id" "text", "p_source" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_player_view"("p_id" "text", "p_source" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_player_view"("p_id" "text", "p_source" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_sponsor_view"("p_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_sponsor_view"("p_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_sponsor_view"("p_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_sponsor_view"("p_id" "uuid", "p_source" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_sponsor_view"("p_id" "uuid", "p_source" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_sponsor_view"("p_id" "uuid", "p_source" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text", "p_source" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text", "p_source" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."increment_tournament_view"("p_tournament_id" "text", "p_source" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."is_admin"() TO "anon";
-GRANT ALL ON FUNCTION "public"."is_admin"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."is_admin"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."is_staff"() TO "anon";
-GRANT ALL ON FUNCTION "public"."is_staff"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."is_staff"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."log_deleted_profile"() TO "anon";
-GRANT ALL ON FUNCTION "public"."log_deleted_profile"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."log_deleted_profile"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."recalc_all_player_points"() TO "anon";
-GRANT ALL ON FUNCTION "public"."recalc_all_player_points"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."recalc_all_player_points"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."recalc_player_categories"("p_ids" "text"[]) TO "anon";
-GRANT ALL ON FUNCTION "public"."recalc_player_categories"("p_ids" "text"[]) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."recalc_player_categories"("p_ids" "text"[]) TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."recalculate_badges"() TO "anon";
-GRANT ALL ON FUNCTION "public"."recalculate_badges"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."recalculate_badges"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."registrations_guard_self_update"() TO "anon";
-GRANT ALL ON FUNCTION "public"."registrations_guard_self_update"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."registrations_guard_self_update"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."safe_int"("val" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."safe_int"("val" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."safe_int"("val" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."sync_player_name"() TO "anon";
-GRANT ALL ON FUNCTION "public"."sync_player_name"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."sync_player_name"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."translit_ru"("src" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."translit_ru"("src" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."translit_ru"("src" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."trigger_check_badges"() TO "anon";
-GRANT ALL ON FUNCTION "public"."trigger_check_badges"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."trigger_check_badges"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."umpire_save_state"("p_key" "text", "p_state" "jsonb") TO "anon";
-GRANT ALL ON FUNCTION "public"."umpire_save_state"("p_key" "text", "p_state" "jsonb") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."umpire_save_state"("p_key" "text", "p_state" "jsonb") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."verify_voucher"("p_token" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."verify_voucher"("p_token" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."verify_voucher"("p_token" "text") TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-GRANT ALL ON TABLE "public"."badge_definitions" TO "anon";
-GRANT ALL ON TABLE "public"."badge_definitions" TO "authenticated";
-GRANT ALL ON TABLE "public"."badge_definitions" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."categories" TO "anon";
-GRANT ALL ON TABLE "public"."categories" TO "authenticated";
-GRANT ALL ON TABLE "public"."categories" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."challenge_predictions" TO "anon";
-GRANT ALL ON TABLE "public"."challenge_predictions" TO "authenticated";
-GRANT ALL ON TABLE "public"."challenge_predictions" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."challenges" TO "anon";
-GRANT ALL ON TABLE "public"."challenges" TO "authenticated";
-GRANT ALL ON TABLE "public"."challenges" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."coaches" TO "anon";
-GRANT ALL ON TABLE "public"."coaches" TO "authenticated";
-GRANT ALL ON TABLE "public"."coaches" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."courts" TO "anon";
-GRANT ALL ON TABLE "public"."courts" TO "authenticated";
-GRANT ALL ON TABLE "public"."courts" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."deleted_accounts" TO "anon";
-GRANT ALL ON TABLE "public"."deleted_accounts" TO "authenticated";
-GRANT ALL ON TABLE "public"."deleted_accounts" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."discount_vouchers" TO "anon";
-GRANT ALL ON TABLE "public"."discount_vouchers" TO "authenticated";
-GRANT ALL ON TABLE "public"."discount_vouchers" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."entity_payments" TO "anon";
-GRANT ALL ON TABLE "public"."entity_payments" TO "authenticated";
-GRANT ALL ON TABLE "public"."entity_payments" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."game_invites" TO "anon";
-GRANT ALL ON TABLE "public"."game_invites" TO "authenticated";
-GRANT ALL ON TABLE "public"."game_invites" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."live_matches" TO "anon";
-GRANT ALL ON TABLE "public"."live_matches" TO "authenticated";
-GRANT ALL ON TABLE "public"."live_matches" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."loyalty_rewards" TO "anon";
-GRANT ALL ON TABLE "public"."loyalty_rewards" TO "authenticated";
-GRANT ALL ON TABLE "public"."loyalty_rewards" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."loyalty_rules" TO "anon";
-GRANT ALL ON TABLE "public"."loyalty_rules" TO "authenticated";
-GRANT ALL ON TABLE "public"."loyalty_rules" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."loyalty_transactions" TO "anon";
-GRANT ALL ON TABLE "public"."loyalty_transactions" TO "authenticated";
-GRANT ALL ON TABLE "public"."loyalty_transactions" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."matches" TO "anon";
-GRANT ALL ON TABLE "public"."matches" TO "authenticated";
-GRANT ALL ON TABLE "public"."matches" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."membership_requests" TO "anon";
-GRANT ALL ON TABLE "public"."membership_requests" TO "authenticated";
-GRANT ALL ON TABLE "public"."membership_requests" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."memberships" TO "anon";
-GRANT ALL ON TABLE "public"."memberships" TO "authenticated";
-GRANT ALL ON TABLE "public"."memberships" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."news" TO "anon";
-GRANT ALL ON TABLE "public"."news" TO "authenticated";
-GRANT ALL ON TABLE "public"."news" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."news_poll_votes" TO "anon";
-GRANT ALL ON TABLE "public"."news_poll_votes" TO "authenticated";
-GRANT ALL ON TABLE "public"."news_poll_votes" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."news_reactions" TO "anon";
-GRANT ALL ON TABLE "public"."news_reactions" TO "authenticated";
-GRANT ALL ON TABLE "public"."news_reactions" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."notification_log" TO "anon";
-GRANT ALL ON TABLE "public"."notification_log" TO "authenticated";
-GRANT ALL ON TABLE "public"."notification_log" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."otp_blocks" TO "anon";
-GRANT ALL ON TABLE "public"."otp_blocks" TO "authenticated";
-GRANT ALL ON TABLE "public"."otp_blocks" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."otp_codes" TO "anon";
-GRANT ALL ON TABLE "public"."otp_codes" TO "authenticated";
-GRANT ALL ON TABLE "public"."otp_codes" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."page_views" TO "anon";
-GRANT ALL ON TABLE "public"."page_views" TO "authenticated";
-GRANT ALL ON TABLE "public"."page_views" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."partner_services" TO "anon";
-GRANT ALL ON TABLE "public"."partner_services" TO "authenticated";
-GRANT ALL ON TABLE "public"."partner_services" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."payments" TO "anon";
-GRANT ALL ON TABLE "public"."payments" TO "authenticated";
-GRANT ALL ON TABLE "public"."payments" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."player_badges" TO "anon";
-GRANT ALL ON TABLE "public"."player_badges" TO "authenticated";
-GRANT ALL ON TABLE "public"."player_badges" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."player_categories" TO "anon";
-GRANT ALL ON TABLE "public"."player_categories" TO "authenticated";
-GRANT ALL ON TABLE "public"."player_categories" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."player_promotions" TO "anon";
-GRANT ALL ON TABLE "public"."player_promotions" TO "authenticated";
-GRANT ALL ON TABLE "public"."player_promotions" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."players" TO "anon";
-GRANT ALL ON TABLE "public"."players" TO "authenticated";
-GRANT ALL ON TABLE "public"."players" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."points_rules" TO "anon";
-GRANT ALL ON TABLE "public"."points_rules" TO "authenticated";
-GRANT ALL ON TABLE "public"."points_rules" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."profiles" TO "anon";
-GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
-GRANT ALL ON TABLE "public"."profiles" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."push_log" TO "anon";
-GRANT ALL ON TABLE "public"."push_log" TO "authenticated";
-GRANT ALL ON TABLE "public"."push_log" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."rate_limits" TO "anon";
-GRANT ALL ON TABLE "public"."rate_limits" TO "authenticated";
-GRANT ALL ON TABLE "public"."rate_limits" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."rating_history" TO "anon";
-GRANT ALL ON TABLE "public"."rating_history" TO "authenticated";
-GRANT ALL ON TABLE "public"."rating_history" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."season_reset_log" TO "anon";
-GRANT ALL ON TABLE "public"."season_reset_log" TO "authenticated";
-GRANT ALL ON TABLE "public"."season_reset_log" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."sponsors" TO "anon";
-GRANT ALL ON TABLE "public"."sponsors" TO "authenticated";
-GRANT ALL ON TABLE "public"."sponsors" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."tournament_levels" TO "anon";
-GRANT ALL ON TABLE "public"."tournament_levels" TO "authenticated";
-GRANT ALL ON TABLE "public"."tournament_levels" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."tournament_registrations" TO "anon";
-GRANT ALL ON TABLE "public"."tournament_registrations" TO "authenticated";
-GRANT ALL ON TABLE "public"."tournament_registrations" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."tournament_results" TO "anon";
-GRANT ALL ON TABLE "public"."tournament_results" TO "authenticated";
-GRANT ALL ON TABLE "public"."tournament_results" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."tournaments" TO "anon";
-GRANT ALL ON TABLE "public"."tournaments" TO "authenticated";
-GRANT ALL ON TABLE "public"."tournaments" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."user_devices" TO "anon";
-GRANT ALL ON TABLE "public"."user_devices" TO "authenticated";
-GRANT ALL ON TABLE "public"."user_devices" TO "service_role";
-
-
-
-
-
-
-
-
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "service_role";
-
-
-
-
-
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "service_role";
-
-
-
-
-
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+--
+-- ЧТО ПОКАЗАЛО СРАВНЕНИЕ С ПРЕЖНИМ СНИМКОМ. Он отстал не на мелочь:
+--   • таблиц в базе 56, в прежнем снимке 42 — НЕ БЫЛО ЧЕТЫРНАДЦАТИ:
+--     app_releases, app_settings, bracket_undo, live_match_points,
+--     news_sources, news_suggestions, notification_texts,
+--     player_link_requests, points_by_place, points_versions,
+--     registration_changes, site_content, site_documents,
+--     slepok_tbsh_uroven;
+--   • у 16 таблиц разошлись столбцы. Крупнее всех `challenges`: появилось
+--     21 столбец (пары, внешние имена, отмена, формат), исчезло 6
+--     (counter_*, встречное предложение). У `players` исчезли badges,
+--     doubles_form, doubles_points, doubles_rank_change, ntrp_rating и
+--     появились ntrp_singles, ntrp_doubles, is_guest, is_member и другие.
+--     У `news` прежний снимок не знал source_url и source_name;
+--   • функций в базе 84, в снимке 48 — НЕ БЫЛО ТРИДЦАТИ ШЕСТИ, среди них
+--     весь счёт матчей (submit/confirm/dispute_match_score), сетка
+--     (advance_bracket_winner, trg_advance_bracket), судейское окно
+--     (umpire_log_point, umpire_undo_point) и пересчёт очков
+--     (recalc_after_match, recalc_pair_stats);
+--   • ДВЕ функции снимок описывал ИНОЙ ФОРМОЙ ВОЗВРАТА, и одна из них нас
+--     уже укусила: get_battle_votes — в снимке (player_id, votes), в базе
+--     (side, player_id, votes); get_my_game_invites — в базе есть ещё
+--     partner_player_id;
+--   • ДВЕ функции снимка в базе отсутствуют вовсе: check_player_badges и
+--     recalculate_badges. Код их не зовёт — проверено поиском.
+--
+-- `slepok_tbsh_uroven` — слепок прошлого куска, оставленный нарочно. Решение
+-- об удалении за Костей, само оно не уйдёт.
+--
+-- ЧТОБЫ ПЕРЕСНЯТЬ: прогнать sql/схема/snyat-shemu.sql, отдать мне вывод — я
+-- соберу файл заново и скажу, что разошлось.
+--
+-- СНЯТО 09.10.2026 · tablicy 786 · ogranicheniya 213 · ukazateli 160 · predstavleniya 1 · funkcii 106 · storozha 21 · dostup 141
+
+
+-- ======================================================================
+-- ТАБЛИЦЫ И СТОЛБЦЫ — имя, тип, пустота, умолчание
+-- ======================================================================
+
+
+-- --- app_releases ------------------------------------------------
+-- app_releases.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- app_releases.platform : text NOT NULL DEFAULT 'android'::text
+-- app_releases.version_code : integer NOT NULL
+-- app_releases.version_name : text NOT NULL
+-- app_releases.url : text
+-- app_releases.notes : text
+-- app_releases.published_at : timestamp with time zone NOT NULL DEFAULT now()
+
+-- --- app_settings ------------------------------------------------
+-- app_settings.key : text NOT NULL
+-- app_settings.value : jsonb NOT NULL
+-- app_settings.updated_at : timestamp with time zone NOT NULL DEFAULT now()
+-- app_settings.updated_by : uuid
+
+-- --- badge_definitions -------------------------------------------
+-- badge_definitions.id : text NOT NULL
+-- badge_definitions.name : text NOT NULL
+-- badge_definitions.name_en : text
+-- badge_definitions.name_kg : text
+-- badge_definitions.icon : text NOT NULL
+-- badge_definitions.description : text
+-- badge_definitions.description_en : text
+-- badge_definitions.description_kg : text
+-- badge_definitions.condition_type : text NOT NULL
+-- badge_definitions.condition_value : integer DEFAULT 0
+-- badge_definitions.sort_order : integer DEFAULT 0
+
+-- --- bracket_undo ------------------------------------------------
+-- bracket_undo.tournament_id : text NOT NULL
+-- bracket_undo.saved_at : timestamp with time zone NOT NULL DEFAULT now()
+-- bracket_undo.saved_by : uuid
+-- bracket_undo.payload : jsonb NOT NULL
+
+-- --- categories --------------------------------------------------
+-- categories.id : text NOT NULL
+-- categories.name : text NOT NULL
+-- categories.name_en : text
+-- categories.name_kg : text
+-- categories.gender : text
+-- categories.sort_order : integer DEFAULT 0
+-- categories.created_at : timestamp with time zone DEFAULT now()
+-- categories.color : text
+
+-- --- challenge_predictions ---------------------------------------
+-- challenge_predictions.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- challenge_predictions.challenge_id : uuid NOT NULL
+-- challenge_predictions.voter_type : text NOT NULL
+-- challenge_predictions.voter_id : text NOT NULL
+-- challenge_predictions.predicted_winner_id : text
+-- challenge_predictions.created_at : timestamp with time zone DEFAULT now()
+-- challenge_predictions.predicted_side : smallint
+
+-- --- challenges --------------------------------------------------
+-- challenges.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- challenges.challenger_id : uuid
+-- challenges.challenger_player_id : text
+-- challenges.opponent_player_id : text
+-- challenges.opponent_profile_id : uuid
+-- challenges.proposed_date : date
+-- challenges.proposed_time : text
+-- challenges.proposed_venue : text
+-- challenges.proposed_court_id : text
+-- challenges.message : text
+-- challenges.status : text DEFAULT 'active'::text
+-- challenges.match_id : uuid
+-- challenges.created_at : timestamp with time zone DEFAULT now()
+-- challenges.expires_at : timestamp with time zone DEFAULT (now() + '10 days'::interval)
+-- challenges.accepted_at : timestamp with time zone
+-- challenges.battle_title : text
+-- challenges.battle_published : boolean DEFAULT false
+-- challenges.battle_published_at : timestamp with time zone
+-- challenges.voting_closed : boolean DEFAULT false
+-- challenges.banner_url : text
+-- challenges.battle_notified_at : timestamp with time zone
+-- challenges.score_draft : text
+-- challenges.live_match_id : uuid
+-- challenges.challenger_ntrp : numeric(4,2)
+-- challenges.opponent_ntrp : numeric(4,2)
+-- challenges.challenger_country : text
+-- challenges.opponent_country : text
+-- challenges.challenger_category : text
+-- challenges.opponent_category : text
+-- challenges.set_format : text DEFAULT 'standard'::text
+-- challenges.cancelled_at : timestamp with time zone
+-- challenges.cancelled_by : uuid
+-- challenges.cancel_reason : text
+-- challenges.challenger_external_name : text
+-- challenges.opponent_external_name : text
+-- challenges.challenger_gender : text
+-- challenges.opponent_gender : text
+-- challenges.format : text DEFAULT 'singles'::text
+-- challenges.challenger_partner_id : text
+-- challenges.challenger_partner_name : text
+-- challenges.challenger_partner_gender : text
+-- challenges.opponent_partner_id : text
+-- challenges.opponent_partner_name : text
+-- challenges.opponent_partner_gender : text
+-- challenges.allow_any_pair : boolean DEFAULT false
+-- challenges.challenger_photo : text
+-- challenges.opponent_photo : text
+-- challenges.challenger_partner_photo : text
+-- challenges.opponent_partner_photo : text
+-- challenges.challenger_partner_country : text
+-- challenges.opponent_partner_country : text
+
+-- --- coaches -----------------------------------------------------
+-- coaches.id : text NOT NULL
+-- coaches.name : text NOT NULL
+-- coaches.name_en : text
+-- coaches.name_kg : text
+-- coaches.photo : text
+-- coaches.specialization : text
+-- coaches.specialization_en : text
+-- coaches.experience : text
+-- coaches.experience_en : text
+-- coaches.phone : text
+-- coaches.email : text
+-- coaches.price : text
+-- coaches.rating : numeric(2,1)
+-- coaches.bio : text
+-- coaches.bio_en : text
+-- coaches.created_at : timestamp with time zone DEFAULT now()
+-- coaches.tags : text[] DEFAULT '{}'::text[]
+-- coaches.students : integer DEFAULT 0
+-- coaches.member_price : integer
+-- coaches.short_desc : text
+-- coaches.short_desc_en : text
+-- coaches.achievements : text[] DEFAULT '{}'::text[]
+-- coaches.achievements_en : text[] DEFAULT '{}'::text[]
+-- coaches.court : text
+-- coaches.court_en : text
+-- coaches.telegram : text
+-- coaches.whatsapp : text
+-- coaches.partner : boolean DEFAULT false
+-- coaches.updated_at : timestamp with time zone DEFAULT now()
+-- coaches.last_name : text
+-- coaches.first_name : text
+-- coaches.patronymic : text
+-- coaches.position : text
+-- coaches.position_en : text
+-- coaches.last_name_en : text
+-- coaches.first_name_en : text
+-- coaches.promoted : boolean DEFAULT false
+-- coaches.partner_pin : text
+-- coaches.view_count : integer DEFAULT 0
+-- coaches.last_name_kg : text
+-- coaches.first_name_kg : text
+-- coaches.position_kg : text
+-- coaches.short_desc_kg : text
+-- coaches.bio_kg : text
+-- coaches.achievements_kg : jsonb DEFAULT '[]'::jsonb
+-- coaches.court_kg : text
+-- coaches.view_count_app : integer DEFAULT 0
+
+-- --- courts ------------------------------------------------------
+-- courts.id : text NOT NULL
+-- courts.name : text NOT NULL
+-- courts.name_en : text
+-- courts.name_kg : text
+-- courts.photo : text
+-- courts.gallery : text[] DEFAULT '{}'::text[]
+-- courts.rating : numeric(2,1) DEFAULT 0
+-- courts.address : text
+-- courts.address_en : text
+-- courts.lat : numeric(8,4)
+-- courts.lng : numeric(8,4)
+-- courts.phone : text
+-- courts.short_desc : text
+-- courts.short_desc_en : text
+-- courts.description : text
+-- courts.description_en : text
+-- courts.amenities : text[] DEFAULT '{}'::text[]
+-- courts.amenities_en : text[] DEFAULT '{}'::text[]
+-- courts.schedule : jsonb DEFAULT '{}'::jsonb
+-- courts.schedule_en : jsonb DEFAULT '{}'::jsonb
+-- courts.partner : boolean DEFAULT false
+-- courts.created_at : timestamp with time zone DEFAULT now()
+-- courts.updated_at : timestamp with time zone DEFAULT now()
+-- courts.court_types : jsonb DEFAULT '[]'::jsonb
+-- courts.email : text
+-- courts.slogan : text
+-- courts.slogan_en : text
+-- courts.street : text
+-- courts.street_en : text
+-- courts.building : text
+-- courts.district : text
+-- courts.district_en : text
+-- courts.city : text DEFAULT 'Бишкек'::text
+-- courts.city_en : text DEFAULT 'Bishkek'::text
+-- courts.postal_code : text
+-- courts.google_maps_url : text
+-- courts.twogis_url : text
+-- courts.promoted : boolean DEFAULT false
+-- courts.description_kg : text
+-- courts.slogan_kg : text
+-- courts.street_kg : text
+-- courts.district_kg : text
+-- courts.city_kg : text
+-- courts.partner_pin : text
+-- courts.view_count : integer DEFAULT 0
+-- courts.additional_services : jsonb DEFAULT '[]'::jsonb
+-- courts.view_count_app : integer DEFAULT 0
+-- courts.instagram : text
+-- courts.whatsapp : text
+-- courts.country : text DEFAULT 'Кыргызстан'::text
+-- courts.country_en : text DEFAULT 'Kyrgyzstan'::text
+-- courts.published_at : timestamp with time zone
+
+-- --- deleted_accounts --------------------------------------------
+-- deleted_accounts.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- deleted_accounts.profile_id : uuid NOT NULL
+-- deleted_accounts.full_name : text
+-- deleted_accounts.email : text
+-- deleted_accounts.role : text DEFAULT 'user'::text
+-- deleted_accounts.phone : text
+-- deleted_accounts.telegram_chat_id : text
+-- deleted_accounts.player_id : text
+-- deleted_accounts.had_membership : boolean DEFAULT false
+-- deleted_accounts.deleted_at : timestamp with time zone DEFAULT now()
+-- deleted_accounts.reason : text
+
+-- --- discount_vouchers -------------------------------------------
+-- discount_vouchers.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- discount_vouchers.profile_id : uuid NOT NULL
+-- discount_vouchers.player_name : text
+-- discount_vouchers.entity_type : text NOT NULL
+-- discount_vouchers.entity_id : text NOT NULL
+-- discount_vouchers.entity_name : text NOT NULL
+-- discount_vouchers.service_id : uuid
+-- discount_vouchers.service_name : text NOT NULL
+-- discount_vouchers.discount_percent : integer NOT NULL
+-- discount_vouchers.qr_token : text NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'::text)
+-- discount_vouchers.status : text DEFAULT 'active'::text
+-- discount_vouchers.created_at : timestamp with time zone DEFAULT now()
+-- discount_vouchers.expires_at : timestamp with time zone DEFAULT (now() + '7 days'::interval)
+-- discount_vouchers.used_at : timestamp with time zone
+-- discount_vouchers.confirmed_by_ip : text
+
+-- --- entity_payments ---------------------------------------------
+-- entity_payments.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- entity_payments.entity_type : text NOT NULL
+-- entity_payments.entity_id : text NOT NULL
+-- entity_payments.entity_name : text NOT NULL
+-- entity_payments.amount : numeric NOT NULL DEFAULT 0
+-- entity_payments.currency : text NOT NULL DEFAULT 'KGS'::text
+-- entity_payments.period_start : date NOT NULL
+-- entity_payments.period_end : date NOT NULL
+-- entity_payments.payment_method : text NOT NULL
+-- entity_payments.purpose : text NOT NULL
+-- entity_payments.note : text
+-- entity_payments.created_by : uuid
+-- entity_payments.created_at : timestamp with time zone NOT NULL DEFAULT now()
+
+-- --- game_invites ------------------------------------------------
+-- game_invites.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- game_invites.sender_id : uuid NOT NULL
+-- game_invites.receiver_player_id : text NOT NULL
+-- game_invites.receiver_profile_id : uuid
+-- game_invites.status : text DEFAULT 'pending'::text
+-- game_invites.created_at : timestamp with time zone DEFAULT now()
+-- game_invites.responded_at : timestamp with time zone
+
+-- --- live_match_points -------------------------------------------
+-- live_match_points.id : bigint NOT NULL DEFAULT nextval('live_match_points_id_seq'::regclass)
+-- live_match_points.match_id : uuid NOT NULL
+-- live_match_points.seq : integer NOT NULL
+-- live_match_points.set_no : smallint NOT NULL
+-- live_match_points.game_no : smallint NOT NULL
+-- live_match_points.winner : smallint NOT NULL
+-- live_match_points.p1 : text NOT NULL
+-- live_match_points.p2 : text NOT NULL
+-- live_match_points.g1 : smallint NOT NULL
+-- live_match_points.g2 : smallint NOT NULL
+-- live_match_points.game_won : smallint
+-- live_match_points.is_break : boolean NOT NULL DEFAULT false
+-- live_match_points.is_tiebreak : boolean NOT NULL DEFAULT false
+-- live_match_points.created_at : timestamp with time zone NOT NULL DEFAULT now()
+-- live_match_points.mark : text
+
+-- --- live_matches ------------------------------------------------
+-- live_matches.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- live_matches.match_id : uuid
+-- live_matches.player1_id : text
+-- live_matches.player2_id : text
+-- live_matches.player1_name : text
+-- live_matches.player2_name : text
+-- live_matches.best_of : integer NOT NULL DEFAULT 3
+-- live_matches.youtube_url : text
+-- live_matches.umpire_key : text NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'::text)
+-- live_matches.serving_player : integer DEFAULT 1
+-- live_matches.points_p1 : text DEFAULT '0'::text
+-- live_matches.points_p2 : text DEFAULT '0'::text
+-- live_matches.current_set : integer DEFAULT 1
+-- live_matches.sets_data : jsonb DEFAULT '[]'::jsonb
+-- live_matches.current_game_p1 : integer DEFAULT 0
+-- live_matches.current_game_p2 : integer DEFAULT 0
+-- live_matches.is_tiebreak : boolean DEFAULT false
+-- live_matches.tiebreak_p1 : integer DEFAULT 0
+-- live_matches.tiebreak_p2 : integer DEFAULT 0
+-- live_matches.status : text DEFAULT 'warmup'::text
+-- live_matches.winner_player : integer
+-- live_matches.final_score : text
+-- live_matches.history : jsonb DEFAULT '[]'::jsonb
+-- live_matches.tournament_label : text
+-- live_matches.created_at : timestamp with time zone DEFAULT now()
+-- live_matches.started_at : timestamp with time zone
+-- live_matches.completed_at : timestamp with time zone
+-- live_matches.sponsor_logo : text
+-- live_matches.set_format : text DEFAULT 'standard'::text
+-- live_matches.sponsor_name : text
+-- live_matches.pause_reason : text
+-- live_matches.break_kind : text
+-- live_matches.break_until : timestamp with time zone
+
+-- --- loyalty_rewards ---------------------------------------------
+-- loyalty_rewards.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- loyalty_rewards.code : text NOT NULL
+-- loyalty_rewards.title : text NOT NULL
+-- loyalty_rewards.title_en : text
+-- loyalty_rewards.cost : integer NOT NULL
+-- loyalty_rewards.active : boolean DEFAULT true
+-- loyalty_rewards.updated_at : timestamp with time zone DEFAULT now()
+
+-- --- loyalty_rules -----------------------------------------------
+-- loyalty_rules.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- loyalty_rules.action : text NOT NULL
+-- loyalty_rules.points : integer NOT NULL DEFAULT 0
+-- loyalty_rules.label : text
+-- loyalty_rules.label_en : text
+-- loyalty_rules.active : boolean DEFAULT true
+-- loyalty_rules.updated_at : timestamp with time zone DEFAULT now()
+
+-- --- loyalty_transactions ----------------------------------------
+-- loyalty_transactions.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- loyalty_transactions.profile_id : uuid NOT NULL
+-- loyalty_transactions.type : text NOT NULL
+-- loyalty_transactions.points : integer NOT NULL
+-- loyalty_transactions.action : text
+-- loyalty_transactions.source_id : text
+-- loyalty_transactions.note : text
+-- loyalty_transactions.created_at : timestamp with time zone DEFAULT now()
+-- loyalty_transactions.expires_at : timestamp with time zone
+
+-- --- matches -----------------------------------------------------
+-- matches.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- matches.tournament_id : text
+-- matches.player1_id : text
+-- matches.player2_id : text
+-- matches.score : text
+-- matches.winner_id : text
+-- matches.round : text
+-- matches.played_at : timestamp with time zone
+-- matches.created_at : timestamp with time zone DEFAULT now()
+-- matches.match_order : integer
+-- matches.round_number : integer
+-- matches.court : integer
+-- matches.scheduled_time : text
+-- matches.scheduled_day : date
+-- matches.status : text DEFAULT 'upcoming'::text
+-- matches.seed1 : integer
+-- matches.seed2 : integer
+-- matches.group_number : integer
+-- matches.notified_at : timestamp with time zone
+-- matches.match_type : text DEFAULT 'tournament'::text
+-- matches.score_status : text
+-- matches.score_submitted_by : uuid
+-- matches.score_submitted_at : timestamp with time zone
+-- matches.score_confirmed_at : timestamp with time zone
+-- matches.score_edited_by : uuid
+-- matches.score_edited_at : timestamp with time zone
+-- matches.score_dispute_note : text
+-- matches.called_ready_at : timestamp with time zone
+-- matches.called_go_at : timestamp with time zone
+-- matches.slot1_label : text
+-- matches.slot2_label : text
+-- matches.reg1_id : uuid
+-- matches.reg2_id : uuid
+
+-- --- membership_requests -----------------------------------------
+-- membership_requests.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- membership_requests.profile_id : uuid
+-- membership_requests.status : text DEFAULT 'select_period'::text
+-- membership_requests.months : integer
+-- membership_requests.amount : numeric(10,2)
+-- membership_requests.category_id : text
+-- membership_requests.receipt_file_id : text
+-- membership_requests.manager_message_id : bigint
+-- membership_requests.created_at : timestamp with time zone DEFAULT now()
+-- membership_requests.updated_at : timestamp with time zone DEFAULT now()
+
+-- --- memberships -------------------------------------------------
+-- memberships.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- memberships.profile_id : uuid
+-- memberships.status : text DEFAULT 'active'::text
+-- memberships.starts_at : date
+-- memberships.expires_at : date
+-- memberships.created_at : timestamp with time zone DEFAULT now()
+-- memberships.created_by : uuid
+-- memberships.note : text
+
+-- --- news --------------------------------------------------------
+-- news.id : text NOT NULL
+-- news.title : text NOT NULL
+-- news.title_en : text
+-- news.title_kg : text
+-- news.slug : text
+-- news.content : text
+-- news.content_en : text
+-- news.excerpt : text
+-- news.excerpt_en : text
+-- news.image : text
+-- news.category : text
+-- news.author : text
+-- news.published_at : timestamp with time zone
+-- news.created_at : timestamp with time zone DEFAULT now()
+-- news.executor : text
+-- news.content_kg : text
+-- news.excerpt_kg : text
+-- news.gallery : jsonb DEFAULT '[]'::jsonb
+-- news.content_images : jsonb DEFAULT '[]'::jsonb
+-- news.poll : jsonb
+-- news.view_count : integer DEFAULT 0
+-- news.tournament_id : text
+-- news.results_notified_at : timestamp with time zone
+-- news.reactions_config : jsonb
+-- news.view_count_app : integer DEFAULT 0
+-- news.image_original : text
+-- news.source_url : text
+-- news.source_name : text
+
+-- --- news_poll_votes ---------------------------------------------
+-- news_poll_votes.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- news_poll_votes.news_id : text NOT NULL
+-- news_poll_votes.user_id : uuid NOT NULL
+-- news_poll_votes.option_index : integer NOT NULL
+-- news_poll_votes.created_at : timestamp with time zone DEFAULT now()
+
+-- --- news_reactions ----------------------------------------------
+-- news_reactions.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- news_reactions.news_id : text NOT NULL
+-- news_reactions.user_id : uuid NOT NULL
+-- news_reactions.reaction_type : text NOT NULL
+-- news_reactions.created_at : timestamp with time zone DEFAULT now()
+
+-- --- news_sources ------------------------------------------------
+-- news_sources.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- news_sources.name : text NOT NULL
+-- news_sources.feed_url : text NOT NULL
+-- news_sources.site_url : text
+-- news_sources.lang : text NOT NULL DEFAULT 'ru'::text
+-- news_sources.active : boolean NOT NULL DEFAULT true
+-- news_sources.last_fetch : timestamp with time zone
+-- news_sources.created_at : timestamp with time zone NOT NULL DEFAULT now()
+
+-- --- news_suggestions --------------------------------------------
+-- news_suggestions.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- news_suggestions.source_id : uuid
+-- news_suggestions.title : text NOT NULL
+-- news_suggestions.link : text NOT NULL
+-- news_suggestions.link_key : text NOT NULL
+-- news_suggestions.source_name : text
+-- news_suggestions.lang : text
+-- news_suggestions.published_at : timestamp with time zone
+-- news_suggestions.status : text NOT NULL DEFAULT 'new'::text
+-- news_suggestions.offered_at : timestamp with time zone
+-- news_suggestions.offers : integer NOT NULL DEFAULT 0
+-- news_suggestions.decided_by : uuid
+-- news_suggestions.decided_at : timestamp with time zone
+-- news_suggestions.news_id : text
+-- news_suggestions.created_at : timestamp with time zone NOT NULL DEFAULT now()
+
+-- --- notification_log --------------------------------------------
+-- notification_log.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- notification_log.profile_id : uuid NOT NULL
+-- notification_log.type : text NOT NULL DEFAULT 'system'::text
+-- notification_log.title : text
+-- notification_log.message : text
+-- notification_log.data : jsonb DEFAULT '{}'::jsonb
+-- notification_log.is_read : boolean NOT NULL DEFAULT false
+-- notification_log.created_at : timestamp with time zone NOT NULL DEFAULT now()
+-- notification_log.push_id : uuid
+-- notification_log.action_type : text
+-- notification_log.action_id : uuid
+
+-- --- notification_texts ------------------------------------------
+-- notification_texts.key : text NOT NULL
+-- notification_texts.ru : text NOT NULL
+-- notification_texts.kg : text
+-- notification_texts.en : text
+-- notification_texts.updated_at : timestamp with time zone NOT NULL DEFAULT now()
+
+-- --- otp_blocks --------------------------------------------------
+-- otp_blocks.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- otp_blocks.block_key : text NOT NULL
+-- otp_blocks.request_count : integer DEFAULT 1
+-- otp_blocks.blocked_until : timestamp with time zone
+-- otp_blocks.escalation : integer DEFAULT 0
+-- otp_blocks.admin_unblocked : boolean DEFAULT false
+-- otp_blocks.updated_at : timestamp with time zone DEFAULT now()
+-- otp_blocks.created_at : timestamp with time zone DEFAULT now()
+
+-- --- otp_codes ---------------------------------------------------
+-- otp_codes.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- otp_codes.identifier : text NOT NULL
+-- otp_codes.code : text NOT NULL
+-- otp_codes.flow : text NOT NULL
+-- otp_codes.channel : text NOT NULL
+-- otp_codes.attempts : integer DEFAULT 0
+-- otp_codes.used : boolean DEFAULT false
+-- otp_codes.expires_at : timestamp with time zone NOT NULL
+-- otp_codes.ip : text
+-- otp_codes.created_at : timestamp with time zone DEFAULT now()
+
+-- --- page_views --------------------------------------------------
+-- page_views.page_name : text NOT NULL
+-- page_views.view_count : integer DEFAULT 0
+-- page_views.updated_at : timestamp with time zone DEFAULT now()
+
+-- --- partner_services --------------------------------------------
+-- partner_services.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- partner_services.entity_type : text NOT NULL
+-- partner_services.entity_id : text NOT NULL
+-- partner_services.service_name : text NOT NULL
+-- partner_services.service_name_en : text
+-- partner_services.service_name_kg : text
+-- partner_services.discount_percent : integer NOT NULL
+-- partner_services.is_active : boolean DEFAULT true
+-- partner_services.sort_order : integer DEFAULT 0
+-- partner_services.created_at : timestamp with time zone DEFAULT now()
+
+-- --- payments ----------------------------------------------------
+-- payments.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- payments.profile_id : uuid
+-- payments.membership_id : uuid
+-- payments.amount : numeric(10,2)
+-- payments.currency : text DEFAULT 'KGS'::text
+-- payments.status : text DEFAULT 'pending'::text
+-- payments.payment_method : text
+-- payments.external_id : text
+-- payments.created_at : timestamp with time zone DEFAULT now()
+-- payments.created_by : uuid
+-- payments.note : text
+-- payments.payer_name : text
+-- payments.payer_email : text
+
+-- --- player_badges -----------------------------------------------
+-- player_badges.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- player_badges.player_id : text NOT NULL
+-- player_badges.badge_id : text NOT NULL
+-- player_badges.earned_at : timestamp with time zone DEFAULT now()
+-- player_badges.seen_at : timestamp with time zone
+
+-- --- player_categories -------------------------------------------
+-- player_categories.player_id : text NOT NULL
+-- player_categories.category_id : text NOT NULL
+-- player_categories.points : integer NOT NULL DEFAULT 0
+-- player_categories.updated_at : timestamp with time zone DEFAULT now()
+-- player_categories.wins : integer NOT NULL DEFAULT 0
+-- player_categories.losses : integer NOT NULL DEFAULT 0
+-- player_categories.closed_at : timestamp with time zone
+-- player_categories.closed_by : uuid
+-- player_categories.closed_reason : text
+
+-- --- player_link_requests ----------------------------------------
+-- player_link_requests.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- player_link_requests.profile_id : uuid NOT NULL
+-- player_link_requests.player_id : text NOT NULL
+-- player_link_requests.status : text NOT NULL DEFAULT 'pending'::text
+-- player_link_requests.note : text
+-- player_link_requests.created_at : timestamp with time zone NOT NULL DEFAULT now()
+-- player_link_requests.decided_at : timestamp with time zone
+-- player_link_requests.decided_by : uuid
+
+-- --- player_promotions -------------------------------------------
+-- player_promotions.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- player_promotions.player_id : text
+-- player_promotions.from_category_id : text
+-- player_promotions.to_category_id : text
+-- player_promotions.season : integer NOT NULL
+-- player_promotions.status : text DEFAULT 'eligible'::text
+-- player_promotions.eligible_date : timestamp with time zone DEFAULT now()
+-- player_promotions.completed_date : timestamp with time zone
+-- player_promotions.created_at : timestamp with time zone DEFAULT now()
+
+-- --- players -----------------------------------------------------
+-- players.id : text NOT NULL
+-- players.name : text NOT NULL
+-- players.name_en : text
+-- players.name_kg : text
+-- players.photo : text
+-- players.country : text DEFAULT '🇰🇬'::text
+-- players.category_id : text
+-- players.points : integer DEFAULT 0
+-- players.wins : integer DEFAULT 0
+-- players.losses : integer DEFAULT 0
+-- players.rank_change : integer DEFAULT 0
+-- players.form : text[] DEFAULT '{}'::text[]
+-- players.is_online : boolean DEFAULT false
+-- players.bio : text
+-- players.bio_en : text
+-- players.phone : text
+-- players.email : text
+-- players.created_at : timestamp with time zone DEFAULT now()
+-- players.updated_at : timestamp with time zone DEFAULT now()
+-- players.show_phone : boolean DEFAULT false
+-- players.banned_until : timestamp without time zone
+-- players.ban_reason : text
+-- players.view_count : integer DEFAULT 0
+-- players.gender : character varying(10)
+-- players.bio_kg : text
+-- players.doubles_wins : integer DEFAULT 0
+-- players.doubles_losses : integer DEFAULT 0
+-- players.view_count_app : integer DEFAULT 0
+-- players.mixed_wins : integer DEFAULT 0
+-- players.mixed_losses : integer DEFAULT 0
+-- players.account_deleted_at : timestamp with time zone
+-- players.is_member : boolean NOT NULL DEFAULT false
+-- players.ntrp_singles : numeric(3,2)
+-- players.ntrp_doubles : numeric(3,2)
+-- players.is_guest : boolean NOT NULL DEFAULT false
+-- players.has_account : boolean NOT NULL DEFAULT false
+
+-- --- points_by_place ---------------------------------------------
+-- points_by_place.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- points_by_place.level_id : uuid NOT NULL
+-- points_by_place.place : integer NOT NULL
+-- points_by_place.points : integer NOT NULL DEFAULT 0
+-- points_by_place.version_id : uuid NOT NULL
+
+-- --- points_rules ------------------------------------------------
+-- points_rules.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- points_rules.level_id : uuid
+-- points_rules.round : text NOT NULL
+-- points_rules.points : integer NOT NULL DEFAULT 0
+
+-- --- points_versions ---------------------------------------------
+-- points_versions.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- points_versions.effective_from : date NOT NULL
+-- points_versions.per_win : integer NOT NULL DEFAULT 25
+-- points_versions.per_entry : integer NOT NULL DEFAULT 10
+-- points_versions.note : text
+-- points_versions.created_at : timestamp with time zone NOT NULL DEFAULT now()
+-- points_versions.created_by : uuid
+
+-- --- profiles ----------------------------------------------------
+-- profiles.id : uuid NOT NULL
+-- profiles.email : text
+-- profiles.full_name : text
+-- profiles.avatar_url : text
+-- profiles.phone : text
+-- profiles.player_id : text
+-- profiles.role : text DEFAULT 'user'::text
+-- profiles.created_at : timestamp with time zone DEFAULT now()
+-- profiles.updated_at : timestamp with time zone DEFAULT now()
+-- profiles.gender : text
+-- profiles.instagram : text DEFAULT ''::text
+-- profiles.telegram : text DEFAULT ''::text
+-- profiles.show_socials : boolean DEFAULT false
+-- profiles.birth_day : integer
+-- profiles.birth_month : integer
+-- profiles.birth_year : integer
+-- profiles.telegram_chat_id : bigint
+-- profiles.last_seen : timestamp with time zone
+-- profiles.play_level : text
+-- profiles.preferred_time : text
+-- profiles.telegram_username : text
+-- profiles.banned_until : timestamp without time zone
+-- profiles.ban_reason : text
+-- profiles.notify_preferences : jsonb
+-- profiles.fcm_token : text
+-- profiles.phone_e164 : text DEFAULT
+-- CASE
+--     WHEN (regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text) = ''::text) THEN ''::text
+--     WHEN (length(regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text)) = 9) THEN ('996'::text \|\| regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text))
+--     WHEN ((length(regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text)) = 10) AND ("left"(regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text), 1) = '0'::text)) THEN ('996'::text \|\| "right"(regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text), 9))
+--     ELSE regexp_replace(COALESCE(phone, ''::text), '[^0-9]'::text, ''::text, 'g'::text)
+-- END
+-- profiles.phone_country : text
+-- profiles.show_phone : boolean DEFAULT false
+-- profiles.whatsapp_phone : text
+-- profiles.whatsapp_country : text
+-- profiles.show_whatsapp : boolean DEFAULT false
+-- profiles.show_telegram : boolean DEFAULT false
+-- profiles.show_instagram : boolean DEFAULT false
+-- profiles.deleted_at : timestamp with time zone
+-- profiles.lang : text NOT NULL DEFAULT 'ru'::text
+
+-- --- push_log ----------------------------------------------------
+-- push_log.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- push_log.admin_id : uuid
+-- push_log.title : text
+-- push_log.message : text
+-- push_log.type : text DEFAULT 'system'::text
+-- push_log.audience : text
+-- push_log.recipients_count : integer DEFAULT 0
+-- push_log.fcm_sent : integer DEFAULT 0
+-- push_log.created_at : timestamp with time zone DEFAULT now()
+-- push_log.recalled_at : timestamp with time zone
+-- push_log.recalled_by : uuid
+
+-- --- rate_limits -------------------------------------------------
+-- rate_limits.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- rate_limits.limit_key : text NOT NULL
+-- rate_limits.action : text NOT NULL
+-- rate_limits.ip : text
+-- rate_limits.created_at : timestamp with time zone DEFAULT now()
+
+-- --- rating_history ----------------------------------------------
+-- rating_history.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- rating_history.player_id : text NOT NULL
+-- rating_history.tournament_name : text NOT NULL
+-- rating_history.tournament_id : text
+-- rating_history.points_earned : integer NOT NULL DEFAULT 0
+-- rating_history.recorded_at : date NOT NULL
+-- rating_history.created_at : timestamp with time zone DEFAULT now()
+-- rating_history.ntrp_before : numeric(4,2)
+-- rating_history.ntrp_after : numeric(4,2)
+-- rating_history.is_doubles : boolean DEFAULT false
+-- rating_history.category_id : text
+
+-- --- registration_changes ----------------------------------------
+-- registration_changes.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- registration_changes.tournament_id : text NOT NULL
+-- registration_changes.registration_id : uuid NOT NULL
+-- registration_changes.side : text NOT NULL
+-- registration_changes.old_player_id : text
+-- registration_changes.new_player_id : text
+-- registration_changes.old_name : text
+-- registration_changes.new_name : text
+-- registration_changes.changed_by : uuid
+-- registration_changes.created_at : timestamp with time zone NOT NULL DEFAULT now()
+
+-- --- season_reset_log --------------------------------------------
+-- season_reset_log.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- season_reset_log.run_at : timestamp with time zone DEFAULT now()
+-- season_reset_log.season : text NOT NULL
+-- season_reset_log.player_id : text
+-- season_reset_log.category_id : text
+-- season_reset_log.gender : text
+-- season_reset_log.points_before : integer
+-- season_reset_log.points_after : integer
+-- season_reset_log.rank_before : integer
+-- season_reset_log.rank_after : integer
+-- season_reset_log.notified : boolean DEFAULT false
+
+-- --- site_content ------------------------------------------------
+-- site_content.key : text NOT NULL
+-- site_content.value : text
+-- site_content.value_en : text
+-- site_content.value_kg : text
+-- site_content.updated_at : timestamp with time zone DEFAULT now()
+
+-- --- site_documents ----------------------------------------------
+-- site_documents.slug : text NOT NULL
+-- site_documents.title : text
+-- site_documents.title_en : text
+-- site_documents.title_kg : text
+-- site_documents.body : text
+-- site_documents.body_en : text
+-- site_documents.body_kg : text
+-- site_documents.updated_at : timestamp with time zone DEFAULT now()
+
+-- --- slepok_tbsh_uroven ------------------------------------------
+-- slepok_tbsh_uroven.снято : timestamp with time zone NOT NULL DEFAULT now()
+-- slepok_tbsh_uroven.id : text NOT NULL
+-- slepok_tbsh_uroven.title : text
+-- slepok_tbsh_uroven.level_id : uuid
+
+-- --- sponsors ----------------------------------------------------
+-- sponsors.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- sponsors.name : text NOT NULL
+-- sponsors.logo : text
+-- sponsors.url : text
+-- sponsors.is_hero : boolean DEFAULT false
+-- sponsors.sort_order : integer DEFAULT 0
+-- sponsors.created_at : timestamp with time zone DEFAULT now()
+-- sponsors.whatsapp : text
+-- sponsors.instagram : text
+-- sponsors.telegram : text
+-- sponsors.email : text
+-- sponsors.address : text
+-- sponsors.description : text
+-- sponsors.description_en : text
+-- sponsors.description_kg : text
+-- sponsors.phone : text
+-- sponsors.view_count : integer DEFAULT 0
+-- sponsors.view_count_app : integer DEFAULT 0
+
+-- --- tournament_levels -------------------------------------------
+-- tournament_levels.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- tournament_levels.name : text NOT NULL
+-- tournament_levels.name_en : text
+-- tournament_levels.sort_order : integer DEFAULT 0
+-- tournament_levels.created_at : timestamp with time zone DEFAULT now()
+-- tournament_levels.on_ladder : boolean NOT NULL DEFAULT true
+-- tournament_levels.max_place : integer NOT NULL DEFAULT 64
+
+-- --- tournament_registrations ------------------------------------
+-- tournament_registrations.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- tournament_registrations.tournament_id : text NOT NULL
+-- tournament_registrations.player_id : text
+-- tournament_registrations.seed_number : integer
+-- tournament_registrations.draw_position : integer
+-- tournament_registrations.status : text DEFAULT 'pending'::text
+-- tournament_registrations.registered_at : timestamp with time zone DEFAULT now()
+-- tournament_registrations.group_number : integer
+-- tournament_registrations.is_external : boolean DEFAULT false
+-- tournament_registrations.external_name : text
+-- tournament_registrations.external_country : text
+-- tournament_registrations.external_ntrp : numeric
+-- tournament_registrations.partner_id : text
+-- tournament_registrations.partner_external_name : text
+-- tournament_registrations.partner_external_ntrp : numeric
+-- tournament_registrations.partner_gender : text
+-- tournament_registrations.block_reason : text
+-- tournament_registrations.withdrawn_at : timestamp with time zone
+-- tournament_registrations.guest_confirmed : boolean NOT NULL DEFAULT false
+-- tournament_registrations.external_gender : text
+-- tournament_registrations.gender_confirmed : boolean NOT NULL DEFAULT true
+-- tournament_registrations.partner_external_country : text
+-- tournament_registrations.seat_pool : text NOT NULL DEFAULT 'online'::text
+-- tournament_registrations.review_reasons : text[] NOT NULL DEFAULT '{}'::text[]
+-- tournament_registrations.waitlisted_at : timestamp with time zone
+-- tournament_registrations.queue_at : timestamp with time zone DEFAULT COALESCE(waitlisted_at, registered_at)
+
+-- --- tournament_results ------------------------------------------
+-- tournament_results.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- tournament_results.tournament_id : text
+-- tournament_results.player_id : text
+-- tournament_results.round_reached : text NOT NULL
+-- tournament_results.points_earned : integer DEFAULT 0
+-- tournament_results.season : integer NOT NULL
+-- tournament_results.category_id : text
+-- tournament_results.is_transition : boolean DEFAULT false
+-- tournament_results.created_at : timestamp with time zone DEFAULT now()
+-- tournament_results.is_doubles : boolean DEFAULT false
+-- tournament_results.partner_id : text
+
+-- --- tournaments -------------------------------------------------
+-- tournaments.id : text NOT NULL
+-- tournaments.title : text NOT NULL
+-- tournaments.title_en : text
+-- tournaments.title_kg : text
+-- tournaments.description : text
+-- tournaments.description_en : text
+-- tournaments.date_start : date NOT NULL
+-- tournaments.date_end : date
+-- tournaments.location : text
+-- tournaments.location_en : text
+-- tournaments.category_id : text NOT NULL
+-- tournaments.status : text DEFAULT 'upcoming'::text
+-- tournaments.max_participants : integer NOT NULL
+-- tournaments.prize_fund : text
+-- tournaments.image : text
+-- tournaments.created_at : timestamp with time zone DEFAULT now()
+-- tournaments.format : text DEFAULT 'singles'::text
+-- tournaments.level_id : uuid
+-- tournaments.draw_size : integer
+-- tournaments.bracket_type : text
+-- tournaments.court_count : integer DEFAULT 2
+-- tournaments.match_duration : integer DEFAULT 90
+-- tournaments.registration_end : date
+-- tournaments.court_id : text
+-- tournaments.registration_start : date
+-- tournaments.description_kg : text
+-- tournaments.published_at : timestamp with time zone
+-- tournaments.start_time : text
+-- tournaments.buffer_minutes : integer DEFAULT 15
+-- tournaments.group_count : integer
+-- tournaments.qualifiers_per_group : integer DEFAULT 2
+-- tournaments.notified_at : timestamp with time zone
+-- tournaments.view_count : integer DEFAULT 0
+-- tournaments.reminded_3d_at : timestamp with time zone
+-- tournaments.reminded_1d_at : timestamp with time zone
+-- tournaments.ntrp_min : numeric
+-- tournaments.ntrp_max : numeric
+-- tournaments.ntrp_combined_max : numeric
+-- tournaments.gender : text NOT NULL
+-- tournaments.manual_group_places : jsonb DEFAULT '{}'::jsonb
+-- tournaments.reserved_spots : integer DEFAULT 0
+-- tournaments.ig_meta : jsonb
+-- tournaments.set_format : text DEFAULT 'standard'::text
+-- tournaments.view_count_app : integer DEFAULT 0
+-- tournaments.fee_member : numeric
+-- tournaments.fee_guest : numeric
+-- tournaments.ready_notified_at : timestamp with time zone
+-- tournaments.draw_seed : integer
+-- tournaments.schedule_notified_at : timestamp with time zone
+-- tournaments.schedule_saved_at : timestamp with time zone
+-- tournaments.playoff_format : text
+-- tournaments.director_name : text
+-- tournaments.referee_name : text
+-- tournaments.image_full : text
+-- tournaments.image_crop : jsonb
+
+-- --- user_devices ------------------------------------------------
+-- user_devices.id : uuid NOT NULL DEFAULT gen_random_uuid()
+-- user_devices.profile_id : uuid NOT NULL
+-- user_devices.device_hash : text NOT NULL
+-- user_devices.user_agent : text
+-- user_devices.last_seen : timestamp with time zone DEFAULT now()
+-- user_devices.created_at : timestamp with time zone DEFAULT now()
+
+
+-- ======================================================================
+-- ОГРАНИЧЕНИЯ — ключи, уникальность, проверки, ПРАВИЛА УДАЛЕНИЯ
+-- ======================================================================
+
+
+-- --- app_releases ------------------------------------------------
+-- app_releases : app_releases_pkey : PRIMARY KEY (id)
+-- app_releases : app_releases_platform_check : CHECK ((platform = ANY (ARRAY['android'::text, 'ios'::text])))
+
+-- --- app_settings ------------------------------------------------
+-- app_settings : app_settings_pkey : PRIMARY KEY (key)
+-- app_settings : app_settings_updated_by_fkey : FOREIGN KEY (updated_by) REFERENCES auth.users(id) ON DELETE SET NULL
+
+-- --- badge_definitions -------------------------------------------
+-- badge_definitions : badge_definitions_pkey : PRIMARY KEY (id)
+
+-- --- bracket_undo ------------------------------------------------
+-- bracket_undo : bracket_undo_pkey : PRIMARY KEY (tournament_id)
+
+-- --- categories --------------------------------------------------
+-- categories : categories_gender_check : CHECK (((gender IS NULL) OR (gender = ANY (ARRAY['men'::text, 'women'::text]))))
+-- categories : categories_pkey : PRIMARY KEY (id)
+
+-- --- challenge_predictions ---------------------------------------
+-- challenge_predictions : challenge_predictions_challenge_id_fkey : FOREIGN KEY (challenge_id) REFERENCES challenges(id) ON DELETE CASCADE
+-- challenge_predictions : challenge_predictions_challenge_id_voter_type_voter_id_key : UNIQUE (challenge_id, voter_type, voter_id)
+-- challenge_predictions : challenge_predictions_pkey : PRIMARY KEY (id)
+-- challenge_predictions : challenge_predictions_predicted_winner_id_fkey : FOREIGN KEY (predicted_winner_id) REFERENCES players(id)
+-- challenge_predictions : challenge_predictions_side_check : CHECK ((predicted_side = ANY (ARRAY[1, 2])))
+-- challenge_predictions : challenge_predictions_voter_type_check : CHECK ((voter_type = ANY (ARRAY['site'::text, 'telegram'::text])))
+
+-- --- challenges --------------------------------------------------
+-- challenges : challenges_challenger_id_fkey : FOREIGN KEY (challenger_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- challenges : challenges_challenger_player_id_fkey : FOREIGN KEY (challenger_player_id) REFERENCES players(id)
+-- challenges : challenges_format_check : CHECK ((format = ANY (ARRAY['singles'::text, 'doubles'::text, 'mixed_doubles'::text])))
+-- challenges : challenges_gender_check : CHECK ((((challenger_gender IS NULL) OR (challenger_gender = ANY (ARRAY['men'::text, 'women'::text]))) AND ((opponent_gender IS NULL) OR (opponent_gender = ANY (ARRAY['men'::text, 'women'::text])))))
+-- challenges : challenges_live_match_id_fkey : FOREIGN KEY (live_match_id) REFERENCES live_matches(id)
+-- challenges : challenges_match_id_fkey : FOREIGN KEY (match_id) REFERENCES matches(id)
+-- challenges : challenges_message_check : CHECK ((char_length(message) <= 150))
+-- challenges : challenges_opponent_player_id_fkey : FOREIGN KEY (opponent_player_id) REFERENCES players(id)
+-- challenges : challenges_opponent_profile_id_fkey : FOREIGN KEY (opponent_profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- challenges : challenges_partner_gender_check : CHECK ((((challenger_partner_gender IS NULL) OR (challenger_partner_gender = ANY (ARRAY['men'::text, 'women'::text]))) AND ((opponent_partner_gender IS NULL) OR (opponent_partner_gender = ANY (ARRAY['men'::text, 'women'::text])))))
+-- challenges : challenges_partners_filled : CHECK (((format = 'singles'::text) OR (((challenger_partner_id IS NOT NULL) OR (challenger_partner_name IS NOT NULL)) AND ((opponent_partner_id IS NOT NULL) OR (opponent_partner_name IS NOT NULL)))))
+-- challenges : challenges_pkey : PRIMARY KEY (id)
+-- challenges : challenges_proposed_court_id_fkey : FOREIGN KEY (proposed_court_id) REFERENCES courts(id)
+-- challenges : challenges_side_filled : CHECK ((((challenger_player_id IS NOT NULL) OR (challenger_external_name IS NOT NULL)) AND ((opponent_player_id IS NOT NULL) OR (opponent_external_name IS NOT NULL))))
+-- challenges : challenges_status_check : CHECK ((status = ANY (ARRAY['active'::text, 'negotiating'::text, 'countered'::text, 'accepted'::text, 'declined'::text, 'expired'::text, 'completed'::text, 'cancelled'::text])))
+
+-- --- coaches -----------------------------------------------------
+-- coaches : coaches_pkey : PRIMARY KEY (id)
+
+-- --- courts ------------------------------------------------------
+-- courts : courts_pkey : PRIMARY KEY (id)
+
+-- --- deleted_accounts --------------------------------------------
+-- deleted_accounts : deleted_accounts_pkey : PRIMARY KEY (id)
+
+-- --- discount_vouchers -------------------------------------------
+-- discount_vouchers : discount_vouchers_entity_type_check : CHECK ((entity_type = ANY (ARRAY['court'::text, 'coach'::text])))
+-- discount_vouchers : discount_vouchers_pkey : PRIMARY KEY (id)
+-- discount_vouchers : discount_vouchers_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES auth.users(id) ON DELETE CASCADE
+-- discount_vouchers : discount_vouchers_qr_token_key : UNIQUE (qr_token)
+-- discount_vouchers : discount_vouchers_service_id_fkey : FOREIGN KEY (service_id) REFERENCES partner_services(id)
+-- discount_vouchers : discount_vouchers_status_check : CHECK ((status = ANY (ARRAY['active'::text, 'used'::text, 'expired'::text, 'cancelled'::text])))
+
+-- --- entity_payments ---------------------------------------------
+-- entity_payments : entity_payments_created_by_fkey : FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL
+-- entity_payments : entity_payments_entity_type_check : CHECK ((entity_type = ANY (ARRAY['court'::text, 'coach'::text, 'player'::text, 'club'::text])))
+-- entity_payments : entity_payments_payment_method_check : CHECK ((payment_method = ANY (ARRAY['cash'::text, 'transfer'::text, 'card'::text])))
+-- entity_payments : entity_payments_pkey : PRIMARY KEY (id)
+-- entity_payments : entity_payments_purpose_check : CHECK ((purpose = ANY (ARRAY['promoted'::text, 'sponsorship'::text, 'rental'::text, 'other'::text])))
+
+-- --- game_invites ------------------------------------------------
+-- game_invites : game_invites_pkey : PRIMARY KEY (id)
+-- game_invites : game_invites_receiver_profile_id_fkey : FOREIGN KEY (receiver_profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- game_invites : game_invites_sender_id_fkey : FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- game_invites : game_invites_status_check : CHECK ((status = ANY (ARRAY['pending'::text, 'accepted'::text, 'declined'::text, 'expired'::text])))
+
+-- --- live_match_points -------------------------------------------
+-- live_match_points : live_match_points_game_won_check : CHECK ((game_won = ANY (ARRAY[1, 2])))
+-- live_match_points : live_match_points_mark_check : CHECK ((mark = ANY (ARRAY['ace'::text, 'double'::text])))
+-- live_match_points : live_match_points_match_id_fkey : FOREIGN KEY (match_id) REFERENCES live_matches(id) ON DELETE CASCADE
+-- live_match_points : live_match_points_match_id_seq_key : UNIQUE (match_id, seq)
+-- live_match_points : live_match_points_pkey : PRIMARY KEY (id)
+-- live_match_points : live_match_points_winner_check : CHECK ((winner = ANY (ARRAY[1, 2])))
+
+-- --- live_matches ------------------------------------------------
+-- live_matches : live_matches_best_of_check : CHECK ((best_of = ANY (ARRAY[1, 3, 5])))
+-- live_matches : live_matches_break_kind_check : CHECK ((break_kind = ANY (ARRAY['changeover'::text, 'set_break'::text])))
+-- live_matches : live_matches_match_id_fkey : FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE SET NULL
+-- live_matches : live_matches_pause_reason_check : CHECK ((pause_reason = ANY (ARRAY['medical'::text, 'toilet'::text, 'weather'::text, 'other'::text])))
+-- live_matches : live_matches_pkey : PRIMARY KEY (id)
+-- live_matches : live_matches_player1_id_fkey : FOREIGN KEY (player1_id) REFERENCES players(id)
+-- live_matches : live_matches_player2_id_fkey : FOREIGN KEY (player2_id) REFERENCES players(id)
+-- live_matches : live_matches_serving_player_check : CHECK ((serving_player = ANY (ARRAY[1, 2])))
+-- live_matches : live_matches_set_format_check : CHECK ((set_format = ANY (ARRAY['standard'::text, 'short'::text])))
+-- live_matches : live_matches_status_check : CHECK ((status = ANY (ARRAY['warmup'::text, 'live'::text, 'paused'::text, 'completed'::text])))
+-- live_matches : live_matches_umpire_key_key : UNIQUE (umpire_key)
+-- live_matches : live_matches_winner_player_check : CHECK ((winner_player = ANY (ARRAY[1, 2])))
+
+-- --- loyalty_rewards ---------------------------------------------
+-- loyalty_rewards : loyalty_rewards_code_key : UNIQUE (code)
+-- loyalty_rewards : loyalty_rewards_pkey : PRIMARY KEY (id)
+
+-- --- loyalty_rules -----------------------------------------------
+-- loyalty_rules : loyalty_rules_action_key : UNIQUE (action)
+-- loyalty_rules : loyalty_rules_pkey : PRIMARY KEY (id)
+
+-- --- loyalty_transactions ----------------------------------------
+-- loyalty_transactions : loyalty_transactions_pkey : PRIMARY KEY (id)
+-- loyalty_transactions : loyalty_transactions_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- loyalty_transactions : loyalty_transactions_type_check : CHECK ((type = ANY (ARRAY['earn'::text, 'redeem'::text, 'expire'::text, 'admin_adjust'::text])))
+
+-- --- matches -----------------------------------------------------
+-- matches : matches_pkey : PRIMARY KEY (id)
+-- matches : matches_player1_id_fkey : FOREIGN KEY (player1_id) REFERENCES players(id)
+-- matches : matches_player2_id_fkey : FOREIGN KEY (player2_id) REFERENCES players(id)
+-- matches : matches_reg1_id_fkey : FOREIGN KEY (reg1_id) REFERENCES tournament_registrations(id) ON DELETE SET NULL
+-- matches : matches_reg2_id_fkey : FOREIGN KEY (reg2_id) REFERENCES tournament_registrations(id) ON DELETE SET NULL
+-- matches : matches_score_edited_by_fkey : FOREIGN KEY (score_edited_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- matches : matches_score_status_check : CHECK (((score_status IS NULL) OR (score_status = ANY (ARRAY['pending'::text, 'confirmed'::text, 'disputed'::text]))))
+-- matches : matches_score_submitted_by_fkey : FOREIGN KEY (score_submitted_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- matches : matches_tournament_id_fkey : FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
+-- matches : matches_winner_id_fkey : FOREIGN KEY (winner_id) REFERENCES players(id)
+
+-- --- membership_requests -----------------------------------------
+-- membership_requests : membership_requests_pkey : PRIMARY KEY (id)
+-- membership_requests : membership_requests_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- membership_requests : membership_requests_status_check : CHECK ((status = ANY (ARRAY['select_period'::text, 'select_category'::text, 'pending_receipt'::text, 'pending_approval'::text, 'approved'::text, 'rejected'::text])))
+
+-- --- memberships -------------------------------------------------
+-- memberships : memberships_created_by_fkey : FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- memberships : memberships_pkey : PRIMARY KEY (id)
+-- memberships : memberships_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- memberships : memberships_status_check : CHECK ((status = ANY (ARRAY['active'::text, 'expired'::text, 'cancelled'::text])))
+
+-- --- news --------------------------------------------------------
+-- news : news_pkey : PRIMARY KEY (id)
+-- news : news_slug_key : UNIQUE (slug)
+-- news : news_tournament_id_fkey : FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE SET NULL
+
+-- --- news_poll_votes ---------------------------------------------
+-- news_poll_votes : news_poll_votes_news_id_fkey : FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE
+-- news_poll_votes : news_poll_votes_news_id_user_id_key : UNIQUE (news_id, user_id)
+-- news_poll_votes : news_poll_votes_pkey : PRIMARY KEY (id)
+-- news_poll_votes : news_poll_votes_user_id_fkey : FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+
+-- --- news_reactions ----------------------------------------------
+-- news_reactions : news_reactions_news_id_fkey : FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE
+-- news_reactions : news_reactions_news_id_user_id_reaction_type_key : UNIQUE (news_id, user_id, reaction_type)
+-- news_reactions : news_reactions_pkey : PRIMARY KEY (id)
+-- news_reactions : news_reactions_reaction_type_check : CHECK ((reaction_type = ANY (ARRAY['tennis'::text, 'fire'::text, 'clap'::text, 'star'::text, 'heart'::text, 'like'::text, 'trophy'::text, 'muscle'::text, 'target'::text, 'wow'::text])))
+-- news_reactions : news_reactions_user_id_fkey : FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+
+-- --- news_sources ------------------------------------------------
+-- news_sources : news_sources_feed_url_key : UNIQUE (feed_url)
+-- news_sources : news_sources_lang_check : CHECK ((lang = ANY (ARRAY['ru'::text, 'en'::text])))
+-- news_sources : news_sources_pkey : PRIMARY KEY (id)
+
+-- --- news_suggestions --------------------------------------------
+-- news_suggestions : news_suggestions_decided_by_fkey : FOREIGN KEY (decided_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- news_suggestions : news_suggestions_link_key_key : UNIQUE (link_key)
+-- news_suggestions : news_suggestions_pkey : PRIMARY KEY (id)
+-- news_suggestions : news_suggestions_source_id_fkey : FOREIGN KEY (source_id) REFERENCES news_sources(id) ON DELETE SET NULL
+-- news_suggestions : news_suggestions_status_check : CHECK ((status = ANY (ARRAY['new'::text, 'offered'::text, 'published'::text, 'skipped'::text, 'expired'::text])))
+
+-- --- notification_log --------------------------------------------
+-- notification_log : notification_log_pkey : PRIMARY KEY (id)
+-- notification_log : notification_log_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+
+-- --- notification_texts ------------------------------------------
+-- notification_texts : notification_texts_pkey : PRIMARY KEY (key)
+
+-- --- otp_blocks --------------------------------------------------
+-- otp_blocks : otp_blocks_block_key_key : UNIQUE (block_key)
+-- otp_blocks : otp_blocks_pkey : PRIMARY KEY (id)
+
+-- --- otp_codes ---------------------------------------------------
+-- otp_codes : otp_codes_channel_check : CHECK ((channel = ANY (ARRAY['telegram'::text, 'email'::text])))
+-- otp_codes : otp_codes_flow_check : CHECK ((flow = ANY (ARRAY['forgot_password'::text, 'register'::text, 'telegram_register'::text])))
+-- otp_codes : otp_codes_pkey : PRIMARY KEY (id)
+
+-- --- page_views --------------------------------------------------
+-- page_views : page_views_pkey : PRIMARY KEY (page_name)
+
+-- --- partner_services --------------------------------------------
+-- partner_services : partner_services_discount_percent_check : CHECK (((discount_percent >= 1) AND (discount_percent <= 100)))
+-- partner_services : partner_services_entity_type_check : CHECK ((entity_type = ANY (ARRAY['court'::text, 'coach'::text])))
+-- partner_services : partner_services_pkey : PRIMARY KEY (id)
+
+-- --- payments ----------------------------------------------------
+-- payments : payments_created_by_fkey : FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- payments : payments_membership_id_fkey : FOREIGN KEY (membership_id) REFERENCES memberships(id)
+-- payments : payments_pkey : PRIMARY KEY (id)
+-- payments : payments_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE SET NULL
+-- payments : payments_status_check : CHECK ((status = ANY (ARRAY['pending'::text, 'completed'::text, 'failed'::text, 'refunded'::text])))
+
+-- --- player_badges -----------------------------------------------
+-- player_badges : player_badges_badge_id_fkey : FOREIGN KEY (badge_id) REFERENCES badge_definitions(id) ON DELETE CASCADE
+-- player_badges : player_badges_pkey : PRIMARY KEY (id)
+-- player_badges : player_badges_player_id_badge_id_key : UNIQUE (player_id, badge_id)
+-- player_badges : player_badges_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+
+-- --- player_categories -------------------------------------------
+-- player_categories : player_categories_category_id_fkey : FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+-- player_categories : player_categories_pkey : PRIMARY KEY (player_id, category_id)
+-- player_categories : player_categories_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+
+-- --- player_link_requests ----------------------------------------
+-- player_link_requests : player_link_requests_decided_by_fkey : FOREIGN KEY (decided_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- player_link_requests : player_link_requests_pkey : PRIMARY KEY (id)
+-- player_link_requests : player_link_requests_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+-- player_link_requests : player_link_requests_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+-- player_link_requests : player_link_requests_status_check : CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'withdrawn'::text])))
+
+-- --- player_promotions -------------------------------------------
+-- player_promotions : player_promotions_from_category_id_fkey : FOREIGN KEY (from_category_id) REFERENCES categories(id)
+-- player_promotions : player_promotions_pkey : PRIMARY KEY (id)
+-- player_promotions : player_promotions_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+-- player_promotions : player_promotions_to_category_id_fkey : FOREIGN KEY (to_category_id) REFERENCES categories(id)
+
+-- --- players -----------------------------------------------------
+-- players : players_category_id_fkey : FOREIGN KEY (category_id) REFERENCES categories(id)
+-- players : players_pkey : PRIMARY KEY (id)
+
+-- --- points_by_place ---------------------------------------------
+-- points_by_place : points_by_place_level_id_fkey : FOREIGN KEY (level_id) REFERENCES tournament_levels(id) ON DELETE CASCADE
+-- points_by_place : points_by_place_pkey : PRIMARY KEY (id)
+-- points_by_place : points_by_place_place_check : CHECK (((place >= 1) AND (place <= 64)))
+-- points_by_place : points_by_place_version_id_fkey : FOREIGN KEY (version_id) REFERENCES points_versions(id) ON DELETE CASCADE
+
+-- --- points_rules ------------------------------------------------
+-- points_rules : points_rules_level_id_fkey : FOREIGN KEY (level_id) REFERENCES tournament_levels(id) ON DELETE CASCADE
+-- points_rules : points_rules_level_id_round_key : UNIQUE (level_id, round)
+-- points_rules : points_rules_pkey : PRIMARY KEY (id)
+
+-- --- points_versions ---------------------------------------------
+-- points_versions : points_versions_created_by_fkey : FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- points_versions : points_versions_effective_from_key : UNIQUE (effective_from)
+-- points_versions : points_versions_per_entry_check : CHECK ((per_entry >= 0))
+-- points_versions : points_versions_per_win_check : CHECK ((per_win >= 0))
+-- points_versions : points_versions_pkey : PRIMARY KEY (id)
+
+-- --- profiles ----------------------------------------------------
+-- profiles : profiles_birth_day_check : CHECK (((birth_day >= 1) AND (birth_day <= 31)))
+-- profiles : profiles_birth_month_check : CHECK (((birth_month >= 1) AND (birth_month <= 12)))
+-- profiles : profiles_gender_check : CHECK (((gender IS NULL) OR (gender = ''::text) OR (gender = ANY (ARRAY['men'::text, 'women'::text]))))
+-- profiles : profiles_id_fkey : FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
+-- profiles : profiles_lang_check : CHECK ((lang = ANY (ARRAY['ru'::text, 'en'::text, 'kg'::text])))
+-- profiles : profiles_phone_unique : UNIQUE (phone)
+-- profiles : profiles_pkey : PRIMARY KEY (id)
+-- profiles : profiles_play_level_check : CHECK ((play_level = ANY (ARRAY['beginner'::text, 'intermediate'::text, 'advanced'::text])))
+-- profiles : profiles_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id)
+-- profiles : profiles_preferred_time_check : CHECK ((preferred_time = ANY (ARRAY['morning'::text, 'afternoon'::text, 'evening'::text, 'weekend'::text])))
+-- profiles : profiles_role_check : CHECK ((role = ANY (ARRAY['user'::text, 'player'::text, 'manager'::text, 'admin'::text])))
+-- profiles : profiles_telegram_chat_id_unique : UNIQUE (telegram_chat_id)
+
+-- --- push_log ----------------------------------------------------
+-- push_log : push_log_admin_id_fkey : FOREIGN KEY (admin_id) REFERENCES profiles(id) ON DELETE SET NULL
+-- push_log : push_log_pkey : PRIMARY KEY (id)
+
+-- --- rate_limits -------------------------------------------------
+-- rate_limits : rate_limits_pkey : PRIMARY KEY (id)
+
+-- --- rating_history ----------------------------------------------
+-- rating_history : rating_history_category_id_fkey : FOREIGN KEY (category_id) REFERENCES categories(id)
+-- rating_history : rating_history_pkey : PRIMARY KEY (id)
+-- rating_history : rating_history_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+-- rating_history : rating_history_tournament_id_fkey : FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
+
+-- --- registration_changes ----------------------------------------
+-- registration_changes : registration_changes_changed_by_fkey : FOREIGN KEY (changed_by) REFERENCES profiles(id) ON DELETE SET NULL
+-- registration_changes : registration_changes_new_player_id_fkey : FOREIGN KEY (new_player_id) REFERENCES players(id) ON DELETE SET NULL
+-- registration_changes : registration_changes_old_player_id_fkey : FOREIGN KEY (old_player_id) REFERENCES players(id) ON DELETE SET NULL
+-- registration_changes : registration_changes_pkey : PRIMARY KEY (id)
+-- registration_changes : registration_changes_registration_id_fkey : FOREIGN KEY (registration_id) REFERENCES tournament_registrations(id) ON DELETE CASCADE
+-- registration_changes : registration_changes_tournament_id_fkey : FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
+
+-- --- season_reset_log --------------------------------------------
+-- season_reset_log : season_reset_log_pkey : PRIMARY KEY (id)
+-- season_reset_log : season_reset_log_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+
+-- --- site_content ------------------------------------------------
+-- site_content : site_content_pkey : PRIMARY KEY (key)
+
+-- --- site_documents ----------------------------------------------
+-- site_documents : site_documents_pkey : PRIMARY KEY (slug)
+
+-- --- slepok_tbsh_uroven ------------------------------------------
+-- slepok_tbsh_uroven : slepok_tbsh_uroven_pkey : PRIMARY KEY ("снято", id)
+
+-- --- sponsors ----------------------------------------------------
+-- sponsors : sponsors_pkey : PRIMARY KEY (id)
+
+-- --- tournament_levels -------------------------------------------
+-- tournament_levels : tournament_levels_max_place_check : CHECK (((max_place >= 1) AND (max_place <= 64)))
+-- tournament_levels : tournament_levels_pkey : PRIMARY KEY (id)
+
+-- --- tournament_registrations ------------------------------------
+-- tournament_registrations : tournament_registrations_partner_id_fkey : FOREIGN KEY (partner_id) REFERENCES players(id)
+-- tournament_registrations : tournament_registrations_pkey : PRIMARY KEY (id)
+-- tournament_registrations : tournament_registrations_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+-- tournament_registrations : tournament_registrations_seat_pool_check : CHECK ((seat_pool = ANY (ARRAY['online'::text, 'reserved'::text])))
+-- tournament_registrations : tournament_registrations_status_check : CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'withdrawn'::text, 'waitlist'::text, 'blocked'::text, 'draw'::text])))
+-- tournament_registrations : tournament_registrations_tournament_id_fkey : FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
+
+-- --- tournament_results ------------------------------------------
+-- tournament_results : tournament_results_category_id_fkey : FOREIGN KEY (category_id) REFERENCES categories(id)
+-- tournament_results : tournament_results_partner_id_fkey : FOREIGN KEY (partner_id) REFERENCES players(id)
+-- tournament_results : tournament_results_pkey : PRIMARY KEY (id)
+-- tournament_results : tournament_results_player_id_fkey : FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+-- tournament_results : tournament_results_tournament_id_fkey : FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
+-- tournament_results : tournament_results_tournament_id_player_id_key : UNIQUE (tournament_id, player_id)
+
+-- --- tournaments -------------------------------------------------
+-- tournaments : tournaments_category_id_fkey : FOREIGN KEY (category_id) REFERENCES categories(id)
+-- tournaments : tournaments_court_id_fkey : FOREIGN KEY (court_id) REFERENCES courts(id)
+-- tournaments : tournaments_format_check : CHECK ((format = ANY (ARRAY['singles'::text, 'doubles'::text, 'mixed_doubles'::text])))
+-- tournaments : tournaments_gender_check : CHECK ((gender = ANY (ARRAY['men'::text, 'women'::text, 'mixed'::text])))
+-- tournaments : tournaments_level_id_fkey : FOREIGN KEY (level_id) REFERENCES tournament_levels(id)
+-- tournaments : tournaments_pkey : PRIMARY KEY (id)
+-- tournaments : tournaments_playoff_format_chk : CHECK (((playoff_format IS NULL) OR (playoff_format = ANY (ARRAY['ig'::text, 'direct'::text]))))
+-- tournaments : tournaments_set_format_check : CHECK ((set_format = ANY (ARRAY['standard'::text, 'short'::text])))
+-- tournaments : tournaments_status_check : CHECK ((status = ANY (ARRAY['upcoming'::text, 'registration_open'::text, 'registration_closed'::text, 'ongoing'::text, 'completed'::text, 'cancelled'::text])))
+
+-- --- user_devices ------------------------------------------------
+-- user_devices : user_devices_pkey : PRIMARY KEY (id)
+-- user_devices : user_devices_profile_id_device_hash_key : UNIQUE (profile_id, device_hash)
+-- user_devices : user_devices_profile_id_fkey : FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+
+
+-- ======================================================================
+-- УКАЗАТЕЛИ
+-- ======================================================================
+
+
+-- --- app_releases ------------------------------------------------
+-- CREATE UNIQUE INDEX app_releases_pkey ON public.app_releases USING btree (id)
+-- CREATE INDEX idx_app_releases_platform ON public.app_releases USING btree (platform, version_code DESC)
+
+-- --- app_settings ------------------------------------------------
+-- CREATE UNIQUE INDEX app_settings_pkey ON public.app_settings USING btree (key)
+
+-- --- badge_definitions -------------------------------------------
+-- CREATE UNIQUE INDEX badge_definitions_pkey ON public.badge_definitions USING btree (id)
+
+-- --- bracket_undo ------------------------------------------------
+-- CREATE UNIQUE INDEX bracket_undo_pkey ON public.bracket_undo USING btree (tournament_id)
+
+-- --- categories --------------------------------------------------
+-- CREATE UNIQUE INDEX categories_pkey ON public.categories USING btree (id)
+
+-- --- challenge_predictions ---------------------------------------
+-- CREATE UNIQUE INDEX challenge_predictions_challenge_id_voter_type_voter_id_key ON public.challenge_predictions USING btree (challenge_id, voter_type, voter_id)
+-- CREATE UNIQUE INDEX challenge_predictions_pkey ON public.challenge_predictions USING btree (id)
+-- CREATE INDEX idx_predictions_challenge ON public.challenge_predictions USING btree (challenge_id)
+
+-- --- challenges --------------------------------------------------
+-- CREATE UNIQUE INDEX challenges_pkey ON public.challenges USING btree (id)
+-- CREATE INDEX idx_challenges_battle ON public.challenges USING btree (battle_published) WHERE (battle_published = true)
+-- CREATE INDEX idx_challenges_challenger ON public.challenges USING btree (challenger_id)
+-- CREATE INDEX idx_challenges_expires ON public.challenges USING btree (expires_at) WHERE (status = ANY (ARRAY['active'::text, 'negotiating'::text, 'countered'::text]))
+-- CREATE UNIQUE INDEX idx_challenges_live_match ON public.challenges USING btree (live_match_id) WHERE (live_match_id IS NOT NULL)
+-- CREATE INDEX idx_challenges_opponent ON public.challenges USING btree (opponent_profile_id)
+-- CREATE INDEX idx_challenges_status ON public.challenges USING btree (status)
+
+-- --- coaches -----------------------------------------------------
+-- CREATE UNIQUE INDEX coaches_pkey ON public.coaches USING btree (id)
+
+-- --- courts ------------------------------------------------------
+-- CREATE UNIQUE INDEX courts_pkey ON public.courts USING btree (id)
+
+-- --- deleted_accounts --------------------------------------------
+-- CREATE UNIQUE INDEX deleted_accounts_pkey ON public.deleted_accounts USING btree (id)
+-- CREATE INDEX idx_deleted_accounts_date ON public.deleted_accounts USING btree (deleted_at)
+
+-- --- discount_vouchers -------------------------------------------
+-- CREATE UNIQUE INDEX discount_vouchers_pkey ON public.discount_vouchers USING btree (id)
+-- CREATE UNIQUE INDEX discount_vouchers_qr_token_key ON public.discount_vouchers USING btree (qr_token)
+-- CREATE INDEX idx_vouchers_entity ON public.discount_vouchers USING btree (entity_type, entity_id, status)
+-- CREATE INDEX idx_vouchers_profile_status ON public.discount_vouchers USING btree (profile_id, status)
+-- CREATE INDEX idx_vouchers_qr_token ON public.discount_vouchers USING btree (qr_token)
+
+-- --- entity_payments ---------------------------------------------
+-- CREATE UNIQUE INDEX entity_payments_pkey ON public.entity_payments USING btree (id)
+-- CREATE INDEX idx_entity_payments_entity ON public.entity_payments USING btree (entity_type, entity_id)
+-- CREATE INDEX idx_entity_payments_promoted ON public.entity_payments USING btree (purpose, period_start, period_end)
+
+-- --- game_invites ------------------------------------------------
+-- CREATE UNIQUE INDEX game_invites_pkey ON public.game_invites USING btree (id)
+-- CREATE INDEX idx_game_invites_receiver ON public.game_invites USING btree (receiver_profile_id)
+-- CREATE INDEX idx_game_invites_sender ON public.game_invites USING btree (sender_id)
+-- CREATE INDEX idx_game_invites_status ON public.game_invites USING btree (status)
+
+-- --- live_match_points -------------------------------------------
+-- CREATE UNIQUE INDEX live_match_points_match_id_seq_key ON public.live_match_points USING btree (match_id, seq)
+-- CREATE INDEX live_match_points_match_seq_idx ON public.live_match_points USING btree (match_id, seq)
+-- CREATE UNIQUE INDEX live_match_points_pkey ON public.live_match_points USING btree (id)
+
+-- --- live_matches ------------------------------------------------
+-- CREATE INDEX idx_live_matches_status ON public.live_matches USING btree (status)
+-- CREATE INDEX idx_live_matches_umpire_key ON public.live_matches USING btree (umpire_key)
+-- CREATE UNIQUE INDEX live_matches_pkey ON public.live_matches USING btree (id)
+-- CREATE UNIQUE INDEX live_matches_umpire_key_key ON public.live_matches USING btree (umpire_key)
+
+-- --- loyalty_rewards ---------------------------------------------
+-- CREATE UNIQUE INDEX loyalty_rewards_code_key ON public.loyalty_rewards USING btree (code)
+-- CREATE UNIQUE INDEX loyalty_rewards_pkey ON public.loyalty_rewards USING btree (id)
+
+-- --- loyalty_rules -----------------------------------------------
+-- CREATE UNIQUE INDEX loyalty_rules_action_key ON public.loyalty_rules USING btree (action)
+-- CREATE UNIQUE INDEX loyalty_rules_pkey ON public.loyalty_rules USING btree (id)
+
+-- --- loyalty_transactions ----------------------------------------
+-- CREATE INDEX idx_loyalty_expires ON public.loyalty_transactions USING btree (expires_at) WHERE (type = 'earn'::text)
+-- CREATE INDEX idx_loyalty_profile ON public.loyalty_transactions USING btree (profile_id)
+-- CREATE UNIQUE INDEX loyalty_transactions_pkey ON public.loyalty_transactions USING btree (id)
+
+-- --- matches -----------------------------------------------------
+-- CREATE INDEX idx_matches_group ON public.matches USING btree (group_number)
+-- CREATE INDEX idx_matches_played_at ON public.matches USING btree (played_at DESC)
+-- CREATE INDEX idx_matches_player1 ON public.matches USING btree (player1_id)
+-- CREATE INDEX idx_matches_player2 ON public.matches USING btree (player2_id)
+-- CREATE INDEX idx_matches_reg1 ON public.matches USING btree (reg1_id)
+-- CREATE INDEX idx_matches_reg2 ON public.matches USING btree (reg2_id)
+-- CREATE INDEX idx_matches_round ON public.matches USING btree (round_number)
+-- CREATE INDEX idx_matches_score_status ON public.matches USING btree (score_status) WHERE (score_status IS NOT NULL)
+-- CREATE INDEX idx_matches_status ON public.matches USING btree (status)
+-- CREATE INDEX idx_matches_tournament ON public.matches USING btree (tournament_id)
+-- CREATE UNIQUE INDEX matches_odna_igra_na_mesto ON public.matches USING btree (tournament_id, COALESCE(group_number, 0), round, round_number, match_order)
+-- CREATE UNIQUE INDEX matches_pkey ON public.matches USING btree (id)
+
+-- --- membership_requests -----------------------------------------
+-- CREATE INDEX idx_membership_requests_profile ON public.membership_requests USING btree (profile_id)
+-- CREATE INDEX idx_membership_requests_status ON public.membership_requests USING btree (status)
+-- CREATE UNIQUE INDEX membership_requests_pkey ON public.membership_requests USING btree (id)
+
+-- --- memberships -------------------------------------------------
+-- CREATE INDEX idx_memberships_profile ON public.memberships USING btree (profile_id)
+-- CREATE UNIQUE INDEX memberships_pkey ON public.memberships USING btree (id)
+
+-- --- news --------------------------------------------------------
+-- CREATE INDEX idx_news_published ON public.news USING btree (published_at DESC)
+-- CREATE INDEX idx_news_slug ON public.news USING btree (slug)
+-- CREATE INDEX idx_news_tournament_id ON public.news USING btree (tournament_id)
+-- CREATE UNIQUE INDEX news_pkey ON public.news USING btree (id)
+-- CREATE UNIQUE INDEX news_slug_key ON public.news USING btree (slug)
+
+-- --- news_poll_votes ---------------------------------------------
+-- CREATE INDEX idx_news_poll_votes_news_id ON public.news_poll_votes USING btree (news_id)
+-- CREATE INDEX idx_news_poll_votes_user_id ON public.news_poll_votes USING btree (user_id)
+-- CREATE UNIQUE INDEX news_poll_votes_news_id_user_id_key ON public.news_poll_votes USING btree (news_id, user_id)
+-- CREATE UNIQUE INDEX news_poll_votes_pkey ON public.news_poll_votes USING btree (id)
+
+-- --- news_reactions ----------------------------------------------
+-- CREATE INDEX idx_news_reactions_news_id ON public.news_reactions USING btree (news_id)
+-- CREATE INDEX idx_news_reactions_user_id ON public.news_reactions USING btree (user_id)
+-- CREATE UNIQUE INDEX news_reactions_news_id_user_id_reaction_type_key ON public.news_reactions USING btree (news_id, user_id, reaction_type)
+-- CREATE UNIQUE INDEX news_reactions_pkey ON public.news_reactions USING btree (id)
+
+-- --- news_sources ------------------------------------------------
+-- CREATE UNIQUE INDEX news_sources_feed_url_key ON public.news_sources USING btree (feed_url)
+-- CREATE UNIQUE INDEX news_sources_pkey ON public.news_sources USING btree (id)
+
+-- --- news_suggestions --------------------------------------------
+-- CREATE INDEX idx_news_suggestions_status ON public.news_suggestions USING btree (status, published_at DESC)
+-- CREATE UNIQUE INDEX news_suggestions_link_key_key ON public.news_suggestions USING btree (link_key)
+-- CREATE UNIQUE INDEX news_suggestions_pkey ON public.news_suggestions USING btree (id)
+
+-- --- notification_log --------------------------------------------
+-- CREATE INDEX idx_notification_log_profile ON public.notification_log USING btree (profile_id, is_read, created_at DESC)
+-- CREATE UNIQUE INDEX notification_log_pkey ON public.notification_log USING btree (id)
+-- CREATE INDEX notification_log_push_id_idx ON public.notification_log USING btree (push_id)
+
+-- --- notification_texts ------------------------------------------
+-- CREATE UNIQUE INDEX notification_texts_pkey ON public.notification_texts USING btree (key)
+
+-- --- otp_blocks --------------------------------------------------
+-- CREATE INDEX idx_otp_blocks_key ON public.otp_blocks USING btree (block_key)
+-- CREATE INDEX idx_otp_blocks_until ON public.otp_blocks USING btree (blocked_until)
+-- CREATE UNIQUE INDEX otp_blocks_block_key_key ON public.otp_blocks USING btree (block_key)
+-- CREATE UNIQUE INDEX otp_blocks_pkey ON public.otp_blocks USING btree (id)
+
+-- --- otp_codes ---------------------------------------------------
+-- CREATE INDEX idx_otp_codes_lookup ON public.otp_codes USING btree (identifier, flow, used, expires_at)
+-- CREATE UNIQUE INDEX otp_codes_pkey ON public.otp_codes USING btree (id)
+
+-- --- page_views --------------------------------------------------
+-- CREATE UNIQUE INDEX page_views_pkey ON public.page_views USING btree (page_name)
+
+-- --- partner_services --------------------------------------------
+-- CREATE INDEX idx_partner_services_entity ON public.partner_services USING btree (entity_type, entity_id)
+-- CREATE UNIQUE INDEX partner_services_pkey ON public.partner_services USING btree (id)
+
+-- --- payments ----------------------------------------------------
+-- CREATE INDEX idx_payments_profile ON public.payments USING btree (profile_id)
+-- CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)
+
+-- --- player_badges -----------------------------------------------
+-- CREATE INDEX idx_player_badges_player ON public.player_badges USING btree (player_id)
+-- CREATE UNIQUE INDEX player_badges_pkey ON public.player_badges USING btree (id)
+-- CREATE UNIQUE INDEX player_badges_player_id_badge_id_key ON public.player_badges USING btree (player_id, badge_id)
+
+-- --- player_categories -------------------------------------------
+-- CREATE INDEX idx_player_categories_cat ON public.player_categories USING btree (category_id, points DESC)
+-- CREATE UNIQUE INDEX player_categories_pkey ON public.player_categories USING btree (player_id, category_id)
+
+-- --- player_link_requests ----------------------------------------
+-- CREATE UNIQUE INDEX idx_link_requests_one_open ON public.player_link_requests USING btree (profile_id) WHERE (status = 'pending'::text)
+-- CREATE INDEX idx_link_requests_pending ON public.player_link_requests USING btree (created_at DESC) WHERE (status = 'pending'::text)
+-- CREATE UNIQUE INDEX player_link_requests_pkey ON public.player_link_requests USING btree (id)
+
+-- --- player_promotions -------------------------------------------
+-- CREATE INDEX idx_player_promotions_player ON public.player_promotions USING btree (player_id)
+-- CREATE INDEX idx_player_promotions_season ON public.player_promotions USING btree (season)
+-- CREATE UNIQUE INDEX player_promotions_pkey ON public.player_promotions USING btree (id)
+
+-- --- players -----------------------------------------------------
+-- CREATE INDEX idx_players_category ON public.players USING btree (category_id)
+-- CREATE INDEX idx_players_is_member ON public.players USING btree (is_member) WHERE is_member
+-- CREATE INDEX idx_players_points ON public.players USING btree (points DESC)
+-- CREATE UNIQUE INDEX players_pkey ON public.players USING btree (id)
+
+-- --- points_by_place ---------------------------------------------
+-- CREATE UNIQUE INDEX points_by_place_pkey ON public.points_by_place USING btree (id)
+-- CREATE UNIQUE INDEX points_by_place_version_level_place ON public.points_by_place USING btree (version_id, level_id, place)
+
+-- --- points_rules ------------------------------------------------
+-- CREATE UNIQUE INDEX points_rules_level_id_round_key ON public.points_rules USING btree (level_id, round)
+-- CREATE UNIQUE INDEX points_rules_pkey ON public.points_rules USING btree (id)
+
+-- --- points_versions ---------------------------------------------
+-- CREATE UNIQUE INDEX points_versions_effective_from_key ON public.points_versions USING btree (effective_from)
+-- CREATE UNIQUE INDEX points_versions_pkey ON public.points_versions USING btree (id)
+
+-- --- profiles ----------------------------------------------------
+-- CREATE INDEX idx_profiles_deleted_at ON public.profiles USING btree (deleted_at) WHERE (deleted_at IS NOT NULL)
+-- CREATE INDEX idx_profiles_email ON public.profiles USING btree (email)
+-- CREATE INDEX idx_profiles_phone_e164 ON public.profiles USING btree (phone_e164) WHERE (phone_e164 <> ''::text)
+-- CREATE UNIQUE INDEX idx_profiles_phone_e164_unique ON public.profiles USING btree (phone_e164) WHERE (phone_e164 <> ''::text)
+-- CREATE UNIQUE INDEX profiles_phone_unique ON public.profiles USING btree (phone)
+-- CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)
+-- CREATE UNIQUE INDEX profiles_telegram_chat_id_unique ON public.profiles USING btree (telegram_chat_id)
+
+-- --- push_log ----------------------------------------------------
+-- CREATE UNIQUE INDEX push_log_pkey ON public.push_log USING btree (id)
+
+-- --- rate_limits -------------------------------------------------
+-- CREATE INDEX idx_rate_limits_key_time ON public.rate_limits USING btree (limit_key, created_at DESC)
+-- CREATE UNIQUE INDEX rate_limits_pkey ON public.rate_limits USING btree (id)
+
+-- --- rating_history ----------------------------------------------
+-- CREATE INDEX idx_rating_history_category ON public.rating_history USING btree (player_id, category_id)
+-- CREATE INDEX idx_rating_history_date ON public.rating_history USING btree (recorded_at)
+-- CREATE INDEX idx_rating_history_player ON public.rating_history USING btree (player_id)
+-- CREATE UNIQUE INDEX rating_history_pkey ON public.rating_history USING btree (id)
+
+-- --- registration_changes ----------------------------------------
+-- CREATE UNIQUE INDEX registration_changes_pkey ON public.registration_changes USING btree (id)
+-- CREATE INDEX registration_changes_turnir ON public.registration_changes USING btree (tournament_id, created_at DESC)
+
+-- --- season_reset_log --------------------------------------------
+-- CREATE INDEX idx_season_reset_player ON public.season_reset_log USING btree (player_id)
+-- CREATE INDEX idx_season_reset_run ON public.season_reset_log USING btree (run_at DESC)
+-- CREATE UNIQUE INDEX season_reset_log_pkey ON public.season_reset_log USING btree (id)
+
+-- --- site_content ------------------------------------------------
+-- CREATE UNIQUE INDEX site_content_pkey ON public.site_content USING btree (key)
+
+-- --- site_documents ----------------------------------------------
+-- CREATE UNIQUE INDEX site_documents_pkey ON public.site_documents USING btree (slug)
+
+-- --- slepok_tbsh_uroven ------------------------------------------
+-- CREATE UNIQUE INDEX slepok_tbsh_uroven_pkey ON public.slepok_tbsh_uroven USING btree ("снято", id)
+
+-- --- sponsors ----------------------------------------------------
+-- CREATE UNIQUE INDEX sponsors_pkey ON public.sponsors USING btree (id)
+
+-- --- tournament_levels -------------------------------------------
+-- CREATE UNIQUE INDEX tournament_levels_pkey ON public.tournament_levels USING btree (id)
+
+-- --- tournament_registrations ------------------------------------
+-- CREATE INDEX idx_registrations_blocked ON public.tournament_registrations USING btree (tournament_id) WHERE (status = 'blocked'::text)
+-- CREATE INDEX idx_registrations_player ON public.tournament_registrations USING btree (player_id)
+-- CREATE INDEX idx_registrations_seat_pool ON public.tournament_registrations USING btree (tournament_id, seat_pool, status)
+-- CREATE INDEX idx_registrations_status ON public.tournament_registrations USING btree (status)
+-- CREATE INDEX idx_registrations_tournament ON public.tournament_registrations USING btree (tournament_id)
+-- CREATE UNIQUE INDEX tournament_registrations_pkey ON public.tournament_registrations USING btree (id)
+-- CREATE INDEX tournament_registrations_queue_idx ON public.tournament_registrations USING btree (tournament_id, seat_pool, queue_at) WHERE (status = 'waitlist'::text)
+-- CREATE UNIQUE INDEX tournament_registrations_tournament_player_unique ON public.tournament_registrations USING btree (tournament_id, player_id) WHERE (player_id IS NOT NULL)
+
+-- --- tournament_results ------------------------------------------
+-- CREATE INDEX idx_tournament_results_category ON public.tournament_results USING btree (category_id)
+-- CREATE INDEX idx_tournament_results_player ON public.tournament_results USING btree (player_id)
+-- CREATE INDEX idx_tournament_results_season ON public.tournament_results USING btree (season)
+-- CREATE INDEX idx_tournament_results_tournament ON public.tournament_results USING btree (tournament_id)
+-- CREATE UNIQUE INDEX tournament_results_pkey ON public.tournament_results USING btree (id)
+-- CREATE UNIQUE INDEX tournament_results_tournament_id_player_id_key ON public.tournament_results USING btree (tournament_id, player_id)
+
+-- --- tournaments -------------------------------------------------
+-- CREATE INDEX idx_tournaments_date ON public.tournaments USING btree (date_start DESC)
+-- CREATE INDEX idx_tournaments_status ON public.tournaments USING btree (status)
+-- CREATE UNIQUE INDEX tournaments_pkey ON public.tournaments USING btree (id)
+
+-- --- user_devices ------------------------------------------------
+-- CREATE UNIQUE INDEX user_devices_pkey ON public.user_devices USING btree (id)
+-- CREATE UNIQUE INDEX user_devices_profile_id_device_hash_key ON public.user_devices USING btree (profile_id, device_hash)
+
+
+-- ======================================================================
+-- ПРЕДСТАВЛЕНИЯ
+-- ======================================================================
+
+
+-- --- players_public ----------------------------------------------
+-- players_public AS  SELECT id,
+--     name,
+--     name_en,
+--     name_kg,
+--     photo,
+--     country,
+--     category_id,
+--     points,
+--     wins,
+--     losses,
+--     rank_change,
+--     form,
+--     doubles_wins,
+--     doubles_losses,
+--     mixed_wins,
+--     mixed_losses,
+--     ntrp_singles,
+--     ntrp_doubles,
+--     gender,
+--     bio,
+--     bio_en,
+--     bio_kg,
+--     is_online,
+--     is_member,
+--     is_guest,
+--     has_account,
+--     view_count,
+--     view_count_app,
+--     created_at,
+--     updated_at
+--    FROM players;
+
+
+-- ======================================================================
+-- ФУНКЦИИ — полные тела, ровно как они лежат в базе
+-- ======================================================================
+
+
+-- --- accept_stale_match_scores() ---------------------------------
+-- CREATE OR REPLACE FUNCTION public.accept_stale_match_scores()
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     n integer := 0;
+-- BEGIN
+--     UPDATE matches SET
+--         score_status       = 'confirmed',
+--         score_confirmed_at = now()
+--      WHERE score_status = 'pending'
+--        AND score_submitted_at < now() - interval '24 hours';
+--     GET DIAGNOSTICS n = ROW_COUNT;
+--     RETURN n;
+-- END;
+-- $function$
+--
+
+-- --- advance_bracket_winner(p_match_id uuid) ---------------------
+-- CREATE OR REPLACE FUNCTION public.advance_bracket_winner(p_match_id uuid)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     m            RECORD;
+--     v_приставка  text;
+--     v_след_круг  integer;
+--     v_след_поряд integer;
+--     v_место      text;      -- player1_id или player2_id
+--     v_сеяный     text;      -- seed1 или seed2
+--     v_посев      integer;
+--     v_проиграл   text;
+--     v_его_посев  integer;
+--     v_след_id    uuid;
+--     v_третий_id  uuid;
+--     v_r1         integer;
+--     v_сетка      integer;
+--     v_кругов     integer;
+--     v_четверть   integer;
+--     v_ниже       integer;
+--     v_итог       jsonb := jsonb_build_object('moved', false);
+-- BEGIN
+--     SELECT * INTO m FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND OR m.winner_id IS NULL OR m.status <> 'completed' THEN
+--         RETURN v_итог;
+--     END IF;
+--
+--     -- В группах сетки нет, двигать некуда
+--     IF m.group_number IS NOT NULL THEN
+--         RETURN v_итог;
+--     END IF;
+--
+--     -- Отборочный круг оставляем менеджеру
+--     IF m.round = 'IG' THEN
+--         RETURN jsonb_build_object('moved', false, 'reason', 'отборочный круг заполняет менеджер');
+--     END IF;
+--
+--     -- Приставка лиги, если это лига
+--     v_приставка := CASE
+--         WHEN m.round LIKE 'PL-%' THEN 'PL-'
+--         WHEN m.round LIKE 'CL-%' THEN 'CL-'
+--         ELSE ''
+--     END;
+--
+--     -- Матч за третье место конечный
+--     IF m.round = v_приставка \|\| '3RD' THEN
+--         RETURN jsonb_build_object('moved', false, 'reason', 'матч за третье место');
+--     END IF;
+--
+--     -- Посев победителя переносим вместе с ним
+--     v_посев := CASE WHEN m.winner_id = m.player1_id THEN m.seed1 ELSE m.seed2 END;
+--
+--     -- Нечётный порядок садится в верхнее место следующего матча, чётный в нижнее
+--     IF m.match_order % 2 <> 0 THEN
+--         v_место := 'player1_id'; v_сеяный := 'seed1';
+--     ELSE
+--         v_место := 'player2_id'; v_сеяный := 'seed2';
+--     END IF;
+--
+--     v_след_круг  := m.round_number + 1;
+--     v_след_поряд := ceil(m.match_order::numeric / 2)::int;
+--
+--     -- ---- FIC: двигаются оба ----
+--     IF m.round LIKE 'FIC-%' THEN
+--         -- Размер сетки — только по её матчам. С групповыми в счёте сетка
+--         -- выходила втрое больше, и адрес следующей клетки уезжал.
+--         SELECT count(*) INTO v_r1 FROM matches
+--          WHERE tournament_id = m.tournament_id AND round_number = 1
+--            AND group_number IS NULL AND round IS DISTINCT FROM 'IG';
+--         v_сетка    := v_r1 * 2;
+--         v_кругов   := CASE WHEN v_сетка > 1 THEN log(2, v_сетка::numeric)::int ELSE 0 END;
+--         v_четверть := v_сетка / 4;
+--
+--         -- Последний круг разыгрывает места, дальше идти некуда
+--         IF m.round_number >= v_кругов THEN
+--             RETURN jsonb_build_object('moved', false, 'reason', 'последний круг');
+--         END IF;
+--
+--         -- Адрес зависит от круга, а не от постоянного шага: раньше здесь
+--         -- была четверть сетки, и все проигравшие валились в нижний блок.
+--         v_след_поряд := public.fic_адрес(v_сетка, m.round_number, m.match_order, true);
+--
+--         SELECT id INTO v_след_id FROM matches
+--          WHERE tournament_id = m.tournament_id
+--            AND round_number = v_след_круг AND match_order = v_след_поряд
+--            AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--          LIMIT 1;
+--
+--         IF v_след_id IS NOT NULL THEN
+--             EXECUTE format('UPDATE matches SET %I = $1, %I = $2 WHERE id = $3', v_место, v_сеяный)
+--               USING m.winner_id, v_посев, v_след_id;
+--             v_итог := jsonb_build_object('moved', true, 'winner_to', v_след_id);
+--         END IF;
+--
+--         -- Проигравший — в тот же круг, но на четверть сетки ниже, в то же место
+--         v_проиграл  := CASE WHEN m.winner_id = m.player1_id THEN m.player2_id ELSE m.player1_id END;
+--         v_его_посев := CASE WHEN m.winner_id = m.player1_id THEN m.seed2 ELSE m.seed1 END;
+--
+--         IF v_проиграл IS NOT NULL THEN
+--             v_ниже := public.fic_адрес(v_сетка, m.round_number, m.match_order, false);
+--             SELECT id INTO v_след_id FROM matches
+--              WHERE tournament_id = m.tournament_id
+--                AND round_number = v_след_круг AND match_order = v_ниже
+--                AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--              LIMIT 1;
+--             IF v_след_id IS NOT NULL THEN
+--                 EXECUTE format('UPDATE matches SET %I = $1, %I = $2 WHERE id = $3', v_место, v_сеяный)
+--                   USING v_проиграл, v_его_посев, v_след_id;
+--                 v_итог := v_итог \|\| jsonb_build_object('loser_to', v_след_id);
+--             END IF;
+--         END IF;
+--
+--         RETURN v_итог;
+--     END IF;
+--
+--     -- ---- Олимпийка и лига ----
+--     SELECT id INTO v_след_id FROM matches
+--      WHERE tournament_id = m.tournament_id
+--        AND round_number = v_след_круг
+--        AND match_order  = v_след_поряд
+--        AND group_number IS NULL
+--        AND round IS DISTINCT FROM 'IG'
+--        AND round IS DISTINCT FROM (v_приставка \|\| '3RD')
+--        AND (v_приставка = '' OR round LIKE v_приставка \|\| '%')
+--      LIMIT 1;
+--
+--     IF v_след_id IS NOT NULL THEN
+--         EXECUTE format('UPDATE matches SET %I = $1, %I = $2 WHERE id = $3', v_место, v_сеяный)
+--           USING m.winner_id, v_посев, v_след_id;
+--         v_итог := jsonb_build_object('moved', true, 'winner_to', v_след_id);
+--     END IF;
+--
+--     -- ---- Проигравший полуфинала — в матч за третье место ----
+--     IF m.round = v_приставка \|\| 'SF' THEN
+--         v_проиграл  := CASE WHEN m.winner_id = m.player1_id THEN m.player2_id ELSE m.player1_id END;
+--         v_его_посев := CASE WHEN m.winner_id = m.player1_id THEN m.seed2 ELSE m.seed1 END;
+--
+--         SELECT id INTO v_третий_id FROM matches
+--          WHERE tournament_id = m.tournament_id AND round = v_приставка \|\| '3RD'
+--          LIMIT 1;
+--
+--         IF v_третий_id IS NOT NULL AND v_проиграл IS NOT NULL THEN
+--             -- Проигравший первого полуфинала встаёт сверху, второго — снизу
+--             IF m.match_order = 1 THEN
+--                 v_место := 'player1_id'; v_сеяный := 'seed1';
+--             ELSE
+--                 v_место := 'player2_id'; v_сеяный := 'seed2';
+--             END IF;
+--             EXECUTE format('UPDATE matches SET %I = $1, %I = $2 WHERE id = $3', v_место, v_сеяный)
+--               USING v_проиграл, v_его_посев, v_третий_id;
+--             v_итог := v_итог \|\| jsonb_build_object('third_place', v_третий_id);
+--         END IF;
+--     END IF;
+--
+--     RETURN v_итог;
+-- END;
+-- $function$
+--
+
+-- --- cancel_battle(p_id uuid, p_reason text) ---------------------
+-- CREATE OR REPLACE FUNCTION public.cancel_battle(p_id uuid, p_reason text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     caller_role text;
+--     ch          challenges%ROWTYPE;
+--     chal_name   text;
+--     opp_name    text;
+--     note_title  text;
+--     note_text   text;
+--     push_row    uuid;
+--     sent_count  int;
+--     reason      text;
+-- BEGIN
+--     SELECT role INTO caller_role FROM profiles WHERE id = auth.uid();
+--     IF caller_role IS NULL OR caller_role NOT IN ('admin', 'manager') THEN
+--         RETURN jsonb_build_object('error', 'forbidden');
+--     END IF;
+--
+--     SELECT * INTO ch FROM challenges WHERE id = p_id;
+--     IF ch.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'not_found');
+--     END IF;
+--
+--     -- Отменять есть что только у принятого или опубликованного: остальное
+--     -- либо ещё не состоялось, либо уже сыграно
+--     IF ch.status NOT IN ('accepted') THEN
+--         RETURN jsonb_build_object('error', 'not_cancellable', 'status', ch.status);
+--     END IF;
+--
+--     reason := nullif(btrim(coalesce(p_reason, '')), '');
+--
+--     UPDATE challenges
+--     SET status = 'cancelled',
+--         cancelled_at = now(),
+--         cancelled_by = auth.uid(),
+--         cancel_reason = reason,
+--         battle_published = false
+--     WHERE id = p_id;
+--
+--     SELECT full_name INTO chal_name FROM profiles WHERE id = ch.challenger_id;
+--     SELECT full_name INTO opp_name FROM profiles WHERE id = ch.opponent_profile_id;
+--
+--     note_title := 'Баттл отменён';
+--     note_text  := COALESCE(ch.battle_title, COALESCE(chal_name, 'Игрок') \|\| ' — ' \|\| COALESCE(opp_name, 'игрок')) \|\|
+--                   ': матч не состоится.' \|\| COALESCE(' ' \|\| reason, '');
+--
+--     -- Клубу — той же дорогой, что и анонс о принятии
+--     INSERT INTO push_log (admin_id, title, message, type, audience, recipients_count, fcm_sent)
+--     VALUES (auth.uid(), note_title, note_text, 'battle', 'all', 0, 0)
+--     RETURNING id INTO push_row;
+--
+--     INSERT INTO notification_log (profile_id, type, title, message, is_read, push_id)
+--     SELECT p.id, 'battle', note_title, note_text, false, push_row
+--     FROM profiles p
+--     WHERE p.id <> ch.challenger_id
+--       AND (ch.opponent_profile_id IS NULL OR p.id <> ch.opponent_profile_id)
+--       AND COALESCE(p.notify_preferences #>> '{site,challenges}', 'true') <> 'false';
+--
+--     GET DIAGNOSTICS sent_count = ROW_COUNT;
+--     UPDATE push_log SET recipients_count = sent_count WHERE id = push_row;
+--
+--     -- Участникам — лично и без фильтра: их это касается напрямую
+--     INSERT INTO notification_log (profile_id, type, title, message, is_read, push_id)
+--     SELECT p.id, 'battle', note_title, note_text, false, push_row
+--     FROM profiles p
+--     WHERE p.id IN (ch.challenger_id, ch.opponent_profile_id);
+--
+--     RETURN jsonb_build_object('ok', true, 'notified', sent_count);
+-- END;
+-- $function$
+--
+
+-- --- cancel_challenge(p_id uuid) ---------------------------------
+-- CREATE OR REPLACE FUNCTION public.cancel_challenge(p_id uuid)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     ch challenges%ROWTYPE;
+-- BEGIN
+--     SELECT * INTO ch FROM challenges WHERE id = p_id;
+--     IF ch.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'not_found');
+--     END IF;
+--
+--     IF ch.challenger_id IS DISTINCT FROM auth.uid() THEN
+--         RETURN jsonb_build_object('error', 'forbidden');
+--     END IF;
+--
+--     IF ch.status <> 'active' THEN
+--         RETURN jsonb_build_object('error', 'already_answered', 'status', ch.status);
+--     END IF;
+--
+--     -- Запись не удаляем: у обеих сторон в истории остаётся, что вызов был
+--     -- и кто передумал. Чтобы позвать снова, заводят новый — со страницы
+--     -- игрока, как и первый раз
+--     UPDATE challenges
+--     SET status = 'cancelled', cancelled_at = now(), cancelled_by = auth.uid()
+--     WHERE id = p_id;
+--
+--     RETURN jsonb_build_object('ok', true);
+-- END;
+-- $function$
+--
+
+-- --- cast_battle_vote(p_challenge_id uuid, p_player_id text, p_side smallint) 
+-- CREATE OR REPLACE FUNCTION public.cast_battle_vote(p_challenge_id uuid, p_player_id text DEFAULT NULL::text, p_side smallint DEFAULT NULL::smallint)
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v_challenge RECORD;
+--     v_side      smallint;
+--     v_existing  smallint;
+--     v_tg_chat   text;
+--     v_tg_vote   smallint;
+--     v_match_dt  timestamptz;
+-- BEGIN
+--     -- Встречного предложения больше нет: дату и место задаёт менеджер,
+--     -- колонки counter_* удалены прежней миграцией
+--     SELECT battle_published, voting_closed,
+--            challenger_player_id, opponent_player_id,
+--            proposed_date AS match_date,
+--            proposed_time AS match_time
+--     INTO v_challenge
+--     FROM challenges WHERE id = p_challenge_id;
+--
+--     IF v_challenge IS NULL OR v_challenge.battle_published = false THEN
+--         RETURN json_build_object('ok', false, 'error', 'not_found');
+--     END IF;
+--
+--     IF v_challenge.voting_closed THEN
+--         RETURN json_build_object('ok', false, 'error', 'voting_closed');
+--     END IF;
+--
+--     -- За кого голос. Раньше сюда принимали любой идентификатор и писали его
+--     -- как есть: проголосовать можно было за постороннего игрока, и он
+--     -- попадал в проценты. Теперь сторона либо определяется, либо отказ
+--     v_side := p_side;
+--     IF v_side IS NULL AND p_player_id IS NOT NULL THEN
+--         IF p_player_id = v_challenge.challenger_player_id THEN
+--             v_side := 1;
+--         ELSIF p_player_id = v_challenge.opponent_player_id THEN
+--             v_side := 2;
+--         END IF;
+--     END IF;
+--
+--     IF v_side IS NULL OR v_side NOT IN (1, 2) THEN
+--         RETURN json_build_object('ok', false, 'error', 'bad_side');
+--     END IF;
+--
+--     -- Голосование закрывается само, когда начался матч
+--     IF v_challenge.match_date IS NOT NULL AND v_challenge.match_time IS NOT NULL THEN
+--         v_match_dt := (v_challenge.match_date::text \|\| ' ' \|\| v_challenge.match_time)::timestamp
+--                       AT TIME ZONE 'Asia/Bishkek';
+--         IF NOW() >= v_match_dt THEN
+--             UPDATE challenges SET voting_closed = true WHERE id = p_challenge_id;
+--             RETURN json_build_object('ok', false, 'error', 'voting_closed');
+--         END IF;
+--     END IF;
+--
+--     SELECT predicted_side INTO v_existing
+--     FROM challenge_predictions
+--     WHERE challenge_id = p_challenge_id
+--       AND voter_type = 'site'
+--       AND voter_id = auth.uid()::text;
+--
+--     IF v_existing IS NOT NULL THEN
+--         RETURN json_build_object('ok', false, 'error', 'already_voted');
+--     END IF;
+--
+--     -- Тот же человек мог проголосовать из Telegram
+--     SELECT telegram_chat_id::text INTO v_tg_chat FROM profiles WHERE id = auth.uid();
+--
+--     IF v_tg_chat IS NOT NULL THEN
+--         SELECT predicted_side INTO v_tg_vote
+--         FROM challenge_predictions
+--         WHERE challenge_id = p_challenge_id
+--           AND voter_type = 'telegram'
+--           AND voter_id = v_tg_chat;
+--
+--         IF v_tg_vote IS NOT NULL THEN
+--             RETURN json_build_object('ok', false, 'error', 'already_voted_tg');
+--         END IF;
+--     END IF;
+--
+--     INSERT INTO challenge_predictions (challenge_id, voter_type, voter_id, predicted_side)
+--     VALUES (p_challenge_id, 'site', auth.uid()::text, v_side);
+--
+--     RETURN json_build_object('ok', true, 'side', v_side);
+-- END;
+-- $function$
+--
+
+-- --- check_and_award_badges(p_player_id text) --------------------
+-- CREATE OR REPLACE FUNCTION public.check_and_award_badges(p_player_id text)
+--  RETURNS text[]
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     new_badges TEXT[] := '{}';
+--     player_rec RECORD;
+--     badge RECORD;
+--     val INTEGER;
+--     earned BOOLEAN;
+--     has_badge BOOLEAN;
+--     t_id TEXT;
+--     lost_set BOOLEAN;
+--     m_rec RECORD;
+--     sets_arr TEXT[];
+--     s_item TEXT;
+--     parts TEXT[];
+--     p1_games INTEGER;
+--     p2_games INTEGER;
+--     i INTEGER;
+-- BEGIN
+--     SELECT * INTO player_rec FROM players WHERE id = p_player_id;
+--     IF NOT FOUND THEN RETURN new_badges; END IF;
+--
+--     FOR badge IN SELECT * FROM badge_definitions WHERE condition_type != 'manual' ORDER BY sort_order LOOP
+--         earned := false;
+--
+--         CASE badge.condition_type
+--
+--             WHEN 'matches_played' THEN
+--                 SELECT COUNT(*) INTO val FROM matches
+--                     WHERE (player1_id = p_player_id OR player2_id = p_player_id)
+--                     AND status = 'completed' AND winner_id IS NOT NULL;
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'wins' THEN
+--                 -- Считаем по сыгранным матчам, а не по счётчику в карточке.
+--                 -- В карточке лежат только рейтинговые турниры: баттл туда не
+--                 -- идёт намеренно, и человек, выигравший баттл, никогда не
+--                 -- получал бы «Первую победу». Значок — про сыгранное, а не
+--                 -- про очки
+--                 SELECT COUNT(*) INTO val FROM matches
+--                     WHERE winner_id = p_player_id AND status = 'completed';
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'tournaments_played' THEN
+--                 SELECT COUNT(DISTINCT tournament_id) INTO val FROM tournament_registrations
+--                     WHERE player_id = p_player_id AND status IN ('approved', 'draw');
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'streak' THEN
+--                 -- Серия побед подряд, считая с последнего матча. Раньше брали
+--                 -- поле «форма» из карточки, а туда попадают только рейтинговые
+--                 -- турниры — баттлы серию не продолжали и не обрывали
+--                 val := 0;
+--                 FOR m_rec IN
+--                     SELECT winner_id FROM matches
+--                      WHERE (player1_id = p_player_id OR player2_id = p_player_id)
+--                        AND status = 'completed' AND winner_id IS NOT NULL
+--                      ORDER BY played_at DESC NULLS LAST, created_at DESC
+--                 LOOP
+--                     IF m_rec.winner_id = p_player_id THEN val := val + 1;
+--                     ELSE EXIT;
+--                     END IF;
+--                 END LOOP;
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'champion' THEN
+--                 SELECT COUNT(*) INTO val FROM tournament_results
+--                     WHERE player_id = p_player_id AND round_reached = 'W'
+--                     AND COALESCE(is_doubles, false) = false;
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'champion_count' THEN
+--                 SELECT COUNT(*) INTO val FROM tournament_results
+--                     WHERE player_id = p_player_id AND round_reached = 'W'
+--                     AND COALESCE(is_doubles, false) = false;
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'finalist' THEN
+--                 -- Именно проигранный финал: у победителя есть свой значок
+--                 SELECT COUNT(*) INTO val FROM tournament_results
+--                     WHERE player_id = p_player_id AND round_reached = 'F'
+--                     AND COALESCE(is_doubles, false) = false;
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'no_set_loss' THEN
+--                 -- Выигранный турнир, в котором не отдан ни один сет
+--                 FOR t_id IN
+--                     SELECT tr.tournament_id FROM tournament_results tr
+--                     WHERE tr.player_id = p_player_id AND tr.round_reached = 'W'
+--                     AND COALESCE(tr.is_doubles, false) = false
+--                 LOOP
+--                     lost_set := false;
+--                     FOR m_rec IN
+--                         SELECT score, player1_id FROM matches
+--                         WHERE tournament_id = t_id
+--                         AND (player1_id = p_player_id OR player2_id = p_player_id)
+--                         AND status = 'completed' AND score IS NOT NULL AND score != 'BYE'
+--                     LOOP
+--                         sets_arr := string_to_array(m_rec.score, ' ');
+--                         IF sets_arr IS NOT NULL THEN
+--                             FOREACH s_item IN ARRAY sets_arr LOOP
+--                                 parts := string_to_array(s_item, '/');
+--                                 IF array_length(parts, 1) = 2 THEN
+--                                     p1_games := safe_int(parts[1]);
+--                                     p2_games := safe_int(parts[2]);
+--                                     IF p1_games IS NOT NULL AND p2_games IS NOT NULL THEN
+--                                         IF (m_rec.player1_id = p_player_id AND p1_games < p2_games)
+--                                         OR (m_rec.player1_id != p_player_id AND p2_games < p1_games) THEN
+--                                             lost_set := true;
+--                                         END IF;
+--                                     END IF;
+--                                 END IF;
+--                             END LOOP;
+--                         END IF;
+--                     END LOOP;
+--                     IF NOT lost_set THEN
+--                         earned := true;
+--                         EXIT;
+--                     END IF;
+--                 END LOOP;
+--
+--             WHEN 'upset' THEN
+--                 SELECT COUNT(*) INTO val FROM matches m
+--                     JOIN players p1 ON p1.id = m.player1_id
+--                     JOIN players p2 ON p2.id = m.player2_id
+--                     WHERE m.winner_id = p_player_id AND m.status = 'completed'
+--                     AND (
+--                         (m.player1_id = p_player_id AND p2.points - p1.points >= badge.condition_value)
+--                         OR (m.player2_id = p_player_id AND p1.points - p2.points >= badge.condition_value)
+--                     );
+--                 earned := val > 0;
+--
+--             WHEN 'rank' THEN
+--                 -- Игрок может держать очки сразу в двух категориях, и очки
+--                 -- лежат в двух местах: player_categories заполнена не для
+--                 -- всех, у остальных они в самой карточке игрока. Считать
+--                 -- место по одной таблице нельзя — в player_categories два
+--                 -- десятка человек, и каждый из них выглядел бы первым.
+--                 -- Сводим оба источника, карточка идёт в ход только там, где
+--                 -- отдельной записи по категории нет.
+--                 WITH standings AS (
+--                     SELECT pc.player_id, pc.category_id, pc.points
+--                     FROM player_categories pc WHERE pc.points > 0
+--                     UNION ALL
+--                     SELECT p.id, p.category_id, p.points
+--                     FROM players p
+--                     WHERE p.points > 0 AND p.category_id IS NOT NULL
+--                       AND NOT EXISTS (
+--                           SELECT 1 FROM player_categories pc2
+--                           WHERE pc2.player_id = p.id AND pc2.category_id = p.category_id)
+--                 )
+--                 SELECT MIN(pos) INTO val FROM (
+--                     SELECT (SELECT COUNT(*) + 1 FROM standings o
+--                             WHERE o.category_id = s.category_id AND o.points > s.points) AS pos
+--                     FROM standings s WHERE s.player_id = p_player_id
+--                 ) ranks;
+--                 earned := val IS NOT NULL AND val <= badge.condition_value;
+--
+--             WHEN 'membership' THEN
+--                 earned := EXISTS (SELECT 1 FROM memberships
+--                     WHERE profile_id IN (SELECT id FROM profiles WHERE player_id = p_player_id)
+--                     AND status = 'active');
+--
+--             WHEN 'first_year' THEN
+--                 earned := player_rec.created_at < '2026-01-01'::timestamptz;
+--
+--             WHEN 'season_count' THEN
+--                 val := EXTRACT(YEAR FROM age(now(), player_rec.created_at))::int;
+--                 earned := val >= badge.condition_value;
+--
+--             WHEN 'domination' THEN
+--                 SELECT MAX(cnt) INTO val FROM (
+--                     SELECT COUNT(*) cnt FROM matches
+--                     WHERE winner_id = p_player_id AND status = 'completed'
+--                     GROUP BY CASE WHEN player1_id = p_player_id THEN player2_id ELSE player1_id END
+--                 ) sub;
+--                 earned := COALESCE(val, 0) >= badge.condition_value;
+--
+--             ELSE
+--                 earned := false;
+--
+--         END CASE;
+--
+--         has_badge := EXISTS (SELECT 1 FROM player_badges
+--             WHERE player_id = p_player_id AND badge_id = badge.id);
+--
+--         IF earned AND NOT has_badge THEN
+--             INSERT INTO player_badges(player_id, badge_id) VALUES (p_player_id, badge.id);
+--             new_badges := array_append(new_badges, badge.id);
+--         ELSIF NOT earned AND has_badge THEN
+--             -- Условие больше не выполняется: значок снимаем
+--             DELETE FROM player_badges
+--                 WHERE player_id = p_player_id AND badge_id = badge.id;
+--         END IF;
+--
+--     END LOOP;
+--
+--     RETURN new_badges;
+-- END;
+-- $function$
+--
+
+-- --- check_battle_pair() -----------------------------------------
+-- CREATE OR REPLACE FUNCTION public.check_battle_pair()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+-- AS $function$
+-- BEGIN
+--     IF NEW.format = 'singles' THEN
+--         RETURN NEW;
+--     END IF;
+--
+--     -- Галочка «состав любой» послабляет только парный. Микст — это по
+--     -- определению мужчина и женщина: разреши там двоих одного пола, и слово
+--     -- «микст» на карточке перестанет что-либо значить
+--     IF NEW.format = 'doubles' AND NEW.allow_any_pair THEN
+--         RETURN NEW;
+--     END IF;
+--
+--     -- Пол известен не всегда: у старых записей его нет, у гостя спрашивают
+--     -- в форме. Чего не знаем, того не проверяем — молча пропускаем
+--     IF NEW.format = 'doubles' THEN
+--         IF NEW.challenger_gender IS NOT NULL AND NEW.challenger_partner_gender IS NOT NULL
+--            AND NEW.challenger_gender <> NEW.challenger_partner_gender THEN
+--             RAISE EXCEPTION 'В парном баттле оба игрока пары одного пола';
+--         END IF;
+--         IF NEW.opponent_gender IS NOT NULL AND NEW.opponent_partner_gender IS NOT NULL
+--            AND NEW.opponent_gender <> NEW.opponent_partner_gender THEN
+--             RAISE EXCEPTION 'В парном баттле оба игрока пары одного пола';
+--         END IF;
+--     ELSIF NEW.format = 'mixed_doubles' THEN
+--         IF NEW.challenger_gender IS NOT NULL AND NEW.challenger_partner_gender IS NOT NULL
+--            AND NEW.challenger_gender = NEW.challenger_partner_gender THEN
+--             RAISE EXCEPTION 'В миксте в паре мужчина и женщина';
+--         END IF;
+--         IF NEW.opponent_gender IS NOT NULL AND NEW.opponent_partner_gender IS NOT NULL
+--            AND NEW.opponent_gender = NEW.opponent_partner_gender THEN
+--             RAISE EXCEPTION 'В миксте в паре мужчина и женщина';
+--         END IF;
+--     END IF;
+--
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- check_doubles_unique() --------------------------------------
+-- CREATE OR REPLACE FUNCTION public.check_doubles_unique()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+-- AS $function$
+-- BEGIN
+--   -- Напарник с карточкой клуба
+--   IF NEW.partner_id IS NOT NULL THEN
+--     -- Он не должен подавать свою заявку в этом же турнире
+--     IF EXISTS (
+--       SELECT 1 FROM tournament_registrations
+--       WHERE tournament_id = NEW.tournament_id
+--         AND player_id = NEW.partner_id
+--         AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
+--         AND status NOT IN ('withdrawn', 'rejected')
+--     ) THEN
+--       RAISE EXCEPTION 'Partner already registered as captain in this tournament';
+--     END IF;
+--
+--     -- И не стоять напарником в другой паре
+--     IF EXISTS (
+--       SELECT 1 FROM tournament_registrations
+--       WHERE tournament_id = NEW.tournament_id
+--         AND partner_id = NEW.partner_id
+--         AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
+--         AND status NOT IN ('withdrawn', 'rejected')
+--     ) THEN
+--       RAISE EXCEPTION 'Partner already in another team in this tournament';
+--     END IF;
+--   END IF;
+--
+--   -- Подавший заявку не должен быть напарником в чужой паре
+--   IF NEW.player_id IS NOT NULL THEN
+--     IF EXISTS (
+--       SELECT 1 FROM tournament_registrations
+--       WHERE tournament_id = NEW.tournament_id
+--         AND partner_id = NEW.player_id
+--         AND id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)
+--         AND status NOT IN ('withdrawn', 'rejected')
+--     ) THEN
+--       RAISE EXCEPTION 'Player already registered as partner in another team';
+--     END IF;
+--   END IF;
+--
+--   RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- check_registration_available(p_email text) ------------------
+-- CREATE OR REPLACE FUNCTION public.check_registration_available(p_email text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--   v_email_taken boolean := false;
+-- BEGIN
+--   -- Check email in auth.users
+--   SELECT EXISTS(
+--     SELECT 1 FROM auth.users WHERE email = lower(p_email)
+--   ) INTO v_email_taken;
+--
+--   RETURN jsonb_build_object('email_taken', v_email_taken);
+-- END;
+-- $function$
+--
+
+-- --- cleanup_expired_otp() ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.cleanup_expired_otp()
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--     DELETE FROM otp_codes WHERE expires_at < now() - interval '24 hours';
+--     DELETE FROM otp_blocks WHERE blocked_until < now() - interval '24 hours' AND admin_unblocked = false;
+-- END;
+-- $function$
+--
+
+-- --- confirm_match_score(p_match_id uuid) ------------------------
+-- CREATE OR REPLACE FUNCTION public.confirm_match_score(p_match_id uuid)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_user     uuid := auth.uid();
+--     v_side     smallint;
+--     v_их_side  smallint;
+--     v_match    RECORD;
+-- BEGIN
+--     IF v_user IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'not_authorized');
+--     END IF;
+--
+--     SELECT * INTO v_match FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'match_not_found');
+--     END IF;
+--
+--     v_side := public.match_side_of(p_match_id, v_user);
+--     IF v_side IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'not_a_player');
+--     END IF;
+--
+--     IF v_match.score_status IS DISTINCT FROM 'pending' THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'nothing_to_confirm');
+--     END IF;
+--
+--     -- Своя сторона свой же счёт не подтверждает: ни автор, ни его напарник
+--     v_их_side := public.match_side_of(p_match_id, v_match.score_submitted_by);
+--     IF v_их_side IS NOT NULL AND v_их_side = v_side THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'own_score');
+--     END IF;
+--
+--     UPDATE matches SET
+--         score_status       = 'confirmed',
+--         score_confirmed_at = now()
+--     WHERE id = p_match_id;
+--
+--     BEGIN
+--         PERFORM public.notify_match_score(p_match_id, 'confirmed');
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'уведомление о подтверждении не отправлено: %', SQLERRM;
+--     END;
+--
+--     RETURN jsonb_build_object('ok', true);
+-- END;
+-- $function$
+--
+
+-- --- confirm_voucher(p_token text, p_pin text) -------------------
+-- CREATE OR REPLACE FUNCTION public.confirm_voucher(p_token text, p_pin text)
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v RECORD;
+--     v_correct_pin TEXT;
+-- BEGIN
+--     SELECT * INTO v
+--     FROM discount_vouchers
+--     WHERE qr_token = p_token;
+--
+--     IF v IS NULL THEN
+--         RETURN json_build_object('status', 'invalid');
+--     END IF;
+--
+--     -- Auto-expire
+--     IF v.status = 'active' AND v.expires_at < NOW() THEN
+--         UPDATE discount_vouchers SET status = 'expired' WHERE id = v.id;
+--         RETURN json_build_object('status', 'expired');
+--     END IF;
+--
+--     IF v.status <> 'active' THEN
+--         RETURN json_build_object('status', v.status);
+--     END IF;
+--
+--     -- Check PIN
+--     IF v.entity_type = 'court' THEN
+--         SELECT partner_pin INTO v_correct_pin FROM courts WHERE id = v.entity_id;
+--     ELSE
+--         SELECT partner_pin INTO v_correct_pin FROM coaches WHERE id = v.entity_id;
+--     END IF;
+--
+--     IF v_correct_pin IS NULL OR p_pin <> v_correct_pin THEN
+--         RETURN json_build_object('status', 'wrong_pin');
+--     END IF;
+--
+--     -- Mark as used
+--     UPDATE discount_vouchers
+--     SET status = 'used', used_at = NOW()
+--     WHERE id = v.id;
+--
+--     RETURN json_build_object('status', 'confirmed');
+-- END;
+-- $function$
+--
+
+-- --- create_challenge(p_opponent_player_id text, p_message text) -
+-- CREATE OR REPLACE FUNCTION public.create_challenge(p_opponent_player_id text, p_message text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     me            profiles%ROWTYPE;
+--     opp_profile   uuid;
+--     pending_count int;
+--     new_id        uuid;
+-- BEGIN
+--     SELECT * INTO me FROM profiles WHERE id = auth.uid();
+--     IF me.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'not_logged_in');
+--     END IF;
+--     IF me.player_id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'no_player');
+--     END IF;
+--     IF me.player_id = p_opponent_player_id THEN
+--         RETURN jsonb_build_object('error', 'self_challenge');
+--     END IF;
+--
+--     -- Вызов на баттл — привилегия членства, а не всякой учётной записи.
+--     -- Сотрудникам клуба разрешено без членства: им заводить показательные
+--     -- матчи по должности
+--     IF me.role NOT IN ('admin', 'manager')
+--        AND NOT public.бесплатный_доступ()
+--        AND NOT EXISTS (
+--         SELECT 1 FROM memberships m
+--         WHERE m.profile_id = me.id AND m.status = 'active'
+--           AND (m.expires_at IS NULL OR m.expires_at >= current_date)
+--     ) THEN
+--         RETURN jsonb_build_object('error', 'not_member');
+--     END IF;
+--
+--     IF NOT EXISTS (SELECT 1 FROM players WHERE id = p_opponent_player_id) THEN
+--         RETURN jsonb_build_object('error', 'opponent_not_found');
+--     END IF;
+--
+--     -- Спам — это не «много вызовов», а много неотвеченных разом. Ответили
+--     -- или срок вышел — место освободилось
+--     SELECT count(*) INTO pending_count
+--     FROM challenges
+--     WHERE challenger_id = me.id AND status = 'active' AND expires_at > now();
+--
+--     IF pending_count >= 3 THEN
+--         RETURN jsonb_build_object('error', 'too_many_pending', 'pending', pending_count);
+--     END IF;
+--
+--     -- Один неотвеченный вызов на человека: второй — это уже напоминание.
+--     -- Смотрим в обе стороны: если он уже позвал тебя, встречный вызов —
+--     -- это тот же матч, только заведённый дважды
+--     IF EXISTS (
+--         SELECT 1 FROM challenges
+--         WHERE status = 'active' AND expires_at > now()
+--           AND ((challenger_player_id = me.player_id AND opponent_player_id = p_opponent_player_id)
+--             OR (challenger_player_id = p_opponent_player_id AND opponent_player_id = me.player_id))
+--     ) THEN
+--         RETURN jsonb_build_object('error', 'already_pending');
+--     END IF;
+--
+--     -- Вызов принят, но матч ещё не сыгран — звать снова некуда: игра уже
+--     -- назначена. Отказ, наоборот, ничего не запрещает: человек мог нажать
+--     -- случайно или передумать
+--     IF EXISTS (
+--         SELECT 1 FROM challenges
+--         WHERE status = 'accepted'
+--           AND ((challenger_player_id = me.player_id AND opponent_player_id = p_opponent_player_id)
+--             OR (challenger_player_id = p_opponent_player_id AND opponent_player_id = me.player_id))
+--     ) THEN
+--         RETURN jsonb_build_object('error', 'match_pending');
+--     END IF;
+--
+--     SELECT id INTO opp_profile FROM profiles WHERE player_id = p_opponent_player_id LIMIT 1;
+--
+--     INSERT INTO challenges (challenger_id, challenger_player_id,
+--                             opponent_player_id, opponent_profile_id,
+--                             message, status, expires_at)
+--     VALUES (me.id, me.player_id, p_opponent_player_id, opp_profile,
+--             nullif(btrim(coalesce(p_message, '')), ''), 'active',
+--             now() + interval '10 days')
+--     RETURNING id INTO new_id;
+--
+--     RETURN jsonb_build_object('ok', true, 'challenge_id', new_id,
+--                               'opponent_profile_id', opp_profile);
+-- END;
+-- $function$
+--
+
+-- --- cron_secret() -----------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.cron_secret()
+--  RETURNS text
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public', 'vault'
+-- AS $function$
+--     SELECT decrypted_secret
+--       FROM vault.decrypted_secrets
+--      WHERE name = 'cron_secret'
+--      LIMIT 1;
+-- $function$
+--
+
+-- --- dispute_match_score(p_match_id uuid, p_note text) -----------
+-- CREATE OR REPLACE FUNCTION public.dispute_match_score(p_match_id uuid, p_note text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_user    uuid := auth.uid();
+--     v_side    smallint;
+--     v_их_side smallint;
+--     v_match   RECORD;
+-- BEGIN
+--     IF v_user IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'not_authorized');
+--     END IF;
+--
+--     SELECT * INTO v_match FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'match_not_found');
+--     END IF;
+--
+--     v_side := public.match_side_of(p_match_id, v_user);
+--     IF v_side IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'not_a_player');
+--     END IF;
+--
+--     IF v_match.score_status IS DISTINCT FROM 'pending' THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'nothing_to_dispute');
+--     END IF;
+--
+--     v_их_side := public.match_side_of(p_match_id, v_match.score_submitted_by);
+--     IF v_их_side IS NOT NULL AND v_их_side = v_side THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'own_score');
+--     END IF;
+--
+--     UPDATE matches SET
+--         score_status       = 'disputed',
+--         score_dispute_note = NULLIF(btrim(COALESCE(p_note, '')), '')
+--     WHERE id = p_match_id;
+--
+--     BEGIN
+--         PERFORM public.notify_match_score(p_match_id, 'disputed');
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'уведомление о споре не отправлено: %', SQLERRM;
+--     END;
+--
+--     BEGIN
+--         PERFORM public.notify_score_dispute(p_match_id);
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'организатор не позван: %', SQLERRM;
+--     END;
+--
+--     RETURN jsonb_build_object('ok', true);
+-- END;
+-- $function$
+--
+
+-- --- drop_challenge_notifications() ------------------------------
+-- CREATE OR REPLACE FUNCTION public.drop_challenge_notifications()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--     DELETE FROM notification_log
+--     WHERE action_type = 'challenge' AND action_id = OLD.id;
+--     RETURN OLD;
+-- END;
+-- $function$
+--
+
+-- --- expire_old_suggestions() ------------------------------------
+-- CREATE OR REPLACE FUNCTION public.expire_old_suggestions()
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE n integer;
+-- BEGIN
+--     -- Предлагали трижды, никто не ответил
+--     UPDATE news_suggestions
+--        SET status = 'expired'
+--      WHERE status = 'offered'
+--        AND offers >= 3
+--        AND offered_at < now() - interval '24 hours';
+--     GET DIAGNOSTICS n = ROW_COUNT;
+--
+--     -- И всё, что старше отсечки: предложить это мы уже не сможем
+--     UPDATE news_suggestions
+--        SET status = 'expired'
+--      WHERE status IN ('new', 'offered')
+--        AND COALESCE(published_at, created_at) < now() - interval '3 days';
+--
+--     RETURN n;
+-- END;
+-- $function$
+--
+
+-- --- fic_адрес("p_сетка" integer, "p_круг" integer, "p_номер" integer, "p_победил" boolean) 
+-- CREATE OR REPLACE FUNCTION public."fic_адрес"("p_сетка" integer, "p_круг" integer, "p_номер" integer, "p_победил" boolean)
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  IMMUTABLE
+-- AS $function$
+-- DECLARE
+--     S  integer;
+--     b  integer;
+--     p  integer;
+-- BEGIN
+--     S := p_сетка / (2 ^ p_круг);
+--     IF S < 1 THEN RETURN NULL; END IF;
+--
+--     b := ceil(p_номер::numeric / S)::int;
+--     p := p_номер - (b - 1) * S;
+--
+--     IF p_победил THEN
+--         RETURN (2 * b - 2) * (S / 2) + ceil(p::numeric / 2)::int;
+--     ELSE
+--         RETURN (2 * b - 1) * (S / 2) + ceil(p::numeric / 2)::int;
+--     END IF;
+-- END;
+-- $function$
+--
+
+-- --- fic_закрыть_проходы("p_турнир" text) ------------------------
+-- CREATE OR REPLACE FUNCTION public."fic_закрыть_проходы"("p_турнир" text)
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_сетка integer;
+--     n       integer;
+--     всего   integer := 0;
+-- BEGIN
+--     SELECT count(*) * 2 INTO v_сетка FROM matches
+--      WHERE tournament_id = p_турнир
+--        AND round_number = 1
+--        AND group_number IS NULL
+--        AND round IS DISTINCT FROM 'IG';
+--     IF v_сетка IS NULL OR v_сетка < 2 THEN RETURN 0; END IF;
+--
+--     -- Проход — это клетка, в которой в итоге окажется ровно один человек.
+--     -- Больше здесь ничего не решается: счёт берём готовый, из fic_итоги.
+--     --
+--     -- Идём кругами: закрытие одного прохода может открыть следующий.
+--     LOOP
+--         WITH itg AS (SELECT * FROM public.fic_итоги(p_турнир))
+--         UPDATE matches t
+--            SET winner_id = COALESCE(t.player1_id, t.player2_id),
+--                score = 'BYE', status = 'completed', played_at = now()
+--           FROM itg
+--          WHERE t.tournament_id = p_турнир
+--            AND t.group_number IS NULL
+--            AND t.round IS DISTINCT FROM 'IG'
+--            AND t.winner_id IS NULL
+--            AND (t.player1_id IS NULL) <> (t.player2_id IS NULL)
+--            AND itg.круг = t.round_number
+--            AND itg.номер = t.match_order
+--            AND itg.итог = 1;
+--         GET DIAGNOSTICS n = ROW_COUNT;
+--         всего := всего + n;
+--         EXIT WHEN n = 0;
+--     END LOOP;
+--
+--     RETURN всего;
+-- END;
+-- $function$
+--
+
+-- --- fic_заменить_дальше("p_турнир" text, "p_круг" integer, "p_старый" text, "p_новый" text) 
+-- CREATE OR REPLACE FUNCTION public."fic_заменить_дальше"("p_турнир" text, "p_круг" integer, "p_старый" text, "p_новый" text)
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     n integer := 0;
+-- BEGIN
+--     IF p_старый IS NULL OR p_новый IS NULL OR p_старый = p_новый THEN
+--         RETURN 0;
+--     END IF;
+--
+--     -- Только сетка. В группах свой круговой турнир со своими кругами, и
+--     -- перестановка по сетке там ничего не решает: кто с кем играет в
+--     -- группе, определила жеребьёвка.
+--     UPDATE matches SET player1_id = p_новый
+--      WHERE tournament_id = p_турнир AND round_number > p_круг
+--        AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--        AND player1_id = p_старый;
+--     GET DIAGNOSTICS n = ROW_COUNT;
+--
+--     UPDATE matches SET player2_id = p_новый
+--      WHERE tournament_id = p_турнир AND round_number > p_круг
+--        AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--        AND player2_id = p_старый;
+--
+--     UPDATE matches SET winner_id = p_новый
+--      WHERE tournament_id = p_турнир AND round_number > p_круг
+--        AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--        AND winner_id = p_старый;
+--
+--     -- Клетки с проходом: победитель в них — тот, кто в клетке стоит. Пока
+--     -- этого не было, при правке результата задним числом игрока подменяли,
+--     -- а победитель оставался от прежнего: места считались по человеку,
+--     -- которого в клетке нет, и он попадал в итоговый список дважды.
+--     -- Если клетка опустела вовсе, снимаем и победителя, и отметку прохода.
+--     UPDATE matches
+--        SET winner_id = COALESCE(player1_id, player2_id),
+--            score  = CASE WHEN COALESCE(player1_id, player2_id) IS NULL
+--                          THEN NULL ELSE score END,
+--            status = CASE WHEN COALESCE(player1_id, player2_id) IS NULL
+--                          THEN 'upcoming' ELSE status END
+--      WHERE tournament_id = p_турнир
+--        AND round_number > p_круг
+--        AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--        AND score = 'BYE'
+--        AND winner_id IS DISTINCT FROM COALESCE(player1_id, player2_id);
+--
+--     RETURN n;
+-- END;
+-- $function$
+--
+
+-- --- fic_затронутые("p_матч" uuid) -------------------------------
+-- CREATE OR REPLACE FUNCTION public."fic_затронутые"("p_матч" uuid)
+--  RETURNS TABLE(id uuid, "круг" integer, "номер" integer, "игрок_1" text, "игрок_2" text, "счёт" text, "победитель" text)
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_турнир  text;
+--     v_сетка   integer;
+--     v_кругов  integer;
+--     v_круг    integer;
+--     v_ном     integer;
+--     v_волна   integer[];
+--     v_след    integer[];
+--     v_куда    integer;
+--     v_текущий integer;
+-- BEGIN
+--     SELECT m.tournament_id, m.round_number, m.match_order
+--       INTO v_турнир, v_круг, v_ном
+--       FROM matches m
+--      WHERE m.id = p_матч
+--        AND m.group_number IS NULL
+--        AND m.round IS DISTINCT FROM 'IG';
+--     -- Правка по сетке идёт только от матча сетки: у групповой встречи и у
+--     -- доп. матча продолжений в этом смысле нет
+--     IF v_турнир IS NULL THEN RETURN; END IF;
+--
+--     SELECT count(*) * 2 INTO v_сетка FROM matches
+--      WHERE tournament_id = v_турнир
+--        AND round_number = 1
+--        AND group_number IS NULL
+--        AND round IS DISTINCT FROM 'IG';
+--     IF v_сетка IS NULL OR v_сетка < 2 THEN RETURN; END IF;
+--     v_кругов := log(2, v_сетка::numeric)::int;
+--
+--     -- Волна: от матча идём вперёд по кругам, собирая клетки-продолжения
+--     v_волна := ARRAY[v_ном];
+--     WHILE v_круг < v_кругов AND array_length(v_волна, 1) > 0 LOOP
+--         v_след := ARRAY[]::integer[];
+--         FOREACH v_текущий IN ARRAY v_волна LOOP
+--             v_куда := public.fic_адрес(v_сетка, v_круг, v_текущий, true);
+--             IF v_куда IS NOT NULL AND NOT (v_куда = ANY(v_след)) THEN
+--                 v_след := v_след \|\| v_куда;
+--             END IF;
+--             v_куда := public.fic_адрес(v_сетка, v_круг, v_текущий, false);
+--             IF v_куда IS NOT NULL AND NOT (v_куда = ANY(v_след)) THEN
+--                 v_след := v_след \|\| v_куда;
+--             END IF;
+--         END LOOP;
+--         v_круг := v_круг + 1;
+--         v_волна := v_след;
+--
+--         RETURN QUERY
+--         SELECT m.id, m.round_number, m.match_order,
+--                coalesce(p1.name, '—'), coalesce(p2.name, '—'),
+--                m.score, pw.name
+--           FROM matches m
+--           LEFT JOIN players p1 ON p1.id = m.player1_id
+--           LEFT JOIN players p2 ON p2.id = m.player2_id
+--           LEFT JOIN players pw ON pw.id = m.winner_id
+--          WHERE m.tournament_id = v_турнир
+--            AND m.round_number = v_круг
+--            AND m.match_order = ANY(v_волна)
+--            AND m.group_number IS NULL
+--            AND m.round IS DISTINCT FROM 'IG'
+--            AND (m.player1_id IS NOT NULL OR m.player2_id IS NOT NULL)
+--          ORDER BY m.round_number, m.match_order;
+--     END LOOP;
+-- END;
+-- $function$
+--
+
+-- --- fic_итоги("p_турнир" text) ----------------------------------
+-- CREATE OR REPLACE FUNCTION public."fic_итоги"("p_турнир" text)
+--  RETURNS TABLE("круг" integer, "номер" integer, "итог" integer)
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_сетка  integer;
+--     v_кругов integer;
+--     v_вкруге integer;
+--     v_итог   integer[];
+--     v_круг   integer;
+--     v_ном    integer;
+--     v_куда   integer;
+--     м        record;
+-- BEGIN
+--     SELECT count(*) * 2 INTO v_сетка FROM matches
+--      WHERE tournament_id = p_турнир
+--        AND round_number = 1
+--        AND group_number IS NULL
+--        AND round IS DISTINCT FROM 'IG';
+--     IF v_сетка IS NULL OR v_сетка < 2 THEN RETURN; END IF;
+--
+--     v_кругов := log(2, v_сетка::numeric)::int;
+--     v_вкруге := v_сетка / 2;
+--
+--     v_итог := array_fill(0, ARRAY[v_кругов, v_вкруге]);
+--
+--     FOR м IN SELECT match_order, player1_id, player2_id, slot1_label, slot2_label
+--                FROM matches
+--               WHERE tournament_id = p_турнир
+--                 AND round_number = 1
+--                 AND group_number IS NULL
+--                 AND round IS DISTINCT FROM 'IG'
+--     LOOP
+--         -- Метка — обещание человека: он приедет, когда доиграет его группа
+--         -- или доп. матч. Такая клетка ждёт, а не закрывается проходом
+--         v_итог[1][м.match_order] :=
+--             (CASE WHEN м.player1_id IS NOT NULL OR м.slot1_label IS NOT NULL THEN 1 ELSE 0 END)
+--           + (CASE WHEN м.player2_id IS NOT NULL OR м.slot2_label IS NOT NULL THEN 1 ELSE 0 END);
+--     END LOOP;
+--
+--     FOR v_круг IN 2..v_кругов LOOP
+--         FOR v_ном IN 1..v_вкруге LOOP
+--             IF v_итог[v_круг - 1][v_ном] >= 1 THEN
+--                 v_куда := public.fic_адрес(v_сетка, v_круг - 1, v_ном, true);
+--                 IF v_куда IS NOT NULL THEN
+--                     v_итог[v_круг][v_куда] := v_итог[v_круг][v_куда] + 1;
+--                 END IF;
+--             END IF;
+--             IF v_итог[v_круг - 1][v_ном] >= 2 THEN
+--                 v_куда := public.fic_адрес(v_сетка, v_круг - 1, v_ном, false);
+--                 IF v_куда IS NOT NULL THEN
+--                     v_итог[v_круг][v_куда] := v_итог[v_круг][v_куда] + 1;
+--                 END IF;
+--             END IF;
+--         END LOOP;
+--     END LOOP;
+--
+--     FOR v_круг IN 1..v_кругов LOOP
+--         FOR v_ном IN 1..v_вкруге LOOP
+--             круг := v_круг;
+--             номер := v_ном;
+--             итог := v_итог[v_круг][v_ном];
+--             RETURN NEXT;
+--         END LOOP;
+--     END LOOP;
+-- END;
+-- $function$
+--
+
+-- --- fic_откатить("p_турнир" text) -------------------------------
+-- CREATE OR REPLACE FUNCTION public."fic_откатить"("p_турнир" text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_снимок jsonb;
+--     v_вернули integer := 0;
+-- BEGIN
+--     IF NOT public.fic_это_персонал() THEN
+--         RAISE EXCEPTION 'Откат делает админ или менеджер';
+--     END IF;
+--
+--     SELECT payload INTO v_снимок FROM public.bracket_undo
+--      WHERE tournament_id = p_турнир;
+--     IF v_снимок IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'reason', 'откатывать нечего');
+--     END IF;
+--
+--     UPDATE matches m
+--        SET player1_id = (b->>'player1_id'),
+--            player2_id = (b->>'player2_id'),
+--            seed1      = (b->>'seed1')::integer,
+--            seed2      = (b->>'seed2')::integer,
+--            winner_id  = (b->>'winner_id'),
+--            score      = (b->>'score'),
+--            status     = (b->>'status'),
+--            played_at  = (b->>'played_at')::timestamptz
+--       FROM jsonb_array_elements(v_снимок) AS b
+--      WHERE m.id = (b->>'id')::uuid;
+--     GET DIAGNOSTICS v_вернули = ROW_COUNT;
+--
+--     DELETE FROM public.bracket_undo WHERE tournament_id = p_турнир;
+--
+--     RETURN jsonb_build_object('ok', true, 'возвращено', v_вернули);
+-- END;
+-- $function$
+--
+
+-- --- fic_пересобрать("p_турнир" text) ----------------------------
+-- CREATE OR REPLACE FUNCTION public."fic_пересобрать"("p_турнир" text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_сетка   integer;
+--     v_кругов  integer;
+--     v_круг    integer;
+--     м         record;
+--     v_поб_н   integer;
+--     v_прг_н   integer;
+--     v_проиграл text;
+--     v_его_посев integer;
+--     v_посев   integer;
+--     v_сохранено integer := 0;
+--     v_снято     integer := 0;
+-- BEGIN
+--     SELECT count(*) * 2 INTO v_сетка FROM matches
+--      WHERE tournament_id = p_турнир AND round_number = 1;
+--     IF v_сетка IS NULL OR v_сетка < 2 THEN
+--         RETURN jsonb_build_object('ok', false, 'reason', 'сетка не найдена');
+--     END IF;
+--     v_кругов := log(2, v_сетка::numeric)::int;
+--
+--     -- Сколько человек окажется в каждой клетке. Считаем один раз и до
+--     -- чистки: счёт зависит только от первого круга, который мы не трогаем.
+--     DROP TABLE IF EXISTS _itog;
+--     CREATE TEMP TABLE _itog ON COMMIT DROP AS
+--         SELECT * FROM public.fic_итоги(p_турнир);
+--
+--     -- Запоминаем, что было: пару, счёт и победителя каждой клетки
+--     DROP TABLE IF EXISTS bylo;
+--     CREATE TEMP TABLE bylo ON COMMIT DROP AS
+--     SELECT round_number, match_order, player1_id, player2_id,
+--            winner_id, score, status, played_at
+--       FROM matches
+--      WHERE tournament_id = p_турнир AND round_number > 1;
+--
+--     -- Чистим всё, кроме первого круга: расставим заново
+--     UPDATE matches
+--        SET player1_id = NULL, player2_id = NULL, seed1 = NULL, seed2 = NULL,
+--            winner_id = NULL, score = NULL, status = 'upcoming', played_at = NULL
+--      WHERE tournament_id = p_турнир AND round_number > 1;
+--
+--     -- Ведём людей по кругам
+--     FOR v_круг IN 1..(v_кругов - 1) LOOP
+--         FOR м IN
+--             SELECT * FROM matches
+--              WHERE tournament_id = p_турнир AND round_number = v_круг
+--                AND winner_id IS NOT NULL
+--              ORDER BY match_order
+--         LOOP
+--             v_поб_н := public.fic_адрес(v_сетка, v_круг, м.match_order, true);
+--             v_прг_н := public.fic_адрес(v_сетка, v_круг, м.match_order, false);
+--
+--             v_посев := CASE WHEN м.winner_id = м.player1_id THEN м.seed1 ELSE м.seed2 END;
+--             v_проиграл := CASE WHEN м.winner_id = м.player1_id THEN м.player2_id ELSE м.player1_id END;
+--             v_его_посев := CASE WHEN м.winner_id = м.player1_id THEN м.seed2 ELSE м.seed1 END;
+--
+--             -- Нечётный номер садится сверху, чётный снизу
+--             IF м.match_order % 2 <> 0 THEN
+--                 UPDATE matches SET player1_id = м.winner_id, seed1 = v_посев
+--                  WHERE tournament_id = p_турнир AND round_number = v_круг + 1
+--                    AND match_order = v_поб_н;
+--                 IF v_проиграл IS NOT NULL THEN
+--                     UPDATE matches SET player1_id = v_проиграл, seed1 = v_его_посев
+--                      WHERE tournament_id = p_турнир AND round_number = v_круг + 1
+--                        AND match_order = v_прг_н;
+--                 END IF;
+--             ELSE
+--                 UPDATE matches SET player2_id = м.winner_id, seed2 = v_посев
+--                  WHERE tournament_id = p_турнир AND round_number = v_круг + 1
+--                    AND match_order = v_поб_н;
+--                 IF v_проиграл IS NOT NULL THEN
+--                     UPDATE matches SET player2_id = v_проиграл, seed2 = v_его_посев
+--                      WHERE tournament_id = p_турнир AND round_number = v_круг + 1
+--                        AND match_order = v_прг_н;
+--                 END IF;
+--             END IF;
+--         END LOOP;
+--
+--         -- Круг заполнен — возвращаем счета тем клеткам, где стоят те же двое.
+--         -- Отметку «проход» не возвращаем: это не результат матча, а вывод из
+--         -- счёта клеток, и ставится он ниже сам. Пока мы её восстанавливали,
+--         -- клетка, ошибочно закрытая проходом, воскресала при каждой
+--         -- пересборке — там же те самые двое.
+--         UPDATE matches m
+--            SET winner_id = b.winner_id, score = b.score,
+--                status = b.status, played_at = b.played_at
+--           FROM bylo b
+--          WHERE m.tournament_id = p_турнир
+--            AND m.round_number = v_круг + 1
+--            AND b.round_number = m.round_number
+--            AND b.match_order  = m.match_order
+--            AND b.winner_id IS NOT NULL
+--            AND b.score IS DISTINCT FROM 'BYE'
+--            AND ((b.player1_id = m.player1_id AND b.player2_id = m.player2_id)
+--              OR (b.player1_id = m.player2_id AND b.player2_id = m.player1_id));
+--
+--         -- Проход — клетка, в которой в итоге окажется ровно один человек.
+--         -- Счёт берём готовый, из fic_итоги: своей проверки здесь нет.
+--         UPDATE matches t
+--            SET winner_id = COALESCE(t.player1_id, t.player2_id),
+--                score = 'BYE', status = 'completed', played_at = now()
+--          WHERE t.tournament_id = p_турнир AND t.round_number = v_круг + 1
+--            AND t.winner_id IS NULL
+--            AND (t.player1_id IS NULL) <> (t.player2_id IS NULL)
+--            AND EXISTS (SELECT 1 FROM _itog itg
+--                         WHERE itg.круг = t.round_number
+--                           AND itg.номер = t.match_order
+--                           AND itg.итог = 1);
+--     END LOOP;
+--
+--     SELECT count(*) INTO v_сохранено FROM matches
+--      WHERE tournament_id = p_турнир AND round_number > 1 AND winner_id IS NOT NULL;
+--     SELECT count(*) INTO v_снято FROM bylo b
+--      WHERE b.winner_id IS NOT NULL
+--        AND NOT EXISTS (SELECT 1 FROM matches m
+--                         WHERE m.tournament_id = p_турнир
+--                           AND m.round_number = b.round_number
+--                           AND m.match_order = b.match_order
+--                           AND m.winner_id IS NOT NULL);
+--
+--     RETURN jsonb_build_object('ok', true, 'сетка', v_сетка, 'кругов', v_кругов,
+--                               'результатов_осталось', v_сохранено,
+--                               'счетов_снято', v_снято);
+-- END;
+-- $function$
+--
+
+-- --- fic_правка("p_матч" uuid, "p_победитель" text, "p_счёт" text) 
+-- CREATE OR REPLACE FUNCTION public."fic_правка"("p_матч" uuid, "p_победитель" text, "p_счёт" text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_турнир   text;
+--     v_старый   text;
+--     v_снимок   jsonb;
+--     v_затронуто integer;
+--     v_сетка    integer;
+--     v_кругов   integer;
+--     v_круг     integer;
+--     v_стар_прг text;
+--     v_круг_матча integer;
+-- BEGIN
+--     IF NOT public.fic_это_персонал() THEN
+--         RAISE EXCEPTION 'Правку сетки делает админ или менеджер';
+--     END IF;
+--
+--     SELECT tournament_id, winner_id, round_number
+--       INTO v_турнир, v_старый, v_круг_матча
+--       FROM matches WHERE id = p_матч;
+--     IF v_турнир IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'reason', 'матч не найден');
+--     END IF;
+--
+--     -- Победитель тот же, поменялся только счёт — дальше по сетке не трогаем
+--     IF p_победитель IS NOT NULL AND v_старый IS NOT DISTINCT FROM p_победитель THEN
+--         UPDATE matches SET score = p_счёт WHERE id = p_матч;
+--         RETURN jsonb_build_object('ok', true, 'затронуто', 0, 'только_счёт', true);
+--     END IF;
+--
+--     -- Запоминаем, что было: сам матч и всё, что от него зависит
+--     SELECT jsonb_agg(to_jsonb(x)) INTO v_снимок
+--       FROM (
+--         SELECT m.id, m.player1_id, m.player2_id, m.seed1, m.seed2,
+--                m.winner_id, m.score, m.status, m.played_at
+--           FROM matches m
+--          WHERE m.id = p_матч
+--             OR m.id IN (SELECT z.id FROM public.fic_затронутые(p_матч) z)
+--       ) x;
+--
+--     INSERT INTO public.bracket_undo (tournament_id, saved_by, payload)
+--     VALUES (v_турнир, auth.uid(), coalesce(v_снимок, '[]'::jsonb))
+--     ON CONFLICT (tournament_id)
+--     DO UPDATE SET payload = excluded.payload, saved_at = now(), saved_by = excluded.saved_by;
+--
+--     -- Зависимым матчам снимаем счёт: он относился к другой паре. А вот людей
+--     -- не трогаем — в клетке рядом стоит соперник из совсем другого матча, и
+--     -- он к этой правке отношения не имеет. Подменится только тот, кто приехал
+--     -- из изменённого матча: это делает fic_заменить_дальше ниже.
+--     UPDATE matches
+--        SET winner_id = NULL, score = NULL, status = 'upcoming', played_at = NULL
+--      WHERE id IN (SELECT z.id FROM public.fic_затронутые(p_матч) z);
+--     GET DIAGNOSTICS v_затронуто = ROW_COUNT;
+--
+--     -- Кто ехал дальше из этого матча
+--     SELECT CASE WHEN v_старый = m.player1_id THEN m.player2_id ELSE m.player1_id END
+--       INTO v_стар_прг
+--       FROM matches m WHERE m.id = p_матч;
+--
+--     -- И ставим новый результат: триггер сам разведёт людей дальше
+--     IF p_победитель IS NULL THEN
+--         UPDATE matches
+--            SET winner_id = NULL, score = NULL, status = 'upcoming', played_at = NULL
+--          WHERE id = p_матч;
+--
+--         -- Результата больше нет — значит и ехать дальше некому: убираем
+--         -- обоих из клеток следующих кругов, соседей оставляя на месте.
+--         --
+--         -- ТОЛЬКО СЕТКА. Без этого отбора зануление уходило в групповые туры
+--         -- 2 и 3: у групп свои круги с теми же номерами.
+--         UPDATE matches SET player1_id = NULL, seed1 = NULL
+--          WHERE tournament_id = v_турнир AND round_number > v_круг_матча
+--            AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--            AND player1_id IN (v_старый, v_стар_прг);
+--         UPDATE matches SET player2_id = NULL, seed2 = NULL
+--          WHERE tournament_id = v_турнир AND round_number > v_круг_матча
+--            AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--            AND player2_id IN (v_старый, v_стар_прг);
+--     ELSE
+--         UPDATE matches
+--            SET winner_id = p_победитель, score = p_счёт,
+--                status = 'completed', played_at = now()
+--          WHERE id = p_матч;
+--     END IF;
+--
+--     -- Зависимые клетки мы чистили целиком, а в них мог стоять человек из
+--     -- другого матча — его тоже стёрло. Поэтому проводим заново всех, кто уже
+--     -- сыграл: идём кругами от первого, каждый победитель встаёт на своё
+--     -- место. Клетки, где счёт остался, его сохраняют.
+--     --
+--     -- РАЗМЕР СЕТКИ СЧИТАЕТСЯ ПО КЛЕТКАМ СЕТКИ. Раньше в первый круг шли и
+--     -- групповые, и отборочные: на c6883b98 выходило 48 вместо 16.
+--     SELECT count(*) * 2 INTO v_сетка FROM matches
+--      WHERE tournament_id = v_турнир AND round_number = 1
+--        AND group_number IS NULL AND round IS DISTINCT FROM 'IG';
+--     v_кругов := CASE WHEN v_сетка > 1 THEN log(2, v_сетка::numeric)::int ELSE 0 END;
+--
+--     FOR v_круг IN 1..greatest(v_кругов - 1, 1) LOOP
+--         UPDATE matches SET status = status
+--          WHERE tournament_id = v_турнир
+--            AND round_number = v_круг
+--            AND group_number IS NULL AND round IS DISTINCT FROM 'IG'
+--            AND winner_id IS NOT NULL;
+--     END LOOP;
+--
+--     PERFORM public.fic_закрыть_проходы(v_турнир);
+--
+--     RETURN jsonb_build_object('ok', true, 'затронуто', v_затронуто,
+--                               'снято', p_победитель IS NULL);
+-- END;
+-- $function$
+--
+
+-- --- fic_это_персонал() ------------------------------------------
+-- CREATE OR REPLACE FUNCTION public."fic_это_персонал"()
+--  RETURNS boolean
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--     SELECT EXISTS (SELECT 1 FROM public.profiles p
+--                     WHERE p.id = auth.uid() AND p.role IN ('admin', 'manager'));
+-- $function$
+--
+
+-- --- fill_payment_payer() ----------------------------------------
+-- CREATE OR REPLACE FUNCTION public.fill_payment_payer()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--     -- Переданное вручную не трогаем: вдруг платил не владелец аккаунта
+--     IF NEW.payer_name IS NULL AND NEW.profile_id IS NOT NULL THEN
+--         SELECT full_name, email
+--           INTO NEW.payer_name, NEW.payer_email
+--           FROM public.profiles
+--          WHERE id = NEW.profile_id;
+--     END IF;
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- fill_prediction_side() --------------------------------------
+-- CREATE OR REPLACE FUNCTION public.fill_prediction_side()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+-- AS $function$
+-- DECLARE
+--     c RECORD;
+-- BEGIN
+--     SELECT challenger_player_id, opponent_player_id INTO c
+--     FROM challenges WHERE id = NEW.challenge_id;
+--
+--     -- Пришёл старый способ: за кого голосовали — знаем, сторону выводим
+--     IF NEW.predicted_side IS NULL AND NEW.predicted_winner_id IS NOT NULL THEN
+--         IF NEW.predicted_winner_id = c.challenger_player_id THEN
+--             NEW.predicted_side := 1;
+--         ELSIF NEW.predicted_winner_id = c.opponent_player_id THEN
+--             NEW.predicted_side := 2;
+--         END IF;
+--     END IF;
+--
+--     -- Пришёл новый: сторону знаем, идентификатор проставляем для старых
+--     -- экранов. У гостя баттла его нет — там колонка останется пустой
+--     IF NEW.predicted_winner_id IS NULL AND NEW.predicted_side IS NOT NULL THEN
+--         NEW.predicted_winner_id := CASE NEW.predicted_side
+--             WHEN 1 THEN c.challenger_player_id
+--             ELSE c.opponent_player_id END;
+--     END IF;
+--
+--     IF NEW.predicted_side IS NULL THEN
+--         RAISE EXCEPTION 'Голос ни за одну из сторон баттла';
+--     END IF;
+--
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- generate_voucher(p_entity_type text, p_entity_id text, p_service_id uuid) 
+-- CREATE OR REPLACE FUNCTION public.generate_voucher(p_entity_type text, p_entity_id text, p_service_id uuid)
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v_user_id UUID;
+--     v_player_name TEXT;
+--     v_entity_name TEXT;
+--     v_service RECORD;
+--     v_existing INT;
+--     v_voucher RECORD;
+--     v_is_member BOOLEAN;
+-- BEGIN
+--     -- Get current user
+--     v_user_id := auth.uid();
+--     IF v_user_id IS NULL THEN
+--         RETURN json_build_object('error', 'not_authenticated');
+--     END IF;
+--
+--     -- Членство или бесплатный период: в бесплатный период скидки доступны
+--     -- всем, кто вошёл, — так решает администратор в Настройках → Доступ.
+--     SELECT public.voucher_membership_ok(v_user_id) INTO v_is_member;
+--
+--     IF NOT v_is_member THEN
+--         RETURN json_build_object('error', 'not_member');
+--     END IF;
+--
+--     -- Get player name from profile
+--     SELECT COALESCE(full_name, 'Member')
+--     INTO v_player_name
+--     FROM profiles WHERE id = v_user_id;
+--
+--     -- Check service exists and is active
+--     SELECT * INTO v_service
+--     FROM partner_services
+--     WHERE id = p_service_id
+--       AND entity_type = p_entity_type
+--       AND entity_id = p_entity_id
+--       AND is_active = true;
+--
+--     IF v_service IS NULL THEN
+--         RETURN json_build_object('error', 'service_not_found');
+--     END IF;
+--
+--     -- Get entity name
+--     IF p_entity_type = 'court' THEN
+--         SELECT name INTO v_entity_name FROM courts WHERE id = p_entity_id AND partner = true;
+--     ELSE
+--         SELECT COALESCE(last_name \|\| ' ' \|\| first_name, name) INTO v_entity_name
+--         FROM coaches WHERE id = p_entity_id AND partner = true;
+--     END IF;
+--
+--     IF v_entity_name IS NULL THEN
+--         RETURN json_build_object('error', 'entity_not_partner');
+--     END IF;
+--
+--     -- Auto-expire old vouchers for this specific service
+--     UPDATE discount_vouchers
+--     SET status = 'expired'
+--     WHERE profile_id = v_user_id
+--       AND entity_type = p_entity_type
+--       AND entity_id = p_entity_id
+--       AND service_id = p_service_id
+--       AND status = 'active'
+--       AND expires_at < NOW();
+--
+--     -- Check 1: Block if active voucher exists for this exact service
+--     SELECT COUNT(*) INTO v_existing
+--     FROM discount_vouchers
+--     WHERE profile_id = v_user_id
+--       AND entity_type = p_entity_type
+--       AND entity_id = p_entity_id
+--       AND service_id = p_service_id
+--       AND status = 'active'
+--       AND expires_at > NOW();
+--
+--     IF v_existing > 0 THEN
+--         RETURN json_build_object('error', 'active_voucher_exists');
+--     END IF;
+--
+--     -- Check 2: Daily limit per service (prevents use-and-repeat abuse)
+--     SELECT COUNT(*) INTO v_existing
+--     FROM discount_vouchers
+--     WHERE profile_id = v_user_id
+--       AND entity_type = p_entity_type
+--       AND entity_id = p_entity_id
+--       AND service_id = p_service_id
+--       AND created_at > NOW() - INTERVAL '24 hours'
+--       AND status IN ('active', 'used');
+--
+--     IF v_existing > 0 THEN
+--         RETURN json_build_object('error', 'daily_limit');
+--     END IF;
+--
+--     -- Create voucher
+--     INSERT INTO discount_vouchers (
+--         profile_id, player_name, entity_type, entity_id, entity_name,
+--         service_id, service_name, discount_percent
+--     ) VALUES (
+--         v_user_id, v_player_name, p_entity_type, p_entity_id, v_entity_name,
+--         p_service_id, v_service.service_name, v_service.discount_percent
+--     )
+--     RETURNING * INTO v_voucher;
+--
+--     RETURN json_build_object(
+--         'success', true,
+--         'voucher', json_build_object(
+--             'id', v_voucher.id,
+--             'qr_token', v_voucher.qr_token,
+--             'player_name', v_voucher.player_name,
+--             'entity_name', v_voucher.entity_name,
+--             'service_name', v_voucher.service_name,
+--             'discount_percent', v_voucher.discount_percent,
+--             'expires_at', v_voucher.expires_at,
+--             'created_at', v_voucher.created_at
+--         )
+--     );
+-- END;
+-- $function$
+--
+
+-- --- get_analytics_overview() ------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_analytics_overview()
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--   result JSON;
+-- BEGIN
+--   SELECT json_build_object(
+--     'courts_views', (SELECT COALESCE(SUM(view_count), 0) FROM courts),
+--     'courts_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM courts),
+--     'coaches_views', (SELECT COALESCE(SUM(view_count), 0) FROM coaches),
+--     'coaches_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM coaches),
+--     'players_views', (SELECT COALESCE(SUM(view_count), 0) FROM players),
+--     'players_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM players),
+--     'news_views', (SELECT COALESCE(SUM(view_count), 0) FROM news),
+--     'news_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM news),
+--     'tournaments_views', (SELECT COALESCE(SUM(view_count), 0) FROM tournaments),
+--     'tournaments_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM tournaments),
+--     'sponsors_views', (SELECT COALESCE(SUM(view_count), 0) FROM sponsors),
+--     'sponsors_views_app', (SELECT COALESCE(SUM(view_count_app), 0) FROM sponsors),
+--     'pages_views', (SELECT COALESCE(SUM(view_count), 0) FROM page_views),
+--     'site_visits', (SELECT COALESCE(view_count, 0) FROM page_views WHERE page_name = 'site_visit'),
+--     'app_visits', (SELECT COALESCE(view_count, 0) FROM page_views WHERE page_name = 'app_visit')
+--   ) INTO result;
+--   RETURN result;
+-- END;
+-- $function$
+--
+
+-- --- get_battle_public(p_challenge_id uuid) ----------------------
+-- CREATE OR REPLACE FUNCTION public.get_battle_public(p_challenge_id uuid)
+--  RETURNS json
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+-- AS $function$
+--     SELECT row_to_json(r) FROM (
+--         SELECT c.id, c.battle_title, c.status, c.voting_closed, c.format,
+--                c.proposed_date, c.proposed_time, c.proposed_venue,
+--                c.challenger_player_id, c.opponent_player_id, c.match_id,
+--                c.challenger_partner_id, c.opponent_partner_id,
+--                c.battle_published_at, c.banner_url,
+--                c.challenger_ntrp, c.opponent_ntrp,
+--                c.challenger_category, c.opponent_category,
+--                c.set_format,
+--                COALESCE(p1.name,    c.challenger_external_name) AS challenger_name,
+--                COALESCE(p1.name_en, c.challenger_external_name) AS challenger_name_en,
+--                COALESCE(p1.name_kg, c.challenger_external_name) AS challenger_name_kg,
+--                COALESCE(p1.photo,   c.challenger_photo)         AS challenger_photo,
+--                COALESCE(c.challenger_country, p1.country)       AS challenger_country,
+--                p1.category_id AS challenger_cat,
+--                p1.wins AS challenger_wins, p1.losses AS challenger_losses, p1.form AS challenger_form,
+--                p1.doubles_wins AS challenger_dbl_wins, p1.doubles_losses AS challenger_dbl_losses,
+--                p1.mixed_wins AS challenger_mix_wins, p1.mixed_losses AS challenger_mix_losses,
+--                p1.points AS challenger_points,
+--                CASE WHEN c.format IN ('doubles', 'mixed_doubles')
+--                    THEN COALESCE(p1.ntrp_doubles, p1.ntrp_singles)
+--                    ELSE p1.ntrp_singles END AS challenger_player_ntrp,
+--                p1.country AS challenger_player_country,
+--                COALESCE(p2.name,    c.opponent_external_name) AS opponent_name,
+--                COALESCE(p2.name_en, c.opponent_external_name) AS opponent_name_en,
+--                COALESCE(p2.name_kg, c.opponent_external_name) AS opponent_name_kg,
+--                COALESCE(p2.photo,   c.opponent_photo)         AS opponent_photo,
+--                COALESCE(c.opponent_country, p2.country)       AS opponent_country,
+--                p2.category_id AS opponent_cat,
+--                p2.wins AS opponent_wins, p2.losses AS opponent_losses, p2.form AS opponent_form,
+--                p2.doubles_wins AS opponent_dbl_wins, p2.doubles_losses AS opponent_dbl_losses,
+--                p2.mixed_wins AS opponent_mix_wins, p2.mixed_losses AS opponent_mix_losses,
+--                p2.points AS opponent_points,
+--                CASE WHEN c.format IN ('doubles', 'mixed_doubles')
+--                    THEN COALESCE(p2.ntrp_doubles, p2.ntrp_singles)
+--                    ELSE p2.ntrp_singles END AS opponent_player_ntrp,
+--                p2.country AS opponent_player_country,
+--                -- Вторые половины пар
+--                COALESCE(m1.name,  c.challenger_partner_name)    AS challenger_partner_display,
+--                COALESCE(m1.photo, c.challenger_partner_photo)   AS challenger_partner_photo,
+--                COALESCE(c.challenger_partner_country, m1.country) AS challenger_partner_country,
+--                m1.category_id AS challenger_partner_cat,
+--                COALESCE(m1.ntrp_doubles, m1.ntrp_singles) AS challenger_partner_ntrp,
+--                m1.doubles_wins AS challenger_partner_dbl_wins,
+--                m1.doubles_losses AS challenger_partner_dbl_losses,
+--                m1.mixed_wins AS challenger_partner_mix_wins,
+--                m1.mixed_losses AS challenger_partner_mix_losses,
+--                COALESCE(m2.name,  c.opponent_partner_name)      AS opponent_partner_display,
+--                COALESCE(m2.photo, c.opponent_partner_photo)     AS opponent_partner_photo,
+--                COALESCE(c.opponent_partner_country, m2.country) AS opponent_partner_country,
+--                m2.category_id AS opponent_partner_cat,
+--                COALESCE(m2.ntrp_doubles, m2.ntrp_singles) AS opponent_partner_ntrp,
+--                m2.doubles_wins AS opponent_partner_dbl_wins,
+--                m2.doubles_losses AS opponent_partner_dbl_losses,
+--                m2.mixed_wins AS opponent_partner_mix_wins,
+--                m2.mixed_losses AS opponent_partner_mix_losses,
+--                ct.google_maps_url AS court_google_maps,
+--                ct.twogis_url AS court_twogis
+--         FROM challenges c
+--         LEFT JOIN players p1 ON p1.id = c.challenger_player_id
+--         LEFT JOIN players p2 ON p2.id = c.opponent_player_id
+--         LEFT JOIN players m1 ON m1.id = c.challenger_partner_id
+--         LEFT JOIN players m2 ON m2.id = c.opponent_partner_id
+--         LEFT JOIN courts ct ON ct.id = c.proposed_court_id
+--         WHERE c.id = p_challenge_id
+--           AND c.battle_published = true
+--     ) r;
+-- $function$
+--
+
+-- --- get_battle_votes(p_challenge_id uuid) -----------------------
+-- CREATE OR REPLACE FUNCTION public.get_battle_votes(p_challenge_id uuid)
+--  RETURNS TABLE(side smallint, player_id text, votes bigint)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+-- AS $function$
+--     SELECT cp.predicted_side AS side,
+--            CASE WHEN cp.predicted_side = 1
+--                 THEN c.challenger_player_id
+--                 ELSE c.opponent_player_id END AS player_id,
+--            count(*) AS votes
+--     FROM challenge_predictions cp
+--     JOIN challenges c ON c.id = cp.challenge_id
+--     WHERE cp.challenge_id = p_challenge_id
+--     GROUP BY cp.predicted_side, c.challenger_player_id, c.opponent_player_id;
+-- $function$
+--
+
+-- --- get_club_stats() --------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_club_stats()
+--  RETURNS TABLE(members integer, users integer, tournaments integer, courts integer, coaches integer)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--     SELECT
+--         (SELECT count(*)::integer FROM memberships
+--           WHERE status = 'active' AND expires_at >= CURRENT_DATE),
+--         (SELECT count(*)::integer FROM profiles),
+--         -- Турниры до 2025 года в базе не заведены: сообщество старше сайта.
+--         -- Архивную часть прибавляет уже сама страница, здесь только живой счёт
+--         (SELECT count(*)::integer FROM tournaments
+--           WHERE status = 'completed' AND date_start >= DATE '2025-01-01'),
+--         (SELECT count(*)::integer FROM courts),
+--         (SELECT count(*)::integer FROM coaches);
+-- $function$
+--
+
+-- --- get_invite_contacts(p_invite_id uuid) -----------------------
+-- CREATE OR REPLACE FUNCTION public.get_invite_contacts(p_invite_id uuid)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--   v_invite  game_invites%ROWTYPE;
+--   v_me      uuid := auth.uid();
+--   v_other   uuid;
+--   v_result  jsonb;
+-- BEGIN
+--   IF v_me IS NULL THEN
+--     RETURN jsonb_build_object('error', 'unauthorized');
+--   END IF;
+--
+--   SELECT * INTO v_invite FROM game_invites WHERE id = p_invite_id;
+--
+--   IF NOT FOUND OR v_invite.status <> 'accepted' THEN
+--     RETURN jsonb_build_object('error', 'not_available');
+--   END IF;
+--
+--   -- Собеседник — тот из двоих, кто не я
+--   IF v_invite.sender_id = v_me THEN
+--     v_other := v_invite.receiver_profile_id;
+--   ELSIF v_invite.receiver_profile_id = v_me THEN
+--     v_other := v_invite.sender_id;
+--   ELSE
+--     RETURN jsonb_build_object('error', 'not_yours');
+--   END IF;
+--
+--   SELECT jsonb_build_object(
+--            'full_name', pr.full_name,
+--            'avatar_url', pr.avatar_url,
+--            'phone', NULLIF(pr.phone, ''),
+--            'whatsapp', NULLIF(COALESCE(pr.whatsapp_phone, pr.phone), ''),
+--            'telegram', NULLIF(pr.telegram, ''),
+--            'instagram', NULLIF(pr.instagram, '')
+--          )
+--     INTO v_result
+--     FROM profiles pr
+--    WHERE pr.id = v_other;
+--
+--   RETURN jsonb_build_object('success', true, 'contacts', v_result);
+-- END;
+-- $function$
+--
+
+-- --- get_live_by_umpire_key(p_key text) --------------------------
+-- CREATE OR REPLACE FUNCTION public.get_live_by_umpire_key(p_key text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v_match RECORD;
+--     v_p1 RECORD;
+--     v_p2 RECORD;
+-- BEGIN
+--     SELECT * INTO v_match FROM live_matches WHERE umpire_key = p_key;
+--     IF v_match IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'Not found');
+--     END IF;
+--
+--     -- Get player info
+--     SELECT id, name, name_en, photo INTO v_p1 FROM players WHERE id = v_match.player1_id;
+--     SELECT id, name, name_en, photo INTO v_p2 FROM players WHERE id = v_match.player2_id;
+--
+--     RETURN jsonb_build_object(
+--         'ok', true,
+--         'match', jsonb_build_object(
+--             'id', v_match.id,
+--             'match_id', v_match.match_id,
+--             'best_of', v_match.best_of,
+--             'youtube_url', v_match.youtube_url,
+--             'serving_player', v_match.serving_player,
+--             'points_p1', v_match.points_p1,
+--             'points_p2', v_match.points_p2,
+--             'current_set', v_match.current_set,
+--             'sets_data', v_match.sets_data,
+--             'current_game_p1', v_match.current_game_p1,
+--             'current_game_p2', v_match.current_game_p2,
+--             'is_tiebreak', v_match.is_tiebreak,
+--             'tiebreak_p1', v_match.tiebreak_p1,
+--             'tiebreak_p2', v_match.tiebreak_p2,
+--             'status', v_match.status,
+--             'winner_player', v_match.winner_player,
+--             'final_score', v_match.final_score,
+--             'history', v_match.history,
+--             'tournament_label', v_match.tournament_label,
+--             'player1_name', COALESCE(v_match.player1_name, v_p1.name),
+--             'player2_name', COALESCE(v_match.player2_name, v_p2.name),
+--             'player1_name_en', v_p1.name_en,
+--             'player2_name_en', v_p2.name_en,
+--             'player1_photo', v_p1.photo,
+--             'player2_photo', v_p2.photo
+--         )
+--     );
+-- END;
+-- $function$
+--
+
+-- --- get_loyalty_balance(p_profile_id uuid) ----------------------
+-- CREATE OR REPLACE FUNCTION public.get_loyalty_balance(p_profile_id uuid)
+--  RETURNS integer
+--  LANGUAGE sql
+--  STABLE
+-- AS $function$
+--     SELECT COALESCE(
+--         SUM(CASE WHEN type = 'earn' THEN points ELSE 0 END) -
+--         SUM(CASE WHEN type IN ('redeem', 'expire') THEN points ELSE 0 END) -
+--         SUM(CASE WHEN type = 'admin_adjust' AND points < 0 THEN ABS(points) ELSE 0 END) +
+--         SUM(CASE WHEN type = 'admin_adjust' AND points > 0 THEN points ELSE 0 END),
+--     0)
+--     FROM loyalty_transactions
+--     WHERE profile_id = p_profile_id;
+-- $function$
+--
+
+-- --- get_my_challenges() -----------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_my_challenges()
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+--   DECLARE
+--       result json;
+--   BEGIN
+--       SELECT json_agg(row_to_json(t)) INTO result
+--       FROM (
+--           SELECT
+--               c.id, c.status, c.proposed_date, c.proposed_time,
+--               c.proposed_venue, c.message, c.created_at, c.expires_at,
+--               c.accepted_at, c.match_id,
+--               c.cancelled_at, c.cancelled_by,
+--               CASE WHEN c.challenger_id = auth.uid() THEN 'sent' ELSE 'received' END AS direction,
+--               c.challenger_player_id,
+--               cp.full_name AS challenger_name,
+--               COALESCE(cp.avatar_url, cpl.photo) AS challenger_avatar,
+--               c.opponent_player_id,
+--               op.full_name AS opponent_name,
+--               COALESCE(op.avatar_url, opl.photo) AS opponent_avatar,
+--               ct.name AS court_name,
+--               COALESCE(m.score, c.score_draft) AS match_score,
+--               m.winner_id AS match_winner_id,
+--               c.battle_published,
+--               c.battle_title
+--           FROM challenges c
+--           LEFT JOIN profiles cp ON cp.id = c.challenger_id
+--           LEFT JOIN profiles op ON op.id = c.opponent_profile_id
+--           LEFT JOIN players cpl ON cpl.id = c.challenger_player_id
+--           LEFT JOIN players opl ON opl.id = c.opponent_player_id
+--           LEFT JOIN courts ct ON ct.id = c.proposed_court_id
+--           LEFT JOIN matches m ON m.id = c.match_id
+--           WHERE c.challenger_id = auth.uid()
+--              OR c.opponent_profile_id = auth.uid()
+--           ORDER BY c.created_at DESC
+--           LIMIT 50
+--       ) t;
+--       RETURN COALESCE(result, '[]'::json);
+--   END;
+--   $function$
+--
+
+-- --- get_my_game_invites() ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_my_game_invites()
+--  RETURNS TABLE(id uuid, status text, created_at timestamp with time zone, responded_at timestamp with time zone, direction text, partner_name text, partner_avatar text, partner_player_id text)
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT gi.id, gi.status, gi.created_at, gi.responded_at,
+--         'sent'::TEXT, pl.name, COALESCE(pr2.avatar_url, pl.photo), pl.id
+--     FROM game_invites gi
+--     JOIN players pl ON pl.id = gi.receiver_player_id
+--     LEFT JOIN profiles pr2 ON pr2.player_id = pl.id
+--     WHERE gi.sender_id = auth.uid()
+--     UNION ALL
+--     SELECT gi.id, gi.status, gi.created_at, gi.responded_at,
+--         'received'::TEXT, pr_s.full_name, pr_s.avatar_url, pr_s.player_id
+--     FROM game_invites gi
+--     JOIN profiles pr_s ON pr_s.id = gi.sender_id
+--     WHERE gi.receiver_profile_id = auth.uid()
+--     ORDER BY created_at DESC
+--     LIMIT 20;
+-- $function$
+--
+
+-- --- get_news_engagement(p_news_ids text[]) ----------------------
+-- CREATE OR REPLACE FUNCTION public.get_news_engagement(p_news_ids text[])
+--  RETURNS TABLE(news_id text, total_reactions bigint, total_votes bigint)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+-- AS $function$
+--     SELECT
+--         n.id AS news_id,
+--         (SELECT COUNT(*) FROM news_reactions r WHERE r.news_id = n.id) AS total_reactions,
+--         (SELECT COUNT(*) FROM news_poll_votes v WHERE v.news_id = n.id) AS total_votes
+--     FROM unnest(p_news_ids) AS n(id);
+-- $function$
+--
+
+-- --- get_news_stats() --------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_news_stats()
+--  RETURNS TABLE(published_count bigint, last_published timestamp with time zone, draft_count bigint, last_draft timestamp with time zone)
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT
+--         COUNT(*) FILTER (WHERE published_at IS NOT NULL) AS published_count,
+--         MAX(published_at) FILTER (WHERE published_at IS NOT NULL) AS last_published,
+--         COUNT(*) FILTER (WHERE published_at IS NULL) AS draft_count,
+--         MAX(created_at) FILTER (WHERE published_at IS NULL) AS last_draft
+--     FROM news;
+-- $function$
+--
+
+-- --- get_page_view_stats() ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_page_view_stats()
+--  RETURNS TABLE(page_name text, view_count integer, updated_at timestamp with time zone)
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT page_name, view_count, updated_at
+--     FROM page_views
+--     ORDER BY view_count DESC;
+-- $function$
+--
+
+-- --- get_player_avatar(p_player_id text) -------------------------
+-- CREATE OR REPLACE FUNCTION public.get_player_avatar(p_player_id text)
+--  RETURNS text
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--   SELECT avatar_url FROM profiles
+--   WHERE player_id = p_player_id LIMIT 1;
+-- $function$
+--
+
+-- --- get_player_challenges(p_player_id text) ---------------------
+-- CREATE OR REPLACE FUNCTION public.get_player_challenges(p_player_id text)
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+--   DECLARE
+--       result JSON;
+--   BEGIN
+--       SELECT json_agg(row_to_json(t)) INTO result
+--       FROM (
+--           SELECT
+--               c.id, c.status, c.proposed_date, c.proposed_time,
+--               c.proposed_venue,
+--               c.created_at, c.accepted_at,
+--               c.challenger_player_id,
+--               COALESCE(cp.name, lm.player1_name) AS challenger_name,
+--               COALESCE(cp.name_en, lm.player1_name) AS challenger_name_en,
+--               COALESCE(cp.name_kg, lm.player1_name) AS challenger_name_kg,
+--               cp.photo AS challenger_photo,
+--               c.opponent_player_id,
+--               COALESCE(op.name, lm.player2_name) AS opponent_name,
+--               COALESCE(op.name_en, lm.player2_name) AS opponent_name_en,
+--               COALESCE(op.name_kg, lm.player2_name) AS opponent_name_kg,
+--               op.photo AS opponent_photo,
+--               ct.name AS court_name,
+--               COALESCE(m.score, c.score_draft) AS match_score,
+--               m.winner_id AS match_winner_id
+--           FROM challenges c
+--           LEFT JOIN players cp ON cp.id = c.challenger_player_id
+--           LEFT JOIN players op ON op.id = c.opponent_player_id
+--           LEFT JOIN courts ct ON ct.id = c.proposed_court_id
+--           LEFT JOIN matches m ON m.id = c.match_id
+--           LEFT JOIN live_matches lm ON lm.id = c.live_match_id
+--           WHERE (c.challenger_player_id = p_player_id OR c.opponent_player_id = p_player_id)
+--             AND c.status IN ('accepted', 'completed')
+--           ORDER BY c.created_at DESC
+--           LIMIT 25
+--       ) t;
+--       RETURN COALESCE(result, '[]'::json);
+--   END;
+--   $function$
+--
+
+-- --- get_poll_results(p_news_id text) ----------------------------
+-- CREATE OR REPLACE FUNCTION public.get_poll_results(p_news_id text)
+--  RETURNS TABLE(option_index integer, count bigint)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+-- AS $function$
+--     SELECT option_index, COUNT(*) AS count
+--     FROM news_poll_votes
+--     WHERE news_id = p_news_id
+--     GROUP BY option_index;
+-- $function$
+--
+
+-- --- get_public_partners() ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_public_partners()
+--  RETURNS TABLE(id text, full_name text, avatar_url text, gender text, last_seen timestamp with time zone, category_name text, category_name_en text, has_telegram boolean, play_level text)
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--   SELECT pl.id, pl.name, COALESCE(pr.avatar_url, pl.photo),
+--       CASE WHEN c.gender = 'men' THEN 'male' ELSE 'female' END,
+--       pr.last_seen, c.name, c.name_en,
+--       (pr.telegram_chat_id IS NOT NULL) AS has_telegram,
+--       pr.play_level
+--   FROM players pl
+--   LEFT JOIN categories c ON pl.category_id = c.id
+--   LEFT JOIN profiles pr ON pr.player_id = pl.id
+--   WHERE pl.name IS NOT NULL AND pl.name != ''
+--     AND (pr.role IS NULL OR pr.role NOT IN ('admin', 'manager'))
+--     AND (
+--       pl.is_member
+--       OR EXISTS (
+--         SELECT 1 FROM memberships m
+--          WHERE m.profile_id = pr.id
+--            AND m.status = 'active'
+--            AND m.expires_at >= CURRENT_DATE
+--       )
+--       OR (public.бесплатный_доступ() AND pr.id IS NOT NULL)
+--     )
+--   ORDER BY pr.last_seen DESC NULLS LAST;
+-- $function$
+--
+
+-- --- get_reaction_counts(p_news_id text) -------------------------
+-- CREATE OR REPLACE FUNCTION public.get_reaction_counts(p_news_id text)
+--  RETURNS TABLE(reaction_type text, count bigint)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+-- AS $function$
+--     SELECT reaction_type, COUNT(*)::BIGINT AS count
+--     FROM news_reactions
+--     WHERE news_id = p_news_id
+--     GROUP BY reaction_type;
+-- $function$
+--
+
+-- --- get_top_news(p_limit integer) -------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_top_news(p_limit integer DEFAULT 3)
+--  RETURNS TABLE(news_id text, title text, score bigint)
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT
+--         n.id AS news_id,
+--         n.title,
+--         (COALESCE(n.view_count, 0) +
+--          COALESCE((SELECT COUNT(*) FROM news_reactions r WHERE r.news_id = n.id), 0) +
+--          COALESCE((SELECT COUNT(*) FROM news_poll_votes v WHERE v.news_id = n.id), 0)
+--         )::BIGINT AS score
+--     FROM news n
+--     WHERE n.published_at IS NOT NULL
+--     ORDER BY score DESC
+--     LIMIT p_limit;
+-- $function$
+--
+
+-- --- get_tournament_stats() --------------------------------------
+-- CREATE OR REPLACE FUNCTION public.get_tournament_stats()
+--  RETURNS TABLE(total_count bigint, active_count bigint, completed_count bigint, total_views bigint)
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT
+--         COUNT(*)::BIGINT AS total_count,
+--         COUNT(*) FILTER (WHERE status NOT IN ('completed','cancelled') OR status IS NULL)::BIGINT AS active_count,
+--         COUNT(*) FILTER (WHERE status IN ('completed','cancelled'))::BIGINT AS completed_count,
+--         COALESCE(SUM(view_count), 0)::BIGINT AS total_views
+--     FROM tournaments
+--     WHERE published_at IS NOT NULL;
+-- $function$
+--
+
+-- --- get_user_reactions(p_news_id text, p_user_id uuid) ----------
+-- CREATE OR REPLACE FUNCTION public.get_user_reactions(p_news_id text, p_user_id uuid)
+--  RETURNS TABLE(reaction_type text)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+-- AS $function$
+--     SELECT reaction_type
+--     FROM news_reactions
+--     WHERE news_id = p_news_id AND user_id = p_user_id;
+-- $function$
+--
+
+-- --- handle_new_user() -------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.handle_new_user()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   INSERT INTO public.profiles (
+--     id,
+--     full_name,
+--     email,
+--     phone,
+--     gender,
+--     birth_day,
+--     birth_month,
+--     birth_year,
+--     role,
+--     created_at
+--   ) VALUES (
+--     NEW.id,
+--     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+--     NEW.email,
+--     NULLIF(NEW.raw_user_meta_data->>'phone', ''),
+--     NULLIF(NEW.raw_user_meta_data->>'gender', ''),
+--     (NEW.raw_user_meta_data->>'birth_day')::int,
+--     (NEW.raw_user_meta_data->>'birth_month')::int,
+--     (NEW.raw_user_meta_data->>'birth_year')::int,
+--     'user',
+--     NOW()
+--   );
+--   RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- handle_updated_at() -----------------------------------------
+-- CREATE OR REPLACE FUNCTION public.handle_updated_at()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+-- AS $function$
+-- BEGIN
+--     NEW.updated_at = now();
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- increment_coach_view(p_id text) -----------------------------
+-- CREATE OR REPLACE FUNCTION public.increment_coach_view(p_id text)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     UPDATE coaches SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+-- $function$
+--
+
+-- --- increment_coach_view(p_id text, p_source text) --------------
+-- CREATE OR REPLACE FUNCTION public.increment_coach_view(p_id text, p_source text DEFAULT 'site'::text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   IF p_source = 'app' THEN
+--     UPDATE coaches SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
+--   ELSE
+--     UPDATE coaches SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+--   END IF;
+-- END;
+-- $function$
+--
+
+-- --- increment_court_view(p_id text) -----------------------------
+-- CREATE OR REPLACE FUNCTION public.increment_court_view(p_id text)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     UPDATE courts SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+-- $function$
+--
+
+-- --- increment_court_view(p_id text, p_source text) --------------
+-- CREATE OR REPLACE FUNCTION public.increment_court_view(p_id text, p_source text DEFAULT 'site'::text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   IF p_source = 'app' THEN
+--     UPDATE courts SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
+--   ELSE
+--     UPDATE courts SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+--   END IF;
+-- END;
+-- $function$
+--
+
+-- --- increment_news_view(p_news_id text) -------------------------
+-- CREATE OR REPLACE FUNCTION public.increment_news_view(p_news_id text)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     UPDATE news SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_news_id;
+-- $function$
+--
+
+-- --- increment_news_view(p_news_id text, p_source text) ----------
+-- CREATE OR REPLACE FUNCTION public.increment_news_view(p_news_id text, p_source text DEFAULT 'site'::text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   IF p_source = 'app' THEN
+--     UPDATE news SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_news_id;
+--   ELSE
+--     UPDATE news SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_news_id;
+--   END IF;
+-- END;
+-- $function$
+--
+
+-- --- increment_page_view(p_page_name text) -----------------------
+-- CREATE OR REPLACE FUNCTION public.increment_page_view(p_page_name text)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     INSERT INTO page_views (page_name, view_count, updated_at)
+--     VALUES (p_page_name, 1, now())
+--     ON CONFLICT (page_name) DO UPDATE
+--     SET view_count = page_views.view_count + 1, updated_at = now();
+-- $function$
+--
+
+-- --- increment_player_view(p_id text) ----------------------------
+-- CREATE OR REPLACE FUNCTION public.increment_player_view(p_id text)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     UPDATE players SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+-- $function$
+--
+
+-- --- increment_player_view(p_id text, p_source text) -------------
+-- CREATE OR REPLACE FUNCTION public.increment_player_view(p_id text, p_source text DEFAULT 'site'::text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   IF p_source = 'app' THEN
+--     UPDATE players SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
+--   ELSE
+--     UPDATE players SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+--   END IF;
+-- END;
+-- $function$
+--
+
+-- --- increment_sponsor_view(p_id uuid) ---------------------------
+-- CREATE OR REPLACE FUNCTION public.increment_sponsor_view(p_id uuid)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     UPDATE sponsors SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+-- $function$
+--
+
+-- --- increment_sponsor_view(p_id uuid, p_source text) ------------
+-- CREATE OR REPLACE FUNCTION public.increment_sponsor_view(p_id uuid, p_source text DEFAULT 'site'::text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   IF p_source = 'app' THEN
+--     UPDATE sponsors SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_id;
+--   ELSE
+--     UPDATE sponsors SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_id;
+--   END IF;
+-- END;
+-- $function$
+--
+
+-- --- increment_tournament_view(p_tournament_id text) -------------
+-- CREATE OR REPLACE FUNCTION public.increment_tournament_view(p_tournament_id text)
+--  RETURNS void
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     UPDATE tournaments SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_tournament_id;
+-- $function$
+--
+
+-- --- increment_tournament_view(p_tournament_id text, p_source text) 
+-- CREATE OR REPLACE FUNCTION public.increment_tournament_view(p_tournament_id text, p_source text DEFAULT 'site'::text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   IF p_source = 'app' THEN
+--     UPDATE tournaments SET view_count_app = COALESCE(view_count_app, 0) + 1 WHERE id = p_tournament_id;
+--   ELSE
+--     UPDATE tournaments SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_tournament_id;
+--   END IF;
+-- END;
+-- $function$
+--
+
+-- --- is_admin() --------------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.is_admin()
+--  RETURNS boolean
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT EXISTS (
+--         SELECT 1 FROM public.profiles
+--         WHERE id = auth.uid() AND role = 'admin'
+--     );
+-- $function$
+--
+
+-- --- is_phone_taken(p_phone text) --------------------------------
+-- CREATE OR REPLACE FUNCTION public.is_phone_taken(p_phone text)
+--  RETURNS boolean
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--   v_digits text;
+-- BEGIN
+--   v_digits := regexp_replace(COALESCE(p_phone, ''), '[^0-9]', '', 'g');
+--   IF v_digits = '' THEN
+--     RETURN false;
+--   END IF;
+--
+--   -- Приводим к тому же виду, что и phone_e164: девять цифр — наш номер
+--   -- без кода, десять с нуля впереди — наш же, записанный по-местному
+--   IF length(v_digits) = 9 THEN
+--     v_digits := '996' \|\| v_digits;
+--   ELSIF length(v_digits) = 10 AND left(v_digits, 1) = '0' THEN
+--     v_digits := '996' \|\| right(v_digits, 9);
+--   END IF;
+--
+--   -- IS DISTINCT FROM, а не <>: у неизвестного посетителя auth.uid() пуст,
+--   -- и обычное сравнение дало бы «неизвестно» вместо «да» — функция молча
+--   -- отвечала бы, что любой номер свободен
+--   RETURN EXISTS(
+--     SELECT 1 FROM profiles
+--      WHERE phone_e164 = v_digits
+--        AND id IS DISTINCT FROM auth.uid()
+--   );
+-- END;
+-- $function$
+--
+
+-- --- is_staff() --------------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.is_staff()
+--  RETURNS boolean
+--  LANGUAGE sql
+--  SECURITY DEFINER
+-- AS $function$
+--     SELECT EXISTS (
+--         SELECT 1 FROM public.profiles
+--         WHERE id = auth.uid() AND role IN ('admin', 'manager')
+--     );
+-- $function$
+--
+
+-- --- log_deleted_profile() ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.log_deleted_profile()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v_has_mem BOOLEAN;
+-- BEGIN
+--     SELECT EXISTS(
+--         SELECT 1 FROM memberships WHERE profile_id = OLD.id AND status = 'active'
+--     ) INTO v_has_mem;
+--
+--     INSERT INTO deleted_accounts (profile_id, full_name, email, role, phone, telegram_chat_id, player_id, had_membership)
+--     VALUES (OLD.id, OLD.full_name, OLD.email, OLD.role, OLD.phone, OLD.telegram_chat_id, OLD.player_id, v_has_mem);
+--
+--     RETURN OLD;
+-- END;
+-- $function$
+--
+
+-- --- mark_badges_seen() ------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.mark_badges_seen()
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     pid text;
+--     n   integer;
+-- BEGIN
+--     SELECT player_id INTO pid FROM profiles WHERE id = auth.uid();
+--     IF pid IS NULL THEN
+--         RETURN 0;
+--     END IF;
+--
+--     UPDATE player_badges
+--     SET seen_at = now()
+--     WHERE player_id = pid AND seen_at IS NULL;
+--
+--     GET DIAGNOSTICS n = ROW_COUNT;
+--     RETURN n;
+-- END;
+-- $function$
+--
+
+-- --- match_side_of(p_match_id uuid, p_user uuid) -----------------
+-- CREATE OR REPLACE FUNCTION public.match_side_of(p_match_id uuid, p_user uuid)
+--  RETURNS smallint
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     m       RECORD;
+--     v_карта text;
+-- BEGIN
+--     SELECT * INTO m FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND THEN RETURN NULL; END IF;
+--
+--     SELECT player_id INTO v_карта FROM profiles WHERE id = p_user;
+--     IF v_карта IS NULL THEN RETURN NULL; END IF;
+--
+--     -- Сам стоит в матче
+--     IF m.player1_id = v_карта THEN RETURN 1; END IF;
+--     IF m.player2_id = v_карта THEN RETURN 2; END IF;
+--
+--     -- Или он напарник того, кто стоит. Пары знает заявка на турнир
+--     IF m.tournament_id IS NOT NULL THEN
+--         IF EXISTS (
+--             SELECT 1 FROM tournament_registrations r
+--              WHERE r.tournament_id = m.tournament_id
+--                AND r.player_id = m.player1_id
+--                AND r.partner_id = v_карта
+--         ) THEN RETURN 1; END IF;
+--
+--         IF EXISTS (
+--             SELECT 1 FROM tournament_registrations r
+--              WHERE r.tournament_id = m.tournament_id
+--                AND r.player_id = m.player2_id
+--                AND r.partner_id = v_карта
+--         ) THEN RETURN 2; END IF;
+--     END IF;
+--
+--     RETURN NULL;
+-- END;
+-- $function$
+--
+
+-- --- next_news_suggestion() --------------------------------------
+-- CREATE OR REPLACE FUNCTION public.next_news_suggestion()
+--  RETURNS SETOF news_suggestions
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--     SELECT *
+--       FROM news_suggestions
+--      WHERE (status = 'new'
+--             OR (status = 'offered' AND offers < 3 AND offered_at < now() - interval '24 hours'))
+--        AND COALESCE(published_at, created_at) > now() - interval '3 days'
+--      ORDER BY (lang = 'ru') DESC,        -- русские вперёд
+--               (status = 'new') DESC,     -- новое раньше повторного показа
+--               COALESCE(published_at, created_at) DESC
+--      LIMIT 1;
+-- $function$
+--
+
+-- --- notify_match_score(p_match_id uuid, "p_повод" text) ---------
+-- CREATE OR REPLACE FUNCTION public.notify_match_score(p_match_id uuid, "p_повод" text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     m         RECORD;
+--     v_кому    uuid;
+--     v_моя     smallint;   -- сторона того, кто вписал
+--     v_другая  smallint;
+--     v_имя     text;
+--     v_текст   text;
+--     v_загол   text;
+-- BEGIN
+--     SELECT * INTO m FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND THEN RETURN; END IF;
+--
+--     v_моя := public.match_side_of(p_match_id, m.score_submitted_by);
+--     IF v_моя IS NULL THEN v_моя := 1; END IF;
+--     v_другая := CASE WHEN v_моя = 1 THEN 2 ELSE 1 END;
+--
+--     -- Имя того, о ком речь: кто вписал или кто ответил
+--     SELECT p.name INTO v_имя
+--       FROM profiles pr JOIN players p ON p.id = pr.player_id
+--      WHERE pr.id = m.score_submitted_by;
+--
+--     IF p_повод = 'submitted' THEN
+--         v_загол := 'Подтвердите счёт';
+--         v_текст := COALESCE(v_имя, 'Соперник') \|\| ' вписал счёт ' \|\|
+--                    replace(COALESCE(m.score, ''), '/', ':') \|\|
+--                    '. Подтвердите, если всё верно — иначе через сутки счёт примется как есть.';
+--     ELSIF p_повод = 'confirmed' THEN
+--         v_загол := 'Счёт подтверждён';
+--         v_текст := 'Соперник подтвердил счёт ' \|\|
+--                    replace(COALESCE(m.score, ''), '/', ':') \|\| '.';
+--     ELSE
+--         v_загол := 'Счёт оспорен';
+--         v_текст := 'Соперник не согласен со счётом. Разберётся организатор.';
+--     END IF;
+--
+--     -- ---- Кому ----
+--     IF p_повод = 'submitted' THEN
+--         -- Всей другой стороне: и капитану, и напарнику, у кого есть аккаунт
+--         FOR v_кому IN
+--             SELECT pr.id
+--               FROM profiles pr
+--              WHERE pr.player_id IS NOT NULL
+--                AND public.match_side_of(p_match_id, pr.id) = v_другая
+--         LOOP
+--             PERFORM public.отправить_о_счёте(v_кому, p_match_id, v_загол, v_текст);
+--         END LOOP;
+--     ELSE
+--         -- Ответ на счёт — тому, кто его вписывал
+--         IF m.score_submitted_by IS NOT NULL THEN
+--             PERFORM public.отправить_о_счёте(m.score_submitted_by, p_match_id, v_загол, v_текст);
+--         END IF;
+--     END IF;
+-- END;
+-- $function$
+--
+
+-- --- notify_score_dispute(p_match_id uuid) -----------------------
+-- CREATE OR REPLACE FUNCTION public.notify_score_dispute(p_match_id uuid)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_кому   uuid;
+--     v_текст  text;
+--     m        RECORD;
+-- BEGIN
+--     SELECT * INTO m FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND THEN RETURN; END IF;
+--
+--     v_текст := 'Счёт ' \|\| replace(COALESCE(m.score, ''), '/', ':') \|\|
+--                ' оспорен. Матч не пойдёт дальше, пока счёт не подтвердят.';
+--
+--     -- Строка в колокольчике каждому, кто может разобраться
+--     FOR v_кому IN
+--         SELECT id FROM profiles WHERE role IN ('admin', 'manager')
+--     LOOP
+--         INSERT INTO notification_log (profile_id, type, title, message, action_type, action_id)
+--         VALUES (v_кому, 'match', 'Спорный счёт', v_текст, 'match_score', p_match_id);
+--     END LOOP;
+--
+--     -- Telegram и почта — через облачную функцию: до них база не дотягивается.
+--     -- Не ушло — строка в колокольчике всё равно осталась
+--     BEGIN
+--         PERFORM net.http_post(
+--             url := current_setting('app.settings.supabase_url') \|\| '/functions/v1/score-dispute-notify',
+--             headers := jsonb_build_object(
+--                 'Authorization', 'Bearer ' \|\| current_setting('app.settings.cron_secret'),
+--                 'Content-Type', 'application/json'
+--             ),
+--             body := jsonb_build_object('match_id', p_match_id::text)
+--         );
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'организатор не позван: %', SQLERRM;
+--     END;
+-- END;
+-- $function$
+--
+
+-- --- notify_tournament_ready(p_tournament_id text) ---------------
+-- CREATE OR REPLACE FUNCTION public.notify_tournament_ready(p_tournament_id text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     t         RECORD;
+--     v_кому    uuid;
+--     v_осталось integer;
+--     v_текст   text;
+-- BEGIN
+--     SELECT * INTO t FROM tournaments WHERE id = p_tournament_id;
+--     IF NOT FOUND THEN RETURN; END IF;
+--
+--     -- Уже говорили или турнир и так закрыт
+--     IF t.ready_notified_at IS NOT NULL OR t.status = 'completed' THEN RETURN; END IF;
+--
+--     -- Незакрытые матчи. Свободные проходы (BYE) считаются сыгранными,
+--     -- у них сразу стоит победитель
+--     SELECT count(*) INTO v_осталось
+--       FROM matches m
+--      WHERE m.tournament_id = p_tournament_id
+--        AND (m.winner_id IS NULL
+--             OR m.score_status IN ('pending', 'disputed'));
+--
+--     IF v_осталось > 0 THEN RETURN; END IF;
+--
+--     -- Турнир без матчей закрывать нечего
+--     IF NOT EXISTS (SELECT 1 FROM matches WHERE tournament_id = p_tournament_id) THEN
+--         RETURN;
+--     END IF;
+--
+--     v_текст := 'Все матчи турнира «' \|\| COALESCE(t.title, p_tournament_id) \|\|
+--                '» сыграны. Можно закрывать турнир — очки начислятся после этого.';
+--
+--     FOR v_кому IN
+--         SELECT id FROM profiles WHERE role IN ('admin', 'manager')
+--     LOOP
+--         INSERT INTO notification_log (profile_id, type, title, message)
+--         VALUES (v_кому, 'tournament', 'Турнир сыгран', v_текст);
+--     END LOOP;
+--
+--     UPDATE tournaments SET ready_notified_at = now() WHERE id = p_tournament_id;
+-- END;
+-- $function$
+--
+
+-- --- ochki_proshloe_ne_pishetsya() -------------------------------
+-- CREATE OR REPLACE FUNCTION public.ochki_proshloe_ne_pishetsya()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     дата    date;
+--     сегодня date := (now() AT TIME ZONE 'Asia/Bishkek')::date;
+-- BEGIN
+--     /* СЕГОДНЯ СЧИТАЕТСЯ ПО БИШКЕКУ, А НЕ ПО UTC.
+--        Дата вступления стоит в одном календаре с `tournaments.date_start` —
+--        это дата турнира в клубе, а клуб в Бишкеке. Сервер базы живёт в UTC и
+--        с 06:00 по Бишкеку показывает уже завтрашний день: администратор,
+--        заводящий версию «с завтра», получил бы отказ «дата уже наступила».
+--        Костя работает по Чикаго — тем хуже, там расхождение целый вечер. */
+--     IF TG_TABLE_NAME = 'points_versions' THEN
+--         IF TG_OP = 'INSERT' THEN
+--             -- Первую версию (сборку из базы) пускаем: она и есть прошлое
+--             IF EXISTS (SELECT 1 FROM public.points_versions)
+--                AND NEW.effective_from <= сегодня THEN
+--                 RAISE EXCEPTION
+--                     'Версия очков заводится только с будущей даты: % уже наступила',
+--                     NEW.effective_from;
+--             END IF;
+--             RETURN NEW;
+--         END IF;
+--
+--         IF OLD.effective_from <= сегодня THEN
+--             RAISE EXCEPTION
+--                 'Версия очков от % уже в силе — поправка заводится новой версией',
+--                 OLD.effective_from;
+--         END IF;
+--         RETURN COALESCE(NEW, OLD);
+--     END IF;
+--
+--     -- points_by_place
+--     SELECT effective_from INTO дата
+--       FROM public.points_versions
+--      WHERE id = COALESCE(NEW.version_id, OLD.version_id);
+--
+--     IF дата <= сегодня THEN
+--         RAISE EXCEPTION
+--             'Таблица очков версии от % уже в силе — поправка заводится новой версией',
+--             дата;
+--     END IF;
+--
+--     RETURN COALESCE(NEW, OLD);
+-- END;
+-- $function$
+--
+
+-- --- purge_deleted_accounts() ------------------------------------
+-- CREATE OR REPLACE FUNCTION public.purge_deleted_accounts()
+--  RETURNS TABLE("удалено" integer, "обезличено_платежей" integer)
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     просроченные uuid[];
+--     n_профилей integer := 0;
+--     n_платежей integer := 0;
+-- BEGIN
+--     -- Кому вышел срок. Тридцать дней считаем от метки, а не от последнего
+--     -- входа: человек мог передумать и вернуться — тогда метку снимут
+--     SELECT array_agg(id) INTO просроченные
+--       FROM profiles
+--      WHERE deleted_at IS NOT NULL
+--        AND deleted_at < now() - interval '30 days';
+--
+--     IF просроченные IS NULL OR array_length(просроченные, 1) IS NULL THEN
+--         RETURN QUERY SELECT 0, 0;
+--         RETURN;
+--     END IF;
+--
+--     -- Деньги остаются, имя уходит. Отчётность клуба не должна зависеть от
+--     -- того, ушёл человек или нет.
+--     --
+--     -- В платеже сохраняем след в примечании: сумма без всякой привязки
+--     -- через год никому ничего не скажет, а «удалённая учётная запись»
+--     -- объясняет, почему строка ничья
+--     UPDATE payments
+--        SET profile_id = NULL,
+--            note = COALESCE(NULLIF(note, ''), '') \|\|
+--                   CASE WHEN COALESCE(note, '') = '' THEN '' ELSE ' · ' END \|\|
+--                   'плательщик удалил учётную запись'
+--      WHERE profile_id = ANY(просроченные);
+--     GET DIAGNOSTICS n_платежей = ROW_COUNT;
+--
+--     -- Карточка игрока переживает учётную запись: очки, история матчей и
+--     -- место в рейтинге принадлежат клубу, а не аккаунту. Просто разрываем
+--     -- связь — карточка становится фоновой, как у тех, кто не регистрировался
+--     UPDATE players
+--        SET is_member = false
+--      WHERE id IN (SELECT player_id FROM profiles
+--                    WHERE id = ANY(просроченные) AND player_id IS NOT NULL);
+--
+--     UPDATE profiles SET player_id = NULL WHERE id = ANY(просроченные);
+--
+--     -- Сам профиль. Приглашения, вызовы, членства, устройства и уведомления
+--     -- уйдут вместе с ним — так задано в связях
+--     DELETE FROM profiles WHERE id = ANY(просроченные);
+--     GET DIAGNOSTICS n_профилей = ROW_COUNT;
+--
+--     RETURN QUERY SELECT n_профилей, n_платежей;
+-- END;
+-- $function$
+--
+
+-- --- recalc_after_battle_link() ----------------------------------
+-- CREATE OR REPLACE FUNCTION public.recalc_after_battle_link()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     ids text[];
+-- BEGIN
+--     IF NEW.match_id IS NULL THEN
+--         RETURN NULL;
+--     END IF;
+--
+--     ids := ARRAY(
+--         SELECT DISTINCT x FROM unnest(ARRAY[
+--             NEW.challenger_player_id, NEW.challenger_partner_id,
+--             NEW.opponent_player_id,   NEW.opponent_partner_id
+--         ]) AS x
+--         WHERE x IS NOT NULL
+--     );
+--
+--     IF array_length(ids, 1) IS NULL THEN
+--         RETURN NULL;
+--     END IF;
+--
+--     PERFORM public.recalc_pair_stats(ids);
+--     PERFORM public.check_and_award_badges(pid) FROM unnest(ids) AS pid;
+--
+--     RETURN NULL;
+-- END;
+-- $function$
+--
+
+-- --- recalc_after_match() ----------------------------------------
+-- CREATE OR REPLACE FUNCTION public.recalc_after_match()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     ids  text[];
+--     tid  text;
+--     mid  uuid;   -- было integer: matches.id — UUID, и присваивание падало
+-- BEGIN
+--     IF TG_OP = 'DELETE' THEN
+--         ids := ARRAY(
+--             SELECT DISTINCT x FROM unnest(ARRAY[OLD.player1_id, OLD.player2_id]) AS x
+--             WHERE x IS NOT NULL
+--         );
+--         tid := OLD.tournament_id;
+--         mid := OLD.id;
+--     ELSE
+--         ids := ARRAY(
+--             SELECT DISTINCT x FROM unnest(ARRAY[
+--                 NEW.player1_id, NEW.player2_id,
+--                 CASE WHEN TG_OP = 'UPDATE' THEN OLD.player1_id END,
+--                 CASE WHEN TG_OP = 'UPDATE' THEN OLD.player2_id END
+--             ]) AS x
+--             WHERE x IS NOT NULL
+--         );
+--         tid := NEW.tournament_id;
+--         mid := NEW.id;
+--     END IF;
+--
+--     IF array_length(ids, 1) IS NULL THEN
+--         RETURN NULL;
+--     END IF;
+--
+--     -- Напарники капитанов из этого турнира
+--     IF tid IS NOT NULL THEN
+--         ids := ids \|\| ARRAY(
+--             SELECT DISTINCT r.partner_id
+--             FROM tournament_registrations r
+--             WHERE r.tournament_id = tid
+--               AND r.player_id = ANY(ids)
+--               AND r.partner_id IS NOT NULL
+--         );
+--     END IF;
+--
+--     -- Напарники из парного баттла
+--     ids := ids \|\| ARRAY(
+--         SELECT DISTINCT x FROM (
+--             SELECT unnest(ARRAY[c.challenger_partner_id, c.opponent_partner_id]) AS x
+--             FROM challenges c WHERE c.match_id = mid
+--         ) q WHERE x IS NOT NULL
+--     );
+--
+--     PERFORM public.recalc_player_categories(ids);
+--     PERFORM public.recalc_pair_stats(ids);
+--
+--     PERFORM public.check_and_award_badges(pid) FROM unnest(ids) AS pid;
+--
+--     RETURN NULL;
+-- END;
+-- $function$
+--
+
+-- --- recalc_all_player_points() ----------------------------------
+-- CREATE OR REPLACE FUNCTION public.recalc_all_player_points()
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+--     DECLARE
+--       oldest_date DATE;
+--       cur_year INT;
+--       rec RECORD;
+--       home_points INT;
+--       doubles INT;
+--     BEGIN
+--       cur_year := EXTRACT(YEAR FROM NOW());
+--       IF EXTRACT(MONTH FROM NOW()) >= 9 THEN
+--         oldest_date := make_date(cur_year - 1, 9, 1);
+--       ELSE
+--         oldest_date := make_date(cur_year - 2, 9, 1);
+--       END IF;
+--
+--       PERFORM recalc_player_categories(ARRAY(SELECT id FROM players));
+--
+--       FOR rec IN SELECT id, category_id FROM players LOOP
+--         IF rec.category_id IS NULL THEN
+--           home_points := 0;
+--         ELSE
+--           SELECT COALESCE(points, 0) INTO home_points
+--           FROM player_categories
+--           WHERE player_id = rec.id AND category_id = rec.category_id;
+--           home_points := COALESCE(home_points, 0);
+--         END IF;
+--
+--         SELECT COALESCE(SUM(points_earned), 0) INTO doubles
+--         FROM rating_history
+--         WHERE player_id = rec.id
+--           AND is_doubles = TRUE
+--           AND recorded_at >= oldest_date;
+--
+--         UPDATE players
+--         SET points = home_points, doubles_points = doubles
+--         WHERE id = rec.id;
+--       END LOOP;
+--     END;
+--     $function$
+--
+
+-- --- recalc_pair_stats(p_ids text[]) -----------------------------
+-- CREATE OR REPLACE FUNCTION public.recalc_pair_stats(p_ids text[])
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--     UPDATE players p
+--     SET doubles_wins = (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN tournaments t ON t.id = m.tournament_id
+--             JOIN tournament_registrations r
+--               ON r.tournament_id = m.tournament_id
+--              AND (r.player_id = p.id OR r.partner_id = p.id)
+--             WHERE t.format = 'doubles'
+--               AND COALESCE(m.score, '') <> 'BYE'
+--               AND r.player_id IN (m.player1_id, m.player2_id)
+--               AND m.winner_id = r.player_id
+--         ) + (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN challenges c ON c.match_id = m.id
+--             WHERE c.format = 'doubles'
+--               AND m.winner_id IS NOT NULL
+--               AND ((p.id IN (c.challenger_player_id, c.challenger_partner_id)
+--                     AND m.winner_id = c.challenger_player_id)
+--                 OR (p.id IN (c.opponent_player_id, c.opponent_partner_id)
+--                     AND m.winner_id = c.opponent_player_id))
+--         ),
+--         doubles_losses = (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN tournaments t ON t.id = m.tournament_id
+--             JOIN tournament_registrations r
+--               ON r.tournament_id = m.tournament_id
+--              AND (r.player_id = p.id OR r.partner_id = p.id)
+--             WHERE t.format = 'doubles'
+--               AND COALESCE(m.score, '') <> 'BYE'
+--               AND r.player_id IN (m.player1_id, m.player2_id)
+--               AND m.winner_id IS NOT NULL
+--               AND m.winner_id <> r.player_id
+--         ) + (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN challenges c ON c.match_id = m.id
+--             WHERE c.format = 'doubles'
+--               AND m.winner_id IS NOT NULL
+--               AND ((p.id IN (c.challenger_player_id, c.challenger_partner_id)
+--                     AND m.winner_id <> c.challenger_player_id)
+--                 OR (p.id IN (c.opponent_player_id, c.opponent_partner_id)
+--                     AND m.winner_id <> c.opponent_player_id))
+--         ),
+--         mixed_wins = (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN tournaments t ON t.id = m.tournament_id
+--             JOIN tournament_registrations r
+--               ON r.tournament_id = m.tournament_id
+--              AND (r.player_id = p.id OR r.partner_id = p.id)
+--             WHERE t.format = 'mixed_doubles'
+--               AND COALESCE(m.score, '') <> 'BYE'
+--               AND r.player_id IN (m.player1_id, m.player2_id)
+--               AND m.winner_id = r.player_id
+--         ) + (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN challenges c ON c.match_id = m.id
+--             WHERE c.format = 'mixed_doubles'
+--               AND m.winner_id IS NOT NULL
+--               AND ((p.id IN (c.challenger_player_id, c.challenger_partner_id)
+--                     AND m.winner_id = c.challenger_player_id)
+--                 OR (p.id IN (c.opponent_player_id, c.opponent_partner_id)
+--                     AND m.winner_id = c.opponent_player_id))
+--         ),
+--         mixed_losses = (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN tournaments t ON t.id = m.tournament_id
+--             JOIN tournament_registrations r
+--               ON r.tournament_id = m.tournament_id
+--              AND (r.player_id = p.id OR r.partner_id = p.id)
+--             WHERE t.format = 'mixed_doubles'
+--               AND COALESCE(m.score, '') <> 'BYE'
+--               AND m.winner_id IS NOT NULL
+--               AND r.player_id IN (m.player1_id, m.player2_id)
+--               AND m.winner_id <> r.player_id
+--         ) + (
+--             SELECT count(DISTINCT m.id) FROM matches m
+--             JOIN challenges c ON c.match_id = m.id
+--             WHERE c.format = 'mixed_doubles'
+--               AND m.winner_id IS NOT NULL
+--               AND ((p.id IN (c.challenger_player_id, c.challenger_partner_id)
+--                     AND m.winner_id <> c.challenger_player_id)
+--                 OR (p.id IN (c.opponent_player_id, c.opponent_partner_id)
+--                     AND m.winner_id <> c.opponent_player_id))
+--         )
+--     WHERE p.id = ANY(p_ids);
+-- END;
+-- $function$
+--
+
+-- --- recalc_player_categories(p_ids text[]) ----------------------
+-- CREATE OR REPLACE FUNCTION public.recalc_player_categories(p_ids text[])
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+--     DECLARE
+--       oldest_date DATE;
+--       cur_year INT;
+--     BEGIN
+--       cur_year := EXTRACT(YEAR FROM NOW());
+--       IF EXTRACT(MONTH FROM NOW()) >= 9 THEN
+--         oldest_date := make_date(cur_year - 1, 9, 1);
+--       ELSE
+--         oldest_date := make_date(cur_year - 2, 9, 1);
+--       END IF;
+--
+--       -- Убираем то, чего в истории больше нет. Закрытые не трогаем: строка
+--       -- нужна, чтобы запрет на заявки не исчез вместе с ней
+--       DELETE FROM player_categories pc
+--       WHERE pc.player_id = ANY(p_ids)
+--         AND pc.closed_at IS NULL
+--         AND NOT EXISTS (
+--             SELECT 1 FROM rating_history rh
+--             WHERE rh.player_id = pc.player_id AND rh.category_id = pc.category_id
+--               AND rh.category_id <> 'friendly'
+--               AND (rh.is_doubles IS NOT TRUE) AND rh.recorded_at >= oldest_date
+--             GROUP BY rh.player_id, rh.category_id
+--             HAVING SUM(rh.points_earned) > 0);
+--
+--       -- Заводим новые и обновляем очки у существующих. Признак закрытия
+--       -- лежит в других колонках и остаётся нетронутым
+--       INSERT INTO player_categories (player_id, category_id, points, updated_at)
+--       SELECT rh.player_id, rh.category_id, SUM(rh.points_earned), now()
+--       FROM rating_history rh
+--       WHERE rh.player_id = ANY(p_ids)
+--         AND rh.category_id IS NOT NULL
+--         AND rh.category_id <> 'friendly'
+--         AND (rh.is_doubles IS NOT TRUE)
+--         AND rh.recorded_at >= oldest_date
+--       GROUP BY rh.player_id, rh.category_id
+--       HAVING SUM(rh.points_earned) > 0
+--       ON CONFLICT (player_id, category_id) DO UPDATE
+--         SET points = EXCLUDED.points, updated_at = now();
+--
+--       -- Очки закрытой категории, выпавшей из сезона, обнуляем: в зачёт они
+--       -- больше не идут, но сама строка остаётся
+--       UPDATE player_categories pc
+--       SET points = 0, updated_at = now()
+--       WHERE pc.player_id = ANY(p_ids)
+--         AND pc.closed_at IS NOT NULL
+--         AND pc.points <> 0
+--         AND NOT EXISTS (
+--             SELECT 1 FROM rating_history rh
+--             WHERE rh.player_id = pc.player_id AND rh.category_id = pc.category_id
+--               AND rh.category_id <> 'friendly'
+--               AND (rh.is_doubles IS NOT TRUE) AND rh.recorded_at >= oldest_date
+--             GROUP BY rh.player_id, rh.category_id
+--             HAVING SUM(rh.points_earned) > 0);
+--
+--       -- Победы и поражения в одиночных турнирах этой категории
+--       UPDATE player_categories pc
+--       SET wins = COALESCE(st.w, 0), losses = COALESCE(st.l, 0)
+--       FROM (
+--         SELECT pl.id AS player_id, t.category_id,
+--                count(*) FILTER (WHERE m.winner_id = pl.id) AS w,
+--                count(*) FILTER (WHERE m.winner_id IS NOT NULL AND m.winner_id <> pl.id) AS l
+--         FROM players pl
+--         JOIN matches m ON (m.player1_id = pl.id OR m.player2_id = pl.id)
+--         JOIN tournaments t ON t.id = m.tournament_id
+--         WHERE pl.id = ANY(p_ids)
+--           AND t.category_id IS NOT NULL
+--           AND t.category_id <> 'friendly'
+--           AND COALESCE(t.format, 'singles') NOT IN ('doubles', 'mixed_doubles')
+--         GROUP BY pl.id, t.category_id
+--       ) st
+--       WHERE pc.player_id = st.player_id AND pc.category_id = st.category_id;
+--
+--       -- Общий счёт игрока по всем турнирам. Это то, что видно на публичной
+--       -- странице: «Всего матчей» и «% побед». Баттлы сюда не входят —
+--       -- у них нет tournament_id.
+--       --
+--       -- Считаем подзапросом на каждого игрока, а не соединением: при
+--       -- соединении игрок, у которого ВСЕ матчи нетурнирные, выпадал из
+--       -- выборки целиком и оставался со старыми, накрученными числами
+--       -- вместо нуля.
+--       UPDATE players p
+--       SET wins = (
+--             SELECT count(*) FROM matches m
+--             JOIN tournaments t ON t.id = m.tournament_id
+--             WHERE m.winner_id = p.id
+--               AND (m.player1_id = p.id OR m.player2_id = p.id)
+--               AND COALESCE(m.score, '') <> 'BYE'
+--               AND COALESCE(t.category_id, '') <> 'friendly'
+--               AND COALESCE(t.format, 'singles') NOT IN ('doubles', 'mixed_doubles')),
+--           losses = (
+--             SELECT count(*) FROM matches m
+--             JOIN tournaments t ON t.id = m.tournament_id
+--             WHERE m.winner_id IS NOT NULL AND m.winner_id <> p.id
+--               AND (m.player1_id = p.id OR m.player2_id = p.id)
+--               AND COALESCE(m.score, '') <> 'BYE'
+--               AND COALESCE(t.category_id, '') <> 'friendly'
+--               AND COALESCE(t.format, 'singles') NOT IN ('doubles', 'mixed_doubles'))
+--       WHERE p.id = ANY(p_ids);
+--
+--       -- Форма — последние пять рейтинговых одиночных встреч, свежая первой
+--       UPDATE players p
+--       SET form = COALESCE(f.form, '{}'::text[])
+--       FROM (
+--         SELECT pl.id AS player_id,
+--                ARRAY(
+--                  SELECT CASE WHEN m.winner_id = pl.id THEN 'W' ELSE 'L' END
+--                  FROM matches m
+--                  JOIN tournaments t ON t.id = m.tournament_id
+--                  WHERE (m.player1_id = pl.id OR m.player2_id = pl.id)
+--                    AND m.winner_id IS NOT NULL
+--                    AND COALESCE(m.score, '') <> 'BYE'
+--                    AND COALESCE(t.category_id, '') <> 'friendly'
+--                    AND COALESCE(t.format, 'singles') NOT IN ('doubles', 'mixed_doubles')
+--                  ORDER BY COALESCE(m.played_at, m.created_at) DESC
+--                  LIMIT 5
+--                ) AS form
+--         FROM players pl
+--         WHERE pl.id = ANY(p_ids)
+--       ) f
+--       WHERE p.id = f.player_id;
+--     END;
+--     $function$
+--
+
+-- --- recall_push(p_push_id uuid) ---------------------------------
+-- CREATE OR REPLACE FUNCTION public.recall_push(p_push_id uuid)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     caller_role text;
+--     removed int;
+--     p push_log%ROWTYPE;
+-- BEGIN
+--     SELECT role INTO caller_role FROM profiles WHERE id = auth.uid();
+--     IF caller_role IS NULL OR caller_role NOT IN ('admin', 'manager') THEN
+--         RETURN jsonb_build_object('error', 'forbidden');
+--     END IF;
+--
+--     SELECT * INTO p FROM push_log WHERE id = p_push_id;
+--     IF NOT FOUND THEN
+--         RETURN jsonb_build_object('error', 'not_found');
+--     END IF;
+--
+--     DELETE FROM notification_log WHERE push_id = p_push_id;
+--     GET DIAGNOSTICS removed = ROW_COUNT;
+--
+--     -- Связи нет — ищем по тексту и времени. Трогаем только несвязанные:
+--     -- у чужой рассылки push_id уже проставлен, её не заденет
+--     IF removed = 0 THEN
+--         DELETE FROM notification_log n
+--         WHERE n.push_id IS NULL
+--           AND n.title IS NOT DISTINCT FROM p.title
+--           AND n.message IS NOT DISTINCT FROM p.message
+--           AND n.created_at BETWEEN p.created_at - interval '2 minutes'
+--                                AND p.created_at + interval '2 minutes';
+--         GET DIAGNOSTICS removed = ROW_COUNT;
+--     END IF;
+--
+--     UPDATE push_log
+--     SET recalled_at = now(), recalled_by = auth.uid()
+--     WHERE id = p_push_id;
+--
+--     RETURN jsonb_build_object('ok', true, 'removed', removed);
+-- END;
+-- $function$
+--
+
+-- --- registrations_guard_self_update() ---------------------------
+-- CREATE OR REPLACE FUNCTION public.registrations_guard_self_update()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   -- Отметка времени снятия ставится здесь, а не на клиенте: так её нельзя
+--   -- подделать и она появляется, откуда бы заявку ни сняли
+--   IF NEW.status = 'withdrawn' AND OLD.status IS DISTINCT FROM 'withdrawn' THEN
+--     NEW.withdrawn_at := now();
+--   ELSIF NEW.status IS DISTINCT FROM 'withdrawn' THEN
+--     NEW.withdrawn_at := NULL;
+--   END IF;
+--
+--   -- Сервер ходит под service_role: это наши Edge Functions, у них своя проверка.
+--   -- Ограничиваем только браузер с пользовательским токеном.
+--   IF auth.uid() IS NULL OR COALESCE(auth.role(), '') = 'service_role' THEN
+--     RETURN NEW;
+--   END IF;
+--
+--   -- Админ и менеджер правят заявку как раньше
+--   IF EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager')) THEN
+--     RETURN NEW;
+--   END IF;
+--
+--   -- Игроку оставляем партнёра и снятие заявки
+--   IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status <> 'withdrawn' THEN
+--     RAISE EXCEPTION 'Заявку можно только снять';
+--   END IF;
+--
+--   IF NEW.tournament_id  IS DISTINCT FROM OLD.tournament_id
+--   OR NEW.player_id      IS DISTINCT FROM OLD.player_id
+--   OR NEW.seed_number    IS DISTINCT FROM OLD.seed_number
+--   OR NEW.draw_position  IS DISTINCT FROM OLD.draw_position
+--   OR NEW.group_number   IS DISTINCT FROM OLD.group_number
+--   OR NEW.registered_at  IS DISTINCT FROM OLD.registered_at
+--   OR NEW.block_reason   IS DISTINCT FROM OLD.block_reason
+--   OR NEW.is_external    IS DISTINCT FROM OLD.is_external THEN
+--     RAISE EXCEPTION 'Эти поля меняет только организатор';
+--   END IF;
+--
+--   -- Снимать заявку после жеребьёвки нельзя: игрок уже в сетке
+--   IF NEW.status = 'withdrawn' AND OLD.status <> 'withdrawn'
+--      AND (OLD.draw_position IS NOT NULL OR OLD.group_number IS NOT NULL) THEN
+--     RAISE EXCEPTION 'Жеребьёвка проведена, снять заявку может только организатор';
+--   END IF;
+--
+--   RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- respond_game_invite(p_invite_id uuid, p_accept boolean) -----
+-- CREATE OR REPLACE FUNCTION public.respond_game_invite(p_invite_id uuid, p_accept boolean)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--   v_invite    game_invites%ROWTYPE;
+--   v_me        uuid := auth.uid();
+--   v_contacts  jsonb;
+-- BEGIN
+--   IF v_me IS NULL THEN
+--     RETURN jsonb_build_object('error', 'unauthorized');
+--   END IF;
+--
+--   SELECT * INTO v_invite FROM game_invites WHERE id = p_invite_id;
+--
+--   IF NOT FOUND THEN
+--     RETURN jsonb_build_object('error', 'not_found');
+--   END IF;
+--
+--   -- Отвечает тот, кому написали. Отправитель ответить за него не может
+--   IF v_invite.receiver_profile_id IS DISTINCT FROM v_me THEN
+--     RETURN jsonb_build_object('error', 'not_yours');
+--   END IF;
+--
+--   IF v_invite.status <> 'pending' THEN
+--     RETURN jsonb_build_object('error', 'already_answered', 'status', v_invite.status);
+--   END IF;
+--
+--   UPDATE game_invites
+--      SET status = CASE WHEN p_accept THEN 'accepted' ELSE 'declined' END,
+--          responded_at = now()
+--    WHERE id = p_invite_id;
+--
+--   IF NOT p_accept THEN
+--     RETURN jsonb_build_object('success', true, 'status', 'declined');
+--   END IF;
+--
+--   -- Согласился — отдаём контакты отправителя
+--   SELECT jsonb_build_object(
+--            'full_name', pr.full_name,
+--            'avatar_url', pr.avatar_url,
+--            'phone', NULLIF(pr.phone, ''),
+--            'whatsapp', NULLIF(COALESCE(pr.whatsapp_phone, pr.phone), ''),
+--            'telegram', NULLIF(pr.telegram, ''),
+--            'instagram', NULLIF(pr.instagram, '')
+--          )
+--     INTO v_contacts
+--     FROM profiles pr
+--    WHERE pr.id = v_invite.sender_id;
+--
+--   RETURN jsonb_build_object('success', true, 'status', 'accepted', 'contacts', v_contacts);
+-- END;
+-- $function$
+--
+
+-- --- respond_to_challenge(p_id uuid, p_accept boolean) -----------
+-- CREATE OR REPLACE FUNCTION public.respond_to_challenge(p_id uuid, p_accept boolean)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     ch         challenges%ROWTYPE;
+--     chal_name  text;
+--     opp_name   text;
+--     note_title text;
+--     note_text  text;
+--     push_row   uuid;
+--     sent_count int;
+-- BEGIN
+--     SELECT * INTO ch FROM challenges WHERE id = p_id;
+--     IF ch.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'not_found');
+--     END IF;
+--
+--     -- Отвечает только тот, кого вызвали
+--     IF ch.opponent_profile_id IS DISTINCT FROM auth.uid() THEN
+--         RETURN jsonb_build_object('error', 'forbidden');
+--     END IF;
+--
+--     -- Уведомление — снимок момента: к нажатию на кнопку могли уже ответить
+--     -- или срок мог выйти. Молча перезаписывать чужой ответ нельзя
+--     IF ch.status <> 'active' THEN
+--         RETURN jsonb_build_object('error', 'already_answered', 'status', ch.status);
+--     END IF;
+--     IF ch.expires_at <= now() THEN
+--         UPDATE challenges SET status = 'expired' WHERE id = p_id;
+--         RETURN jsonb_build_object('error', 'expired');
+--     END IF;
+--
+--     UPDATE challenges
+--     SET status = CASE WHEN p_accept THEN 'accepted' ELSE 'declined' END,
+--         accepted_at = CASE WHEN p_accept THEN now() ELSE NULL END
+--     WHERE id = p_id;
+--
+--     SELECT full_name INTO chal_name FROM profiles WHERE id = ch.challenger_id;
+--     SELECT full_name INTO opp_name FROM profiles WHERE id = ch.opponent_profile_id;
+--
+--     -- Автору — лично. Он отправил вызов и до сих пор узнавал об ответе,
+--     -- только сам заглянув в кабинет
+--     INSERT INTO notification_log (profile_id, type, title, message, is_read,
+--                                   action_type, action_id)
+--     VALUES (
+--         ch.challenger_id, 'challenge',
+--         CASE WHEN p_accept THEN 'Вызов принят' ELSE 'Вызов отклонён' END,
+--         COALESCE(opp_name, 'Соперник') \|\|
+--         CASE WHEN p_accept
+--              THEN ' принял ваш вызов.'
+--              ELSE ' отклонил ваш вызов.' END,
+--         false, 'challenge', p_id);
+--
+--     -- Вызов приняли — об этом знает весь клуб. Публичной страницы у баттла
+--     -- ещё нет: дату и место назначит менеджер, а пока идёт анонс
+--     IF p_accept THEN
+--         note_title := '🔥 Скоро баттл';
+--         note_text  := COALESCE(chal_name, 'Игрок') \|\| ' и ' \|\| COALESCE(opp_name, 'игрок') \|\|
+--                       ' сыграют показательный матч. Дату и место объявим в ближайшее время.';
+--
+--         INSERT INTO push_log (admin_id, title, message, type, audience, recipients_count, fcm_sent)
+--         VALUES (NULL, note_title, note_text, 'battle', 'all', 0, 0)
+--         RETURNING id INTO push_row;
+--
+--         -- Участников не тревожим этим анонсом: им ушло личное
+--         INSERT INTO notification_log (profile_id, type, title, message, is_read, push_id)
+--         SELECT p.id, 'battle', note_title, note_text, false, push_row
+--         FROM profiles p
+--         WHERE p.id <> ch.challenger_id
+--           AND (ch.opponent_profile_id IS NULL OR p.id <> ch.opponent_profile_id)
+--           AND COALESCE(p.notify_preferences #>> '{site,challenges}', 'true') <> 'false';
+--
+--         GET DIAGNOSTICS sent_count = ROW_COUNT;
+--         UPDATE push_log SET recipients_count = sent_count WHERE id = push_row;
+--     END IF;
+--
+--     RETURN jsonb_build_object('ok', true,
+--         'status', CASE WHEN p_accept THEN 'accepted' ELSE 'declined' END,
+--         'challenger_player_id', ch.challenger_player_id,
+--         'opponent_player_id', ch.opponent_player_id);
+-- END;
+-- $function$
+--
+
+-- --- safe_int(val text) ------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.safe_int(val text)
+--  RETURNS integer
+--  LANGUAGE plpgsql
+--  IMMUTABLE
+-- AS $function$
+-- BEGIN
+--   RETURN val::integer;
+-- EXCEPTION WHEN OTHERS THEN
+--   RETURN NULL;
+-- END;
+-- $function$
+--
+
+-- --- set_category_closed(p_player_id text, p_category_id text, p_closed boolean, p_reason text) 
+-- CREATE OR REPLACE FUNCTION public.set_category_closed(p_player_id text, p_category_id text, p_closed boolean, p_reason text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     caller_role text;
+--     open_count int;
+-- BEGIN
+--     SELECT role INTO caller_role FROM profiles WHERE id = auth.uid();
+--     IF caller_role IS NULL OR caller_role NOT IN ('admin', 'manager') THEN
+--         RETURN jsonb_build_object('error', 'forbidden');
+--     END IF;
+--
+--     IF p_closed THEN
+--         -- Строки может не быть вовсе: назначенная категория без очков её не
+--         -- заводит. Заводим сами, иначе запрет некуда записать
+--         INSERT INTO player_categories (player_id, category_id, points, updated_at,
+--                                        closed_at, closed_by, closed_reason)
+--         VALUES (p_player_id, p_category_id, 0, now(), now(), auth.uid(), p_reason)
+--         ON CONFLICT (player_id, category_id) DO UPDATE
+--           SET closed_at = now(), closed_by = auth.uid(), closed_reason = p_reason;
+--
+--         RETURN jsonb_build_object('ok', true);
+--     ELSE
+--         -- Открытых больше двух быть не должно
+--         SELECT count(*) INTO open_count
+--         FROM player_categories
+--         WHERE player_id = p_player_id AND closed_at IS NULL
+--           AND category_id <> p_category_id;
+--
+--         IF open_count >= 2 THEN
+--             RETURN jsonb_build_object('error', 'too_many_open', 'open', open_count);
+--         END IF;
+--
+--         UPDATE player_categories
+--         SET closed_at = NULL, closed_by = NULL, closed_reason = NULL
+--         WHERE player_id = p_player_id AND category_id = p_category_id;
+--     END IF;
+--
+--     IF NOT FOUND THEN
+--         RETURN jsonb_build_object('error', 'not_found');
+--     END IF;
+--
+--     RETURN jsonb_build_object('ok', true);
+-- END;
+-- $function$
+--
+
+-- --- site_content_touch() ----------------------------------------
+-- CREATE OR REPLACE FUNCTION public.site_content_touch()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+-- AS $function$
+-- BEGIN
+--     NEW.updated_at := now();
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- submit_match_score(p_match_id uuid, p_score text, p_played_at date) 
+-- CREATE OR REPLACE FUNCTION public.submit_match_score(p_match_id uuid, p_score text, p_played_at date DEFAULT NULL::date)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_user     uuid := auth.uid();
+--     v_side     smallint;
+--     v_match    RECORD;
+--     v_sets     text[];
+--     v_set      text;
+--     v_parts    text[];
+--     v_g1       integer;
+--     v_g2       integer;
+--     v_won1     integer := 0;
+--     v_won2     integer := 0;
+--     v_winner   text;
+-- BEGIN
+--     IF v_user IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'not_authorized');
+--     END IF;
+--
+--     SELECT * INTO v_match FROM matches WHERE id = p_match_id;
+--     IF NOT FOUND THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'match_not_found');
+--     END IF;
+--
+--     v_side := public.match_side_of(p_match_id, v_user);
+--     IF v_side IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'not_a_player');
+--     END IF;
+--
+--     -- Подтверждённый счёт игрок не переписывает: дальше только организатор
+--     IF v_match.score_status = 'confirmed' OR
+--        (v_match.score_status IS NULL AND v_match.winner_id IS NOT NULL) THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'already_final');
+--     END IF;
+--
+--     -- Разбор счёта. Ждём «6/3 6/4», допускаем тай-брейк в скобках: «7/6(9-7)»
+--     v_sets := string_to_array(btrim(p_score), ' ');
+--     IF v_sets IS NULL OR array_length(v_sets, 1) IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'empty_score');
+--     END IF;
+--
+--     FOREACH v_set IN ARRAY v_sets LOOP
+--         v_parts := regexp_match(v_set, '^(\\d{1,2})/(\\d{1,2})(?:\\(\\d{1,2}-\\d{1,2}\\))?$');
+--         IF v_parts IS NULL THEN
+--             RETURN jsonb_build_object('ok', false, 'error', 'bad_score', 'set', v_set);
+--         END IF;
+--         v_g1 := v_parts[1]::int;
+--         v_g2 := v_parts[2]::int;
+--         IF v_g1 = v_g2 THEN
+--             RETURN jsonb_build_object('ok', false, 'error', 'tied_set', 'set', v_set);
+--         END IF;
+--         IF v_g1 > v_g2 THEN v_won1 := v_won1 + 1; ELSE v_won2 := v_won2 + 1; END IF;
+--     END LOOP;
+--
+--     IF v_won1 = v_won2 THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'no_winner');
+--     END IF;
+--
+--     v_winner := CASE WHEN v_won1 > v_won2 THEN v_match.player1_id ELSE v_match.player2_id END;
+--
+--     UPDATE matches SET
+--         score              = btrim(p_score),
+--         winner_id          = v_winner,
+--         status             = 'completed',
+--         played_at          = COALESCE(p_played_at::timestamptz, played_at, now()),
+--         score_status       = 'pending',
+--         score_submitted_by = v_user,
+--         score_submitted_at = now(),
+--         score_confirmed_at = NULL,
+--         score_dispute_note = NULL
+--     WHERE id = p_match_id;
+--
+--     -- Сопернику — строка в колокольчике. Не отправилось — счёт всё равно
+--     -- остаётся: уведомление не должно ронять сохранение
+--     BEGIN
+--         PERFORM public.notify_match_score(p_match_id, 'submitted');
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'уведомление о счёте не отправлено: %', SQLERRM;
+--     END;
+--
+--     RETURN jsonb_build_object('ok', true, 'winner_id', v_winner,
+--                               'awaiting_side', CASE WHEN v_side = 1 THEN 2 ELSE 1 END);
+-- END;
+-- $function$
+--
+
+-- --- sync_player_name() ------------------------------------------
+-- CREATE OR REPLACE FUNCTION public.sync_player_name()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- BEGIN
+--     IF NEW.player_id IS NULL THEN
+--         RETURN NEW;
+--     END IF;
+--
+--     -- Имя: следует за профилем, перевод пересчитывается
+--     IF NEW.full_name IS NOT NULL
+--        AND btrim(NEW.full_name) <> ''
+--        AND NEW.full_name IS DISTINCT FROM OLD.full_name
+--     THEN
+--         UPDATE players
+--         SET name    = NEW.full_name,
+--             name_en = translit_ru(NEW.full_name),
+--             name_kg = NULL
+--         WHERE id = NEW.player_id
+--           AND name IS DISTINCT FROM NEW.full_name;
+--     END IF;
+--
+--     -- Фото: список рейтинга и поиск партнёра читают карточку игрока
+--     IF NEW.avatar_url IS DISTINCT FROM OLD.avatar_url THEN
+--         UPDATE players
+--         SET photo = NEW.avatar_url
+--         WHERE id = NEW.player_id
+--           AND photo IS DISTINCT FROM NEW.avatar_url;
+--     END IF;
+--
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- translit_ru(src text) ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.translit_ru(src text)
+--  RETURNS text
+--  LANGUAGE plpgsql
+--  IMMUTABLE
+-- AS $function$
+-- DECLARE
+--     -- Буквы, дающие несколько латинских: их заменяем по одной
+--     pairs CONSTANT TEXT[][] := ARRAY[
+--         ['щ','shch'], ['ж','zh'], ['ч','ch'], ['ш','sh'], ['ц','ts'],
+--         ['х','kh'],   ['ю','yu'], ['я','ya'], ['ё','e'],  ['ң','ng']
+--     ];
+--     out TEXT;
+--     i INT;
+-- BEGIN
+--     IF src IS NULL OR btrim(src) = '' THEN
+--         RETURN NULL;
+--     END IF;
+--
+--     out := lower(src);
+--
+--     FOR i IN 1 .. array_length(pairs, 1) LOOP
+--         out := replace(out, pairs[i][1], pairs[i][2]);
+--     END LOOP;
+--
+--     -- Остальные — одна к одной. Твёрдый и мягкий знаки исчезают: в конце
+--     -- строки замен их пары нет, и translate такие буквы удаляет.
+--     out := translate(
+--         out,
+--         'абвгдезийклмнопрстуфыэөүъь',
+--         'abvgdeziyklmnoprstufyeou'
+--     );
+--
+--     RETURN initcap(out);
+-- END;
+-- $function$
+--
+
+-- --- trg_advance_bracket() ---------------------------------------
+-- CREATE OR REPLACE FUNCTION public.trg_advance_bracket()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_стар_поб text;
+--     v_стар_прг text;
+--     v_нов_прг  text;
+-- BEGIN
+--     -- Счёт ещё не окончательный: ждёт второго или оспорен
+--     IF NEW.score_status IN ('pending', 'disputed') THEN
+--         RETURN NULL;
+--     END IF;
+--
+--     IF NEW.winner_id IS NOT NULL
+--        AND NEW.status = 'completed'
+--        AND (TG_OP = 'INSERT'
+--             OR OLD.winner_id IS DISTINCT FROM NEW.winner_id
+--             OR OLD.status IS DISTINCT FROM NEW.status
+--             OR OLD.score_status IS DISTINCT FROM NEW.score_status)
+--     THEN
+--         -- Победителя переиграли: убираем прежнего из дальнейших кругов
+--         IF TG_OP = 'UPDATE' AND OLD.winner_id IS NOT NULL
+--            AND OLD.winner_id IS DISTINCT FROM NEW.winner_id THEN
+--             v_стар_поб := OLD.winner_id;
+--             v_стар_прг := CASE WHEN OLD.winner_id = NEW.player1_id
+--                                THEN NEW.player2_id ELSE NEW.player1_id END;
+--             v_нов_прг  := CASE WHEN NEW.winner_id = NEW.player1_id
+--                                THEN NEW.player2_id ELSE NEW.player1_id END;
+--
+--             PERFORM public.fic_заменить_дальше(
+--                 NEW.tournament_id, NEW.round_number, v_стар_поб, NEW.winner_id);
+--             PERFORM public.fic_заменить_дальше(
+--                 NEW.tournament_id, NEW.round_number, v_стар_прг, v_нов_прг);
+--         END IF;
+--
+--         PERFORM public.advance_bracket_winner(NEW.id);
+--
+--         -- Закрываем проходы без игры: если в клетке остался один человек и
+--         -- второму взяться неоткуда, победитель определяется сам. Иначе такие
+--         -- матчи висят несыгранными и турнир нельзя завершить.
+--         PERFORM public.fic_закрыть_проходы(NEW.tournament_id);
+--     END IF;
+--     RETURN NULL;
+-- END;
+-- $function$
+--
+
+-- --- trg_tournament_ready() --------------------------------------
+-- CREATE OR REPLACE FUNCTION public.trg_tournament_ready()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- BEGIN
+--     IF NEW.tournament_id IS NULL THEN RETURN NULL; END IF;
+--     IF NEW.winner_id IS NULL THEN RETURN NULL; END IF;
+--     IF NEW.score_status IN ('pending', 'disputed') THEN RETURN NULL; END IF;
+--
+--     BEGIN
+--         PERFORM public.notify_tournament_ready(NEW.tournament_id);
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'не удалось позвать закрывать турнир: %', SQLERRM;
+--     END;
+--     RETURN NULL;
+-- END;
+-- $function$
+--
+
+-- --- trigger_check_badges() --------------------------------------
+-- CREATE OR REPLACE FUNCTION public.trigger_check_badges()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- BEGIN
+--   PERFORM check_and_award_badges(NEW.id);
+--   RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- umpire_log_point(p_key text, p_entry jsonb) -----------------
+-- CREATE OR REPLACE FUNCTION public.umpire_log_point(p_key text, p_entry jsonb)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_match_id uuid;
+--     v_seq      integer;
+--     v_mark     text;
+-- BEGIN
+--     SELECT id INTO v_match_id FROM public.live_matches WHERE umpire_key = p_key;
+--     IF v_match_id IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'ключ не найден');
+--     END IF;
+--
+--     v_mark := NULLIF(p_entry->>'mark', '');
+--     IF v_mark IS NOT NULL AND v_mark NOT IN ('ace', 'double') THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'неизвестная метка');
+--     END IF;
+--
+--     SELECT COALESCE(MAX(seq), 0) + 1 INTO v_seq
+--       FROM public.live_match_points WHERE match_id = v_match_id;
+--
+--     INSERT INTO public.live_match_points
+--         (match_id, seq, set_no, game_no, winner, p1, p2, g1, g2, game_won, is_break, is_tiebreak, mark)
+--     VALUES (
+--         v_match_id,
+--         v_seq,
+--         COALESCE((p_entry->>'set_no')::smallint, 1),
+--         COALESCE((p_entry->>'game_no')::smallint, 1),
+--         (p_entry->>'winner')::smallint,
+--         COALESCE(p_entry->>'p1', '0'),
+--         COALESCE(p_entry->>'p2', '0'),
+--         COALESCE((p_entry->>'g1')::smallint, 0),
+--         COALESCE((p_entry->>'g2')::smallint, 0),
+--         NULLIF(p_entry->>'game_won', '')::smallint,
+--         COALESCE((p_entry->>'is_break')::boolean, false),
+--         COALESCE((p_entry->>'is_tiebreak')::boolean, false),
+--         v_mark
+--     );
+--
+--     RETURN jsonb_build_object('ok', true, 'seq', v_seq);
+-- END;
+-- $function$
+--
+
+-- --- umpire_save_state(p_key text, p_state jsonb) ----------------
+-- CREATE OR REPLACE FUNCTION public.umpire_save_state(p_key text, p_state jsonb)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v_id UUID; v_live RECORD; v_prof1_id UUID; v_prof2_id UUID; v_score TEXT;
+-- BEGIN
+--     SELECT id INTO v_id FROM live_matches WHERE umpire_key = p_key;
+--     IF v_id IS NULL THEN RETURN jsonb_build_object('ok', false, 'error', 'Invalid umpire key'); END IF;
+--     UPDATE live_matches SET
+--         serving_player = COALESCE((p_state->>'serving_player')::int, serving_player),
+--         points_p1 = COALESCE(p_state->>'points_p1', points_p1),
+--         points_p2 = COALESCE(p_state->>'points_p2', points_p2),
+--         current_set = COALESCE((p_state->>'current_set')::int, current_set),
+--         sets_data = COALESCE(p_state->'sets_data', sets_data),
+--         current_game_p1 = COALESCE((p_state->>'current_game_p1')::int, current_game_p1),
+--         current_game_p2 = COALESCE((p_state->>'current_game_p2')::int, current_game_p2),
+--         is_tiebreak = COALESCE((p_state->>'is_tiebreak')::boolean, is_tiebreak),
+--         tiebreak_p1 = COALESCE((p_state->>'tiebreak_p1')::int, tiebreak_p1),
+--         tiebreak_p2 = COALESCE((p_state->>'tiebreak_p2')::int, tiebreak_p2),
+--         status = COALESCE(p_state->>'status', status),
+--         winner_player = (p_state->>'winner_player')::int,
+--         final_score = p_state->>'final_score',
+--         history = COALESCE(p_state->'history', history),
+--         /* ПЕРЕРЫВЫ. Пишутся БЕЗ COALESCE: здесь NULL — это значение, а не
+--            «не прислали». Судья снял паузу — причина обязана исчезнуть, иначе
+--            зритель увидит «медицинский» посреди идущей игры. */
+--         pause_reason = CASE WHEN COALESCE(p_state->>'status', status) = 'paused'
+--                             THEN NULLIF(p_state->>'pause_reason', '') END,
+--         break_kind   = NULLIF(p_state->>'break_kind', ''),
+--         break_until  = NULLIF(p_state->>'break_until', '')::timestamptz,
+--         started_at = CASE WHEN p_state->>'status' = 'live' AND started_at IS NULL THEN now() ELSE started_at END,
+--         completed_at = CASE WHEN p_state->>'status' = 'completed' THEN now() ELSE completed_at END
+--     WHERE id = v_id;
+--     IF p_state->>'status' = 'completed' THEN
+--         SELECT match_id, player1_id, player2_id, final_score INTO v_live FROM live_matches WHERE id = v_id;
+--         v_score := COALESCE(p_state->>'final_score', v_live.final_score);
+--         IF v_live.match_id IS NULL
+--            AND (v_live.player1_id IS NOT NULL OR v_live.player2_id IS NOT NULL)
+--            AND NOT EXISTS (SELECT 1 FROM challenges WHERE live_match_id = v_id)
+--         THEN
+--             SELECT p.id INTO v_prof1_id FROM profiles p WHERE p.player_id = v_live.player1_id LIMIT 1;
+--             SELECT p.id INTO v_prof2_id FROM profiles p WHERE p.player_id = v_live.player2_id LIMIT 1;
+--             INSERT INTO challenges (challenger_id, challenger_player_id, opponent_player_id, opponent_profile_id, proposed_date, proposed_time, status, score_draft, live_match_id, created_at, expires_at, accepted_at)
+--             VALUES (v_prof1_id, v_live.player1_id, v_live.player2_id, v_prof2_id, CURRENT_DATE, to_char(now() AT TIME ZONE 'Asia/Bishkek', 'HH24:MI'), 'completed', v_score, v_id, now(), now() + interval '72 hours', now());
+--         END IF;
+--     END IF;
+--     RETURN jsonb_build_object('ok', true, 'id', v_id);
+-- END;
+-- $function$
+--
+
+-- --- umpire_undo_point(p_key text) -------------------------------
+-- CREATE OR REPLACE FUNCTION public.umpire_undo_point(p_key text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     v_match_id uuid;
+--     v_seq      integer;
+-- BEGIN
+--     SELECT id INTO v_match_id FROM public.live_matches WHERE umpire_key = p_key;
+--     IF v_match_id IS NULL THEN
+--         RETURN jsonb_build_object('ok', false, 'error', 'ключ не найден');
+--     END IF;
+--
+--     DELETE FROM public.live_match_points
+--      WHERE match_id = v_match_id
+--        AND seq = (SELECT MAX(seq) FROM public.live_match_points WHERE match_id = v_match_id)
+--     RETURNING seq INTO v_seq;
+--
+--     RETURN jsonb_build_object('ok', true, 'removed', v_seq);
+-- END;
+-- $function$
+--
+
+-- --- verify_voucher(p_token text) --------------------------------
+-- CREATE OR REPLACE FUNCTION public.verify_voucher(p_token text)
+--  RETURNS json
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+-- AS $function$
+-- DECLARE
+--     v RECORD;
+-- BEGIN
+--     SELECT * INTO v
+--     FROM discount_vouchers
+--     WHERE qr_token = p_token;
+--
+--     IF v IS NULL THEN
+--         RETURN json_build_object('status', 'invalid');
+--     END IF;
+--
+--     -- Auto-expire
+--     IF v.status = 'active' AND v.expires_at < NOW() THEN
+--         UPDATE discount_vouchers SET status = 'expired' WHERE id = v.id;
+--         RETURN json_build_object('status', 'expired');
+--     END IF;
+--
+--     IF v.status = 'used' THEN
+--         RETURN json_build_object(
+--             'status', 'already_used',
+--             'used_at', v.used_at
+--         );
+--     END IF;
+--
+--     IF v.status = 'expired' THEN
+--         RETURN json_build_object('status', 'expired');
+--     END IF;
+--
+--     IF v.status = 'cancelled' THEN
+--         RETURN json_build_object('status', 'invalid');
+--     END IF;
+--
+--     -- Active voucher
+--     RETURN json_build_object(
+--         'status', 'valid',
+--         'player_name', v.player_name,
+--         'entity_type', v.entity_type,
+--         'entity_name', v.entity_name,
+--         'service_name', v.service_name,
+--         'discount_percent', v.discount_percent,
+--         'expires_at', v.expires_at,
+--         'created_at', v.created_at
+--     );
+-- END;
+-- $function$
+--
+
+-- --- voucher_membership_ok(p_profile uuid) -----------------------
+-- CREATE OR REPLACE FUNCTION public.voucher_membership_ok(p_profile uuid)
+--  RETURNS boolean
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--     SELECT public.бесплатный_доступ()
+--         OR EXISTS (SELECT 1 FROM memberships
+--                     WHERE profile_id = p_profile
+--                       AND status = 'active'
+--                       AND expires_at > now());
+-- $function$
+--
+
+-- --- бесплатный_доступ() -----------------------------------------
+-- CREATE OR REPLACE FUNCTION public."бесплатный_доступ"()
+--  RETURNS boolean
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--     SELECT COALESCE(
+--         (SELECT (value #>> '{}')::date >= current_date
+--            FROM public.app_settings
+--           WHERE key = 'free_access_until'
+--             AND value IS NOT NULL
+--             AND value::text <> 'null'),
+--         false);
+-- $function$
+--
+
+-- --- запросить_привязку(p_player_id text) ------------------------
+-- CREATE OR REPLACE FUNCTION public."запросить_привязку"(p_player_id text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     я        profiles%ROWTYPE;
+--     карточка players%ROWTYPE;
+--     новая    uuid;
+--     была     uuid;
+-- BEGIN
+--     SELECT * INTO я FROM profiles WHERE id = auth.uid();
+--     IF я.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'not_logged_in');
+--     END IF;
+--     IF я.player_id IS NOT NULL THEN
+--         RETURN jsonb_build_object('error', 'already_linked');
+--     END IF;
+--
+--     SELECT * INTO карточка FROM players WHERE id = p_player_id;
+--     IF карточка.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'player_not_found');
+--     END IF;
+--     IF карточка.is_guest THEN
+--         RETURN jsonb_build_object('error', 'player_is_guest');
+--     END IF;
+--
+--     IF EXISTS (SELECT 1 FROM profiles WHERE player_id = p_player_id AND deleted_at IS NULL) THEN
+--         RETURN jsonb_build_object('error', 'player_taken');
+--     END IF;
+--
+--     -- Уже просил эту же карточку — второй раз заводить нечего
+--     SELECT id INTO была FROM player_link_requests
+--      WHERE profile_id = я.id AND status = 'pending' AND player_id = p_player_id;
+--     IF была IS NOT NULL THEN
+--         RETURN jsonb_build_object('ok', true, 'request_id', была, 'same', true);
+--     END IF;
+--
+--     -- Передумал: прежнюю закрываем как отозванную и заводим новую
+--     UPDATE player_link_requests
+--        SET status = 'withdrawn', decided_at = now(), note = 'игрок выбрал другую карточку'
+--      WHERE profile_id = я.id AND status = 'pending';
+--
+--     INSERT INTO player_link_requests (profile_id, player_id)
+--     VALUES (я.id, p_player_id)
+--     RETURNING id INTO новая;
+--
+--     RETURN jsonb_build_object('ok', true, 'request_id', новая);
+-- END $function$
+--
+
+-- --- обновить_признак_учётки() -----------------------------------
+-- CREATE OR REPLACE FUNCTION public."обновить_признак_учётки"()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- BEGIN
+--     -- Пересчитываем обе стороны: и ту карточку, к которой привязались,
+--     -- и ту, от которой отвязались
+--     IF TG_OP <> 'INSERT' AND OLD.player_id IS NOT NULL THEN
+--         UPDATE public.players p
+--            SET has_account = EXISTS (SELECT 1 FROM public.profiles pr
+--                                       WHERE pr.player_id = p.id AND pr.deleted_at IS NULL)
+--          WHERE p.id = OLD.player_id;
+--     END IF;
+--
+--     IF TG_OP <> 'DELETE' AND NEW.player_id IS NOT NULL THEN
+--         UPDATE public.players p
+--            SET has_account = EXISTS (SELECT 1 FROM public.profiles pr
+--                                       WHERE pr.player_id = p.id AND pr.deleted_at IS NULL)
+--          WHERE p.id = NEW.player_id;
+--     END IF;
+--
+--     RETURN NULL;
+-- END $function$
+--
+
+-- --- отправить_о_счёте("p_кому" uuid, p_match_id uuid, "p_загол" text, "p_текст" text) 
+-- CREATE OR REPLACE FUNCTION public."отправить_о_счёте"("p_кому" uuid, p_match_id uuid, "p_загол" text, "p_текст" text)
+--  RETURNS void
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- BEGIN
+--     INSERT INTO notification_log (profile_id, type, title, message, action_type, action_id)
+--     VALUES (p_кому, 'match', p_загол, p_текст, 'match_score', p_match_id);
+--
+--     -- Push. Не ушёл — строка в колокольчике всё равно осталась
+--     BEGIN
+--         PERFORM net.http_post(
+--             url := current_setting('app.settings.supabase_url') \|\| '/functions/v1/send-push',
+--             headers := jsonb_build_object(
+--                 'Authorization', 'Bearer ' \|\| current_setting('app.settings.cron_secret'),
+--                 'Content-Type', 'application/json'
+--             ),
+--             body := jsonb_build_object(
+--                 'title', p_загол,
+--                 'message', p_текст,
+--                 'type', 'match',
+--                 'audience', 'user',
+--                 'user_id', p_кому::text,
+--                 'action_type', 'match_score',
+--                 'action_id', p_match_id::text,
+--                 'skip_log', true
+--             )
+--         );
+--     EXCEPTION WHEN others THEN
+--         RAISE WARNING 'push о счёте не отправлен: %', SQLERRM;
+--     END;
+-- END;
+-- $function$
+--
+
+-- --- перевести_пол() ---------------------------------------------
+-- CREATE OR REPLACE FUNCTION public."перевести_пол"()
+--  RETURNS trigger
+--  LANGUAGE plpgsql
+-- AS $function$
+-- BEGIN
+--     IF NEW.gender = 'male'   THEN NEW.gender := 'men';   END IF;
+--     IF NEW.gender = 'female' THEN NEW.gender := 'women'; END IF;
+--     -- Пустую строку старые сборки шлют, когда пол не выбран
+--     IF NEW.gender = ''       THEN NEW.gender := NULL;    END IF;
+--     RETURN NEW;
+-- END;
+-- $function$
+--
+
+-- --- позвать_функцию("p_имя" text) -------------------------------
+-- CREATE OR REPLACE FUNCTION public."позвать_функцию"("p_имя" text)
+--  RETURNS bigint
+--  LANGUAGE sql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--     SELECT net.http_post(
+--         url := 'https://qqkzszesviukopgjbead.supabase.co/functions/v1/' \|\| p_имя,
+--         headers := jsonb_build_object(
+--             'Authorization', 'Bearer ' \|\| public.cron_secret(),
+--             'Content-Type', 'application/json'),
+--         body := '{}'::jsonb);
+-- $function$
+--
+
+-- --- решить_привязку(p_request_id uuid, p_approve boolean, p_note text) 
+-- CREATE OR REPLACE FUNCTION public."решить_привязку"(p_request_id uuid, p_approve boolean, p_note text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--     заявка player_link_requests%ROWTYPE;
+-- BEGIN
+--     IF NOT EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager')) THEN
+--         RETURN jsonb_build_object('error', 'not_staff');
+--     END IF;
+--
+--     SELECT * INTO заявка FROM player_link_requests WHERE id = p_request_id;
+--     IF заявка.id IS NULL THEN
+--         RETURN jsonb_build_object('error', 'request_not_found');
+--     END IF;
+--     IF заявка.status <> 'pending' THEN
+--         RETURN jsonb_build_object('error', 'already_decided', 'status', заявка.status);
+--     END IF;
+--
+--     IF p_approve THEN
+--         IF EXISTS (SELECT 1 FROM profiles
+--                     WHERE player_id = заявка.player_id AND deleted_at IS NULL) THEN
+--             RETURN jsonb_build_object('error', 'player_taken');
+--         END IF;
+--
+--         UPDATE profiles SET player_id = заявка.player_id WHERE id = заявка.profile_id;
+--
+--         -- Остальные заявки на эту же карточку теряют смысл
+--         UPDATE player_link_requests
+--            SET status = 'rejected', decided_at = now(), decided_by = auth.uid(),
+--                note = coalesce(note, 'карточку забрал другой')
+--          WHERE player_id = заявка.player_id AND status = 'pending' AND id <> заявка.id;
+--     END IF;
+--
+--     UPDATE player_link_requests
+--        SET status = CASE WHEN p_approve THEN 'approved' ELSE 'rejected' END,
+--            decided_at = now(), decided_by = auth.uid(),
+--            note = coalesce(p_note, note)
+--      WHERE id = p_request_id;
+--
+--     RETURN jsonb_build_object('ok', true);
+-- END $function$
+--
+
+
+-- ======================================================================
+-- ПРАВИЛА-СТОРОЖА (триггеры)
+-- ======================================================================
+
+
+-- --- challenge_predictions.trg_fill_prediction_side --------------
+-- CREATE TRIGGER trg_fill_prediction_side BEFORE INSERT ON public.challenge_predictions FOR EACH ROW EXECUTE FUNCTION fill_prediction_side()
+
+-- --- challenges.trg_check_battle_pair ----------------------------
+-- CREATE TRIGGER trg_check_battle_pair BEFORE INSERT OR UPDATE ON public.challenges FOR EACH ROW EXECUTE FUNCTION check_battle_pair()
+
+-- --- challenges.trg_drop_challenge_notifications -----------------
+-- CREATE TRIGGER trg_drop_challenge_notifications AFTER DELETE ON public.challenges FOR EACH ROW EXECUTE FUNCTION drop_challenge_notifications()
+
+-- --- challenges.trg_recalc_after_battle_link ---------------------
+-- CREATE TRIGGER trg_recalc_after_battle_link AFTER UPDATE OF match_id ON public.challenges FOR EACH ROW EXECUTE FUNCTION recalc_after_battle_link()
+
+-- --- matches.trg_advance_bracket ---------------------------------
+-- CREATE TRIGGER trg_advance_bracket AFTER INSERT OR UPDATE OF winner_id, status, score_status ON public.matches FOR EACH ROW EXECUTE FUNCTION trg_advance_bracket()
+
+-- --- matches.trg_recalc_after_match ------------------------------
+-- CREATE TRIGGER trg_recalc_after_match AFTER INSERT OR DELETE OR UPDATE OF winner_id, score, status, played_at ON public.matches FOR EACH ROW EXECUTE FUNCTION recalc_after_match()
+
+-- --- matches.trg_tournament_ready --------------------------------
+-- CREATE TRIGGER trg_tournament_ready AFTER INSERT OR UPDATE OF winner_id, status, score_status ON public.matches FOR EACH ROW EXECUTE FUNCTION trg_tournament_ready()
+
+-- --- payments.trg_fill_payment_payer -----------------------------
+-- CREATE TRIGGER trg_fill_payment_payer BEFORE INSERT ON public.payments FOR EACH ROW EXECUTE FUNCTION fill_payment_payer()
+
+-- --- players.set_updated_at_players ------------------------------
+-- CREATE TRIGGER set_updated_at_players BEFORE UPDATE ON public.players FOR EACH ROW EXECUTE FUNCTION handle_updated_at()
+
+-- --- players.trg_player_badges -----------------------------------
+-- CREATE TRIGGER trg_player_badges AFTER UPDATE ON public.players FOR EACH ROW WHEN (((old.wins IS DISTINCT FROM new.wins) OR (old.losses IS DISTINCT FROM new.losses) OR (old.form IS DISTINCT FROM new.form) OR (old.points IS DISTINCT FROM new.points))) EXECUTE FUNCTION trigger_check_badges()
+
+-- --- points_by_place.ochki_mesta_storozh -------------------------
+-- CREATE TRIGGER ochki_mesta_storozh BEFORE INSERT OR DELETE OR UPDATE ON public.points_by_place FOR EACH ROW EXECUTE FUNCTION ochki_proshloe_ne_pishetsya()
+
+-- --- points_versions.ochki_versii_storozh ------------------------
+-- CREATE TRIGGER ochki_versii_storozh BEFORE INSERT OR DELETE OR UPDATE ON public.points_versions FOR EACH ROW EXECUTE FUNCTION ochki_proshloe_ne_pishetsya()
+
+-- --- profiles.set_updated_at_profiles ----------------------------
+-- CREATE TRIGGER set_updated_at_profiles BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION handle_updated_at()
+
+-- --- profiles.trg_log_deleted_profile ----------------------------
+-- CREATE TRIGGER trg_log_deleted_profile BEFORE DELETE ON public.profiles FOR EACH ROW EXECUTE FUNCTION log_deleted_profile()
+
+-- --- profiles.trg_sync_player_name -------------------------------
+-- CREATE TRIGGER trg_sync_player_name AFTER UPDATE OF full_name, avatar_url ON public.profiles FOR EACH ROW EXECUTE FUNCTION sync_player_name()
+
+-- --- profiles.trg_перевести_пол ----------------------------------
+-- CREATE TRIGGER "trg_перевести_пол" BEFORE INSERT OR UPDATE OF gender ON public.profiles FOR EACH ROW EXECUTE FUNCTION "перевести_пол"()
+
+-- --- profiles.trg_признак_учётки ---------------------------------
+-- CREATE TRIGGER "trg_признак_учётки" AFTER INSERT OR DELETE OR UPDATE OF player_id, deleted_at ON public.profiles FOR EACH ROW EXECUTE FUNCTION "обновить_признак_учётки"()
+
+-- --- site_content.site_content_touch -----------------------------
+-- CREATE TRIGGER site_content_touch BEFORE UPDATE ON public.site_content FOR EACH ROW EXECUTE FUNCTION site_content_touch()
+
+-- --- site_documents.site_documents_touch -------------------------
+-- CREATE TRIGGER site_documents_touch BEFORE UPDATE ON public.site_documents FOR EACH ROW EXECUTE FUNCTION site_content_touch()
+
+-- --- tournament_registrations.registrations_guard_self_update ----
+-- CREATE TRIGGER registrations_guard_self_update BEFORE UPDATE ON public.tournament_registrations FOR EACH ROW EXECUTE FUNCTION registrations_guard_self_update()
+
+-- --- tournament_registrations.trg_check_doubles_unique -----------
+-- CREATE TRIGGER trg_check_doubles_unique BEFORE INSERT OR UPDATE ON public.tournament_registrations FOR EACH ROW EXECUTE FUNCTION check_doubles_unique()
+
+
+-- ======================================================================
+-- ПРАВИЛА ДОСТУПА (RLS)
+-- ======================================================================
+
+
+-- --- app_releases ------------------------------------------------
+-- app_releases : app_releases_read : SELECT : {public} : USING true : CHECK —
+-- app_releases : app_releases_staff : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- app_settings ------------------------------------------------
+-- app_settings : app_settings_read : SELECT : {anon,authenticated} : USING true : CHECK —
+-- app_settings : app_settings_write : ALL : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = 'admin'::text)))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = 'admin'::text))))
+
+-- --- badge_definitions -------------------------------------------
+-- badge_definitions : Public read badges : SELECT : {public} : USING true : CHECK —
+
+-- --- bracket_undo ------------------------------------------------
+-- bracket_undo : bracket_undo_staff : SELECT : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- categories --------------------------------------------------
+-- categories : Admin full access categories : ALL : {public} : USING is_admin() : CHECK —
+-- categories : Public read categories : SELECT : {public} : USING true : CHECK —
+
+-- --- challenge_predictions ---------------------------------------
+-- challenge_predictions : predictions_insert_auth : INSERT : {authenticated} : USING — : CHECK ((voter_type = 'site'::text) AND (voter_id = (auth.uid())::text))
+-- challenge_predictions : predictions_select_all : SELECT : {public} : USING true : CHECK —
+-- challenge_predictions : predictions_staff_all : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- challenge_predictions : predictions_update_auth : UPDATE : {authenticated} : USING ((voter_type = 'site'::text) AND (voter_id = (auth.uid())::text)) : CHECK ((voter_type = 'site'::text) AND (voter_id = (auth.uid())::text))
+
+-- --- challenges --------------------------------------------------
+-- challenges : challenges_challenger_read : SELECT : {public} : USING (challenger_id = auth.uid()) : CHECK —
+-- challenges : challenges_completed_read : SELECT : {authenticated} : USING (status = 'completed'::text) : CHECK —
+-- challenges : challenges_opponent_read : SELECT : {public} : USING (opponent_profile_id = auth.uid()) : CHECK —
+-- challenges : challenges_public_battles : SELECT : {public} : USING (battle_published = true) : CHECK —
+-- challenges : challenges_staff_all : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- coaches -----------------------------------------------------
+-- coaches : Admin full access coaches : ALL : {public} : USING is_admin() : CHECK —
+-- coaches : Coaches: admin write : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- coaches : Coaches: public read : SELECT : {public} : USING true : CHECK —
+-- coaches : Public read coaches : SELECT : {public} : USING true : CHECK —
+
+-- --- courts ------------------------------------------------------
+-- courts : Courts editable by admins : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::text)))) : CHECK —
+-- courts : Courts visible to all : SELECT : {public} : USING true : CHECK —
+
+-- --- deleted_accounts --------------------------------------------
+-- deleted_accounts : deleted_accounts_staff_read : SELECT : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- discount_vouchers -------------------------------------------
+-- discount_vouchers : vouchers_staff_read_all : SELECT : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- discount_vouchers : vouchers_staff_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- discount_vouchers : vouchers_user_insert_own : INSERT : {public} : USING — : CHECK (profile_id = auth.uid())
+-- discount_vouchers : vouchers_user_read_own : SELECT : {public} : USING (profile_id = auth.uid()) : CHECK —
+-- discount_vouchers : Админ и менеджер удаляют скидки : DELETE : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- entity_payments ---------------------------------------------
+-- entity_payments : Staff full access entity_payments : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- game_invites ------------------------------------------------
+-- game_invites : receiver_read : SELECT : {public} : USING (receiver_profile_id = auth.uid()) : CHECK —
+-- game_invites : sender_read : SELECT : {public} : USING (sender_id = auth.uid()) : CHECK —
+
+-- --- live_match_points -------------------------------------------
+-- live_match_points : live_match_points_public_read : SELECT : {public} : USING true : CHECK —
+-- live_match_points : live_match_points_staff_delete : DELETE : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'moderator'::text]))))) : CHECK —
+
+-- --- live_matches ------------------------------------------------
+-- live_matches : live_matches_public_read : SELECT : {public} : USING true : CHECK —
+-- live_matches : live_matches_staff_delete : DELETE : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- live_matches : live_matches_staff_insert : INSERT : {authenticated} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- live_matches : live_matches_staff_update : UPDATE : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- loyalty_rewards ---------------------------------------------
+-- loyalty_rewards : loyalty_rewards_staff_all : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- loyalty_rewards : loyalty_rewards_user_read : SELECT : {public} : USING (active = true) : CHECK —
+
+-- --- loyalty_rules -----------------------------------------------
+-- loyalty_rules : loyalty_rules_staff_all : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- loyalty_rules : loyalty_rules_user_read : SELECT : {public} : USING (active = true) : CHECK —
+
+-- --- loyalty_transactions ----------------------------------------
+-- loyalty_transactions : loyalty_transactions_staff_all : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- loyalty_transactions : loyalty_transactions_user_read : SELECT : {public} : USING (profile_id = auth.uid()) : CHECK —
+-- loyalty_transactions : loyalty_transactions_user_redeem : INSERT : {public} : USING — : CHECK ((profile_id = auth.uid()) AND (type = 'redeem'::text))
+
+-- --- matches -----------------------------------------------------
+-- matches : Admin full access matches : ALL : {public} : USING is_admin() : CHECK —
+-- matches : Public read matches : SELECT : {public} : USING true : CHECK —
+
+-- --- membership_requests -----------------------------------------
+-- membership_requests : membership_requests_own_insert : INSERT : {public} : USING — : CHECK (profile_id = auth.uid())
+-- membership_requests : membership_requests_own_read : SELECT : {public} : USING (profile_id = auth.uid()) : CHECK —
+-- membership_requests : membership_requests_own_update : UPDATE : {public} : USING (profile_id = auth.uid()) : CHECK —
+-- membership_requests : membership_requests_staff_read : SELECT : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- membership_requests : membership_requests_staff_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- memberships -------------------------------------------------
+-- memberships : Staff full access memberships : ALL : {public} : USING is_staff() : CHECK is_staff()
+-- memberships : Users read own membership : SELECT : {public} : USING (auth.uid() = profile_id) : CHECK —
+
+-- --- news --------------------------------------------------------
+-- news : Admin full access news : ALL : {public} : USING is_admin() : CHECK —
+-- news : Public read news : SELECT : {public} : USING true : CHECK —
+-- news : Public read published news : SELECT : {anon} : USING (published_at IS NOT NULL) : CHECK —
+
+-- --- news_poll_votes ---------------------------------------------
+-- news_poll_votes : Anyone can read votes : SELECT : {public} : USING true : CHECK —
+-- news_poll_votes : Auth users insert vote : INSERT : {public} : USING — : CHECK (auth.uid() = user_id)
+
+-- --- news_reactions ----------------------------------------------
+-- news_reactions : Anyone can read reactions : SELECT : {public} : USING true : CHECK —
+-- news_reactions : Auth users insert reactions : INSERT : {public} : USING — : CHECK (auth.uid() = user_id)
+-- news_reactions : Users delete own reactions : DELETE : {public} : USING (auth.uid() = user_id) : CHECK —
+
+-- --- news_sources ------------------------------------------------
+-- news_sources : news_sources_staff : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- news_suggestions --------------------------------------------
+-- news_suggestions : news_suggestions_staff : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- notification_log --------------------------------------------
+-- notification_log : Service can insert notifications : INSERT : {public} : USING — : CHECK true
+-- notification_log : Service insert notifications : INSERT : {public} : USING — : CHECK true
+-- notification_log : Staff read notifications : SELECT : {public} : USING is_staff() : CHECK —
+-- notification_log : Users can read own notifications : SELECT : {public} : USING (auth.uid() = profile_id) : CHECK —
+-- notification_log : Users can update own notifications : UPDATE : {public} : USING (auth.uid() = profile_id) : CHECK —
+
+-- --- notification_texts ------------------------------------------
+-- notification_texts : Тексты читают все : SELECT : {public} : USING true : CHECK —
+
+-- --- page_views --------------------------------------------------
+-- page_views : Anyone can read page_views : SELECT : {public} : USING true : CHECK —
+-- page_views : Staff can manage page_views : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- partner_services --------------------------------------------
+-- partner_services : partner_services_public_read : SELECT : {public} : USING true : CHECK —
+-- partner_services : partner_services_staff_delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- partner_services : partner_services_staff_insert : INSERT : {public} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- partner_services : partner_services_staff_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- payments ----------------------------------------------------
+-- payments : Staff full access payments : ALL : {public} : USING is_staff() : CHECK is_staff()
+-- payments : Users read own payments : SELECT : {public} : USING (auth.uid() = profile_id) : CHECK —
+
+-- --- player_badges -----------------------------------------------
+-- player_badges : Public read player badges : SELECT : {public} : USING true : CHECK —
+-- player_badges : Staff manage badges : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- player_categories -------------------------------------------
+-- player_categories : Anyone reads player categories : SELECT : {public} : USING true : CHECK —
+-- player_categories : Staff writes player categories : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- player_link_requests ----------------------------------------
+-- player_link_requests : link_requests_read : SELECT : {authenticated} : USING ((profile_id = auth.uid()) OR (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text])))))) : CHECK —
+-- player_link_requests : link_requests_staff : ALL : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+
+-- --- player_promotions -------------------------------------------
+-- player_promotions : player_promotions_admin_delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- player_promotions : player_promotions_admin_insert : INSERT : {public} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- player_promotions : player_promotions_admin_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- player_promotions : player_promotions_read : SELECT : {public} : USING true : CHECK —
+
+-- --- players -----------------------------------------------------
+-- players : Admin full access players : ALL : {public} : USING is_admin() : CHECK —
+-- players : Public read players : SELECT : {public} : USING true : CHECK —
+-- players : managers_update_players : UPDATE : {authenticated} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+
+-- --- points_by_place ---------------------------------------------
+-- points_by_place : points_by_place_admin : ALL : {public} : USING is_admin() : CHECK is_admin()
+-- points_by_place : points_by_place_read : SELECT : {public} : USING true : CHECK —
+
+-- --- points_rules ------------------------------------------------
+-- points_rules : points_rules_admin : ALL : {public} : USING is_admin() : CHECK is_admin()
+-- points_rules : points_rules_read : SELECT : {public} : USING true : CHECK —
+
+-- --- points_versions ---------------------------------------------
+-- points_versions : points_versions_admin : ALL : {public} : USING is_admin() : CHECK is_admin()
+-- points_versions : points_versions_read : SELECT : {public} : USING true : CHECK —
+
+-- --- profiles ----------------------------------------------------
+-- profiles : Admin full access profiles : ALL : {public} : USING is_admin() : CHECK —
+-- profiles : Users can insert own profile : INSERT : {public} : USING — : CHECK (auth.uid() = id)
+-- profiles : Users can update own profile : UPDATE : {public} : USING (auth.uid() = id) : CHECK —
+-- profiles : Users can view own profile : SELECT : {public} : USING (auth.uid() = id) : CHECK —
+-- profiles : Users insert own profile : INSERT : {public} : USING — : CHECK (auth.uid() = id)
+-- profiles : Users read own profile : SELECT : {public} : USING (auth.uid() = id) : CHECK —
+-- profiles : Users update own profile : UPDATE : {public} : USING (auth.uid() = id) : CHECK —
+
+-- --- push_log ----------------------------------------------------
+-- push_log : Admins can delete push_log : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = 'admin'::text)))) : CHECK —
+-- push_log : Admins can read push_log : SELECT : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::text)))) : CHECK —
+-- push_log : Service can insert push_log : INSERT : {public} : USING — : CHECK true
+-- push_log : Staff can update push_log : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- rating_history ----------------------------------------------
+-- rating_history : Public read : SELECT : {public} : USING true : CHECK —
+-- rating_history : Staff delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- rating_history : Staff insert : INSERT : {public} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- rating_history : Staff update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+
+-- --- registration_changes ----------------------------------------
+-- registration_changes : registration_changes_staff : ALL : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles p
+--   WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+
+-- --- season_reset_log --------------------------------------------
+-- season_reset_log : Staff full access season reset : ALL : {public} : USING is_staff() : CHECK is_staff()
+-- season_reset_log : Users read own season reset : SELECT : {public} : USING (player_id = ( SELECT profiles.player_id
+--    FROM profiles
+--   WHERE (profiles.id = auth.uid()))) : CHECK —
+
+-- --- site_content ------------------------------------------------
+-- site_content : site_content видно всем : SELECT : {public} : USING true : CHECK —
+-- site_content : site_content меняет персонал : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- site_documents ----------------------------------------------
+-- site_documents : документы видно всем : SELECT : {public} : USING true : CHECK —
+-- site_documents : документы меняет персонал : ALL : {public} : USING is_staff() : CHECK is_staff()
+
+-- --- sponsors ----------------------------------------------------
+-- sponsors : sponsors_admin_delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- sponsors : sponsors_admin_insert : INSERT : {public} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- sponsors : sponsors_admin_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- sponsors : sponsors_read : SELECT : {public} : USING true : CHECK —
+
+-- --- tournament_levels -------------------------------------------
+-- tournament_levels : tournament_levels_admin_delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- tournament_levels : tournament_levels_admin_insert : INSERT : {public} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- tournament_levels : tournament_levels_admin_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- tournament_levels : tournament_levels_read : SELECT : {public} : USING true : CHECK —
+
+-- --- tournament_registrations ------------------------------------
+-- tournament_registrations : registrations_admin_delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- tournament_registrations : registrations_admin_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- tournament_registrations : registrations_insert : INSERT : {public} : USING — : CHECK (auth.uid() IS NOT NULL)
+-- tournament_registrations : registrations_read : SELECT : {public} : USING true : CHECK —
+-- tournament_registrations : registrations_self_add_partner : UPDATE : {public} : USING (player_id IN ( SELECT profiles.player_id
+--    FROM profiles
+--   WHERE (profiles.id = auth.uid()))) : CHECK (player_id IN ( SELECT profiles.player_id
+--    FROM profiles
+--   WHERE (profiles.id = auth.uid())))
+
+-- --- tournament_results ------------------------------------------
+-- tournament_results : tournament_results_admin_delete : DELETE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK —
+-- tournament_results : tournament_results_admin_insert : INSERT : {public} : USING — : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- tournament_results : tournament_results_admin_update : UPDATE : {public} : USING (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text]))))) : CHECK (EXISTS ( SELECT 1
+--    FROM profiles
+--   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'manager'::text])))))
+-- tournament_results : tournament_results_read : SELECT : {public} : USING true : CHECK —
+
+-- --- tournaments -------------------------------------------------
+-- tournaments : Admin full access tournaments : ALL : {public} : USING is_admin() : CHECK —
+-- tournaments : Public read tournaments : SELECT : {public} : USING true : CHECK —
+
+-- --- user_devices ------------------------------------------------
+-- user_devices : Users insert own devices : INSERT : {public} : USING — : CHECK (auth.uid() = profile_id)
+-- user_devices : Users read own devices : SELECT : {public} : USING (auth.uid() = profile_id) : CHECK —
+-- user_devices : Users update own devices : UPDATE : {public} : USING (auth.uid() = profile_id) : CHECK —
 
