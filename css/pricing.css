@@ -1,17 +1,48 @@
-/* ============================================
-   PRICING PAGE — Membership Plans
-   Prefix: pr-
-   ============================================ */
+/* ========================================
+   СТРАНИЦА «ЦЕНЫ» — членские взносы
+   Префиксы: pr- (страница), pm- (прайс), pmm- (окно оплаты)
+   v25 · 09.10.2026
+   ========================================
 
-/* ---- HERO (reuse ip-hero pattern) ---- */
+   ЧТО БЫЛО ДО ПРАВКИ, замер пяти видов на трёх языках:
+   - заголовок страницы 22.62 · 42.2 · 27.2 · 51.2 · 51.2 — ни одного на
+     ступени; все шесть плавающих кеглей приходили из ЧЕТЫРЁХ clamp;
+   - обложка 275 · 300 · 275 · 300 · 300, доля экрана 33% · 77% · 27% ·
+     39% · 33%: на телефоне лёжа три четверти экрана, потому что правила
+     низкого горизонтального у «Цен» не было;
+   - межстрочных восемь (1 · 1.2 · 1.25 · 1.45 · 1.5 · 1.55 · 1.6 · 1.7),
+     шесть мимо лестницы, и два уровня стояли на normal от шрифта;
+   - отступов мимо шкалы 72;
+   - границ ЧЕТЫРЕ при двух разрешённых: 768 объявлена трижды, плюс
+     самодельная 780, плюс 480 и 375;
+   - :focus-visible — одно правило на 157 блоков;
+   - prefers-reduced-motion — ноль при 24 движущихся правилах;
+   - 27 классов обслуживали СТАРЫЙ механизм, живший только на en и kg,
+     и ещё 4 были мертвы вовсе.
+
+   ЧТО УБРАНО ОТСЮДА СОВСЕМ:
+   - .pr-card*, .pr-badge, .pr-plan-name, .pr-price*, .pr-features,
+     .pr-cta-btn*, .pr-modal*, .pr-pay-*, .pr-cta — старая одиночная
+     карточка с ценой, вбитой в разметку en/kg, и её окно оплаты.
+     Чужие языки переведены на русский механизм, второй набор не нужен.
+   - .pr-faq-* — то же понятие, что .ip-faq-* раздела «Инфо», снятое в
+     компонент Accordion 38:63. «Цены» подключают css/info-pages.css и
+     берут раскрывашку оттуда. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ.
+   ======================================== */
+
+/* ---- ОБЛОЖКА ----
+   Пол и воздух — общие крутилки раздела, те же, что у восьми соседних.
+   Высоту на узких видах держит общее правило css/style.css:5384, куда
+   .pr-hero.pr-hero внесён этой же правкой. */
+
 .pr-hero {
     position: relative;
-    min-height: 300px;
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 120px 24px 60px;
+    padding: var(--oblozhka-vozduh) var(--pad-x) var(--oblozhka-vozduh-niz);
     overflow: hidden;
 }
 
@@ -19,7 +50,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 60%, var(--bg-primary) 100%);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.85) 60%, var(--bg-primary) 100%);
     z-index: 1;
 }
 
@@ -37,11 +68,14 @@
     max-width: 700px;
 }
 
+/* Заголовок и перебивка едут ОДНОЙ связкой: 40↔21, 32↔18, 26↔16 — ровно
+   три ступени шкалы на каждом виде, как на остальных девяти разделах */
 .pr-hero-title {
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: var(--fs-hero);
     font-weight: 800;
     letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    line-height: 1.3;
+    margin-bottom: var(--space-3);
 }
 
 .pr-hero-title span {
@@ -49,557 +83,62 @@
 }
 
 .pr-hero-subtitle {
-    font-size: var(--fs-md);
+    font-size: var(--fs-hero-sub);
     color: var(--text-secondary);
     max-width: 540px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
-/* ---- CONTAINER ---- */
+/* ---- КОНТЕЙНЕР ---- */
 .pr-container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 60px 24px 80px;
+    padding: var(--section-y) var(--pad-x) var(--section-y);
 }
 
-/* ---- PLAN CARD ---- */
-.pr-card-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 64px;
-}
+/* ---- БЕСПЛАТНЫЙ ПЕРИОД ----
 
-.pr-card {
-    background: var(--surface-glass);
-    border: 2px solid rgba(204, 255, 0, 0.25);
-    border-radius: var(--radius-xl);
-    padding: 40px 36px;
-    max-width: 440px;
-    width: 100%;
-    text-align: center;
-    position: relative;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}
+   Пока в app_settings стоит дата free_access_until и она не прошла,
+   платформа открыта всем, кто вошёл. Это самое важное, что страница
+   «Цены» может сказать человеку сегодня, поэтому блок стоит ПЕРВЫМ.
 
-.pr-badge {
-    display: inline-block;
-    background: rgba(204, 255, 0, 0.12);
-    color: var(--accent);
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    padding: 6px 16px;
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(204, 255, 0, 0.2);
-    margin-bottom: 24px;
-}
+   Блок — свойство данных, а не разметки: дата прошла или стёрта в
+   админке — он исчезает сам, строки в коде для этого трогать не надо.
+   Текст приходит из site_content (ключи pricing_free_title и
+   pricing_free_text) и меняется без выкладки. */
 
-.pr-plan-name {
-    font-size: var(--fs-lg);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-}
-
-.pr-price {
-    margin-bottom: 32px;
-}
-
-.pr-price-amount {
-    font-size: var(--fs-3xl);
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-    line-height: 1;
-}
-
-.pr-price-currency {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--accent);
-    margin-left: 4px;
-}
-
-.pr-price-period {
-    display: block;
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
-    margin-top: 6px;
-}
-
-/* Features list */
-.pr-features {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 32px;
-    text-align: left;
-}
-
-.pr-features li {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 10px 0;
-    color: var(--text-secondary);
-    font-size: var(--fs-base);
-    line-height: 1.5;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.pr-features li:last-child {
-    border-bottom: none;
-}
-
-.pr-features li svg {
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-/* CTA Button */
-.pr-cta-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    background: var(--accent);
-    color: #000;
-    font-family: inherit;
-    font-size: var(--fs-base);
-    font-weight: 700;
-    padding: 16px 32px;
-    border: none;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    text-decoration: none;
-    transition: background var(--transition-fast), transform var(--transition-fast);
-}
-
-.pr-cta-btn:hover {
-    background: var(--accent-hover);
-    transform: translateY(-2px);
-}
-
-.pr-cta-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.pr-cta-btn-active {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    cursor: default;
-}
-
-.pr-cta-btn-active:hover {
-    background: rgba(34, 197, 94, 0.15);
-    transform: none;
-}
-
-/* ---- FAQ SECTION ---- */
-.pr-faq-title {
-    font-size: var(--fs-xl);
-    font-weight: 700;
-    margin-bottom: 24px;
-    text-align: center;
-}
-
-.pr-faq-title span {
-    color: var(--accent);
-}
-
-.pr-faq-item {
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    margin-bottom: 10px;
-    background: var(--surface-glass);
-    overflow: hidden;
-    transition: border-color var(--transition-fast);
-}
-
-.pr-faq-item:hover {
-    border-color: var(--border-light);
-}
-
-.pr-faq-item.active {
-    border-color: rgba(204, 255, 0, 0.2);
-}
-
-.pr-faq-question {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 20px;
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: var(--fs-base);
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    gap: 16px;
-    transition: color var(--transition-fast);
-}
-
-.pr-faq-question:hover {
-    color: var(--accent);
-}
-
-.pr-faq-icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: var(--surface-glass);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform var(--transition-base), background var(--transition-base);
-}
-
-.pr-faq-item.active .pr-faq-icon {
-    transform: rotate(45deg);
-    background: var(--accent);
-    color: #000;
-}
-
-.pr-faq-answer {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease;
-}
-
-.pr-faq-item.active .pr-faq-answer {
-    max-height: 500px;
-}
-
-.pr-faq-answer-inner {
-    padding: 0 20px 20px;
-    color: var(--text-secondary);
-    font-size: var(--fs-base);
-    line-height: 1.7;
-}
-
-/* ---- MODAL ---- */
-.pr-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: pr-fade-in 0.2s ease;
-}
-
-@keyframes pr-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-.pr-modal {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-subtle);
+.pm-free {
+    max-width: 900px;
+    margin: 0 auto var(--space-6);
+    padding: var(--space-4) var(--space-4);
     border-radius: var(--radius-lg);
-    width: 90%;
-    max-width: 480px;
-    padding: 36px 32px;
-    text-align: center;
-    position: relative;
-    max-height: 90vh;
-    overflow-y: auto;
+    background: rgba(204, 255, 0, 0.08);
+    border: 1px solid rgba(204, 255, 0, 0.25);
 }
 
-.pr-modal-close {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: var(--fs-xl);
-    cursor: pointer;
-    line-height: 1;
-}
+.pm-free[hidden] { display: none; }
 
-.pr-modal-close:hover {
-    color: var(--text-primary);
-}
-
-.pr-modal-icon {
-    font-size: var(--fs-3xl);
-    margin-bottom: 16px;
-    display: block;
-}
-
-.pr-modal-title {
-    font-size: var(--fs-md);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-}
-
-.pr-modal-text {
-    color: var(--text-secondary);
-    font-size: var(--fs-base);
-    line-height: 1.6;
-    margin-bottom: 24px;
-}
-
-.pr-modal-btns {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Payment Methods Grid */
-.pr-pay-label {
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-    text-align: left;
-}
-
-.pr-pay-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.pr-pay-method {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 14px 8px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    position: relative;
-    opacity: 0.55;
-}
-
-.pr-pay-method:hover {
-    border-color: var(--accent);
-    opacity: 1;
-}
-
-.pr-pay-method.selected {
-    border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.06);
-    opacity: 1;
-}
-
-.pr-pay-method-icon {
-    font-size: var(--fs-xl);
-    line-height: 1;
-}
-
-.pr-pay-method-name {
+.pm-free-title {
     font-size: var(--fs-2xs);
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-align: center;
-    line-height: 1.2;
-}
-
-.pr-pay-method.selected .pr-pay-method-name {
-    color: var(--accent);
-}
-
-.pr-pay-soon {
-    font-size: var(--fs-2xs);
-    color: var(--text-dim);
-    position: absolute;
-    top: 4px;
-    right: 6px;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.pr-pay-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 16px 0;
-    color: var(--text-dim);
-    font-size: var(--fs-xs);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.pr-pay-divider::before,
-.pr-pay-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-subtle);
-}
-
-.pr-modal-note {
-    font-size: var(--fs-xs);
-    color: var(--text-dim);
-    margin-top: 16px;
+    letter-spacing: 0.08em;
     line-height: 1.5;
+    color: var(--accent);
+    margin-bottom: var(--space-2);
 }
 
-.pr-modal-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 24px;
-    border-radius: var(--radius-full);
+.pm-free-text {
     font-size: var(--fs-base);
-    font-weight: 600;
-    text-decoration: none;
-    transition: var(--transition-fast);
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-}
-
-.pr-modal-btn-telegram {
-    background: #229ED9;
-    color: #fff;
-}
-
-.pr-modal-btn-telegram:hover {
-    background: #1a8abf;
-}
-
-.pr-modal-btn-phone {
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
-}
-
-.pr-modal-btn-phone:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-/* ---- CTA Section ---- */
-.pr-cta {
-    background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-xl);
-    padding: 48px 40px;
-    text-align: center;
-    margin-top: 40px;
-}
-
-.pr-cta h3 {
-    font-size: var(--fs-xl);
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-
-.pr-cta h3 span {
-    color: var(--accent);
-}
-
-.pr-cta p {
+    line-height: 1.5;
     color: var(--text-secondary);
-    margin-bottom: 24px;
-    font-size: var(--fs-base);
+    margin: 0;
 }
 
-/* ---- RESPONSIVE ---- */
-@media (max-width: 768px) {
-
-    /* Раздел «Инфо» по общей шкале: название страницы шло 32-м кеглем,
-       заголовки внутри — 24-м */
-    .pr-hero-title {
-        font-size: clamp(1.35rem, 5.8vw, 1.7rem);
-        line-height: 1.2;
-    }
-
-    .pr-faq-title,
-    .pr-section-title {
-        font-size: clamp(1.15rem, 5vw, 1.32rem);
-        line-height: 1.25;
-    }
-
-    .pr-faq-lead,
-    .pr-faq-answer-inner {
-        font-size: var(--fs-sm);
-        line-height: 1.55;
-    }
-    
-    .pr-container {
-        padding: 40px 16px 60px;
-    }
-    .pr-card {
-        padding: 32px 24px;
-    }
-    .pr-price-amount {
-        font-size: var(--fs-3xl);
-    }
-    .pr-modal {
-        padding: 28px 24px;
-    }
-    .pr-cta {
-        padding: 36px 24px;
-    }
-}
-
-@media (max-width: 480px) {
-    .pr-card {
-        padding: 28px 20px;
-    }
-    .pr-price-amount {
-        font-size: var(--fs-2xl);
-    }
-    .pr-faq-question {
-        padding: 14px 16px;
-        font-size: var(--fs-sm);
-    }
-    .pr-faq-answer-inner {
-        padding: 0 16px 16px;
-        font-size: var(--fs-sm);
-    }
-}
-
-@media (max-width: 375px) {
-    
-    .pr-hero-title {
-        font-size: var(--fs-xl);
-    }
-    .pr-container {
-        padding: 32px 12px 48px;
-    }
-    .pr-cta {
-        padding: 28px 16px;
-    }
-    .pr-cta h3 {
-        font-size: var(--fs-lg);
-    }
-}
-
-/* ========================================
-   ПРАЙС-ЛИСТ ЧЛЕНСТВА
-   ========================================
-   Раньше здесь стояла одна карточка с суммой, вбитой в разметку в трёх
-   языковых копиях. Стало три строки — вступительный взнос, годовое и
-   помесячное членство: человек приходит на «Цены» узнать, сколько это
-   стоит, а не выбирать тариф из трёх. Суммы приходят из базы; пока их не
-   утвердили, в строке стоит «уточняется».
-   ======================================== */
+/* ---- КАРТОЧКА ПРАЙСА ----
+   Поля standalone-карточки — Regular 24 по Card 29:65. Стояло 32/36,
+   12/36 и 26/36: три разные пары на одну карточку. */
 
 .pm-card {
     background: var(--surface-glass);
@@ -612,67 +151,129 @@
     margin: 0 auto;
 }
 
-.pm-head { padding: 32px 36px 8px; }
-.pm-title { font-size: var(--fs-lg); font-weight: 700; color: var(--text-primary); }
-.pm-sub { color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.6; margin-top: 6px; }
+.pm-head {
+    padding: var(--space-6) var(--space-6) var(--space-3);
+}
 
-.pm-list { padding: 12px 36px 8px; }
+/* Название карточки — тот же уровень, что заголовок секции на остальных
+   шести страницах раздела: 26 на широких, 21 на узких */
+.pm-title {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.pm-sub {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    margin-top: var(--space-2);
+}
+
+.pm-list {
+    padding: 0 var(--space-6);
+}
 
 .pm-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 28px;
-    padding: 22px 0;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
     border-bottom: 1px solid var(--border-subtle);
 }
+
 .pm-row:last-child { border-bottom: none; }
 
-.pm-name { font-weight: 600; color: var(--text-primary); font-size: var(--fs-base); }
+.pm-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    line-height: 1.5;
+}
+
 .pm-note {
     display: block;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     font-weight: 400;
-    margin-top: 5px;
-    line-height: 1.55;
+    margin-top: var(--space-2);
+    line-height: 1.5;
 }
-.pm-right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-.pm-val { font-size: var(--fs-base); font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
-.pm-val.set { font-size: var(--fs-xl); font-weight: 800; color: var(--accent); }
 
+.pm-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-shrink: 0;
+}
+
+.pm-val {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Сумма пришла из базы — она и есть товар строки */
+.pm-val.set {
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    color: var(--accent);
+}
+
+/* Плашка — Badge 27:53: высота 24, 11 Medium, поля 0/8 */
 .pm-tag {
-    display: inline-block;
-    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    margin-left: var(--space-2);
     vertical-align: middle;
     background: rgba(204, 255, 0, 0.12);
     color: var(--accent);
     font-size: var(--fs-2xs);
-    font-weight: 800;
+    font-weight: 500;
+    line-height: 1;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 3px 9px;
+    letter-spacing: 0.5px;
+    padding: 0 var(--space-2);
     border-radius: var(--radius-full);
 }
 
-.pm-foot { padding: 26px 36px 34px; border-top: 1px solid var(--border-subtle); }
+.pm-foot {
+    padding: var(--space-6);
+    border-top: 1px solid var(--border-subtle);
+}
+
 .pm-foot h4 {
     font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    line-height: 1.5;
     color: var(--accent);
-    margin-bottom: 18px;
+    margin-bottom: var(--space-4);
 }
 
-.pm-feats { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 28px; }
+.pm-feats {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3) var(--space-6);
+}
+
 .pm-feats li {
     position: relative;
-    padding-left: 26px;
+    padding-left: var(--space-6);
     color: var(--text-secondary);
     font-size: var(--fs-base);
     line-height: 1.5;
 }
+
 .pm-feats li::before {
     content: '';
     position: absolute;
@@ -685,25 +286,27 @@
     transform: rotate(-45deg);
 }
 
-/* Главное действие карточки — лаймовая заливка, как «Регистрация» и
-   «Подробнее» на остальном сайте. Прозрачная с серой рамкой она
-   загоралась только при наведении, а на телефоне наведения нет:
-   кнопка выглядела выключенной */
+/* Главное действие карточки. Высоту держит СВОЙСТВО, а не поля — иначе
+   она едет за межстрочным содержимого (Button 17:82). Было 41 на узких */
 .pm-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    margin-top: 26px;
-    padding: 16px 24px;
+    min-height: 44px;
+    margin-top: var(--space-6);
+    padding: 0 var(--space-6);
     border-radius: var(--radius-full);
     border: 1px solid var(--accent);
     background: var(--accent);
-    color: #000;
+    color: var(--accent-on, #0A0A0A);
     font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 700;
+    line-height: 1.3;
     cursor: pointer;
     text-align: center;
-    transition: all var(--transition-base);
+    transition: background var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
 }
 
 .pm-btn:hover {
@@ -712,39 +315,101 @@
     transform: translateY(-1px);
 }
 
-.pm-btn:focus {
-    outline: none;
-}
+.pm-btn:focus { outline: none; }
 
 .pm-btn:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
+/* Состояние членства над кнопкой: до какого числа оплачено */
+.pm-state {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: rgba(204, 255, 0, 0.08);
+    border: 1px solid rgba(204, 255, 0, 0.25);
+    color: var(--accent);
+    font-size: var(--fs-base);
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.pm-state[hidden] { display: none; }
+
 /* Турнирный взнос — не тариф, а факт: у каждого турнира он свой */
 .pm-entry {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 24px;
+    gap: var(--space-6);
     max-width: 900px;
-    margin: 28px auto 0;
-    padding: 22px 28px;
+    margin: var(--space-6) auto 0;
+    padding: var(--space-4) var(--space-6);
     border: 1px dashed var(--border-light);
     border-radius: var(--radius-lg);
 }
-.pm-entry-name { font-weight: 600; color: var(--text-primary); }
+
+.pm-entry-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    line-height: 1.5;
+}
+
 .pm-entry-sub {
     display: block;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     font-weight: 400;
-    margin-top: 5px;
-    line-height: 1.55;
+    margin-top: var(--space-2);
+    line-height: 1.5;
 }
-.pm-entry-val { flex-shrink: 0; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
 
-/* ---- Окно выбора периода и способа оплаты ---- */
+.pm-entry-val {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+/* ---- ВОПРОСЫ ----
+   Сама раскрывашка живёт в css/info-pages.css (.ip-faq-*): это один
+   компонент на весь раздел, Accordion 38:63. Здесь — только заголовок
+   секции и подпись под ним. */
+
+.pr-faq-title {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: var(--space-3);
+    text-align: center;
+}
+
+.pr-faq-title span { color: var(--accent); }
+
+.pr-faq-lead {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    max-width: 640px;
+    margin: 0 auto var(--space-6);
+}
+
+.pr-faq-lead a { color: var(--accent); }
+
+/* Между турнирным взносом и вопросами нужен воздух */
+.pm-entry + .pr-faq-title { margin-top: var(--space-10); }
+
+/* ---- ОКНО ВЫБОРА ПЕРИОДА И СПОСОБА ОПЛАТЫ ----
+   Modal 26:143: ширину выбирают ЧИСЛОМ ПОЛЕЙ, не типом содержимого.
+   Здесь два периода, четыре способа и кнопка — это md 520. Стояло 460.
+   Поля 20 у шапки, тела и подвала. Стояло 32. */
+
 .pmm-overlay {
     position: fixed;
     inset: 0;
@@ -755,8 +420,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: var(--space-6);
 }
+
 .pmm-overlay[hidden] { display: none; }
 
 .pmm {
@@ -764,213 +430,288 @@
     border: 1px solid var(--border-light);
     border-radius: var(--radius-xl);
     width: 100%;
-    max-width: 460px;
-    padding: 32px;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--space-4);
     position: relative;
 }
+
+/* Закрытие было целью 15x26 — в неё не попадает палец. Button 17:82:
+   цель нажатия всегда 44 */
 .pmm-close {
     position: absolute;
-    top: 16px;
-    right: 18px;
+    top: var(--space-2);
+    right: var(--space-2);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
+    border-radius: var(--radius-full);
     color: var(--text-secondary);
     font-size: var(--fs-xl);
     line-height: 1;
     cursor: pointer;
 }
-.pmm-title { font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); margin-bottom: 22px; }
+
+.pmm-close:hover { color: var(--text-primary); }
+
+.pmm-close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.pmm-title {
+    font-size: var(--fs-md);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    padding-right: 44px;
+}
+
 .pmm-label {
     font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    line-height: 1.5;
     color: var(--accent);
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
 }
-.pmm-opts { display: grid; gap: 10px; margin-bottom: 26px; }
+
+.pmm-opts {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+/* ВЫБРАННОЕ МЕНЯЕТ ТОЛЬКО ГРАНИЦУ — правило самого Card 29:65:
+   «do not also change the fill, or selection and hover become
+   indistinguishable». Стояли и граница, и заливка */
 .pmm-opt {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    padding: 16px 18px;
+    gap: var(--space-4);
+    min-height: 44px;
+    /* КЕГЛЬ ЗАДАЁТСЯ, А НЕ ДОСТАЁТСЯ ОТ БРАУЗЕРА. У кнопки свой умолчальный
+       размер: прогон намерил 13.33 — ступени такой нет. То же правило, что
+       у межстрочного: «normal» и «не задано» — это ссылка на настройку
+       браузера, а не значение. */
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    padding: var(--space-4);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     background: transparent;
     font-family: inherit;
     text-align: left;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: border-color var(--transition-base);
 }
+
 .pmm-opt:hover { border-color: var(--border-light); }
-.pmm-opt.on { border-color: var(--accent); background: rgba(204, 255, 0, 0.06); }
-.pmm-opt-name { font-weight: 600; color: var(--text-primary); font-size: var(--fs-base); }
+.pmm-opt.on { border-color: var(--accent); }
+
+.pmm-opt:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.pmm-opt-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    line-height: 1.5;
+}
+
 .pmm-opt-sub {
     display: block;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     font-weight: 400;
-    margin-top: 3px;
+    line-height: 1.5;
+    margin-top: var(--space-2);
 }
-.pmm-opt-val { color: var(--text-secondary); font-weight: 600; font-size: var(--fs-sm); white-space: nowrap; }
+
+.pmm-opt-val {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
 .pmm-opt.on .pmm-opt-val { color: var(--accent); }
 
-.pmm-ways { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+/* Способы оплаты стали КНОПКАМИ: были div, и с клавиатуры в них не
+   попасть вовсе. Нажатие даёт уведомление «скоро» */
+.pmm-ways {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
 .pmm-way {
-    padding: 14px 12px;
+    min-height: 44px;
+    padding: var(--space-3);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
+    background: transparent;
+    font-family: inherit;
     text-align: center;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
+    line-height: 1.5;
     position: relative;
-    opacity: 0.5;
+    cursor: pointer;
+    transition: border-color var(--transition-base);
 }
+
+.pmm-way:hover { border-color: var(--border-light); }
+
+.pmm-way:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Плашка «скоро» — Badge 27:53, 11 Medium. Цвет был --text-dim: 3.14 на
+   фоне, мимо AA, и решение 06.10 убирает его из текста */
 .pmm-way-soon {
     position: absolute;
     top: -8px;
-    right: 8px;
+    right: var(--space-2);
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
-    padding: 1px 8px;
+    padding: 0 var(--space-2);
     font-size: var(--fs-2xs);
-    font-weight: 700;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.5px;
 }
 
 .pmm-go {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    padding: 15px;
+    min-height: 44px;
+    padding: 0 var(--space-4);
     border-radius: var(--radius-full);
     border: none;
     background: var(--accent);
-    color: #0a0a0a;
+    color: var(--accent-on, #0A0A0A);
     font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 700;
+    line-height: 1.3;
     cursor: pointer;
 }
-.pmm-go[disabled] {
-    background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-secondary);
-    cursor: default;
+
+.pmm-go:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
+
 .pmm-hint {
     display: block;
-    margin-top: 14px;
+    margin-top: var(--space-3);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    line-height: 1.55;
+    line-height: 1.5;
     text-align: center;
 }
-
-@media (max-width: 780px) {
-    .pm-head, .pm-list, .pm-foot { padding-left: 22px; padding-right: 22px; }
-    .pm-row { flex-direction: column; align-items: flex-start; gap: 14px; }
-    .pm-feats { grid-template-columns: 1fr; }
-    .pm-entry { flex-direction: column; gap: 10px; }
-}
-
-/* Подпись под заголовком вопросов: куда идти за остальным */
-.pr-faq-lead {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: var(--fs-base);
-    line-height: 1.6;
-    max-width: 640px;
-    margin: -18px auto 32px;
-}
-
-/* Это правило стоит ниже мобильного блока и перебивало его — размер для
-   телефона задаём здесь же */
-@media (max-width: 768px) {
-    .pr-faq-lead {
-        font-size: var(--fs-sm);
-        line-height: 1.55;
-    }
-}
-.pr-faq-lead a { color: var(--accent); }
-
-/* Между строкой турнирного взноса и вопросами нужен воздух */
-.pm-entry + .pr-faq-title { margin-top: 72px; }
-
-/* Состояние членства над кнопкой: до какого числа оплачено */
-.pm-state {
-    margin-top: 22px;
-    padding: 12px 18px;
-    border-radius: var(--radius-lg);
-    background: rgba(204, 255, 0, 0.08);
-    border: 1px solid rgba(204, 255, 0, 0.25);
-    color: var(--accent);
-    font-size: var(--fs-base);
-    font-weight: 600;
-    text-align: center;
-}
-.pm-state[hidden] { display: none; }
 
 /* ========================================
-   Телефон: карточка членства по общей шкале
-
-   Блок объявлен ниже мобильного, поэтому правки здесь: название карточки
-   шло 20-м кеглем, пункты — 15.2, сумма — 24. На фоне заголовков разделов
-   в 19.5 карточка выглядела крупнее самой страницы
+   УЗКИЕ ВИДЫ — только две границы, 992 и 640
    ======================================== */
 
-@media (max-width: 768px) {
-    .pm-title {
-        font-size: clamp(1.05rem, 4.6vw, 1.2rem);
-        line-height: 1.25;
+@media (max-width: 992px) {
+    /* Название карточки и заголовок вопросов — тот же уровень, что
+       заголовок секции на остальных шести страницах раздела */
+    .pm-title,
+    .pr-faq-title {
+        font-size: var(--fs-lg);
     }
 
-    .pm-sub {
-        font-size: var(--fs-sm);
-        line-height: 1.45;
-    }
-
-    .pm-val {
-        font-size: var(--fs-sm);
-    }
-
-    /* Сумма — как цифры на обложках: заметно, но не громче заголовка */
     .pm-val.set {
         font-size: var(--fs-md);
     }
 
-    .pm-note {
+    .pm-head,
+    .pm-list,
+    .pm-foot {
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+    }
+
+    .pm-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    .pm-feats {
+        grid-template-columns: 1fr;
+    }
+
+    .pm-entry {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+}
+
+@media (max-width: 640px) {
+    .pr-container {
+        padding: var(--section-y-sm) var(--pad-x) var(--section-y);
+    }
+
+    .pm-note,
+    .pm-entry-sub {
         font-size: var(--fs-xs);
     }
 
-    .pm-list li,
-    .pm-list p {
-        font-size: var(--fs-sm);
-        line-height: 1.5;
+    .pmm-overlay {
+        padding: var(--space-4);
     }
 
-    /* Что даёт членство — список выгод */
-    .pm-feats,
-    .pm-feats li,
-    .pm-feat {
-        font-size: var(--fs-sm);
-        line-height: 1.5;
+    .pmm {
+        padding: var(--space-4);
     }
 
-    .pm-btn {
-        font-size: var(--fs-sm);
-        padding: 11px 20px;
+    .pmm-ways {
+        grid-template-columns: 1fr;
     }
+}
 
-    .pm-entry-val {
-        font-size: var(--fs-sm);
+/* Телефон лёжа: обложка забирала 77% экрана. Эталон раздела — то же
+   правило, что у турниров: пола нет, воздух узкий, КЕГЛИ НЕ ТРОГАЮТСЯ */
+@media (max-height: 500px) and (orientation: landscape) {
+    .pr-hero {
+        min-height: 0;
+        padding: var(--section-y-sm) var(--pad-x) var(--section-y-sm);
     }
+}
 
-    /* Подпись под названием страницы — как в остальных разделах */
-    .pr-hero-subtitle {
-        font-size: var(--fs-sm);
-        line-height: 1.5;
+/* Движение спрашивает системную настройку. Его не было вовсе при 24
+   движущихся правилах */
+@media (prefers-reduced-motion: reduce) {
+    .pm-btn,
+    .pmm-opt,
+    .pmm-way,
+    .pm-btn:hover {
+        transition: none;
+        transform: none;
     }
 }

@@ -25,7 +25,9 @@
     <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="../css/tokens.css?v=25">
     <link rel="stylesheet" href="../css/style.css?v=400">
-    <link rel="stylesheet" href="../css/pricing.css?v=24">
+    <link rel="stylesheet" href="../css/kslt-toast.css?v=1">
+    <link rel="stylesheet" href="../css/info-pages.css?v=42">
+    <link rel="stylesheet" href="../css/pricing.css?v=25">
 </head>
 <body>
     <!-- HEADER -->
@@ -294,6 +296,15 @@
 
         <div class="pr-container">
 
+            <!-- БЕСПЛАТНЫЙ ПЕРИОД. Блок — свойство данных: показывается, пока в
+                 app_settings стоит непрошедшая дата free_access_until, и исчезает
+                 сам, когда её стёрли или она прошла. Текст приходит из site_content
+                 (pricing_free_title, pricing_free_text) и меняется без выкладки -->
+            <div class="pm-free" id="prFree" hidden>
+                <div class="pm-free-title" id="prFreeTitle"></div>
+                <p class="pm-free-text" id="prFreeText">Платить взнос не нужно: доступ открыт всем, кто вошёл. Суммы ниже начнут действовать после этой даты.</p>
+            </div>
+
             <!-- ПРАЙС-ЛИСТ -->
             <div class="pm-card">
                 <div class="pm-head">
@@ -347,37 +358,37 @@
             <h2 class="pr-faq-title">Вопросы о <span>членстве</span></h2>
             <p class="pr-faq-lead">Только про деньги. Всё остальное — вступление, категории, турниры — на странице <a href="faq.html">FAQ</a>.</p>
 
-            <div class="pr-faq-item">
-                <button class="pr-faq-question">Чем годовое членство отличается от помесячного?<span class="pr-faq-icon">+</span></button>
-                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Чем годовое членство отличается от помесячного?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
                     Только периодом оплаты и суммой — членство одно и то же, права одинаковые. Годовое выгоднее в пересчёте на месяц. Членство действует ровно в оплаченный период.
                 </div></div>
             </div>
 
-            <div class="pr-faq-item">
-                <button class="pr-faq-question">Что будет, если перестать платить?<span class="pr-faq-icon">+</span></button>
-                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Что будет, если перестать платить?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
                     Членство закончится вместе с оплаченным периодом, и к рейтинговым турнирам вас не допустят. Если взносы не оплачены в течение шести месяцев, участник выбывает из членства КСЛТ, а рейтинг замораживается. Вернуться можно в любой момент — снова оплатив вступительный взнос. Подробнее — <a href="rules.html#rules-membership">Правила, раздел 02</a>.
                 </div></div>
             </div>
 
-            <div class="pr-faq-item">
-                <button class="pr-faq-question">Вступительный взнос платится каждый раз?<span class="pr-faq-icon">+</span></button>
-                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Вступительный взнос платится каждый раз?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
                     Нет, только один раз при вступлении. Второй раз он понадобится, лишь если вы выбыли из членства и возвращаетесь.
                 </div></div>
             </div>
 
-            <div class="pr-faq-item">
-                <button class="pr-faq-question">Входит ли участие в турнире в членский взнос?<span class="pr-faq-icon">+</span></button>
-                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Входит ли участие в турнире в членский взнос?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
                     Нет. Турнирный взнос платится отдельно и у каждого турнира свой — он указан в карточке турнира. Членство даёт приоритет при регистрации и сниженный взнос, но не бесплатное участие.
                 </div></div>
             </div>
 
-            <div class="pr-faq-item">
-                <button class="pr-faq-question">Как оплатить сейчас?<span class="pr-faq-icon">+</span></button>
-                <div class="pr-faq-answer"><div class="pr-faq-answer-inner">
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Как оплатить сейчас?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
                     Оплата на сайте скоро появится. Пока членство оформляется через менеджера КСЛТ: после оплаты он отмечает её в системе, и членство появляется в вашем личном кабинете.
                 </div></div>
             </div>
@@ -411,10 +422,10 @@
 
             <div class="pmm-label">Способ оплаты</div>
             <div class="pmm-ways">
-                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>MBank · QR</div>
-                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>О!Деньги</div>
-                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>Элкарт</div>
-                <div class="pmm-way"><span class="pmm-way-soon">скоро</span>Visa / MasterCard</div>
+                <button type="button" class="pmm-way"><span class="pmm-way-soon">скоро</span>MBank · QR</button>
+                <button type="button" class="pmm-way"><span class="pmm-way-soon">скоро</span>О!Деньги</button>
+                <button type="button" class="pmm-way"><span class="pmm-way-soon">скоро</span>Элкарт</button>
+                <button type="button" class="pmm-way"><span class="pmm-way-soon">скоро</span>Visa / MasterCard</button>
             </div>
 
             <button class="pmm-go" id="payGo" disabled>Суммы уточняются</button>
@@ -522,17 +533,20 @@
     <script src="../js/contact-icons.js?v=1"></script>
     <script src="../js/auth-nav.js?v=24"></script>
     <script src="../js/script.js?v=20"></script>
-    <script src="../js/membership.js?v=3"></script>
+    <script src="../js/kslt-vremya.js?v=1"></script>
+    <script src="../js/kslt-toast.js?v=1"></script>
+    <script src="../js/site-content.js?v=3"></script>
+    <script src="../js/membership.js?v=4"></script>
     <script>
     (function() {
         'use strict';
 
         // ---- Раскрытие ответов ----
-        document.querySelectorAll('.pr-faq-question').forEach(function(btn) {
+        document.querySelectorAll('.ip-faq-question').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                var item = btn.closest('.pr-faq-item');
+                var item = btn.closest('.ip-faq-item');
                 var isOpen = item.classList.contains('active');
-                document.querySelectorAll('.pr-faq-item').forEach(function(el) { el.classList.remove('active'); });
+                document.querySelectorAll('.ip-faq-item').forEach(function(el) { el.classList.remove('active'); });
                 if (!isOpen) item.classList.add('active');
             });
         });
@@ -583,25 +597,64 @@
         var modal = document.getElementById('payModal');
         var btn = document.getElementById('prPayBtn');
 
-        function isLoggedIn() {
+        // ВХОД СПРАШИВАЕМ У КЛИЕНТА, А НЕ У СТРОКИ.
+        // Здесь стоял localStorage по ключу 'sb-<id боевого проекта>-auth-token':
+        // id базы был вписан в страницу, и на тестовой проверка не срабатывала
+        // никогда — ни в приборе, ни в пробе. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ.
+        var _вошёл = null;
+        async function вошёлЛи() {
+            if (_вошёл !== null) return _вошёл;
+            _вошёл = false;
             try {
-                var raw = localStorage.getItem('sb-qqkzszesviukopgjbead-auth-token');
-                if (!raw) return false;
-                var session = JSON.parse(raw);
-                return !!(session && session.access_token && session.expires_at &&
-                    session.expires_at > Math.floor(Date.now() / 1000));
-            } catch (e) { return false; }
+                var r = await window.supabaseClient.auth.getSession();
+                _вошёл = !!(r && r.data && r.data.session);
+            } catch (e) { /* нет сети — считаем, что не вошёл */ }
+            return _вошёл;
         }
 
         // Пока онлайн-оплаты нет, вход ничего не решает: и гость, и вошедший
         // видят одно и то же окно с порядком оформления через менеджера.
         // Гнать человека логиниться, чтобы он там узнал, что платить негде, —
         // значит вводить в заблуждение. Когда оплата появится, вернём вход
-        if (btn && !isLoggedIn()) btn.textContent = 'Как оформить членство';
+        (async function () {
+            if (btn && !(await вошёлЛи())) btn.textContent = 'Как оформить членство';
+        })();
+
+        // ---- Бесплатный период ----
+        //
+        // Пока в app_settings стоит непрошедшая дата free_access_until, платить
+        // взнос не нужно, и это самое важное, что страница может сказать
+        // сегодня. Поэтому блок стоит первым — и он СВОЙСТВО ДАННЫХ: дату
+        // стёрли или она прошла, блок исчез сам, код для этого не трогают.
+        // Текст лежит в site_content и меняется без выкладки.
+        async function показатьБесплатный() {
+            var короб = document.getElementById('prFree');
+            if (!короб || !window.бесплатныйПериод) return;
+            try {
+                if (!(await window.бесплатныйПериод())) return;
+                var до = await window.бесплатныйДоступДо();
+                // ДАТА РАЗБИРАЕТСЯ ПО ЧАСТЯМ, А НЕ ЧЕРЕЗ Date.
+                // new Date('2026-12-31') — это UTC-полночь, и западнее Гринвича
+                // она показывает предыдущий день: замер дал «30 декабря» там,
+                // где в базе стоит 31-е. В app_settings лежит ДЕНЬ, а не момент.
+                var ч = String(до).slice(0, 10).split('-');
+                var М = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+                var дата = ч[2].replace(/^0/,'') + ' ' + М[+ч[1]-1] + ' ' + ч[0];
+                var заголовок = 'До ' + дата + ' — бесплатно';
+                var текст = document.getElementById('prFreeText').textContent;
+                if (window.KSLT_CONTENT) {
+                    заголовок = window.KSLT_CONTENT.get('pricing_free_title', заголовок);
+                    текст = window.KSLT_CONTENT.get('pricing_free_text', текст);
+                }
+                document.getElementById('prFreeTitle').textContent = заголовок;
+                document.getElementById('prFreeText').textContent = текст;
+                короб.hidden = false;
+            } catch (e) { /* нет сети — блока просто не будет */ }
+        }
 
         // Показываем, есть ли уже действующее членство, и до какого числа
         async function showState() {
-            if (!isLoggedIn() || !window.checkMembership) return;
+            if (!(await вошёлЛи()) || !window.checkMembership) return;
             var state = document.getElementById('prState');
             try {
                 var m = await window.checkMembership();
@@ -614,21 +667,49 @@
             } catch (e) { /* нет сети — оставляем как есть */ }
         }
 
+        // ---- Окно: фокус, ловушка Tab и возврат ----
+        //
+        // Окно своё, а не общая оболочка админки, и ловушки у него не было:
+        // Tab уходил за окно, фокус после открытия оставался на body, возврата
+        // не было вовсе.
+        var фокусДоОкна = null;
+
+        function фокусируемые() {
+            return modal.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        }
+
+        function открыть() {
+            фокусДоОкна = document.activeElement;
+            modal.hidden = false;
+            var ц = фокусируемые();
+            if (ц.length) ц[ц.length > 1 ? 1 : 0].focus();
+        }
+
+        function закрыть() {
+            modal.hidden = true;
+            if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
+        }
+
         if (btn && modal) {
-            btn.addEventListener('click', function() {
-                modal.hidden = false;
-            });
+            btn.addEventListener('click', открыть);
 
             // Вернулись со страницы входа — открываем окно сразу
-            if (isLoggedIn() && new URLSearchParams(location.search).get('pay') === '1') {
-                modal.hidden = false;
-            }
+            (async function () {
+                if ((await вошёлЛи()) && new URLSearchParams(location.search).get('pay') === '1') открыть();
+            })();
 
             showState();
-            document.getElementById('payClose').addEventListener('click', function() { modal.hidden = true; });
-            modal.addEventListener('click', function(e) { if (e.target === modal) modal.hidden = true; });
+            document.getElementById('payClose').addEventListener('click', закрыть);
+            modal.addEventListener('click', function(e) { if (e.target === modal) закрыть(); });
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !modal.hidden) modal.hidden = true;
+                if (modal.hidden) return;
+                if (e.key === 'Escape') { закрыть(); return; }
+                if (e.key !== 'Tab') return;
+                var ц = фокусируемые();
+                if (!ц.length) return;
+                var первый = ц[0], последний = ц[ц.length - 1];
+                if (e.shiftKey && document.activeElement === первый) { e.preventDefault(); последний.focus(); }
+                else if (!e.shiftKey && document.activeElement === последний) { e.preventDefault(); первый.focus(); }
             });
 
             var opts = modal.querySelectorAll('.pmm-opt');
@@ -638,7 +719,29 @@
                     o.classList.add('on');
                 });
             });
+
+            // ---- Способы оплаты и кнопка ----
+            //
+            // У #payGo не было НИ ОДНОГО обработчика: появились бы суммы — он
+            // загорелся бы и не делал ничего. Пока онлайн-оплаты нет, оба
+            // говорят об этом вслух одним общим уведомлением (Toast 30:59),
+            // а не четырьмя разными способами.
+            function скоро() {
+                if (!window.KSLT_TOAST) return;
+                window.KSLT_TOAST.показать(
+                    'Онлайн-оплата ещё в разработке. Напишите менеджеру КСЛТ — он оформит членство и отметит оплату в системе.',
+                    { тон: 'info', заголовок: 'Скоро' });
+            }
+
+            modal.querySelectorAll('.pmm-way').forEach(function (w) {
+                w.addEventListener('click', скоро);
+            });
+
+            var go = document.getElementById('payGo');
+            if (go) go.addEventListener('click', скоро);
         }
+
+        показатьБесплатный();
 
         loadPrices();
     })();
