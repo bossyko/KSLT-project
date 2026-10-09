@@ -106,7 +106,35 @@ const ОТКАТЫ = [
   ['pages/admin.html',
    'kslt-rules.js?v=',
    'kslt-rules.js?v=11&bylo=',
-   'версии подняты — иначе браузер отдаст старое из кеша']
+   'версии подняты — иначе браузер отдаст старое из кеша'],
+
+  /* ─── лестница категорий в посеве, 09.10 ─── */
+
+  /* ТО, ЧТО БЫЛО В КОДЕ ДО 09.10: дверь «Пережеребить» брала игроков без
+     категории, и ступень лестницы становилась нулём у всех. */
+  ['js/admin/sections/bracket.js',
+   ".select('id, name, name_en, points, category_id, ntrp_singles, ntrp_doubles').in('id', playerIds);",
+   ".select('id, name, name_en, points, ntrp_singles, ntrp_doubles').in('id', playerIds);",
+   'КАЖДАЯ дверь жеребьёвки берёт категорию игрока'],
+
+  /* Дверь перестала находиться вовсе — сторожить стало нечего. */
+  ['js/admin/sections/bracket.js',
+   ".select('id, name, name_en, points, category_id, gender, ntrp_singles, ntrp_doubles')",
+   ".select('id, imya, name_en, points, category_id, gender, ntrp_singles, ntrp_doubles')",
+   'ни одна выборка игроков с очками не ускользает от сторожа'],
+
+  /* Лестница снова своя, в коде, а не из базы — вторая копия понятия. */
+  ['js/admin/sections/bracket.js',
+   'return лестница[п.category_id] || 0;',
+   "return ({ promasters: 5, masters: 4, tour: 3 })[п.category_id] || 0;",
+   'ступень посева берётся из лестницы категорий, а не из своего порядка'],
+
+  /* Место в рейтинге снова перебивает категорию: ключи переставлены. */
+  ['js/admin/sections/bracket.js',
+   'var сA = ступень(a), сB = ступень(b);\n            if (сA !== сB) return сB - сA;   // выше по лестнице — раньше\n',
+   'var сA = ступень(a), сB = ступень(b);\n',
+   'ступень решает РАНЬШЕ места в рейтинге'],
+
 ];
 
 function прогон() {
