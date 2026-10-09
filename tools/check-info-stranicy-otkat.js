@@ -40,8 +40,8 @@ const ОТКАТЫ = [
         '.ip-about-text {\n    color: var(--text-secondary);\n    font-size: clamp(1rem, 2vw, 1.05rem);',
    'ни одного clamp для кегля во всём файле'],
 
-  [CSS, '.ip-hero-subtitle {\n    /* Подзаголовок обложки — та же крутилка, что у восьми соседних\n       разделов: 21 · 18 · 16. */\n    font-size: var(--fs-hero-sub);\n    color: var(--text-secondary);\n    max-width: 540px;\n    margin: 0 auto;\n    line-height: 1.65;',
-        '.ip-hero-subtitle {\n    /* Подзаголовок обложки — та же крутилка, что у восьми соседних\n       разделов: 21 · 18 · 16. */\n    font-size: var(--fs-hero-sub);\n    color: var(--text-secondary);\n    max-width: 540px;\n    margin: 0 auto;\n    line-height: 1.6;',
+  [CSS, '    max-width: 80ch;\n    margin: 0 auto;\n    line-height: 1.65;',
+        '    max-width: 80ch;\n    margin: 0 auto;\n    line-height: 1.6;',
    'межстрочные — только ступени лестницы'],
 
   [CSS, '    font-weight: 600;\n    line-height: 1.3;\n    text-align: left;',
@@ -78,6 +78,13 @@ const ОТКАТЫ = [
   [CSS, '    .ip-hero-subtitle {\n        line-height: 1.5;',
         '    .ip-hero-subtitle {\n        font-size: var(--fs-sm);\n        line-height: 1.5;',
    'кегль перебивки обложки объявлен в файле РОВНО ОДИН раз'],
+
+  /* 09.10, вечер: цвет ссылки в теле документа. */
+  ['pages/rules.html', '<span class="ip-draft-note-text">', '<span class="ip-draft-note-text" style="color: #CCFF00;">',
+   'цвет ссылки в теле документа задан правилом, а не инлайном'],
+
+  [CSS, '.ip-rules-list a,\n.ip-doc-lead a', '.ip-rules-list b,\n.ip-doc-lead a',
+   'у ссылки в теле документа есть свой цвет и подчёркивание'],
 
   ['pages/faq-kg.html', 'info-pages.css?v=', 'info-pages.css?v=11&bylo=',
    'версия стиля поднята и одинакова на всех восемнадцати страницах'],
