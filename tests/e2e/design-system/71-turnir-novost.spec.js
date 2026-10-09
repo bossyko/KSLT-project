@@ -38,8 +38,8 @@ test.describe('Вкладка «Новости» турнира', () => {
         await expect(page.locator('#adNewsCat')).toHaveCount(1);
         await expect(page.locator('#adNewsContent')).toHaveCount(1);
         await expect(page.locator('#adNewsPreview')).toHaveCount(1);
-        // Карточек десять от формы плюс одна своя — «Фото с турнира»
-        expect(await page.locator('.ad-form-card').count()).toBeGreaterThanOrEqual(11);
+        // Карточки все до одной — от формы раздела, своих у вкладки нет
+        expect(await page.locator('.ad-form-card').count()).toBeGreaterThanOrEqual(10);
     });
 
     test('старой копии полей не осталось ни одного', async ({ page }) => {
@@ -62,10 +62,15 @@ test.describe('Вкладка «Новости» турнира', () => {
         expect(текст).toMatch(/Призовые места/);
     });
 
-    test('«Фото с турнира» на месте и считает до десяти', async ({ page }) => {
-        await expect(page.locator('#adTrnPhotoGrid')).toHaveCount(1);
-        await expect(page.locator('#adTrnPhotoCount')).toHaveText('0');
-        await expect(page.locator('#adTrnPhotoInput')).toHaveCount(1);
+    test('ФОТО ЖИВЁТ В ОДНОМ МЕСТЕ: блока «Фото с турнира» больше нет', async ({ page }) => {
+        /* Он был вторым местом под фотографии, и на странице это давало
+           ДВЕ РАЗНЫЕ карусели — нижнюю и внутри текста. Снят по слову
+           Кости 09.10: замер базы показал, что из девяти статей с непустой
+           `gallery` ни одна не из турнира — блоком не пользовались ни разу */
+        await expect(page.locator('#adTrnPhotoGrid')).toHaveCount(0);
+        await expect(page.locator('#adTrnPhotoInput')).toHaveCount(0);
+        // Фото вставляются редактором — он на месте
+        await expect(page.locator('#adNewsContentImgInput')).toHaveCount(1);
     });
 
     test('«Рассылка в ТГ» есть и погашена, пока статья не опубликована', async ({ page }) => {

@@ -13951,10 +13951,10 @@
            Слово Кости 08.10: «перенести форму заполнения с новостей прямо
            в турниры во вкладку новости — завершил, залил, опубликовал, и
            оно оказалось в новостях».
-           Своего у вкладки осталось ровно три вещи, которых в разделе нет
-           и быть не должно: заготовка с победителями, «Фото с турнира» и
-           «Рассылка в ТГ». Всё остальное приезжает само, потому что оно
-           ОДНО. */
+           Своего у вкладки осталось ДВЕ вещи, которых в разделе нет и
+           быть не должно: заготовка с победителями и «Рассылка в ТГ».
+           Третьей было «Фото с турнира» — снято 09.10, см. ниже.
+           Всё остальное приезжает само, потому что оно ОДНО. */
         var статья = existing || {
             title: generated.title,
             title_en: generated.titleEn,
@@ -13966,11 +13966,9 @@
             content_en: generated.contentEn,
             content_kg: '',
             category: 'results',
-            slug: A.slugify(generated.title),
-            gallery: []
+            slug: A.slugify(generated.title)
         };
 
-        var галерея = (статья.gallery || []).slice();
         var отправлено = existing ? existing.results_notified_at : null;
         var опубликовано = existing ? existing.published_at : null;
 
@@ -13987,19 +13985,17 @@
             безШапки: true,
             tournamentId: tournament.id,
 
-            /* «Фото с турнира» — своё: в разделе галереи нет вовсе */
-            своиБлоки:
-                '<div class="ad-form-card">' +
-                    '<div class="ad-trn-photos-head">' +
-                        '<div class="ad-form-card-title">' + L.trnNewsPhotos +
-                            ' (<span id="adTrnPhotoCount">' + галерея.length + '</span>/10)</div>' +
-                        '<label class="ad-btn ad-btn-secondary ad-trn-photo-pick">' +
-                            '\uD83D\uDCF7 ' + L.trnNewsUploadPhotos +
-                            '<input type="file" id="adTrnPhotoInput" multiple accept="image/*" class="ad-trn-photo-file">' +
-                        '</label>' +
-                    '</div>' +
-                    '<div id="adTrnPhotoGrid" class="ad-trn-photo-grid"></div>' +
-                '</div>',
+            /* ФОТО ЖИВЁТ В ОДНОМ МЕСТЕ — В ТЕКСТЕ СТАТЬИ.
+               Блок «Фото с турнира» был вторым местом под фотографии: своя
+               галерея писала в `news.gallery`, а редактор — в сам текст, и
+               на странице это ДВЕ РАЗНЫЕ карусели (нижняя и внутри текста).
+               Снят по слову Кости 09.10, и замер базы его подтвердил: из
+               девяти статей с непустой `gallery` НИ ОДНА не из турнира —
+               блоком не воспользовались ни разу. Редактор формы умеет
+               вставлять фото сам, и этого довольно.
+               Тридцать шесть фотографий в девяти старых статьях остаются
+               в базе и показываются сайтом: их перенос в текст — отдельный
+               кусок, он трогает данные и идёт со слепком. */
 
             /* «Рассылка в ТГ» — тоже своё. Гаснет на `[disabled]`, а не
                вторым способом сказать то же (замер 04.10) */
@@ -14015,9 +14011,9 @@
                серверную отметку о рассылке, иначе функция вернёт 409
                «Already notified», и переслать будет нельзя */
             своиПоля: function(публикуем) {
-                var поля = { gallery: галерея };
-                if (публикуем) поля.results_notified_at = null;
-                return поля;
+                /* Обновили публикацию — снимаем серверную отметку о
+                   рассылке, иначе функция вернёт 409 «Already notified» */
+                return публикуем ? { results_notified_at: null } : {};
             },
 
             /* Сохранили — перечитываем статью и рисуем панель заново:
@@ -14031,24 +14027,6 @@
             },
 
             после: function(короб) {
-                нарисоватьФото();
-
-                var поле = document.getElementById('adTrnPhotoInput');
-                if (поле) поле.addEventListener('change', async function() {
-                    var файлы = Array.from(поле.files || []);
-                    var осталось = 10 - галерея.length;
-                    if (осталось <= 0) {
-                        A.showToast(isEn ? 'Max 10 photos' : 'Максимум 10 фото', 'error');
-                        return;
-                    }
-                    файлы = файлы.slice(0, осталось);
-                    for (var i = 0; i < файлы.length; i++) {
-                        var адрес = await A.uploadImage(файлы[i], 'news');
-                        if (адрес) { галерея.push(адрес); нарисоватьФото(); }
-                    }
-                    поле.value = '';
-                });
-
                 var кнТГ = document.getElementById('adTrnNewsTg');
                 if (кнТГ) кнТГ.addEventListener('click', function() {
                     if (!опубликовано) {
@@ -14092,32 +14070,6 @@
                     }, isEn ? 'Send' : 'Отправить');
                 });
 
-                function нарисоватьФото() {
-                    var сетка = document.getElementById('adTrnPhotoGrid');
-                    if (!сетка) return;
-                    var счёт = document.getElementById('adTrnPhotoCount');
-                    if (счёт) счёт.textContent = галерея.length;
-
-                    if (галерея.length === 0) {
-                        сетка.innerHTML = '<div class="ad-trn-photo-empty">' +
-                            (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
-                        return;
-                    }
-                    var плитки = '';
-                    галерея.forEach(function(адрес, i) {
-                        плитки += '<div class="ad-trn-photo-cell">' +
-                            '<img src="' + A.esc(адрес) + '" class="ad-trn-photo-img">' +
-                            '<button class="ad-trn-photo-remove" data-photo-idx="' + i + '">&times;</button>' +
-                        '</div>';
-                    });
-                    сетка.innerHTML = плитки;
-                    сетка.querySelectorAll('.ad-trn-photo-remove').forEach(function(кн) {
-                        кн.addEventListener('click', function() {
-                            галерея.splice(parseInt(кн.dataset.photoIdx), 1);
-                            нарисоватьФото();
-                        });
-                    });
-                }
             }
         });
     }

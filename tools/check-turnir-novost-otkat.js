@@ -27,17 +27,21 @@ const ОТКАТЫ = [
         `        A.renderNewsFormКопия(статья, {`,
    'вкладка зовёт ТУ ЖЕ форму, что раздел «Новости»'],
 
-  [BRK, `                    '<input type="file" id="adTrnPhotoInput" multiple accept="image/*" class="ad-trn-photo-file">' +`,
-        `                    '<input type="file" id="adTrnNewsTitle" multiple accept="image/*" class="ad-trn-photo-file">' +`,
+  [BRK, `            контейнер: 'adBrkNewsContent',`,
+        `            контейнер: 'adTrnNewsTitle',`,
    'своих полей `adTrnNews*` у вкладки не осталось'],
 
   [NJS, `    A.renderNewsForm = renderNewsForm;`,
         `    A.renderNewsForm = renderNewsForm; var adTrnNewsTg = 1;`,
    '«Рассылка в ТГ» осталась своей — её в разделе нет'],
 
-  [BRK, `                var поля = { gallery: галерея };`,
-        `                var поля = {};`,
-   '«Фото с турнира» осталось своим и дописывается в запись входом'],
+  [BRK, `            своиПоля: function(публикуем) {`,
+        `            своиПоля: function(публикуем) { var adTrnPhotoGrid = 1;`,
+   'ФОТО ЖИВЁТ В ОДНОМ МЕСТЕ — В ТЕКСТЕ СТАТЬИ'],
+
+  [BRK, `                return публикуем ? { results_notified_at: null } : {};`,
+        `                return {};`,
+   'вход по-прежнему дописывает своё поле при публикации'],
 
   [BRK, `            tournamentId: tournament.id,`,
         `            tournamentIdНеТот: tournament.id,`,
