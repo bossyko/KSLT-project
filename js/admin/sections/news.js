@@ -45,8 +45,6 @@
     var newsImageOriginalFile = null;
     var newsImageUrl = '';
     var newsImageOriginalUrl = '';   // афиша без обрезки — для шапки новости
-    var newsGalleryUrls = [];
-    var newsGalleryFiles = [];
     var newsContentImages = [];
     var newsContentImageFiles = [];
     var newsPollData = null;
@@ -589,8 +587,6 @@
         newsImageFile = null;
         newsImageUrl = (article && article.image) ? article.image : '';
         newsImageOriginalUrl = (article && article.image_original) ? article.image_original : '';
-        newsGalleryUrls = (article && article.gallery) ? article.gallery.slice() : [];
-        newsGalleryFiles = [];
         newsContentImages = (article && article.content_images) ? article.content_images.slice() : [];
         newsContentImageFiles = [];
         for (var ci = 0; ci < newsContentImages.length; ci++) newsContentImageFiles.push(null);
@@ -1704,9 +1700,10 @@
                 reactions_config: reactionsConfig
             };
 
-            /* Вход дописывает свои поля. У вкладки турнира это «Фото с
-               турнира» (`gallery`) и снятая отметка рассылки: форма о них
-               не знает и знать не должна, а запись в базу — одна */
+            /* Вход дописывает свои поля. У вкладки турнира это снятая
+               отметка рассылки: форма о ней не знает и знать не должна, а
+               запись в базу — одна. Блок «Фото с турнира» (`gallery`) здесь
+               стоял до 09.10 — снят, фото живёт в тексте статьи. */
             if (newsFormOpts.своиПоля) {
                 var своё = newsFormOpts.своиПоля(doPublish) || {};
                 Object.keys(своё).forEach(function(к) { data[к] = своё[к]; });

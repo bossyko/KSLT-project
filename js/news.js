@@ -103,7 +103,6 @@ function mapDbArticle(row) {
         category: row.category || 'announcement',
         categoryLabel: catLabels[row.category] || row.category,
         content: contentBlocks,
-        gallery: (row.gallery && Array.isArray(row.gallery)) ? row.gallery : [],
         content_images: (row.content_images && Array.isArray(row.content_images)) ? row.content_images : [],
         poll: row.poll || null,
         tags: [],
@@ -580,41 +579,16 @@ function renderContent(article) {
         cimgIdx++;
     }
 
-    // Галерея. Больше двух снимков выкладывать в столбик незачем — читатель
-    // прокручивает их вместо того, чтобы читать. Тогда показываем один крупно,
-    // остальные лентой под ним; по нажатию открывается просмотр во весь экран.
-    if (article.gallery && article.gallery.length) {
-        if (article.gallery.length > 2) {
-            html += '<div class="news-carousel news-animate">' +
-                '<div class="news-carousel-stage">' +
-                    '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
-                    /* КАДР — КНОПКА. Картинка фокус не берёт: окно нельзя было
-                       открыть с клавиатуры вовсе, а после закрытия фокус
-                       уходил в тело страницы, а не туда, откуда пришёл. */
-                    '<button type="button" class="news-carousel-kadr" aria-label="' + getLabels().viewerTitle + '">' +
-                        '<img class="news-carousel-main" src="' + esc(article.gallery[0]) + '" alt="" data-index="0">' +
-                    '</button>' +
-                    '<button class="news-carousel-nav news-carousel-next" aria-label="Следующее">&#8250;</button>' +
-                    '<div class="news-carousel-count">1 / ' + article.gallery.length + '</div>' +
-                '</div>' +
-                '<div class="news-carousel-thumbs">' +
-                    article.gallery.map(function(url, i) {
-                        return '<button class="news-carousel-thumb' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
-                            '<img src="' + esc(url) + '" alt="" loading="lazy">' +
-                        '</button>';
-                    }).join('') +
-                '</div>' +
-            '</div>';
-        } else {
-            html += '<div class="news-gallery news-animate">';
-            article.gallery.forEach(function(url) {
-                html += '<a href="' + esc(url) + '" class="news-gallery-item" data-lightbox>' +
-                    '<img src="' + esc(url) + '" alt="" loading="lazy">' +
-                '</a>';
-            });
-            html += '</div>';
-        }
-    }
+    /* НИЖНЕЙ ГАЛЕРЕИ БОЛЬШЕ НЕТ — ФОТО ЖИВЁТ В ТЕКСТЕ.
+       Снято 09.10. Фотография в статье жила в двух местах: блок «Фото с
+       турнира» писал в `news.gallery` и рисовался здесь, а редактор ставил
+       снимки в текст — ОДНО ПОНЯТИЕ, ДВА ПОВЕДЕНИЯ, и лента внизу жила по
+       своим правилам. Блок в админке снят, 36 снимков девяти статей
+       перенесены в текст (sql/схема/galereya-v-tekst-statyi.sql, проверено
+       чтением базы). Подряд идущие <figure> собирает в ленту
+       js/kslt-lenta.js — одно устройство на обе стороны.
+       В `news.gallery` больше не пишет никто: проверено, ни одного
+       `gallery:` в js/admin. */
 
     // Poll (from poll column)
     if (article.poll && article.poll.question && article.poll.options) {
@@ -638,8 +612,8 @@ function renderContent(article) {
     собратьСнимкиВГалерею(container);
     собратьПобедителей(container);
     открытьСКлавиатуры(container);
-    initCarousel(container, article.gallery || []);
-    initPhotoViewer(container, article.gallery || []);
+    initCarousel(container);
+    initPhotoViewer(container);
 }
 
 /* Значки места: золото, серебро, бронза, медаль, кубок. Строка победителя
@@ -750,7 +724,7 @@ function открытьСКлавиатуры(root) {
     });
 }
 
-function initCarousel(root, photos) {
+function initCarousel(root) {
     // Каруселей на странице может быть несколько: галерея новости и наборы
     // снимков внутри текста. Заводим каждую по её собственным адресам.
     Array.prototype.forEach.call(root.querySelectorAll('.news-carousel'), function(wrap) {
@@ -758,7 +732,7 @@ function initCarousel(root, photos) {
            адреса снимков) понимается по-прежнему — приводим её к общему виду. */
         var кадры = wrap.dataset.kadry ? JSON.parse(wrap.dataset.kadry) : null;
         if (!кадры) {
-            var адреса = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : (photos || []);
+            var адреса = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : [];
             кадры = адреса.map(function(а) { return { вид: 'фото', адрес: а }; });
         }
         завестиКарусель(wrap, кадры);
@@ -804,12 +778,12 @@ function завестиКарусель(wrap, кадры) {
  * ленту и ждёт, что пролистает её и на весь экран. Снимки из текста
  * листаются между собой.
  */
-function initPhotoViewer(root, gallery) {
-    var IN_TEXT = '.news-gallery-item[data-lightbox], .news-html figure img';
+function initPhotoViewer(root) {
+    /* СНИМОК В ТЕКСТЕ — ОДИН ВИД РАЗМЕТКИ. Ссылка-плитка
+       `.news-gallery-item` ушла вместе с нижней галереей 09.10. */
+    var IN_TEXT = '.news-html figure img';
 
-    function urlOf(el) {
-        return el.tagName === 'IMG' ? el.src : el.getAttribute('href');
-    }
+    function urlOf(el) { return el.src; }
 
     /* Enter и пробел делают то же, что нажатие: у кадра есть role="button",
        и клавиатура обязана вести себя как кнопка, а не как картинка. */
@@ -829,7 +803,7 @@ function initPhotoViewer(root, gallery) {
                           : e.target.closest('.news-carousel-main');
         if (main) {
             var wrap = main.closest('.news-carousel');
-            var свои = (wrap && wrap.dataset.photos) ? JSON.parse(wrap.dataset.photos) : gallery;
+            var свои = (wrap && wrap.dataset.photos) ? JSON.parse(wrap.dataset.photos) : null;
             if (свои && свои.length) {
                 e.preventDefault();
                 openPhotoViewer(свои, Number(main.dataset.index) || 0);

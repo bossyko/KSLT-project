@@ -347,37 +347,11 @@ h3.news-heading {
     background: var(--bg-card);
 }
 
-/* Gallery */
-.news-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    align-items: start;
-    gap: var(--space-3);
-    margin: var(--space-lg) 0;
-}
-/* КОРОБ ДЕРЖИТ ФОРМУ КАДРА, А НЕ ЛАНДШАФТ ПО ПРИВЫЧКЕ. Стояло 4:3 с
-   object-fit: cover, а все снимки с турниров — портрет 3:4: срезался верх и
-   низ, то есть лица. Коробки нет вовсе — её задаёт сам снимок. */
-.news-gallery-item {
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    display: block;
-}
-.news-gallery-item img {
-    width: 100%;
-    height: auto;
-    display: block;
-    transition: transform 0.3s ease;
-}
-.news-gallery-item:hover img {
-    transform: scale(1.05);
-}
-@media (max-width: 640px) {
-    .news-gallery {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-2);
-    }
-}
+/* НИЖНЕЙ ГАЛЕРЕИ БОЛЬШЕ НЕТ. Правила `.news-gallery*` снесены 09.10
+   вместе с блоком в js/news.js: разметку, на которую они стояли, не
+   выдаёт больше никто. МЁРТВЫМ КОД НАЗВАН ПОСЛЕ ПРОВЕРКИ — поиск по
+   проекту не нашёл ни одного места, где эти классы ставятся. Фото в
+   тексте показывает лента, её правила — `.news-carousel*`. */
 
 /* Quote */
 .news-quote {
@@ -1806,7 +1780,6 @@ body.news-article-page .section-sponsors-compact {
     }
 
     .news-hero-bg img,
-    .news-gallery-item:hover img,
     .news-carousel-track {
         transform: none;
         transition: none;
