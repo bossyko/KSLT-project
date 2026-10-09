@@ -130,8 +130,13 @@ const ОТКАТЫ = [
         `                    btnWrap.style.display = '';`,
    'полоса выбора гаснет по событию, а не по пересчёту DOM'],
 
-  [TJS, `reloadFn: loadTournamentsList });`,
-        `reloadFn: function() { loadTournamentsList(); } });`,
+  /* ЯКОРЬ ПЕРЕАИМЁН 09.10. Был `reloadFn: loadTournamentsList });` — одной
+     строкой, потому что у турниров полоса заводилась одним вызовом. С 09.10
+     у неё два крючка (предупреждение о начислениях и пересчёт очков), вызов
+     стал многострочным, и закрывающая скобка уехала. ЯКОРЬ ДЕРЖИТСЯ НА
+     СОДЕРЖИМОМ, А НЕ НА СОСЕДЕ, КОТОРЫЙ МОЖЕТ УЕХАТЬ — беру само поле. */
+  [TJS, `reloadFn: loadTournamentsList,`,
+        `reloadFn: function() { loadTournamentsList(); },`,
    'ни одна обёртка `reloadFn` не прячет промис'],
 
   [UJS, `            checkAll.indeterminate = count > 0 && count < total.length;`,
