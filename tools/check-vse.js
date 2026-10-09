@@ -71,7 +71,8 @@ const КУСКИ = [
        заведена. */
     ['жеребьёвка и сетки за места', 'check-draw.js', 'check-draw-otkat.js'],
     ['обзорная «Инфо»', 'check-info-obzor.js', 'check-info-obzor-otkat.js'],
-    ['страницы «Инфо»', 'check-info-stranicy.js', 'check-info-stranicy-otkat.js']
+    ['страницы «Инфо»', 'check-info-stranicy.js', 'check-info-stranicy-otkat.js'],
+    ['«Цены»', 'check-ceny.js', 'check-ceny-otkat.js']
 ];
 
 function прогнать(файл) {
