@@ -682,7 +682,9 @@
         hero += '</div>'; // .pp-photo-wrap
 
         hero += '<div class="pp-info">';
-        hero += '<h2 class="pp-name">' + player.name + '</h2>';
+        // ИМЯ ИГРОКА — ЗАГОЛОВОК ПЕРВОГО УРОВНЯ. Замер 09.10: h1 на странице
+        // ноль, иерархия начиналась с h2, и диктор не находил названия экрана
+        hero += '<h1 class="pp-name">' + player.name + '</h1>';
         // Карточка остаётся и после ухода человека: результаты и очки
         // принадлежат турнирам, где он играл. Но связи с учётной записью
         // больше нет — об этом и говорит метка
@@ -1410,9 +1412,14 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'h2h-overlay';
+        // ОКНО НАЗЫВАЕТ СЕБЯ ОКНОМ. Замер 09.10: ни role, ни aria-modal, и
+        // фокус оставался на body — с клавиатуры окно было невидимо вовсе
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', LH.title || 'Head to Head');
         overlay.innerHTML =
             '<div class="h2h-modal">' +
-                '<button class="h2h-close">&times;</button>' +
+                '<button class="h2h-close" aria-label="' + (LH.close || 'Закрыть') + '">&times;</button>' +
                 '<div class="h2h-loading">' + LH.loading + '</div>' +
             '</div>';
         document.body.appendChild(overlay);
@@ -1421,6 +1428,24 @@
         // Close handlers
         var closeBtn = overlay.querySelector('.h2h-close');
         closeBtn.addEventListener('click', function() { closeH2H(overlay); });
+
+        // ЛОВУШКА TAB И ВОЗВРАТ ФОКУСА — то же решение, что у смотрелки
+        // фотографий 08.10: пока окно открыто, клавиша не уводит за него, а
+        // при закрытии фокус возвращается туда, откуда окно позвали
+        var фокусДоОкна = document.activeElement;
+        closeBtn.focus();
+        var ловушка = function(e) {
+            if (e.key !== 'Tab') return;
+            var сп = overlay.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+            if (!сп.length) return;
+            var пер = сп[0], посл = сп[сп.length - 1];
+            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
+            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
+        };
+        overlay.addEventListener('keydown', ловушка);
+        overlay.addEventListener('h2h-closed', function() {
+            if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
+        });
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) closeH2H(overlay);
         });
@@ -1572,6 +1597,9 @@
 
     function closeH2H(overlay) {
         overlay.classList.remove('visible');
+        // Возврат фокуса слушает сам оверлей: закрыть окно можно тремя
+        // способами — кнопкой, фоном и Esc, — а вернуть фокус надо один раз
+        overlay.dispatchEvent(new CustomEvent('h2h-closed'));
         setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
     }
 

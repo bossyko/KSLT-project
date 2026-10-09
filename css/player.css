@@ -71,7 +71,11 @@
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid var(--accent);
+    /* ЛИЧНОСТЬ НЕ БЕРЁТ НИ ЦВЕТ СТАТУСА, НИ АКЦЕНТ — Avatar 29:82 говорит это
+       прямо. Было кольцо 4px лаймом: лайм принадлежит одному главному
+       действию на экране, а портрет не действие. Ступень 2xl 120 заведена в
+       компоненте 09.10 по слову Кости — число больше не местное. */
+    border: 3px solid rgba(255, 255, 255, 0.08);
 }
 
 .pp-online-dot {
@@ -97,7 +101,10 @@
 
 .pp-name {
     font-size: var(--fs-2xl);
-    font-weight: 800;
+    /* 800 в системе весов нет: 400 · 500 · 600 · 700. И межстрочный заголовка
+       — ступень 1.1, а не общие 1.5: 32 x 1.5 давало строку в 48 */
+    font-weight: 700;
+    line-height: 1.1;
     letter-spacing: -0.02em;
     margin-bottom: 4px;
 }
@@ -259,7 +266,9 @@
    сходятся с историей» возникает там же, где эти цифры видны */
 .pp-stats-note {
     margin: 0 0 28px;
-    color: var(--text-dim);
+    /* --text-dim даёт 3.19 при норме AA 4.5 — решение Кости 06.10 убирает
+       его из текста; тихих уровней три, и самый тихий из них --text-muted */
+    color: var(--text-muted);
     font-size: var(--fs-sm);
 }
 
@@ -269,16 +278,21 @@
 }
 
 .pp-stat-num {
-    font-size: var(--fs-md);
-    font-weight: 800;
+    /* Stat tile 39:57 просит 32 Bold. Костя посмотрел на макете и сказал
+       мельче — ступень 21, вес из системы. ГЛАЗ ГЛАВНЕЕ КОМПОНЕНТА, и
+       отклонение записано на доске 722:12, а не спрятано */
+    font-size: var(--fs-lg);
+    font-weight: 700;
     color: var(--accent);
     line-height: 1.1;
     margin-bottom: 1px;
 }
 
 .pp-stat-label {
-    color: var(--text-dim);
-    font-size: var(--fs-2xs);
+    /* Было --text-dim: контраст 3.14 при норме AA 4.5 — решение 06.10 убирает
+       его из текста. Stat tile 39:57: подпись 12 капсом */
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -320,7 +334,7 @@
 }
 .pp-pair-note {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 .pp-pair-tag {
     font-size: var(--fs-2xs);
@@ -391,6 +405,8 @@
 .pp-section-title {
     font-size: var(--fs-lg);
     font-weight: 700;
+    /* Лестница 86:10: заголовку 1.1–1.3, а не общие 1.5 */
+    line-height: 1.3;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border-subtle);
@@ -438,6 +454,11 @@
     padding: 4px 10px;
     border-radius: var(--radius-full);
     cursor: pointer;
+    /* ЦЕЛЬ НАЖАТИЯ 44 ПРОЗРАЧНЫМ СЛОЕМ, решение 04.10: красится ступень,
+       нажимается палец. Замер 09.10: кнопка была 47 x 23, и таких на
+       странице десять. Цвет не трогаю — лайм на карточке даёт 16:1,
+       моя первая запись про 1.18 была ошибкой прибора */
+    position: relative;
     transition: all var(--transition-fast);
     white-space: nowrap;
 }
@@ -1067,9 +1088,9 @@ a.pp-tournament:hover {
     .pp-stat {
         padding: 2px 0;
     }
-    .pp-stat-num {
-        font-size: var(--fs-base);
-    }
+    /* ОДИН УРОВЕНЬ — ОДИН КЕГЛЬ НА ВСЕ ВИДЫ: было 16 на 480 и 18 на 375 при
+       21 на широких, то есть три значения на один уровень. Замер 09.10:
+       четыре цифры при 21 помещаются в ряд даже на 390 */
     .pp-actions {
         flex-direction: column;
         width: 100%;
@@ -1090,9 +1111,6 @@ a.pp-tournament:hover {
     }
     .pp-name {
         font-size: var(--fs-lg);
-    }
-    .pp-stat-num {
-        font-size: var(--fs-md);
     }
     .pp-cta {
         padding: 28px 16px;
@@ -1170,6 +1188,7 @@ a.pp-tournament:hover {
 }
 
 /* Close button */
+/* Icon button 40:93: под палец годится только lg 44. Было 36 */
 .h2h-close {
     position: absolute;
     top: 14px;
@@ -1563,7 +1582,8 @@ a.pp-tournament:hover {
 .pp-chal-textarea {
     resize: none;
     height: 118px;
-    line-height: 1.45;
+    /* ступень лестницы, было 1.45 */
+    line-height: 1.5;
     /* Не «прятать лишнее»: при неудачном наборе слов последняя строка
        уходила бы под край молча. Высоты хватает на все 150 символов,
        а если текст всё же не влез — лучше полоса, чем пропажа */
@@ -1908,6 +1928,16 @@ a.pp-tournament:hover {
    Плавает у левого края под шапкой: виден и поверх баннера, и когда баннер
    уже прокручен. В потоке он уезжал вместе с баннером, а прилипание не
    помогает — оно действует только в пределах родителя. */
+/* ОБЩИЙ КОМПОНЕНТ ПРИНОСИТ ВТОРУЮ ПОДЛОЖКУ, И ОНА ЗАКРАШИВАЕТ ИМЯ.
+   .kslt-back-wrap::before (css/style.css:8713) рисует полосу ВО ВСЮ ШИРИНУ
+   окна сплошным --bg-primary. Здесь у ссылки есть своя таблетка, и пока
+   она fixed, широкая подложка едет вместе с окном поверх шапки.
+   Общее правило не трогаю: его зовут шесть мест и держат пять файлов
+   заморозки — гашу подложку только на этой странице. */
+.kslt-back-wrap.pp-back-float::before {
+    content: none;
+}
+
 .kslt-back-wrap.pp-back-float {
     position: fixed;
     top: 76px;
@@ -1995,7 +2025,8 @@ a.pp-tournament:hover {
     background: var(--surface-glass);
     color: var(--text-muted);
     font-size: var(--fs-sm);
-    line-height: 1.4;
+    /* ступень лестницы, было 1.4 */
+    line-height: 1.5;
     max-width: 340px;
 }
 
@@ -2022,8 +2053,9 @@ a.pp-tournament:hover {
     }
 
     .pp-tournament-name {
+        /* ступень лестницы, было 1.25 */
         font-size: var(--fs-sm);
-        line-height: 1.25;
+        line-height: 1.3;
         white-space: normal;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -2105,20 +2137,38 @@ a.pp-tournament:hover {
 }
 
 /* ============================================
-   ШАПКА ИГРОКА: ЗНАЧЕНИЯ В ОДНУ КОЛОНКУ
+   ШАПКА ИГРОКА: ЗНАЧЕНИЯ В ОДНУ КОЛОНКУ ПОД ФЛАГОМ
    ============================================ */
 
-/* «MASTERS 660 · #5» и «NTRP 4 одиночка» шли каждая своей строкой по
-   центру, и значения начинались на разной вертикали — 660 правее, чем
-   «4 одиночка». Собираем в сетку из двух колонок: слева метки, справа
-   значения, и цифры встают друг под другом. */
+/* «MASTERS 660 · #5» и «NTRP 4 одиночка» шли каждая своей строкой, и
+   значения начинались на разной вертикали. Собираем в сетку из двух
+   колонок: слева метки, справа значения, цифры встают друг под другом.
+
+   09.10, СЛОВО КОСТИ И ТО ЖЕ РЕШЕНИЕ У ATP, WTA И ITF: колонка стоит ПОД
+   ФЛАГОМ, одной левой кромкой с именем и страной. Было justify-content:
+   center и метки по правому краю — замер дал 253 px пустоты между флагом и
+   метками, и глаз прыгал через середину.
+
+   ОДНО ОПРЕДЕЛЕНИЕ: раньше .pp-ratings объявлялся в файле ДВАЖДЫ — на :124
+   колонкой флекса и здесь сеткой. Выигрывало второе, первое молчало. */
 
 .pp-ratings {
     display: grid;
     grid-template-columns: auto auto;
-    justify-content: center;
+    justify-content: start;
     align-items: baseline;
-    gap: 4px 10px;
+    gap: 4px 12px;
+    margin-bottom: 12px;
+}
+
+/* На узких видах шапка центрируется целиком — значит и колонка едет в
+   центр ЦЕЛИКОМ, а не растягивается на всю ширину: внутри неё метки и
+   значения остаются на одной левой кромке. Замер 09.10 до правки: на 768
+   флаг стоял на 319, а колонка начиналась на 124. */
+@media (max-width: 992px) {
+    .pp-ratings {
+        justify-content: center;
+    }
 }
 
 /* Строка растворяется в сетке, её метка и значение становятся ячейками */
@@ -2127,8 +2177,8 @@ a.pp-tournament:hover {
 }
 
 .pp-rating-label {
-    justify-self: end;
-    text-align: right;
+    justify-self: start;
+    text-align: left;
 }
 
 .pp-rating-value {
@@ -2199,5 +2249,70 @@ a.pp-tournament:hover {
 
     .pp-container {
         padding-bottom: 24px;
+    }
+}
+
+
+/* ============================================
+   ЦЕЛИ НАЖАТИЯ, ФОКУС И ДВИЖЕНИЕ — 09.10
+   ============================================ */
+
+/* ЗАМЕР 09.10: 44 нажимаемых места в main, 25 из них ниже цели 44 — ссылки
+   на турниры и игроков голой высотой 18, кнопка H2H 47 x 23, ссылка
+   «назад» 139 x 21, раскрывашка значков 43. Красится ступень, нажимается
+   палец: слой не знает высоты элемента и не меняет вид. */
+.pp-match-h2h::after,
+.kslt-back-wrap.pp-back-float .kslt-back::after,
+.pp-badges-expand::after,
+.pp-tournament-link::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    min-height: 44px;
+    transform: translateY(-50%);
+}
+
+.kslt-back-wrap.pp-back-float .kslt-back,
+.pp-badges-expand {
+    position: relative;
+}
+
+/* ФОКУС С КЛАВИАТУРЫ: было НОЛЬ правил на 352 при 27 :hover — страницу
+   нельзя было пройти клавишей, не теряя место. Кольцо то же, что у
+   Button 17:82. */
+.pp-match-h2h:focus-visible,
+.pp-subsection-toggle:focus-visible,
+.pp-badges-expand:focus-visible,
+.pp-tournament:focus-visible,
+.h2h-close:focus-visible,
+.h2h-profile-btn:focus-visible,
+.kslt-back-wrap.pp-back-float .kslt-back:focus-visible,
+.pp-action-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* ДВИЖЕНИЕ СПРАШИВАЕТ СИСТЕМНУЮ НАСТРОЙКУ: было 28 правил с анимацией и
+   переходами и ноль упоминаний настройки. Пульсация точки «в сети» и
+   увеличение кнопки по наведению — ровно то, от чего эта настройка
+   защищает. */
+@media (prefers-reduced-motion: reduce) {
+    .pp-online-dot {
+        animation: none;
+    }
+
+    .pp-match-h2h:hover,
+    .pp-tournament:hover {
+        transform: none;
+    }
+
+    .h2h-overlay,
+    .h2h-modal,
+    .pp-fade-in {
+        transition: none;
+        animation: none;
     }
 }
