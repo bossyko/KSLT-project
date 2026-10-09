@@ -308,6 +308,7 @@
    способа. Здесь accent #CCFF00 — 16.85:1, подчёркивание остаётся
    признаком ссылки, а не цвет в одиночку. */
 .ip-rules-list a,
+.ip-rules-section p a,
 .ip-doc-lead a,
 .ip-draft-note-text a,
 .ip-about-text a,
@@ -318,6 +319,7 @@
 }
 
 .ip-rules-list a:hover,
+.ip-rules-section p a:hover,
 .ip-doc-lead a:hover,
 .ip-draft-note-text a:hover,
 .ip-about-text a:hover,

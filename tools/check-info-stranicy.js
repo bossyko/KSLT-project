@@ -164,8 +164,8 @@ const ФОКУСНЫЕ = ['.ip-faq-question:focus-visible', '.ip-cta-btn:focus-v
     'в разметку вернулся инлайновый цвет — починить его из файла стилей нельзя вовсе, и он переживёт любую правку темы');
 
 правило('у ссылки в теле документа есть свой цвет и подчёркивание',
-    /\.ip-rules-list a[\s\S]{0,200}color:\s*var\(--accent\)/.test(CSSч) &&
-    /\.ip-rules-list a[\s\S]{0,200}text-decoration:\s*underline/.test(CSSч),
+    /\.ip-rules-section p a[\s\S]{0,200}color:\s*var\(--accent\)/.test(CSSч) &&
+    /\.ip-rules-section p a[\s\S]{0,200}text-decoration:\s*underline/.test(CSSч),
     'ссылка в теле документа осталась без цвета — браузер покрасит её синим #0000EE, это 2.11:1 на нашем фоне');
 
 /* ─────────── ВЕРСИИ ─────────── */

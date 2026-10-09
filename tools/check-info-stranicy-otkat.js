@@ -83,7 +83,7 @@ const ОТКАТЫ = [
   ['pages/rules.html', '<span class="ip-draft-note-text">', '<span class="ip-draft-note-text" style="color: #CCFF00;">',
    'цвет ссылки в теле документа задан правилом, а не инлайном'],
 
-  [CSS, '.ip-rules-list a,\n.ip-doc-lead a', '.ip-rules-list b,\n.ip-doc-lead a',
+  [CSS, '.ip-rules-list a,\n.ip-rules-section p a,', '.ip-rules-list b,\n.ip-rules-section p b,',
    'у ссылки в теле документа есть свой цвет и подчёркивание'],
 
   ['pages/faq-kg.html', 'info-pages.css?v=', 'info-pages.css?v=11&bylo=',
