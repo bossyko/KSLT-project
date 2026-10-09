@@ -1,11 +1,34 @@
--- ОСТОРОЖНО: 08.10 ЭТОТ ФАЙЛ В БАЗУ ЕЩЁ НЕ ПОПАДАЛ, И ПРОСТО ТАК ЕГО
--- ГОНЯТЬ НЕЛЬЗЯ. Живая `get_battle_votes` возвращает
--- `(side smallint, player_id text, votes bigint)` — проверено чтением
--- pg_proc 08.10. Этот файл заменит её на `(side, votes)`, БЕЗ `player_id`,
--- а на `player_id` смотрит админка: js/admin/sections/challenges.js:392
--- (`vm[v.player_id]`). Прогнать — и в «Вызовах» у всех станут нули.
--- Сначала перевести админку на `side`, и только потом этот файл.
+-- КОД ЭТОТ ФАЙЛ БОЛЬШЕ НЕ ДЕРЖИТ — НО ОН УДАЛЯЕТ СТОЛБЕЦ, И ЭТО НАВСЕГДА.
 --
+-- ЧТО БЫЛО. 09.10 файл гонять было нельзя: он меняет форму
+-- `get_battle_votes` на `(side, votes)`, БЕЗ `player_id`, а по `player_id`
+-- читали два места — js/admin/sections/challenges.js (голоса во «Вызовах»)
+-- и js/challenge-detail.js (точность прогноза). Оба переведены на сторону
+-- 09.10, и теперь в проекте НИ ОДНОГО читателя по игроку: заморожено
+-- правилами в tools/check-golosa-storony.js, прувер 4 из 4. Столбца
+-- `predicted_winner_id` в коде нет вовсе — тоже под правилом.
+--
+-- ЧТО ОСТАЛОСЬ. Шаг 2 делает `DROP COLUMN predicted_winner_id` —
+-- НЕВОЗВРАТНО. Поэтому ниже добавлен ШАГ 0: слепок. Урок 01.10 стоил 58
+-- счетов, которые восстановить было нечем.
+--
+-- ПОРЯДОК: шаг 0, шаг 1, и только если шаг 1 показал ноль — шаги 2, 3, 4.
+-- Каждый отдельным прогоном. Решение о прогоне — за Костей.
+--
+
+-- ---- 0. СЛЕПОК. Копия того, что столбец унесёт с собой ------------------
+CREATE TABLE IF NOT EXISTS public.slepok_predictions_winner_0810 AS
+SELECT id, challenge_id, predicted_winner_id, predicted_side, now() AS snyato
+  FROM public.challenge_predictions;
+
+SELECT count(*)                                            AS golosov,
+       count(predicted_winner_id)                          AS s_igrokom,
+       count(*) FILTER (WHERE predicted_side IS NULL)       AS bez_storony
+  FROM public.slepok_predictions_winner_0810;
+
+-- `bez_storony` обязан быть НОЛЬ. Иначе шаг 2 поставит NOT NULL и упадёт,
+-- а голоса без стороны останутся без игрока И без стороны.
+
 -- ============================================
 -- Уборка после перехода голосования на стороны
 -- ============================================
