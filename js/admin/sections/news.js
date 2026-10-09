@@ -32,6 +32,14 @@
     var ПРЕДЕЛ_ОПИСАНИЯ = 240;
 
     var newsEditingId = null;
+    /* ОДНА ФОРМА — ДВА ВХОДА. Раздел «Новости» и вкладка «Новости» турнира
+       рисуют ОДНУ И ТУ ЖЕ форму: до 08.10 во вкладке жила её обеднённая
+       копия — голая `textarea` вместо редактора, без обложки, без предела
+       подзаголовка, со своими именами полей `adTrnNews*`. Два компонента на
+       одно понятие расходятся не сразу, а на второй правке, и разошлись.
+       Теперь форма одна, а вход в неё описывается опциями: куда рисовать,
+       куда возвращаться, что дорисовать своего. */
+    var newsFormOpts = {};
     var newsEditingPublishedAt = null;
     var newsImageFile = null;
     var newsImageOriginalFile = null;
@@ -555,8 +563,25 @@
     }
 
     // ---- News Form ----
-    function renderNewsForm(article) {
-        var container = document.getElementById('ad-content');
+    /**
+     * Форма статьи. Одна на раздел «Новости» и на вкладку турнира.
+     *
+     * @param {Object|null} article — статья или null для новой
+     * @param {Object} [опции]
+     *   @param {string}   опции.контейнер — id короба, куда рисовать
+     *   @param {boolean}  опции.безШапки — не рисовать заголовок и «Назад»
+     *   @param {Function} опции.назад — чем заменить уход к списку
+     *   @param {Function} опции.послеСохранения — после удачной записи
+     *   @param {Function} опции.послеУдаления — после удаления
+     *   @param {string}   опции.своиБлоки — HTML перед кнопками
+     *   @param {string}   опции.своиКнопки — HTML в ряду кнопок
+     *   @param {Function} опции.после — позвать по готовой форме
+     *   @param {string}   опции.tournamentId — чей турнир, если статья его
+     */
+    function renderNewsForm(article, опции) {
+        var О = опции || {};
+        newsFormOpts = О;
+        var container = document.getElementById(О.контейнер || 'ad-content');
         if (!container) return;
 
         newsEditingId = article ? article.id : null;
@@ -585,10 +610,11 @@
         var hasImageClass = newsImageUrl ? ' has-image' : '';
 
         container.innerHTML =
-            '<div class="ad-section-header">' +
-                '<h2 class="ad-section-title">' + title + '</h2>' +
-                '<button class="ad-btn ad-btn-secondary" id="adNewsBack">' + L.back + '</button>' +
-            '</div>' +
+            (О.безШапки ? '' :
+                '<div class="ad-section-header">' +
+                    '<h2 class="ad-section-title">' + title + '</h2>' +
+                    '<button class="ad-btn ad-btn-secondary" id="adNewsBack">' + L.back + '</button>' +
+                '</div>') +
 
             /* ПОРЯДОК БЛОКОВ = ПОРЯДОК СТРАНИЦЫ. Было: обложка, строка меты,
                цифры, заголовок, подзаголовок, текст, предпросмотр, и только
@@ -794,11 +820,15 @@
                 '<div id="adNewsPollStats"></div>' +
             '</div>' +
 
+            // Свои блоки входа — «Фото с турнира» у вкладки турнира
+            (О.своиБлоки || '') +
+
             // Actions
             '<div class="ad-btn-row">' +
                 '<button class="ad-btn ad-btn-secondary" id="adNewsSave">' + L.save + '</button>' +
                 '<button class="ad-btn ad-btn-primary" id="adNewsPublish">' + (newsEditingPublishedAt ? L.update : L.publish) + '</button>' +
-                (newsEditingId ? '<button class="ad-btn ad-btn-danger" id="adNewsDelete">' + L.delete + '</button>' : '') +
+                (newsEditingId && !О.безУдаления ? '<button class="ad-btn ad-btn-danger" id="adNewsDelete">' + L.delete + '</button>' : '') +
+                (О.своиКнопки || '') +
                 '<span class="ad-draft-status" id="adDraftStatus">' + (function() {
                     if (!article) return '';
                     var ts = article.updated_at || article.published_at || article.created_at;
@@ -815,16 +845,21 @@
         // --- Event Listeners ---
 
         // Back (with unsaved changes protection)
-        document.getElementById('adNewsBack').addEventListener('click', function() {
+        /* Уход к списку — свойство ВХОДА, а не формы: из раздела это
+           «назад к новостям», из турнира — «назад к списку турниров» */
+        var кСписку = О.назад || function() {
+            A.setAdminHash('content');
+            renderNewsList();
+        };
+        var кнопкаНазад = document.getElementById('adNewsBack');
+        if (кнопкаНазад) кнопкаНазад.addEventListener('click', function() {
             if (newsDraftDirty) {
                 A.showConfirm(L.unsavedChanges, L.unsavedChangesText, function() {
                     newsDraftDirty = false;
-                    A.setAdminHash('content');
-                    renderNewsList();
+                    кСписку();
                 }, L.unsavedLeaveBtn);
             } else {
-                A.setAdminHash('content');
-                renderNewsList();
+                кСписку();
             }
         });
 
@@ -1299,6 +1334,10 @@
             clearTimeout(autosaveTimer);
             autosaveTimer = setTimeout(autosaveDraft, 3000);
         });
+
+        /* Вход довешивает своё — обработчики «Фото с турнира» и «Рассылки
+           в ТГ». Зовётся ПОСЛЕ всех своих: форма уже целиком на экране */
+        if (О.после) О.после(container);
     }
 
     /* ДВА ПРЕДСТАВЛЕНИЯ ОДНОЙ ОБЛОЖКИ РЯДОМ. Механизм взят у афиши турнира
@@ -1656,11 +1695,22 @@
                 content_images: contentImagesFinal,
                 poll: pollFinal,
                 category: document.getElementById('adNewsCat').value,
+                /* Статья, заведённая из турнира, помнит свой турнир. Связь
+                   `news.tournament_id` в схеме есть с рождения */
+                tournament_id: newsFormOpts.tournamentId || null,
                 author: document.getElementById('adNewsAuthor').value.trim(),
                 executor: document.getElementById('adNewsExecutor').value.trim(),
                 published_at: publishedAt,
                 reactions_config: reactionsConfig
             };
+
+            /* Вход дописывает свои поля. У вкладки турнира это «Фото с
+               турнира» (`gallery`) и снятая отметка рассылки: форма о них
+               не знает и знать не должна, а запись в базу — одна */
+            if (newsFormOpts.своиПоля) {
+                var своё = newsFormOpts.своиПоля(doPublish) || {};
+                Object.keys(своё).forEach(function(к) { data[к] = своё[к]; });
+            }
 
             if (!data.title) {
                 A.showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
@@ -1732,7 +1782,8 @@
             // Опубликовали — работа со статьёй закончена, показываем список.
             // При промежуточном сохранении остаёмся в форме: статью пишут
             // долго и сохраняются по ходу, уводить оттуда нельзя
-            if (doPublish) renderNewsList();
+            if (newsFormOpts.послеСохранения) newsFormOpts.послеСохранения(doPublish);
+            else if (doPublish) renderNewsList();
         } catch (e) {
             A.showToast(e.message || 'Error', 'error');
             activeBtn.disabled = false;
@@ -1749,13 +1800,16 @@
             return;
         }
         A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
-        renderNewsList();
+        if (newsFormOpts.послеУдаления) newsFormOpts.послеУдаления();
+        else renderNewsList();
     }
 
 
     // ---- Export to namespace ----
     A.renderNewsSection = renderNewsSection;
     A.renderNewsList = renderNewsList;
+    /* Форму зовёт и вкладка турнира — одно определение на одно понятие */
+    A.renderNewsForm = renderNewsForm;
     A.loadAndEditNews = loadAndEditNews;
 
 })();

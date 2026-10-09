@@ -13858,7 +13858,7 @@
                 var plLines = [];
                 var medals = ['🥇', '🥈', '🥉'];
                 for (var i = 0; i < Math.min(3, plResults.length); i++) {
-                    plLines.push(medals[i] + ' ' + fullName(plResults[i].player_id, lang) + ' — ' + (plResults[i].points_earned || 0) + (lang === 'en' ? ' pts' : ' очков'));
+                    plLines.push(medals[i] + ' ' + fullName(plResults[i].player_id, lang));
                 }
                 lines.push(plLines.join('\n'));
 
@@ -13867,7 +13867,7 @@
                     lines.push(lang === 'en' ? 'Consolation League' : 'Утешительная лига');
                     var clLines = [];
                     for (var j = 0; j < Math.min(3, clResults.length); j++) {
-                        clLines.push(medals[j] + ' ' + fullName(clResults[j].player_id, lang) + ' — ' + (clResults[j].points_earned || 0) + (lang === 'en' ? ' pts' : ' очков'));
+                        clLines.push(medals[j] + ' ' + fullName(clResults[j].player_id, lang));
                     }
                     lines.push(clLines.join('\n'));
                 }
@@ -13877,14 +13877,18 @@
                 var stdMedals = ['🥇', '🥈', '🥉'];
                 var stdLines = [];
                 for (var k = 0; k < Math.min(3, sortedResults.length); k++) {
-                    stdLines.push(stdMedals[k] + ' ' + fullName(sortedResults[k].player_id, lang) + ' — ' + (sortedResults[k].points_earned || 0) + (lang === 'en' ? ' pts' : ' очков'));
+                    stdLines.push(stdMedals[k] + ' ' + fullName(sortedResults[k].player_id, lang));
                 }
                 lines.push(stdLines.join('\n'));
             }
 
+            /* ОЧКИ УШЛИ ИЗ ТЕКСТА СТАТЬИ — слово Кости 08.10. Рейтинга
+               это не касается вовсе: генератор только ЧИТАЛ `points_earned`,
+               чтобы сложить строку. Начисления, `rating_history` и
+               `player_categories` он не трогал и не трогает. */
             var outro = lang === 'en'
-                ? 'A total of ' + totalPoints + ' rating points were distributed. Thank you to all participants for a great game!'
-                : 'Всего распределено ' + totalPoints + ' рейтинговых очков. Благодарим всех участников за отличную игру!';
+                ? 'Thank you to all participants for a great game!'
+                : 'Благодарим всех участников за отличную игру!';
             lines.push(outro);
 
             return lines.join('\n\n');
@@ -13923,463 +13927,208 @@
 
         // Render the panel
         renderNewsPanel(container, tournament, existing, generated);
+
+        /* ПЕРЕРИСОВКА ПЕРЕЧИТЫВАЕТ СТАТЬЮ, А НЕ ВОССТАНАВЛИВАЕТ ПО ПАМЯТИ.
+           Состояние кнопки рассылки сторожили двумя снимками формы в
+           переменных: что опубликовано и что ушло в ТГ. Снимок — это
+           память, а память расходится с базой. Теперь после сохранения,
+           удаления и рассылки панель собирается заново от свежих данных:
+           СТОРОЖ, А НЕ ПАМЯТЬ. */
+        initNewsPanel.перерисовать = function() {
+            initNewsPanel(tournament, results, playersMap, matches, registrations, isDbl);
+        };
     }
 
     /**
      * Render the News panel UI.
      */
     function renderNewsPanel(container, tournament, existing, generated) {
-        // State from existing article or generated template
-        var title = existing ? existing.title : generated.title;
-        var titleEn = existing ? (existing.title_en || '') : generated.titleEn;
-        var titleKg = existing ? (existing.title_kg || '') : '';
-        var excerpt = existing ? (existing.excerpt || '') : generated.excerpt;
-        var excerptEn = existing ? (existing.excerpt_en || '') : generated.excerptEn;
-        var excerptKg = existing ? (existing.excerpt_kg || '') : '';
-        var content = existing ? (existing.content || '') : generated.content;
-        var contentEn = existing ? (existing.content_en || '') : generated.contentEn;
-        var contentKg = existing ? (existing.content_kg || '') : '';
-        var galleryUrls = existing && existing.gallery ? existing.gallery.slice() : [];
-        var newsId = existing ? existing.id : null;
-        var publishedAt = existing ? existing.published_at : null;
-        var tgSentAt = existing ? existing.results_notified_at : null;
-        var slug = existing ? existing.slug : A.slugify(generated.title);
+        /* ВКЛАДКА ЗОВЁТ ТУ ЖЕ ФОРМУ, ЧТО И РАЗДЕЛ «НОВОСТИ».
+           До 08.10 здесь жила её обеднённая копия: голая `textarea` вместо
+           редактора, ни обложки, ни предела подзаголовка, ни предпросмотра,
+           и свои имена полей `adTrnNews*`. Два компонента на одно понятие
+           расходятся не сразу, а на второй правке — и разошлись.
+           Слово Кости 08.10: «перенести форму заполнения с новостей прямо
+           в турниры во вкладку новости — завершил, залил, опубликовал, и
+           оно оказалось в новостях».
+           Своего у вкладки осталось ровно три вещи, которых в разделе нет
+           и быть не должно: заготовка с победителями, «Фото с турнира» и
+           «Рассылка в ТГ». Всё остальное приезжает само, потому что оно
+           ОДНО. */
+        var статья = existing || {
+            title: generated.title,
+            title_en: generated.titleEn,
+            title_kg: '',
+            excerpt: generated.excerpt,
+            excerpt_en: generated.excerptEn,
+            excerpt_kg: '',
+            content: generated.content,
+            content_en: generated.contentEn,
+            content_kg: '',
+            category: 'results',
+            slug: A.slugify(generated.title),
+            gallery: []
+        };
 
-        // Status label
-        var statusHtml = '';
-        if (tgSentAt) {
-            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--sent">✅ ' + L.trnNewsTgSent + '</span>';
-        } else if (publishedAt) {
-            var d = new Date(publishedAt);
-            var dateStr = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
-            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--pub">📰 ' + L.trnNewsPublished + ' ' + dateStr + '</span>';
-        } else if (existing) {
-            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--draft">📝 ' + L.trnNewsDraft + '</span>';
-        } else {
-            statusHtml = '<span class="ad-trn-news-status ad-trn-news-status--gen">✨ ' + L.trnNewsGenerated + '</span>';
-        }
+        var галерея = (статья.gallery || []).slice();
+        var отправлено = existing ? existing.results_notified_at : null;
+        var опубликовано = existing ? existing.published_at : null;
 
-        var html = '<div class="ad-trn-news-head">' +
-            '<h3 class="ad-trn-news-title">📰 ' + L.trnTabNews + '</h3>' +
-            '<div id="adNewsStatus">' + statusHtml + '</div>' +
-        '</div>';
-
-        // Title card with lang tabs
-        html += '<div class="ad-form-card">' +
-            '<div class="ad-form-card-title">' + L.trnNewsTitle + '</div>' +
-            '<div class="ad-lang-tabs" id="adTrnNewsTitleTabs">' +
-                '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
-            '</div>' +
-            '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                '<div class="ad-field"><input type="text" class="ad-field-input" id="adTrnNewsTitle" placeholder="' + L.trnNewsTitle + ' (RU)" value="' + A.esc(title) + '"></div>' +
-            '</div>' +
-            '<div class="ad-lang-panel" data-lang-panel="en">' +
-                '<div class="ad-field"><input type="text" class="ad-field-input" id="adTrnNewsTitleEn" placeholder="' + L.trnNewsTitle + ' (EN)" value="' + A.esc(titleEn) + '"></div>' +
-            '</div>' +
-            '<div class="ad-lang-panel" data-lang-panel="kg">' +
-                '<div class="ad-field"><input type="text" class="ad-field-input" id="adTrnNewsTitleKg" placeholder="' + L.trnNewsTitle + ' (KG)" value="' + A.esc(titleKg) + '"></div>' +
-            '</div>' +
-            '<button type="button" class="ad-btn-translate-all" data-ru="adTrnNewsTitle" data-en="adTrnNewsTitleEn" data-kg="adTrnNewsTitleKg">&#127760; ' + L.translateAllBtn + '</button>' +
-        '</div>';
-
-        // Content card with lang tabs
-        html += '<div class="ad-form-card">' +
-            '<div class="ad-form-card-title">' + L.trnNewsContent + '</div>' +
-            '<div class="ad-lang-tabs" id="adTrnNewsContentTabs">' +
-                '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
-            '</div>' +
-            '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                '<div class="ad-field"><textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adTrnNewsContent" placeholder="' + L.trnNewsContent + ' (RU)">' + A.esc(content) + '</textarea></div>' +
-            '</div>' +
-            '<div class="ad-lang-panel" data-lang-panel="en">' +
-                '<div class="ad-field"><textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adTrnNewsContentEn" placeholder="' + L.trnNewsContent + ' (EN)">' + A.esc(contentEn) + '</textarea></div>' +
-            '</div>' +
-            '<div class="ad-lang-panel" data-lang-panel="kg">' +
-                '<div class="ad-field"><textarea class="ad-field-input ad-field-textarea ad-field-textarea-lg" id="adTrnNewsContentKg" placeholder="' + L.trnNewsContent + ' (KG)">' + A.esc(contentKg) + '</textarea></div>' +
-            '</div>' +
-            '<button type="button" class="ad-btn-translate-all" data-ru="adTrnNewsContent" data-en="adTrnNewsContentEn" data-kg="adTrnNewsContentKg">&#127760; ' + L.translateAllBtn + '</button>' +
-        '</div>';
-
-        // Excerpt card with lang tabs
-        html += '<div class="ad-form-card">' +
-            '<div class="ad-form-card-title">' + L.trnNewsExcerpt + '</div>' +
-            '<div class="ad-lang-tabs" id="adTrnNewsExcerptTabs">' +
-                '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
-                '<button class="ad-lang-tab" data-lang="en">EN</button>' +
-                '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
-            '</div>' +
-            '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                '<div class="ad-field"><textarea class="ad-field-input ad-field-textarea" id="adTrnNewsExcerpt" placeholder="' + L.trnNewsExcerpt + ' (RU)">' + A.esc(excerpt) + '</textarea></div>' +
-            '</div>' +
-            '<div class="ad-lang-panel" data-lang-panel="en">' +
-                '<div class="ad-field"><textarea class="ad-field-input ad-field-textarea" id="adTrnNewsExcerptEn" placeholder="' + L.trnNewsExcerpt + ' (EN)">' + A.esc(excerptEn) + '</textarea></div>' +
-            '</div>' +
-            '<div class="ad-lang-panel" data-lang-panel="kg">' +
-                '<div class="ad-field"><textarea class="ad-field-input ad-field-textarea" id="adTrnNewsExcerptKg" placeholder="' + L.trnNewsExcerpt + ' (KG)">' + A.esc(excerptKg) + '</textarea></div>' +
-            '</div>' +
-            '<button type="button" class="ad-btn-translate-all" data-ru="adTrnNewsExcerpt" data-en="adTrnNewsExcerptEn" data-kg="adTrnNewsExcerptKg">&#127760; ' + L.translateAllBtn + '</button>' +
-        '</div>';
-
-        // Gallery card
-        html += '<div class="ad-form-card">' +
-            '<div class="ad-trn-photos-head">' +
-                '<div class="ad-form-card-title">' + L.trnNewsPhotos + ' (<span id="adTrnPhotoCount">' + galleryUrls.length + '</span>/10)</div>' +
-                '<label class="ad-btn ad-btn-secondary ad-trn-photo-pick">' +
-                    '📷 ' + L.trnNewsUploadPhotos +
-                    '<input type="file" id="adTrnPhotoInput" multiple accept="image/*" class="ad-trn-photo-file">' +
-                '</label>' +
-            '</div>' +
-            '<div id="adTrnPhotoGrid" class="ad-trn-photo-grid"></div>' +
-        '</div>';
-
-        // Actions
-        var publishBtnLabel = publishedAt ? (isEn ? '📰 Update Publication' : '📰 Обновить публикацию') : '📰 ' + L.trnNewsPublish;
-        var tgBtnLabel = tgSentAt ? tgSentLabel() : '📢 ' + L.trnNewsSendTg;
-        var tgDisabled = !publishedAt || tgSentAt;
-
-        html += '<div class="ad-trn-news-actions">' +
-            '<button class="ad-btn ad-btn-secondary" id="adTrnNewsSave">💾 ' + L.trnNewsSaveDraft + '</button>' +
-            '<button class="ad-btn ad-btn-primary" id="adTrnNewsPublish">' + publishBtnLabel + '</button>' +
-            '<button class="ad-btn ad-btn-secondary" id="adTrnNewsTg" ' + (tgDisabled ? 'disabled' : '') + '>' + tgBtnLabel + '</button>' +
-        '</div>';
-
-        container.innerHTML = html;
-
-        // --- Lang tabs switching ---
-        container.querySelectorAll('.ad-lang-tabs').forEach(function(tabsContainer) {
-            tabsContainer.querySelectorAll('.ad-lang-tab').forEach(function(tab) {
-                tab.addEventListener('click', function() {
-                    var lang = tab.dataset.lang;
-                    var card = tabsContainer.closest('.ad-form-card');
-                    if (!card) return;
-                    card.querySelectorAll('.ad-lang-tab').forEach(function(t) { t.classList.remove('active'); });
-                    tab.classList.add('active');
-                    card.querySelectorAll('.ad-lang-panel').forEach(function(p) {
-                        p.classList.toggle('active', p.dataset.langPanel === lang);
-                    });
-                });
-            });
-        });
-
-        // --- Translate ALL — "Перевести в пустые" buttons (delegate) ---
-        container.addEventListener('click', function(e) {
-            var btn = e.target.closest('.ad-btn-translate-all');
-            if (!btn) return;
-            A.translateToEmpty(btn.dataset.ru, btn.dataset.en, btn.dataset.kg, btn);
-        });
-
-        // --- Gallery state & rendering ---
-        var currentGallery = galleryUrls.slice();
-
-        // --- Отслеживание изменений ---
-        // Рассылку можно повторить только если публикацию реально обновили.
-        // Черновик — заготовка, слепки не трогает.
-        function newsSnapshot() {
-            var d = collectNewsData(false);
-            d.published_at = null; // дата публикации в сравнении не участвует
-            return JSON.stringify(d);
-        }
-        // Дата и время отправки: «04.08 в 14:32»
-        function fmtSent(iso) {
+        /** Дата и время отправки: «04.08 в 14:32» */
+        function когдаОтправили(iso) {
             var d = new Date(iso);
             var p = function(n) { return String(n).padStart(2, '0'); };
             return p(d.getDate()) + '.' + p(d.getMonth() + 1) +
                 (isEn ? ' at ' : ' в ') + p(d.getHours()) + ':' + p(d.getMinutes());
         }
-        function tgSentLabel() {
-            if (!tgSentAt) return '';
-            return '✅ ' + L.trnNewsTgSent + ' ' + fmtSent(tgSentAt);
-        }
-        var publishedSnapshot = newsSnapshot();                  // что сейчас опубликовано
-        var sentSnapshot = tgSentAt ? publishedSnapshot : null;  // что ушло в последнюю рассылку
 
-        function refreshNewsButtons() {
-            var pubBtn = document.getElementById('adTrnNewsPublish');
-            var tgBtn = document.getElementById('adTrnNewsTg');
-            if (!pubBtn || !tgBtn) return;
+        A.renderNewsForm(статья, {
+            контейнер: 'adBrkNewsContent',
+            безШапки: true,
+            tournamentId: tournament.id,
 
-            // До первой публикации кнопка публикации всегда доступна
-            if (publishedAt) pubBtn.disabled = (newsSnapshot() === publishedSnapshot);
+            /* «Фото с турнира» — своё: в разделе галереи нет вовсе */
+            своиБлоки:
+                '<div class="ad-form-card">' +
+                    '<div class="ad-trn-photos-head">' +
+                        '<div class="ad-form-card-title">' + L.trnNewsPhotos +
+                            ' (<span id="adTrnPhotoCount">' + галерея.length + '</span>/10)</div>' +
+                        '<label class="ad-btn ad-btn-secondary ad-trn-photo-pick">' +
+                            '\uD83D\uDCF7 ' + L.trnNewsUploadPhotos +
+                            '<input type="file" id="adTrnPhotoInput" multiple accept="image/*" class="ad-trn-photo-file">' +
+                        '</label>' +
+                    '</div>' +
+                    '<div id="adTrnPhotoGrid" class="ad-trn-photo-grid"></div>' +
+                '</div>',
 
-            // Рассылка: только по опубликованному и только если публикация менялась после отправки
-            var canSend = !!publishedAt && publishedSnapshot !== sentSnapshot;
-            /* ПОГАСАНИЕ ВИСИТ НА `[disabled]`, А НЕ ВТОРЫМ СПОСОБОМ СКАЗАТЬ
-               ТО ЖЕ. Скрипт ставил `style.opacity` рядом с атрибутом —
-               одно состояние, записанное дважды, и оно же единственный
-               инлайн, переживший правку разметки: его ставит не сборка
-               страницы, а обработчик. Инлайн, который ставит скрипт,
-               чтением разметки не находится — находится замером. */
-            tgBtn.disabled = !canSend;
-            tgBtn.textContent = canSend
-                ? '📢 ' + (sentSnapshot ? L.trnNewsResendTg : L.trnNewsSendTg)
-                : (tgSentAt ? tgSentLabel() : '📢 ' + L.trnNewsSendTg);
-        }
+            /* «Рассылка в ТГ» — тоже своё. Гаснет на `[disabled]`, а не
+               вторым способом сказать то же (замер 04.10) */
+            своиКнопки:
+                '<button class="ad-btn ad-btn-secondary" id="adTrnNewsTg"' +
+                    ((!опубликовано || отправлено) ? ' disabled' : '') + '>' +
+                    (отправлено
+                        ? '\u2705 ' + L.trnNewsTgSent + ' ' + когдаОтправили(отправлено)
+                        : '\uD83D\uDCE2 ' + L.trnNewsSendTg) +
+                '</button>',
 
-        renderPhotoGrid();
-        refreshNewsButtons();
+            /* Что вкладка дописывает в запись. Обновили публикацию — снимаем
+               серверную отметку о рассылке, иначе функция вернёт 409
+               «Already notified», и переслать будет нельзя */
+            своиПоля: function(публикуем) {
+                var поля = { gallery: галерея };
+                if (публикуем) поля.results_notified_at = null;
+                return поля;
+            },
 
-        // Любая правка в полях формы пересчитывает состояние кнопок
-        container.addEventListener('input', refreshNewsButtons);
+            /* Сохранили — перечитываем статью и рисуем панель заново:
+               состояние кнопки рассылки считается от свежих данных, а не
+               от снимков, которые приходилось сторожить руками */
+            послеСохранения: function() {
+                initNewsPanel.перерисовать && initNewsPanel.перерисовать();
+            },
+            послеУдаления: function() {
+                initNewsPanel.перерисовать && initNewsPanel.перерисовать();
+            },
 
-        function renderPhotoGrid() {
-            var grid = document.getElementById('adTrnPhotoGrid');
-            if (!grid) return;
-            var countEl = document.getElementById('adTrnPhotoCount');
-            if (countEl) countEl.textContent = currentGallery.length;
+            после: function(короб) {
+                нарисоватьФото();
 
-            if (currentGallery.length === 0) {
-                grid.innerHTML = '<div class="ad-trn-photo-empty">' +
-                    (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
-                return;
-            }
-            var ph = '';
-            currentGallery.forEach(function(url, idx) {
-                ph += '<div class="ad-trn-photo-cell">' +
-                    '<img src="' + A.esc(url) + '" class="ad-trn-photo-img">' +
-                    '<button class="ad-trn-photo-remove" data-photo-idx="' + idx + '">&times;</button>' +
-                '</div>';
-            });
-            grid.innerHTML = ph;
-
-            // Remove photo handlers
-            grid.querySelectorAll('.ad-trn-photo-remove').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var idx = parseInt(btn.dataset.photoIdx);
-                    currentGallery.splice(idx, 1);
-                    renderPhotoGrid();
-                    refreshNewsButtons();
+                var поле = document.getElementById('adTrnPhotoInput');
+                if (поле) поле.addEventListener('change', async function() {
+                    var файлы = Array.from(поле.files || []);
+                    var осталось = 10 - галерея.length;
+                    if (осталось <= 0) {
+                        A.showToast(isEn ? 'Max 10 photos' : 'Максимум 10 фото', 'error');
+                        return;
+                    }
+                    файлы = файлы.slice(0, осталось);
+                    for (var i = 0; i < файлы.length; i++) {
+                        var адрес = await A.uploadImage(файлы[i], 'news');
+                        if (адрес) { галерея.push(адрес); нарисоватьФото(); }
+                    }
+                    поле.value = '';
                 });
-            });
-        }
 
-        // Photo upload
-        var photoInput = document.getElementById('adTrnPhotoInput');
-        if (photoInput) {
-            photoInput.addEventListener('change', async function() {
-                var files = Array.from(photoInput.files || []);
-                var remaining = 10 - currentGallery.length;
-                if (remaining <= 0) {
-                    A.showToast(isEn ? 'Max 10 photos' : 'Максимум 10 фото', 'error');
-                    return;
-                }
-                files = files.slice(0, remaining);
-                for (var i = 0; i < files.length; i++) {
-                    var url = await A.uploadImage(files[i], 'news');
-                    if (url) {
-                        currentGallery.push(url);
-                        renderPhotoGrid();
-                        refreshNewsButtons();
+                var кнТГ = document.getElementById('adTrnNewsTg');
+                if (кнТГ) кнТГ.addEventListener('click', function() {
+                    if (!опубликовано) {
+                        A.showToast(isEn ? 'Publish the article first' : 'Сначала опубликуйте статью', 'error');
+                        return;
                     }
-                }
-                photoInput.value = '';
-            });
-        }
+                    /* При повторе честно предупреждаем: подписчики получат
+                       уведомление второй раз */
+                    var вопрос = отправлено
+                        ? L.trnNewsResendConfirm.replace('{date}', когдаОтправили(отправлено))
+                        : (isEn ? 'Send results to Telegram group?' : 'Отправить результаты в TG группу?');
+                    A.showConfirm('Telegram', вопрос, async function() {
+                        кнТГ.disabled = true;
+                        кнТГ.textContent = '\uD83D\uDCE2 ...';
+                        try {
+                            var сессия = await A.client.auth.getSession();
+                            var токен = сессия.data.session ? сессия.data.session.access_token : '';
+                            var ответ = await fetch(SUPABASE_URL + '/functions/v1/tournament-results-notify', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Bearer ' + токен,
+                                    'Content-Type': 'application/json',
+                                    'apikey': SUPABASE_ANON_KEY
+                                },
+                                body: JSON.stringify({ tournament_id: tournament.id })
+                            });
+                            var итог = await ответ.json();
+                            if (!ответ.ok) throw new Error(итог.error || 'HTTP ' + ответ.status);
+                            A.showToast(isEn ? 'Sent to Telegram!' : 'Отправлено в Telegram!', 'success');
+                            if (initNewsPanel.перерисовать) initNewsPanel.перерисовать();
+                        } catch (e) {
+                            var беда = e.message || 'Error';
+                            if (беда === 'Already notified') {
+                                беда = isEn
+                                    ? 'Already sent. Update the publication to send again.'
+                                    : 'Рассылка уже отправлена. Чтобы отправить снова, обновите публикацию.';
+                            }
+                            A.showToast(беда, 'error');
+                            кнТГ.disabled = false;
+                        }
+                    }, isEn ? 'Send' : 'Отправить');
+                });
 
-        // --- Collect data helper ---
-        function collectNewsData(doPublish) {
-            var t = (document.getElementById('adTrnNewsTitle') || {}).value || '';
-            var s = slug || A.slugify(t);
-            return {
-                title: t.trim(),
-                title_en: ((document.getElementById('adTrnNewsTitleEn') || {}).value || '').trim(),
-                title_kg: ((document.getElementById('adTrnNewsTitleKg') || {}).value || '').trim(),
-                slug: s,
-                excerpt: ((document.getElementById('adTrnNewsExcerpt') || {}).value || '').trim(),
-                excerpt_en: ((document.getElementById('adTrnNewsExcerptEn') || {}).value || '').trim(),
-                excerpt_kg: ((document.getElementById('adTrnNewsExcerptKg') || {}).value || '').trim(),
-                content: ((document.getElementById('adTrnNewsContent') || {}).value || '').trim(),
-                content_en: ((document.getElementById('adTrnNewsContentEn') || {}).value || '').trim(),
-                content_kg: ((document.getElementById('adTrnNewsContentKg') || {}).value || '').trim(),
-                category: 'results',
-                tournament_id: tournament.id,
-                gallery: currentGallery,
-                content_images: currentGallery.length > 0 ? [{ url: currentGallery[0], after_paragraph: 1 }] : [],
-                image: currentGallery.length > 0 ? currentGallery[0] : null,
-                published_at: doPublish ? new Date().toISOString() : (publishedAt || null)
-            };
-        }
+                function нарисоватьФото() {
+                    var сетка = document.getElementById('adTrnPhotoGrid');
+                    if (!сетка) return;
+                    var счёт = document.getElementById('adTrnPhotoCount');
+                    if (счёт) счёт.textContent = галерея.length;
 
-        /* У ВКЛАДКИ «НОВОСТИ» СВОЙ СТОРОЖ, И ОН СОХРАНЯЕТ НОВОСТЬ.
-           Своего у неё не было вовсе: сторож черновика на всю админку
-           ставила только форма турнира, и окно «Несохранённые изменения»
-           на этой вкладке предлагало сохранить ТУРНИР, а не статью.
-           Костя 08.10: «делаю изменения и потом хочу сохранить — не
-           работает». Оно и не могло: сохранялось не то.
-           Грязь считается по вводу в саму панель — один слушатель на всё,
-           а не по полю на каждое. */
-        var новостьГрязная = false;
-        var панельНовости = document.getElementById('adBrkNewsPanel');
-        if (панельНовости) {
-            панельНовости.addEventListener('input', function() { новостьГрязная = true; });
-        }
-
-        /** Сохранение черновика. Вынесено из обработчика кнопки: его зовёт
-         *  и кнопка, и сторож при уходе — а значит кнопки может не быть. */
-        async function сохранитьЧерновикНовости(послеСохранения) {
-            var btn = document.getElementById('adTrnNewsSave');
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '💾 ...';
-            }
-            try {
-                var data = collectNewsData(false);
-                if (!data.title) {
-                    A.showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
-                    вернутьКнопку();
-                    return;
-                }
-                var result;
-                if (newsId) {
-                    result = await A.client.from('news').update(data).eq('id', newsId);
-                } else {
-                    data.id = crypto.randomUUID();
-                    result = await A.client.from('news').insert(data);
-                    if (!result.error) newsId = data.id;
-                }
-                if (result.error) throw new Error(result.error.message);
-                slug = data.slug;
-                A.showToast(L.saved, 'success');
-                var statusEl = document.getElementById('adNewsStatus');
-                if (statusEl) statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--draft">📝 ' + L.trnNewsDraft + '</span>';
-                /* Сохранили — терять больше нечего, и уходить можно */
-                новостьГрязная = false;
-                вернутьКнопку();
-                if (послеСохранения) послеСохранения();
-                return;
-            } catch (e) {
-                A.showToast(e.message || 'Error', 'error');
-            }
-            вернутьКнопку();
-
-            function вернутьКнопку() {
-                var б = document.getElementById('adTrnNewsSave');
-                if (!б) return;
-                б.disabled = false;
-                б.textContent = '💾 ' + L.trnNewsSaveDraft;
-            }
-        }
-
-        document.getElementById('adTrnNewsSave').addEventListener('click', function() {
-            сохранитьЧерновикНовости();
-        });
-
-        /* Тот же сторож, что у формы турнира, но свой и про СТАТЬЮ. Экран
-           его больше не переживает: `switchTab` снимает сторожа, а ставит
-           его тот, кому есть что терять (layout.js) */
-        A.стеречьЧерновик(
-            function() { return новостьГрязная; },
-            function(уйти) {
-                A.showConfirm(L.unsavedChanges, L.unsavedChangesText,
-                    function() { return сохранитьЧерновикНовости(уйти); },
-                    L.unsavedSaveBtn,
-                    null,
-                    { label: L.unsavedLeaveBtn, action: function() { новостьГрязная = false; уйти(); } });
-            }
-        );
-
-        // --- Publish ---
-        document.getElementById('adTrnNewsPublish').addEventListener('click', async function() {
-            var btn = this;
-            btn.disabled = true;
-            btn.textContent = '📰 ...';
-            try {
-                var data = collectNewsData(true);
-                // Публикацию обновили — снимаем серверную отметку о рассылке,
-                // иначе tournament-results-notify вернёт 409 «Already notified»
-                data.results_notified_at = null;
-                if (!data.title) {
-                    A.showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
-                    btn.disabled = false;
-                    btn.textContent = '📰 ' + L.trnNewsPublish;
-                    return;
-                }
-                var result;
-                if (newsId) {
-                    result = await A.client.from('news').update(data).eq('id', newsId);
-                } else {
-                    data.id = crypto.randomUUID();
-                    result = await A.client.from('news').insert(data);
-                    if (!result.error) newsId = data.id;
-                }
-                if (result.error) throw new Error(result.error.message);
-                publishedAt = data.published_at;
-                slug = data.slug;
-                A.showToast(isEn ? 'Published!' : 'Опубликовано!', 'success');
-                var statusEl = document.getElementById('adNewsStatus');
-                if (statusEl) {
-                    var d = new Date(publishedAt);
-                    var ds = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
-                    statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--pub">📰 ' + L.trnNewsPublished + ' ' + ds + '</span>';
-                }
-                // Публикация обновлена — фиксируем новый слепок.
-                // Если он отличается от отправленного, рассылка станет доступна повторно.
-                publishedSnapshot = newsSnapshot();
-            } catch (e) {
-                A.showToast(e.message || 'Error', 'error');
-            }
-            btn.disabled = false;
-            btn.textContent = isEn ? '📰 Update Publication' : '📰 Обновить публикацию';
-            refreshNewsButtons();
-        });
-
-        // --- Send TG ---
-        document.getElementById('adTrnNewsTg').addEventListener('click', function() {
-            var tgBtn = this;
-            if (!publishedAt) {
-                A.showToast(isEn ? 'Publish the article first' : 'Сначала опубликуйте статью', 'error');
-                return;
-            }
-            // При повторе честно предупреждаем: подписчики получат уведомление второй раз
-            var confirmMsg;
-            if (tgSentAt) {
-                confirmMsg = L.trnNewsResendConfirm.replace('{date}', fmtSent(tgSentAt));
-            } else {
-                confirmMsg = isEn ? 'Send results to Telegram group?' : 'Отправить результаты в TG группу?';
-            }
-            A.showConfirm(isEn ? 'Telegram' : 'Telegram', confirmMsg, async function() {
-                tgBtn.disabled = true;
-                tgBtn.textContent = '📢 ...';
-                try {
-                    var session = await A.client.auth.getSession();
-                    var token = session.data.session ? session.data.session.access_token : '';
-                    var res = await fetch(SUPABASE_URL + '/functions/v1/tournament-results-notify', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Content-Type': 'application/json',
-                            'apikey': SUPABASE_ANON_KEY
-                        },
-                        body: JSON.stringify({ tournament_id: tournament.id })
+                    if (галерея.length === 0) {
+                        сетка.innerHTML = '<div class="ad-trn-photo-empty">' +
+                            (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
+                        return;
+                    }
+                    var плитки = '';
+                    галерея.forEach(function(адрес, i) {
+                        плитки += '<div class="ad-trn-photo-cell">' +
+                            '<img src="' + A.esc(адрес) + '" class="ad-trn-photo-img">' +
+                            '<button class="ad-trn-photo-remove" data-photo-idx="' + i + '">&times;</button>' +
+                        '</div>';
                     });
-                    var result = await res.json();
-                    if (!res.ok) throw new Error(result.error || 'HTTP ' + res.status);
-                    tgSentAt = new Date().toISOString();
-                    A.showToast(isEn ? 'Sent to Telegram!' : 'Отправлено в Telegram!', 'success');
-                    var statusEl = document.getElementById('adNewsStatus');
-                    if (statusEl) statusEl.innerHTML = '<span class="ad-trn-news-status ad-trn-news-status--sent">✅ ' + L.trnNewsTgSent + ' ' + fmtSent(tgSentAt) + '</span>';
-                    // Отправили текущую публикацию — кнопка гаснет до следующего обновления
-                    sentSnapshot = publishedSnapshot;
-                    refreshNewsButtons();
-                } catch (e) {
-                    var msg = e.message || 'Error';
-                    if (msg === 'Already notified') {
-                        msg = isEn
-                            ? 'Already sent. Update the publication to send again.'
-                            : 'Рассылка уже отправлена. Чтобы отправить снова, обновите публикацию.';
-                    }
-                    A.showToast(msg, 'error');
-                    refreshNewsButtons();
+                    сетка.innerHTML = плитки;
+                    сетка.querySelectorAll('.ad-trn-photo-remove').forEach(function(кн) {
+                        кн.addEventListener('click', function() {
+                            галерея.splice(parseInt(кн.dataset.photoIdx), 1);
+                            нарисоватьФото();
+                        });
+                    });
                 }
-            }, isEn ? 'Send' : 'Отправить');
+            }
         });
     }
 
     // ---- Export to namespace ----
     A.recalcDoublesPoints = recalcDoublesPoints;
+    /* Стенду вкладки «Новости» турнира нужна НАСТОЯЩАЯ панель, а не её
+       пересказ: скопированный стенд остаётся зелёным после того, как
+       админку поменяли, и доказывает только сам себя. */
+    A.renderNewsPanel = renderNewsPanel;
+    A.generateArticleContent = generateArticleContent;
     A.renderBracketManagement = renderBracketManagement;
     /* Стенду нужна НАСТОЯЩАЯ расстановка, а не своя выдумка: он рисовал
        клетки по порядку и сводил двух непрошедших, чего продукт не
