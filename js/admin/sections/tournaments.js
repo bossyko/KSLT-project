@@ -561,7 +561,32 @@
            перерисовки, получал `undefined`, возвращался сразу и считал
            галочки по старому DOM. Костя увидел это глазами 08.10, ночь.
            Передаём саму функцию: она `async`, промис у неё есть. */
-        A.setupBulkDelete({ tableId: 'adTrnTable', tableName: 'tournaments', reloadFn: loadTournamentsList });
+        /* МАССОВОЕ УДАЛЕНИЕ НЕ ПЕРЕСЧИТЫВАЛО ОЧКИ ВОВСЕ. Полоса делала
+           `delete().in('id', ids)` и всё: история уходила каскадом, а сумма
+           в `player_categories` оставалась прежней — игрок стоял в рейтинге
+           выше, чем заслужил, и ничто об этом не говорило. Одиночное
+           удаление пересчитывало с самого начала: ОДНО ПОНЯТИЕ, ДВА
+           ПОВЕДЕНИЯ. Починено 09.10 двумя крючками.
+           Игроков собираем ДО удаления и несём во второй крючок: после
+           удаления спрашивать уже не у кого. */
+        var потериПередУдалением = null;
+        A.setupBulkDelete({
+            tableId: 'adTrnTable', tableName: 'tournaments', reloadFn: loadTournamentsList,
+            доУдаления: async function(ids) {
+                потериПередУдалением = await считатьПотери(ids);
+                return текстПотерь(потериПередУдалением, ids.length);
+            },
+            послеУдаления: async function() {
+                var игроки = потериПередУдалением && потериПередУдалением.игроки;
+                потериПередУдалением = null;
+                if (!игроки || !игроки.length) return;
+                var пересчёт = await A.client.rpc('recalc_player_categories', { p_ids: игроки });
+                if (пересчёт.error) {
+                    A.showToast((isEn ? 'Points not recalculated: ' : 'Очки не пересчитались: ') +
+                                пересчёт.error.message, 'error');
+                }
+            }
+        });
     }
 
     // ---- Tournament Pagination ----
@@ -687,6 +712,102 @@
      * длины основы. Сетка на 24, пришло 17: менеджер читал «24 → 6 групп по
      * 4», а выходило 3/3/3/3/3/2. Теперь число одно на обоих.
      */
+    /**
+     * ЧТО УНЕСЁТ УДАЛЕНИЕ — СЧИТАЕТСЯ, А НЕ ПРЕДПОЛАГАЕТСЯ.
+     *
+     * Радиус прочитан в снимке схемы, а не угадан: каскадом уходят matches,
+     * rating_history (НАЧИСЛЕНИЯ), tournament_registrations,
+     * registration_changes, tournament_results. Статьи остаются и теряют
+     * только связь — `news_tournament_id_fkey ... ON DELETE SET NULL`, и
+     * окно об этом МОЛЧИТ: решение Кости 09.10 по макету, уцелевшее его в
+     * этот миг не занимает.
+     *
+     * Начисления считаем ЧТЕНИЕМ СТРОК, а не счётчиком: нужны три числа
+     * сразу — строк, игроков и очков, — и те же игроки нужны потом для
+     * пересчёта. Второй раз за ними не ходим.
+     */
+    async function считатьПотери(ids) {
+        var пусто = { заявок: 0, матчей: 0, результатов: 0,
+                      начислений: 0, игроков: 0, очков: 0, игроки: [], сНачислениями: 0 };
+        if (!A.client || !ids || !ids.length) return пусто;
+
+        function сколько(таблица) {
+            return A.client.from(таблица)
+                .select('id', { count: 'exact', head: true })
+                .in('tournament_id', ids);
+        }
+
+        var ответы = await Promise.all([
+            сколько('tournament_registrations'),
+            сколько('matches'),
+            сколько('tournament_results'),
+            A.client.from('rating_history')
+                .select('player_id, points_earned, tournament_id')
+                .in('tournament_id', ids)
+        ]);
+
+        var история = ответы[3].data || [];
+        var игроки = {};
+        var турниры = {};
+        var очков = 0;
+        история.forEach(function(с) {
+            игроки[с.player_id] = true;
+            турниры[с.tournament_id] = true;
+            очков += (с.points_earned || 0);
+        });
+
+        return {
+            заявок:    ответы[0].count || 0,
+            матчей:    ответы[1].count || 0,
+            результатов: ответы[2].count || 0,
+            начислений: история.length,
+            игроков:   Object.keys(игроки).length,
+            очков:     очков,
+            игроки:    Object.keys(игроки),
+            сНачислениями: Object.keys(турниры).length
+        };
+    }
+
+    /** Разметка тела окна. `.ad-confirm-text` по умолчанию по центру —
+        список так не читается, поэтому у него свой класс (дополнение к
+        готовому окну, а не новое окно; ширина при этом уезжает на
+        md-ступень 520, которая в admin.css уже заведена). */
+    function текстПотерь(п, турниров) {
+        function строка(подпись, значение) {
+            return '<li><span>' + подпись + '</span><b>' + значение + '</b></li>';
+        }
+        var число = function(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+        var есть = п.заявок || п.матчей || п.результатов || п.начислений;
+        if (!есть) {
+            return '<p class="ad-udalenie-pusto">' + (isEn
+                ? 'Nothing but the tournament itself will be removed: it has no entries, matches, results or points.'
+                : 'Кроме самого турнира не уйдёт ничего: заявок, матчей, результатов и начислений у него нет.') + '</p>';
+        }
+        var строки =
+            строка(isEn ? 'entries' : 'заявок', число(п.заявок)) +
+            строка(isEn ? 'matches' : 'матчей', число(п.матчей)) +
+            строка(isEn ? 'results' : 'результатов', число(п.результатов)) +
+            строка(isEn ? 'points records' : 'начислений',
+                   число(п.начислений) + ' · ' +
+                   число(п.игроков) + (isEn ? ' players' : ' игроков') + ' · ' +
+                   число(п.очков) + (isEn ? ' pts' : ' очков'));
+        if (турниров > 1) {
+            строки += строка(isEn ? 'of them with points' : 'из них с начислениями',
+                             число(п.сНачислениями) + ' / ' + число(турниров));
+        }
+        return '<div class="ad-udalenie">' +
+                   '<p class="ad-udalenie-zagolovok">' + (isEn
+                       ? 'Will be removed for good:'
+                       : 'Безвозвратно уйдёт:') + '</p>' +
+                   '<ul class="ad-udalenie-spisok">' + строки + '</ul>' +
+               '</div>';
+    }
+
+    /* СТЕНД ЗОВЁТ ЖИВОЙ КОД, А НЕ КОПИЮ РАЗМЕТКИ. Если скопировать тело
+       окна в стенд, стенд начнёт показывать своё, а не то, что видит
+       Костя, — и будет врать тем убедительнее, чем дольше живёт. */
+    A.текстПотерьТурнира = текстПотерь;
+
     async function узнатьЗаявкиВОснове(item) {
         заявокВОснове = null;
         if (!item || !item.id || !A.client) return;
@@ -1824,9 +1945,17 @@ function обновитьРасклад() {
         // Delete
         var delBtn = document.getElementById('adTrnDelete');
         if (delBtn) {
-            delBtn.addEventListener('click', function() {
-                A.showConfirm(L.trnDeleteConfirm, L.deleteConfirmText, function() {
-                    deleteTournamentHandler();
+            /* ОКНО ЗНАЛО ПОСЛЕДСТВИЯ И МОЛЧАЛО О НИХ. Обработчик удаления
+               читал затронутых игроков с самого начала — чтобы пересчитать
+               очки, — но человеку не показывал ничего. Теперь то же чтение
+               кормит и окно, и пересчёт: ОДИН ЗАПРОС НА ОБА ДЕЛА. */
+            delBtn.addEventListener('click', async function() {
+                if (!trnEditingId) return;
+                delBtn.disabled = true;
+                var потери = await считатьПотери([trnEditingId]);
+                delBtn.disabled = false;
+                A.showConfirm(L.trnDeleteConfirm, текстПотерь(потери, 1), function() {
+                    deleteTournamentHandler(потери);
                 });
             });
         }
@@ -2360,18 +2489,25 @@ function обновитьРасклад() {
     }
 
     // ---- Delete Tournament ----
-    async function deleteTournamentHandler() {
+    async function deleteTournamentHandler(потери) {
         if (!trnEditingId) return;
 
-        // Кому турнир начислял очки — узнаём до удаления: записи истории
-        // уходят вместе с ним, и потом спрашивать будет уже не у кого
-        var affected = [];
-        try {
-            var rh = await A.client.from('rating_history')
-                .select('player_id')
-                .eq('tournament_id', trnEditingId);
-            affected = [...new Set((rh.data || []).map(function(r) { return r.player_id; }))];
-        } catch (e) { /* пересчёт не критичен для самого удаления */ }
+        /* Кому турнир начислял очки — узнаём ДО удаления: записи истории
+           уходят вместе с ним (`rating_history_tournament_id_fkey ...
+           ON DELETE CASCADE`, снимок схемы), и потом спрашивать уже не у
+           кого. Обычно список уже посчитан окном предупреждения и приходит
+           сюда даром; запрос остаётся запасным ходом на случай зова без
+           окна. */
+        var affected = (потери && потери.игроки) || null;
+        if (!affected) {
+            affected = [];
+            try {
+                var rh = await A.client.from('rating_history')
+                    .select('player_id')
+                    .eq('tournament_id', trnEditingId);
+                affected = [...new Set((rh.data || []).map(function(r) { return r.player_id; }))];
+            } catch (e) { /* пересчёт не критичен для самого удаления */ }
+        }
 
         var result = await A.client.from('tournaments').delete().eq('id', trnEditingId);
         if (result.error) {
@@ -2379,9 +2515,13 @@ function обновитьРасклад() {
             return;
         }
 
-        // Очки по категориям собираются из истории. Записи удалились вместе
-        // с турниром, но сумма в player_categories осталась прежней — её
-        // надо пересобрать, иначе игрок стоит в рейтинге выше, чем заслужил
+        /* Очки по категориям собираются из истории. Записи удалились вместе
+           с турниром, но сумма в `player_categories` осталась прежней — её
+           надо пересобрать, иначе игрок стоит в рейтинге выше, чем заслужил.
+           ЭТО НЕ ДОГАДКА: правило удаления прочитано в снимке схемы, а не
+           выведено из имени связи. 09.10 я записал обратное — будто история
+           остаётся, — прочитав ПРЕЖНИЙ снимок, который отстал на 14 таблиц
+           и 36 функций. Врал не комментарий, а мой источник. */
         if (affected.length) {
             var recalc = await A.client.rpc('recalc_player_categories', { p_ids: affected });
             if (recalc.error) {
