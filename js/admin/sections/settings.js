@@ -45,6 +45,7 @@
             ? [
                 { key: 'rules', label: L.setSubRules },
                 { key: 'promotions', label: L.setSubPromo },
+                { key: 'prices', label: isEn ? 'Prices' : 'Цены' },
                 { key: 'access', label: isEn ? 'Access' : 'Доступ' }
               ]
             : [ { key: 'rules', label: L.setSubRules } ];
@@ -87,8 +88,153 @@
         renderSetRules();
         if (A.currentRole === 'admin') {
             renderSetPromotions();
+            renderSetPrices();
             renderSetAccess();
         }
+    }
+
+    // ---- Цены: членские взносы ----
+    //
+    // Суммы лежат в базе (pricing_plans), а не в коде: приложение у людей
+    // установлено, и правка в коде дошла бы до них только с новой сборкой.
+    // Сумма из базы действует сразу, на сайте и в приложении, и РАЗОМ НА
+    // ТРЁХ ЯЗЫКАХ — источник один. До 09.10 цена была вписана в разметку
+    // en и kg (1 000 KGS) и ещё раз лежала мёртвым объектом в коде.
+    //
+    // Пустая сумма — не ошибка, а состояние: страница честно пишет
+    // «уточняется», а кнопка оплаты выключена. УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ.
+    //
+    // Писать сюда может ТОЛЬКО администратор — слово Кости 09.10. Это
+    // держит не экран, а правило базы (pricing_plans_admin): спрятать
+    // кнопку мало, запрет живёт там, где данные.
+    var ВИДЫ = [
+        { kind: 'join',  ru: 'Вступительный взнос', en: 'Joining fee' },
+        { kind: 'year',  ru: 'Годовое членство',    en: 'Annual membership' },
+        { kind: 'month', ru: 'Помесячное членство', en: 'Monthly membership' }
+    ];
+
+    async function renderSetPrices() {
+        var panel = document.getElementById('setPanelPrices');
+        if (!panel) return;
+
+        var планы = {};
+        var р = await A.client.from('pricing_plans').select('*');
+        if (р.error) {
+            panel.innerHTML = '<div class="ad-empty-state"><p>' +
+                (isEn ? 'Prices table is not available: ' : 'Таблица цен недоступна: ') +
+                р.error.message + '</p></div>';
+            return;
+        }
+        (р.data || []).forEach(function(p) { планы[p.kind] = p; });
+
+        var тексты = {};
+        var т = await A.client.from('site_content')
+            .select('key, value, value_en, value_kg')
+            .in('key', ['pricing_free_title', 'pricing_free_text']);
+        (т.data || []).forEach(function(r) { тексты[r.key] = r; });
+
+        var строки = ВИДЫ.map(function(в) {
+            var p = планы[в.kind] || {};
+            var сумма = (p.amount === null || p.amount === undefined) ? '' : p.amount;
+            return '<div class="ad-field-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;">' +
+                '<div style="flex:1;min-width:160px;">' +
+                    '<label class="ad-field-label">' + (isEn ? в.en : в.ru) + '</label>' +
+                    '<input type="number" min="0" step="1" class="ad-field-input" id="pp-' + в.kind + '" ' +
+                        'value="' + сумма + '" placeholder="' + (isEn ? 'to be announced' : 'уточняется') + '">' +
+                '</div>' +
+                '<div style="width:120px;">' +
+                    '<label class="ad-field-label">' + (isEn ? 'Currency' : 'Валюта') + '</label>' +
+                    '<input type="text" class="ad-field-input" id="pc-' + в.kind + '" value="' + (p.currency || 'сом') + '">' +
+                '</div>' +
+            '</div>';
+        }).join('');
+
+        function поле(ключ, подпись, многострочный) {
+            var r = тексты[ключ] || {};
+            var ввод = function(суф, язык, знач) {
+                var общий = 'class="ad-field-input" id="sc-' + ключ + суф + '" value="' + (знач || '').replace(/"/g, '&quot;') + '"';
+                return '<div style="flex:1;min-width:200px;">' +
+                    '<label class="ad-field-label">' + подпись + ' · ' + язык + '</label>' +
+                    (многострочный
+                        ? '<textarea class="ad-field-input" id="sc-' + ключ + суф + '" rows="2">' + (знач || '') + '</textarea>'
+                        : '<input type="text" ' + общий + '>') +
+                '</div>';
+            };
+            return '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">' +
+                ввод('', 'RU', r.value) + ввод('-en', 'EN', r.value_en) + ввод('-kg', 'KG', r.value_kg) +
+            '</div>';
+        }
+
+        panel.innerHTML =
+            '<div class="ad-card" style="max-width:720px;">' +
+                '<h3 style="margin-bottom:8px;">' + (isEn ? 'Membership fees' : 'Членские взносы') + '</h3>' +
+                '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
+                    (isEn
+                        ? 'The amounts shown on the Pricing page. An empty amount is not an error: the page says «to be announced» and the payment button stays off.'
+                        : 'Суммы, которые видно на странице «Цены». Пустая сумма — не ошибка: страница пишет «уточняется», а кнопка оплаты выключена.') +
+                '</p>' +
+                строки +
+                '<button class="ad-btn ad-btn-primary" id="ppSave">' + (isEn ? 'Save amounts' : 'Сохранить суммы') + '</button>' +
+            '</div>' +
+            '<div class="ad-card" style="max-width:720px;margin-top:24px;">' +
+                '<h3 style="margin-bottom:8px;">' + (isEn ? 'Free period notice' : 'Плашка бесплатного периода') + '</h3>' +
+                '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
+                    (isEn
+                        ? 'Shown on the Pricing page while the free-access date has not passed. Empty text leaves only the line with the date; clearing the date in Access hides the whole block.'
+                        : 'Видна на странице «Цены», пока не прошла дата бесплатного доступа. Пустой текст оставит только строку с датой; стёртая дата во вкладке «Доступ» убирает блок целиком.') +
+                '</p>' +
+                поле('pricing_free_title', (isEn ? 'Heading' : 'Заголовок'), false) +
+                поле('pricing_free_text', (isEn ? 'Text' : 'Текст'), true) +
+                '<button class="ad-btn ad-btn-primary" id="scSave">' + (isEn ? 'Save text' : 'Сохранить текст') + '</button>' +
+            '</div>';
+
+        var сохрСуммы = document.getElementById('ppSave');
+        if (сохрСуммы) сохрСуммы.addEventListener('click', async function() {
+            сохрСуммы.disabled = true;
+            var беды = [];
+            for (var i = 0; i < ВИДЫ.length; i++) {
+                var kind = ВИДЫ[i].kind;
+                var сырое = document.getElementById('pp-' + kind).value.trim();
+                var сумма = сырое === '' ? null : Number(сырое);
+                if (сумма !== null && !(сумма >= 0)) {
+                    беды.push((isEn ? 'Wrong amount: ' : 'Неверная сумма: ') + сырое);
+                    continue;
+                }
+                var res = await A.client.from('pricing_plans')
+                    .update({ amount: сумма,
+                              currency: document.getElementById('pc-' + kind).value.trim() || 'сом',
+                              updated_at: new Date().toISOString(),
+                              updated_by: (window.ksltUser && window.ksltUser.id) || null })
+                    .eq('kind', kind);
+                if (res.error) беды.push(kind + ': ' + res.error.message);
+            }
+            сохрСуммы.disabled = false;
+            if (беды.length) { A.showToast(беды.join(' · '), 'error'); return; }
+            A.showToast(isEn ? 'Saved' : 'Сохранено', 'success');
+            renderSetPrices();
+        });
+
+        var сохрТекст = document.getElementById('scSave');
+        if (сохрТекст) сохрТекст.addEventListener('click', async function() {
+            сохрТекст.disabled = true;
+            var беды = [];
+            var ключи = ['pricing_free_title', 'pricing_free_text'];
+            for (var i = 0; i < ключи.length; i++) {
+                var к = ключи[i];
+                var запись = {
+                    key: к,
+                    value: document.getElementById('sc-' + к).value,
+                    value_en: document.getElementById('sc-' + к + '-en').value,
+                    value_kg: document.getElementById('sc-' + к + '-kg').value
+                };
+                var res = await A.client.from('site_content').upsert(запись, { onConflict: 'key' });
+                if (res.error) беды.push(к + ': ' + res.error.message);
+            }
+            сохрТекст.disabled = false;
+            if (беды.length) { A.showToast(беды.join(' · '), 'error'); return; }
+            A.showToast(isEn ? 'Saved' : 'Сохранено', 'success');
+            renderSetPrices();
+        });
     }
 
     // ---- Доступ: бесплатный период ----
