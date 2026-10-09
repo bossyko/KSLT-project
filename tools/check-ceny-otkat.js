@@ -108,7 +108,10 @@ const ОТКАТЫ = [
   [CSS, '.pm-card {', '.pr-card { padding: 40px 36px; }\n\n.pm-card {',
    'классы старого механизма не вернулись в css'],
 
-  [RU, '<link rel="stylesheet" href="../css/info-pages.css?v=42">', '',
+  /* ЯКОРЬ БЕЗ НОМЕРА ВЕРСИИ: она уезжает при каждой правке общего файла,
+     и прувер падал на «якорь встречается 0 раз» — поймал это сам, когда
+     09.10 версия ушла с 42 на 43. Держимся за имя файла, а не за число. */
+  [RU, '../css/info-pages.css?v=', '../css/info-pages-net.css?v=',
    'раскрывашка берётся из общего файла раздела'],
 
   [EN, '<span class="pm-val" data-plan="year">to be announced</span>',

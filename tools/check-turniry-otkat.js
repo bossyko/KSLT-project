@@ -268,8 +268,11 @@ const ОТКАТЫ = [
         `            var el = document.getElementById('toStatTotal');\n            if (el) el.textContent = all.length;\n            var elВсего = document.getElementById('toStatTotal');`,
    'обзорная не считает турниры своим all.length'],
 
-  [HTML, `<script src="../js/stats.js?v=5"></script>`,
-         `<!-- stats.js otklyuchen -->`,
+  /* ЯКОРЬ БЕЗ НОМЕРА ВЕРСИИ — она уезжает при каждой правке файла; 09.10
+     stats.js ушёл с v=5 на v=6, и прувер упал на «якорь встречается 0 раз».
+     ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ, А НЕ НА СОСЕДЕ, КОТОРЫЙ МОЖЕТ УЕХАТЬ. */
+  [HTML, `<script src="../js/stats.js?v=`,
+         `<script src="../js/stats-net.js?v=`,
    'обзорная ru подключает js/stats.js'],
 
   [JSФ, `                if (totalPrize > 0) {`,

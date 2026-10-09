@@ -57,7 +57,7 @@ const ОТКАТЫ = [
    'ни одного отступа мимо шкалы'],
 
   [CSS, '.ip-cta-btn:focus-visible,', '.ip-cta-btn:focus-net,',
-   'фокус с клавиатуры виден на всех шести страницах'],
+   'фокус с клавиатуры виден у вопроса и у кнопки призыва'],
 
   [CSS, '@media (prefers-reduced-motion: reduce) {', '@media (prefers-reduced-motion: net) {',
    'движение спрашивает системную настройку'],
