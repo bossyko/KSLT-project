@@ -6,18 +6,6 @@
     'use strict';
 
     /**
-     * @typedef {Object} MembershipPlan
-     * @property {string} id
-     * @property {string} name
-     * @property {string} name_en
-     * @property {number} price
-     * @property {string} currency
-     * @property {number} duration_months
-     * @property {string[]} features
-     * @property {string[]} features_en
-     */
-
-    /**
      * @typedef {Object} CheckMembershipResult
      * @property {boolean} active
      * @property {boolean} paid
@@ -25,27 +13,13 @@
      * @property {number} daysLeft
      */
 
-    /** @type {MembershipPlan} */
-    window.KSLT_MEMBERSHIP_PLAN = {
-        id: 'monthly-2026',
-        name: 'Ежемесячное членство KSLT',
-        name_en: 'KSLT Monthly Membership',
-        price: 1000,
-        currency: 'KGS',
-        duration_months: 1,
-        features: [
-            'Участие во всех турнирах KSLT',
-            'Полный рейтинг и статистика',
-            'Скидки на аренду кортов',
-            'Доступ к закрытым мероприятиям'
-        ],
-        features_en: [
-            'Participate in all KSLT tournaments',
-            'Full rankings and statistics',
-            'Court rental discounts',
-            'Access to exclusive events'
-        ]
-    };
+    // ТРЕТЬЯ КОПИЯ ЦЕНЫ СНЯТА 09.10.
+    //
+    // Здесь лежал window.KSLT_MEMBERSHIP_PLAN с price: 1000 и списком выгод.
+    // Поиск по проекту показал: единственное упоминание — само объявление,
+    // читателей ноль. МЁРТВЫМ КОД НАЗЫВАЕТСЯ ПОСЛЕ ПРОВЕРКИ, и проверка
+    // проведена. Суммы живут в таблице pricing_plans и меняются в админке:
+    // Настройки → Цены.
 
     /**
      * Checks current user's active membership status.
@@ -75,7 +49,11 @@
     window.бесплатныйПериод = async function() {
         var до = await window.бесплатныйДоступДо();
         if (!до) return false;
-        var сегодня = new Date().toISOString().split('T')[0];
+        // ДЕНЬ СЧИТАЕТСЯ ПО БИШКЕКУ — слово Кости 09.10: основное время клуба.
+        // Было по Гринвичу: с полуночи до 6 утра в Бишкеке бесплатный период
+        // считался ещё вчерашним днём и заканчивался на шесть часов позже.
+        var сегодня = (window.KSLT_VREMYA && window.KSLT_VREMYA.сегодня())
+            || new Date().toISOString().split('T')[0];
         return сегодня <= до;
     };
 
@@ -127,7 +105,10 @@
                      membership: { free_period: true, until: до } };
         }
 
-        var today = new Date().toISOString().split('T')[0];
+        // Тот же день Бишкека: членство, истекающее сегодня, живо до конца
+        // КЛУБНОГО дня, а не до полуночи по Гринвичу
+        var today = (window.KSLT_VREMYA && window.KSLT_VREMYA.сегодня())
+            || new Date().toISOString().split('T')[0];
 
         var result = await client
             .from('memberships')
