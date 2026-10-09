@@ -70,7 +70,8 @@ const КУСКИ = [
        не сделал». 09.10 файлу дан код выхода, написан прувер, запись
        заведена. */
     ['жеребьёвка и сетки за места', 'check-draw.js', 'check-draw-otkat.js'],
-    ['обзорная «Инфо»', 'check-info-obzor.js', 'check-info-obzor-otkat.js']
+    ['обзорная «Инфо»', 'check-info-obzor.js', 'check-info-obzor-otkat.js'],
+    ['страницы «Инфо»', 'check-info-stranicy.js', 'check-info-stranicy-otkat.js']
 ];
 
 function прогнать(файл) {
