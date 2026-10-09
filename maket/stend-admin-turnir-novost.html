@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.instagram.com;">
+<title>КСЛТ — стенд вкладки «Новости» турнира</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Вкладку рисует НАСТОЯЩАЯ `renderNewsPanel`
+  (js/admin/sections/bracket.js), которая зовёт НАСТОЯЩУЮ форму статьи
+  (js/admin/sections/news.js). Разметка сюда НЕ КОПИРУЕТСЯ.
+
+  ЗАЧЕМ. До 08.10 во вкладке жила обеднённая копия формы раздела: голая
+  textarea вместо редактора, без обложки, без предела подзаголовка, со
+  своими именами полей. Слово Кости: перенести форму сюда целиком. Стенд
+  доказывает, что это ОДНА форма, а не вторая такая же.
+
+  БАЗЫ ЗДЕСЬ НЕТ И ВХОДА ТОЖЕ: `A.client` подменён заглушкой. Писать ей
+  нечем — методов insert/update/delete у неё нет вовсе.
+
+  СТОЯЩЕЕ УСЛОВИЕ: АДМИНКА — ДЕСКТОП И ПЛАНШЕТ, ТОЛЬКО РУССКИЙ.
+  Виды: 1512 · 1024 · 768.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=25">
+<link rel="stylesheet" href="../css/style.css?v=400">
+<link rel="stylesheet" href="../css/admin.css?v=230">
+<link rel="stylesheet" href="../css/news.css?v=73">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); }
+  #adBrkNewsContent { padding: var(--space-6); }
+  /* style.css гасит body до нуля и зажигает скриптом загрузки страницы,
+     которого у стенда нет: замеры шли верные, а снимок был чёрный */
+  body { opacity: 1 !important; }
+</style>
+</head>
+<body class="ad-page">
+
+<div id="ad-content"></div>
+<div id="adBrkNewsContent" data-stend="вкладка новости турнира"></div>
+
+<script src="../js/tournament-status.js?v=1"></script>
+<script src="../js/admin/core/constants.js?v=145"></script>
+<script src="../js/admin/core/utils.js?v=42"></script>
+<script src="../js/admin/core/cover-crop.js?v=3"></script>
+<script src="../js/kslt-video.js?v=3"></script>
+<script src="../js/kslt-lenta.js?v=3"></script>
+<script src="../js/admin/core/editor.js?v=11"></script>
+<script src="../js/admin/core/layout.js?v=12"></script>
+<script src="../js/admin/sections/news.js?v=33"></script>
+<script src="../js/admin/sections/bracket.js?v=273"></script>
+<script>
+(function() {
+    'use strict';
+    var A = window.KSLT_ADMIN;
+
+    /* Кадр рисуем сами: в прогоне картинки с сети закрыты, а СЛОМАННОЕ
+       ИЗОБРАЖЕНИЕ ДАЁТ ЧУЖУЮ ГЕОМЕТРИЮ */
+    var КАДР = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">' +
+        '<rect width="1280" height="720" fill="#2b3a4a"/>' +
+        '<circle cx="640" cy="360" r="220" fill="#cf0"/></svg>');
+
+    A.client = {
+        rpc: function() { return Promise.resolve({ data: [] }); },
+        auth: { getSession: function() { return Promise.resolve({ data: { session: null } }); } },
+        from: function() {
+            return { select: function() { return { eq: function() {
+                return { maybeSingle: function() { return Promise.resolve({ data: null }); },
+                         single: function() { return Promise.resolve({ data: null }); } };
+            } }; } };
+        }
+    };
+
+    var ТУРНИР = { id: 'stend-turnir', name: 'Дружеский турнир в мужском парном разряде' };
+
+    /* СОДЕРЖИМОЕ КРАЙНЕЕ: статьи ещё нет — вкладка показывает заготовку,
+       собранную генератором. Это и есть тот случай, ради которого всё:
+       завершил турнир, зашёл, дописал, опубликовал. */
+    var ЗАГОТОВКА = {
+        title: 'Результаты: Дружеский турнир в мужском парном разряде',
+        titleEn: 'Results: Men’s Doubles Friendly',
+        excerpt: 'Результаты турнира «Дружеский турнир в мужском парном разряде».',
+        excerptEn: 'Results of the men’s doubles friendly.',
+        content: '<p>Турнир «Дружеский турнир в мужском парном разряде» завершён! ' +
+                 'В соревнованиях приняли участие 14 пар.</p>' +
+                 '<p>Призовые места</p>' +
+                 '<p>🥇 Иванов Иван / Петров Пётр</p>' +
+                 '<p>🥈 Сидоров Сидор / Кузнецов Кузьма</p>' +
+                 '<p>Благодарим всех участников за отличную игру!</p>',
+        contentEn: '<p>The tournament is over!</p>'
+    };
+
+    A.renderNewsPanel(document.getElementById('adBrkNewsContent'), ТУРНИР, null, ЗАГОТОВКА);
+    document.body.dataset.stendGotov = '1';
+})();
+</script>
+</body>
+</html>
