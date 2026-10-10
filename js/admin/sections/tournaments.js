@@ -1199,7 +1199,15 @@
                     '</div>' +
                     '<div class="ad-field ad-pole-uzkoe">' +
                         '<label class="ad-field-label">' + L.trnMatchDuration + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMatchDuration" placeholder="90" value="' + (item ? (item.match_duration || 90) : 90) + '">' +
+                        /* ПУСТОЕ ПОЛЕ, А НЕ ПОДСТАВЛЕННЫЕ 90. Замер 10.10: поле оставили
+                           пустым, при сохранении сработало `|| 90`, и расписание
+                           боевого турнира посчиталось по полутора часам — до 21:30.
+                           Число стояло и в `value`, то есть выглядело как уже
+                           заданное. Теперь у нового турнира поле пустое и
+                           обязательное: пропустить его молча нельзя.
+                           В подсказке единица измерения, а не пример числа —
+                           иначе она снова читается как умолчание. */
+                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adTrnMatchDuration" placeholder="' + L.trnMatchDurationHint + '" value="' + (item && item.match_duration ? item.match_duration : '') + '">' +
                     '</div>' +
                     '<div class="ad-field ad-pole-uzkoe">' +
                         '<label class="ad-field-label">' + L.trnStartTime + '</label>' +
@@ -2148,7 +2156,7 @@ function обновитьРасклад() {
             court_count: parseInt(document.getElementById('adTrnCourtCount').value, 10) || 2,
             director_name: document.getElementById('adTrnDirector').value.trim() || null,
             referee_name: document.getElementById('adTrnReferee').value.trim() || null,
-            match_duration: parseInt(document.getElementById('adTrnMatchDuration').value, 10) || 90,
+            match_duration: parseInt(document.getElementById('adTrnMatchDuration').value, 10) || null,
             start_time: document.getElementById('adTrnStartTime').value || null,
             registration_start: document.getElementById('adTrnRegStart').value || null,
             registration_end: document.getElementById('adTrnRegEnd').value || null,
@@ -2419,6 +2427,22 @@ function обновитьРасклад() {
                     : (isDbl ? 'Укажите максимум пар' : 'Укажите максимум участников'), 'error');
                 var maxField = document.getElementById('adTrnMaxPart');
                 if (maxField) maxField.focus();
+                saveBtn.disabled = false;
+                saveBtn.textContent = L.save;
+                return;
+            }
+
+            /* БЕЗ ДЛИТЕЛЬНОСТИ МАТЧА РАСПИСАНИЕ СЧИТАТЬ НЕЧЕМ.
+               Раньше пустое поле молча превращалось в 90 минут, и менеджер
+               узнавал об этом, только увидев, что турнир идёт до половины
+               десятого вечера. Замер 10.10 по слепкам боевого MASTERS: две
+               жеребьёвки подряд с шагом 90 при заданных позже 35.
+               Отказ, а не подстановка: число решает, влезет ли турнир в день,
+               и выдумывать его за человека нельзя. */
+            if (!data.match_duration) {
+                A.showToast(isEn ? 'Match duration is required' : 'Укажите длительность матча', 'error');
+                var durField = document.getElementById('adTrnMatchDuration');
+                if (durField) durField.focus();
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;

@@ -7511,7 +7511,7 @@
         var drawSize = tournament.draw_size || 16;
         var bracketType = tournament.bracket_type || 'single_elimination';
         var courtCount = tournament.court_count || 2;
-        var matchDuration = tournament.match_duration || 90;
+        var matchDuration = tournament.match_duration || KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
 
         // Get approved registrations
         var isDbl = isDoublesTournament(tournament);
@@ -10549,7 +10549,7 @@
     // ---- Schedule for playoff matches (after group stage) ----
     async function assignPlayoffSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
-        var matchDuration = tournament.match_duration || 90;
+        var matchDuration = tournament.match_duration || KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
         var scheduledDay = tournament.date_start || null;
 
         // Fetch playoff matches
@@ -10771,7 +10771,7 @@
         номера.sort(function(a, b) { return a - b; });
 
         var кортов = tournament.court_count || 2;
-        var шаг = tournament.match_duration || 90;
+        var шаг = tournament.match_duration || KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
         var старт1 = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
 
         var html =
@@ -10941,7 +10941,7 @@
 
     async function assignGroupSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
-        var matchDuration = tournament.match_duration || 90;
+        var matchDuration = tournament.match_duration || KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
         // Волны идут встык: время матча и есть шаг расписания. Перерыв между
@@ -10981,7 +10981,7 @@
     // ---- Auto Schedule Assignment ----
     async function assignSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
-        var matchDuration = tournament.match_duration || 90;
+        var matchDuration = tournament.match_duration || KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
         var drawSize = tournament.draw_size || 16;
@@ -11085,7 +11085,7 @@
     // ---- FIC Schedule Assignment ----
     async function assignFicSchedule(tournament) {
         var courtCount = tournament.court_count || 2;
-        var matchDuration = tournament.match_duration || 90;
+        var matchDuration = tournament.match_duration || KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
         var startTime = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
         var scheduledDay = tournament.date_start || null;
         var drawSize = tournament.draw_size || 16;

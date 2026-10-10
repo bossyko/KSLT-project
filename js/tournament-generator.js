@@ -273,7 +273,12 @@ function _generateSE(players, drawSize, seedCount, config, lang) {
     var courtCount = config.courtCount || 2;
     var days = config.days || [{ date: "TBD", label: "День 1" }];
     var startTime = config.startTime || "09:00";
-    var matchDuration = config.matchDuration || 90;
+    /* ВОСЬМОЕ МЕСТО, ГДЕ ЖИЛО ЧИСЛО 90. Сведено к одному определению
+       10.10: умолчание длительности лежит в KSLT_RULES, а не в каждом
+       файле отдельно. Правило читается в момент вызова, а не загрузки —
+       к тому времени kslt-rules.js уже подключён на всех страницах,
+       которые зовут генератор. */
+    var matchDuration = config.matchDuration || window.KSLT_RULES.МИНУТ_НА_МАТЧ_ПО_УМОЛЧАНИЮ;
 
     // --- Расстановка в сетке ---
     var draw = new Array(drawSize);
