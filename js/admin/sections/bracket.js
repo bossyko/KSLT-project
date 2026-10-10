@@ -2198,23 +2198,36 @@
         return итог;
     }
 
+    /**
+     * Кто из двух пар сильнее — ОДНО ОПРЕДЕЛЕНИЕ НА ДВУХ ЧИТАТЕЛЕЙ.
+     *
+     * Правило живёт здесь, а не внутри сортировки, потому что читателей
+     * теперь два: сама жеребьёвка (`посилеОтсортировать`) и предпоказ на
+     * экране заявок. Будь их двое в разных местах — они разошлись бы на
+     * первой же правке, и менеджеру показывали бы одну тройку, а сеялась
+     * бы другая. Беда родилась бы ровно на этом шве.
+     *
+     * Мера парного турнира — СУММА NTRP пары. Равные суммы разводит
+     * сильнейший в паре: 4.5 и 3 играют сильнее, чем 4 и 3.5, хотя сумма
+     * одна. NTRP нет вовсе — считаем очками.
+     */
+    function сильнееПара(a, b, playersMap) {
+        var ntrpA = getTeamNtrp(a, playersMap);
+        var ntrpB = getTeamNtrp(b, playersMap);
+        if (ntrpA || ntrpB) {
+            if ((ntrpB || 0) !== (ntrpA || 0)) return (ntrpB || 0) - (ntrpA || 0);
+            var стA = сильнейшийВПаре(a, playersMap);
+            var стB = сильнейшийВПаре(b, playersMap);
+            if (стB !== стA) return стB - стA;
+        }
+        return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
+    }
+
     async function посилеОтсортировать(список, tournament, playersMap, isDbl) {
         if (!список || список.length < 2) return список;
 
         if (isDbl) {
-            список.sort(function(a, b) {
-                var ntrpA = getTeamNtrp(a, playersMap);
-                var ntrpB = getTeamNtrp(b, playersMap);
-                if (ntrpA || ntrpB) {
-                    if ((ntrpB || 0) !== (ntrpA || 0)) return (ntrpB || 0) - (ntrpA || 0);
-                    // Суммы равны — выше та пара, у кого сильнее первый номер:
-                    // 4.5 и 3 играют сильнее, чем 4 и 3.5, хотя сумма одна
-                    var стA = сильнейшийВПаре(a, playersMap);
-                    var стB = сильнейшийВПаре(b, playersMap);
-                    if (стB !== стA) return стB - стA;
-                }
-                return getTeamPoints(b, playersMap) - getTeamPoints(a, playersMap);
-            });
+            список.sort(function(a, b) { return сильнееПара(a, b, playersMap); });
             return список;
         }
 
@@ -4556,6 +4569,47 @@
                     L.regSeedCount.replace('{n}', расставлено).replace('{m}', норма) +
                     (хватает ? '' : ' \u00B7 ' + L.regSeedHint) +
                 '</div>';
+
+                /* ПРЕДПОКАЗ: КОГО ПОСТАВИЛ БЫ РАСЧЁТ.
+                 *
+                 * Строка выше считала только КОЛИЧЕСТВО сеяных, а не состав.
+                 * Чтобы увидеть, кого выберет продукт, приходилось нажать
+                 * жеребьёвку — то есть узнать ПОСЛЕ, а не до. Менеджер при
+                 * этом ищет сильнейших глазами: список идёт по времени
+                 * подачи (`registered_at`), а не по силе, и на боевом
+                 * MASTERS 10.10 сильнейшая пара стояла третьей строкой
+                 * между 8.25 и 7.50.
+                 *
+                 * ТОЛЬКО ДЛЯ ПАРНЫХ. Там мера считается здесь же, без
+                 * запросов. У одиночных сила берётся из `местаВКатегории`,
+                 * а это запрос к базе — его в отрисовке строки не сделать,
+                 * и городить второй расчёт ради подсказки значило бы завести
+                 * второе определение силы.
+                 *
+                 * ЭТО ПОДСКАЗКА, А НЕ РЕШЕНИЕ: номера она не ставит, выбор
+                 * остаётся за менеджером. */
+                if (isDbl && mainDraw.length > 1) {
+                    var поСиле = mainDraw.slice()
+                        .sort(function(a, b) { return сильнееПара(a, b, playersMap); })
+                        .slice(0, норма);
+                    var строкиПредпоказа = поСиле.map(function(r, i) {
+                        var кап = r.player_id && playersMap[r.player_id]
+                            ? playersMap[r.player_id].name : (r.external_name || '?');
+                        var пар = r.partner_id && playersMap[r.partner_id]
+                            ? playersMap[r.partner_id].name : (r.partner_external_name || '\u2014');
+                        var сила = getTeamNtrp(r, playersMap);
+                        var свой = r.seed_number
+                            ? ' <span class="ad-reg-mark ad-reg-mark-seed">' + r.seed_number + '</span>' : '';
+                        return '<li>' + (i + 1) + ') ' + A.esc(кап) + ' / ' + A.esc(пар) +
+                               ' <span class="ad-reg-cell-muted">' +
+                               (сила ? 'NTRP ' + сила : L.regSeedNoNtrp) + '</span>' + свой + '</li>';
+                    }).join('');
+                    html += '<div class="ad-alert ad-alert-info ad-reg-note">' +
+                        '<strong>' + L.regSeedPreview + '</strong>' +
+                        '<ul class="ad-reg-seed-preview">' + строкиПредпоказа + '</ul>' +
+                        '<div class="ad-reg-cell-muted">' + L.regSeedPreviewHint + '</div>' +
+                    '</div>';
+                }
             }
 
             // ---- Main Draw ----

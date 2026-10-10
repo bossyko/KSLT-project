@@ -1256,6 +1256,21 @@ body.ad-page {
 .ad-reg-mark-ext  { background: rgba(33, 150, 243, 0.15); color: #64b5f6; }
 .ad-reg-mark-seed { background: var(--accent-subtle); color: var(--accent); }
 
+/* ПРЕДПОКАЗ СЕЯНЫХ. Список внутри подсказки: три-шесть строк, читаются
+   сверху вниз, поэтому маркеры не нужны — номер уже стоит в тексте.
+   Отступы — ступени шкалы: 8 сверху и снизу, 8 слева. Строки разводит
+   межстрочный со своей лестницы, а не собственные поля: иначе в подсказке
+   завелось бы число мимо обеих шкал. */
+.ad-reg-seed-preview {
+    margin: var(--space-2) 0;
+    padding-left: var(--space-2);
+    list-style: none;
+}
+
+.ad-reg-seed-preview li {
+    line-height: var(--lh-normal);
+}
+
 /* Номер строки. Было инлайном `text-align:center;padding:4px 6px` — 4 и 6
    на шкале отступов 8·12·16·24·32·40 нет. Отступ отдан системному
    правилу ячейки (10/12 по описанию `Table cell 131:130`). */
