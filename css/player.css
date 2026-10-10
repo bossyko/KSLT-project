@@ -7,12 +7,21 @@
 /* Баннер держит карточку игрока, а не надпись по центру: высоту задаёт
    содержимое. Верхний отступ и минимальная высота — общие для карточек
    игрока, тренера, корта и турнира */
+/* ОДНА МЕРА СТРАНИЦЫ — БОКОВОЕ ПОЛЕ. Замер 09.10: шапка стояла левее тела
+   на 24 (десктоп, планшет лёжа) и правее на 4 (узкие виды). Причина — поле
+   было определено дважды и по-разному: у .pp-hero снаружи предела 900, у
+   .pp-container внутри него. Теперь поле одно, живёт в --pp-gutter, и обе
+   коробки держат его ВНУТРИ своих 900 — границы совпадают по построению,
+   а не по совпадению чисел. */
+.pp-hero,
+.pp-container { --pp-gutter: 24px; }
+
 .pp-hero {
     position: relative;
     min-height: 300px;
     display: flex;
     align-items: center;
-    padding: 110px 24px 40px;
+    padding: 110px 0 40px;
     overflow: hidden;
 }
 
@@ -37,6 +46,7 @@
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
+    padding: 0 var(--pp-gutter);
 }
 
 /* Внутри баннера карточке не нужны ни своя рамка, ни отступ снизу */
@@ -48,7 +58,7 @@
 .pp-container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 32px 24px 80px;
+    padding: 32px var(--pp-gutter) 80px;
 }
 
 /* Back link — now uses global .kslt-back-wrap + .kslt-back from style.css */
@@ -214,7 +224,16 @@
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    transition: all var(--transition-fast);
+    /* ПЕРЕЧИСЛЯЕМ, А НЕ «ALL». Прогон 09.10 замерил на кнопке H2H:
+       :focus-visible — да, цвет контура лаймовый, стиль solid, а ширина 0px.
+       «all» анимирует и outline-width: контур у клавиатурного пользователя
+       не появлялся мгновенно, а наезжал от нуля. Переход остаётся там, где
+       нужен, но контур фокуса под него не попадает. */
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
 }
 
 /* Значок крупнее текста: на 0.9rem огонь терялся рядом с жирной надписью */
@@ -328,7 +347,13 @@
     gap: 10px;
     margin-bottom: 10px;
 }
-.pp-pair-title {
+/* НАЗВАНИЕ БЛОКА ВНУТРИ РАЗДЕЛА — ОДИН УРОВЕНЬ, ОДНО ОПРЕДЕЛЕНИЕ.
+   «Pro-Masters» (.pp-cat-name) и «Микст» (.pp-pair-title) — одна ступень
+   лестницы: 16/700. До 09.10 они были объявлены врозь, в двух концах файла
+   (строки 341 и 1824), одинаковыми по случайности. Беда родилась бы на шве:
+   поправят один — второй уедет. Сторож на одинаковость стоит в заморозке. */
+.pp-pair-title,
+.pp-cat-name {
     font-size: var(--fs-base);
     font-weight: 700;
 }
@@ -400,6 +425,15 @@
 @media (max-width: 640px) {
     .pp-chart-box { height: 260px; padding: 10px; }
     .pp-chart-box-sm { height: 150px; }
+
+    /* ЦИФРА ПОКАЗАТЕЛЯ НА ТЕЛЕФОНЕ — СТУПЕНЬЮ НИЖЕ. Замер 09.10 на 390:
+       карточка 86.5 шириной, подпись «Поражения» 12 занимает ровно 87 —
+       впритык. Пара «цифра + подпись» стояла 21/12, через три ступени;
+       на 18/12 это две, и ряд из четырёх читается как один блок, а не как
+       четыре отдельных числа. Так же поступают компактный класс iOS и
+       dense-вариант Material: крупное число опускается на ступень, подпись
+       остаётся — 11 была бы ниже порога читаемости. */
+    .pp-stat-num { font-size: var(--fs-md); }
 }
 
 .pp-section-title {
@@ -407,6 +441,10 @@
     font-weight: 700;
     /* Лестница 86:10: заголовку 1.1–1.3, а не общие 1.5 */
     line-height: 1.3;
+    /* ВОЗДУХ МЕЖДУ СЕКЦИЯМИ — ступень 40. Жил отдельным объявлением
+       .pp-section-title в другом конце файла: один класс, два блока — тот же
+       шов, что и у «Pro-Masters» с «Микстом». Сведено 09.10 */
+    margin-top: var(--space-10);
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border-subtle);
@@ -468,7 +506,16 @@
        странице десять. Цвет не трогаю — лайм на карточке даёт 16:1,
        моя первая запись про 1.18 была ошибкой прибора */
     position: relative;
-    transition: all var(--transition-fast);
+    /* ПЕРЕЧИСЛЯЕМ, А НЕ «ALL». Прогон 09.10 замерил на кнопке H2H:
+       :focus-visible — да, цвет контура лаймовый, стиль solid, а ширина 0px.
+       «all» анимирует и outline-width: контур у клавиатурного пользователя
+       не появлялся мгновенно, а наезжал от нуля. Переход остаётся там, где
+       нужен, но контур фокуса под него не попадает. */
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
     white-space: nowrap;
 }
 
@@ -695,7 +742,16 @@ a.pp-match-opponent-name:hover {
     font-weight: 600;
     padding: 12px 20px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    /* ПЕРЕЧИСЛЯЕМ, А НЕ «ALL». Прогон 09.10 замерил на кнопке H2H:
+       :focus-visible — да, цвет контура лаймовый, стиль solid, а ширина 0px.
+       «all» анимирует и outline-width: контур у клавиатурного пользователя
+       не появлялся мгновенно, а наезжал от нуля. Переход остаётся там, где
+       нужен, но контур фокуса под него не попадает. */
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
     text-align: center;
 }
 
@@ -861,28 +917,9 @@ a.pp-tournament:hover {
     max-height: 0;
 }
 
-/* Show all / Collapse button */
-.pp-show-all-btn {
-    display: block;
-    width: 100%;
-    padding: 12px 20px;
-    margin-top: 8px;
-    background: none;
-    border: 1px dashed var(--border-subtle);
-    border-radius: var(--radius-md);
-    color: var(--accent);
-    font-family: inherit;
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-    transition: all var(--transition-fast);
-}
-
-.pp-show-all-btn:hover {
-    border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.05);
-}
+/* .pp-show-all-btn снят 09.10: отсечка переехала на общий .kslt-more
+   (css/kslt-otsechka.css). Проверено поиском по js, html и тестам —
+   класс не встречался нигде, кроме этих двух правил. */
 
 /* ---- CHALLENGES ---- */
 .pp-challenges {
@@ -1018,12 +1055,14 @@ a.pp-tournament:hover {
 }
 
 @media (max-width: 768px) {
+    .pp-hero,
+    .pp-container { --pp-gutter: 16px; }
     .pp-hero {
         min-height: 280px;
-        padding: 100px 20px 48px;
+        padding: 100px 0 48px;
     }
     .pp-container {
-        padding: 40px 16px 60px;
+        padding: 40px var(--pp-gutter) 60px;
     }
     .pp-header {
         flex-direction: column;
@@ -1111,12 +1150,14 @@ a.pp-tournament:hover {
 }
 
 @media (max-width: 375px) {
+    .pp-hero,
+    .pp-container { --pp-gutter: 12px; }
     .pp-hero {
-        padding: 100px 16px 40px;
+        padding: 100px 0 40px;
         min-height: 240px;
     }
     .pp-container {
-        padding: 32px 12px 48px;
+        padding: 32px var(--pp-gutter) 48px;
     }
     .pp-name {
         font-size: var(--fs-lg);
@@ -1274,7 +1315,9 @@ a.pp-tournament:hover {
 
 .h2h-score {
     font-size: var(--fs-2xl);
-    font-weight: 800;
+    /* 800 в системе весов нет: 400 · 500 · 600 · 700. Счёт и так крупнейший
+       кегль окна и красится акцентом — лишний вес ничего не добавляет */
+    font-weight: 700;
     color: var(--accent);
     letter-spacing: 0.02em;
     line-height: 1;
@@ -1313,7 +1356,7 @@ a.pp-tournament:hover {
 
 .h2h-stat-val {
     font-size: var(--fs-lg);
-    font-weight: 800;
+    font-weight: 700;
     min-width: 40px;
 }
 
@@ -1694,7 +1737,7 @@ a.pp-tournament:hover {
 
 .pp-guest-name {
     font-size: var(--fs-xl);
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
@@ -1733,7 +1776,15 @@ a.pp-tournament:hover {
     font-weight: 700;
     border-radius: var(--radius-full);
     text-decoration: none;
-    transition: all 0.2s ease;
+    /* ПЕРЕЧИСЛЯЕМ, А НЕ «ALL». Прогон 09.10 замерил на кнопке H2H:
+       :focus-visible — да, цвет контура лаймовый, стиль solid, а ширина 0px.
+       «all» анимирует и outline-width: контур у клавиатурного пользователя
+       не появлялся мгновенно, а наезжал от нуля. Переход остаётся там, где
+       нужен, но контур фокуса под него не попадает. */
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
 }
 
 .pp-guest-btn:hover {
@@ -1826,10 +1877,8 @@ a.pp-tournament:hover {
     margin-bottom: 10px;
 }
 
-.pp-cat-name {
-    font-weight: 700;
-    font-size: var(--fs-base);
-}
+/* .pp-cat-name объявлен вместе с .pp-pair-title — см. «НАЗВАНИЕ БЛОКА
+   ВНУТРИ РАЗДЕЛА» выше. Здесь второго объявления нет намеренно. */
 
 .pp-cat-home {
     font-size: var(--fs-2xs);
@@ -2148,17 +2197,21 @@ a.pp-tournament:hover {
 /* ВОЗДУХ НАД ЗАГОЛОВКОМ СЕКЦИИ. Замер 09.10: margin-top у всех четырёх
    заголовков НОЛЬ — «История рейтинга» упиралась в полосу побед над ней.
    Ступень 40 шкалы отступов, как между секциями на остальных страницах. */
-.pp-section-title {
-    margin-top: var(--space-10);
-}
-
-/* ПЕРВЫЙ ЗАГОЛОВОК ПОСЛЕ ШАПКИ ВОЗДУХ УЖЕ ПОЛУЧИЛ ОТ НЕЁ.
-   Сначала я добавил сюда и :first-child — и правило съело само себя:
-   каждый заголовок первый в СВОЕЙ секции, так что воздух обнулился у всех.
-   Замер это и показал: margin-top остался 0 на всех четырёх. */
-.pp-header + .pp-section-title {
+/* ВОЗДУХ НАД ПЕРВЫМ ЗАГОЛОВКОМ — ОДИН, А НЕ ДВА. Замер 09.10 на 390 и 768:
+   от низа полосы «Назад» до заголовка 80 = padding-top контейнера 40 ПЛЮС
+   межсекционный margin заголовка 40. Два определения одного понятия на одном
+   месте. Межсекционный воздух нужен МЕЖДУ секциями; у первой сверху уже есть
+   поле контейнера. Остаётся 40 на узких видах и 32 на десктопе — ступень. */
+.pp-container > .pp-section-title:first-child {
     margin-top: 0;
 }
+
+/* ПРАВИЛО «.pp-header + .pp-section-title» СНЯТО 09.10 КАК МЁРТВОЕ.
+   Названо мёртвым ПОСЛЕ ПРОВЕРКИ, а не по виду: шапка лежит в .pp-hero-content
+   (pages/player.html:287), заголовки — в .pp-container, братьями они не были
+   ни разу. Замер подтвердил: margin-top 40 у всех четырёх заголовков на
+   десктопе и на телефоне, то есть сброс не сработал ни на одном.
+   Воздух над первым даёт padding-top контейнера: 32 + 40. */
 
 /* ============================================
    ШАПКА ИГРОКА: ЗНАЧЕНИЯ В ОДНУ КОЛОНКУ ПОД ФЛАГОМ

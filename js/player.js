@@ -1036,12 +1036,16 @@
 
     var _allMatchesLoaded = false;
 
-    function renderRealMatches(container, matches, showAll) {
-        var LIMIT = 25;
-        var visible = showAll ? matches : matches.slice(0, LIMIT);
-        var hasMore = !showAll && matches.length > LIMIT;
+    /* ОТСЕЧКА ОБЩАЯ, А НЕ СВОЯ. Здесь была ТРЕТЬЯ копия механизма — с
+       пределом 25 и своими кнопками «показать все» и «свернуть», — при том
+       что слово Кости 06.10 говорит «10 везде», а механизм уже жил на
+       странице турнира. Теперь один: js/kslt-otsechka.js.
+       Строки рисуются ВСЕ: лишние получают класс и скрыты видом, значит их
+       находит поиск по странице и читает диктор. */
+    function renderRealMatches(container, matches) {
+        var visible = matches;
         var html = '';
-        visible.forEach(function(m) {
+        visible.forEach(function(m, индекс) {
             var isP1 = m.player1_id === _playerId;
             var oppId = isP1 ? m.player2_id : m.player1_id;
             var opp = lookupPlayer(oppId);
@@ -1058,7 +1062,8 @@
             var kind = matchKind(m);
             var pairGame = kind === 'doubles' || kind === 'mixed';
 
-            html += '<div class="pp-match' + (pairGame ? '' : ' pp-match-clickable') + '"' +
+            html += '<div class="pp-match' + (pairGame ? '' : ' pp-match-clickable') +
+                window.KSLT_OTSECHKA.класс(индекс, matches.length) + '"' +
                 (tId ? ' data-tournament-id="' + esc(tId) + '"' : '') +
                 (pairGame ? '' : ' data-opponent-id="' + esc(opp.id) +
                     '" data-opponent-name="' + esc(opp.name) +
@@ -1078,28 +1083,11 @@
             html += '</div>';
         });
 
-        if (hasMore) {
-            html += '<button class="pp-show-all-btn" id="ppShowAllMatches">' + L.showAll + ' (' + matches.length + ')</button>';
-        } else if (showAll && matches.length > 10) {
-            html += '<button class="pp-show-all-btn" id="ppCollapseMatches">' + L.collapse + '</button>';
-        }
+        html += window.KSLT_OTSECHKA.кнопка(matches.length, lang);
 
         container.innerHTML = html;
         attachMatchClickHandlers(container);
-
-        var showBtn = document.getElementById('ppShowAllMatches');
-        if (showBtn) {
-            showBtn.addEventListener('click', function() {
-                renderRealMatches(container, matches, true);
-            });
-        }
-        var colBtn = document.getElementById('ppCollapseMatches');
-        if (colBtn) {
-            colBtn.addEventListener('click', function() {
-                renderRealMatches(container, matches, false);
-                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        }
+        window.KSLT_OTSECHKA.включить(container);
     }
 
     function renderMockMatches(container, data) {
@@ -1243,16 +1231,21 @@
                     html += '<div class="pp-tournament-section-label" style="margin-top:12px;">' +
                         (isEn ? 'Played' : isKg ? 'Ойнолгон' : 'Сыгранные') + '</div>';
                 }
-                past.forEach(function(item) {
-                    html += renderTournamentCard(item, false);
+                past.forEach(function(item, индекс) {
+                    html += renderTournamentCard(item, false, индекс, past.length);
                 });
+                /* Та же отсечка, что у матчей и у страницы турнира: прошедших
+                   бывает много — у Азима Исакова 17, и список уходил вниз без
+                   края. Будущие не прячем: их единицы, и они и есть новость. */
+                html += window.KSLT_OTSECHKA.кнопка(past.length, lang);
             }
 
             container.innerHTML = html;
+            window.KSLT_OTSECHKA.включить(container);
         });
     }
 
-    function renderTournamentCard(item, isUpcoming) {
+    function renderTournamentCard(item, isUpcoming, индекс, всего) {
         var ROUND_LABELS = {
             'W': LH.winner, 'F': LH.roundF, 'SF': LH.roundSF, 'QF': LH.roundQF,
             'R16': 'R16', 'R32': 'R32', '3RD': LH.round3rd, '4TH': LH.round4th
@@ -1273,9 +1266,12 @@
         // Запись, добавленную админом руками, открывать нечего: такого
         // турнира в базе нет. Показываем название и очки, но без ссылки
         var manual = !t.id;
+        // Номер строки приходит только у прошедших: будущие не прячем
+        var отсечка = (typeof всего === 'number')
+            ? window.KSLT_OTSECHKA.класс(индекс, всего) : '';
         var html = manual
-            ? '<div class="pp-tournament pp-tournament-plain">'
-            : '<a class="pp-tournament" href="' + tPage + '">';
+            ? '<div class="pp-tournament pp-tournament-plain' + отсечка + '">'
+            : '<a class="pp-tournament' + отсечка + '" href="' + tPage + '">';
         if (tImg) {
             html += '<img src="' + esc(tImg) + '" alt="' + esc(tName) + '" class="pp-tournament-photo">';
         } else {
