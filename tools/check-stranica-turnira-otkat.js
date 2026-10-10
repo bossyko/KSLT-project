@@ -28,6 +28,9 @@ fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/
 
 const CSS = 'css/tournament-detail.css';
 const JSФ = 'js/tournament-detail.js';
+// отсечка живёт в общем файле — откаты на неё трогают его
+const ОТСJS = 'js/kslt-otsechka.js';
+const ОТСCSS = 'css/kslt-otsechka.css';
 const RU  = 'pages/tournament.html';
 const EN  = 'pages/tournament-en.html';
 const ГЕН = 'js/tournament-generator.js';
@@ -172,9 +175,13 @@ const ОТКАТЫ = [
   [CSS, '    .td-fic-chip {\n        transition: none;\n    }',
         '    .td-fic-chip-net {\n        transition: none;\n    }',
    'у новых переходов есть отказ от движения'],
-  [JSФ, "var СТРОК_СРАЗУ = 10;",
-        "var СТРОК_СРАЗУ = 10;\nvar СТРОК_СРАЗУ = 8;",
-   'отсечка длинной таблицы — одно определение на три таблицы'],
+  [ОТСJS, "    O.СТРОК_СРАЗУ = 10;",
+          "    O.СТРОК_СРАЗУ = 10;\n    O.СТРОК_СРАЗУ = 8;",
+   'отсечка — одно определение на весь сайт, и оно не здесь'],
+
+  [JSФ, "    return window.KSLT_OTSECHKA.класс(номер, всего);",
+        "    return (всего > 10 && номер >= 10) ? ' kslt-skryta' : '';",
+   'отсечка — одно определение на весь сайт, и оно не здесь'],
 
   [JSФ, "            partHtml += кнопкаОтсечки(mainDraw.length);",
         "            partHtml += '';",
@@ -184,12 +191,16 @@ const ОТКАТЫ = [
         "            var отсечкаНужна = true;",
    'у расписания две пряталки никогда не работают вместе'],
 
-  [CSS, ".td-row-vse .td-row-skryta { display: table-row; }",
-        ".td-row-vse .td-row-net { display: table-row; }",
+  [ОТСCSS, ".kslt-skryta { display: none !important; }",
+           ".kslt-skryta-net { display: none !important; }",
    'строка прячется классом, а разметку не покидает'],
 
-  [JSФ, "           слово + ' (' + всего + ')</button>';",
-        "           слово + '</button>';",
+  [ОТСJS, "                        строка.classList.remove('kslt-skryta');",
+          "                        строка.style.display = 'table-row';",
+   'строка прячется классом, а разметку не покидает'],
+
+  [ОТСJS, "               слово + ' (' + всего + ')</button>';",
+          "               слово + '</button>';",
    'кнопка отсечки говорит, сколько прячет, и на трёх языках'],
 ];
 

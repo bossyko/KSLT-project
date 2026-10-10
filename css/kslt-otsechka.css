@@ -1,0 +1,32 @@
+/* ОТСЕЧКА ДЛИННОГО СПИСКА — ОДНА НА ВЕСЬ САЙТ.
+   Пара к js/kslt-otsechka.js. Скрытие — одно правило; раскрытие снимает
+   класс, поэтому строка возвращается к своему display сама и файл не знает,
+   таблица там или карточки. */
+
+/* !important здесь не уступка, а правило жанра: класс-утилита видимости
+   должен перебивать display компонента (.pp-match — grid, .td-row — 
+   table-row), иначе отсечка зависит от порядка подключения файлов.
+   Так же сделано в Bootstrap (.d-none) и в утилитах Tailwind. */
+.kslt-skryta { display: none !important; }
+
+.kslt-more {
+    display: block;
+    width: 100%;
+    /* 44 — ступень шкалы кнопок и нижняя граница цели нажатия */
+    height: 44px;
+    margin-top: var(--space-2);
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    /* 1 — ступень лестницы межстрочных. У кнопки фиксированной высоты
+       строка одна, и normal оставляет значение, которого нет в шкале */
+    line-height: 1;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.kslt-more:hover { border-color: var(--accent); color: var(--accent); }
+.kslt-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

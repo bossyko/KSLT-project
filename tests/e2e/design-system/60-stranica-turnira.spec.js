@@ -328,7 +328,7 @@ test.describe('страница турнира · ' + Я.имя, () => {
                     всего: t.querySelectorAll('tbody tr').length,
                     видно: [...t.querySelectorAll('tbody tr')].filter(вид).length
                 }));
-            const кн = [...document.querySelectorAll('.td-more')].map(b => ({
+            const кн = [...document.querySelectorAll('.kslt-more')].map(b => ({
                 текст: b.textContent.trim(),
                 высота: Math.round(b.getBoundingClientRect().height),
                 aria: b.getAttribute('aria-expanded')
@@ -352,8 +352,8 @@ test.describe('страница турнира · ' + Я.имя, () => {
         }
 
         /* НАЖАТИЕ, А НЕ ЧТЕНИЕ КЛАССА: слой цели уже однажды съедал кнопку. */
-        const сколько = await page.locator('.td-more').count();
-        for (let i = 0; i < сколько; i++) await page.locator('.td-more').first().click();
+        const сколько = await page.locator('.kslt-more').count();
+        for (let i = 0; i < сколько; i++) await page.locator('.kslt-more').first().click();
         await page.waitForTimeout(300);
         const после = await page.evaluate(() => {
             const вид = э => э && э.offsetParent !== null && !э.hidden;
@@ -362,7 +362,7 @@ test.describe('страница турнира · ' + Я.имя, () => {
                     .filter(t => t.offsetParent !== null && t.querySelectorAll('tbody tr').length > 10)
                     .map(t => [...t.querySelectorAll('tbody tr')].filter(r => !вид(r)).length)
                     .reduce((a, b) => a + b, 0),
-                кнопок: document.querySelectorAll('.td-more').length
+                кнопок: document.querySelectorAll('.kslt-more').length
             };
         });
         expect(после.спрятанных, 'после нажатия часть строк осталась скрытой').toBe(0);
@@ -388,8 +388,8 @@ test.describe('страница турнира · ' + Я.имя, () => {
             const sc = document.querySelector('#scheduleContainer');
             return {
                 полоса: !!sc.querySelector('.td-sched-ranshe'),
-                отсечка: sc.querySelectorAll('.td-more').length,
-                спрятаноКлассом: sc.querySelectorAll('.td-row-skryta').length,
+                отсечка: sc.querySelectorAll('.kslt-more').length,
+                спрятаноКлассом: sc.querySelectorAll('.kslt-skryta').length,
                 строк: sc.querySelectorAll('tbody tr').length
             };
         });
