@@ -72,7 +72,8 @@ const КУСКИ = [
     ['жеребьёвка и сетки за места', 'check-draw.js', 'check-draw-otkat.js'],
     ['обзорная «Инфо»', 'check-info-obzor.js', 'check-info-obzor-otkat.js'],
     ['страницы «Инфо»', 'check-info-stranicy.js', 'check-info-stranicy-otkat.js'],
-    ['«Цены»', 'check-ceny.js', 'check-ceny-otkat.js']
+    ['«Цены»', 'check-ceny.js', 'check-ceny-otkat.js'],
+    ['страница игрока', 'check-stranica-igroka.js', 'check-stranica-igroka-otkat.js']
 ];
 
 function прогнать(файл) {
