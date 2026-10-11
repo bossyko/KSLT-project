@@ -587,7 +587,7 @@
         var player = data.player;
         var rankingsPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
         var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
-        var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : 'https://placehold.co/240x240?text=?';
+        var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : '';
 
         var titleText = isEn ? 'Register to view player profiles' : (isKg ? 'Оюнчулардын профилин көрүү үчүн катталыңыз' : 'Зарегистрируйтесь для просмотра профилей');
         var descText = isEn ? 'Full stats, match history, achievements and challenges are available after registration' : (isKg ? 'Толук статистика, матч тарыхы, жетишкендиктер жана чакырыктар каттоодон кийин жеткиликтүү' : 'Полная статистика, история матчей, достижения и вызовы доступны после регистрации');
@@ -607,7 +607,7 @@
             '</div>' +
             '<div class="pp-guest-block">' +
                 '<div class="pp-guest-preview">' +
-                    '<img src="' + esc(photoUrl) + '" alt="" class="pp-guest-photo">' +
+                    кружокИгрока(player.name, photoUrl, 'pp-guest-photo') +
                     '<h2 class="pp-guest-name">' + esc(player.name) + '</h2>' +
                 '</div>' +
                 '<div class="pp-guest-cta">' +
@@ -671,8 +671,11 @@
         // ---- Header ----
         hero += '<div class="pp-header pp-fade-in">';
         hero += '<div class="pp-photo-wrap">';
-        var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : 'https://placehold.co/240x240?text=No+Photo';
-        hero += '<img src="' + esc(photoUrl) + '" alt="' + esc(player.name) + '" class="pp-photo">';
+        /* БЕЗ ФОТОГРАФИИ — ИНИЦИАЛЫ, И ЭТО ЖЕ СНИМАЕТ АНГЛИЙСКОЕ «No Photo»
+           НА ТРЁХ ЯЗЫКАХ: заглушка приходила с чужого CDN с зашитой в адрес
+           английской подписью. */
+        var photoUrl = player.photo ? player.photo.replace('w=80&h=80', 'w=240&h=240') : '';
+        hero += кружокИгрока(player.name, photoUrl, 'pp-photo');
         if (player.online) hero += '<div class="pp-online-dot"></div>';
         // Motto under photo
         var motto = isEn ? (player.bio_en || player.bio) : (isKg ? (player.bio_kg || player.bio) : player.bio);
@@ -970,6 +973,39 @@
     // Cache for Supabase-loaded player names (opponent display)
     var _playerCache = {};
 
+    /**
+     * Инициалы для кружка вместо фотографии.
+     *
+     * Две буквы, а не одна: по одной букве однофамильцы и тёзки сливаются, а
+     * у пары два кружка выглядели бы одинаково. Больше двух в кружок не
+     * влезает, поэтому у длинных имён берём первое слово и последнее.
+     *
+     * Правило взято у кабинета (`js/dashboard.js:3358`) БЕЗ нового разбора:
+     * человек видит одни и те же буквы на обеих страницах.
+     */
+    function инициалыИмени(имя) {
+        var слова = String(имя || '').trim().split(/\s+/).filter(Boolean);
+        if (слова.length === 0) return '?';
+        if (слова.length === 1) return слова[0].charAt(0).toUpperCase();
+        return (слова[0].charAt(0) + слова[слова.length - 1].charAt(0)).toUpperCase();
+    }
+
+    /**
+     * Кружок игрока: фотография, а без неё — инициалы.
+     *
+     * Здесь стоял адрес на чужой CDN (`placehold.co`): три одинаковых серых
+     * вопросительных знака в строке, запрос наружу на каждый из них и пустой
+     * короб, когда сеть до него не дошла. Инициалы рисуются своими силами —
+     * так уже сделано в кабинете, на пьедестале и в карточках вызова.
+     */
+    function кружокИгрока(имя, фото, класс) {
+        var кл = класс || 'pp-match-opponent-photo';
+        return фото
+            ? '<img src="' + esc(фото) + '" alt="' + esc(имя || '') + '" class="' + кл + '">'
+            : '<span class="' + кл + ' pp-photo-ph" aria-hidden="true">' +
+                esc(инициалыИмени(имя)) + '</span>';
+    }
+
     // Look up player from static data or cache
     function lookupPlayer(id) {
         var d = findPlayer(id);
@@ -988,7 +1024,73 @@
         return { id: id, name: id, photo: '' };
     }
 
-    function loadRealMatches(data) {
+    /**
+     * Турниры, где игрок заявлен НАПАРНИКОМ: { турнир: капитан пары }.
+     *
+     * В матче помещаются только двое — `player1_id` и `player2_id`, и это
+     * капитаны пар. Напарник в матче не упомянут вовсе, поэтому своих парных
+     * игр он на этой странице не видел: у Дениса Ли 11.10 выходило 25 матчей
+     * вместо 29 и 5 турниров вместо 7, а заявок напарником в базе 114 — у 86
+     * разных игроков. Пару восстанавливаем по заявке: она знает и капитана,
+     * и напарника. Приём взят из кабинета, где он уже работает
+     * (js/dashboard.js:3213 и :3236), чтобы правило было одно.
+     */
+    async function турнирыНапарника(pid) {
+        var итог = {};
+        if (!client || !pid) return итог;
+        var res = await client.from('tournament_registrations')
+            .select('tournament_id, player_id')
+            .eq('partner_id', pid)
+            .in('status', ['approved', 'draw']);
+        (res.data || []).forEach(function(r) {
+            if (r.tournament_id && r.player_id) итог[r.tournament_id] = r.player_id;
+        });
+        return итог;
+    }
+
+    /**
+     * Составы пар в парных турнирах списка: { турнир: { капитан: напарник } }.
+     *
+     * Одним запросом на все турниры сразу, а не по строке: в списке их до
+     * пятидесяти. Напарник может быть не из клуба — тогда от него в заявке
+     * осталось только вписанное имя, и фото взять неоткуда.
+     */
+    async function составыПар(matches) {
+        var пары = {};
+        if (!client) return пары;
+        var ids = [];
+        matches.forEach(function(m) {
+            var род = matchKind(m);
+            if (род !== 'doubles' && род !== 'mixed') return;
+            if (m.tournament_id && ids.indexOf(m.tournament_id) === -1) ids.push(m.tournament_id);
+        });
+        if (!ids.length) return пары;
+        var res = await client.from('tournament_registrations')
+            .select('tournament_id, player_id, partner_id, partner_external_name')
+            .in('tournament_id', ids);
+        ids.forEach(function(tid) { пары[tid] = {}; });
+        (res.data || []).forEach(function(r) {
+            if (!пары[r.tournament_id] || !r.player_id) return;
+            пары[r.tournament_id][r.player_id] = {
+                id: r.partner_id || '',
+                external: r.partner_external_name || ''
+            };
+        });
+        return пары;
+    }
+
+    /** Имя и фото напарника по записи состава. */
+    function напарникПоСоставу(состав) {
+        if (!состав) return null;
+        if (состав.id) {
+            var и = lookupPlayer(состав.id);
+            if (и && и.name && и.name !== состав.id) return { name: и.name, photo: и.photo || '' };
+        }
+        if (состав.external) return { name: состав.external, photo: '' };
+        return null;
+    }
+
+    async function loadRealMatches(data) {
         var container = document.getElementById('ppMatchesContainer');
         if (!container) return;
 
@@ -1000,38 +1102,59 @@
         // Здесь всё сыгранное: рейтинговые и дружеские турниры, парные, микст
         // и баттлы. В зачёт из этого идут только рейтинговые одиночные —
         // об этом говорит метка у названия турнира
-        client.from('matches')
+        // Матчи берём и там, где игрок стоит сам, и там, где за его пару
+        // записан капитан — иначе напарник своих парных игр не увидит
+        var капитаны = await турнирыНапарника(_playerId);
+        var условия = ['player1_id.eq.' + _playerId, 'player2_id.eq.' + _playerId];
+        Object.keys(капитаны).forEach(function(tid) {
+            условия.push('and(tournament_id.eq.' + tid + ',player1_id.eq.' + капитаны[tid] + ')');
+            условия.push('and(tournament_id.eq.' + tid + ',player2_id.eq.' + капитаны[tid] + ')');
+        });
+
+        var res = await client.from('matches')
             .select('*, match_type, tournament:tournaments(id, title, title_en, title_kg, format, category_id)')
-            .or('player1_id.eq.' + _playerId + ',player2_id.eq.' + _playerId)
+            .or(условия.join(','))
             .not('winner_id', 'is', null)
             .order('played_at', { ascending: false })
-            .limit(50)
-            .then(async function(res) {
-                if (res.error || !res.data || res.data.length === 0) {
-                    container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
-                    return;
-                }
+            .limit(50);
 
-                // Имена соперников забираем одним запросом до отрисовки. Раньше
-                // каждое имя догружалось по одному и попадало в список только
-                // при следующей отрисовке — до неё в строке стоял внутренний
-                // адрес карточки, вроде «erlan-shekerbekov»
-                var чужие = [];
-                res.data.forEach(function(m) {
-                    var o = m.player1_id === _playerId ? m.player2_id : m.player1_id;
-                    if (o && !_playerCache[o] && чужие.indexOf(o) === -1) чужие.push(o);
-                });
-                if (чужие.length) {
-                    var сп = await client.from('players_public')
-                        .select('id, name, name_en, name_kg, photo').in('id', чужие);
-                    (сп.data || []).forEach(function(p) {
-                        var имя = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
-                        _playerCache[p.id] = { id: p.id, name: имя || p.id, photo: p.photo || '' };
-                    });
-                }
+        if (res.error || !res.data || res.data.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
+            return;
+        }
 
-                renderRealMatches(container, res.data);
+        var пары = await составыПар(res.data);
+
+        // Имена соперников забираем одним запросом до отрисовки. Раньше
+        // каждое имя догружалось по одному и попадало в список только
+        // при следующей отрисовке — до неё в строке стоял внутренний
+        // адрес карточки, вроде «erlan-shekerbekov».
+        // Напарники — своей и чужой стороны — идут тем же запросом: иначе
+        // первая отрисовка показала бы вместо имени адрес карточки
+        var чужие = [];
+        function дозапросить(id) {
+            if (id && !_playerCache[id] && чужие.indexOf(id) === -1) чужие.push(id);
+        }
+        res.data.forEach(function(m) {
+            var мойКапитан = капитаны[m.tournament_id] || _playerId;
+            дозапросить(m.player1_id === мойКапитан ? m.player2_id : m.player1_id);
+            if (мойКапитан !== _playerId) дозапросить(мойКапитан);
+            var составы = пары[m.tournament_id];
+            if (!составы) return;
+            [m.player1_id, m.player2_id].forEach(function(cap) {
+                if (составы[cap] && составы[cap].id) дозапросить(составы[cap].id);
             });
+        });
+        if (чужие.length) {
+            var сп = await client.from('players_public')
+                .select('id, name, name_en, name_kg, photo').in('id', чужие);
+            (сп.data || []).forEach(function(p) {
+                var имя = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
+                _playerCache[p.id] = { id: p.id, name: имя || p.id, photo: p.photo || '' };
+            });
+        }
+
+        renderRealMatches(container, res.data, капитаны, пары);
     }
 
     var _allMatchesLoaded = false;
@@ -1042,15 +1165,20 @@
        странице турнира. Теперь один: js/kslt-otsechka.js.
        Строки рисуются ВСЕ: лишние получают класс и скрыты видом, значит их
        находит поиск по странице и читает диктор. */
-    function renderRealMatches(container, matches) {
+    function renderRealMatches(container, matches, капитаны, пары) {
+        капитаны = капитаны || {};
+        пары = пары || {};
         var visible = matches;
         var html = '';
         visible.forEach(function(m, индекс) {
-            var isP1 = m.player1_id === _playerId;
+            // Моя сторона — это я сам, а в парном турнире, где я напарник,
+            // капитан моей пары: в матче записан он
+            var мойКапитан = капитаны[m.tournament_id] || _playerId;
+            var isP1 = m.player1_id === мойКапитан;
             var oppId = isP1 ? m.player2_id : m.player1_id;
             var opp = lookupPlayer(oppId);
-            var result = m.winner_id === _playerId ? 'W' : 'L';
-            var oppPhoto = opp.photo || 'https://placehold.co/36x36?text=?';
+            var result = m.winner_id === мойКапитан ? 'W' : 'L';
+            var oppPhoto = opp.photo || '';
             var score = m.score || '';
             var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
 
@@ -1070,12 +1198,50 @@
                     '" data-opponent-photo="' + esc(oppPhoto) + '"') + '>';
             html += '<div class="pp-match-date">' + formatMatchDate(m.played_at) + '</div>';
             var tPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+
+            /* С КЕМ ИГРАЛИ В ПАРЕ. Капитану напарника знает заявка; напарнику
+               парой был капитан, который и записан в матче. Слова те же, что
+               в кабинете (js/dashboard.js:839, :537, :235), чтобы одно и то же
+               называлось одинаково. Через L не идём: словарь на этой странице
+               всегда русский — window.playerProfileLabels нигде не заводится,
+               померено 11.10 на player-en.html, где метки матчей выходят
+               по-русски. Это записано в находки. */
+            var составы = пары[m.tournament_id] || {};
+            var мойНапарник = null, напарникСоперника = null;
+            if (pairGame) {
+                мойНапарник = (мойКапитан === _playerId)
+                    ? напарникПоСоставу(составы[_playerId])
+                    : { name: lookupPlayer(мойКапитан).name, photo: lookupPlayer(мойКапитан).photo };
+                напарникСоперника = напарникПоСоставу(составы[oppId]);
+            }
+            var словоВПаре = isEn ? 'with' : (isKg ? 'жупташы' : 'в паре с');
+
             html += '<div class="pp-match-tournament">' +
-                (tName ? '<a href="' + tPage + '?id=' + esc(tId) + '&tab=bracket">' + esc(tName) + '</a>' : '') +
-                matchKindTag(m) + '</div>';
+                '<span class="pp-match-tournament-row">' +
+                    (tName ? '<a href="' + tPage + '?id=' + esc(tId) + '&tab=bracket">' + esc(tName) + '</a>' : '') +
+                    matchKindTag(m) +
+                '</span>' +
+                (мойНапарник ? '<span class="pp-match-mate">' + словоВПаре +
+                    ' <span class="pp-match-mate-name">' + esc(мойНапарник.name) + '</span></span>' : '') +
+                '</div>';
+
             html += '<div class="pp-match-opponent">';
-            html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(opp.name) + '" class="pp-match-opponent-photo">';
-            html += '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>';
+            if (напарникСоперника) {
+                // У пары кружков два, внахлёст, и два имени в столбик: одно
+                // фото и одно имя на двоих обманывали — играли четверо
+                html += '<span class="pp-match-opponent-photos">' +
+                    кружокИгрока(opp.name, oppPhoto) +
+                    кружокИгрока(напарникСоперника.name, напарникСоперника.photo,
+                        'pp-match-opponent-photo pp-match-opponent-photo-2') +
+                    '</span>';
+                html += '<span class="pp-match-opponent-pair">' +
+                    '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>' +
+                    '<span class="pp-match-opponent-name">' + esc(напарникСоперника.name) + '</span>' +
+                    '</span>';
+            } else {
+                html += кружокИгрока(opp.name, oppPhoto);
+                html += '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>';
+            }
             html += '</div>';
             html += '<div class="pp-match-score">' + displayScore + '</div>';
             html += '<div class="pp-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</div>';
@@ -1098,7 +1264,7 @@
             html += '<div class="pp-match-date">' + m.date + '</div>';
             html += '<div class="pp-match-tournament"></div>';
             html += '<div class="pp-match-opponent">';
-            html += '<img src="' + esc(m.opponent.photo) + '" alt="' + esc(m.opponent.name) + '" class="pp-match-opponent-photo">';
+            html += кружокИгрока(m.opponent.name, m.opponent.photo);
             html += '<span class="pp-match-opponent-name">' + m.opponent.name + '</span>';
             html += '</div>';
             html += '<div class="pp-match-score">' + m.score + '</div>';
@@ -1147,9 +1313,11 @@
         }
 
         Promise.all([
+            // И свои заявки, и те, где игрок записан напарником: в парной
+            // заявке капитан один, а играли двое
             client.from('tournament_registrations')
                 .select('status, tournament:tournaments(id, title, title_en, title_kg, date_start, image)')
-                .eq('player_id', _playerId)
+                .or('player_id.eq.' + _playerId + ',partner_id.eq.' + _playerId)
                 .in('status', ['approved', 'draw'])
                 .order('registered_at', { ascending: false })
                 .limit(10),
@@ -1333,11 +1501,11 @@
             var oppName, oppPhoto, oppId;
             if (isChallenger) {
                 oppName = isEn ? (c.opponent_name_en || c.opponent_name) : (isKg ? (c.opponent_name_kg || c.opponent_name) : c.opponent_name);
-                oppPhoto = c.opponent_photo || 'https://placehold.co/36x36?text=?';
+                oppPhoto = c.opponent_photo || '';
                 oppId = c.opponent_player_id;
             } else {
                 oppName = isEn ? (c.challenger_name_en || c.challenger_name) : (isKg ? (c.challenger_name_kg || c.challenger_name) : c.challenger_name);
-                oppPhoto = c.challenger_photo || 'https://placehold.co/36x36?text=?';
+                oppPhoto = c.challenger_photo || '';
                 oppId = c.challenger_player_id;
             }
 
@@ -1353,11 +1521,11 @@
             html += '<div class="pp-match-opponent">';
             if (oppId) {
                 html += '<a href="' + playerPage + '?id=' + esc(oppId) + '">';
-                html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
+                html += кружокИгрока(oppName, oppPhoto);
                 html += '</a>';
                 html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-match-opponent-name" style="color:inherit;text-decoration:none;">' + esc(oppName) + '</a>';
             } else {
-                html += '<img src="' + esc(oppPhoto) + '" alt="' + esc(oppName) + '" class="pp-match-opponent-photo">';
+                html += кружокИгрока(oppName, oppPhoto);
                 html += '<span class="pp-match-opponent-name" style="color:rgba(255,255,255,0.5);">' + esc(oppName || 'Unknown') + '</span>';
             }
             html += '</div>';
@@ -1523,7 +1691,7 @@
         // Header: avatars + score
         html += '<div class="h2h-header">';
         html += '<div class="h2h-player">';
-        html += '<img src="' + esc(_playerPhoto) + '" class="h2h-photo" alt="">';
+        html += кружокИгрока(_playerName, _playerPhoto, 'h2h-photo');
         html += '<div class="h2h-name">' + esc(_playerName) + '</div>';
         html += '</div>';
         html += '<div class="h2h-center">';
@@ -1533,7 +1701,7 @@
         html += '<div class="h2h-label">' + matchesLabel + '</div>';
         html += '</div>';
         html += '<div class="h2h-player">';
-        html += '<img src="' + esc(oppPhoto) + '" class="h2h-photo" alt="">';
+        html += кружокИгрока(oppName, oppPhoto, 'h2h-photo');
         html += '<div class="h2h-name">' + esc(oppName) + '</div>';
         html += '</div>';
         html += '</div>';
@@ -1806,7 +1974,11 @@
                         .order('points', { ascending: false });
 
                     var catById = {};
-                    var allCatsRes = await client.from('categories').select('id, name, name_en, name_kg');
+                    // sort_order — ступень лестницы категорий. Порядок карточек
+                    // берётся по ней, а не по очкам: набрать в Masters больше,
+                    // чем в Pro-Masters, можно, и тогда карточки вставали
+                    // наоборот, споря с графиком под ними
+                    var allCatsRes = await client.from('categories').select('id, name, name_en, name_kg, sort_order');
                     (allCatsRes.data || []).forEach(function(c) { catById[c.id] = c; });
 
                     if (pcRes.data && pcRes.data.length > 0) {
@@ -1834,6 +2006,7 @@
                                 losses: row.losses || 0,
                                 closed: !!row.closed_at,
                                 rank: место,
+                                sort_order: c2 ? (Number(c2.sort_order) || 0) : 0,
                                 isHome: row.category_id === p.category_id
                             });
                             if (row.category_id === p.category_id) rank = место;
@@ -1851,8 +2024,17 @@
                             id: p.category_id,
                             name: hc ? (isEn ? (hc.name_en || hc.name) : (isKg ? (hc.name_kg || hc.name) : hc.name)) : p.category_id,
                             points: 0, wins: 0, losses: 0, closed: false,
-                            rank: null, isHome: true
+                            rank: null, isHome: true,
+                            sort_order: hc ? (Number(hc.sort_order) || 0) : 0
                         });
+                    }
+
+                    // Наивысшая категория первой. Правило общее: тем же
+                    // сравнением выстраивает линии график истории рейтинга
+                    // (js/rating-chart.js). Домашняя категория без очков
+                    // встаёт на свою ступень, а не в конец списка
+                    if (window.KSLT_RULES && KSLT_RULES.поСилеКатегорий) {
+                        myCats.sort(KSLT_RULES.поСилеКатегорий);
                     }
 
                     var playerName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
@@ -1922,7 +2104,7 @@
         _playerName = data.player.name;
         _playerPhoto = data.player.photo
             ? data.player.photo.replace('w=80&h=80', 'w=240&h=240')
-            : 'https://placehold.co/80x80?text=?';
+            : '';
 
         // Load badges from Supabase (parallel)
         var badgeResults = await Promise.all([
