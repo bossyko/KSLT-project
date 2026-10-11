@@ -24,6 +24,8 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-igrok-'));
 const CSS = 'css/player.css';
 const JSФ = 'js/player.js';
 const RU  = 'pages/player.html';
+const ГРФ = 'js/rating-chart.js';
+const ПРВ = 'js/kslt-rules.js';
 const EN  = 'pages/player-en.html';
 
 const ОТКАТЫ = [
@@ -143,17 +145,92 @@ const ОТКАТЫ = [
    'мёртвой кнопки отсечки в файле нет'],
 
   /* ── версии ── */
-  [RU, '<link rel="stylesheet" href="../css/player.css?v=62">',
-       '<link rel="stylesheet" href="../css/player.css?v=61">',
+  [RU, '<link rel="stylesheet" href="../css/player.css?v=64">',
+       '<link rel="stylesheet" href="../css/player.css?v=63">',
    'версия player.css одна на все три языка'],
 
-  [RU, '<script src="../js/player.js?v=57"></script>',
-       '<script src="../js/player.js?v=56"></script>',
+  [RU, '<script src="../js/player.js?v=59"></script>',
+       '<script src="../js/player.js?v=58"></script>',
    'версия player.js одна на все три языка'],
 
   [RU, '<link rel="stylesheet" href="../css/kslt-otsechka.css?v=3">',
        '<link rel="stylesheet" href="../css/kslt-otsechka.css?v=2">',
    'версия kslt-otsechka.css одна на все три языка'],
+
+  /* ── лестница категорий ── */
+  [ПРВ, 'R.поСилеКатегорий = function (а, б) {',
+        'R.поСилеКатегорийДругая = function (а, б) {',
+   'правило силы категорий объявлено ровно один раз'],
+
+  [JSФ, "select('id, name, name_en, name_kg, sort_order')",
+        "select('id, name, name_en, name_kg')",
+   'страница игрока строит карточки по ступени, а не по очкам'],
+
+  [ГРФ, 'return window.KSLT_RULES.поСилеКатегорий(cats[a], cats[b]);',
+        'return ((cats[b] && cats[b].sort) || 0) - ((cats[a] && cats[a].sort) || 0);',
+   'график линий зовёт общее правило, а не сравнивает ступень руками'],
+
+  /* ── легенда графика ── */
+  [ГРФ, 'fillStyle: ds.borderColor,',
+        'fillStyle: ds.pointBackgroundColor,',
+   'запись легенды собирается сама и красится цветом линии'],
+
+  [ГРФ, 'color: ЦВЕТ_ПОДПИСИ, usePointStyle: true',
+        "color: '#ccc', usePointStyle: true",
+   'подпись легенды названа одним именем, а не двумя числами'],
+
+  /* ── парные игры видны и напарнику ── */
+  [JSФ, ".eq('partner_id', pid)",
+        ".eq('player_id', pid)",
+   'матчи берутся и там, где за пару записан капитан'],
+
+  [JSФ, ".or('player_id.eq.' + _playerId + ',partner_id.eq.' + _playerId)",
+        ".eq('player_id', _playerId)",
+   'турниры берутся и по заявке напарником'],
+
+  [JSФ, 'var isP1 = m.player1_id === мойКапитан;',
+        'var isP1 = m.player1_id === _playerId;',
+   'своя сторона считается от капитана пары, а не от самого игрока'],
+
+  /* ── одни слова со страницей кабинета ── */
+  [JSФ, "var словоВПаре = isEn ? 'with' : (isKg ? 'жупташы' : 'в паре с');",
+        "var словоВПаре = isEn ? 'with' : (isKg ? 'жуптук' : 'в паре с');",
+   'слова «в паре с» на странице и в кабинете одни и те же'],
+
+  /* ── строка напарника ── */
+  [CSS, '    white-space: nowrap;\n    font-size: var(--fs-2xs);\n    line-height: 1.3;\n    color: var(--text-muted);',
+        '    white-space: nowrap;\n    font-size: var(--fs-xs);\n    line-height: 1.3;\n    color: var(--text-muted);',
+   'строка напарника строго мельче названия турнира'],
+
+  [CSS, '.pp-match-mate-name {\n    color: var(--text-secondary);',
+        '.pp-match-mate-name {\n    color: var(--text-dim);',
+   'строка напарника не красится в --text-dim'],
+
+  /* ── пара соперников ── */
+  [CSS, '.pp-match-opponent-pair {',
+        '.pp-match-opponent-dvoe {',
+   'у пары соперников рисуются оба, а не один за двоих'],
+
+  [CSS, '    margin-left: -8px;\n    box-shadow: 0 0 0 2px var(--bg-primary);',
+        '    margin-left: -5px;\n    box-shadow: 0 0 0 2px var(--bg-primary);',
+   'нахлёст кружков стоит на ступени шкалы'],
+
+  /* ── кружок без фотографии ── */
+  [JSФ, "        return фото\n            ? '<img src=\"' + esc(фото) + '\" alt=\"' + esc(имя || '') + '\" class=\"' + кл + '\">'",
+        "        return фото\n            ? '<img src=\"' + esc(фото) + '\" class=\"pp-match-opponent-photo\" alt=\"\">'",
+   'кружок игрока строится ОДНИМ местом'],
+
+  [JSФ, 'return (слова[0].charAt(0) + слова[слова.length - 1].charAt(0)).toUpperCase();',
+        'return слова[0].charAt(0).toUpperCase();',
+   'инициалы — две буквы, как в кабинете'],
+
+  [CSS, '    background: rgba(255, 255, 255, 0.06);\n    color: var(--text-secondary);',
+        '    background: rgba(255, 255, 255, 0.06);\n    color: var(--accent);',
+   'портрет не берёт ни акцент, ни цвет статуса'],
+
+  [CSS, '    background: rgba(204, 255, 0, 0.1);\n    color: var(--accent);\n    font-size: var(--fs-sm);',
+        '    background: rgba(204, 255, 0, 0.1);\n    color: var(--text-dim);\n    font-size: var(--fs-sm);',
+   'буквы в кружке читаемы и весом из системы'],
 
   [RU, '<script src="../js/kslt-otsechka.js?v=1"></script>',
        '<script src="../js/kslt-otsechka.js?v=2"></script>',
