@@ -16,6 +16,11 @@
 
     var FALLBACK_COLOR = '#8A8A8F';
 
+    /* Цвет подписи в легенде. Одним именем, потому что его называют дважды:
+       в настройках легенды и в каждой её записи — запись, собранная своими
+       руками, настроек не наследует. */
+    var ЦВЕТ_ПОДПИСИ = '#ccc';
+
     /** Нарисованные графики по идентификатору холста — чтобы гасить прежний. */
     var _charts = {};
 
@@ -94,9 +99,10 @@
         var byCat = {};
         rows.forEach(function(r) { (byCat[r.category_id] = byCat[r.category_id] || []).push(r); });
 
-        // Сильные категории первыми, как в рейтинге
+        // Сильные категории первыми, как в рейтинге. Правило одно на продукт:
+        // карточки категорий на странице игрока сортируются им же
         var order = Object.keys(byCat).sort(function(a, b) {
-            return ((cats[b] && cats[b].sort) || 0) - ((cats[a] && cats[a].sort) || 0);
+            return window.KSLT_RULES.поСилеКатегорий(cats[a], cats[b]);
         });
 
         var sets = order.map(function(cat) {
@@ -233,7 +239,37 @@
                     legend: {
                         position: 'bottom',
                         align: 'start',
-                        labels: { color: '#ccc', usePointStyle: true, pointStyle: 'circle', boxWidth: 8, padding: 16, font: { size: 12 } }
+                        /* ЦВЕТ КРУЖКА БЕРЁТСЯ У ЛИНИИ, А НЕ У ТОЧКИ НОМЕР НОЛЬ.
+                           При `usePointStyle` Chart.js строит запись легенды из
+                           стиля ТОЧКИ с номером 0. А `pointBackgroundColor` у
+                           нас — массив по точкам: засечка стоит только в дни
+                           турниров, в остальные она 'transparent'. У линии,
+                           чей первый турнир не совпал с самой левой датой,
+                           нулевая точка прозрачная — и кружок в легенде
+                           пропадал, оставалась одна подпись.
+                           Померено 11.10 на furkat-sadykov: у «Pro-Masters»
+                           fillStyle приходил 'transparent', у «Masters» —
+                           '#B76BFF' с обводкой '#0d0d10', цветом фона.
+                           Берём `borderColor` — он у линии один и уже несёт
+                           приглушение закрытой категории. */
+                        labels: {
+                            color: ЦВЕТ_ПОДПИСИ, usePointStyle: true, pointStyle: 'circle',
+                            boxWidth: 8, padding: 16, font: { size: 12 },
+                            generateLabels: function(chart) {
+                                return chart.data.datasets.map(function(ds, и) {
+                                    return {
+                                        text: ds.label,
+                                        fillStyle: ds.borderColor,
+                                        strokeStyle: ds.borderColor,
+                                        lineWidth: 0,
+                                        pointStyle: 'circle',
+                                        fontColor: ЦВЕТ_ПОДПИСИ,
+                                        hidden: !chart.isDatasetVisible(и),
+                                        datasetIndex: и
+                                    };
+                                });
+                            }
+                        }
                     },
                     tooltip: {
                         backgroundColor: 'rgba(20,20,24,0.95)',
