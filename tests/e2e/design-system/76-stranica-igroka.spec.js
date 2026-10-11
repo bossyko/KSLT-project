@@ -104,6 +104,149 @@ async function найтиИгрока(page, что = 'с категорией') 
     return найдено.id;
 }
 
+/**
+ * Игрок, у которого категорий две и больше, и очки НЕ совпадают с лестницей.
+ *
+ * Именно такой случай и ловит правило: когда порядок по очкам и порядок по
+ * ступени совпадают, проверять нечего — карточки встанут верно и по старому
+ * коду. Возвращает id и ожидаемый порядок меток категорий.
+ */
+async function найтиДвеКатегории(page) {
+    await page.goto('/index.html');
+    return page.evaluate(async ({ url, key }) => {
+        const взять = async путь => {
+            const r = await fetch(url + '/rest/v1/' + путь, {
+                headers: { apikey: key, Authorization: 'Bearer ' + key }
+            });
+            return r.ok ? r.json() : null;
+        };
+        const кат = await взять('categories?select=id,name,name_en,name_kg,sort_order');
+        const пк = await взять('player_categories?select=player_id,category_id,points,closed_at');
+        if (!кат || !пк) return { беда: 'база не ответила на запрос категорий' };
+
+        /* Имена во всех трёх языках сразу: страница открывается на своём, и
+           сверять надо по тому, что в ней написано, а не по русскому. */
+        const ступень = {}, поИмени = {};
+        кат.forEach(к => {
+            ступень[к.id] = Number(к.sort_order) || 0;
+            [к.name, к.name_en, к.name_kg].forEach(н => {
+                if (н) поИмени[String(н).trim()] = ступень[к.id];
+            });
+        });
+
+        const по = {};
+        пк.forEach(с => {
+            if (с.closed_at || с.category_id === 'friendly') return;
+            (по[с.player_id] = по[с.player_id] || []).push(с);
+        });
+        /* СПОР ОЧКОВ СО СТУПЕНЬЮ — ЛУЧШИЙ СЛУЧАЙ, А НЕ ОБЯЗАТЕЛЬНЫЙ.
+           Первая редакция брала ТОЛЬКО такого игрока, и в тестовой базе его
+           не нашлось: проверка ушла в пропуск на всех пятнадцати прогонах
+           11.10, то есть шла вхолостую. Берём спорного, если он есть, иначе
+           любого с двумя категориями — отношение «ступени не возрастают»
+           проверяется и на нём. Какой случай достался, проба говорит
+           вслух. */
+        let запасной = null;
+        for (const id of Object.keys(по)) {
+            const свои = по[id];
+            if (свои.length < 2) continue;
+            const поОчкам = свои.slice().sort((a, b) => (b.points || 0) - (a.points || 0))
+                .map(с => с.category_id);
+            const поСтупени = свои.slice().sort((a, b) => ступень[b.category_id] - ступень[a.category_id])
+                .map(с => с.category_id);
+            if (поОчкам.join('|') !== поСтупени.join('|')) {
+                return { id, лестница: поИмени, спорный: true, категорий: свои.length };
+            }
+            if (!запасной) запасной = { id, лестница: поИмени, спорный: false, категорий: свои.length };
+        }
+        if (запасной) return запасной;
+        return { беда: 'в базе нет ни одного игрока с двумя открытыми категориями' };
+    }, { url: db.url, key: db.key });
+}
+
+/**
+ * Игрок, который в парном турнире был НАПАРНИКОМ, а не капитаном.
+ *
+ * В матче записаны только капитаны, поэтому такой игрок — самая строгая
+ * проверка: если страница снова станет спрашивать матчи только по себе, у
+ * него не будет ни одной парной строки вовсе.
+ */
+/**
+ * Игрок, у которого график истории рейтинга рисуется.
+ *
+ * Линию даёт строка `rating_history` с категорией, не дружеской, не парная и
+ * в сезонном окне — тот же отбор, что в `js/rating-chart.js`. Спрашиваем
+ * ровно его, а не «кого-нибудь с категорией»: категория есть и у того, кто
+ * ни одного турнира не сыграл.
+ */
+async function найтиСГрафиком(page) {
+    await page.goto('/index.html');
+    return page.evaluate(async ({ url, key }) => {
+        const now = new Date();
+        const год = now.getFullYear();
+        const самаяСтарая = ((now.getMonth() + 1) >= 9 ? год - 1 : год - 2) + '-09-01';
+        const r = await fetch(url + '/rest/v1/rating_history' +
+            '?select=player_id,category_id,is_doubles,recorded_at' +
+            '&category_id=not.is.null&category_id=neq.friendly' +
+            '&recorded_at=gte.' + самаяСтарая + '&limit=5000', {
+            headers: { apikey: key, Authorization: 'Bearer ' + key }
+        });
+        if (!r.ok) return { беда: 'база не ответила на запрос истории рейтинга' };
+        const строки = await r.json();
+
+        const скольких = {};
+        строки.forEach(с => {
+            if (с.is_doubles === true || !с.player_id) return;
+            скольких[с.player_id] = (скольких[с.player_id] || 0) + 1;
+        });
+        const кандидаты = Object.keys(скольких).sort((a, b) => скольких[b] - скольких[a]);
+        if (!кандидаты.length) return { беда: 'в базе нет ни одной строки истории рейтинга, из которой строится линия' };
+        return { id: кандидаты[0], строк: скольких[кандидаты[0]] };
+    }, { url: db.url, key: db.key });
+}
+
+async function найтиНапарника(page) {
+    await page.goto('/index.html');
+    return page.evaluate(async ({ url, key }) => {
+        const взять = async путь => {
+            const r = await fetch(url + '/rest/v1/' + путь, {
+                headers: { apikey: key, Authorization: 'Bearer ' + key }
+            });
+            return r.ok ? r.json() : null;
+        };
+        const заявки = await взять('tournament_registrations?select=tournament_id,player_id,partner_id,status' +
+            '&partner_id=not.is.null&status=in.(approved,draw)&limit=5000');
+        if (!заявки) return { беда: 'база не ответила на запрос заявок с напарником' };
+        if (!заявки.length) return { беда: 'в базе нет ни одной парной заявки' };
+
+        /* Матчи просим ТОЛЬКО по этим турнирам. Запрос «все матчи» база
+           отдаёт обрезанным на тысяче строк, и нужный турнир мог не попасть
+           в выборку вовсе — проверка молча уходила бы в пропуск. */
+        const турниры = [...new Set(заявки.map(з => з.tournament_id).filter(Boolean))];
+        const матчи = await взять('matches?select=tournament_id,player1_id,player2_id' +
+            '&winner_id=not.is.null&tournament_id=in.(' + турниры.join(',') + ')&limit=5000');
+        const игроки = await взять('players?select=id,name,is_guest&limit=5000');
+        if (!матчи || !игроки) return { беда: 'база не ответила на запрос матчей этих турниров' };
+
+        const сМатчами = {};
+        матчи.forEach(м => {
+            if (!м.tournament_id) return;
+            (сМатчами[м.tournament_id] = сМатчами[м.tournament_id] || []).push(м);
+        });
+        const карточка = {};
+        игроки.forEach(и => { if (!и.is_guest) карточка[и.id] = и.name; });
+
+        for (const з of заявки) {
+            if (!карточка[з.partner_id] || !карточка[з.player_id]) continue;
+            const свои = (сМатчами[з.tournament_id] || [])
+                .filter(м => м.player1_id === з.player_id || м.player2_id === з.player_id);
+            if (!свои.length) continue;
+            return { id: з.partner_id, капитан: карточка[з.player_id], матчей: свои.length };
+        }
+        return { беда: 'в базе нет игрока, который был напарником в сыгранном парном турнире' };
+    }, { url: db.url, key: db.key });
+}
+
 async function открыть(page, хвост, id) {
     await page.goto('/pages/player' + хвост + '.html?id=' + id);
     await page.waitForFunction(
@@ -383,6 +526,102 @@ test.describe('страница игрока · ' + Я.имя, () => {
             return d ? d.contains(document.activeElement) : null;
         });
         expect(внутри, 'Tab ушёл из окна наружу').toBe(true);
+    });
+
+    /* ЛЕСТНИЦА, А НЕ ОЧКИ. Набрать в Masters больше, чем в Pro-Masters,
+       можно — и тогда карточки вставали против лестницы и против линий
+       графика под ними. */
+    test('карточки категорий идут по лестнице, а не по очкам', async ({ page }) => {
+        const кто = await найтиДвеКатегории(page);
+        test.skip(!!кто.беда, кто.беда || '');
+        await открыть(page, Я.хвост, кто.id);
+
+        const видно = await page.evaluate(() =>
+            [...document.querySelectorAll('.pp-cat-name')].map(э => э.textContent.trim()));
+        expect(видно.length,
+            'ПОРОГ: карточек категорий на странице меньше двух, а в базе их ' +
+            кто.категорий).toBeGreaterThan(1);
+        /* Случай называется вслух: на НЕспорном игроке проверка слабее —
+           там же порядок совпал бы и по очкам. */
+        test.info().annotations.push({
+            type: 'случай',
+            description: кто.спорный
+                ? 'очки спорят со ступенью — проверка строгая'
+                : 'очки и ступень согласны: проверяется только отношение'
+        });
+
+        /* ЗАМОРОЖЕНО ОТНОШЕНИЕ, А НЕ СПИСОК: ступени идут не возрастая.
+           Так проверка переживёт и домашнюю категорию без очков, которую
+           страница дописывает сама, и любой новый уровень лестницы. */
+        const ступени = видно.map(н => кто.лестница[н]);
+        expect(ступени.filter(с => с === undefined).length,
+            'на странице есть категория, которой нет в лестнице: ' + видно.join(' · ')).toBe(0);
+        for (let и = 1; и < ступени.length; и++) {
+            expect(ступени[и], 'карточки встали против лестницы: ' + видно.join(' · ') +
+                ' — ступени ' + ступени.join(' · ')).toBeLessThanOrEqual(ступени[и - 1]);
+        }
+    });
+
+    /* ЦВЕТ КРУЖКА ЛЕГЕНДЫ — У ЛИНИИ. При usePointStyle Chart.js брал стиль
+       точки номер ноль, а она у большинства линий прозрачная. */
+    test('в легенде графика у каждой линии свой цвет', async ({ page }) => {
+        /* ИГРОКА БЕРЁМ ТОГО, У КОГО ГРАФИК ВООБЩЕ РИСУЕТСЯ.
+           Первая редакция брала игрока «с категорией», у него истории
+           рейтинга не оказалось, и проверка ушла в пропуск на всех
+           пятнадцати прогонах 11.10. Спрашиваем базу про те самые строки,
+           из которых график складывает линии. */
+        const кто = await найтиСГрафиком(page);
+        test.skip(!!кто.беда, кто.беда || '');
+        await открыть(page, Я.хвост, кто.id);
+
+        const есть = await page.evaluate(() =>
+            !!(window.Chart && window.Chart.getChart && window.Chart.getChart('ppRatingChart')));
+        expect(есть, 'у игрока есть ' + кто.строк + ' строк истории рейтинга, а графика на странице нет').toBe(true);
+
+        const записи = await page.evaluate(() => {
+            const ч = window.Chart.getChart('ppRatingChart');
+            return ч.legend.legendItems.map((з, и) => ({
+                подпись: з.text,
+                цвет: String(з.fillStyle || ''),
+                линия: String(ч.data.datasets[и].borderColor || '')
+            }));
+        });
+        expect(записи.length, 'ПОРОГ: в легенде графика нет ни одной записи').toBeGreaterThan(0);
+        записи.forEach(з => {
+            expect(з.цвет, 'у записи «' + з.подпись + '» кружок прозрачный').not.toBe('transparent');
+            expect(з.цвет, 'цвет записи «' + з.подпись + '» разошёлся с цветом линии').toBe(з.линия);
+        });
+    });
+
+    /* НАПАРНИК ВИДИТ СВОИ ПАРНЫЕ ИГРЫ, И СТРОКА НАЗЫВАЕТ ВСЕХ ЧЕТВЕРЫХ. */
+    test('парная строка называет напарника и обоих соперников', async ({ page }) => {
+        const кто = await найтиНапарника(page);
+        test.skip(!!кто.беда, кто.беда || '');
+        await открыть(page, Я.хвост, кто.id);
+
+        const о = await page.evaluate(() => {
+            const строки = [...document.querySelectorAll('#ppMatchesContainer .pp-match')];
+            const парные = строки.filter(с => с.querySelector('.pp-match-mate'));
+            const п = парные[0];
+            return {
+                всего: строки.length,
+                парных: парные.length,
+                напарник: п ? п.querySelector('.pp-match-mate').textContent.trim() : '',
+                имяНапарника: п ? (p => p ? p.textContent.trim() : '')(п.querySelector('.pp-match-mate-name')) : '',
+                именСоперника: п ? п.querySelectorAll('.pp-match-opponent-name').length : 0,
+                кружков: п ? п.querySelectorAll('.pp-match-opponent-photo').length : 0
+            };
+        });
+
+        expect(о.парных,
+            'у игрока, который был напарником, нет ни одной парной строки: ' +
+            'список снова спрашивает матчи только по нему самому').toBeGreaterThan(0);
+
+        const слово = Я.имя === 'en' ? 'with' : (Я.имя === 'kg' ? 'жупташы' : 'в паре с');
+        expect(о.напарник, 'строка напарника написана не на языке страницы').toContain(слово);
+        expect(о.имяНапарника, 'в строке напарника нет имени').toBeTruthy();
+        expect(о.именСоперника, 'у пары соперников показано не два имени').toBe(2);
+        expect(о.кружков, 'у пары соперников показано не два кружка').toBe(2);
     });
 });
 }
