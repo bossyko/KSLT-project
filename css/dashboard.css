@@ -2764,6 +2764,52 @@ select:-webkit-autofill {
 
 /* Ссылка на платежи в карточке членства: сам список живёт в своём разделе,
    повторять его здесь незачем */
+/* Сумма платежа — один вес на все виды. На широком она шла 400 и ничем
+   не отличалась от способа и примечания в той же строке */
+.db-pay-amount {
+    font-weight: 600;
+}
+
+/* ШИРИНЫ КОЛОНОК ОБЩЕЙ ТАБЛИЦЫ НАПИСАНЫ ДЛЯ МАТЧЕЙ, А НЕСУТ ИХ ПЯТЬ
+   РАЗНЫХ ТАБЛИЦ. `.db-matches-table td:nth-child(2)` отдаёт второй
+   колонке 34 % — у матчей это соперник, которому ширина нужна, а у
+   платежей это СУММА: на 1024 она получала 200 при нужных 90, а
+   примечание сжималось до 93 и просило 123. Таблица переливалась на
+   619 при 589, и это была настоящая прокрутка вбок на десктопе.
+   Отвечаем тем же весом — удвоением класса, как в куске 59, — и
+   правим ПАРУ «заголовок + клетка», а не половину:
+   сумма по содержимому, примечание забирает остаток. */
+.db-pay-table.db-matches-table th:nth-child(2),
+.db-pay-table.db-matches-table td:nth-child(2) {
+    /* Раскладка таблицы жёсткая (`table-layout: fixed`, :3237), и процент
+       здесь буквален: первая редакция правила поставила 1 % и колонка
+       схлопнулась в 7 пикселей — замер поймал это сразу. Ширина названа
+       числом: «1 000 000 KGS» просит 95 при кегле 14 и весе 600 */
+    width: 140px;
+    white-space: nowrap;
+}
+
+.db-pay-table.db-matches-table th:nth-child(5),
+.db-pay-table.db-matches-table td:nth-child(5) {
+    width: auto;
+}
+
+/* Примечание пишет человек, и в нём встречается слово длиннее колонки:
+   на 1024 «Мастерс-этап», просило 123 при 113, и таблица снова просила
+   599 при 589. Перенос внутри слова — а не отсечка: примечание читают
+   целиком, в отличие от имени в строке баттла */
+.db-pay-note {
+    overflow-wrap: anywhere;
+}
+
+/* ПЛИТКИ ПЛАТЕЖЕЙ БЕРУТ ТУ ЖЕ ЕДИНСТВЕННУЮ СТУПЕНЬ, что баланс и окно
+   обмена. Было 26 с межстрочным 1.5 на широком и 18 с 1.1 на узком —
+   один уровень с двумя межстрочными и двумя кеглями */
+#db-payments .db-stat-value {
+    font-size: var(--db-fs-cifra);
+    line-height: var(--lh-tight);
+}
+
 .db-pay-link {
     margin-top: 14px;
     padding-top: 12px;
@@ -4365,8 +4411,8 @@ select:-webkit-autofill {
             "date   amount"
             "method status"
             "note   note";
-        gap: 2px 10px;
-        padding: 12px 2px;
+        gap: 4px 8px;
+        padding: 12px 4px;
         border-bottom: 1px solid var(--border-subtle);
     }
 
@@ -4381,11 +4427,15 @@ select:-webkit-autofill {
         color: var(--text-secondary);
     }
 
+    /* АКЦЕНТ НЕСЁТ ВЕС, А КЕГЛЬ — РЕЖИМ СТРОКИ. Было: на широком виде
+       сумма 14/400, то есть не выделена вовсе, а здесь 16/700 — выделение
+       существовало только на телефоне. Вес теперь один на все виды (600,
+       как у очков баллов и счёта баттлов), а кегль ступенью выше соседей
+       ТОЛЬКО там, где строка стала списком: в списке сумма — товар */
     .db-pay-amount {
         grid-area: amount;
         text-align: right;
         font-size: var(--fs-base);
-        font-weight: 700;
         /* Без этого «2 500 KGS» ломалось на три строки: колонка сжималась
            по содержимому, а пробелы разрешали перенос */
         white-space: nowrap;
@@ -4405,7 +4455,7 @@ select:-webkit-autofill {
 
     .db-pay-note {
         grid-area: note;
-        margin-top: 2px;
+        margin-top: 4px;
         font-size: var(--fs-xs);
         color: var(--text-muted);
     }
@@ -4567,33 +4617,46 @@ select:-webkit-autofill {
 
 /* Те же размеры, что стояли в разметке — вынесены, чтобы телефон мог их
    переопределить */
+/* КРУПНАЯ ЦИФРА КАБИНЕТА — ОДНА СТУПЕНЬ НА ВСЕ ТРИ МЕСТА ЭТОГО КУСКА.
+   Было пять ступеней на одно понятие: 3xl у баланса, 2xl в окне обмена,
+   xl и md у плиток. Слово Кости 12.10 по макету 749:12 — «сумма одинаково
+   сделай, они больше чем другие»: один кегль у баланса, окна и плиток,
+   и он крупнее подписей рядом (26 против 11 и 12) и заголовка раздела 21.
+   Шесть остальных объявлений .db-stat-value живут в статистике и админских
+   карточках — они сводятся вместе с их куском, здесь не трогаются. */
+:root {
+    --db-fs-cifra: var(--fs-xl);
+}
+
 .db-loy-balance {
     text-align: center;
-    padding: 28px 16px 20px;
+    padding: 24px 16px 20px;
     background: linear-gradient(135deg, rgba(204, 255, 0, 0.08) 0%, rgba(204, 255, 0, 0.02) 100%);
     border: 1px solid rgba(204, 255, 0, 0.15);
     border-radius: 12px;
 }
 
+/* Контраст был 3.82 при норме AA 4.5 — краска взята из шкалы, а не
+   из своей альфы. Разрядка одна на оба вида: было 1.5 и 1 */
 .db-loy-balance-label {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
     margin-bottom: 8px;
 }
 
 .db-loy-balance-value {
-    font-size: var(--fs-3xl);
+    font-size: var(--db-fs-cifra);
     font-weight: 700;
-    line-height: 1;
+    line-height: var(--lh-none);
     color: var(--accent);
 }
 
 .db-loy-balance-unit {
     margin-top: 4px;
     font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-muted);
 }
 
 .db-loy-expiry {
@@ -4602,12 +4665,19 @@ select:-webkit-autofill {
     color: var(--text-muted);
 }
 
+/* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЯМИ — Button 17:82. Было 10/28 и высота
+   складывалась сама */
 .db-loy-redeem {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
     margin-top: 20px;
-    padding: 10px 28px;
+    padding: 0 24px;
     font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 700;
+    line-height: var(--lh-none);
     color: #000;
     background: var(--accent);
     border: none;
@@ -4618,10 +4688,11 @@ select:-webkit-autofill {
 .db-loy-history-title {
     margin: 20px 0 12px;
     font-size: var(--fs-base);
+    line-height: var(--lh-tight);
 }
 
 .db-loy-type {
-    padding: 2px 8px;
+    padding: 4px 8px;
     font-size: var(--fs-xs);
     background: rgba(255, 255, 255, 0.06);
     border-radius: 4px;
@@ -4632,25 +4703,29 @@ select:-webkit-autofill {
     color: var(--text-muted);
 }
 
+/* ПРИХОД И РАСХОД — КРАСКА СИСТЕМЫ. В разметке стояли #4caf50 и #f44336
+   инлайном (js:6131, :6134): Material мимо палитры, и инлайн бьёт правило
+   по весу — починить его из файла стилей нельзя вовсе. Те же два тона уже
+   носят значки статуса, сведённые куском 59 */
 .db-loy-points {
     font-weight: 600;
 }
 
+.db-loy-points.is-plus  { color: var(--green-500); }
+.db-loy-points.is-minus { color: var(--red-500); }
+
 @media (max-width: 992px) {
     /* Баланс: цифра в 48 пикселей с полями по 28 занимала треть экрана */
     .db-loy-balance {
-        padding: 16px 12px 14px;
+        padding: 16px 12px 16px;
     }
 
     .db-loy-balance-label {
         font-size: var(--fs-2xs);
-        letter-spacing: 1px;
         margin-bottom: 4px;
     }
 
-    .db-loy-balance-value {
-        font-size: var(--fs-2xl);
-    }
+    /* Кегля здесь больше нет: цифра одна на всех видах, --db-fs-cifra */
 
     .db-loy-balance-unit {
         font-size: var(--fs-2xs);
@@ -4663,12 +4738,12 @@ select:-webkit-autofill {
 
     .db-loy-redeem {
         margin-top: 12px;
-        padding: 8px 18px;
+        padding: 0 16px;
         font-size: var(--fs-xs);
     }
 
     .db-loy-history-title {
-        margin: 14px 0 8px;
+        margin: 16px 0 8px;
         font-size: var(--fs-sm);
     }
 
@@ -4699,8 +4774,8 @@ select:-webkit-autofill {
             "action points"
             "date   points";
         align-items: center;
-        gap: 2px 10px;
-        padding: 10px 2px;
+        gap: 4px 8px;
+        padding: 8px 4px;
         border-bottom: 1px solid var(--border-subtle);
     }
 
@@ -4716,7 +4791,6 @@ select:-webkit-autofill {
 
     .db-loy-type {
         font-size: var(--fs-2xs);
-        padding: 1px 6px;
     }
 
     .db-loy-date {
@@ -4737,14 +4811,18 @@ select:-webkit-autofill {
    ОКНО ОБМЕНА БАЛЛОВ
    ============================================ */
 
+/* MODAL 26:143 ВЫБИРАЕТ ШИРИНУ ПО ЧИСЛУ ЭЛЕМЕНТОВ, А НЕ ПО ВКУСУ:
+   список наград — это 1–3 пункта, то есть ступень sm 400. Стояло 420 —
+   числа, которого нет ни в одной ступени (400 · 520 · 720). Поля 20 на
+   шапку, тело и подвал — было 28/24 и 18/16 на телефоне. Потолок 90vh */
 .db-redeem-modal {
     background: #111111;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
-    padding: 28px 24px;
-    max-width: 420px;
+    padding: 20px;
+    max-width: 400px;
     width: 90%;
-    max-height: 80vh;
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
@@ -4759,17 +4837,26 @@ select:-webkit-autofill {
 .db-redeem-title {
     margin: 0;
     font-size: var(--fs-md);
+    line-height: var(--lh-tight);
     color: #fff;
 }
 
+/* ICON BUTTON 40:93: «Only lg (44) meets the 44pt minimum touch target»,
+   и закрытие окна названо там прямо среди заменяемого. Было 30x26 */
 .db-loy-close {
-    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
     font-family: inherit;
     font-size: var(--fs-md);
-    line-height: 1;
-    color: rgba(255, 255, 255, 0.4);
+    line-height: var(--lh-none);
+    color: var(--text-muted);
     background: none;
     border: none;
+    border-radius: 999px;
     cursor: pointer;
 }
 
@@ -4781,23 +4868,24 @@ select:-webkit-autofill {
 }
 
 .db-redeem-balance-value {
-    font-size: var(--fs-2xl);
+    font-size: var(--db-fs-cifra);
     font-weight: 700;
+    line-height: var(--lh-none);
     color: var(--accent);
 }
 
 .db-redeem-balance-label {
     margin-top: 4px;
     font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--text-muted);
 }
 
 .db-redeem-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
+    gap: 12px;
+    padding: 12px 16px;
     margin-bottom: 8px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -4811,22 +4899,43 @@ select:-webkit-autofill {
 }
 
 .db-redeem-item-cost {
-    margin-top: 2px;
+    margin-top: 4px;
     font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
 }
 
+/* BUTTON 17:82 xs 28, высота свойством. Было 96x31 на широком и 84x29 на
+   узком — два размера, и ни одного на шкале 28·36·44·52. Ступень xs
+   законна только с прозрачным слоем цели 44 — решение 04.10 */
 .db-loy-redeem-item {
-    padding: 8px 18px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 16px;
     font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 700;
+    line-height: var(--lh-none);
     color: #000;
     background: var(--accent);
     border: none;
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
+}
+
+.db-loy-redeem-item::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
 }
 
 /* Баллов не хватает — кнопка гаснет, но остаётся на месте: видно, сколько
@@ -4839,10 +4948,9 @@ select:-webkit-autofill {
 }
 
 @media (max-width: 992px) {
+    /* Поля, ширина и потолок — ОДНО определение выше: 20, 400, 90vh */
     .db-redeem-modal {
-        padding: 18px 16px;
         width: 92%;
-        max-height: 85vh;
     }
 
     .db-redeem-head {
@@ -4856,12 +4964,8 @@ select:-webkit-autofill {
     /* Баланс здесь тот же, что в разделе: 35 пикселей цифры в окне
        шириной 351 занимали больше места, чем сам список наград */
     .db-redeem-balance {
-        padding: 10px 0 14px;
+        padding: 12px 0 16px;
         margin-bottom: 12px;
-    }
-
-    .db-redeem-balance-value {
-        font-size: var(--fs-2xl);
     }
 
     .db-redeem-balance-label {
@@ -4869,8 +4973,8 @@ select:-webkit-autofill {
     }
 
     .db-redeem-item {
-        padding: 10px 12px;
-        margin-bottom: 6px;
+        padding: 12px;
+        margin-bottom: 8px;
     }
 
     .db-redeem-item-title {
@@ -4882,8 +4986,7 @@ select:-webkit-autofill {
     }
 
     .db-loy-redeem-item {
-        padding: 7px 12px;
-        font-size: var(--fs-xs);
+        padding: 0 12px;
     }
 }
 

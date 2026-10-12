@@ -177,6 +177,7 @@
         payMethod: 'Ыкмасы',
         payStatus: 'Статусу',
         payNoPayments: 'Төлөмдөр жок',
+        payNoPaymentsText: 'Клубга жана турнирлерге төлөмдөрүңүз ушул жерде көрүнөт',
         payCash: 'Накталай',
         payTransfer: 'Которуу',
         payCard: 'Карта',
@@ -483,6 +484,7 @@
         payMethod: 'Method',
         payStatus: 'Status',
         payNoPayments: 'No payments yet',
+        payNoPaymentsText: 'Your club and tournament payments will appear here',
         payCash: 'Cash',
         payTransfer: 'Transfer',
         payCard: 'Card',
@@ -786,6 +788,7 @@
         payMethod: 'Способ',
         payStatus: 'Статус',
         payNoPayments: 'Платежей пока нет',
+        payNoPaymentsText: 'Здесь появятся взносы за турниры и оплата членства',
         payCash: 'Наличные',
         payTransfer: 'Перевод',
         payCard: 'Карта',
@@ -2856,6 +2859,10 @@
     }
 
     /** Сколько сыгранных турниров показываем сразу. */
+    /* СКОЛЬКО СТРОК НА СТРАНИЦЕ — ОДНО ЧИСЛО НА ВЕСЬ КАБИНЕТ.
+       Было три: это 10 на пять списков через renderPaged, LOY_PER_PAGE 20
+       у истории баллов и PAY_PER_PAGE 10 у платежей — причём два из трёх
+       уже совпадали, а третье отличалось молча. Одно понятие, одно число */
     var GAMES_PAGE = 10;
 
     /**
@@ -5996,7 +6003,7 @@
 
     // ---- Render Payments ----
     // ---- Render Loyalty Tab ----
-    var LOY_PER_PAGE = 20;
+    var LOY_PER_PAGE = GAMES_PAGE;
     var loyPage = 1;
     var loyAllTx = [];
 
@@ -6125,20 +6132,24 @@
             var actionLabel = LOY_ACTION_MAP[t.action] || (t.action || '—');
             var dateStr = new Date(t.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
 
-            var ptsStyle = '';
+            /* КРАСКА — КЛАССОМ ИЗ СИСТЕМЫ. Стояли #4caf50 и #f44336
+               инлайном: Material мимо палитры, и инлайн бьёт правило по
+               весу — поправить его из файла стилей нельзя вовсе. Те же
+               два тона носят значки статуса, сведённые куском 59 */
+            var ptsClass = '';
             var ptsPrefix = '';
             if (t.type === 'earn' || (t.type === 'admin_adjust' && t.points > 0)) {
-                ptsStyle = 'color:#4caf50;';
+                ptsClass = ' is-plus';
                 ptsPrefix = '+';
             } else {
-                ptsStyle = 'color:#f44336;';
+                ptsClass = ' is-minus';
                 ptsPrefix = '-';
             }
 
             html += '<tr class="db-loy-row">' +
                 '<td class="db-loy-date">' + dateStr + '</td>' +
                 '<td class="db-loy-action"><span class="db-loy-type">' + dbEsc(typeLabel) + '</span> ' + dbEsc(actionLabel) + '</td>' +
-                '<td class="db-loy-points" style="' + ptsStyle + '">' + ptsPrefix + Math.abs(t.points) + '</td>' +
+                '<td class="db-loy-points' + ptsClass + '">' + ptsPrefix + Math.abs(t.points) + '</td>' +
             '</tr>';
         });
 
@@ -6169,17 +6180,22 @@
     }
 
     function showRedeemModal(profileId, balance, rewards) {
-        // Build overlay
+        /* НАКЛАДКА — ТОТ ЖЕ КЛАСС, ЧТО У ДВУХ ДРУГИХ ОКОН КАБИНЕТА.
+           Здесь она собиралась семью свойствами инлайном, и фон с
+           размытием были свои: 0.75 и 4px против 0.72 и 6px у соседей —
+           одно понятие, два определения */
         var overlay = document.createElement('div');
-        overlay.className = 'db-modal-overlay';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+        overlay.className = 'db-modal-back';
 
-        // Размеры — в классах: окно собиралось инлайн-стилями, и телефон до
-        // них не доставал
-        var html = '<div class="db-redeem-modal">' +
+        /* ОКНО НАЗЫВАЕТ СЕБЯ ЗАГОЛОВКОМ — то же, что у dbModal и у окна
+           H2H: без role и имени диктор читает пустой диалог */
+        var идЗаголовкаОбмена = 'db-redeem-title-' + (++_номерОкна);
+
+        var html = '<div class="db-redeem-modal" role="dialog" aria-modal="true"' +
+                ' aria-labelledby="' + идЗаголовкаОбмена + '">' +
             '<div class="db-redeem-head">' +
-                '<h3 class="db-redeem-title">' + L.loyRedeemTitle + '</h3>' +
-                '<button class="db-loy-close">✕</button>' +
+                '<h3 class="db-redeem-title" id="' + идЗаголовкаОбмена + '">' + L.loyRedeemTitle + '</h3>' +
+                '<button type="button" class="db-loy-close" aria-label="' + L.close + '">✕</button>' +
             '</div>' +
             '<div class="db-redeem-balance">' +
                 '<div class="db-redeem-balance-value">' + balance + '</div>' +
@@ -6205,13 +6221,39 @@
         overlay.innerHTML = html;
         document.body.appendChild(overlay);
 
-        // Close
-        overlay.querySelector('.db-loy-close').addEventListener('click', function() {
+        /* ЛОВУШКА TAB, ВОЗВРАТ ФОКУСА И ВЫХОД ПО ESCAPE — третье окно
+           кабинета получает ровно то же, что первые два (js:4527 и :3740).
+           Правило, выведенное на одном куске, применяется к следующему */
+        var фокусДоОбмена = document.activeElement;
+        var кнопкаЗакрытьОбмен = overlay.querySelector('.db-loy-close');
+
+        function закрытьОбмен() {
             overlay.remove();
-        });
+            document.removeEventListener('keydown', поКлавишеОбмена);
+            overlay.removeEventListener('keydown', ловушкаОбмена);
+            if (фокусДоОбмена && фокусДоОбмена.focus) фокусДоОбмена.focus();
+        }
+        function поКлавишеОбмена(e) { if (e.key === 'Escape') закрытьОбмен(); }
+        function ловушкаОбмена(e) {
+            if (e.key !== 'Tab') return;
+            var сп = overlay.querySelectorAll(
+                'button:not([disabled]), a[href], input:not([disabled]), ' +
+                'select:not([disabled]), textarea:not([disabled]), ' +
+                '[tabindex]:not([tabindex="-1"])'
+            );
+            if (!сп.length) return;
+            var пер = сп[0], посл = сп[сп.length - 1];
+            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
+            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
+        }
+
+        кнопкаЗакрытьОбмен.addEventListener('click', закрытьОбмен);
         overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) overlay.remove();
+            if (e.target === overlay) закрытьОбмен();
         });
+        overlay.addEventListener('keydown', ловушкаОбмена);
+        document.addEventListener('keydown', поКлавишеОбмена);
+        кнопкаЗакрытьОбмен.focus();
 
         // Redeem buttons
         overlay.querySelectorAll('.db-loy-redeem-item').forEach(function(btn) {
@@ -6250,7 +6292,9 @@
                     return;
                 }
 
-                overlay.remove();
+                /* ЗАКРЫТИЕ ОДНО НА ВСЕ ВЫХОДЫ: голый remove оставлял на
+                   документе обработчик Escape и не возвращал фокус */
+                закрытьОбмен();
                 // Refresh loyalty tab
                 var session = await client.auth.getSession();
                 if (session.data.session) {
@@ -6262,7 +6306,7 @@
 
     // ---- Payments ----
     var payPage = 1;
-    var PAY_PER_PAGE = 10;
+    var PAY_PER_PAGE = GAMES_PAGE;
     var payAllData = [];
 
     async function renderPayments() {
@@ -6294,9 +6338,13 @@
             if (total === 0) {
                 container.innerHTML =
                     '<h2 class="db-section-title">' + L.payHistory + '</h2>' +
+                    /* EMPTY STATE 37:53: «always say what will appear
+                       here» — строки не было вовсе, одно голое «платежей
+                       нет». У баллов и у игр она есть с самого начала */
                     '<div class="db-card"><div class="db-empty">' +
                         '<div class="db-empty-icon">💳</div>' +
                         '<div class="db-empty-title">' + L.payNoPayments + '</div>' +
+                        '<div class="db-empty-text">' + L.payNoPaymentsText + '</div>' +
                     '</div></div>';
                 return;
             }
