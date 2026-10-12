@@ -61,6 +61,9 @@ module.exports = defineConfig({
        80-kabinet-razdely — шесть разделов кабинета: статистика, скидки,
                             уведомления, профиль, настройки и игры. Всё за
                             входом, без сессии бокового меню нет вовсе
+       81-shrift-upravleniy — шрифт управлений и карточка профиля. Половина
+                            щупов живёт в кабинете, а карточка рисуется
+                            только вошедшему: без сессии ни кнопок, ни имени
 
        Сессии в tests/.auth/ от старого прогона лежат, но им 25.09: подняться
        с просроченной сессией — это проверить страницу входа, а не кабинет. */
@@ -74,7 +77,8 @@ module.exports = defineConfig({
         '**/77-kabinet-obshchiy.spec.js',
         '**/78-kabinet-spiski.spec.js',
         '**/79-kabinet-bally-platezhi.spec.js',
-        '**/80-kabinet-razdely.spec.js'
+        '**/80-kabinet-razdely.spec.js',
+        '**/81-shrift-upravleniy.spec.js'
     ],
 
     timeout: 30000,
