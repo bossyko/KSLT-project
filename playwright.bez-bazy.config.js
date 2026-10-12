@@ -55,6 +55,9 @@ module.exports = defineConfig({
        78-kabinet-spiski  — списки баттлов и приглашений внутри того же
                             кабинета: строки рисует js по данным игрока,
                             без сессии ни одной строки на странице нет
+       79-kabinet-bally-platezhi — баллы и платежи того же кабинета: баланс
+                            приходит запросом из-за входа, и без сессии
+                            раздел не рисуется вовсе
 
        Сессии в tests/.auth/ от старого прогона лежат, но им 25.09: подняться
        с просроченной сессией — это проверить страницу входа, а не кабинет. */
@@ -66,7 +69,8 @@ module.exports = defineConfig({
         '**/42-live-stranica.spec.js',
         '**/76-stranica-igroka.spec.js',
         '**/77-kabinet-obshchiy.spec.js',
-        '**/78-kabinet-spiski.spec.js'
+        '**/78-kabinet-spiski.spec.js',
+        '**/79-kabinet-bally-platezhi.spec.js'
     ],
 
     timeout: 30000,
