@@ -188,10 +188,10 @@ const ОТКАТЫ = [
    'подпись пустых платежей заведена на всех трёх языках'],
 
   /* ── версии ── */
-  [EN, '../css/dashboard.css?v=131', '../css/dashboard.css?v=130',
+  [EN, '../css/dashboard.css?v=', '../css/dashboard.css?v=1&bylo=',
    'версия dashboard.css одна на все три языка'],
 
-  [EN, '../js/dashboard.js?v=134', '../js/dashboard.js?v=133',
+  [EN, '../js/dashboard.js?v=', '../js/dashboard.js?v=1&bylo=',
    'версия dashboard.js одна на все три языка'],
 ];
 

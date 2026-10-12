@@ -133,16 +133,16 @@ const ОТКАТЫ = [
    'отступы своих разделов не уходят со шкалы'],
 
   /* ── версии ── */
-  [EN, '../css/dashboard.css?v=131', '../css/dashboard.css?v=130',
+  [EN, '../css/dashboard.css?v=', '../css/dashboard.css?v=1&bylo=',
    'версия dashboard.css одна на все три языка'],
 
-  [EN, '../js/dashboard.js?v=134', '../js/dashboard.js?v=133',
+  [EN, '../js/dashboard.js?v=', '../js/dashboard.js?v=1&bylo=',
    'версия dashboard.js одна на все три языка'],
 
-  [EN, '../js/rating-chart.js?v=14', '../js/rating-chart.js?v=13',
+  [EN, '../js/rating-chart.js?v=', '../js/rating-chart.js?v=1&bylo=',
    'версия rating-chart.js одна на все три языка'],
 
-  [EN, '../css/style.css?v=402', '../css/style.css?v=401',
+  [EN, '../css/style.css?v=', '../css/style.css?v=1&bylo=',
    'версия style.css одна на все три языка'],
 ];
 
