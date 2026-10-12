@@ -144,14 +144,23 @@ const ОТКАТЫ = [
 
   [JSФ, "        back.addEventListener('keydown', ловушка);",
         "        back.addEventListener('keyup', ловушка);",
-   'окно держит Tab внутри себя'],
+   'оба окна кабинета держат Tab внутри себя'],
 
-  [JSФ, '        var фокусДоОкна = document.activeElement;',
-        '        var фокусДоОкна = null;',
-   'окно возвращает фокус туда, откуда его позвали'],
+  [JSФ, '        var фокусДоОкна = document.activeElement;\n        var кнопкаЗакрыть = back.querySelector',
+        '        var фокусДоОкна = null;\n        var кнопкаЗакрыть = back.querySelector',
+   'оба окна кабинета возвращают фокус туда, откуда их позвали'],
 
-  [JSФ, '        кнопкаЗакрыть.focus();', '        кнопкаЗакрыть.blur();',
-   'окно открывается с фокусом на себе'],
+  [JSФ, "        overlay.addEventListener('keydown', ловушка);",
+        "        overlay.addEventListener('keyup', ловушка);",
+   'оба окна кабинета держат Tab внутри себя'],
+
+  [JSФ, '        var фокусДоОкна = document.activeElement;\n        var closeOverlay',
+        '        var фокусДоОкна = null;\n        var closeOverlay',
+   'оба окна кабинета возвращают фокус туда, откуда их позвали'],
+
+  [JSФ, "        document.addEventListener('keydown', onKey);\n        кнопкаЗакрыть.focus();",
+        "        document.addEventListener('keydown', onKey);",
+   'оба окна кабинета открываются с фокусом на себе'],
 
   /* ── один уровень — одно объявление ── */
   [CSS, '    line-height: 1.1;\n    /* КАПС СНЯТ',
