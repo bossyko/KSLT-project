@@ -210,7 +210,10 @@
         qrDownload: 'PNG жүктөө',
         qrCopy: 'Шилтемени көчүрүү',
         qrCopied: 'Көчүрүлдү!',
-        games: 'Менин оюндарым',
+        // «Оюндарым» и так значит «мои игры»: суффикс -ым несёт «мои».
+        // Полное «Менин оюндарым» не влезало в плитку на 375 — 107 при 99,
+        // переносилось на вторую строку и ломало высоту (прогон 11.10)
+        games: 'Оюндарым',
         gamesTitle: 'Менин оюндарым',
         subTournaments: 'Өткөн мелдештер',
         subMatches: 'Матчтар',
@@ -233,6 +236,7 @@
         noMatches: 'Матчтар жок',
         noMatchesText: 'Сиздин матчтарыңыз мелдештерден кийин бул жерде көрүнөт',
         matchDate: 'Күн', matchOpponent: 'Атаандаш', matchScore: 'Эсеп', matchResult: 'Жыйынтык', matchTournament: 'Мелдеш', matchRound: 'Раунд', matchDoubles: 'Жуптук', matchWith: 'жупташы',
+        shownOf: 'ичинен', pageOf: 'ичинен', prevPage: '\u2190 Артка', nextPage: 'Кийинки \u2192',
         tagRating: 'рейтинг', tagFriendly: 'достук', tagDoubles: 'жуптук', tagMixed: 'аралаш', tagBattle: 'баттл',
         statsNote: 'Статистика рейтингдик жеке мелдештер боюнча',
         challenges: 'Сынактар',
@@ -535,6 +539,7 @@
         noMatches: 'No matches yet',
         noMatchesText: 'Your matches will appear here after tournaments',
         matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round', matchDoubles: 'Doubles', matchWith: 'with',
+        shownOf: 'of', pageOf: 'of', prevPage: '\u2190 Previous', nextPage: 'Next \u2192',
         tagRating: 'rating', tagFriendly: 'friendly', tagDoubles: 'doubles', tagMixed: 'mixed', tagBattle: 'battle',
         statsNote: 'Statistics from rating singles tournaments only',
         challenges: 'Challenges',
@@ -837,6 +842,7 @@
         noMatches: 'Матчей пока нет',
         noMatchesText: 'Ваши матчи появятся здесь после участия в турнирах',
         matchDate: 'Дата', matchOpponent: 'Соперник', matchScore: 'Счёт', matchResult: 'Итог', matchTournament: 'Турнир', matchRound: 'Раунд', matchDoubles: 'Парный', matchWith: 'в паре с',
+        shownOf: 'из', pageOf: 'из', prevPage: '\u2190 Назад', nextPage: 'Далее \u2192',
         tagRating: 'рейтинг', tagFriendly: 'дружеский', tagDoubles: 'пары', tagMixed: 'микст', tagBattle: 'баттл',
         statsNote: 'Статистика по рейтинговым одиночным турнирам',
         challenges: 'Вызовы',
@@ -2870,28 +2876,32 @@
 
         var html = renderRows(items.slice(from, from + GAMES_PAGE));
 
-        if (pages > 1) {
-            html += '<div class="db-pager">';
-            html += '<button class="db-pager-btn" data-page="' + (page - 1) + '"' +
-                    (page === 0 ? ' disabled' : '') + '>\u2039</button>';
-            for (var i = 0; i < pages; i++) {
-                html += '<button class="db-pager-btn' + (i === page ? ' active' : '') +
-                        '" data-page="' + i + '">' + (i + 1) + '</button>';
-            }
-            html += '<button class="db-pager-btn" data-page="' + (page + 1) + '"' +
-                    (page === pages - 1 ? ' disabled' : '') + '>\u203A</button>';
-            html += '</div>';
-        }
+        /* ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ, `js/polosa-stranic.js`.
+           Своя была ШЕСТОЙ копией одного понятия: четыре сведены 07.10,
+           пятая снесена 08.10, а кабинет всё это время рисовал свою —
+           кнопки 28x28 мимо ступеней, все номера подряд без окна и БЕЗ
+           СЧЁТЧИКА СТРОК, который по решению 06.10 обязателен. */
+        html += '<div class="db-polosa"></div>';
 
         container.innerHTML = html;
         // Разметка переписывается на каждой странице, значит и обработчики
         // на строках надо навешивать заново
         if (afterRender) afterRender(container);
 
-        container.querySelectorAll('.db-pager-btn').forEach(function(btn) {
+        var полоса = container.querySelector('.db-polosa');
+        if (полоса && window.KSLT_полосаСтраниц) {
+            // Компонент считает страницы С ЕДИНИЦЫ, здесь они с нуля
+            window.KSLT_полосаСтраниц(полоса, items.length, page + 1, GAMES_PAGE, L);
+        }
+
+        container.querySelectorAll('.pl-page-btn').forEach(function(btn) {
             if (btn.disabled) return;
             btn.addEventListener('click', function() {
-                renderPaged(container, items, renderRows, parseInt(btn.dataset.page, 10), afterRender);
+                var к = page;
+                if (btn.classList.contains('pl-page-prev')) к = page - 1;
+                else if (btn.classList.contains('pl-page-next')) к = page + 1;
+                else if (btn.dataset.page) к = parseInt(btn.dataset.page, 10) - 1;
+                renderPaged(container, items, renderRows, к, afterRender);
             });
         });
     }
@@ -4426,6 +4436,27 @@
      * @param {{title: string, body: string, actions: Array}} opts
      * @returns {{el: HTMLElement, close: Function}}
      */
+    /**
+     * Сказать человеку одной строкой.
+     *
+     * Было четыре браузерных `alert()` — чужая рамка посреди тёмной
+     * страницы, которая ещё и останавливает всё до нажатия «ОК». С 09.10 в
+     * продукте одно уведомление на сайт (`js/kslt-toast.js`, по компоненту
+     * `Toast 30:59`): тон несёт точка, а не фон.
+     *
+     * Если общий файл на странице не подключён, честнее показать браузерное
+     * окно, чем промолчать: человек должен узнать, почему не сохранилось.
+     */
+    function сказать(текст, тон) {
+        if (window.KSLT_TOAST && window.KSLT_TOAST.показать) {
+            window.KSLT_TOAST.показать(текст, { тон: тон || 'info' });
+            return;
+        }
+        alert(текст);
+    }
+
+    var _номерОкна = 0;
+
     function dbModal(opts) {
         var back = document.createElement('div');
         back.className = 'db-modal-back';
@@ -4436,10 +4467,14 @@
                    '" data-act="' + i + '">' + a.label + '</button>';
         }).join('');
 
+        // ОКНО НАЗЫВАЕТ СЕБЯ ЗАГОЛОВКОМ. Замер 11.10: role и aria-modal
+        // стояли, а имени у окна не было — диктор читал пустой диалог
+        var идЗаголовка = 'db-modal-title-' + (++_номерОкна);
+
         back.innerHTML =
-            '<div class="db-modal" role="dialog" aria-modal="true">' +
+            '<div class="db-modal" role="dialog" aria-modal="true" aria-labelledby="' + идЗаголовка + '">' +
                 '<div class="db-modal-head">' +
-                    '<h3 class="db-modal-title">' + opts.title + '</h3>' +
+                    '<h3 class="db-modal-title" id="' + идЗаголовка + '">' + opts.title + '</h3>' +
                     '<button type="button" class="db-modal-close" aria-label="' + L.close + '">&times;</button>' +
                 '</div>' +
                 opts.body +
@@ -4449,16 +4484,39 @@
         document.body.appendChild(back);
         document.body.style.overflow = 'hidden';
 
+        // ЛОВУШКА TAB И ВОЗВРАТ ФОКУСА — то же решение, что у окна H2H
+        // страницы игрока (js/player.js:1598): пока окно открыто, клавиша не
+        // уводит за него, а при закрытии фокус возвращается туда, откуда
+        // окно позвали
+        var фокусДоОкна = document.activeElement;
+        var кнопкаЗакрыть = back.querySelector('.db-modal-close');
+
         function close() {
             back.remove();
             document.body.style.overflow = '';
             document.removeEventListener('keydown', onKey);
+            back.removeEventListener('keydown', ловушка);
+            if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         }
         function onKey(e) { if (e.key === 'Escape') close(); }
+        function ловушка(e) {
+            if (e.key !== 'Tab') return;
+            var сп = back.querySelectorAll(
+                'button:not([disabled]), a[href], input:not([disabled]), ' +
+                'select:not([disabled]), textarea:not([disabled]), ' +
+                '[tabindex]:not([tabindex="-1"])'
+            );
+            if (!сп.length) return;
+            var пер = сп[0], посл = сп[сп.length - 1];
+            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
+            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
+        }
 
-        back.querySelector('.db-modal-close').addEventListener('click', close);
+        кнопкаЗакрыть.addEventListener('click', close);
         back.addEventListener('click', function(e) { if (e.target === back) close(); });
+        back.addEventListener('keydown', ловушка);
         document.addEventListener('keydown', onKey);
+        кнопкаЗакрыть.focus();
 
         (opts.actions || []).forEach(function(a, i) {
             var btn = back.querySelector('[data-act="' + i + '"]');
@@ -4482,12 +4540,12 @@
         // Script validation
         if (firstName && !scriptRegex.test(firstName)) {
             var msg = isKg ? 'Атта тамгалар гана болушу керек' : isEn ? 'The first name may contain letters only' : 'В имени допустимы только буквы';
-            alert(msg);
+            сказать(msg, 'err');
             return;
         }
         if (lastName && !scriptRegex.test(lastName)) {
             var msg2 = isKg ? 'Фамилияда тамгалар гана болушу керек' : isEn ? 'The last name may contain letters only' : 'В фамилии допустимы только буквы';
-            alert(msg2);
+            сказать(msg2, 'err');
             return;
         }
         var phoneCountryEl = document.getElementById('profilePhoneCountry');
@@ -6052,22 +6110,25 @@
 
         html += '</tbody></table></div>';
 
-        // Pagination
-        var totalPages = Math.ceil(total / LOY_PER_PAGE);
-        if (totalPages > 1) {
-            html += '<div style="display:flex;justify-content:center;gap:4px;margin-top:12px;">';
-            for (var p = 1; p <= totalPages; p++) {
-                var activeStyle = p === loyPage ? 'background:var(--accent);color:#000;' : 'background:rgba(255,255,255,0.06);color:var(--text-muted);';
-                html += '<button class="db-loy-page" data-loyp="' + p + '" style="border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;' + activeStyle + '">' + p + '</button>';
-            }
-            html += '</div>';
-        }
+        /* ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ. Здесь она была нарисована
+           ЦЕЛИКОМ ИНЛАЙНАМИ: `font-size: 0.8rem` — это 12.8, мимо шкалы, —
+           плюс поля и скругление прямо в разметке. Инлайн бьёт правило по
+           весу, и починить его из файла стилей нельзя вовсе. */
+        html += '<div class="db-polosa"></div>';
 
         wrap.innerHTML = html;
 
-        wrap.querySelectorAll('[data-loyp]').forEach(function(btn) {
+        var полосаБаллов = wrap.querySelector('.db-polosa');
+        if (полосаБаллов && window.KSLT_полосаСтраниц) {
+            window.KSLT_полосаСтраниц(полосаБаллов, total, loyPage, LOY_PER_PAGE, L);
+        }
+
+        wrap.querySelectorAll('.pl-page-btn').forEach(function(btn) {
+            if (btn.disabled) return;
             btn.addEventListener('click', function() {
-                loyPage = parseInt(this.dataset.loyp);
+                if (btn.classList.contains('pl-page-prev')) loyPage = loyPage - 1;
+                else if (btn.classList.contains('pl-page-next')) loyPage = loyPage + 1;
+                else if (btn.dataset.page) loyPage = parseInt(btn.dataset.page, 10);
                 renderLoyaltyHistory();
             });
         });
@@ -6133,7 +6194,7 @@
                 var balCheck = await client.rpc('get_loyalty_balance', { p_profile_id: profileId });
                 var currentBal = balCheck.data || 0;
                 if (currentBal < rwCost) {
-                    alert(L.loyNotEnough);
+                    сказать(L.loyNotEnough, 'warn');
                     this.disabled = false;
                     this.textContent = L.loyRedeemBtn;
                     return;
@@ -6149,7 +6210,7 @@
                 });
 
                 if (res.error) {
-                    alert(res.error.message);
+                    сказать(res.error.message, 'err');
                     this.disabled = false;
                     this.textContent = L.loyRedeemBtn;
                     return;
@@ -6263,22 +6324,22 @@
 
             html += '</tbody></table></div>';
 
-            // Pagination
-            if (totalPages > 1) {
-                html += '<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">';
-                for (var pg = 1; pg <= totalPages; pg++) {
-                    var activeStyle = pg === payPage ? 'background:var(--accent);color:#000;' : 'background:var(--card-bg);color:var(--text-secondary);';
-                    html += '<button class="db-pay-page-btn" data-page="' + pg + '" style="' + activeStyle + 'border:1px solid var(--border-subtle);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">' + pg + '</button>';
-                }
-                html += '</div>';
-            }
+            // ПОЛОСА СТРАНИЦ — ОБЩИЙ КОМПОНЕНТ, третья своя копия снята
+            html += '<div class="db-polosa"></div>';
 
             container.innerHTML = html;
 
-            // Pagination clicks
-            container.querySelectorAll('.db-pay-page-btn').forEach(function(btn) {
+            var полосаПлатежей = container.querySelector('.db-polosa');
+            if (полосаПлатежей && window.KSLT_полосаСтраниц) {
+                window.KSLT_полосаСтраниц(полосаПлатежей, total, payPage, PAY_PER_PAGE, L);
+            }
+
+            container.querySelectorAll('.pl-page-btn').forEach(function(btn) {
+                if (btn.disabled) return;
                 btn.addEventListener('click', function() {
-                    payPage = parseInt(this.dataset.page);
+                    if (btn.classList.contains('pl-page-prev')) payPage = payPage - 1;
+                    else if (btn.classList.contains('pl-page-next')) payPage = payPage + 1;
+                    else if (btn.dataset.page) payPage = parseInt(btn.dataset.page, 10);
                     renderPayTable();
                 });
             });
