@@ -31,11 +31,11 @@ const ОТКАТЫ = [
 
   [CSS, '.db-loy-balance-value {\n    font-size: var(--db-fs-cifra);',
         '.db-loy-balance-value {\n    font-size: var(--fs-3xl);',
-   'цифру зовут все три места куска, а не каждое своё число'],
+   'цифру зовёт \\.db-loy-balance-value, а не своё число'],
 
   [CSS, '.db-redeem-balance-value {\n    font-size: var(--db-fs-cifra);',
         '.db-redeem-balance-value {\n    font-size: var(--fs-2xl);',
-   'цифру зовут все три места куска, а не каждое своё число'],
+   'цифру зовёт \\.db-redeem-balance-value, а не своё число'],
 
   [CSS, '#db-payments .db-stat-value {\n    font-size: var(--db-fs-cifra);',
         '#db-payments .db-stat-value {\n    font-size: var(--fs-xl);',
@@ -46,8 +46,8 @@ const ОТКАТЫ = [
    'цифра плитки платежей несёт межстрочный заголовка на всех видах'],
 
   /* второй кегль в медиа — ровно то, что сняли */
-  [CSS, '    /* Кегля здесь больше нет: цифра одна на всех видах, --db-fs-cifra */',
-        '    .db-loy-balance-value {\n        font-size: var(--fs-2xl);\n    }',
+  [CSS, '    /* Кегля здесь больше нет: цифра одна на всех видах, --db-fs-cifra */\n',
+        '    .db-loy-balance-value {\n        font-size: var(--fs-2xl);\n    }\n',
    'у баланса баллов ровно один кегль на все виды'],
 
   [CSS, '    .db-redeem-item {\n        padding: 12px;\n        margin-bottom: 8px;\n    }',
@@ -111,8 +111,8 @@ const ОТКАТЫ = [
         '                overlay.remove();\n                // Refresh loyalty tab',
    'все выходы из окна идут через одно закрытие'],
 
-  [JSФ, "        overlay.className = 'db-modal-back';",
-        "        overlay.className = 'db-modal-back';\n        overlay.style.cssText = 'position:fixed;inset:0';",
+  [JSФ, "        overlay.className = 'db-modal-back';\n\n        /* ОКНО НАЗЫВАЕТ СЕБЯ ЗАГОЛОВКОМ",
+        "        overlay.className = 'db-modal-back';\n        overlay.style.cssText = 'position:fixed;inset:0';\n\n        /* ОКНО НАЗЫВАЕТ СЕБЯ ЗАГОЛОВКОМ",
    'накладка окна обмена — общий класс, а не семь свойств инлайном'],
 
   /* ── цели нажатия ── */
@@ -188,10 +188,10 @@ const ОТКАТЫ = [
    'подпись пустых платежей заведена на всех трёх языках'],
 
   /* ── версии ── */
-  [EN, '../css/dashboard.css?v=129', '../css/dashboard.css?v=128',
+  [EN, '../css/dashboard.css?v=131', '../css/dashboard.css?v=130',
    'версия dashboard.css одна на все три языка'],
 
-  [EN, '../js/dashboard.js?v=132', '../js/dashboard.js?v=131',
+  [EN, '../js/dashboard.js?v=134', '../js/dashboard.js?v=133',
    'версия dashboard.js одна на все три языка'],
 ];
 

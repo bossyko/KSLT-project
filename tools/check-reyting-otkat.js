@@ -246,9 +246,12 @@ const ОТКАТЫ = [
  '    min-width: 40px;\n    height: 40px;',
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
+/* 12.10: слой полосы страниц получил ширину 44 — он стал
+   `translate(-50%, -50%)` с min-width. Откат поправлен под новую запись,
+   а не отменён: проверяется то же самое — высота слоя не отпускается */
 ['отпустить слою цели нажатия высоту', 'css/style.css',
- '    transform: translateY(-50%);\n    height: var(--btn-h-md);\n}\n\n/* Многоточие',
- '    transform: translateY(-50%);\n    height: var(--btn-h-sm);\n}\n\n/* Многоточие',
+ '    min-width: var(--btn-h-md);\n    width: 100%;\n    height: var(--btn-h-md);',
+ '    min-width: var(--btn-h-md);\n    width: 100%;\n    height: var(--btn-h-sm);',
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
 ['вернуть кнопке страницы радиус 12', 'css/style.css',
