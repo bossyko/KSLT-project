@@ -97,7 +97,7 @@ const ОТКАТЫ = [
 
   [CSS, '.db-invites-table th:nth-child(1),\n.db-invites-table td:nth-child(1) { width: 76px; }',
         '.db-invites-table th:nth-child(1),\n.db-invites-table td:nth-child(1) { width: 76px; }\n.db-invites-table th:nth-child(2),\n.db-invites-table td:nth-child(2) { width: 90px; }',
-   'ширины колонок не разрослись сверх трёх известных наборов'],
+   'ширины колонок не разрослись сверх известных наборов'],
 
   /* ── версии ── */
   [EN, 'dashboard.css?v=', 'dashboard.css?v=1',
