@@ -49,6 +49,9 @@ module.exports = defineConfig({
                             renderGuestBlock — ни шапки, ни разделов, ни
                             показателей. Выяснено прогоном 09.10: двенадцать
                             тестов упали подряд с «No players found»
+       77-kabinet-obshchiy — общий слой кабинета: тот же вход, и разделы
+                            открываются нажатием по боковому меню, которого
+                            без сессии на странице нет вовсе
 
        Сессии в tests/.auth/ от старого прогона лежат, но им 25.09: подняться
        с просроченной сессией — это проверить страницу входа, а не кабинет. */
@@ -58,7 +61,8 @@ module.exports = defineConfig({
         '**/17-trn-forma.spec.js',
         '**/20-header-offsets.spec.js',
         '**/42-live-stranica.spec.js',
-        '**/76-stranica-igroka.spec.js'
+        '**/76-stranica-igroka.spec.js',
+        '**/77-kabinet-obshchiy.spec.js'
     ],
 
     timeout: 30000,
