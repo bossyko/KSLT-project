@@ -263,14 +263,18 @@ body.db-page.auth-ready {
     display: block;
     font-size: var(--fs-xs);
     color: var(--text-muted);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+/* INPUT 25:5 ВЕЛИТ ВЫСОТУ ЯВНО: «Height 44px… set explicitly — a select
+   computes its height from the option font otherwise and drifts 2-4px».
+   Наши поля стояли 43 — ровно тот дрейф, о котором описание предупреждает */
 .db-field-input {
     width: 100%;
-    padding: 12px 16px;
+    min-height: 44px;
+    padding: 0 16px;
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -365,11 +369,21 @@ textarea.db-field-input:read-only {
 }
 
 /* ---- Buttons ---- */
+/* ВЫСОТУ ДЕРЖИТ СТУПЕНЬ, А НЕ ПОЛЯ — Button 17:82 говорит это сам:
+   «Height is set by the height property, never by vertical padding».
+   Было `padding: 12px 32px` и ни одной высоты: кнопка выходила 40 —
+   числа, которого нет в шкале 28·36·44·52 и которое нигде не написано.
+   В разметке кабинета это 45 кнопок, и все они чинятся здесь. */
 .db-btn {
-    padding: 12px 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-md, 44px);
+    padding: 0 32px;
     border-radius: var(--radius-full);
     font-size: var(--fs-sm);
     font-weight: 600;
+    line-height: var(--lh-none);
     cursor: pointer;
     border: none;
     transition: var(--transition-fast);
@@ -800,7 +814,7 @@ select.db-field-input {
    получалась рамка в рамке. Без неё четыре числа читаются так же, а высота
    падает ещё на четверть */
 .db-stats-grid-mini .db-stat-card {
-    padding: 2px 0;
+    padding: 4px 0;
     background: none;
     border: none;
     /* Число по центру своей подписи: при выравнивании по левому краю
@@ -810,14 +824,17 @@ select.db-field-input {
 
 .db-stats-grid-mini .db-stat-value {
     font-size: var(--fs-base);
-    margin-bottom: 1px;
+    margin-bottom: 4px;
 }
 
 /* Очки — то, ради чего игрок открыл раздел. Победы, поражения и место при
    них: одинаковый размер у всех четырёх лишал блок главного числа */
+/* Главное число категории — ТА ЖЕ единственная ступень кабинета.
+   Соседние 16 остаются: это не «крупная цифра», а вторичные числа при
+   ней, и разница между ними — то, ради чего блок так устроен */
 .db-stats-grid-mini .db-stat-card:first-child .db-stat-value {
-    font-size: var(--fs-xl);
-    line-height: 1.1;
+    font-size: var(--db-fs-cifra);
+    line-height: var(--lh-tight);
 }
 
 /* Разрядка была рассчитана на крупную подпись под большим числом; на этом
@@ -835,9 +852,14 @@ select.db-field-input {
     text-align: center;
 }
 
+/* ОДНА СТУПЕНЬ НА ВСЕ КРУПНЫЕ ЧИСЛА КАБИНЕТА — слово Кости 12.10 по
+   макету 765:12: «26». Было пять ступеней в шести объявлениях: xl здесь,
+   lg в двух медиа, md в третьем, base у мини-плиток. Баланс баллов и
+   плитки платежей уже стоят на этой переменной */
 .db-stat-value {
-    font-size: var(--fs-xl);
+    font-size: var(--db-fs-cifra);
     font-weight: 700;
+    line-height: var(--lh-tight);
     color: var(--accent);
     margin-bottom: 4px;
 }
@@ -1013,7 +1035,7 @@ select.db-field-input {
 }
 
 .db-pw-field .db-field-input {
-    padding-right: 50px;
+    padding-right: 48px;
 }
 
 .db-pw-eye {
@@ -1069,7 +1091,7 @@ select.db-field-input {
 }
 
 .db-pw-rule + .db-pw-rule {
-    margin-left: 6px;
+    margin-left: 4px;
     padding-left: 8px;
     border-left: 1px solid var(--border-subtle);
 }
@@ -1709,9 +1731,7 @@ select.db-field-input {
         padding: 12px;
     }
 
-    .db-stat-value {
-        font-size: var(--fs-lg);
-    }
+    /* Кегля здесь больше нет: цифра одна на всех видах, --db-fs-cifra */
 }
 
 /* ============================================
@@ -1865,11 +1885,11 @@ select.db-field-input {
 .db-badge-item {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
-    padding: 6px 14px;
+    padding: 4px 12px;
     font-size: var(--fs-sm);
     font-weight: 600;
     transition: border-color var(--transition-fast), transform 0.25s ease;
@@ -1927,8 +1947,16 @@ select.db-field-input {
 }
 
 /* ---- All Badges Grid (expandable) ---- */
+/* UTILITY BUTTON 56:101: «Если клик только ПЕРЕСТАВЛЯЕТ то, что уже на
+   экране, — это Utility, размеры xs 28 и sm 36». Кнопка разворачивает
+   список значков, ничего не отправляя: ступень sm 36, а высота 39 была
+   суммой полей 10/16 */
 .db-badges-expand-btn {
-    display: block;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
     width: 100%;
     background: none;
     border: 1px dashed var(--border-subtle);
@@ -1937,7 +1965,8 @@ select.db-field-input {
     font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
-    padding: 10px 16px;
+    line-height: var(--lh-none);
+    padding: 0 16px;
     margin-top: 8px;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -1958,7 +1987,7 @@ select.db-field-input {
 .db-badges-all {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: 4px;
     margin-top: 12px;
 }
 
@@ -1966,7 +1995,7 @@ select.db-field-input {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: var(--radius-md);
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);
@@ -2012,7 +2041,7 @@ select.db-field-input {
 .db-badge-all-name {
     font-weight: 600;
     font-size: var(--fs-sm);
-    margin-bottom: 1px;
+    margin-bottom: 4px;
 }
 
 .db-badge-all-desc {
@@ -2039,7 +2068,7 @@ select.db-field-input {
     background: rgba(20, 20, 20, 0.95);
     border: 1px solid var(--accent);
     border-radius: var(--radius-lg);
-    padding: 14px 24px;
+    padding: 12px 24px;
     color: var(--text-primary);
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -2531,20 +2560,20 @@ select:-webkit-autofill {
    понимает, что открывает и кому */
 .db-contacts-note {
     font-size: var(--fs-sm);
-    line-height: 1.65;
+    line-height: var(--lh-relaxed);
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.03);
     border-left: 2px solid var(--accent);
     border-radius: 0 8px 8px 0;
-    padding: 10px 14px;
-    margin-bottom: 18px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
 }
 
 /* Подключение телеграма: раньше здесь была одна строка про членство, и
    человек не понимал, зачем нажимать. Перечисляем, что придёт, до нажатия */
 .db-tg-block {
-    margin-top: 14px;
-    padding-top: 14px;
+    margin-top: 12px;
+    padding-top: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -2552,7 +2581,7 @@ select:-webkit-autofill {
     font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .db-tg-list {
@@ -2565,15 +2594,22 @@ select:-webkit-autofill {
 
 .db-tg-list li::marker { color: var(--accent); }
 
+/* Ступень sm 36 вместо высоты 36 из полей 9/18 — число то же, но теперь
+   оно НАЗВАНО. Краска синяя фирменная, её не трогаем: контраст 4.16
+   поднят фоном, а не осветлением чужого цвета */
 .db-tg-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 9px 18px;
+    justify-content: center;
+    min-height: 36px;
+    gap: 8px;
+    padding: 0 16px;
     font-size: var(--fs-sm);
     font-weight: 600;
-    background: rgba(0, 136, 204, 0.15);
-    color: #0088cc;
+    line-height: var(--lh-none);
+    background: rgba(0, 136, 204, 0.28);
+    color: #2AA3DC;
     border: 1px solid rgba(0, 136, 204, 0.3);
     border-radius: 8px;
     text-decoration: none;
@@ -2588,7 +2624,7 @@ select:-webkit-autofill {
     gap: 8px;
     color: #4caf50;
     font-size: var(--fs-sm);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .db-tg-connected span { font-size: var(--fs-md); }
@@ -2624,7 +2660,7 @@ select:-webkit-autofill {
 .db-notif-off input { cursor: not-allowed; }
 
 .db-notif-hint {
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: var(--fs-sm);
     line-height: 1.65;
     color: var(--text-secondary);
@@ -2727,7 +2763,7 @@ select:-webkit-autofill {
 /* Кнопки окна — в одну ступень с кнопками админки: 10×20 при кегле 0.85.
    Общие 12×32 при 0.9 делали окно шире содержимого */
 .db-modal-actions .db-btn {
-    padding: 10px 20px;
+    padding: 8px 20px;
     font-size: var(--fs-sm);
 }
 
@@ -2873,8 +2909,8 @@ select:-webkit-autofill {
 
 /* ---- Достижения: сколько осталось до значка ---- */
 .db-badge-progress {
-    margin-left: 2px;
-    padding: 1px 7px;
+    margin-left: 4px;
+    padding: 4px 8px;
     border-radius: var(--radius-full);
     background: rgba(255,255,255,0.06);
     color: var(--text-secondary, var(--text-muted));
@@ -2940,7 +2976,7 @@ select:-webkit-autofill {
 .db-notif-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 /* Каждое уведомление — своя карточка. Одним списком с тонкими линиями они
@@ -2950,7 +2986,7 @@ select:-webkit-autofill {
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 9px 14px;
+    padding: 8px 12px;
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -2970,7 +3006,7 @@ select:-webkit-autofill {
     background: none;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
-    padding: 5px 14px;
+    padding: 4px 12px;
     color: var(--text-muted);
     font-size: var(--fs-xs);
     font-family: inherit;
@@ -3030,7 +3066,7 @@ select:-webkit-autofill {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.3;
-    margin-top: 1px;
+    margin-top: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3056,7 +3092,9 @@ select:-webkit-autofill {
     overflow: visible;
 }
 
+/* Слой цели 44 ниже требует своей системы координат */
 .db-tour-link {
+    position: relative;
     color: var(--text-primary, #fff);
     text-decoration: none;
 }
@@ -3107,7 +3145,7 @@ select:-webkit-autofill {
    её высоту зелёным прямоугольником во всю колонку. Цвет живёт на значке. */
 .db-status-badge {
     display: inline-block;
-    padding: 3px 8px;
+    padding: 4px 8px;
     border-radius: 6px;
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -3117,7 +3155,9 @@ select:-webkit-autofill {
 }
 
 /* Соперник ведёт на свою страницу */
+/* Слой цели 44 ниже требует своей системы координат */
 .db-opp-link {
+    position: relative;
     color: inherit;
     text-decoration: none;
 }
@@ -3306,14 +3346,41 @@ select:-webkit-autofill {
 
 .db-notif-filters {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     flex-wrap: wrap;
 }
 
+/* СЛОЙ ЦЕЛИ 44 У ВСЕГО, ЧТО СТОИТ НА СТУПЕНИ НИЖЕ 44 — решение 04.10,
+   применяется без нового разбора: ступень красится, палец получает 44 */
+.db-chip::after,
+.db-badges-expand-btn::after,
+.db-tg-btn::after,
+.db-btn-sm::after,
+.db-matches-table .db-opp-link::after,
+.db-matches-table .db-tour-link::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+}
+
 /* Фильтр — теми же таблетками, что и остальные переключатели кабинета */
+/* FILTER CHIP 49:77: 36 высотой, поля 16. Чип фильтрует список НА МЕСТЕ —
+   вкладка переключает весь вид, и описание прямо запрещает их путать.
+   Было 32 из полей 5/14 */
 .db-chip {
-    padding: 5px 14px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 16px;
     font-family: inherit;
+    line-height: var(--lh-none);
     font-size: var(--fs-xs);
     color: var(--text-muted);
     background: none;
@@ -3338,8 +3405,11 @@ select:-webkit-autofill {
 .db-notif-table td:nth-child(1) { width: 110px; }
 .db-notif-table td:nth-child(2) { width: 44px; text-align: center; }
 
+/* Межстрочный назван ЗДЕСЬ, в базе уровня: в медиа стояло 1.3, а база
+   наследовала 1.5 — один уровень с двумя значениями */
 .db-notif-type {
     font-size: var(--fs-base);
+    line-height: var(--lh-snug);
 }
 
 .db-notif-row {
@@ -3368,7 +3438,7 @@ select:-webkit-autofill {
 .db-notif-table .db-notif-msg {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    margin-top: 2px;
+    margin-top: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3466,8 +3536,11 @@ select:-webkit-autofill {
     gap: 8px;
 }
 
+/* Межстрочный управляющего элемента один: в блоке целей ниже стоял 1,
+   здесь 1.3 — и выигрывал тот, что ниже по файлу */
 .db-btn-sm {
-    padding: 5px 12px;
+    position: relative;
+    padding: 0 12px;
     font-size: var(--fs-xs);
     border-radius: var(--radius-full);
     line-height: 1.3;
@@ -3501,7 +3574,7 @@ select:-webkit-autofill {
     .db-invites-table th:nth-child(4),
     .db-invites-table td:nth-child(4) { width: auto; }
     .db-inv-actions { justify-content: flex-start; }
-    .db-btn-sm { padding: 5px 10px; font-size: var(--fs-xs); }
+    .db-btn-sm { padding: 4px 8px; font-size: var(--fs-xs); }
 }
 
 /* Карточка контактов собеседника — то, чем обменялись по согласию */
@@ -3762,8 +3835,8 @@ select:-webkit-autofill {
 .db-profile-card-head {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .db-profile-card-photo {
@@ -3795,7 +3868,7 @@ select:-webkit-autofill {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .db-profile-card-row {
@@ -3918,12 +3991,9 @@ select:-webkit-autofill {
 
 @media (max-width: 992px) {
     .db-stat-card {
-        padding: 10px 8px;
+        padding: 8px;
     }
 
-    .db-stat-value {
-        font-size: var(--fs-lg);
-    }
 
     .db-stat-label {
         font-size: var(--fs-2xs);
@@ -3960,8 +4030,8 @@ select:-webkit-autofill {
         grid-template-areas:
             "icon text"
             ".    date";
-        column-gap: 10px;
-        padding: 12px 14px;
+        column-gap: 8px;
+        padding: 12px 12px;
         border-bottom: 1px solid var(--border-subtle);
     }
 
@@ -3984,7 +4054,6 @@ select:-webkit-autofill {
         grid-area: icon;
         text-align: left;
         font-size: var(--fs-base);
-        line-height: 1.3;
     }
 
     .db-notif-row td:last-child {
@@ -4020,8 +4089,10 @@ select:-webkit-autofill {
 /* Две подписи в одной кнопке: широкому экрану — полная, телефону —
    короткая. Иначе «Отметить все прочитанными» не влезало рядом с
    фильтрами и уезжало во второй ряд */
+/* Узкая подпись шапки таблицы — межстрочный назван, был браузерный */
 .db-label-narrow {
     display: none;
+    line-height: var(--lh-snug);
 }
 
 @media (max-width: 992px) {
@@ -4045,14 +4116,14 @@ select:-webkit-autofill {
     }
 
     .db-notif-bar .db-chip {
-        padding: 5px 10px;
+        padding: 4px 8px;
         font-size: var(--fs-xs);
         white-space: nowrap;
     }
 
     .db-notif-all-read {
         flex: 0 0 auto;
-        padding: 5px 10px;
+        padding: 4px 8px;
         font-size: var(--fs-xs);
         white-space: nowrap;
     }
@@ -4111,27 +4182,26 @@ select:-webkit-autofill {
     }
 
     #dbBadgesNext .db-badges-earned {
-        gap: 6px;
-        margin-bottom: 10px;
+        gap: 4px;
+        margin-bottom: 8px;
     }
 
     #dbBadgesNext .db-badge-item {
-        padding: 4px 10px;
+        padding: 4px 8px;
         font-size: var(--fs-xs);
         gap: 4px;
     }
 
     #dbBadgesNext .db-badge-progress {
         font-size: var(--fs-2xs);
-        padding: 1px 5px;
+        padding: 4px 4px;
     }
 
     .db-stat-value {
-        font-size: var(--fs-md);
-        /* 1.15 не ступень: цифра в одну строку стоит на 1.1, как база
-           этого же уровня выше по файлу */
-        line-height: 1.1;
-        margin-bottom: 2px;
+        /* кегль один на все виды; здесь остаётся только межстрочный,
+           и он тот же, что в базе уровня */
+        line-height: var(--lh-tight);
+        margin-bottom: 4px;
     }
 
     .db-stat-label {
@@ -4164,13 +4234,13 @@ select:-webkit-autofill {
 
     .db-contacts-note {
         font-size: var(--fs-xs);
-        line-height: 1.5;
-        padding: 8px 10px;
-        margin-bottom: 14px;
+        /* межстрочный один на все виды — он назван в базе уровня */
+        padding: 8px 12px;
+        margin-bottom: 12px;
     }
 
     .db-avatar-upload {
-        gap: 10px;
+        gap: 8px;
     }
 }
 
@@ -4213,7 +4283,7 @@ select:-webkit-autofill {
     }
 
     .db-profile-card-actions .db-btn {
-        padding: 9px 10px;
+        padding: 8px 8px;
         font-size: var(--fs-xs);
     }
 }
@@ -4229,11 +4299,14 @@ select:-webkit-autofill {
     gap: 8px;
 }
 
+/* Высота ступенью: блок целей ниже уже даёт 36, но межстрочный оставался
+   браузерным normal — ссылка на шрифт, а не значение */
 .db-choice {
-    padding: 8px 16px;
+    padding: 0 16px;
     font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 600;
+    line-height: var(--lh-none);
     color: var(--text-secondary);
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
@@ -4346,18 +4419,17 @@ select:-webkit-autofill {
 
     .db-tg-title {
         font-size: var(--fs-sm);
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     .db-tg-list {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         padding-left: 16px;
         font-size: var(--fs-xs);
-        line-height: 1.5;
     }
 
     .db-tg-btn {
-        padding: 8px 14px;
+        padding: 8px 12px;
         font-size: var(--fs-xs);
     }
 }
@@ -4482,7 +4554,7 @@ select:-webkit-autofill {
 /* Размеры были вписаны прямо в разметку — те же, что здесь. Разница в
    одном: теперь их видит телефон */
 .db-voucher-item {
-    padding: 14px 16px;
+    padding: 12px 16px;
 }
 
 .db-voucher-row {
@@ -4510,12 +4582,14 @@ select:-webkit-autofill {
 
 /* На широком экране срок стоит под названием, как и стоял: сетку из двух
    колонок держит .db-voucher-row, а этот блок занимает всю первую */
+/* Контраст был 3.21 при норме AA 4.5: краска стояла своей альфой 0.35.
+   Срок действия не украшение — по нему человек решает, успеет он или нет */
 .db-voucher-dates {
     order: 3;
     flex: 1 1 100%;
     margin-top: 4px;
     font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-muted);
 }
 
 .db-voucher-side {
@@ -4526,12 +4600,12 @@ select:-webkit-autofill {
 
 .db-voucher-status {
     font-size: var(--fs-xs);
-    padding: 3px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
 }
 
 .db-voucher-qr-btn {
-    padding: 4px 10px;
+    padding: 4px 8px;
     font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -4554,7 +4628,7 @@ select:-webkit-autofill {
     }
 
     .db-voucher-item {
-        padding: 12px 10px;
+        padding: 12px 8px;
     }
 
     .db-voucher-row {
@@ -4564,7 +4638,7 @@ select:-webkit-autofill {
             "main   side"
             "dates  side";
         align-items: start;
-        gap: 4px 10px;
+        gap: 4px 8px;
     }
 
     .db-voucher-main {
@@ -4579,23 +4653,23 @@ select:-webkit-autofill {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 6px;
+        gap: 4px;
     }
 
     .db-voucher-status {
         font-size: var(--fs-2xs);
-        padding: 2px 8px;
+        padding: 4px 8px;
     }
 
     .db-voucher-qr-btn {
-        padding: 6px 10px;
+        padding: 4px 8px;
         font-size: var(--fs-xs);
         white-space: nowrap;
     }
 
     .db-voucher-name {
         font-size: var(--fs-sm);
-        margin-bottom: 2px;
+        margin-bottom: 4px;
     }
 
     .db-voucher-service {
@@ -4725,7 +4799,7 @@ select:-webkit-autofill {
         margin-bottom: 4px;
     }
 
-    /* Кегля здесь больше нет: цифра одна на всех видах, --db-fs-cifra */
+    /* Кегля у плитки здесь больше нет: цифра одна на всех видах */
 
     .db-loy-balance-unit {
         font-size: var(--fs-2xs);
@@ -4805,6 +4879,84 @@ select:-webkit-autofill {
         font-size: var(--fs-base);
         white-space: nowrap;
     }
+}
+
+/* ============================================
+   ОКНО QR — КАРТОЧКА ИГРОКА
+   ============================================ */
+
+/* Было собрано целиком инлайном: окно девятью свойствами, крестик шестью,
+   кегли в rem мимо шкалы (1.5 · 1.15 · 0.88 · 0.78 · 0.75) и свой фон
+   rgba(26,26,30). Размеры телефона жили веткой `if (innerWidth <= 560)` —
+   то есть граница 560, которой нет среди разрешённых 640 и 992 */
+.db-qr-modal {
+    position: relative;
+    max-width: 340px;
+    width: 90%;
+    padding: 32px;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+}
+
+.db-qr-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.db-qr-brand {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    line-height: var(--lh-tight);
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.db-qr-sub {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.db-qr-code {
+    display: inline-block;
+    padding: 12px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.db-qr-name {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.db-qr-cat {
+    font-size: var(--fs-xs);
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+.db-qr-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* Телефон: граница своя была 560 — её нет среди разрешённых. Квадрат кода
+   камере хватает и меньше, поля окна тоже уменьшаются */
+@media (max-width: 640px) {
+    .db-qr-modal { padding: 20px; }
+    .db-qr-brand { font-size: var(--fs-md); }
+    .db-qr-sub,
+    .db-qr-cat { margin-bottom: 12px; }
+    .db-qr-code { padding: 8px; margin-bottom: 12px; }
+    .db-qr-name { font-size: var(--fs-sm); }
+    .db-qr-actions .db-btn { padding: 0 16px; font-size: var(--fs-xs); white-space: nowrap; }
 }
 
 /* ============================================
@@ -5001,9 +5153,12 @@ select:-webkit-autofill {
     border-collapse: collapse;
 }
 
+/* Межстрочный назван в базе уровня: в медиа стоял 1.3, а здесь
+   наследовалось 1.5 */
 .db-notify-head {
     padding: 4px 12px;
     text-align: center;
+    line-height: var(--lh-snug);
     font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--text-muted);
@@ -5044,13 +5199,12 @@ select:-webkit-autofill {
     .db-notify-head {
         width: 22%;
         font-size: var(--fs-2xs);
-        line-height: 1.3;
         word-break: normal;
         hyphens: none;
     }
 
     .db-notify-name {
-        padding: 8px 2px 8px 0;
+        padding: 8px 4px 8px 0;
         font-size: var(--fs-xs);
     }
 
@@ -5065,7 +5219,7 @@ select:-webkit-autofill {
     /* Кнопки раздела: общие поля 12×32 при кегле 0.9 — на телефоне это
        половина ширины экрана ради одного слова */
     #db-settings .db-btn {
-        padding: 10px 18px;
+        padding: 8px 16px;
         font-size: var(--fs-xs);
     }
 
@@ -5192,7 +5346,7 @@ select:-webkit-autofill {
    #db-settings .db-btn, и обычный класс его не перебивает */
 #db-settings .db-devices-more {
     min-height: 32px;
-    padding: 7px 14px;
+    padding: 8px 12px;
     font-size: var(--fs-xs);
 }
 
@@ -5374,7 +5528,6 @@ select:-webkit-autofill {
     display: inline-flex;
     align-items: center;
     min-height: 36px;
-    line-height: 1;
 }
 
 .db-toggle-arrow,
@@ -5475,6 +5628,68 @@ select:-webkit-autofill {
               Кнопки ответа 147 и счёт НЕ ВСТРЕЧАЮТСЯ: кнопки бывают у
               активного вызова, счёт — у сыгранного.
    ====================================================================== */
+/* ======================================================================
+   ТАБЛИЦА МАТЧЕЙ НА ТЕЛЕФОНЕ — ТОТ ЖЕ ПРИЁМ, ЧТО У БАТТЛОВ, 12.10
+
+   Прогон 12.10 нашёл то, чего не видел замер: у аккаунта с матчами
+   таблица просит 336 при 309 — семь колонок (дата, соперник, счёт, итог,
+   турнир, раунд, H2H), из которых на ≤640 прячется только турнир.
+   У Кости матчей в этом разделе нет, и беда не показывалась вовсе.
+
+   ПРАВИЛО, ВЫВЕДЕННОЕ НА БАТТЛАХ, ПРИМЕНЯЕТСЯ БЕЗ НОВОГО РАЗБОРА: это та
+   же лента событий, и сравнивать между строками в ней нечего.
+     линия 1  соперник, справа H2H
+     линия 2  дата · счёт · итог · раунд
+   ====================================================================== */
+@media (max-width: 640px) {
+    .db-games-table,
+    .db-games-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .db-games-table thead {
+        display: none;
+    }
+
+    .db-games-table tbody tr {
+        display: grid;
+        grid-template-columns: auto auto auto 1fr auto;
+        grid-template-areas:
+            "who  who   who  who  h2h"
+            "date score res  round .";
+        align-items: center;
+        gap: 4px 8px;
+        padding: 12px 4px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Тем же весом, что общие проценты колонок: удвоение класса */
+    .db-games-table.db-matches-table tbody td {
+        display: block;
+        width: auto;
+        padding: 0;
+        border: none;
+    }
+
+    .db-games-table tbody td:nth-child(2) { grid-area: who; }
+    .db-games-table .db-match-date       { grid-area: date; }
+    .db-games-table .db-match-score      { grid-area: score; text-align: left; }
+    .db-games-table .db-match-result-cell { grid-area: res; text-align: left; }
+    .db-games-table .db-match-round      { grid-area: round; text-align: left; }
+    .db-games-table td:last-child        { grid-area: h2h; text-align: right; }
+
+    /* Имя соперника в одну строку с отсечкой — решение куска 59 слово в слово */
+    .db-games-table .db-opp-link {
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+    }
+}
+
 @media (max-width: 640px) {
     .db-battles-table,
     .db-battles-table tbody,

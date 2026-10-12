@@ -222,6 +222,21 @@
             };
         });
 
+        /* Имя графика собирается из того же, что нарисовано: сколько
+           линий, какая ведёт и с какого значения до какого */
+        (function () {
+            var части = series.sets.map(function (s) {
+                var c = cats[s.cat] || { name: s.cat };
+                var v = s.values.filter(function (x) { return x != null; });
+                if (!v.length) return c.name;
+                return c.name + ' ' + t(opts, 'от ', 'from ', '') + v[0] +
+                    t(opts, ' до ', ' to ', '-ден ') + v[v.length - 1];
+            });
+            назватьГрафик(canvas,
+                t(opts, 'График рейтинговых очков: ', 'Rating points chart: ', 'Рейтинг упайлары: ') +
+                части.join('; '));
+        })();
+
         _charts[opts.canvasId] = new Chart(canvas, {
             type: 'line',
             data: { labels: series.dates, datasets: datasets },
@@ -328,6 +343,22 @@
      * терялся: у турнира 16 марта на оси стояло 15-е. Разбираем строку
      * как есть, без часовых поясов.
      */
+    /* ХОЛСТ САМ ПО СЕБЕ НЕ ГОВОРИТ НИЧЕГО. Замер 12.10: у dbRatingChart и
+       dbNtrpChart не было ни role, ни aria-label, ни запасного текста —
+       для диктора это пустая картинка, и человек, который не видит, не
+       узнаёт о графике вовсе (WCAG 1.1.1). Имя собирается ИЗ ДАННЫХ, а не
+       пишется общей фразой: «с 450 до 870 очков» — это то же, что видит
+       глазами зрячий. Файл один на три экрана: публичная страница игрока,
+       кабинет и карточка игрока в админке. */
+    function назватьГрафик(canvas, подпись) {
+        if (!canvas || !подпись) return;
+        canvas.setAttribute('role', 'img');
+        canvas.setAttribute('aria-label', подпись);
+        // Запасной текст ВНУТРИ холста: его читают и те, у кого canvas
+        // не нарисовался вовсе
+        canvas.textContent = подпись;
+    }
+
     function dateParts(value) {
         var m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
         if (m) return [m[3], m[2], m[1]];
@@ -393,6 +424,11 @@
             }
             return;
         }
+        назватьГрафик(canvas,
+            t(opts, 'График уровня NTRP: от ', 'NTRP level chart: from ', 'NTRP деңгээли: ') +
+            ntrpText(values[0]) + t(opts, ' до ', ' to ', '-ден ') + ntrpText(values[values.length - 1]) +
+            ', ' + values.length + t(opts, ' измерений', ' measurements', ' өлчөө'));
+
         _charts[opts.ntrpCanvasId] = new Chart(canvas, {
             type: 'line',
             data: {

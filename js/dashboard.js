@@ -1536,34 +1536,31 @@
         var baseUrl = 'https://kslt.netlify.app';
         var playerUrl = baseUrl + '/pages/player.html?id=' + encodeURIComponent(profile.player_id);
 
+        /* ЧЕТВЁРТОЕ ОКНО КАБИНЕТА, И ОНО БЫЛО СОБРАНО ЦЕЛИКОМ ИНЛАЙНОМ:
+           накладка семью свойствами, окно девятью, крестик шестью, плюс
+           свои кегли в rem мимо шкалы и свой фон rgba(26,26,30). Инлайн
+           бьёт правило по весу, и починить его из файла стилей нельзя
+           вовсе. Накладка берёт общий класс трёх других окон, остальное —
+           свои классы в css. Размеры телефона остаются, но теперь они
+           живут в медиа, а не в ветке if по ширине окна. */
         var overlay = document.createElement('div');
         overlay.id = 'dbQrModal';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;animation:dbModalFadeIn 0.25s ease forwards;';
+        overlay.className = 'db-modal-back';
 
-        // На телефоне окно занимало почти весь экран: квадрат 200 плюс
-        // белые поля вокруг, плюс отступы окна в 32. Читается код и
-        // меньшего размера — камере хватает 150
-        var телефон = window.innerWidth <= 560;
-        var размерQR = телефон ? 150 : 200;
-        var поляОкна = телефон ? 20 : 32;
-        var стильКнопки = телефон
-            ? ' style="padding:9px 14px;font-size:0.78rem;white-space:nowrap;"'
-            : '';
+        var размерQR = window.innerWidth <= 640 ? 150 : 200;
+        var идЗаголовкаQR = 'db-qr-title-' + (++_номерОкна);
 
         overlay.innerHTML =
-            '<style>@keyframes dbModalFadeIn{to{opacity:1}}@keyframes dbModalSlideIn{to{transform:translateY(0) scale(1)}}</style>' +
-            '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:' + поляОкна + 'px;text-align:center;max-width:340px;width:90%;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
-                '<button id="dbQrClose" style="position:absolute;top:8px;right:12px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.4rem;cursor:pointer;">&times;</button>' +
-                '<div style="font-size:' + (телефон ? '1.15rem' : '1.5rem') + ';font-weight:700;color:#CCFF00;margin-bottom:2px;">KSLT</div>' +
-                '<div style="font-size:0.75rem;color:#888;margin-bottom:' + (телефон ? '12' : '20') + 'px;">' + L.qrTitle + '</div>' +
-                '<div id="dbQrCode" style="display:inline-block;padding:' + (телефон ? '8' : '12') + 'px;background:#fff;border-radius:8px;margin-bottom:' + (телефон ? '10' : '16') + 'px;"></div>' +
-                '<div style="font-weight:600;font-size:' + (телефон ? '0.88rem' : '1rem') + ';color:#fff;margin-bottom:2px;">' + escHtml(profile.full_name || '') + '</div>' +
-                '<div id="dbQrCategory" style="font-size:0.75rem;color:var(--accent);margin-bottom:' + (телефон ? '12' : '20') + 'px;"></div>' +
-                // Кнопки под размер окна: общие поля 12×32 на телефоне
-                // разгоняли «Скачать PNG» на две строки
-                '<div style="display:flex;gap:8px;justify-content:center;">' +
-                    '<button class="db-btn db-btn-primary" id="dbQrDownload"' + стильКнопки + '>' + L.qrDownload + '</button>' +
-                    '<button class="db-btn db-btn-outline" id="dbQrCopy"' + стильКнопки + '>' + L.qrCopy + '</button>' +
+            '<div class="db-qr-modal" role="dialog" aria-modal="true" aria-labelledby="' + идЗаголовкаQR + '">' +
+                '<button type="button" class="db-loy-close db-qr-close" id="dbQrClose" aria-label="' + L.close + '">&times;</button>' +
+                '<div class="db-qr-brand">KSLT</div>' +
+                '<div class="db-qr-sub" id="' + идЗаголовкаQR + '">' + L.qrTitle + '</div>' +
+                '<div id="dbQrCode" class="db-qr-code"></div>' +
+                '<div class="db-qr-name">' + escHtml(profile.full_name || '') + '</div>' +
+                '<div id="dbQrCategory" class="db-qr-cat"></div>' +
+                '<div class="db-qr-actions">' +
+                    '<button class="db-btn db-btn-primary" id="dbQrDownload">' + L.qrDownload + '</button>' +
+                    '<button class="db-btn db-btn-outline" id="dbQrCopy">' + L.qrCopy + '</button>' +
                 '</div>' +
             '</div>';
 
@@ -1592,9 +1589,35 @@
             });
         }
 
-        // Close
-        document.getElementById('dbQrClose').addEventListener('click', function() { overlay.remove(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        /* ОБОЛОЧКА ТРЁХ ДРУГИХ ОКОН — ловушка Tab, возврат фокуса, Escape */
+        var фокусДоQR = document.activeElement;
+        var кнопкаЗакрытьQR = overlay.querySelector('#dbQrClose');
+
+        function закрытьQR() {
+            overlay.remove();
+            document.removeEventListener('keydown', поКлавишеQR);
+            overlay.removeEventListener('keydown', ловушкаQR);
+            if (фокусДоQR && фокусДоQR.focus) фокусДоQR.focus();
+        }
+        function поКлавишеQR(e) { if (e.key === 'Escape') закрытьQR(); }
+        function ловушкаQR(e) {
+            if (e.key !== 'Tab') return;
+            var сп = overlay.querySelectorAll(
+                'button:not([disabled]), a[href], input:not([disabled]), ' +
+                'select:not([disabled]), textarea:not([disabled]), ' +
+                '[tabindex]:not([tabindex="-1"])'
+            );
+            if (!сп.length) return;
+            var пер = сп[0], посл = сп[сп.length - 1];
+            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
+            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
+        }
+
+        кнопкаЗакрытьQR.addEventListener('click', закрытьQR);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) закрытьQR(); });
+        overlay.addEventListener('keydown', ловушкаQR);
+        document.addEventListener('keydown', поКлавишеQR);
+        кнопкаЗакрытьQR.focus();
 
         // Copy link
         document.getElementById('dbQrCopy').addEventListener('click', function() {
@@ -3497,7 +3520,11 @@
         myCaptains = myCaptains || {};
 
         renderPaged(container, matches, function(rows) {
-            var html = '<table class="db-matches-table"><thead><tr>';
+            /* ТАБЛИЦА МАТЧЕЙ НАЗЫВАЕТ СЕБЯ. Класс .db-matches-table носят
+               пятеро — матчи, баттлы, приглашения, платежи и баллы, — и
+               отличить именно матчи было нечем. Свой класс нужен, чтобы
+               раскладка списком на телефоне досталась им, а не всем */
+            var html = '<table class="db-matches-table db-games-table"><thead><tr>';
             html += '<th>' + L.matchDate + '</th>';
             html += '<th>' + L.matchOpponent + '</th>';
             html += '<th style="text-align:center">' + L.matchScore + '</th>';
