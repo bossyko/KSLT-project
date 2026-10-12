@@ -2933,7 +2933,7 @@
         container.innerHTML =
             '<table class="db-matches-table db-tour-table"><thead><tr>' +
                 '<th>' + L.matchDate + '</th>' +
-                '<th>' + L.matchTournament + '</th>' +
+                '<th class="db-th-tournament">' + L.matchTournament + '</th>' +
                 '<th>' + L.tourStatus + '</th>' +
                 '<th></th>' +
             '</tr></thead><tbody>' +
@@ -2957,7 +2957,7 @@
         renderPaged(container, played, function(rows) {
             return '<table class="db-matches-table db-tour-table"><thead><tr>' +
                     '<th>' + L.matchDate + '</th>' +
-                    '<th>' + L.matchTournament + '</th>' +
+                    '<th class="db-th-tournament">' + L.matchTournament + '</th>' +
                     '<th>' + L.tourResult + '</th>' +
                     '<th style="text-align:right">' + L.points + '</th>' +
                 '</tr></thead><tbody>' +
@@ -3495,7 +3495,7 @@
             html += '<th>' + L.matchOpponent + '</th>';
             html += '<th style="text-align:center">' + L.matchScore + '</th>';
             html += '<th style="text-align:center">' + L.matchResult + '</th>';
-            html += '<th>' + L.matchTournament + '</th>';
+            html += '<th class="db-th-tournament">' + L.matchTournament + '</th>';
             html += '<th style="text-align:center">' + L.matchRound + '</th>';
             html += '<th style="text-align:center">H2H</th>';
             html += '</tr></thead><tbody>';
@@ -3727,15 +3727,42 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'h2h-overlay';
-        overlay.innerHTML = '<div class="h2h-modal"><button class="h2h-close">&times;</button><div class="h2h-loading">' + LH.loading + '</div></div>';
+        // ОКНО НАЗЫВАЕТ СЕБЯ ОКНОМ. Замер 12.10: ни role, ни aria-modal, ни
+        // имени — диктор читал пустой div, и с клавиатуры окно было невидимо.
+        // На публичной странице игрока это починено 09.10 (js/player.js:1577);
+        // ПРАВИЛО, ВЫВЕДЕННОЕ НА ОДНОМ КУСКЕ, РАБОТАЕТ НА СЛЕДУЮЩЕМ, и сюда
+        // его не перенесли
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', LH.title || 'Head to Head');
+        overlay.innerHTML = '<div class="h2h-modal"><button class="h2h-close" aria-label="' +
+            (LH.close || 'Закрыть') + '">&times;</button><div class="h2h-loading">' + LH.loading + '</div></div>';
         document.body.appendChild(overlay);
         requestAnimationFrame(function() { overlay.classList.add('visible'); });
 
+        // ЛОВУШКА TAB И ВОЗВРАТ ФОКУСА — то же решение, что у окна кабинета
+        // (dbModal) и у окна H2H страницы игрока: пока окно открыто, клавиша
+        // не уводит за него, а при закрытии фокус возвращается туда, откуда
+        // окно позвали
+        var фокусДоОкна = document.activeElement;
         var closeOverlay = function() {
             overlay.classList.remove('visible');
+            overlay.removeEventListener('keydown', ловушка);
             setTimeout(function() { overlay.remove(); }, 300);
+            if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         };
-        overlay.querySelector('.h2h-close').addEventListener('click', closeOverlay);
+        function ловушка(e) {
+            if (e.key !== 'Tab') return;
+            var сп = overlay.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+            if (!сп.length) return;
+            var пер = сп[0], посл = сп[сп.length - 1];
+            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
+            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
+        }
+        var кнопкаЗакрыть = overlay.querySelector('.h2h-close');
+        кнопкаЗакрыть.addEventListener('click', closeOverlay);
+        кнопкаЗакрыть.focus();
+        overlay.addEventListener('keydown', ловушка);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) closeOverlay(); });
         document.addEventListener('keydown', function handler(e) {
             if (e.key === 'Escape') { closeOverlay(); document.removeEventListener('keydown', handler); }
@@ -4008,7 +4035,14 @@
                 '</div></td>' +
                 '<td class="db-match-score">' + escHtml(ch.match_score || '') + '</td>' +
                 '<td class="db-match-result-cell">' + outcome + '</td>' +
-                '<td style="text-align:center">' + (actions
+                // КЛЕТКА НАЗЫВАЕТ, ЧТО В НЕЙ ЛЕЖИТ. На телефоне строка
+                // раскладывается списком, и значок статуса встаёт в первую
+                // линию рядом с именем, а кнопки ответа — во вторую: вместе
+                // они не помещаются (посчитано 12.10: имя 133 минимум плюс
+                // кнопки 147 при ширине 324). Различить их раскладка может
+                // только по имени клетки — по номеру они одна и та же
+                '<td class="' + (actions ? 'db-cell-actions' : 'db-cell-status') +
+                    '" style="text-align:center">' + (actions
                     ? '<div class="db-chal-actions">' + actions + '</div>'
                     : '<span class="db-status-badge db-invite-' + st.cls + '">' + st.label + '</span>') + '</td>' +
                 '<td style="text-align:center">' + h2h + '</td>' +

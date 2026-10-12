@@ -1512,6 +1512,10 @@ select.db-field-input {
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
+    /* Межстрочный был браузерный `normal` — единственный уровень строки
+       мимо лестницы 1 · 1.1 · 1.3 · 1.5 · 1.65 (замер 12.10). 1 — ступень
+       одиночной строки кнопки, та же, что у .db-btn и .db-chal-btn */
+    line-height: 1;
     padding: 3px 8px;
     border-radius: 4px;
     cursor: pointer;
@@ -1663,7 +1667,16 @@ select.db-field-input {
         flex-direction: column;
     }
 
-    .db-matches-table th:nth-child(5),
+    /* ПРЯЧЕТСЯ ПАРА «ЗАГОЛОВОК + ЯЧЕЙКА», А НЕ НОМЕР КОЛОНКИ.
+       Было `th:nth-child(5)` — правило писалось для таблицы матчей, где
+       пятая колонка турнир. Но класс .db-matches-table несут ещё баттлы,
+       приглашения, платежи и баллы, а у них пятая колонка своя: у баттлов
+       это статус. Заголовок исчезал, ячейка оставалась — в шапке пять
+       клеток, в теле шесть, и `table-layout: fixed`, который берёт ширины
+       ИЗ ПЕРВОЙ СТРОКИ, раздавал их со сдвигом. Замер 12.10 на 390: шапка
+       110 · 110 · 11 · 11 · 0 · 70, ячейки 110 · 110 · 11 · 11 · 70 · 11 —
+       кнопка H2H шириной 40 стояла в ячейке 11 и торчала за край. */
+    .db-matches-table th.db-th-tournament,
     .db-matches-table td.db-match-tournament {
         display: none;
     }
@@ -1785,14 +1798,26 @@ select.db-field-input {
     border-radius: 6px;
 }
 
+/* ТОНА ЗНАЧКА — ИЗ ШКАЛЫ, И ФОН НЕПРОЗРАЧНЫЙ.
+   Стояли #4caf50 и #f44336 — Material, которого в палитре КСЛТ нет вовсе,
+   на прозрачном тинте 10 %. Замер 12.10 на СМЕШАННОМ фоне: красный давал
+   **4.10** при норме AA 4.5. ПРОЗРАЧНАЯ КРАСКА СМЕШИВАЕТСЯ С ФОНОМ, и у
+   значка в кабинете подложек три — #0A0A0A, #111111 и #1E1E1E, — то есть
+   контраст у одного значка получался разный в разных местах.
+   Посчитано на #1E1E1E: --red-500 на тинте 15 % даёт 4.19, на 13 % — 4.33,
+   на 10 % — 4.49. Ни один не проходит, и дело не в тоне: тинт поднимает
+   фон быстрее, чем краску.
+   Поэтому фон берётся непрозрачной ступенью шкалы — `--danger-surface` и
+   `--success-surface`. Контраст перестаёт зависеть от подложки:
+   **5.16** и **7.25**. */
 .db-invite-accepted {
-    color: #4caf50;
-    background: rgba(76, 175, 80, 0.1);
+    color: var(--green-500);
+    background: var(--success-surface);
 }
 
 .db-invite-declined {
-    color: #f44336;
-    background: rgba(244, 67, 54, 0.1);
+    color: var(--red-500);
+    background: var(--danger-surface);
 }
 
 .db-invite-pending {
@@ -3096,13 +3121,25 @@ select:-webkit-autofill {
 /* ---- Ответ на вызов прямо в строке ----
    Раньше принять вызов можно было только из Telegram: на сайте кнопок не
    было вовсе. */
+/* ОДНО ОБЪЯВЛЕНИЕ НА ОДИН КЛАСС. `justify-content: center` стоял вторым
+   блоком строкой ниже по файлу (12.10) — два объявления на одно понятие,
+   и выигрывало второе. Сведено сюда. */
 .db-chal-actions {
     display: flex;
+    justify-content: center;
     gap: 6px;
     flex-wrap: wrap;
 }
 
 .db-chal-btn {
+    /* Высота — ступень xs 28 по `Button 17:82`, и держится СВОЙСТВОМ:
+       «Height is set by the height property, never by vertical padding».
+       Замер 12.10 дал 25 — поля считали от межстрочного, и кнопка уезжала
+       при каждой правке кегля. Межстрочный 1 — ступень одиночной строки */
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    line-height: 1;
     padding: 4px 10px;
     font-family: inherit;
     font-size: var(--fs-xs);
@@ -3139,10 +3176,6 @@ select:-webkit-autofill {
 }
 
 /* Кнопки ответа стоят по центру своей колонки, как и значок статуса */
-.db-chal-actions {
-    justify-content: center;
-}
-
 /* Вызов уже отвечен — вместо кнопок строка с исходом */
 .db-modal-answered {
     padding: 14px 20px 18px;
@@ -3318,6 +3351,24 @@ select:-webkit-autofill {
     text-overflow: ellipsis;
     vertical-align: middle;
 }
+
+/* ЗНАЧОК ПРИВЕДЁН К КОМПОНЕНТУ `Badge 27:53`, И РАСХОЖДЕНИЙ БЫЛО ТРИ.
+   Описание: «Height 24px, horizontal padding 8px, radius/full, 11px Medium
+   uppercase with 0.5px letter spacing». В коде стояли вес 700, радиус 6 и
+   высота 23 — ни одно из трёх не бралось из компонента.
+   Краска: контраст подписи был 4.10 при норме AA 4.5 — посчитано на
+   СМЕШАННОМ фоне rgb(51,34,32), а не на прозрачном слое. Тон danger взят из
+   шкалы (--red-500 #FF4757) вместо местного #F44336: он светлее, и подпись
+   поднимается выше порога. Прозрачная краска смешивается с фоном, а не
+   отбрасывается. */
+.db-status-badge {
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
 
 /* ============================================
    Приглашения поиграть
@@ -5284,6 +5335,195 @@ select:-webkit-autofill {
         flex-direction: row;
         gap: 8px;
         padding: 8px 12px;
+        min-height: 44px;
+    }
+}
+
+/* ======================================================================
+   БАТТЛЫ И ПРИГЛАШЕНИЯ НА ТЕЛЕФОНЕ — СТРОКА СПИСКА, А НЕ СТРОКА ТАБЛИЦЫ
+   12.10, по слову Кости «прокрутка вбок не годится»
+
+   ЗАМЕР ДО ПРАВКИ на 390: таблица 324 на экране и просит 361; под имя
+   остаётся 110, под счёт и итог — по 11; у приглашений хуже — 542 при 309.
+   Шесть колонок на 375 не помещаются ни при каких ширинах, и прокрутка
+   вбок внутри вертикального списка — не решение, а перенос беды.
+
+   ТАБЛИЦА ОПРАВДАНА, КОГДА КОЛОНКИ СРАВНИВАЮТ МЕЖДУ СТРОКАМИ — цены,
+   очки, места. Здесь сравнивать нечего: это лента событий, и ленты на
+   телефоне строят списком (Gmail, Linear, Stripe, «Почта» на iOS).
+   На видах шире 640 таблица остаётся ровно такой, какой была.
+
+   СОБРАНО ИЗ ГОТОВОГО, СВОЕГО НЕ НАРИСОВАНО НИ ОДНОГО:
+     • карточка — `Card 29:65`, «Compact padding 16 for dense lists»;
+     • кружок   — `Avatar 29:82`, «sm 32 for lists» (было xs 24 — размер
+       строки ТАБЛИЦЫ, и это был верный размер, пока строка ею была);
+     • значок   — `Badge 27:53`, высота 24, поля 8, радиус full;
+     • кнопки   — `Button 17:82` xs 28 плюс прозрачный слой цели 44.
+
+   ЧТО ВО ЧТО ВЛЕЗАЕТ — ПОСЧИТАНО МЕРОЙ ТЕКСТА, 324 доступно:
+     линия 1  кружок 32 + имя + значок; при самом длинном значке
+              COUNTER-PROPOSAL (143 вместе с капсом, разрядкой и полями)
+              под имя остаётся 133, а «Адиль Валимамедов» просит 142 —
+              поэтому имя стоит в ОДНУ строку и обрезается многоточием,
+              а значок не сжимается. Так устроен Gmail: тема обрезается,
+              дата справа держит место. Имя целиком доступно всегда — оно
+              ссылка на страницу игрока.
+     линия 2  дата 57 + счёт 51 + итог 16 + H2H 40 с зазорами = 200.
+              Кнопки ответа 147 и счёт НЕ ВСТРЕЧАЮТСЯ: кнопки бывают у
+              активного вызова, счёт — у сыгранного.
+   ====================================================================== */
+@media (max-width: 640px) {
+    .db-battles-table,
+    .db-battles-table tbody,
+    .db-invites-table,
+    .db-invites-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    /* Шапка таблицы в списке не нужна: каждое значение и так названо своим
+       видом — кружок, значок, счёт. Прятать её от ДИКТОРА нельзя, но и
+       читать «Дата Соперник Счёт» перед каждой строкой он не должен,
+       поэтому она уходит целиком вместе со своей ролью */
+    .db-battles-table thead,
+    .db-invites-table thead {
+        display: none;
+    }
+
+    .db-battles-table tbody tr,
+    .db-invites-table tbody tr {
+        display: grid;
+        column-gap: 12px;
+        row-gap: 10px;
+        align-items: center;
+        margin-bottom: 8px;
+        padding: 12px 16px;
+        border: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        background: var(--bg-card);
+    }
+
+    /* Клетки становятся блоками. ПРАВИЛО 08.10: клетка таблицы, оставшаяся
+       `display: table-cell` внутри грида, не растягивается на свою дорожку —
+       помогает только блок с названной областью, а не номер дорожки */
+    .db-battles-table tbody td,
+    .db-invites-table tbody td {
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        text-align: left;
+    }
+
+    /* ── баттлы: шесть клеток в две линии ── */
+    .db-battles-table tbody tr {
+        grid-template-columns: auto auto auto 1fr auto;
+        grid-template-areas:
+            "who  who   who  who status"
+            "date score res  act  h2h";
+    }
+
+    .db-battles-table tbody td:nth-child(1) { grid-area: date; }
+    .db-battles-table tbody td:nth-child(2) { grid-area: who; }
+    .db-battles-table tbody td:nth-child(3) { grid-area: score; }
+    .db-battles-table tbody td:nth-child(4) { grid-area: res; }
+    .db-battles-table tbody td.db-cell-status  { grid-area: status; justify-self: end; }
+    .db-battles-table tbody td.db-cell-actions { grid-area: act; justify-self: end; }
+    .db-battles-table tbody td:nth-child(6) { grid-area: h2h; justify-self: end; }
+
+    /* ── приглашения: четыре клетки в две линии ── */
+    .db-invites-table tbody tr {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+            "who  who  status"
+            "date .    act";
+    }
+
+    .db-invites-table tbody td:nth-child(1) { grid-area: date; }
+    .db-invites-table tbody td:nth-child(2) { grid-area: who; }
+    .db-invites-table tbody td:nth-child(3) { grid-area: status; justify-self: end; }
+    .db-invites-table tbody td:nth-child(4) { grid-area: act; justify-self: end; }
+
+    /* ШИРИНЫ КОЛОНОК СНИМАЮТСЯ ЦЕЛИКОМ, И КЛАСС УДВОЕН НЕ ДЛЯ КРАСОТЫ.
+       Наборов ширин три — 110 и 34 % у .db-matches-table, 150 и 70 у
+       .db-battles-table, 76 · 104 · 210 у .db-invites-table, — и все они
+       записаны через `td:nth-child(N)`, то есть весят (0,3,1). Простое
+       `.db-battles-table tbody td` весит (0,1,2) и проигрывает: замер 12.10
+       после первой редакции показал клетку имени 44 вместо 140 и значок,
+       который держал свои прежние 150. Удвоение класса уравнивает вес —
+       тот же приём, что у витрины новостей 08.10.
+       В списке ширину клетке даёт её ОБЛАСТЬ, а не прежняя колонка. */
+    .db-battles-table.db-battles-table tbody td:nth-child(1),
+    .db-battles-table.db-battles-table tbody td:nth-child(2),
+    .db-battles-table.db-battles-table tbody td:nth-child(3),
+    .db-battles-table.db-battles-table tbody td:nth-child(4),
+    .db-battles-table.db-battles-table tbody td:nth-child(5),
+    .db-battles-table.db-battles-table tbody td:nth-child(6),
+    .db-invites-table.db-invites-table tbody td:nth-child(1),
+    .db-invites-table.db-invites-table tbody td:nth-child(2),
+    .db-invites-table.db-invites-table tbody td:nth-child(3),
+    .db-invites-table.db-invites-table tbody td:nth-child(4) {
+        width: auto;
+    }
+
+    /* Имя в одну строку с отсечкой — см. расчёт в шапке блока */
+    .db-battles-table .db-match-opponent > span,
+    .db-invites-table .db-match-opponent > span {
+        min-width: 0;
+    }
+
+    .db-battles-table .db-opp-link,
+    .db-invites-table .db-opp-link {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Кружок — ступень списка, а не строки таблицы */
+    .db-battles-table .db-match-avatar,
+    .db-battles-table .db-match-avatar-ph,
+    .db-invites-table .db-match-avatar,
+    .db-invites-table .db-match-avatar-ph {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+    }
+
+    /* Пустые клетки не занимают место: у вызова без счёта строка не должна
+       раздвигаться пустотой. НОЛЬ — ЗАКОННОЕ ЗНАЧЕНИЕ, а пусто — нет */
+    .db-battles-table tbody td:empty {
+        display: none;
+    }
+}
+
+/* ЦЕЛЬ НАЖАТИЯ 44 ПРОЗРАЧНЫМ СЛОЕМ — решение 04.10 без нового разбора.
+   Замер 12.10: H2H красится 40x21, кнопка ответа 28 высотой. Красить их
+   крупнее значило бы развести со строкой, поэтому растёт не краска, а цель */
+.db-match-h2h,
+.db-chal-btn {
+    position: relative;
+}
+
+.db-match-h2h::after,
+.db-chal-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+}
+
+/* Закрытие окна H2H: `Icon button 40:93` — «Only lg (44) meets the 44pt
+   minimum touch target». Замер 12.10 дал 36 — это размер md, desktop-only */
+@media (max-width: 992px) {
+    .h2h-close {
+        min-width: 44px;
         min-height: 44px;
     }
 }
