@@ -58,6 +58,9 @@ module.exports = defineConfig({
        79-kabinet-bally-platezhi — баллы и платежи того же кабинета: баланс
                             приходит запросом из-за входа, и без сессии
                             раздел не рисуется вовсе
+       80-kabinet-razdely — шесть разделов кабинета: статистика, скидки,
+                            уведомления, профиль, настройки и игры. Всё за
+                            входом, без сессии бокового меню нет вовсе
 
        Сессии в tests/.auth/ от старого прогона лежат, но им 25.09: подняться
        с просроченной сессией — это проверить страницу входа, а не кабинет. */
@@ -70,7 +73,8 @@ module.exports = defineConfig({
         '**/76-stranica-igroka.spec.js',
         '**/77-kabinet-obshchiy.spec.js',
         '**/78-kabinet-spiski.spec.js',
-        '**/79-kabinet-bally-platezhi.spec.js'
+        '**/79-kabinet-bally-platezhi.spec.js',
+        '**/80-kabinet-razdely.spec.js'
     ],
 
     timeout: 30000,
