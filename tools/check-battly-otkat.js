@@ -83,10 +83,15 @@ const ОТКАТЫ = [
  '    height: 20px;\n    transform: translateY(-50%);\n}\n\n/* ═══ ВИДИМЫЙ ФОКУС',
  'место и ссылки карт несут слой цели 44'],
 
-['снять видимый фокус у обзора', О,
- '.bo-featured-link:focus-visible,\n.bo-vote-btn:focus-visible,\n.bo-more:focus-visible,\n.bo-meta-venue:focus-visible,\n.bo-strip:focus-visible {',
- '.bo-featured-link:hover,\n.bo-vote-btn:hover,\n.bo-more:hover,\n.bo-meta-venue:hover,\n.bo-strip:hover {',
- 'видимый фокус есть в обоих файлах'],
+['снять видимый фокус у кнопок обзора', О,
+ '.bo-vote-btn:focus-visible,\n.bo-more:focus-visible,\n.bo-meta-venue:focus-visible,\n.bo-strip:focus-visible {',
+ '.bo-vote-btn:hover,\n.bo-more:hover,\n.bo-meta-venue:hover,\n.bo-strip:hover {',
+ 'видимый фокус есть у каждого, кто берёт фокус'],
+
+['снять видимый фокус у слоя-ссылки', О,
+ '.bo-featured > .bo-featured-cover:focus-visible {',
+ '.bo-featured > .bo-featured-cover:hover {',
+ 'видимый фокус есть у каждого, кто берёт фокус'],
 
 ['снять у обзора спрос разрешения на движение', О,
  '@media (prefers-reduced-motion: reduce) {\n    .bo-cd,',
@@ -148,10 +153,15 @@ const ОТКАТЫ = [
  '                html += \'<div class="to-card-grid">\';',
  'сетка карточек рисуется своим классом'],
 
-['вернуть «Подробнее» нарисованной кнопкой', ДО,
+['вернуть «Подробнее» второй ссылкой', ДО,
+ '\'<span class="bo-featured-link" aria-hidden="true">\' + L.details + \'</span>\'',
  '\'<a class="bo-featured-link" href="\' + linkHref + \'">\' + L.details + \'</a>\'',
- '\'<span class="bo-featured-link">\' + L.details + \'</span>\'',
- '«Подробнее» — настоящая ссылка'],
+ 'переход у крупной карточки ровно один, и это слой-ссылка'],
+
+['вернуть обработчику переход по карточке', ДО,
+ '            /* ПЕРЕХОД НЕСЁТ СЛОЙ-ССЫЛКА, А НЕ ЭТОТ ОБРАБОТЧИК. Здесь',
+ '            window.location.href = card.dataset.href; /*',
+ 'обработчик больше не уводит с крупной карточки'],
 
 ['вернуть «ничего не найдено» при пустой базе', ДО,
  '        if (!_allBattles.length) {',

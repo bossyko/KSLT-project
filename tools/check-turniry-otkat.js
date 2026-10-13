@@ -317,8 +317,11 @@ const ОТКАТЫ = [
         `.to-compact > .to-compact-cover {\n    position: static;`,
    'слой растянут на всю полосу, а не на своё содержимое'],
 
-  [CSS, `    z-index: 2;\n    border-radius: inherit;`,
-        `    z-index: 0;\n    border-radius: inherit;`,
+  /* Якорь расширен 13.10: прежний (`z-index: 2` плюс радиус) стал встречаться
+     ДВАЖДЫ, когда слой получила и крупная карточка. Держимся за свой
+     селектор, а не за пару общих строк. */
+  [CSS, `.to-compact > .to-compact-cover {\n    position: absolute;\n    inset: 0;\n    z-index: 2;`,
+        `.to-compact > .to-compact-cover {\n    position: absolute;\n    inset: 0;\n    z-index: 0;`,
    'слой лежит ВЫШЕ содержимого, а не под ним'],
 
   [CSS, `.to-compact > .to-compact-right {\n    z-index: 3;\n}`,
