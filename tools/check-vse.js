@@ -79,7 +79,8 @@ const КУСКИ = [
     ['списки кабинета на телефоне', 'check-kabinet-spiski.js', 'check-kabinet-spiski-otkat.js'],
     ['баллы и платежи кабинета', 'check-kabinet-bally-platezhi.js', 'check-kabinet-bally-platezhi-otkat.js'],
     ['разделы кабинета', 'check-kabinet-razdely.js', 'check-kabinet-razdely-otkat.js'],
-    ['шрифт управлений', 'check-shrift-upravleniy.js', 'check-shrift-upravleniy-otkat.js']
+    ['шрифт управлений', 'check-shrift-upravleniy.js', 'check-shrift-upravleniy-otkat.js'],
+    ['английская ветка кортов', 'check-korty-trenery-angliyskiy.js', 'check-korty-trenery-angliyskiy-otkat.js']
 ];
 
 function прогнать(файл) {

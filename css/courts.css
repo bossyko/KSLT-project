@@ -258,7 +258,8 @@
 .ct-card-name {
     font-size: var(--fs-base);
     font-weight: 700;
-    line-height: 1.25;
+    /* 1.25 не ступень лестницы 1 · 1.1 · 1.3 · 1.5 · 1.65 — замер 12.10 */
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -284,7 +285,8 @@
    мета, 72 % белого: 5.33 при пороге 4.5. */
 .ct-card-type {
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    /* 1.4 мимо лестницы — замер 12.10 */
+    line-height: 1.5;
     color: var(--text-secondary);
     font-weight: 600;
 }
@@ -326,7 +328,8 @@
 
 .ct-card-price {
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    /* 1.4 мимо лестницы — замер 12.10, та же правка, что у типа карточки */
+    line-height: 1.5;
     color: var(--text-secondary);
 }
 

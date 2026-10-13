@@ -64,6 +64,9 @@ module.exports = defineConfig({
        81-shrift-upravleniy — шрифт управлений и карточка профиля. Половина
                             щупов живёт в кабинете, а карточка рисуется
                             только вошедшему: без сессии ни кнопок, ни имени
+       82-korty-angliyskiy — английская ветка кортов и тренеров. Витрина
+                            рисуется ИЗ БАЗЫ: без неё ни карточек, ни
+                            выпадашек, и все щупы ждут признака впустую
 
        Сессии в tests/.auth/ от старого прогона лежат, но им 25.09: подняться
        с просроченной сессией — это проверить страницу входа, а не кабинет. */
@@ -78,7 +81,8 @@ module.exports = defineConfig({
         '**/78-kabinet-spiski.spec.js',
         '**/79-kabinet-bally-platezhi.spec.js',
         '**/80-kabinet-razdely.spec.js',
-        '**/81-shrift-upravleniy.spec.js'
+        '**/81-shrift-upravleniy.spec.js',
+        '**/82-korty-angliyskiy.spec.js'
     ],
 
     timeout: 30000,

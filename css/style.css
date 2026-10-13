@@ -5730,6 +5730,42 @@ h2 {
     opacity: 0.7;
 }
 
+/* ГАЛОЧКА У ВЫБРАННОГО ПУНКТА — `Menu item 32:44` ТРЕБУЕТ ЕЁ ПРЯМО:
+   «Selected carries a tick and goes accent/default — never rely on the
+   tint alone, it is invisible to anyone who cannot separate the two
+   greys». До 12.10 выбранный пункт отличался ТОЛЬКО краской, и человек,
+   не различающий два серых, не видел своего выбора вовсе.
+   Галочка встаёт перед счётчиком, а не вместо него. */
+.ct-dd-tick {
+    flex-shrink: 0;
+    margin-left: auto;
+    color: var(--accent);
+}
+
+.ct-dd-item .ct-dd-count {
+    margin-left: 0;
+}
+
+/* ФОКУС ВИДЕН — ЗАМЕР 12.10 ПОКАЗАЛ, ЧТО ЕГО НЕТ ВОВСЕ.
+   У чипов, карточек кортов и тренеров и у кнопок полосы страниц обводка
+   была `3px none` и до `.focus()`, и после: человек с клавиатуры не видел,
+   где стоит. В `courts.css` и `coaches.css` слова `focus-visible` не
+   встречалось ни разу.
+   ПОЛОСА СТРАНИЦ ОБЩАЯ — правило чинит её сразу на рейтинге, новостях,
+   поиске игрока и в кабинете, а не только здесь.
+   Обводка та же, что у шапки выше по файлу: 2px accent с отступом 2. */
+.ct-dd-toggle:focus-visible,
+.ct-dd-item:focus-visible,
+.f-dd-item:focus-visible,
+.ct-card:focus-visible,
+.co-card:focus-visible,
+.pl-page-btn:focus-visible,
+.ct-search-input:focus-visible,
+.co-search-input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* Шире телефона: место есть, и список держится своей кнопки */
 @media (min-width: 641px) {
     .f-dd,

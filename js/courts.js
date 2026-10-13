@@ -60,7 +60,82 @@
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
-    var L_labels = window.courtsLabels || (isKg ? {
+    /* АНГЛИЙСКАЯ ВЕТКА ЗАВЕДЕНА 12.10. Её не было вовсе: словарь строился
+       как `isKg ? {kg} : {ru}`, и английская страница получала РУССКИЙ
+       словарь — при `<html lang="en">`. Замер: 58 русских узлов из 110
+       видимых плюс 28 русских атрибутов. Корты и тренеры были последними
+       двумя файлами продукта без ветки `isEn`.
+
+       Крючок `window.courtsLabels` снят: его не задавал никто с момента
+       написания, а он создавал вид, что словарь можно подменить снаружи. */
+    var L_labels = isEn ? {
+        heroTitle: "Courts",
+        heroSubtitle: "Where to play in Kyrgyzstan: surface, prices, rental",
+        filterAll: "All",
+        filterIndoor: "Indoor",
+        filterOutdoor: "Outdoor",
+        filterClay: "Clay",
+        filterHard: "Hard",
+        courts: "courts",
+        rating: "rating",
+        priceFrom: "from",
+        priceCurrency: "som/hour",
+        detailsBtn: "Details",
+        bookBtn: "KSLT discount",
+        aboutTitle: "About the venue",
+        amenitiesTitle: "Amenities",
+        scheduleTitle: "Schedule and prices",
+        locationTitle: "Location",
+        galleryTitle: "Gallery",
+        ctaTitle: "Discounts for KSLT members",
+        ctaText: "Sign up and get a membership to receive discounts at partner courts",
+        ctaBtn: "Sign up",
+        ctaTextAuth: "As a KSLT member you get discounts at partner courts and coaches",
+        ctaBtnAuth: "View discounts",
+        backBtn: "All courts",
+        partnerBadge: "KSLT Partner",
+        surface: "Surface",
+        phone: "Phone",
+        newBadge: "New",
+        filterType: "Court type",
+        shownOf: "of",
+        pageOf: "of",
+        prevPage: "\u2190 Back",
+        nextPage: "Next \u2192",
+        filterSurface: "Surface",
+        filterCarpet: "Carpet",
+        filterGrass: "Grass",
+        filterCity: "City",
+        searchPlaceholder: "Search courts...",
+        recommendedBadge: "KSLT recommends",
+        discountTitle: "Discounts for KSLT members",
+        getVoucher: "Get discount",
+        discountGuest: "Sign up and get a membership for discounts",
+        discountRegistered: "Get a KSLT membership for discounts",
+        voucherReady: "Your discount is ready!",
+        voucherLimit: "You already have an active discount",
+        voucherExpires: "Valid until",
+        voucherDownload: "Download QR",
+        voucherDiscount: "Discount",
+        voucherService: "Service",
+        myVouchers: "My discounts",
+        voucherActive: "Active",
+        voucherUsed: "Used",
+        voucherExpired: "Expired",
+        voucherShowQR: "QR",
+        noVouchersYet: "No discounts yet",
+        pickService: "Choose a service",
+        pickSubmit: "Get discount",
+        noDiscountsConfigured: "No discounts set up yet",
+        courtTypesTitle: "Court types",
+        thType: "Type",
+        thSurface: "Surface",
+        thQty: "Qty",
+        thPrice: "Price",
+        additionalServicesTitle: "Additional services",
+        thService: "Service",
+        thServicePrice: "Price"
+    } : (isKg ? {
         heroTitle: 'Корттор',
         heroSubtitle: 'Кыргызстанда кайда ойноо керек: жабуу, баа, ижара',
         filterAll: 'Баары',
@@ -199,6 +274,14 @@
     var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр', grass: 'Трава' };
     var SURFACE_MAP_EN = { hard: 'Hard', clay: 'Clay', carpet: 'Carpet', grass: 'Grass' };
     var SURFACE_MAP_KG = { hard: 'Катуу', clay: 'Топурак', carpet: 'Килем', grass: 'Чөп' };
+
+    /* ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. Покрытие называлось ДВАЖДЫ: этими
+       картами (их зовёт карточка, `js/courts.js` ниже) и ключами
+       filterHard / filterClay / filterCarpet / filterGrass в словаре, их
+       звали фильтры. Пока английской ветки не было, расхождение не было
+       видно: обе копии отдавали русское. Теперь карта одна, выбранная по
+       языку, а ключи словаря остались для совместимости и ничем не правят. */
+    var ПОКРЫТИЯ = isEn ? SURFACE_MAP_EN : (isKg ? SURFACE_MAP_KG : SURFACE_MAP);
 
     // Фотографий у кортов пока нет ни у одного: реестр собирали из 2ГИС и
     // гидов, снимки добавим по мере получения. До тех пор общая картинка
@@ -445,7 +528,7 @@
 
         // Surface from first court type
         var surfaceKey = courtTypes.length ? (courtTypes[0].surface || '') : '';
-        var surface = surfaceKey ? (isEn ? (SURFACE_MAP_EN[surfaceKey] || surfaceKey) : isKg ? (SURFACE_MAP_KG[surfaceKey] || surfaceKey) : (SURFACE_MAP[surfaceKey] || surfaceKey)) : '';
+        var surface = surfaceKey ? (ПОКРЫТИЯ[surfaceKey] || surfaceKey) : '';
 
         // Total courts count
         var totalCourts = 0;
@@ -616,12 +699,7 @@
             });
         }
 
-        var labels = {
-            hard: L_labels.filterHard,
-            clay: L_labels.filterClay,
-            carpet: L_labels.filterCarpet,
-            grass: L_labels.filterGrass
-        };
+        var labels = ПОКРЫТИЯ;
         var pool = applyFilters('surface');
         ['hard', 'clay', 'carpet', 'grass'].forEach(function(key) {
             var n = pool.filter(function(c) { return hasSurface(c, key); }).length;
@@ -641,8 +719,8 @@
 
         if (current !== 'all' && !options.some(function(o) { return o.value === current; })) {
             var labelsMap = {
-                hard: L_labels.filterHard, clay: L_labels.filterClay,
-                carpet: L_labels.filterCarpet, grass: L_labels.filterGrass,
+                hard: ПОКРЫТИЯ.hard, clay: ПОКРЫТИЯ.clay,
+                carpet: ПОКРЫТИЯ.carpet, grass: ПОКРЫТИЯ.grass,
                 indoor: L_labels.filterIndoor, outdoor: L_labels.filterOutdoor
             };
             options = options.concat([{ value: current, label: labelsMap[current] || current, count: 0 }]);
@@ -651,20 +729,37 @@
         var title = allLabel;
         options.forEach(function(o) { if (o.value === current) title = o.label; });
 
+        /* ГАЛОЧКА У ВЫБРАННОГО — ТРЕБОВАНИЕ КОМПОНЕНТА, А НЕ УКРАШЕНИЕ.
+           `Menu item 32:44`: «Selected carries a tick and goes
+           accent/default — never rely on the tint alone, it is invisible
+           to anyone who cannot separate the two greys». До 12.10 выбранный
+           пункт отличался ТОЛЬКО краской. */
+        var ГАЛКА = '<svg class="ct-dd-tick" width="14" height="14" viewBox="0 0 24 24" ' +
+            'fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">' +
+            '<path d="M20 6L9 17l-5-5"/></svg>';
+
         var items = '<button class="ct-dd-item' + (current === 'all' ? ' active' : '') +
-            '" data-dd-value="all">' + allLabel + '</button>';
+            '" data-dd-value="all"' + (current === 'all' ? ' aria-current="true"' : '') + '>' +
+            allLabel + (current === 'all' ? ГАЛКА : '') + '</button>';
         options.forEach(function(o) {
-            items += '<button class="ct-dd-item' + (o.value === current ? ' active' : '') +
-                '" data-dd-value="' + esc(o.value) + '">' + esc(o.label) +
+            var выбран = o.value === current;
+            items += '<button class="ct-dd-item' + (выбран ? ' active' : '') +
+                '" data-dd-value="' + esc(o.value) + '"' + (выбран ? ' aria-current="true"' : '') + '>' +
+                esc(o.label) + (выбран ? ГАЛКА : '') +
                 '<span class="ct-dd-count">' + o.count + '</span></button>';
         });
 
+        /* ЧТО ЧИТАЕТ ДИКТОР. Раскрывашка обязана сказать, что она
+           раскрывашка и открыта ли она: без `aria-haspopup` и
+           `aria-expanded` это просто кнопка с непонятным словом.
+           `aria-expanded` переключается при открытии — `initDropdowns`. */
         return '<div class="ct-dd" data-dd="' + kind + '">' +
-            '<button class="trn-chip ct-dd-toggle' + (current !== 'all' ? ' active' : '') + '">' +
+            '<button class="trn-chip ct-dd-toggle' + (current !== 'all' ? ' active' : '') + '"' +
+                ' aria-haspopup="listbox" aria-expanded="false">' +
                 esc(title) +
-                '<svg class="ct-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
+                '<svg class="ct-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
             '</button>' +
-            '<div class="ct-dd-menu">' + items + '</div>' +
+            '<div class="ct-dd-menu" role="listbox">' + items + '</div>' +
         '</div>';
     }
 
@@ -1038,16 +1133,28 @@
             var item = e.target.closest('.ct-dd-item');
 
             // Клик мимо — закрываем открытое
+            /* `aria-expanded` ходит ВМЕСТЕ с классом open, и обновляется в
+               одном месте — иначе диктор и экран разойдутся на первом же
+               закрытии «кликом мимо» */
+            var закрытьВсе = function() {
+                document.querySelectorAll('.ct-dd.open').forEach(function(d) {
+                    d.classList.remove('open');
+                    var к = d.querySelector('.ct-dd-toggle');
+                    if (к) к.setAttribute('aria-expanded', 'false');
+                });
+            };
+
             if (!toggle && !item) {
-                document.querySelectorAll('.ct-dd.open').forEach(function(d) { d.classList.remove('open'); });
+                закрытьВсе();
                 return;
             }
 
             if (toggle) {
                 var dd = toggle.closest('.ct-dd');
                 var wasOpen = dd.classList.contains('open');
-                document.querySelectorAll('.ct-dd.open').forEach(function(d) { d.classList.remove('open'); });
+                закрытьВсе();
                 dd.classList.toggle('open', !wasOpen);
+                toggle.setAttribute('aria-expanded', String(!wasOpen));
                 return;
             }
 
@@ -1059,6 +1166,8 @@
             else currentSurfaceFilter = value;
 
             wrap.classList.remove('open');
+            var кнопкаWrap = wrap.querySelector('.ct-dd-toggle');
+            if (кнопкаWrap) кнопкаWrap.setAttribute('aria-expanded', 'false');
             _currentPage = 1;
             refreshDropdowns();
             renderGrid();
@@ -1187,7 +1296,7 @@
         var allSurfaces = [];
         var surfaceSeen = {};
         (court._courtTypes || []).forEach(function(ct) {
-            var sLabel = isEn ? (SURFACE_MAP_EN[ct.surface] || ct.surface) : isKg ? (SURFACE_MAP_KG[ct.surface] || ct.surface) : (SURFACE_MAP[ct.surface] || ct.surface);
+            var sLabel = ПОКРЫТИЯ[ct.surface] || ct.surface;
             if (sLabel && !surfaceSeen[sLabel]) { surfaceSeen[sLabel] = true; allSurfaces.push(sLabel); }
         });
         var surfacesText = allSurfaces.join(', ') || court.surface;
@@ -1223,7 +1332,7 @@
                     '</div>';
             court._courtTypes.forEach(function(ct) {
                 var typeLabel = TYPE_LABELS[ct.type] || ct.type || '';
-                var surfaceLabel = isEn ? (SURFACE_MAP_EN[ct.surface] || ct.surface) : isKg ? (SURFACE_MAP_KG[ct.surface] || ct.surface) : (SURFACE_MAP[ct.surface] || ct.surface);
+                var surfaceLabel = ПОКРЫТИЯ[ct.surface] || ct.surface;
                 var priceText = ct.price ? (ct.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '—';
                 if (ct.partner && ct.discount) {
                     priceText += ' <span class="ct-svc-discount">KSLT -' + ct.discount + '%</span>';

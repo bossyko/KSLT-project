@@ -68,7 +68,72 @@
 
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
-    var L = window.coachesLabels || (isKg ? {
+    /* АНГЛИЙСКАЯ ВЕТКА ЗАВЕДЕНА 12.10 — её не было, как и у кортов.
+       `experience` на КАРТОЧКЕ намеренно короткое: замер 12.10 дал
+       «лет опыта» 53.4 против «years of experience» 103.3 — почти вдвое,
+       и это самое узкое место карточки. Полная подпись живёт на странице
+       тренера, где место есть (`experienceFull`).
+
+       Крючок `window.coachesLabels` снят: его не задавал никто. */
+    var L = isEn ? {
+        heroTitle: "Coaches",
+        heroSubtitle: "Professional coaches for players of every level",
+        filterAll: "All",
+        ddAge: "Age",
+        ddForm: "Format",
+        ddLevel: "Level",
+        filterAdults: "Adults",
+        filterKids: "Kids",
+        filterGroup: "Group",
+        filterIndividual: "Individual",
+        filterBeginner: "Beginners",
+        filterAdvanced: "Advanced",
+        experience: "years",
+        experienceFull: "years of experience",
+        students: "students",
+        rating: "rating",
+        priceFrom: "from",
+        priceCurrency: "som/hour",
+        detailsBtn: "Details",
+        bookBtn: "KSLT discount",
+        shownOf: "of",
+        pageOf: "of",
+        prevPage: "\u2190 Back",
+        nextPage: "Next \u2192",
+        bioTitle: "About the coach",
+        achievementsTitle: "Achievements",
+        scheduleTitle: "Schedule",
+        reviewsTitle: "Student reviews",
+        ctaTitle: "Discounts for KSLT members",
+        ctaText: "Sign up and become a KSLT member for discounts at partner coaches",
+        ctaBtn: "Book a session",
+        backBtn: "All coaches",
+        court: "Court",
+        loginToContact: "Sign in to get in touch",
+        noContacts: "No contacts listed",
+        contactCoach: "Contact the coach",
+        searchPlaceholder: "Search coaches...",
+        recommendedBadge: "KSLT recommends",
+        discountTitle: "Discounts for KSLT members",
+        getVoucher: "Get discount",
+        discountGuest: "Sign up and get a membership for discounts",
+        discountRegistered: "Get a KSLT membership for discounts",
+        voucherReady: "Your discount is ready!",
+        voucherLimit: "You already have an active discount",
+        voucherExpires: "Valid until",
+        voucherDownload: "Download QR",
+        voucherDiscount: "Discount",
+        voucherService: "Service",
+        myVouchers: "My discounts",
+        voucherActive: "Active",
+        voucherUsed: "Used",
+        voucherExpired: "Expired",
+        voucherShowQR: "QR",
+        noVouchersYet: "No discounts yet",
+        pickService: "Choose a service",
+        pickSubmit: "Get discount",
+        noDiscountsConfigured: "No discounts set up yet"
+    } : (isKg ? {
         heroTitle: 'Машыктыруучулар',
         heroSubtitle: 'Бардык деңгээлдеги оюнчулар үчүн кесипкөй машыктыруучулар',
         filterAll: 'Баары',
@@ -82,6 +147,7 @@
         filterBeginner: 'Башталгыч',
         filterAdvanced: 'Алдыңкы',
         experience: 'жыл тажрыйба',
+        experienceFull: 'жыл тажрыйба',
         students: 'окуучу',
         rating: 'рейтинг',
         priceFrom: 'дан',
@@ -139,6 +205,7 @@
         filterBeginner: "Начинающие",
         filterAdvanced: "Продвинутые",
         experience: "лет опыта",
+        experienceFull: "лет опыта",
         students: "учеников",
         rating: "рейтинг",
         priceFrom: "от",
@@ -927,7 +994,7 @@
 
         // Stats
         var statsHtml = '';
-        if (coach.experience) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.experience + '</div><div class="co-detail-stat-label">' + L.experience + '</div></div>';
+        if (coach.experience) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.experience + '</div><div class="co-detail-stat-label">' + L.experienceFull + '</div></div>';
         if (coach.students) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.students + '+</div><div class="co-detail-stat-label">' + L.students + '</div></div>';
         if (coach.rating) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.rating + '</div><div class="co-detail-stat-label">' + L.rating + '</div></div>';
         if (coach.price) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.price + '</div><div class="co-detail-stat-label">' + L.priceCurrency + '</div></div>';
