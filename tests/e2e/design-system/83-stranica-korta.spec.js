@@ -327,45 +327,41 @@ test('фокус на странице корта виден от настоящ
     expect(о.ширина, 'обводка фокуса нулевой ширины — её анимирует transition').toBeGreaterThanOrEqual(2);
 });
 
-/* ══ 8. КОЛОНКА ОБЪЕКТА — ОДНА ШИРИНА И ОДИН ЛЕВЫЙ КРАЙ ════════════════ */
+/* ══ 8. ВОЗВРАТ БЕЗ ПОДЛОЖКИ НА ШИРОКИХ ВИДАХ ══════════════════════════
+   Колонка 840 отменена Костей 13.10 («верни как было»), и щупы на неё сняты.
+   Осталось то, о чём он просил отдельно: подложек у возврата быть не должно.
+   ══════════════════════════════════════════════════════════════════════ */
 
-for (const [имя, адрес, признак] of [
-    ['корта', КОРТ, '.ct-detail-header'],
-    ['тренера', ТРЕНЕР, '.co-detail-info']
-]) {
-    test('на широком виде страница ' + имя + ' стоит одной колонкой', async ({ page }) => {
-        await открыть(page, адрес, признак);
-        const з = await page.evaluate(() => {
-            /* ПОРОГ С НАЗВАННОЙ ПРИЧИНОЙ: правило живёт от 993, и на телефоне
-               проверять нечего — там колонка во всю ширину по замыслу. */
-            if (window.innerWidth < 993) return { узкий: true };
-            const СЕЛЕКТОРЫ = ['.kslt-back-wrap', '.ct-detail-header, .co-detail-header',
-                               '.ct-section, .co-section', '.ct-types-table', '.ct-map-embed'];
-            const блоки = [];
-            СЕЛЕКТОРЫ.forEach(сел => {
-                const э = document.querySelector(сел);
-                if (!э) return;
-                const r = э.getBoundingClientRect();
-                блоки.push({ сел: сел.split(',')[0], w: Math.round(r.width), x: Math.round(r.left) });
-            });
-            const к = document.querySelector('.kslt-back-wrap');
-            const cs = к ? getComputedStyle(к) : null;
-            const до = к ? getComputedStyle(к, '::before') : null;
-            return { узкий: false, блоки,
-                     подложка: cs ? { фон: cs.backgroundColor, размытие: cs.backdropFilter, до: до.display } : null };
-        });
-        test.skip(з.узкий === true, 'вид уже 993 — колонка объекта там во всю ширину по замыслу');
-        expect(з.блоки.length, 'ПОРОГ: блоков колонки нет — мерить нечего').toBeGreaterThan(2);
-        const ширины = [...new Set(з.блоки.map(б => б.w))];
-        const края = [...new Set(з.блоки.map(б => б.x))];
-        expect(ширины, 'блоки страницы разной ширины: ' + JSON.stringify(з.блоки)).toHaveLength(1);
-        expect(края, 'блоки страницы с разным левым краем: ' + JSON.stringify(з.блоки)).toHaveLength(1);
-        expect(ширины[0], 'колонка объекта должна быть 840 — она выведена из меры абзаца').toBe(840);
-        expect(з.подложка.размытие, 'у возврата осталось размытие — это та самая подложка').toBe('none');
-        expect(['rgba(0, 0, 0, 0)', 'transparent'], 'у возврата осталась заливка').toContain(з.подложка.фон);
-        expect(з.подложка.до, 'у возврата осталась полоса во всю ширину окна').toBe('none');
+test('у возврата на широком виде нет подложки', async ({ page }) => {
+    await открыть(page, КОРТ, '.ct-detail-header');
+    const з = await page.evaluate(() => {
+        if (window.innerWidth < 993) return { узкий: true };
+        const к = document.querySelector('.kslt-back-wrap');
+        if (!к) return { узкий: false, нет: true };
+        const cs = getComputedStyle(к);
+        const до = getComputedStyle(к, '::before');
+        const ссылка = document.querySelector('.kslt-back');
+        ссылка.scrollIntoView({ block: 'center' });
+        const r = ссылка.getBoundingClientRect();
+        const x = Math.round(r.left + r.width / 2), цY = r.top + r.height / 2;
+        const своя = y => {
+            const т = document.elementFromPoint(x, Math.round(y));
+            return !!(т && (т === ссылка || ссылка.contains(т)));
+        };
+        let a = цY, b = цY;
+        while (a > 1 && своя(a - 1)) a--;
+        while (b < window.innerHeight - 1 && своя(b + 1)) b++;
+        return { узкий: false, фон: cs.backgroundColor, размытие: cs.backdropFilter,
+                 до: до.display, цель: Math.round(b - a) };
     });
-}
+    test.skip(з.узкий === true, 'вид уже 993 — там возврат в потоке по прежнему правилу');
+    expect(з.нет, 'ПОРОГ: возврата нет на странице — проверять нечего').toBeUndefined();
+    expect(з.размытие, 'у возврата осталось размытие — это та самая подложка').toBe('none');
+    expect(['rgba(0, 0, 0, 0)', 'transparent'], 'у возврата осталась заливка').toContain(з.фон);
+    expect(з.до, 'у возврата осталась полоса во всю ширину окна').toBe('none');
+    expect(з.цель, 'поле под выступ слоя цели снято — нажатие перехватывают соседи')
+        .toBeGreaterThanOrEqual(43);
+});
 
 /* ══ 9. СТРАНИЦА НЕ ШИРЕ ОКНА ══════════════════════════════════════════ */
 

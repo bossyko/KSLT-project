@@ -157,26 +157,16 @@ const ОТКАТЫ = [
  'движение страницы тренера спрашивает разрешения'],
 
 
-/* ── колонка объекта ──────────────────────────────────────────────────── */
-
-['вернуть ширину колонки числом вместо крутилки', ТОК,
- '  --stranica-objekta: 840px;',
- '  --stranica-objekta-nope: 840px;',
- 'ширина колонки объекта объявлена крутилкой, а не числом'],
-
-['вернуть счёт колонки по коробке', К,
- '        max-width: var(--stranica-objekta);\n        padding-inline: 0;',
- '        max-width: calc(var(--stranica-objekta) + var(--gutter) * 2);',
- 'колонка меряется содержимым, а боковое поле снято'],
+/* ── что пережило отмену колонки ──────────────────────────────────────── */
 
 ['вернуть возврату подложку на широких видах', С,
- '    .kslt-back-wrap.kslt-back-float::before {\n        display: none;\n    }',
- '    .kslt-back-wrap.kslt-back-flat-nope {\n        display: none;\n    }',
- 'возврат на широких видах стоит в колонке без подложки'],
+ '    .kslt-back-wrap.kslt-back-float::before {',
+ '    .kslt-back-wrap.kslt-back-float-nope::before {',
+ 'возврат на широких видах стоит без подложки'],
 
 ['снять у возврата поле под выступ слоя цели', С,
- '        padding-block: 12px;\n        padding-inline: 0;',
- '        padding-block: 8px;\n        padding-inline: 0;',
+ '        padding-block: 12px;\n        padding-inline: var(--pad-x);',
+ '        padding-block: 8px;\n        padding-inline: var(--pad-x);',
  'у возврата в потоке есть поле под выступ слоя цели'],
 
 ['вернуть границу возврата на 1300', С,
@@ -188,11 +178,6 @@ const ОТКАТЫ = [
  '        grid-template-columns: repeat(auto-fill, 220px);',
  '        grid-template-columns: repeat(4, 1fr);',
  'плитка тренера держит ширину компонента, а не делит колонку'],
-
-['вернуть показателям корта центровку', К,
- '.ct-detail-stats-single {\n    display: flex;\n    justify-content: flex-start;',
- '.ct-detail-stats-single {\n    display: flex;\n    justify-content: center;',
- 'показатели корта стоят по левому краю колонки'],
 
 ];
 
