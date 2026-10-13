@@ -145,8 +145,10 @@ const ОТКАТЫ = [
    'мёртвой кнопки отсечки в файле нет'],
 
   /* ── версии ── */
-  [RU, '<link rel="stylesheet" href="../css/player.css?v=64">',
-       '<link rel="stylesheet" href="../css/player.css?v=63">',
+  /* 13.10: якорь держался за НОМЕР версии — его поднимает каждая правка.
+     Ту же беду ловили 09.10 у двух чужих откатов. Держимся за ИМЯ ФАЙЛА. */
+  [RU, '<link rel="stylesheet" href="../css/player.css?v=',
+       '<link rel="stylesheet" href="../css/player.css?v=9',
    'версия player.css одна на все три языка'],
 
   [RU, '<script src="../js/player.js?v=59"></script>',

@@ -116,8 +116,8 @@ const ОТКАТЫ = [
    'накладка окна обмена — общий класс, а не семь свойств инлайном'],
 
   /* ── цели нажатия ── */
-  [CSS, '    min-width: 44px;\n    min-height: 44px;\n    padding: 0;\n    font-family: inherit;\n    font-size: var(--fs-md);',
-        '    min-width: 30px;\n    min-height: 26px;\n    padding: 0;\n    font-family: inherit;\n    font-size: var(--fs-md);',
+  [CSS, '    min-width: 44px;\n    min-height: 44px;\n    padding: 0;\n    font-size: var(--fs-md);',
+        '    min-width: 30px;\n    min-height: 26px;\n    padding: 0;\n    font-size: var(--fs-md);',
    'крестик окна обмена берёт ступень под палец'],
 
   [CSS, '.db-loy-redeem {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    min-height: 44px;',

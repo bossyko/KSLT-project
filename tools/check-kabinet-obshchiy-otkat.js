@@ -50,8 +50,8 @@ const ОТКАТЫ = [
         '    line-height: 1.25;',
    'каждый межстрочный стоит на ступени лестницы'],
 
-  [CSS, '.db-section select,\n.db-section textarea {\n    font-size: var(--fs-base);\n    line-height: 1.3;\n    font-family: inherit;\n}',
-        '.db-section select,\n.db-section textarea {\n    font-family: inherit;\n}',
+  [CSS, '.db-section select,\n.db-section textarea {\n    font-size: var(--fs-base);\n    line-height: 1.3;\n}',
+        '.db-section select,\n.db-section textarea {\n}',
    'select и textarea стоят на той же лестнице, что поле ввода'],
 
   /* ── границы медиа ── */

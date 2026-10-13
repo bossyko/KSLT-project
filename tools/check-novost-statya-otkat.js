@@ -160,11 +160,18 @@ const ОТКАТЫ = [
          `.news-pobediteli-gruppa {`,
    'уровень заголовка категории объявлен один раз, с родителем в селекторе'],
 
+  /* 13.10: якорь держался за соседство с `font-family: inherit`, а строку
+     сняли вместе с остальными 78 копиями. Держимся за СВОЙ класс. */
   [CSS, `    color: var(--text-secondary);
-    font-family: inherit;
-    background: var(--bg-card);`,
-         `    font-family: inherit;
-    background: var(--bg-card);`,
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    cursor: pointer;`,
+         `    color: ButtonText;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    cursor: pointer;`,
    'цвет текста кнопки оценки берётся из токена, а не от браузера'],
 
   [СТИ, `.kslt-back::after {`, `.kslt-back::after-было {`,

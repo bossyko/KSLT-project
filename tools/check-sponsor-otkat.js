@@ -68,9 +68,11 @@ const ОТКАТЫ = [
    '.sp-cta-btn:focus-visible {\n    outline-offset: 3px;\n}',
    'у кнопки есть кольцо фокуса'],
 
+  /* 13.10: якорь был общей строкой и после снятия копий наследования стал
+     встречаться трижды. ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ СВОЕГО БЛОКА. */
   ['css/style.css',
-   '    color: var(--accent-on);\n    font-family: inherit;',
-   '    color: #0a0a0a;\n    font-family: inherit;',
+   '    background: var(--accent);\n    color: var(--accent-on);\n    font-size: var(--fs-sm);',
+   '    background: var(--accent);\n    color: #0a0a0a;\n    font-size: var(--fs-sm);',
    'текст на лайме берётся токеном, а не литералом'],
 
   ['css/style.css',

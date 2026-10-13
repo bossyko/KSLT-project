@@ -18,23 +18,28 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-shrift-'));
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
 const CSS = 'css/dashboard.css';
-const ОБЩ = 'css/style.css';
+const ОБЩ = 'css/tokens.css';   /* дом правила переехал 13.10 */
 const JSФ = 'js/dashboard.js';
 const EN  = 'pages/dashboard-en.html';
 
 const ОТКАТЫ = [
   /* ── шрифт управлений ── */
-  [ОБЩ, 'input, button, select, textarea {\n    font-family: inherit;\n}',
-        'input, button, select, textarea {\n    letter-spacing: normal;\n}',
+  [ОБЩ, 'input, button, select, textarea {\n  font-family: inherit;\n}',
+        'input, button, select, textarea {\n  letter-spacing: normal;\n}',
    'шрифт управлений наследуется общим правилом'],
 
-  [ОБЩ, 'input, button, select, textarea {\n    font-family: inherit;\n}',
-        'input, button, select, textarea {\n    font-family: inherit;\n}\n\ninput, button, select, textarea {\n    font-family: inherit;\n}',
+  [ОБЩ, 'input, button, select, textarea {\n  font-family: inherit;\n}',
+        'input, button, select, textarea {\n  font-family: inherit;\n}\n\ninput, button, select, textarea {\n  font-family: inherit;\n}',
    'общее правило шрифта объявлено ровно один раз'],
 
   [CSS, '.db-profile-card-empty {\n    font-size: var(--fs-sm);',
         '.db-profile-card-empty {\n    font-family: inherit;\n    font-size: var(--fs-sm);',
-   'поштучные копии наследования не плодятся'],
+   'поштучных копий наследования не осталось ни одной'],
+
+  /* ОХВАТ. Страница, потерявшая дом правила, роняет сторож охвата — ровно
+     так и подвело судейское окно, пока дом стоял в `style.css`. */
+  ['pages/players.html', 'tokens.css?v=', 'tokens-NET.css?v=',
+   'дом общего правила подключают ВСЕ страницы продукта'],
 
   /* ── подчёркивание ── */
   [CSS, '    text-decoration: none;\n    transition: var(--transition-fast);\n}\n\n.db-btn-primary {',

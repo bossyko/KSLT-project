@@ -81,8 +81,8 @@ const ОТКАТЫ = [
         '    .db-contacts-note {\n        line-height: 1.5;\n        font-size: var(--fs-xs);',
    'ни один уровень кабинета не несёт два межстрочных'],
 
-  [CSS, '.db-choice {\n    padding: 0 16px;\n    font-family: inherit;\n    font-size: var(--fs-xs);\n    font-weight: 600;\n    line-height: var(--lh-none);',
-        '.db-choice {\n    padding: 0 16px;\n    font-family: inherit;\n    font-size: var(--fs-xs);\n    font-weight: 600;',
+  [CSS, '.db-choice {\n    padding: 0 16px;\n    font-size: var(--fs-xs);\n    font-weight: 600;\n    line-height: var(--lh-none);',
+        '.db-choice {\n    padding: 0 16px;\n    font-size: var(--fs-xs);\n    font-weight: 600;',
    'у управляющих элементов межстрочный назван значением'],
 
   /* ── краска ── */
