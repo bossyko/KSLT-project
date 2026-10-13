@@ -285,7 +285,15 @@
             ? '<img class="bc-banner" src="' + esc(battle.banner_url) + '" alt="">'
             : '';
 
+        /* СЛОЙ-ССЫЛКА НА ВСЮ КАРТОЧКУ. Общий сборщик — js/kslt-sloy.js.
+           До 13.10 переход делал обработчик ниже: карточку нельзя было
+           открыть в новой вкладке, взять с клавиатуры и прочитать диктором.
+           Кнопки голоса и место живут внутри, поэтому слой, а не обёртка. */
         return '<div class="bc-card" data-battle="' + battle.id + '">' +
+            (window.KSLT_SLOY
+                ? window.KSLT_SLOY.слой('bc-card-cover', detailUrl(battle.id),
+                                        battle.battle_title || L.battle)
+                : '') +
             bannerHtml +
             '<div class="bc-card-inner">' +
                 '<div class="bc-header">' +
@@ -309,7 +317,9 @@
                     '<span class="bc-pct bc-pct-p2">' + pct2 + '%</span>' +
                 '</div>' +
                 (venue ? '<div class="bc-meta"><span class="bc-meta-item bc-meta-venue" data-venue="' + esc(venue) + '">\uD83D\uDCCD ' + esc(venue) + '</span></div>' : '') +
-                '<a href="' + detailUrl(battle.id) + '" class="bc-details-link">' + L.moreDetails + ' →</a>' +
+                /* НАДПИСЬ, А НЕ ВТОРАЯ ССЫЛКА: переход несёт слой на всю
+                   карточку. Две ссылки на один адрес диктор читает дважды. */
+                '<span class="bc-details-link" aria-hidden="true">' + L.moreDetails + ' →</span>' +
             '</div>' +
         '</div>';
     }
@@ -513,7 +523,9 @@
                 // палец проходит сквозь неё в карточку, и человек, уже
                 // отдавший голос, вместо ничего уезжал на страницу баттла
                 if (e.target.closest('.bc-vote-buttons, .bc-vote-btn, .bc-meta-venue, a')) return;
-                window.location.href = detailUrl(card.dataset.battle);
+                /* ПЕРЕХОД НЕСЁТ СЛОЙ-ССЫЛКА. Обработчик остался страховкой
+                   для случая, когда общий модуль не подключён. */
+                if (!window.KSLT_SLOY) window.location.href = detailUrl(card.dataset.battle);
             });
         });
     }

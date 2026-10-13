@@ -148,6 +148,41 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
+/* ═══ СЛОЙ-ССЫЛКА КРУПНОЙ КАРТОЧКИ ═══════════════════════════════════════
+   13.10, вечер. Карточка была `div[data-href]` с обработчиком: в новой
+   вкладке открывалась только надпись «Подробнее». Теперь прямым ребёнком
+   лежит растянутая ссылка (js/kslt-sloy.js), порядок слоёв — тот же, что на
+   полосе турнира 04.10 и на карточке игрока:
+
+     фон и содержимое       z-index 1
+     слой-ссылка            z-index 2   — ВЫШЕ содержимого
+     кнопки голоса, место   z-index 3   — своё действие выше ссылки */
+.bo-featured > .bo-featured-bg,
+.bo-featured > .bo-featured-content {
+    position: relative;
+    z-index: 1;
+}
+
+.bo-featured > .bo-featured-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    text-decoration: none;
+}
+
+.bo-featured > .bo-featured-cover:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -4px;
+}
+
+/* Своё действие — выше слоя. Иначе слой съел бы голос и карту */
+.bo-featured .bo-vote-btn,
+.bo-featured .bo-meta-venue {
+    position: relative;
+    z-index: 3;
+}
+
 .bo-featured-bg {
     position: absolute;
     inset: 0;
@@ -927,7 +962,8 @@
    В файле не было ни одного `:focus-visible`, при том что на странице
    ссылка карточки, две кнопки голоса, «показать ещё», место и полосы.
    Кольцо — то же, что требует компонент `Button 17:82`. */
-.bo-featured-link:focus-visible,
+/* `.bo-featured-link` из списка снят 13.10, вечер: он стал <span>, а span
+   фокус не берёт — кольцо на нём мёртвое. Кольцо карточки несёт слой. */
 .bo-vote-btn:focus-visible,
 .bo-more:focus-visible,
 .bo-meta-venue:focus-visible,

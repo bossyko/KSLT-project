@@ -673,7 +673,14 @@
             ? '<div class="bo-featured-bg"><img src="' + esc(b.banner_url) + '" alt="" loading="lazy"></div><div class="bo-featured-overlay"></div>'
             : '<div class="bo-featured-overlay bo-featured-plain"></div>';
 
+        /* СЛОЙ-ССЫЛКА НА ВСЮ КАРТОЧКУ. Общий сборщик — js/kslt-sloy.js.
+           До 13.10 карточка была `div[data-href]` с обработчиком: её нельзя
+           было открыть в новой вкладке средней кнопкой нигде, кроме надписи
+           «Подробнее». */
         return '<div class="bo-featured" data-href="' + linkHref + '" data-battle="' + b.id + '">' +
+            (window.KSLT_SLOY
+                ? window.KSLT_SLOY.слой('bo-featured-cover', linkHref, b.battle_title || '')
+                : '') +
             bgHtml +
             '<div class="bo-featured-content">' +
                 '<div class="bo-featured-top">' +
@@ -701,14 +708,14 @@
                     (date ? '<span>📅 ' + formatDate(date) + (time ? ' · ' + esc(time) : '') + '</span>' : '') +
                     (venue ? '<span class="bo-meta-venue" data-venue="' + esc(venue) + '">📍 ' + esc(venue) + '</span>' : '') +
                 '</div>' +
-                /* НАСТОЯЩАЯ ССЫЛКА, А НЕ НАРИСОВАННАЯ. Был <span> без
-                   своего обработчика: нажатие доходило до карточки, а
-                   клавиатура и поисковик не видели перехода вовсе — замер
-                   13.10 дал две остановки Tab внутри карточки, и обе это
-                   кнопки голоса. Карточку целиком в <a> завернуть нельзя:
-                   внутри кнопки, а кнопка внутри ссылки — недопустимая
-                   разметка (правило 07.10). */
-                '<a class="bo-featured-link" href="' + linkHref + '">' + L.details + '</a>' +
+                /* НАДПИСЬ, А НЕ ВТОРАЯ ССЫЛКА. Утром 13.10 здесь стояла
+                   настоящая <a>: она дала клавиатуре и поисковику переход,
+                   которого не было вовсе. Вечером того же дня ссылкой стала
+                   ВСЯ карточка — слоем (см. выше), и две ссылки на один
+                   адрес внутри одной карточки диктор прочитал бы дважды.
+                   Тот же ход, что на полосе турнира 04.10: видимая надпись
+                   остаётся надписью, переход несёт слой. */
+                '<span class="bo-featured-link" aria-hidden="true">' + L.details + '</span>' +
             '</div>' +
         '</div>';
     }
@@ -954,14 +961,8 @@
                 return;
             }
 
-            // Настоящая ссылка внутри карточки работает сама
-            if (e.target.closest('a')) return;
-
-            // Card click → navigate
-            var card = e.target.closest('.bo-featured[data-href]');
-            if (card) {
-                window.location.href = card.dataset.href;
-            }
+            /* ПЕРЕХОД НЕСЁТ СЛОЙ-ССЫЛКА, А НЕ ЭТОТ ОБРАБОТЧИК. Здесь
+               остались только свои действия карточки — голос и место. */
         });
     }
 

@@ -30,6 +30,36 @@
 }
 
 /* ---- Card ---- */
+/* ═══ СЛОЙ-ССЫЛКА КАРТОЧКИ БАТТЛА ═══════════════════════════════════════
+   13.10. Переход делал обработчик на `div[data-battle]`: ни новой вкладки,
+   ни клавиатуры, ни диктора. Порядок слоёв — общий для сайта: содержимое 1,
+   слой 2, своё действие 3 (js/kslt-sloy.js). */
+.bc-card > .bc-card-inner,
+.bc-card > .bc-banner {
+    position: relative;
+    z-index: 1;
+}
+
+.bc-card > .bc-card-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    text-decoration: none;
+}
+
+.bc-card > .bc-card-cover:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -4px;
+}
+
+.bc-card .bc-vote-btn,
+.bc-card .bc-vote-buttons,
+.bc-card .bc-meta-venue {
+    position: relative;
+    z-index: 3;
+}
+
 .bc-card {
     position: relative;
     width: 100%;
