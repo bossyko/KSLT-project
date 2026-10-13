@@ -77,6 +77,7 @@ const SECTION = {
     'offer': 'info',
     'terms': 'info',
     'privacy-policy': 'info',
+    'sponsors': 'info',
 };
 
 const SECTIONS = ['tournaments', 'rankings', 'services', 'news', 'info'];
