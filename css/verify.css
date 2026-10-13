@@ -1,141 +1,176 @@
-/* ========================================
-   VERIFY — Voucher Verification Page
-   Styles with vr- prefix
-   ======================================== */
+/* ========================================================================
+   ПОДТВЕРЖДЕНИЕ ВАУЧЕРА — pages/verify{,-en,-kg}.html
+   Экран кассы: администратор заведения подтверждает скидку члена КСЛТ.
+
+   РАЗОБРАНО 13.10. Что было найдено числом:
+   · на телефоне боком администратор видел поле PIN и кнопку, но НЕ видел
+     плашку «действительная» и ИМЯ ВЛАДЕЛЬЦА — подтверждал скидку, не видя
+     чью. Причина не в вёрстке, а в автофокусе поля: focus() прокручивал
+     страницу на 259. Исправлено в js/verify.js, не здесь. Свою первую
+     запись («center уводит верх за нулевую прокрутку») снимаю: я читал
+     getBoundingClientRect, не посмотрев на scrollY, и назвал проблемой
+     показание прибора;
+   · метка строки rgba(255,255,255,0.45) давала контраст 4.44 при норме 4.5;
+   · фон страницы — сине-фиолетовый градиент, чужой продукту;
+   · `prefers-reduced-motion` 0 на две анимации, своих `:focus-visible` 0;
+   · `#ff4757` трижды числом — это системный --danger, просто записанный
+     мимо токена;
+   · мёртвые .logo-text и .logo-icon — 0 вхождений в js и html.
+
+   КОМПОНЕНТЫ, ЧЬИ ОПИСАНИЯ РЕШИЛИ ЗА МЕНЯ:
+   Card 29:65   — радиус 16, padding 24, border/subtle, bg/card.
+   Badge 27:53  — высота 24, поля 8, 11 Medium uppercase, letter-spacing 0.5.
+   Button 17:82 — «Height is set by the height property, never by vertical
+                  padding». Главное действие экрана — ступень lg 52,
+                  radius/full, текст accent/on, фокус 3px кольцом,
+                  disabled 45%.
+   Input 25:5   — радиус 8, bg/elevated, border/subtle, фокус accent + 3px
+                  кольцо, ошибка --danger на --danger-subtle. Кегль не ниже
+                  16, иначе Safari на iOS зумит страницу при фокусе.
+   ======================================================================== */
 
 .vr-page {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* ЦЕНТРОВКА ОСТАВЛЕНА КАК БЫЛА, И ЭТО ПРОВЕРЕНО, А НЕ ПРИНЯТО НА ВЕРУ.
+       13.10 я записал в находки, будто `center` уводит верх карточки за
+       нулевую точку прокрутки на 844 × 390. ЭТО БЫЛА ОШИБКА ПРИБОРА: я
+       читал getBoundingClientRect, не посмотрев на scrollY. Контейнер
+       растёт под содержимое (померено: 649 при экране 390), и при нулевой
+       прокрутке верх карточки 93 — что с `center`, что с `flex-start`,
+       число одно и то же. Вниз экран уезжал не от вёрстки, а от автофокуса
+       в поле PIN — см. js/verify.js. */
     justify-content: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+    padding: var(--space-5);
+    background: var(--bg-base);
 }
 
 .vr-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: var(--space-8);
 }
 
 .vr-header .logo {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
     text-decoration: none;
 }
 
-.vr-header .logo-text {
-    font-size: var(--fs-xl);
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: 2px;
-}
-
-.vr-header .logo-icon {
-    font-size: var(--fs-lg);
-}
-
 .vr-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 40px 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
     max-width: 440px;
     width: 100%;
     text-align: center;
-    backdrop-filter: blur(12px);
 }
 
 .vr-loading {
-    color: rgba(255,255,255,0.5);
+    color: var(--text-muted);
     font-size: var(--fs-base);
-    padding: 40px 0;
+    line-height: var(--lh-normal);
+    padding: var(--space-10) 0;
 }
 
-/* Valid voucher card */
-.vr-valid {
-    text-align: center;
-}
+/* ── Действительный ваучер ─────────────────────────────────────────────── */
 
+.vr-valid { text-align: center; }
+
+/* Геометрия Badge 27:53, тон Accent/Subtle. */
 .vr-badge {
-    display: inline-block;
-    background: rgba(204,255,0,0.12);
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--accent-subtle);
     color: var(--accent);
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
+    font-size: 11px;
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    margin-bottom: var(--space-5);
 }
 
 .vr-details {
     text-align: left;
-    margin: 20px 0;
+    margin: var(--space-5) 0;
 }
 
 .vr-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.7);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    line-height: var(--lh-snug);
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .vr-row:last-child { border-bottom: none; }
 
-.vr-row-label {
-    color: rgba(255,255,255,0.45);
-}
+/* Было rgba(255,255,255,0.45) — контраст 4.44 при норме 4.5. */
+.vr-row-label { color: var(--text-muted); }
 
 .vr-row-value {
-    font-weight: 600;
-    color: rgba(255,255,255,0.9);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    text-align: right;
 }
 
 .vr-discount-badge {
     color: var(--accent);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     font-size: var(--fs-md);
+    line-height: var(--lh-snug);
 }
 
-/* PIN input */
-.vr-pin-section {
-    margin-top: 28px;
-}
+/* ── PIN ───────────────────────────────────────────────────────────────── */
+
+.vr-pin-section { margin-top: var(--space-8); }
 
 .vr-pin-label {
     display: block;
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 12px;
+    line-height: var(--lh-snug);
+    color: var(--text-muted);
+    margin-bottom: var(--space-3);
 }
 
 .vr-pin-input {
     width: 180px;
-    height: 56px;
+    /* Ступень кнопок: 28 · 36 · 44 · 52. Было 56 — не ступень. */
+    height: var(--btn-h-lg);
     font-size: var(--fs-2xl);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-none);
     letter-spacing: 12px;
+    text-indent: 12px; /* letter-spacing вешает зазор справа от последней цифры */
     text-align: center;
-    background: rgba(255,255,255,0.06);
-    border: 2px solid rgba(255,255,255,0.12);
-    border-radius: 14px;
-    color: #fff;
+    background: var(--bg-elevated);
+    border: 2px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     outline: none;
     transition: border-color 0.2s;
-    font-family: 'Inter', monospace;
+    font-family: var(--font-sans);
 }
 
-.vr-pin-input:focus {
+.vr-pin-input:focus { border-color: var(--accent); }
+
+.vr-pin-input:focus-visible {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
 .vr-pin-input.vr-pin-error {
-    border-color: #ff4757;
+    border-color: var(--danger);
+    background: var(--danger-subtle);
     animation: vrShake 0.3s;
 }
 
@@ -145,59 +180,88 @@
     75% { transform: translateX(6px); }
 }
 
+/* ── Кнопка ────────────────────────────────────────────────────────────── */
+
 .vr-confirm-btn {
     display: block;
     width: 100%;
-    margin-top: 16px;
-    padding: 14px;
+    margin-top: var(--space-4);
+    /* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЯМИ — правило Button 17:82. Было
+       `padding: 14px`, и высота выходила 48: мимо ступеней и зависима от
+       межстрочного содержимого. */
+    height: var(--btn-h-lg);
+    padding: 0 var(--space-4);
     background: var(--accent);
-    color: #000;
+    color: var(--accent-on);
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-full);
+    font-family: var(--font-sans);
     font-size: var(--fs-base);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-none);
     cursor: pointer;
     transition: opacity 0.2s;
 }
 
 .vr-confirm-btn:hover { opacity: 0.85; }
+
+.vr-confirm-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
 .vr-confirm-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.45; /* Button 17:82: «dims the whole node to 45%» */
     cursor: not-allowed;
 }
 
-/* Error states */
+/* ── Отказ ─────────────────────────────────────────────────────────────── */
+
 .vr-error {
     text-align: center;
-    padding: 20px 0;
+    padding: var(--space-5) 0;
 }
 
 .vr-error-icon {
-    font-size: var(--fs-3xl);
-    margin-bottom: 16px;
+    font-size: var(--fs-2xl);
+    line-height: var(--lh-none);
+    margin-bottom: var(--space-4);
 }
 
 .vr-error-title {
     font-size: var(--fs-md);
-    font-weight: 700;
-    color: #ff4757;
-    margin-bottom: 8px;
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    color: var(--danger);
+    margin-bottom: var(--space-2);
 }
 
 .vr-error-text {
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.5);
+    line-height: var(--lh-normal);
+    color: var(--text-muted);
 }
 
-/* Success state */
+/* ПРАВИЛО Empty state 37:53: «always say what will appear here and how,
+   never just no data». Отказ обязан сказать, что делать дальше. */
+.vr-error-next {
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    margin-top: var(--space-3);
+}
+
+/* ── Подтверждено ──────────────────────────────────────────────────────── */
+
 .vr-success {
     text-align: center;
-    padding: 20px 0;
+    padding: var(--space-5) 0;
 }
 
 .vr-success-icon {
-    font-size: var(--fs-4xl);
-    margin-bottom: 16px;
+    font-size: var(--fs-2xl);
+    line-height: var(--lh-none);
+    margin-bottom: var(--space-4);
     animation: vrPop 0.4s ease-out;
 }
 
@@ -209,31 +273,50 @@
 
 .vr-success-title {
     font-size: var(--fs-lg);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
     color: var(--accent);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .vr-success-text {
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.6);
+    line-height: var(--lh-normal);
+    color: var(--text-muted);
 }
 
 .vr-pin-error-msg {
-    color: #ff4757;
+    color: var(--danger);
     font-size: var(--fs-sm);
-    margin-top: 8px;
+    line-height: var(--lh-snug);
+    margin-top: var(--space-2);
 }
 
-@media (max-width: 480px) {
-    .vr-card {
-        padding: 28px 20px;
-        border-radius: 16px;
-    }
+/* Разметка больше не носит `style="display:none"` — умолчание свойство
+   данных, а не разметки. */
+.vr-pin-error-msg:empty { display: none; }
+
+/* ── Движение ──────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .vr-pin-input.vr-pin-error,
+    .vr-success-icon { animation: none; }
+    .vr-pin-input,
+    .vr-confirm-btn { transition: none; }
+}
+
+/* ── Телефон ───────────────────────────────────────────────────────────── */
+
+/* Граница 640, а не 480: на 480 телефон боком (844) получал широкий
+   вариант, и своей ступени у него не было. */
+@media (max-width: 640px) {
+    .vr-card { padding: var(--space-5) var(--space-4); }
+
     .vr-pin-input {
         width: 160px;
-        height: 48px;
+        height: var(--btn-h-md);
         font-size: var(--fs-xl);
         letter-spacing: 10px;
+        text-indent: 10px;
     }
 }
