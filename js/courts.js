@@ -1728,7 +1728,12 @@
         var existing = document.getElementById('ctVoucherModal');
         if (existing) existing.remove();
 
-        var verifyUrl = 'https://kslt.netlify.app/pages/verify.html?token=' + voucher.qr_token;
+        /* ЯЗЫК ВАУЧЕРА — 13.10. Страницы verify-en.html и verify-kg.html
+           существуют и верны, но до сегодня все три генератора QR строили
+           только русский адрес: обе переведённые страницы были недостижимы.
+           Язык здесь уже известен — им подписан сам QR. */
+        var verifySuffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var verifyUrl = 'https://kslt.netlify.app/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
         var expiresDate = new Date(voucher.expires_at);
         var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
