@@ -192,6 +192,25 @@ for (const { я, страница, цель } of ЯЗЫКИ) {
             if (!f) return null;
             return [...f.querySelectorAll('a[href*="sponsors"]')].map(a => a.getAttribute('href'));
         });
+        /* СОСТАВ БЛОКА — ОДИН НА ТРИ ЯЗЫКА. До 13.10 en и kg несли в том же
+           блоке аренду кортов и проведение турниров, а русский — нет. Сведено
+           по слову Кости; на экране это видно так: в блоке, где лежат ссылки
+           на спонсоров, других ссылок нет вовсе, и заголовок называет
+           спонсоров. Проверяется на каждом языке — значит и равенство
+           языков держится, без сравнения страниц между собой. */
+        const блок = await page.evaluate(() => {
+            const b = [...document.querySelectorAll('footer .footer-block')]
+                .filter(x => x.querySelector('a[href*="sponsors"]'))[0];
+            if (!b) return null;
+            const h = b.querySelector('h4');
+            return { заголовок: h ? h.textContent.trim() : null,
+                     все: [...b.querySelectorAll('.footer-links a')].map(a => a.getAttribute('href')) };
+        });
+        expect(блок, 'ПОРОГ: блока со ссылками на спонсоров в подвале нет').not.toBeNull();
+        expect(блок.все.filter(h => h.indexOf('sponsors') === -1),
+            'в блоке спонсоров появились чужие ссылки: ' + JSON.stringify(блок.все)).toEqual([]);
+        expect(блок.заголовок, 'заголовок блока не называет спонсоров')
+            .toMatch(/Спонсор|sponsor|Демөөрч/i);
         expect(п, 'ПОРОГ: подвала на странице нет').not.toBeNull();
         expect(п.length, 'в подвале нет ни одной ссылки на спонсоров').toBeGreaterThan(0);
         /* До 13.10 на en и kg ссылки не было вовсе, и страница была
