@@ -603,13 +603,18 @@
    закрытые куски. Находка стоит на доске 482:9, блок L, с 27.09. */
 .to-hero .tournament-hero-stats .hero-stat-value,
 .tournament-hero .tournament-hero-stats .hero-stat-value,
-.td-hero .td-hero-stats .hero-stat-value {
+.td-hero .td-hero-stats .hero-stat-value,
+/* Баттлы 13.10: семейства здесь не было, и цифру обложки правило витрины
+   считало долями ширины — на 390 выходило 25, числа нет ни в шкале, ни в
+   токенах. */
+.bo-hero .bo-hero-stats .bo-hero-stat-value {
   font-size: var(--fs-hero-num);
 }
 
 .to-hero .tournament-hero-stats .hero-stat-label,
 .tournament-hero .tournament-hero-stats .hero-stat-label,
-.td-hero .td-hero-stats .hero-stat-label {
+.td-hero .td-hero-stats .hero-stat-label,
+.bo-hero .bo-hero-stats .bo-hero-stat-label {
   font-size: var(--fs-hero-cap);
 }
 
