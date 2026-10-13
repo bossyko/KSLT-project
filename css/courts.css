@@ -661,7 +661,11 @@
     background: var(--surface-glass);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 20px 32px;
+    /* ПИЛЮЛЯ СТАЛА НА СТУПЕНЬ МЕНЬШЕ — слово Кости 13.10: «давай сделаем её
+       чуть поменьше». Поля 20/32 → 16/24, обе ступени шкалы. Вместе с кеглем
+       ниже это снимает и столкновение: показатель был 21/800, ровно как
+       заголовок секции 21/700, и спорил с ним за первый взгляд. */
+    padding: 16px 24px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -669,8 +673,10 @@
     justify-content: center;
 }
 
+/* ПОКАЗАТЕЛЬ СТРОГО МЕЛЬЧЕ ЗАГОЛОВКА СЕКЦИИ — отношение, а не число.
+   Было 21 при заголовке 21; стало 18 при 21. */
 .ct-stat-item {
-    font-size: var(--fs-lg);
+    font-size: var(--fs-md);
     font-weight: 800;
     color: var(--accent);
     white-space: nowrap;
@@ -1307,7 +1313,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 14px;
+    /* 10 и 14 — не ступени шкалы (4 · 8 · 12 · 16 · 20 · 24). Поймано
+       сторожем при правке пилюли 13.10: правило искало пару по всему файлу
+       и нашло её здесь. */
+    padding: 12px 16px;
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.04);
@@ -1556,11 +1565,13 @@
 
 @media (max-width: 768px) {
     .ct-detail-stat-combined {
-        padding: 10px 14px;
+        /* 10 и 14 — не ступени шкалы отступов (4 · 8 · 12 · 16 · 20 · 24),
+           поймано при правке пилюли 13.10 */
+        padding: 12px 16px;
     }
 
     .ct-stat-item {
-        font-size: var(--fs-md);
+        font-size: var(--fs-base);
     }
 
     .ct-detail-type {

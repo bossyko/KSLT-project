@@ -164,6 +164,16 @@ const ОТКАТЫ = [
  '    .kslt-back-wrap.kslt-back-float-nope::before {',
  'возврат на широких видах стоит без подложки'],
 
+['вернуть показателю кегль заголовка секции', К,
+ '.ct-stat-item {\n    font-size: var(--fs-md);',
+ '.ct-stat-item {\n    font-size: var(--fs-lg);',
+ 'показатель корта мельче заголовка секции'],
+
+['вернуть пилюле поля мимо шкалы', К,
+ '        padding: 12px 16px;\n    }\n\n    .ct-stat-item {',
+ '        padding: 10px 14px;\n    }\n\n    .ct-stat-item {',
+ 'поля пилюли показателей стоят на ступенях шкалы'],
+
 ['снять у возврата поле под выступ слоя цели', С,
  '        padding-block: 12px;\n        padding-inline: var(--pad-x);',
  '        padding-block: 8px;\n        padding-inline: var(--pad-x);',
