@@ -67,6 +67,8 @@ module.exports = defineConfig({
        82-korty-angliyskiy — английская ветка кортов и тренеров. Витрина
                             рисуется ИЗ БАЗЫ: без неё ни карточек, ни
                             выпадашек, и все щупы ждут признака впустую
+       83-stranica-korta   — страница корта и страница тренера. Обе рисуются
+                            из базы целиком: без неё в `main` вообще пусто
 
        Сессии в tests/.auth/ от старого прогона лежат, но им 25.09: подняться
        с просроченной сессией — это проверить страницу входа, а не кабинет. */
@@ -82,7 +84,8 @@ module.exports = defineConfig({
         '**/79-kabinet-bally-platezhi.spec.js',
         '**/80-kabinet-razdely.spec.js',
         '**/81-shrift-upravleniy.spec.js',
-        '**/82-korty-angliyskiy.spec.js'
+        '**/82-korty-angliyskiy.spec.js',
+        '**/83-stranica-korta.spec.js'
     ],
 
     timeout: 30000,
