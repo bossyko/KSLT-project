@@ -5144,7 +5144,8 @@ h2 {
     color: var(--text-primary);
     font-family: var(--font-primary);
     outline: none;
-    transition: all 0.25s;
+    /* не «all»: см. чип выше — outline-width под переход не попадает */
+    transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
 }
 
 .trn-search-input::placeholder {
@@ -5212,7 +5213,16 @@ h2 {
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
-    transition: all var(--transition-fast);
+    /* ПЕРЕЧИСЛЯЕМ, А НЕ «ALL» — правило куплено 09.10 на кнопке H2H и
+       применяется здесь без нового разбора. «all» анимирует и
+       outline-width: контур у клавиатурного пользователя наезжает от нуля,
+       и замер сразу после Tab видит `0px solid` при горящем
+       :focus-visible. Прогон 12.10 уронил на этом пять щупов подряд. */
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
 }
 
 /* ЦЕЛЬ НАЖАТИЯ — СТУПЕНЬ 44, А ВЫСОТА ОСТАЁТСЯ СВОЕЙ.
@@ -5565,7 +5575,9 @@ h2 {
     font-weight: var(--fw-medium);
     line-height: var(--lh-none);
     cursor: pointer;
-    transition: all 0.2s;
+    /* не «all»: оно анимирует outline-width, и контур фокуса наезжает
+       от нуля — та же беда, что у чипа (09.10, 12.10) */
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
 /* Слой цели нажатия: коробка 36, попадание 44. Слой прозрачный и ничего не
