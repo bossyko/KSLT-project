@@ -236,12 +236,12 @@
         } else if (from === 'tournaments') {
             html += '<a href="tournaments-overview' + suffix + '.html" class="kslt-back">\u2190 ' + tourLabel + '</a>';
             html += '<span class="kslt-back-sep">/</span>';
-            html += '<span class="kslt-back" style="color:var(--text-muted);cursor:default;">' + battleLabel + '</span>';
+            html += '<span class="kslt-back kslt-back-here">' + battleLabel + '</span>';
         } else {
             var homeHref = isEn ? '../index-en.html' : (isKg ? '../index-kg.html' : '../index.html');
             html += '<a href="' + homeHref + '" class="kslt-back">\u2190 ' + homeLabel + '</a>';
             html += '<span class="kslt-back-sep">/</span>';
-            html += '<span class="kslt-back" style="color:var(--text-muted);cursor:default;">' + battleLabel + '</span>';
+            html += '<span class="kslt-back kslt-back-here">' + battleLabel + '</span>';
         }
 
         el.innerHTML = html;
@@ -619,17 +619,13 @@
         var c1Name = sideLabel(b, 1);
         var c2Name = sideLabel(b, 2);
 
-        // Auto-close voting when match time arrives (Asia/Bishkek = UTC+6)
+        /* ЗАКРЫТИЕ ГОЛОСОВАНИЯ — ОДНО ПРАВИЛО НА ДВА ЭКРАНА, и живёт оно
+           в battle-format.js рядом с состоянием баттла. Здесь и в
+           js/battles-overview.js одно и то же условие было написано дважды. */
         var matchDate = b.proposed_date || '';
         var matchTime = b.proposed_time || '';
-        var timeExpired = false;
-        if (matchDate && matchTime) {
-            var matchDt = new Date(matchDate + 'T' + matchTime + ':00+06:00');
-            if (!isNaN(matchDt.getTime()) && Date.now() >= matchDt.getTime()) {
-                timeExpired = true;
-            }
-        }
-        var closed = b.voting_closed || b.status === 'completed' || timeExpired;
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var closed = BF ? BF.votingClosed(b) : !!b.voting_closed;
         var alreadyVoted = !!_myVoteSide;
         var canVote = _userId && !closed && !alreadyVoted;
 
@@ -915,10 +911,19 @@
         var c1Name = sideLabel(b, 1);
         var c2Name = sideLabel(b, 2);
 
+        /* СЧЁТ ВСТРЕЧ — ПО СТОРОНЕ, ТЕМ ЖЕ ПРАВИЛОМ, ЧТО И ПОБЕДИТЕЛЬ.
+           У баттла с гостем `p1` пустой, и сравнение по игроку отдавало ВСЕ
+           встречи второму: замер 13.10 дал «0 : 2» при пяти матчах — числа
+           не сходились сами с собой. */
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var сторонаПобедителя = function(m) {
+            return BF ? BF.winnerSide(b, m.winner_id) : null;
+        };
         var w1 = 0, w2 = 0;
         matches.forEach(function(m) {
-            if (m.winner_id === p1) w1++;
-            else if (m.winner_id === p2) w2++;
+            var с = сторонаПобедителя(m);
+            if (с === 1) w1++;
+            else if (с === 2) w2++;
         });
 
         // Прогноз считает и личные встречи. Страница их уже загрузила —
@@ -949,7 +954,8 @@
         var duelLabel = isEn ? '(Duel)' : (isKg ? '(Чакыруу)' : '(Вызов)');
 
         function rowHtml(m, hidden) {
-            var winName = m.winner_id === p1 ? c1Name : c2Name;
+            var с = сторонаПобедителя(m);
+            var winName = с === 1 ? c1Name : (с === 2 ? c2Name : '\u2014');
             var typeTag = m.match_type === 'duel'
                 ? ' <span class="ch-h2h-duel">' + duelLabel + '</span>' : '';
             return '<div class="ch-h2h-match' + (hidden ? ' ch-h2h-hidden' : '') + '">' +
@@ -1016,8 +1022,18 @@
         var c1Name = sideLabel(b, 1);
         var c2Name = sideLabel(b, 2);
 
-        var winnerName = match.winner_id === p1 ? c1Name : c2Name;
-        var isP1Winner = match.winner_id === p1;
+        /* ПОБЕДИТЕЛЬ — ПО СТОРОНЕ, А НЕ ПО ИГРОКУ.
+           Было: `match.winner_id === b.challenger_player_id`. У баттла с
+           приглашённым со стороны этот столбец ПУСТОЙ, и когда выигрывал
+           гость, `matches.winner_id` указывать было не на кого — сравнение
+           превращалось в `null === null`, отвечало «да», и страница писала
+           «Победитель: <гость>» при любом исходе. Выиграй зарегистрированный
+           соперник — та же строка назвала бы его и была бы права случайно.
+           Проверено на стенде 13.10: maket/stend-vyzov.html?sluchay=gost. */
+        var BF = window.KSLT_BATTLE_FORMAT;
+        var сторона = BF ? BF.winnerSide(b, match.winner_id) : null;
+        var isP1Winner = сторона === 1;
+        var winnerName = сторона === 2 ? c2Name : (сторона === 1 ? c1Name : '');
 
         // Parse score: "6/4 7/6(11-9)" → sets
         var sets = (match.score || '').split(' ').filter(Boolean);
@@ -1037,8 +1053,8 @@
         var v1 = _votes[1] || 0;
         var v2 = _votes[2] || 0;
         var total = v1 + v2;
-        var correctVotes = match.winner_id === p1 ? v1 : v2;
-        var pctCorrect = total > 0 ? Math.round(correctVotes / total * 100) : 0;
+        var correctVotes = сторона === 1 ? v1 : (сторона === 2 ? v2 : 0);
+        var pctCorrect = (total > 0 && сторона) ? Math.round(correctVotes / total * 100) : 0;
 
         section.innerHTML =
             '<div class="ch-score-inner">' +
@@ -1048,8 +1064,11 @@
                     setsHtml +
                     '<span class="ch-score-player' + (!isP1Winner ? ' winner' : '') + '">' + esc(c2Name) + '</span>' +
                 '</div>' +
-                '<div class="ch-winner-badge">' + L.winner + ': ' + esc(winnerName) + '</div>' +
-                (total > 0 ? '<div class="ch-prediction-result"><strong>' + pctCorrect + '%</strong> ' + L.predictionResult + '</div>' : '') +
+                /* Стороны не знаем — молчим. Соврать нельзя, промолчать можно:
+                   то же правило, по которому состав пары не называется полом,
+                   когда пол участников неизвестен (battle-format.js). */
+                (winnerName ? '<div class="ch-winner-badge">' + L.winner + ': ' + esc(winnerName) + '</div>' : '') +
+                (total > 0 && сторона ? '<div class="ch-prediction-result"><strong>' + pctCorrect + '%</strong> ' + L.predictionResult + '</div>' : '') +
             '</div>';
 
         if (_battle) moveAside(_battle);
