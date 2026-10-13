@@ -509,10 +509,19 @@
     grid-template-columns: var(--колонки-рейтинга);
     align-items: center;
     /* Ряд 52 — ступень шкалы кнопок. Было 65: высоту давали поля 12,
-       а не содержимое. */
+       а не содержимое.
+
+       ПОПРАВКА 13.10: ряд выходил 53, а не 52, и ПОСЛЕДНИЙ был 52 — то есть
+       ряды в одной таблице не равны между собой. Померено: содержимое 40
+       плюс поля 12 — это ровно 52, а один лишний пиксель давала РАЗДЕЛЬНАЯ
+       ЛИНИЯ: `border-bottom` занимает место в потоке, а у последнего ряда
+       его нет. Линия переведена во внутреннюю тень — она рисуется, но
+       высоты не занимает. Правило дома: ВЫСОТУ РЯДА ДЕРЖИТ СВОЙСТВО, А НЕ
+       СУММА ПОЛЕЙ (куплено на админке 08.10). */
+    min-height: var(--btn-h-lg);
     padding: 6px 16px;
     gap: 8px;
-    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: inset 0 -1px 0 var(--border-subtle);
     transition: all 0.2s;
     opacity: 0;
     transform: translateY(10px);
@@ -523,8 +532,9 @@
     transform: translateY(0);
 }
 
+/* Линия теперь тень, и снимается она тоже тенью. */
 .pl-row:last-child {
-    border-bottom: none;
+    box-shadow: none;
 }
 
 .pl-row:not(.pl-row-header):hover {
@@ -645,8 +655,14 @@
     font-size: var(--fs-md);
 }
 
+/* ЗНАЧОК NTRP ПЕРЕНОСИЛСЯ, И ОТ ЭТОГО РЯД СТАНОВИЛСЯ ВЫШЕ. Померено 13.10 на
+   768 и 844: у парного значения «4.5 / 4.0» ячейка выходила 48 вместо 24, и
+   ряд — 68 при 56 у соседей. Правило не новое: `Badge 27:53` говорит высоту
+   24 и ОДНУ строку, и ровно эту беду ловили в админке 08.10 («каждая
+   четвёртая строка была 56»). Сюда оно не доехало. */
 .pl-col-ntrp {
     text-align: center;
+    white-space: nowrap;
 }
 
 .pl-ntrp-value {
@@ -1395,7 +1411,7 @@
     }
 
     .pl-row:last-child {
-        border-bottom: 1px solid var(--border-subtle);
+        box-shadow: inset 0 -1px 0 var(--border-subtle);
     }
 
     .pl-col-rank {
