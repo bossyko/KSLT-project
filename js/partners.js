@@ -565,7 +565,24 @@
         }
 
         var playerPage = isEn ? 'player-en.html' : isKg ? 'player-kg.html' : 'player.html';
-        var html = '<div class="pt-card' + (extraClass || '') + '" data-player-url="' + playerPage + '?id=' + escHtml(p.id) + '" style="cursor:pointer;">' +
+        var адрес = playerPage + '?id=' + escHtml(p.id);
+
+        /* СЛОЙ-ССЫЛКА, А НЕ ОБРАБОТЧИК. Померено 13.10: девять карточек были
+           `div` с `cursor:pointer` инлайном, фокусируемых внутри ОДИН —
+           кнопка «Пригласить», ссылок ноль. Карточку нельзя было открыть в
+           новой вкладке, взять с клавиатуры и прочитать диктором.
+
+           ГОСТЮ СЛОЯ НЕ ДАЁМ, и это не упущение: на странице профиля его
+           ждёт только замок, а вернувшись, он теряет место в списке —
+           решение уже записано ниже в обработчике. Ссылки, которая никуда
+           не ведёт, на экране не бывает. */
+        var слой = (_accessLevel !== 'guest' && window.KSLT_SLOY)
+            ? window.KSLT_SLOY.слой('pt-card-cover', адрес, p.full_name || '')
+            : '';
+
+        var html = '<div class="pt-card' + (extraClass || '') +
+            (слой ? ' pt-card-link' : '') + '" data-player-url="' + адрес + '">' +
+            слой +
             ntrpHtml +
             '<div class="pt-avatar-wrap">' +
                 avatarHtml +
@@ -655,7 +672,8 @@
             return;
         }
 
-        window.location.href = card.dataset.playerUrl;
+        /* ДАЛЬШЕ ОБРАБОТЧИК НЕ ИДЁТ: вошедшему переход делает слой-ссылка
+           внутри карточки. Здесь остался только гостевой случай. */
     });
 
     // ---- Invite click delegation ----

@@ -135,6 +135,9 @@
 
 .pt-card {
     position: relative;
+    /* БЫЛО ИНЛАЙНОМ В js/partners.js. Карточка нажимаема у всех: вошедшему
+       слой-ссылка ведёт на профиль, гостю открывается окно регистрации. */
+    cursor: pointer;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
@@ -144,6 +147,36 @@
     align-items: center;
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+}
+
+/* ═══ СЛОЙ-ССЫЛКА КАРТОЧКИ ИГРОКА ═══════════════════════════════════════
+   13.10. Карточка вела на профиль обработчиком: `div` с `cursor:pointer`
+   инлайном, фокусируемых внутри ОДИН, ссылок ноль. Теперь прямым ребёнком
+   лежит растянутая ссылка (js/kslt-sloy.js), а порядок слоёв взят с полосы
+   турнира, где он выведен 04.10:
+
+     содержимое          z-index 1
+     слой-ссылка         z-index 2   — ВЫШЕ содержимого, иначе оно его съест
+     «Пригласить»        z-index 3   — своё действие выше ссылки
+
+   Гостю слоя не дают: карточка открывает окно регистрации, а не профиль, —
+   поэтому правила висят на .pt-card-link, а не на .pt-card. */
+.pt-card-link > * {
+    position: relative;
+    z-index: 1;
+}
+
+.pt-card-link > .pt-card-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    text-decoration: none;
+}
+
+.pt-card-link > .pt-card-cover:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .pt-card:hover {
@@ -172,9 +205,15 @@
     border-radius: inherit;
 }
 
+/* КНОПКА ВЫШЕ СЛОЯ-ССЫЛКИ. 13.10: сначала я завёл второе правило
+   `.pt-card-link > .pt-invite-btn`, и замер показал у кнопки z-index 1 —
+   это правило той же силы стоит НИЖЕ по файлу и побеждало порядком.
+   ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: ступень кнопки живёт здесь, а не в
+   двух местах. 3 — чтобы «Пригласить» оставалась нажимаемой поверх слоя;
+   у карточки без слоя соседей выше 1 нет, и число ничего не меняет. */
 .pt-card .pt-invite-btn {
     position: relative;
-    z-index: 1;
+    z-index: 3;
 }
 
 /* Кольцо фокуса — обязательное по WCAG 2.4.7, описание Button 17:82.
