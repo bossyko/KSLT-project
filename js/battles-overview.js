@@ -440,10 +440,15 @@
             // полоса растягивалась на высоту соседа: когда она одна,
             // получалась пустая коробка с тонкой строчкой посередине
             if (live.length === 1) {
-                html += renderFeaturedBattle(live[0], false);
+                html += renderFeaturedBattle(live[0]);
             } else {
-                html += '<div class="to-card-grid">';
-                for (var k = 0; k < live.length; k++) html += renderFeaturedBattle(live[k], false);
+                // СВОЙ КЛАСС, А НЕ ЧУЖОЙ. До 13.10 сетка рисовалась
+                // классом турниров, и на телефоне её правило из витрины
+                // категорий (tournaments-overview.css:1714) ставило ДВЕ
+                // колонки: карточка выходила 173 × 800, название в семь
+                // строк, имена наезжали на VS. Замер 13.10 на 390.
+                html += '<div class="bo-card-grid">';
+                for (var k = 0; k < live.length; k++) html += renderFeaturedBattle(live[k]);
                 html += '</div>';
             }
             html += '</div>';
@@ -469,10 +474,10 @@
             // пустоты читалась как поломка. Достаточно строки
             html += '<div class="bo-empty-slim">' + L.empty + '</div>';
         } else if (active.length === 1) {
-            html += renderFeaturedBattle(active[0], false);
+            html += renderFeaturedBattle(active[0]);
         } else {
-            html += '<div class="to-card-grid">';
-            for (var i = 0; i < active.length; i++) html += renderFeaturedBattle(active[i], false);
+            html += '<div class="bo-card-grid">';
+            for (var i = 0; i < active.length; i++) html += renderFeaturedBattle(active[i]);
             html += '</div>';
         }
         html += '</div>';
@@ -562,8 +567,10 @@
         var venue = b.proposed_venue || '';
         var sub = names + (venue ? ' · ' + esc(venue) : '');
 
+        /* Те же слова, что на крупной карточке: состояние называет
+           tournament-status, а не свой словарь этого файла. */
         var right = isCompleted
-            ? '<span class="bo-strip-badge bo-strip-done">' + L.completedBadge + '</span>'
+            ? '<span class="bo-strip-badge bo-strip-done">' + esc(BF.stateLabel(b) || L.completedBadge) + '</span>'
             : '<span class="bo-strip-badge bo-strip-live">' + L.voteBadge + '</span>';
 
         // Так же, как в турнирах: у живого баттла баннер миниатюрой, у
@@ -589,7 +596,7 @@
         '</a>';
     }
 
-    function renderFeaturedBattle(b, isCompleted) {
+    function renderFeaturedBattle(b) {
         var p1 = _players[b.challenger_player_id] || {};
         var p2 = _players[b.opponent_player_id] || {};
         // Сторона — один человек или пара. Собирает общий модуль, чтобы
@@ -617,19 +624,15 @@
 
         var myVote = _userVotes[b.id] || null;
 
-        // Time-based auto-close voting (same logic as challenge-detail.js)
-        var timeExpired = false;
-        if (date && time) {
-            var matchDt = new Date(date + 'T' + time + ':00+06:00');
-            if (!isNaN(matchDt.getTime()) && Date.now() >= matchDt.getTime()) {
-                timeExpired = true;
-            }
-        }
-        var isClosed = !!b.voting_closed || isCompleted || timeExpired;
+        /* ЗАКРЫТИЕ ГОЛОСОВАНИЯ — ОДНО ПРАВИЛО НА ДВА ЭКРАНА.
+           Было написано здесь и в challenge-detail.js, и комментарий сам
+           признавался: «same logic as challenge-detail.js». Теперь правило
+           живёт в battle-format.js рядом с состоянием баттла. */
+        var isClosed = BF.votingClosed(b);
 
         // Vote section
         var voteHtml = '';
-        if (!isCompleted) {
+        {
             if (isClosed) {
                 voteHtml = '<div class="bo-vote-closed-msg">' + L.votingClosed + '</div>';
             } else if (_userId && myVote) {
@@ -648,28 +651,33 @@
             }
         }
 
-        // Score/winner for completed
-        var resultHtml = '';
-        if (isCompleted) {
-            // Winner = player with most votes (approximate for now)
-            var winId = v1 >= v2 ? b.challenger_player_id : b.opponent_player_id;
-            var winName = v1 >= v2 ? p1Name : p2Name;
-            resultHtml =
-                '<div class="bo-winner-name">' + L.winner + ': ' + esc(winName) + '</div>';
-        }
+        /* ВЕТКА ЗАВЕРШЁННОГО СНЯТА 13.10, И ВМЕСТЕ С НЕЙ — ЛОЖЬ.
+           Все четыре вызова этой функции передавали isCompleted = false
+           (завершённые идут полосами), то есть ветка не выполнялась; а
+           внутри неё победитель вычислялся СРАВНЕНИЕМ ГОЛОСОВ:
+           `v1 >= v2 ? challenger : opponent`, с припиской «approximate for
+           now». Матч решает счёт, а не зрители. Строка не работала, но
+           лежала в файле и ждала первого `true`. */
 
         var linkHref = detailUrl(b.id);
-        var statusClass = isCompleted ? 'completed' : 'active';
+        /* ЗНАЧОК ГОВОРИТ СОСТОЯНИЕ, А НЕ НАЗВАНИЕ РАЗДЕЛА. До 13.10 здесь
+           стояло L.heroBadge — слово «БАТТЛЫ», то есть заголовок страницы,
+           повторённый на каждой карточке. Состояние считает battle-format,
+           называет tournament-status: лестница слов выбрана Костей 28.09 и
+           переведена на три языка. Свой, третий набор слов не заводим. */
+        var состояние = BF.state(b);
+        var statusClass = состояние === 'done' ? 'completed' : 'active';
+        var statusText = BF.stateLabel(b) || L.heroBadge;
 
         var bgHtml = b.banner_url
             ? '<div class="bo-featured-bg"><img src="' + esc(b.banner_url) + '" alt="" loading="lazy"></div><div class="bo-featured-overlay"></div>'
-            : '<div class="bo-featured-overlay" style="background:var(--bg-card)"></div>';
+            : '<div class="bo-featured-overlay bo-featured-plain"></div>';
 
         return '<div class="bo-featured" data-href="' + linkHref + '" data-battle="' + b.id + '">' +
             bgHtml +
             '<div class="bo-featured-content">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-                    '<span class="bo-status ' + statusClass + '">' + (isCompleted ? L.result : L.heroBadge) + '</span>' +
+                '<div class="bo-featured-top">' +
+                    '<span class="bo-status ' + statusClass + '">' + esc(statusText) + '</span>' +
                     getCountdownHtml(date, time) +
                 '</div>' +
                 '<div class="bo-featured-title">' + esc(b.battle_title || 'Battle') + '</div>' +
@@ -689,73 +697,26 @@
                     '<span class="bo-total-votes">' + vTotal + ' ' + L.votes + '</span>' +
                     '<span class="bo-pct-p2">' + pct2 + '%</span>' +
                 '</div>' +
-                resultHtml +
                 '<div class="bo-featured-meta">' +
                     (date ? '<span>📅 ' + formatDate(date) + (time ? ' · ' + esc(time) : '') + '</span>' : '') +
                     (venue ? '<span class="bo-meta-venue" data-venue="' + esc(venue) + '">📍 ' + esc(venue) + '</span>' : '') +
                 '</div>' +
-                '<span class="bo-featured-link">' + L.details + '</span>' +
+                /* НАСТОЯЩАЯ ССЫЛКА, А НЕ НАРИСОВАННАЯ. Был <span> без
+                   своего обработчика: нажатие доходило до карточки, а
+                   клавиатура и поисковик не видели перехода вовсе — замер
+                   13.10 дал две остановки Tab внутри карточки, и обе это
+                   кнопки голоса. Карточку целиком в <a> завернуть нельзя:
+                   внутри кнопки, а кнопка внутри ссылки — недопустимая
+                   разметка (правило 07.10). */
+                '<a class="bo-featured-link" href="' + linkHref + '">' + L.details + '</a>' +
             '</div>' +
         '</div>';
     }
 
-    function renderCompactBattle(b, isCompleted) {
-        // Стороны собирает общий модуль — иначе приглашённый со стороны
-        // человек оставался без имени и снимка
-        var BF = window.KSLT_BATTLE_FORMAT;
-        var side1 = BF.side(b, 1, _players, getPlayerName);
-        var side2 = BF.side(b, 2, _players, getPlayerName);
-        var p1Name = BF.shortSide(side1.names);
-        var p2Name = BF.shortSide(side2.names);
-        var p1Photo = side1.photos[0] || 'https://placehold.co/36x36/1a1a1a/666?text=?';
-        var p2Photo = side2.photos[0] || 'https://placehold.co/36x36/1a1a1a/666?text=?';
-
-        var date = b.proposed_date || '';
-        var venue = b.proposed_venue || '';
-
-        // Votes
-        var vData = _votesData[b.id] || { votes: {}, total: 0 };
-        var v1 = vData.votes[1] || 0;
-        var v2 = vData.votes[2] || 0;
-        var vTotal = vData.total || 0;
-        var pct1 = vTotal > 0 ? Math.round(v1 / vTotal * 100) : 50;
-        var pct2 = vTotal > 0 ? 100 - pct1 : 50;
-
-        var statusClass = isCompleted ? 'completed' : 'active';
-        var statusText = isCompleted ? L.result : L.heroBadge;
-
-        // Compact result for completed
-        var scoreHtml = '';
-        if (isCompleted && vTotal > 0) {
-            var compactWinName = v1 >= v2 ? p1Name : p2Name;
-            scoreHtml = '<span style="font-size:0.75rem;color:var(--accent);font-weight:700">' + L.winner + ': ' + esc(compactWinName) + '</span>';
-        }
-
-        var linkHref = detailUrl(b.id);
-
-        return '<div class="bo-compact" data-href="' + linkHref + '" data-battle="' + b.id + '">' +
-            '<div class="bo-compact-left">' +
-                '<div class="bo-compact-photos">' +
-                    '<img class="bo-compact-photo" src="' + esc(p1Photo) + '" alt="">' +
-                    '<img class="bo-compact-photo" src="' + esc(p2Photo) + '" alt="">' +
-                '</div>' +
-                '<span class="bo-compact-vs">' + L.vs + '</span>' +
-            '</div>' +
-            '<div class="bo-compact-info">' +
-                '<h4>' + esc(b.battle_title || p1Name + ' vs ' + p2Name) + '</h4>' +
-                '<div class="bo-compact-sub">' +
-                    '<span>' + esc(p1Name) + ' vs ' + esc(p2Name) + '</span>' +
-                    (date ? '<span>· ' + formatDate(date) + '</span>' : '') +
-                    (venue ? '<span>· ' + esc(venue) + '</span>' : '') +
-                '</div>' +
-            '</div>' +
-            '<div class="bo-compact-right">' +
-                '<span class="bo-status ' + statusClass + '">' + statusText + '</span>' +
-                scoreHtml +
-                (!isCompleted ? '<div class="bo-compact-bar"><div class="bo-bar-p1" style="width:' + pct1 + '%"></div><div class="bo-bar-p2" style="width:' + pct2 + '%"></div></div><span class="bo-compact-pct">' + pct1 + '% / ' + pct2 + '%</span>' : '') +
-            '</div>' +
-        '</div>';
-    }
+    /* renderCompactBattle СНЯТА 13.10. Она не звалась ниоткуда, а её
+       классы `.bo-compact*` не были объявлены ни в одном файле стилей —
+       проверено `grep` по css, ноль вхождений. 105 строк разметки, которая
+       не могла появиться на экране. */
 
     // ---- Vote handler ----
     function handleVote(btn) {
@@ -770,7 +731,7 @@
             return;
         }
 
-        var card = btn.closest('.bo-featured, .bo-compact');
+        var card = btn.closest('.bo-featured');
         card.querySelectorAll('.bo-vote-btn').forEach(function(b) { b.disabled = true; });
         btn.classList.add('bo-vote-selected');
 
@@ -865,27 +826,74 @@
         }, 2000);
     }
 
+    /**
+     * Окно выбора карты.
+     *
+     * ПРАВИЛО КУПЛЕНО НА ОКНЕ СПОНСОРОВ 13.10 И БЕРЁТСЯ ДОСЛОВНО. Замер
+     * 13.10: окно открывалось без роли, без имени, фокус оставался на
+     * странице под ним, Tab уходил на страницу, а Esc не закрывал вовсе.
+     * Для читалки это был не диалог, а внезапно появившийся кусок текста.
+     *
+     * Ширина — sm по компоненту `Modal 26:143`: «width is chosen by field
+     * count», а здесь три управления.
+     */
     function showMapModal(venue) {
         var existing = document.getElementById('boMapModal');
         if (existing) existing.remove();
+
+        var ктоОткрыл = document.activeElement;
         var q = encodeURIComponent(venue);
         var overlay = document.createElement('div');
         overlay.id = 'boMapModal';
         overlay.className = 'bo-map-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'boMapTitle');
         overlay.innerHTML =
             '<div class="bo-map-modal">' +
-                '<div class="bo-map-title">' + L.openIn + ':</div>' +
-                '<a href="https://2gis.kg/search/' + q + '" target="_blank" class="bo-map-btn bo-map-2gis">2GIS</a>' +
-                '<a href="https://www.google.com/maps/search/' + q + '" target="_blank" class="bo-map-btn bo-map-google">Google Maps</a>' +
-                '<button class="bo-map-btn bo-map-cancel" id="boMapCancel">' + L.cancel + '</button>' +
+                '<h2 class="bo-map-title" id="boMapTitle">' + L.openIn + ':</h2>' +
+                '<a href="https://2gis.kg/search/' + q + '" target="_blank" rel="noopener" class="bo-map-btn bo-map-2gis">2GIS</a>' +
+                '<a href="https://www.google.com/maps/search/' + q + '" target="_blank" rel="noopener" class="bo-map-btn bo-map-google">Google Maps</a>' +
+                '<button type="button" class="bo-map-btn bo-map-cancel" id="boMapCancel">' + L.cancel + '</button>' +
             '</div>';
         document.body.appendChild(overlay);
+
+        function поля() {
+            return [].slice.call(overlay.querySelectorAll('a[href], button'))
+                .filter(function(э) { return э.offsetParent !== null; });
+        }
+        function закрыть() {
+            document.removeEventListener('keydown', поКлавише, true);
+            overlay.remove();
+            /* Фокус возвращается тому, кто окно открыл: иначе он падает в
+               начало страницы, и человек теряет место. */
+            if (ктоОткрыл && ктоОткрыл.focus) { try { ктоОткрыл.focus(); } catch (e) {} }
+        }
+        function поКлавише(e) {
+            if (e.key === 'Escape') { e.preventDefault(); закрыть(); return; }
+            if (e.key !== 'Tab') return;
+            /* ЛОВУШКА TAB: с последнего поля фокус идёт на первое, а не на
+               страницу под окном. */
+            var п = поля();
+            if (!п.length) return;
+            var первый = п[0], последний = п[п.length - 1];
+            if (e.shiftKey && document.activeElement === первый) {
+                e.preventDefault(); последний.focus();
+            } else if (!e.shiftKey && document.activeElement === последний) {
+                e.preventDefault(); первый.focus();
+            }
+        }
+
+        document.addEventListener('keydown', поКлавише, true);
         overlay.addEventListener('click', function(e) {
-            if (e.target === overlay || e.target.id === 'boMapCancel') overlay.remove();
+            if (e.target === overlay || e.target.id === 'boMapCancel') закрыть();
         });
         overlay.querySelectorAll('a').forEach(function(a) {
-            a.addEventListener('click', function() { setTimeout(function() { overlay.remove(); }, 200); });
+            a.addEventListener('click', function() { setTimeout(закрыть, 200); });
         });
+
+        var первое = поля()[0];
+        if (первое) { try { первое.focus(); } catch (e) {} }
     }
 
     /**
@@ -946,8 +954,11 @@
                 return;
             }
 
+            // Настоящая ссылка внутри карточки работает сама
+            if (e.target.closest('a')) return;
+
             // Card click → navigate
-            var card = e.target.closest('.bo-featured[data-href], .bo-compact[data-href]');
+            var card = e.target.closest('.bo-featured[data-href]');
             if (card) {
                 window.location.href = card.dataset.href;
             }
@@ -979,6 +990,16 @@
 
         if (_statusFilter === 'upcoming') completed = [];
         if (_statusFilter === 'past') active = [];
+
+        /* «НИЧЕГО НЕ НАЙДЕНО» — ЭТО ОТВЕТ ПРО ПОИСК. Когда баттлов нет
+           вовсе (а в боевой базе 13.10 их ноль), человек ничего не искал, и
+           эта строка читается как поломка. Пустую базу показываем обычными
+           разделами с их строками «Баттлов пока нет» — две разные пустоты не
+           должны говорить одинаково. */
+        if (!_allBattles.length) {
+            renderSections([], []);
+            return;
+        }
 
         if ((_statusFilter === 'upcoming' && !active.length) ||
             (_statusFilter === 'past' && !completed.length) ||
