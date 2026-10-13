@@ -29,7 +29,13 @@
         errorUsedText: 'Бул скидка колдонулду',
         errorWrongPin: 'Туура эмес PIN-код',
         errorNoToken: 'Жараксыз шилтеме',
-        errorNoTokenText: 'QR-код табылган жок'
+        errorNoTokenText: 'QR-код табылган жок',
+        errorPinShort: 'Код төрт сандан турат',
+        errorSystem: 'Текшерүү мүмкүн болбоду',
+        errorSystemText: 'Байланыш үзүлдү',
+        nextScan: 'QR-кодду кайра көрсөтүүнү сураңыз.',
+        nextNew: 'КСЛТ колдонмосунан жаңы ваучер түзүүнү сураңыз.',
+        nextRetry: 'Кайра аракет кылыңыз же бетти жаңылаңыз.'
     } : (isEn ? {
         loading: 'Loading...',
         validBadge: 'VALID DISCOUNT',
@@ -51,11 +57,17 @@
         errorUsedText: 'This discount was already used',
         errorWrongPin: 'Wrong PIN code',
         errorNoToken: 'Invalid link',
-        errorNoTokenText: 'No QR code found'
+        errorNoTokenText: 'No QR code found',
+        errorPinShort: 'The code is four digits',
+        errorSystem: 'Could not verify',
+        errorSystemText: 'Connection failed',
+        nextScan: 'Ask the member to show the QR code again.',
+        nextNew: 'Ask the member to create a new voucher in the KSLT app.',
+        nextRetry: 'Try again or reload the page.'
     } : {
         loading: 'Загрузка...',
         validBadge: 'ДЕЙСТВИТЕЛЬНАЯ СКИДКА',
-        playerName: 'Член KSLT',
+        playerName: 'Член КСЛТ',
         service: 'Услуга',
         discount: 'Скидка',
         venue: 'Заведение',
@@ -73,8 +85,19 @@
         errorUsedText: 'Данная скидка уже использована',
         errorWrongPin: 'Неверный PIN-код',
         errorNoToken: 'Некорректная ссылка',
-        errorNoTokenText: 'QR-код не найден'
+        errorNoTokenText: 'QR-код не найден',
+        errorPinShort: 'Код состоит из четырёх цифр',
+        errorSystem: 'Не удалось проверить',
+        errorSystemText: 'Связь прервалась',
+        nextScan: 'Попросите показать QR-код ещё раз.',
+        nextNew: 'Попросите создать новый ваучер в приложении КСЛТ.',
+        nextRetry: 'Попробуйте ещё раз или обновите страницу.'
     });
+
+    /* ЯЗЫК ДАТЫ. Трёхходовка уже решена в продукте — js/home-news.js:42 и
+       js/news.js:53. Здесь до 13.10 стояла двухходовка, и кыргызский
+       получал русский формат. */
+    var ЛОКАЛЬ = isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU');
 
     function esc(str) {
         if (!str) return '';
@@ -87,11 +110,15 @@
 
     function init() {
         if (!token) {
-            showError(L.errorNoToken, L.errorNoTokenText);
+            showError(L.errorNoToken, L.errorNoTokenText, L.nextScan);
             return;
         }
         if (!client) {
-            showError('Error', 'Supabase not loaded');
+            /* ТЕХНИЧЕСКОЕ СООБЩЕНИЕ ЧЕЛОВЕКУ НЕ ПОКАЗЫВАЕМ. До 13.10 здесь
+               стояло «Error / Supabase not loaded» — непереведённое и ничего
+               не говорящее администратору в зале. */
+            console.error('verify: supabaseClient не подключён');
+            showError(L.errorSystem, L.errorSystemText, L.nextRetry);
             return;
         }
         card.innerHTML = '<div class="vr-loading">' + L.loading + '</div>';
@@ -104,29 +131,30 @@
             var data = result.data;
 
             if (!data || data.status === 'invalid') {
-                showError(L.errorInvalid, L.errorInvalidText);
+                showError(L.errorInvalid, L.errorInvalidText, L.nextScan);
                 return;
             }
             if (data.status === 'expired') {
-                showError(L.errorExpired, L.errorExpiredText);
+                showError(L.errorExpired, L.errorExpiredText, L.nextNew);
                 return;
             }
             if (data.status === 'already_used') {
-                var usedDate = data.used_at ? new Date(data.used_at).toLocaleString(isEn ? 'en-US' : 'ru-RU') : '';
-                showError(L.errorUsed, L.errorUsedText + (usedDate ? ' (' + usedDate + ')' : ''));
+                var usedDate = data.used_at ? new Date(data.used_at).toLocaleString(ЛОКАЛЬ) : '';
+                showError(L.errorUsed, L.errorUsedText + (usedDate ? ' (' + usedDate + ')' : ''), L.nextNew);
                 return;
             }
             if (data.status === 'valid') {
                 showValid(data);
             }
         } catch (e) {
-            showError('Error', e.message || 'Unknown error');
+            console.error('verify_voucher:', e);
+            showError(L.errorSystem, L.errorSystemText, L.nextRetry);
         }
     }
 
     function showValid(data) {
         var expiresDate = new Date(data.expires_at);
-        var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var expiresStr = expiresDate.toLocaleString(ЛОКАЛЬ, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
         card.innerHTML =
             '<div class="vr-valid">' +
@@ -139,9 +167,11 @@
                     '<div class="vr-row"><span class="vr-row-label">' + L.validUntil + '</span><span class="vr-row-value">' + expiresStr + '</span></div>' +
                 '</div>' +
                 '<div class="vr-pin-section">' +
-                    '<label class="vr-pin-label">' + L.enterPin + '</label>' +
-                    '<input type="text" class="vr-pin-input" id="vrPinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">' +
-                    '<div class="vr-pin-error-msg" id="vrPinError" style="display:none;"></div>' +
+                    '<label class="vr-pin-label" for="vrPinInput">' + L.enterPin + '</label>' +
+                    '<input type="text" class="vr-pin-input" id="vrPinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-describedby="vrPinError">' +
+                    /* role="alert" — иначе диктор смену текста не объявит, а
+                       зрячий видит только дрожание рамки. */
+                    '<div class="vr-pin-error-msg" id="vrPinError" role="alert"></div>' +
                     '<button class="vr-confirm-btn" id="vrConfirmBtn">' + L.confirm + '</button>' +
                 '</div>' +
             '</div>';
@@ -150,14 +180,18 @@
         var confirmBtn = document.getElementById('vrConfirmBtn');
         var pinError = document.getElementById('vrPinError');
 
-        // Auto-focus PIN
-        pinInput.focus();
+        /* АВТОФОКУС БЕЗ ПРОКРУТКИ. Померено 13.10 на 844 × 390: обычный
+           focus() прокручивал страницу на 259, и администратор видел поле
+           PIN и кнопку, но НЕ видел плашку «действительная» и имя
+           владельца — подтверждал скидку, не видя чью. Вёрстка здесь ни
+           при чём: при нулевой прокрутке верх карточки 93 и плашка 119. */
+        pinInput.focus({ preventScroll: true });
 
         // Only allow digits
         pinInput.addEventListener('input', function() {
             this.value = this.value.replace(/\D/g, '');
             pinInput.classList.remove('vr-pin-error');
-            pinError.style.display = 'none';
+            pinError.textContent = '';
         });
 
         // Enter key
@@ -168,7 +202,12 @@
         confirmBtn.addEventListener('click', function() {
             var pin = pinInput.value.trim();
             if (pin.length !== 4) {
+                /* КРАСНАЯ РАМКА БЕЗ СЛОВА — ЭТО НЕ ОТВЕТ. До 13.10 короткий
+                   код ставил класс и молча выходил: диктор не говорил
+                   ничего, зрячий видел только тряску. */
                 pinInput.classList.add('vr-pin-error');
+                pinError.textContent = L.errorPinShort;
+                pinInput.focus();
                 return;
             }
             confirmBtn.disabled = true;
@@ -201,7 +240,6 @@
                 pinInput.value = '';
                 pinInput.classList.add('vr-pin-error');
                 pinError.textContent = L.errorWrongPin;
-                pinError.style.display = 'block';
                 pinInput.focus();
                 confirmBtn.disabled = false;
                 confirmBtn.textContent = L.confirm;
@@ -214,30 +252,32 @@
                 already_used: L.errorUsed,
                 invalid: L.errorInvalid
             };
-            showError(msgs[data.status] || data.status, '');
+            var дальше = data.status === 'invalid' ? L.nextScan : L.nextNew;
+            showError(msgs[data.status] || L.errorSystem, '', дальше);
         } catch (e) {
+            console.error('confirm_voucher:', e);
             confirmBtn.disabled = false;
             confirmBtn.textContent = L.confirm;
-            pinError.textContent = e.message || 'Error';
-            pinError.style.display = 'block';
+            pinError.textContent = L.errorSystemText;
         }
     }
 
     function showSuccess() {
         card.innerHTML =
             '<div class="vr-success">' +
-                '<div class="vr-success-icon">&#10003;</div>' +
+                '<div class="vr-success-icon" aria-hidden="true">&#10003;</div>' +
                 '<h3 class="vr-success-title">' + L.successTitle + '</h3>' +
                 '<p class="vr-success-text">' + L.successText + '</p>' +
             '</div>';
     }
 
-    function showError(title, text) {
+    function showError(title, text, next) {
         card.innerHTML =
             '<div class="vr-error">' +
-                '<div class="vr-error-icon">&#10060;</div>' +
+                '<div class="vr-error-icon" aria-hidden="true">&#10060;</div>' +
                 '<h3 class="vr-error-title">' + esc(title) + '</h3>' +
-                '<p class="vr-error-text">' + esc(text) + '</p>' +
+                (text ? '<p class="vr-error-text">' + esc(text) + '</p>' : '') +
+                (next ? '<p class="vr-error-next">' + esc(next) + '</p>' : '') +
             '</div>';
     }
 
