@@ -135,7 +135,6 @@
     border-radius: 8px;
     color: var(--text-primary);
     padding: 7px 10px;
-    font-family: inherit;
     font-size: var(--fs-sm);
 }
 
@@ -183,7 +182,6 @@
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     color: var(--text-primary);
-    font-family: inherit;
 }
 
 .ms-in:focus { outline: none; border-color: var(--accent); }
@@ -217,7 +215,6 @@
     color: #0a0a0a;
     font-size: var(--fs-base);
     font-weight: 700;
-    font-family: inherit;
 }
 
 .ms-send:disabled { opacity: 0.6; cursor: default; }

@@ -305,7 +305,6 @@ body {
 .um-btn {
     border: none;
     border-radius: var(--radius-lg);
-    font-family: inherit;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.1s;

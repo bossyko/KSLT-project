@@ -280,7 +280,6 @@ body.db-page.auth-ready {
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-size: var(--fs-base);
-    font-family: inherit;
     transition: var(--transition-fast);
     box-sizing: border-box;
 }
@@ -672,7 +671,6 @@ select.db-field-input {
     flex-shrink: 0;
     white-space: nowrap;
     padding: 8px 14px;
-    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--text-muted);
@@ -1969,7 +1967,6 @@ select.db-field-input {
     border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--accent);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     line-height: var(--lh-none);
@@ -3016,7 +3013,6 @@ select:-webkit-autofill {
     padding: 4px 12px;
     color: var(--text-muted);
     font-size: var(--fs-xs);
-    font-family: inherit;
     cursor: pointer;
 }
 
@@ -3234,7 +3230,6 @@ select:-webkit-autofill {
     min-height: 28px;
     line-height: 1;
     padding: 4px 10px;
-    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 500;
     white-space: nowrap;
@@ -3386,7 +3381,6 @@ select:-webkit-autofill {
     align-items: center;
     min-height: 36px;
     padding: 0 16px;
-    font-family: inherit;
     line-height: var(--lh-none);
     font-size: var(--fs-xs);
     color: var(--text-muted);
@@ -3706,7 +3700,6 @@ select:-webkit-autofill {
     color: #0a0a0a;
     font-weight: 700;
     font-size: var(--fs-xs);
-    font-family: inherit;
 }
 
 .mma-wait {
@@ -4319,7 +4312,6 @@ select:-webkit-autofill {
    браузерным normal — ссылка на шрифт, а не значение */
 .db-choice {
     padding: 0 16px;
-    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 600;
     line-height: var(--lh-none);
@@ -4347,7 +4339,6 @@ select:-webkit-autofill {
 .db-copy-phone {
     margin-top: 6px;
     padding: 0;
-    font-family: inherit;
     font-size: var(--fs-xs);
     color: var(--text-muted);
     background: none;
@@ -4622,7 +4613,6 @@ select:-webkit-autofill {
 
 .db-voucher-qr-btn {
     padding: 4px 8px;
-    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 600;
     color: #000;
@@ -4764,7 +4754,6 @@ select:-webkit-autofill {
     min-height: 44px;
     margin-top: 20px;
     padding: 0 24px;
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 700;
     line-height: var(--lh-none);
@@ -5018,7 +5007,6 @@ select:-webkit-autofill {
     min-width: 44px;
     min-height: 44px;
     padding: 0;
-    font-family: inherit;
     font-size: var(--fs-md);
     line-height: var(--lh-none);
     color: var(--text-muted);
@@ -5082,7 +5070,6 @@ select:-webkit-autofill {
     justify-content: center;
     min-height: 28px;
     padding: 0 16px;
-    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 700;
     line-height: var(--lh-none);
@@ -5561,7 +5548,6 @@ select:-webkit-autofill {
 .db-section textarea {
     font-size: var(--fs-base);
     line-height: 1.3;
-    font-family: inherit;
 }
 
 /* ---- 4. ОТКАЗ ОТ ДВИЖЕНИЯ ----

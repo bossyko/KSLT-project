@@ -46,7 +46,7 @@
     min-height: var(--btn-h-md); line-height: var(--lh-none);
     padding-inline: 32px; border-radius: var(--radius-full);
     border: none; background: var(--accent); color: #0a0a0a;
-    font-family: inherit; font-size: var(--fs-base); font-weight: 700; cursor: pointer;
+    font-size: var(--fs-base); font-weight: 700; cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s; text-decoration: none;
 }
 .sn-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(204, 255, 0, 0.28); }

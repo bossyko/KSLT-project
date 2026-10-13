@@ -508,7 +508,6 @@
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
-    font-family: inherit;
     cursor: pointer;
     transition: background var(--transition-fast), color var(--transition-fast);
 }

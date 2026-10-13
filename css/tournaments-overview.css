@@ -688,7 +688,6 @@
     border-radius: var(--radius-md);
     text-decoration: none;
     border: none;
-    font-family: inherit;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
 }
@@ -1240,7 +1239,6 @@
     border-radius: var(--radius-full, 999px);
     background: var(--accent, #CCFF00);
     color: #000;
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;

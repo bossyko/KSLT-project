@@ -488,7 +488,6 @@
     color: var(--text-primary);
     font-size: var(--fs-xs);
     font-weight: 600;
-    font-family: inherit;
     cursor: pointer;
     transition: all 0.2s;
     /* Длинные фамилии распирали кнопку, и пара кнопок вылезала за край
@@ -624,7 +623,6 @@
     border-radius: var(--radius-md);
     text-decoration: none;
     border: none;
-    font-family: inherit;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
     text-align: center;
@@ -818,7 +816,6 @@
     font-size: var(--fs-sm);
     text-decoration: none;
     border: none;
-    font-family: inherit;
     cursor: pointer;
     transition: opacity 0.2s;
 }

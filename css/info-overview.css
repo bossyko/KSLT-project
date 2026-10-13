@@ -157,7 +157,6 @@
     border-radius: var(--radius-md);
     text-decoration: none;
     border: none;
-    font-family: inherit;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
 }

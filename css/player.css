@@ -219,7 +219,6 @@
     gap: 8px;
     padding: 12px 24px;
     border-radius: var(--radius-full);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
@@ -494,7 +493,6 @@
     background: transparent;
     border: 1px solid var(--accent);
     color: var(--accent);
-    font-family: inherit;
     font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -834,7 +832,6 @@ a.pp-match-opponent-name:hover {
     border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--accent);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     padding: 12px 20px;
@@ -981,7 +978,6 @@ a.pp-tournament:hover {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 600;
     cursor: pointer;
@@ -1115,7 +1111,6 @@ a.pp-tournament:hover {
     gap: 8px;
     background: var(--accent);
     color: #000;
-    font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 700;
     padding: 14px 36px;
@@ -1560,7 +1555,6 @@ a.pp-tournament:hover {
     color: #000;
     font-weight: 700;
     font-size: var(--fs-sm);
-    font-family: inherit;
     border: none;
     border-radius: var(--radius-full);
     text-decoration: none;
@@ -1720,7 +1714,6 @@ a.pp-tournament:hover {
     color: #fff;
     padding: 10px 12px;
     font-size: var(--fs-sm);
-    font-family: inherit;
     outline: none;
     transition: border-color 0.2s;
 }
@@ -1760,7 +1753,6 @@ a.pp-tournament:hover {
     padding: 12px;
     font-size: var(--fs-base);
     font-weight: 600;
-    font-family: inherit;
     cursor: pointer;
     transition: opacity 0.2s;
     margin-top: 4px;

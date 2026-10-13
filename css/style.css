@@ -40,22 +40,12 @@ input, button, select, textarea {
     appearance: none;
 }
 
-/* ШРИФТ УПРАВЛЕНИЙ — ОДНИМ ОПРЕДЕЛЕНИЕМ, А НЕ ВОСЕМЬЮДЕСЯТЬЮ КОПИЯМИ.
-   `button`, `input`, `select` и `textarea` не наследуют семейство от body:
-   браузер ставит им свой системный шрифт. В продукте это лечилось
-   поштучно — `font-family: inherit` написан ВОСЕМЬДЕСЯТ раз в двадцати
-   четырёх файлах css, и там, где забыли, элемент выпадал в системный
-   Arial. Замер 12.10 на 390: в кабинете мимо Inter 12 видимых
-   управлений из 26, на каждой публичной странице 5 — и все пять общие:
-   колокольчик, меню пользователя, выход, бургер и «наверх». То есть
-   шапка сайта на всех страницах рисовала кнопки чужим шрифтом.
-
-   Селектор из одних типов, вес нулевой — любое правило с классом
-   перебьёт его, если шрифт кнопки намеренно другой. Поштучные копии
-   становятся мёртвыми, снимаются своим куском со сторожем */
-input, button, select, textarea {
-    font-family: inherit;
-}
+/* ШРИФТ УПРАВЛЕНИЙ ПЕРЕЕХАЛ В `css/tokens.css` — 13.10.
+   Правило стояло здесь и не доезжало до судейского окна и табло: они
+   `style.css` не грузят вовсе. В `css/umpire.css` из-за этого жила
+   ЕДИНСТВЕННАЯ не мёртвая копия `font-family: inherit` на весь продукт —
+   проверено пробниками на 31 странице. Дом правила — файл, который грузят
+   ВСЕ 90 страниц. */
 
 /* ========================================
    HEADER VARIANT 2: HYBRID (Комбинация)
@@ -4060,7 +4050,6 @@ h2 {
     justify-content: center;
     padding: 10px 0;
     border-radius: var(--radius-full);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
@@ -4202,7 +4191,6 @@ h2 {
     justify-content: center;
     padding: 10px 0;
     border-radius: var(--radius-full);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
@@ -5914,7 +5902,6 @@ h2 {
     color: #000;
     font-size: var(--fs-sm);
     font-weight: 700;
-    font-family: inherit;
     border: none;
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -6041,7 +6028,6 @@ h2 {
     color: #000;
     font-size: var(--fs-sm);
     font-weight: 700;
-    font-family: inherit;
     border: none;
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -6986,7 +6972,6 @@ h2 {
     border-radius: var(--radius-full);
     background: var(--accent);
     color: var(--bg-primary);
-    font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
@@ -8599,7 +8584,6 @@ body.nav-open {
     justify-content: center;
     background-color: transparent;
     color: var(--text-muted);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 600;
     border-radius: var(--radius-full);
@@ -9112,7 +9096,6 @@ body.nav-open {
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-family: inherit;
     /* 16, а не 0.95rem = 15.2. Ниже 16 Safari на iOS зумит страницу при
        касании поля, и человек после первого же тапа видит четверть формы.
        Токен --input-fs держит это значение для всех полей продукта. */
@@ -9226,7 +9209,6 @@ body.nav-open {
     color: #000;
     border: none;
     border-radius: var(--radius-md);
-    font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 700;
     cursor: pointer;
@@ -9297,7 +9279,6 @@ body.nav-open {
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
@@ -9359,7 +9340,6 @@ body.nav-open {
     border-radius: var(--radius-md);
     font-size: var(--fs-sm);
     font-weight: 500;
-    font-family: inherit;
     cursor: pointer;
     transition: all var(--transition-fast);
     border: 1px solid var(--border-light);
@@ -9399,7 +9379,6 @@ body.nav-open {
     border-radius: 8px;
     color: var(--text-primary);
     font-size: var(--fs-sm);
-    font-family: inherit;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -9437,7 +9416,6 @@ body.nav-open {
     border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-secondary);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
@@ -9852,7 +9830,6 @@ body.nav-open {
     font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
-    font-family: inherit;
 }
 
 .otp-method-tab.active {
@@ -9879,7 +9856,6 @@ body.nav-open {
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: var(--fs-base);
-    font-family: inherit;
     cursor: pointer;
     -webkit-appearance: none;
     appearance: none;
@@ -10216,7 +10192,6 @@ img {
 .site-notif-act {
     flex: 1;
     padding: 10px 14px;
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: 500;
     /* Скругление как у кнопок сайта, а не восемь пикселей из ниоткуда */
@@ -10586,7 +10561,6 @@ input:-internal-autofill-previewed {
     border: none;
     background: var(--accent);
     color: var(--accent-on);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: var(--fw-bold);
     cursor: pointer;

@@ -268,7 +268,6 @@
     border-radius: var(--radius-md);
     padding: 6px 30px 6px 12px;
     font-size: var(--fs-sm);
-    font-family: inherit;
     cursor: pointer;
     outline: none;
     min-width: 180px;
@@ -610,7 +609,6 @@
     color: #000;
     font-size: var(--fs-sm);             /* 14; было 12 */
     font-weight: 700;
-    font-family: inherit;
     border-right: none;
     border-bottom: none;
     border-left: none;

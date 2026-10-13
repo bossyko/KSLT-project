@@ -1872,7 +1872,6 @@ body.ad-page {
     /* Было 30 высотой — мимо шкалы кнопок 28·36·44·52 */
     height: var(--btn-h-sm);
     padding: 0 var(--space-3);
-    font-family: inherit;
     font-size: var(--fs-xs);
     line-height: 1.2;
     /* Было числом #CCFF00 — одно определение на одно понятие */
@@ -2084,7 +2083,6 @@ body.ad-page {
     border-radius: var(--input-radius);
     color: var(--text-primary);
     font-size: var(--input-fs);
-    font-family: inherit;
     /* Не normal: его считает браузер, и замерить у него нечего.
        Замерено было 19.5px на 16px — это 1.22, тесно для абзаца.
        Высота текстовых полей поднята со 120 до 144, чтобы видимых
@@ -2404,7 +2402,6 @@ input[type="date"]::-webkit-datetime-edit {
     cursor: pointer;
     color: var(--ad-text-secondary, rgba(255,255,255,0.6));
     font: 600 0.84rem inherit;
-    font-family: inherit;
     transition: background 0.15s, color 0.15s;
 }
 .ad-seg-btn:hover { color: var(--ad-text, #fff); }
@@ -2471,7 +2468,6 @@ input[type="date"]::-webkit-datetime-edit {
     border-radius: var(--radius-full);
     background: rgba(0, 0, 0, 0.55);
     color: #fff;
-    font-family: inherit;
     font-size: var(--fs-base);
     /* Круг 28 задаёт высоту — строке остаётся не быть выше него */
     line-height: var(--lh-none);
@@ -2578,7 +2574,6 @@ input[type="date"]::-webkit-datetime-edit {
     border-radius: var(--radius-full);
     background: rgba(0, 0, 0, 0.65);
     color: #fff;
-    font-family: inherit;
     font-size: var(--fs-base);
     /* Высота задана кругом 28 — строке остаётся не быть выше него */
     line-height: var(--lh-none);
@@ -2893,7 +2888,6 @@ select.ad-field-input {
     border-radius: 0;
     background: transparent;
     color: var(--text-muted);
-    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
     /* Подчёркивание рисует тень, а не рамка и не псевдоэлемент: `::after`
@@ -3071,7 +3065,6 @@ select.ad-field-input {
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-muted);
-    font-family: inherit;
     font-size: var(--fs-sm);
     /* Было 1.4 — мимо лестницы. Текст короба переносится, это основной
        уровень; высота короба задана --afisha-h, сдвига нет */
@@ -6714,7 +6707,6 @@ select.ad-field-input {
     align-items: center;
     height: var(--btn-h-sm);
     padding: 0 var(--space-3);
-    font-family: inherit;
     font-size: var(--fs-xs);
     line-height: var(--lh-none);
     color: var(--text-secondary, #aaa);
@@ -7183,7 +7175,6 @@ select.ad-field-input {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-family: inherit;
     font-size: var(--fs-sm);
     white-space: nowrap;
     cursor: pointer;
@@ -7233,7 +7224,6 @@ select.ad-field-input {
     border: none;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-family: inherit;
     font-size: var(--fs-sm);
     text-align: left;
     cursor: pointer;
@@ -8569,8 +8559,7 @@ select.ad-field-input {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-size: var(--fs-sm); font-weight: 600; font-family: inherit;
-    text-align: center; font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm); font-weight: 600;    text-align: center; font-variant-numeric: tabular-nums;
     transition: var(--transition-fast);
 }
 /* СТРЕЛОК «НА 1» У ПОЛЯ НЕТ — слово Кости 03.10: «убери на 1 в поле очки,
@@ -8623,7 +8612,7 @@ select.ad-field-input {
 .ad-pts-ver-pill {
     min-height: 28px; display: inline-flex; align-items: center;
     padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full);
-    font-size: var(--fs-xs); font-family: inherit; cursor: pointer;
+    font-size: var(--fs-xs); cursor: pointer;
     background: var(--bg-surface); color: var(--text-muted);
 }
 .ad-pts-ver-pill:hover { color: var(--text-primary); }
