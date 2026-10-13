@@ -575,15 +575,63 @@ test.describe('липкая полоса разряда', () => {
             if (!полосаЕсть) { нету.push(разряд); continue; }
             await page.waitForTimeout(400);
 
+            /* ЦЕЛЬ НАЖАТИЯ МЕРЯЕТСЯ ПОПАДАНИЕМ, А НЕ ВЫСОТОЙ КОРОБКИ. Тест
+               написан 06.10 и мерил `getBoundingClientRect().height`; 07.10
+               чип пола на телефоне лёжа получил видимую высоту 36 и слой
+               цели 44 (`css/players.css`, `.pl-gender-tab::after`, медиа
+               `max-height: 500px and (orientation: landscape)`) — по тому же
+               правилу, что пилюля разряда. Коробка 36 законна, если попадание
+               доходит до 44, и именно это отношение здесь и проверяется.
+               Второе место с тем же понятием —
+               `tests/e2e/design-system/62-telefon-razdela.spec.js`.
+               ШАГ ОБХОДА — ЦЕЛЫЙ ПИКСЕЛЬ, И ОДИН ОН ТЕРЯЕТ: замер 12.10 дал
+               43 у слоя ровно 44 и 43 у коробки ровно 44, поэтому порог 43. */
             const r = await page.evaluate(() => {
-                const мер = э => э ? Math.round(э.getBoundingClientRect().height) : null;
+                const СТУПЕНИ = [28, 36, 44, 52];
+                const мера = сел => {
+                    const э = document.querySelector(сел);
+                    if (!э) return null;
+                    э.scrollIntoView({ block: 'center' });
+                    const rr = э.getBoundingClientRect();
+                    const x = Math.round(rr.left + rr.width / 2);
+                    const цY = rr.top + rr.height / 2;
+                    const своя = y => {
+                        const т = document.elementFromPoint(x, Math.round(y));
+                        return !!(т && (т === э || э.contains(т)));
+                    };
+                    const коробка = Math.round(rr.height);
+                    if (!своя(цY)) return { коробка, попадание: null };
+                    let в = цY, н = цY;
+                    while (в > 1 && своя(в - 1)) в--;
+                    while (н < window.innerHeight - 1 && своя(н + 1)) н++;
+                    return {
+                        коробка,
+                        попадание: Math.round(н - в),
+                        наСтупени: СТУПЕНИ.includes(коробка),
+                    };
+                };
                 return {
-                    поиск: мер(document.querySelector('.trn-search-input')),
-                    чип: мер(document.querySelector('.pl-gender-tab')),
+                    поиск: мера('.trn-search-input'),
+                    чип: мера('.pl-gender-tab'),
                 };
             });
-            if (r.поиск !== null && r.поиск < 44) мелкие.push(разряд + ': поиск ' + r.поиск);
-            if (r.чип !== null && r.чип < 44) мелкие.push(разряд + ': чип пола ' + r.чип);
+            for (const [имя, з] of [['поиск', r.поиск], ['чип пола', r.чип]]) {
+                if (!з) continue;
+                /* Центр элемента не отдал сам элемент — его накрыли сверху, и
+                   это беда злее мелкой цели: нажатие не доходит вовсе. */
+                if (з.попадание === null) {
+                    мелкие.push(разряд + ': ' + имя + ' накрыт, центр отдаёт чужой элемент');
+                    continue;
+                }
+                if (з.попадание < 43) {
+                    мелкие.push(разряд + ': ' + имя + ' цель ' + з.попадание +
+                                ' при коробке ' + з.коробка);
+                }
+                if (!з.наСтупени) {
+                    мелкие.push(разряд + ': ' + имя + ' коробка ' + з.коробка +
+                                ' мимо шкалы кнопок 28 · 36 · 44 · 52');
+                }
+            }
         }
         test.skip(нету.length === РАЗРЯДЫ.length,
             'ни одного разряда нет в базе прогона: ' + нету.join(', '));

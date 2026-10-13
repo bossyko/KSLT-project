@@ -25,6 +25,17 @@ const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-reyting.js'),
 
 const ОТКАТЫ = [
 
+/* ДОБАВЛЕНО 12.10: обе половины приёма у чипа пола на телефоне лёжа. */
+['снять слой цели у чипа пола на телефоне лёжа', 'css/players.css',
+ "        transform: translateY(-50%);\n        height: var(--btn-h-md);\n    }",
+ "        transform: translateY(-50%);\n    }",
+ 'чип пола на телефоне лёжа — ступень шкалы и слой цели'],
+
+['вернуть чипу пола на телефоне лёжа видимую высоту 44', 'css/players.css',
+ "        position: relative;\n        min-height: var(--btn-h-sm);\n        padding: 7px 16px;",
+ "        position: relative;\n        min-height: var(--btn-h-md);\n        padding: 7px 16px;",
+ 'чип пола на телефоне лёжа — ступень шкалы и слой цели'],
+
 /* ДОБАВЛЕНО 12.10: снимаем поле под выступ слоя цели — полоса снова
    станет шире себя на 4 у крайней кнопки. */
 ['снять поле полосы под выступ слоя цели', 'css/style.css',
