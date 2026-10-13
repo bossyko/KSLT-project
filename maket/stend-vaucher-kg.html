@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+    <title>КСЛТ — Проверка ваучера</title>
+    <meta name="description" content="Проверка ваучера — КСЛТ, теннисное сообщество Кыргызстана.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="КСЛТ">
+    <meta property="og:title" content="КСЛТ — Проверка ваучера">
+    <meta property="og:description" content="Проверка ваучера — КСЛТ, теннисное сообщество Кыргызстана.">
+    <meta property="og:url" content="https://bossyko.github.io/KSLT-project/pages/verify.html">
+    <meta property="og:image" content="https://bossyko.github.io/KSLT-project/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="../css/tokens.css?v=28">
+    <link rel="stylesheet" href="../css/style.css?v=410">
+    <link rel="stylesheet" href="../css/verify.css?v=1">
+    <script>
+    /* СТЕНД: браузер кеширует css по URL, а ?v= при правке файла не
+       меняется — замер брал бы старую вёрстку. Здесь, и только здесь,
+       адрес стиля получает метку времени. */
+    document.write('<link rel="stylesheet" href="../css/verify.css?cb=' + Date.now() + '">');
+    </script>
+</head>
+<body>
+    <div class="stend-podpis">СТЕНД · данные подставные · ?sost=valid|used|invalid|expired &amp;&amp; ?yaz=ru|en|kg</div>
+    <div class="vr-page">
+        <div class="vr-header">
+            <a href="../index-kg.html" class="logo">
+                <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+            </a>
+        </div>
+        <div class="vr-card" id="vrCard">
+            <div class="vr-loading">Загрузка...</div>
+        </div>
+    </div>
+
+    <style>
+        .stend-podpis {
+            position: fixed; top: 6px; left: 6px; z-index: 50;
+            font: 11px/1.3 sans-serif; color: rgba(255,255,255,0.4);
+        }
+    </style>
+
+    <script>
+    /* Форма ответа снята с sql/схема/schema-snapshot.sql:5656-5665 (verify_voucher).
+       Крайний случай: длинное имя, длинное название услуги и заведения.
+       Кнопка подтверждения в базу не пишет: confirm_voucher тоже подставная. */
+    (function(){
+        var п = new URLSearchParams(location.search);
+        var сост = п.get('sost') || 'valid';
+        var ВАУЧЕР = {
+            status: 'valid',
+            player_name: 'Абдыкадырова Айсулуу Жусупбековна',
+            entity_type: 'court',
+            entity_name: 'Теннисный центр «Ала-Тоо», Бишкек',
+            service_name: 'Аренда корта с покрытием hard, вечернее время',
+            discount_percent: 15,
+            expires_at: new Date(Date.now() + 36e5 * 30).toISOString(),
+            created_at: new Date().toISOString()
+        };
+        var ОТВЕТЫ = {
+            valid: ВАУЧЕР,
+            used: { status: 'already_used', used_at: new Date(Date.now() - 36e5 * 5).toISOString() },
+            invalid: { status: 'invalid' },
+            expired: { status: 'expired' }
+        };
+        window.supabaseClient = {
+            rpc: function(имя, арг){
+                if (имя === 'verify_voucher') return Promise.resolve({ data: ОТВЕТЫ[сост] || ОТВЕТЫ.valid, error: null });
+                if (имя === 'confirm_voucher') {
+                    return Promise.resolve({ data: { status: арг.p_pin === '1234' ? 'confirmed' : 'wrong_pin' }, error: null });
+                }
+                return Promise.resolve({ data: null, error: null });
+            }
+        };
+        if (!п.get('token')) {
+            history.replaceState(null, '', location.pathname + '?' + (function(){
+                п.set('token','stend'); return п.toString();
+            })());
+        }
+    })();
+    </script>
+    <script src="../js/verify.js?v=1"></script>
+</body>
+</html>
