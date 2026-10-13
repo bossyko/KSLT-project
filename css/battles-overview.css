@@ -11,7 +11,10 @@
     position: relative;
     padding: var(--section-y) var(--pad-x) var(--section-y);
     text-align: center;
-    min-height: 460px;
+    /* ПОЛ ОБЛОЖКИ — ОБЩИЙ ТОКЕН, А НЕ ОДИННАДЦАТОЕ ЧИСЛО. Его зовут корты,
+       тренеры, игроки, новости, цены, услуги, партнёры, «Инфо» — десять
+       файлов. Баттлы держали свои 460 / 275 / 340. */
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -48,9 +51,12 @@
 }
 
 .bo-hero h1 {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    /* ЛЕСТНИЦА ОБЛОЖКИ УЖЕ ЗАВЕДЕНА В ТОКЕНАХ: 40 / 32 / 26 по ступеням
+       992 и 640 (tokens.css:171, 578, 588). Здесь стоял свой clamp, и он
+       давал 50 / 45 / 37 — ни одного кегля из девяти (замер 13.10). */
+    font-size: var(--fs-hero);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: var(--lh-tight);
     color: var(--text-primary);
     margin-bottom: 18px;
 }
@@ -58,12 +64,12 @@
 /* Лозунг раздела. Цвет приглушённый и вес меньше, чем у заголовка:
    белым и жирным он сливался с названием в одну массу */
 .bo-hero-sub {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    font-size: var(--fs-hero-sub);
     font-weight: 600;
     color: var(--text-secondary);
     max-width: 720px;
     margin: 0 auto var(--space-lg);
-    line-height: 1.5;
+    line-height: var(--lh-normal);
 }
 
 .bo-hero-stats {
@@ -122,9 +128,10 @@
 /* ========================================
    FEATURED CARD (big VS card)
    ======================================== */
+/* Радиус 16 — по компоненту `Card 29:65`; было 24. */
 .bo-featured {
     position: relative;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     min-height: 420px;
     display: flex;
@@ -208,7 +215,7 @@
     font-weight: 600;
     color: var(--text-primary);
     text-align: center;
-    line-height: 1.25;
+    line-height: var(--lh-snug);
     max-width: 150px;
     overflow-wrap: break-word;
 }
@@ -252,7 +259,8 @@
 
 .bo-strip-sub {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    /* Контраст 3.21 при норме 4.5 — мерено по фактической краске 13.10 */
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -260,13 +268,18 @@
 
 .bo-strip-right { text-align: right; }
 
+/* ГЕОМЕТРИЯ ЗНАЧКА — ИЗ КОМПОНЕНТА `Badge 27:53`: высота 24, поля 8,
+   радиус full, 11-й кегль средним весом, разрядка 0.5. */
 .bo-strip-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding-inline: 8px;
     font-size: var(--fs-2xs);
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.5px;
+    line-height: var(--lh-none);
     text-transform: uppercase;
-    padding: 3px 10px;
     border-radius: var(--radius-full);
     white-space: nowrap;
 }
@@ -301,7 +314,7 @@
 .bo-empty-slim {
     padding: 26px 20px;
     text-align: center;
-    color: var(--text-dim);
+    color: var(--text-muted);
     border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-lg);
 }
@@ -309,19 +322,26 @@
 .bo-more-wrap { text-align: center; margin-top: var(--space-md); }
 
 .bo-more {
-    padding: 10px 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-sm);
+    padding-inline: 24px;
     border-radius: var(--radius-full);
     border: 1px solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-primary);
-    font: 600 0.9rem inherit;
-    font-family: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: var(--lh-none);
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
 }
 .bo-more:hover { border-color: var(--accent); color: var(--accent); }
 
-@media (max-width: 860px) {
+/* Полосы в одну колонку — на домашней границе. Было 860: третья точка
+   останова при двух разрешённых. */
+@media (max-width: 992px) {
     .bo-strip-grid { grid-template-columns: 1fr; }
 }
 
@@ -335,7 +355,7 @@
     display: flex;
     flex-direction: column;
     gap: 1px;
-    line-height: 1.25;
+    line-height: var(--lh-snug);
 }
 .bo-player-name.bo-pair-names span { font-size: var(--fs-sm); }
 
@@ -359,7 +379,9 @@
 }
 
 .bo-vs-badge {
-    font-size: var(--fs-lg);
+    /* Строго мельче названия карточки (18): перебивка не спорит с именем
+       баттла. Было 21 против 18 — замер 13.10. */
+    font-size: var(--fs-base);
     font-weight: 900;
     color: var(--accent);
     flex-shrink: 0;
@@ -420,7 +442,11 @@
 
 .bo-vote-btn {
     flex: 1;
-    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-sm);
+    padding-inline: 12px;
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: var(--radius-md);
     background: rgba(255,255,255,0.06);
@@ -518,11 +544,14 @@
 
 /* Status badge */
 .bo-status {
-    display: inline-block;
-    padding: 4px 14px;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding-inline: 8px;
     border-radius: var(--radius-full);
     font-size: var(--fs-2xs);
-    font-weight: 600;
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -544,11 +573,17 @@
 }
 
 /* Featured link button */
+/* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЯМИ. Замер 13.10: 41 — мимо ступеней
+   28 · 36 · 44 · 52. На телефоне ступень 44: это основной переход карточки. */
 .bo-featured-link {
-    display: inline-block;
-    padding: 10px 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-sm);
+    padding-inline: 24px;
+    line-height: var(--lh-none);
     background: var(--accent);
-    color: #000;
+    color: var(--accent-on);
     font-size: var(--fs-sm);
     font-weight: 700;
     border-radius: var(--radius-md);
@@ -615,7 +650,7 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #fff;
-    line-height: 1;
+    line-height: var(--lh-none);
     position: relative;
     overflow: hidden;
     animation: boCdAppear 0.4s ease-out;
@@ -728,10 +763,15 @@
     min-width: 240px;
 }
 
+/* Имя окна — заголовок уровня, а не div: читалка берёт его по
+   aria-labelledby, и уровень обязан существовать (правило куплено на окне
+   контактов спонсоров 13.10). */
 .bo-map-title {
+    margin: 0 0 4px;
+    font-size: var(--fs-md);
     font-weight: 600;
+    line-height: var(--lh-snug);
     color: var(--text-primary);
-    margin-bottom: 4px;
 }
 
 .bo-map-btn {
@@ -777,18 +817,15 @@
     .bo-featured {
         min-height: 360px;
     }
-}
 
-@media (max-width: 768px) {
-    /* Обложка по общему стандарту — тому же, что на страницах категорий
-       турниров: сверху место под шапку, снизу коротко, лишней высоты нет */
+    /* Обложка по общему стандарту: название вверху, цифры внизу — так же,
+       как на страницах категорий турниров. Пол высоты даёт общий токен,
+       своего числа здесь больше нет. */
     .bo-hero {
         padding: var(--section-y) var(--pad-x) var(--section-y-sm);
-        min-height: 275px;
         align-items: stretch;
     }
 
-    /* Название вверху, цифры внизу — так же, как на страницах категорий */
     .bo-hero-content {
         width: 100%;
         display: flex;
@@ -796,34 +833,33 @@
         justify-content: space-between;
     }
 
-    .bo-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
     .bo-section {
         padding: var(--section-y-sm) var(--pad-x);
-    }
-
-    .bo-featured {
-        min-height: 320px;
     }
 
     .bo-player-img {
         width: 64px;
         height: 64px;
     }
+
+    /* Однострочная подпись полосы обрезалась почти вдвое: от «ТЕСТ второй
+       категории — Tour мужской одиночный» оставалось меньше половины.
+       Две строки, многоточие остаётся. Было в своём блоке на 1024. */
+    .bo-strip-sub {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: var(--lh-snug);
+    }
 }
 
-@media (max-width: 480px) {
-    .bo-hero h1 {
-        font-size: var(--fs-xl);
-    }
-
-    .bo-hero-sub {
-        font-size: var(--fs-base);
-    }
-
-        .bo-featured {
+/* ГРАНИЦ ДВЕ, И ЭТО ВТОРАЯ. Было четыре своих — 860, 768, 480 и 375 — плюс
+   1024. Кегли обложки ступают сами, из токенов `--fs-hero*`; здесь остаётся
+   только то, что от них не зависит. Снимок игрока на 375 был 48: теперь 56,
+   как на 390, — одна ступень на весь телефон. */
+@media (max-width: 640px) {
+    .bo-featured {
         min-height: 280px;
     }
 
@@ -840,42 +876,95 @@
         font-size: var(--fs-xs);
         max-width: 100px;
     }
-
-    .bo-vs-badge {
-        font-size: var(--fs-md);
-    }
-
-}
-
-@media (max-width: 375px) {
-        .bo-featured-link {
-        padding: 8px 20px;
-        font-size: var(--fs-xs);
-    }
-
-    .bo-player-img {
-        width: 48px;
-        height: 48px;
-    }
 }
 
 /* Заглушка пустого списка — пламя вместо листа бумаги из общего набора */
 .bo-empty-icon {
     font-size: var(--fs-3xl);
-    line-height: 1;
+    line-height: var(--lh-none);
     margin-bottom: var(--space-sm);
     opacity: 0.45;
 }
 
-/* На телефоне и планшете однострочная подпись обрезалась почти вдвое: от
-   «ТЕСТ второй категории — Tour мужской одиночный» оставалось меньше
-   половины. Даём две строки, многоточие остаётся */
-@media (max-width: 1024px) {
-    .bo-strip-sub {
-        white-space: normal;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        line-height: 1.25;
+
+/* ═══ КЛАССЫ ВМЕСТО АТРИБУТА style ═══════════════════════════════════════
+   В js лежали два инлайновых набора: шапка карточки (значок и отсчёт в ряд)
+   и подложка карточки без афиши. Оформление живёт в файле стилей. */
+.bo-featured-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.bo-featured-plain {
+    background: var(--bg-card);
+}
+
+/* ═══ МЕСТО — ЭТО КНОПКА, А НЕ ТЕКСТ ═════════════════════════════════════
+   Нажатие открывает окно с картами, а замер 13.10 дал цель 20: самая мелкая
+   цель обеих страниц была у того, что вообще не выглядит нажимаемым.
+   Слой цели даётся псевдоэлементом — коробка остаётся в строке меты. */
+.bo-meta-venue {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-sm);
+    cursor: pointer;
+}
+
+.bo-meta-venue::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--btn-h-md);
+    transform: translateY(-50%);
+}
+
+/* ═══ ВИДИМЫЙ ФОКУС ══════════════════════════════════════════════════════
+   В файле не было ни одного `:focus-visible`, при том что на странице
+   ссылка карточки, две кнопки голоса, «показать ещё», место и полосы.
+   Кольцо — то же, что требует компонент `Button 17:82`. */
+.bo-featured-link:focus-visible,
+.bo-vote-btn:focus-visible,
+.bo-more:focus-visible,
+.bo-meta-venue:focus-visible,
+.bo-strip:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+}
+
+/* ═══ ДВИЖЕНИЕ СПРАШИВАЕТ РАЗРЕШЕНИЯ ═════════════════════════════════════
+   Три анимации, из них две бесконечные: блик обратного отсчёта и пульс
+   срочности. Блока `prefers-reduced-motion` в файле не было вовсе. */
+@media (prefers-reduced-motion: reduce) {
+    .bo-cd,
+    .bo-cd::after,
+    .bo-cd-urgent {
+        animation: none;
+    }
+    .bo-featured,
+    .bo-bar-p1,
+    .bo-bar-p2,
+    .bo-featured-link,
+    .bo-toast {
+        transition: none;
+    }
+    .bo-featured:hover {
+        transform: none;
+    }
+}
+
+/* ═══ ЦЕЛЬ 44 НА ТЕЛЕФОНЕ ════════════════════════════════════════════════
+   Ступень 36 остаётся мыши, пальцу — 44. Граница домашняя. */
+@media (max-width: 640px) {
+    .bo-featured-link,
+    .bo-vote-btn,
+    .bo-more,
+    .bo-meta-venue {
+        min-height: var(--btn-h-md);
     }
 }

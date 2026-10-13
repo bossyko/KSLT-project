@@ -9,7 +9,8 @@
 .ch-hero {
     position: relative;
     z-index: 0;
-    min-height: 460px;
+    /* Пол обложки — общий токен, тот же, что у десяти других разделов. */
+    min-height: var(--oblozhka-pol);
     display: flex;
     align-items: flex-end;
     padding: var(--section-y) var(--pad-x) var(--section-y-sm);
@@ -103,8 +104,9 @@
     padding-top: 12px;
     border-top: 1px solid var(--border-subtle);
     font-size: var(--fs-xs);
-    line-height: 1.5;
-    color: var(--text-dim);
+    line-height: var(--lh-normal);
+    /* Контраст 3.21 при норме 4.5 — мерено по фактической краске 13.10 */
+    color: var(--text-muted);
     text-align: center;
 }
 
@@ -159,7 +161,8 @@
     margin: 0;
 }
 
-@media (max-width: 900px) {
+/* Домашняя граница вместо своей 900: точек останова на сайте две. */
+@media (max-width: 992px) {
     .ch-duel-grid {
         grid-template-columns: 1fr;
     }
@@ -190,11 +193,13 @@
 .ch-back-link:hover { color: var(--accent); }
 
 .ch-battle-title {
-    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    /* 40 / 32 / 26 из `--fs-hero`: тот же clamp давал 50 / 45 / 37, то есть
+       три кегля мимо девятиступенчатой шкалы (замер 13.10). */
+    font-size: var(--fs-hero);
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 14px;
-    line-height: 1.1;
+    line-height: var(--lh-tight);
 }
 
 .ch-vs-container {
@@ -276,7 +281,10 @@
 }
 
 .ch-vs-text {
-    font-size: var(--fs-3xl);
+    /* ПЕРЕБИВКА СТРОГО МЕЛЬЧЕ ЗАГОЛОВКА НА КАЖДОМ ВИДЕ. Было 40 при
+       заголовке 37 на 844 и 26 при 21 на 390 — самым крупным на экране
+       оказывалось слово VS, а не имя баттла. */
+    font-size: var(--fs-2xl);
     font-weight: 900;
     color: var(--accent);
     text-shadow: 0 0 20px rgba(204, 255, 0, 0.4), 0 0 40px rgba(204, 255, 0, 0.2);
@@ -377,7 +385,11 @@
     min-width: 0;
 }
 
+/* ПОЧТИ ЧЁРНЫЙ, А НЕ БЕЛЫЙ. Компонент `Badge 27:53` говорит прямо:
+   «Solid takes NEAR-BLACK text, not white. White on danger measures 3.34 and
+   fails». У нас на красной половине полосы вышло 3.76 — замер 13.10. */
 .ch-bar-left span, .ch-bar-right span {
+    color: #0a0a0a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -404,9 +416,9 @@
     width: 128px;
 }
 .ch-pair .ch-player-photo { width: 100px; height: 132px; }
-.ch-pair .ch-player-name { font-size: var(--fs-base); line-height: 1.25; min-height: 2.4em; }
+.ch-pair .ch-player-name { font-size: var(--fs-base); line-height: var(--lh-snug); min-height: 2.4em; }
 .ch-pair-plus {
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-lg);
     font-weight: 700;
     margin-top: 56px;
@@ -461,7 +473,7 @@
 
 .ch-forecast-hint {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 
 .ch-forecast-names {
@@ -535,15 +547,20 @@
 .ch-vote-btn .ch-vote-name {
     font-size: var(--fs-base);
     font-weight: 700;
+    /* Был `normal` — то есть межстрочный не задан вовсе, его решал шрифт. */
+    line-height: var(--lh-tight);
 }
 .ch-vote-btn .ch-vote-count {
     font-size: var(--fs-xs);
     font-weight: 400;
-    color: var(--text-dim);
+    line-height: var(--lh-tight);
+    /* 3.14 на подложке кнопки — мерено 13.10 */
+    color: var(--text-muted);
 }
 .ch-vote-btn .ch-vote-cta {
     font-size: var(--fs-2xs);
     font-weight: 600;
+    line-height: var(--lh-tight);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--accent);
@@ -605,7 +622,7 @@
     color: var(--accent);
     font-size: var(--fs-base);
     font-weight: 700;
-    line-height: 1;
+    line-height: var(--lh-none);
 }
 
 .ch-voted-badge {
@@ -957,14 +974,11 @@
     font-size: var(--fs-base);
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-    .ch-hero { padding: var(--section-y-sm) var(--pad-x); }
-    .ch-battle-title { font-size: var(--fs-xl); }
-    .ch-vs-container {
-        flex-direction: column;
-        gap: var(--space-md);
-    }
+/* === RESPONSIVE ===
+   ГРАНИЦ ДВЕ: 992 и 640. Было три своих — 900, 768 и 480. Кегли заголовка
+   и перебивки ступают сами, из токенов, и в медиа больше не повторяются. */
+@media (max-width: 992px) {
+    .ch-hero { padding: var(--section-y) var(--pad-x) var(--section-y-sm); }
     .ch-vs-text { font-size: var(--fs-xl); }
     .ch-player-photo { width: 100px; height: 130px; }
     .ch-player-name { font-size: var(--fs-md); }
@@ -977,14 +991,100 @@
     .ch-score { padding: var(--section-y-sm) var(--pad-x); }
     .ch-score-display { flex-direction: column; gap: var(--space-sm); }
     .ch-score-player { min-width: auto; }
-    .ch-hero { min-height: 340px; padding: var(--section-y) var(--pad-x) var(--section-y-sm); }
 }
 
-@media (max-width: 480px) {
+/* ═══ СОПЕРНИКИ НА ТЕЛЕФОНЕ — ДВА СТОЛБЦА, А НЕ ЛЕНТА ════════════════════
+   Блок разворачивался в колонку, и «кто с кем» растягивалось на 927 при
+   экране 844: снимок 100×132, имя в три строки, категория, NTRP, победы и
+   поражения каждое своей строкой. Костя 13.10: «какие они удлинённые».
+   Две стороны рядом — так устроен заголовок матча у ATP и ESPN: сравнение
+   читается взглядом, а не прокруткой. Замер после правки: 422 вместо 927,
+   сторона 138 шириной, имя ложится в две строки, перелива нет. */
+@media (max-width: 640px) {
     .ch-hero { padding: var(--space-md) var(--pad-x); }
-    .ch-battle-title { font-size: var(--fs-lg); }
-    .ch-player-photo { width: 80px; height: 110px; }
-    .ch-player-stats { flex-direction: column; gap: 2px; text-align: center; }
+    /* Заголовок на телефоне 26, значит перебивка 21: ОТНОШЕНИЕ держится на
+       каждом виде, а не только на широких. Замер 13.10 после правки поймал
+       ровно это: на 390 оба стояли 26. */
+    .ch-vs-text { font-size: var(--fs-lg); }
+
+    .ch-vs-container {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .ch-player-card { max-width: none; min-width: 0; }
+    .ch-players { padding: 16px; }
+    .ch-player-photo { width: 72px; height: 96px; }
+    /* У пары свой снимок, и правило выше до него не доставало: селектор
+       `.ch-pair .ch-player-photo` весит больше. Замер 13.10: на 390 пара
+       держала 100×132, пока одиночный уже сжимался до 80×110. */
+    .ch-pair .ch-player-photo { width: 72px; height: 96px; }
+    .ch-player-name { font-size: var(--fs-sm); line-height: var(--lh-snug); }
+    .ch-player-cat, .ch-player-ntrp { font-size: var(--fs-2xs); }
+    .ch-player-stats { flex-direction: row; gap: 8px; font-size: var(--fs-xs); }
+    .ch-vs-divider { align-self: center; }
+
     .ch-h2h-match { flex-direction: column; gap: 4px; text-align: center; }
     .ch-h2h-winner { text-align: center; min-width: auto; }
+}
+
+/* ═══ ВИДИМЫЙ ФОКУС ══════════════════════════════════════════════════════
+   В файле не было ни одного `:focus-visible` при двух кнопках голоса,
+   ссылках карт, кнопке «ещё встречи» и возврате. */
+.ch-vote-btn:focus-visible,
+.ch-map-link:focus-visible,
+.ch-h2h-more:focus-visible,
+.ch-back-link:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+}
+
+/* Слой цели у ссылок карт: сами они живут в строке меты, коробка 15. */
+.ch-map-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-sm);
+}
+.ch-map-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--btn-h-md);
+    transform: translateY(-50%);
+}
+.ch-h2h-more {
+    min-height: var(--btn-h-sm);
+}
+@media (max-width: 640px) {
+    .ch-map-link,
+    .ch-h2h-more { min-height: var(--btn-h-md); }
+}
+
+/* Крошка текущего раздела: была атрибутом style в js. */
+.kslt-back-here {
+    color: var(--text-muted);
+    cursor: default;
+}
+
+/* ═══ ДВИЖЕНИЕ СПРАШИВАЕТ РАЗРЕШЕНИЯ ═════════════════════════════════════
+   Две анимации, из них бесконечный пульс кнопки голоса. */
+@media (prefers-reduced-motion: reduce) {
+    .ch-vote-btn:not(.disabled):not(.selected),
+    .ch-vote-toast {
+        animation: none;
+    }
+    .ch-forecast-bar i,
+    .ch-bar-left,
+    .ch-bar-right,
+    .ch-player-photo,
+    .ch-vote-btn {
+        transition: none;
+    }
+    .ch-vote-btn:hover:not(.disabled) {
+        transform: none;
+    }
 }
