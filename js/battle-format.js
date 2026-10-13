@@ -145,4 +145,55 @@
     BF.isPlayed = function(b) {
         return BF.state(b) === 'done';
     };
+
+    /**
+     * Закрыто ли голосование. ОДНО ПРАВИЛО НА ДВА ЭКРАНА.
+     *
+     * До 13.10 это условие было написано дважды — в js/battles-overview.js
+     * и в js/challenge-detail.js, — и второй файл сам об этом говорил
+     * комментарием «same logic as challenge-detail.js». Два определения
+     * одного понятия расходятся не сразу, а на первой же правке одного из
+     * них: закрытое на карточке голосование оставалось открытым на
+     * странице, и наоборот.
+     *
+     * Закрыто, когда закрыл судья (`voting_closed`), когда счёт сохранён
+     * (`status === 'completed'`) или когда время матча наступило —
+     * последнее считает BF.state, по тем же часам Бишкека.
+     */
+    BF.votingClosed = function(b) {
+        if (!b) return false;
+        return !!b.voting_closed || BF.state(b) !== 'upcoming';
+    };
+
+    /**
+     * Сторона победителя: 1, 2 или null.
+     *
+     * ПОЧЕМУ ПО СТОРОНЕ, А НЕ ПО ИГРОКУ. Приглашённый со стороны человек в
+     * базе не заведён, и `matches.winner_id` указать на него НЕ МОЖЕТ.
+     * Сравнение `winner_id === challenger_player_id` у такого баттла
+     * сравнивало два пустых значения и отвечало «да»: страница объявляла
+     * победителем гостя при любом исходе, а история встреч отдавала все
+     * победы второму игроку и писала счёт «0 : 2» при пяти матчах.
+     * Проверено на стенде 13.10 (maket/stend-vyzov.html?sluchay=gost).
+     *
+     * Сторона известна всегда: их ровно две, и голоса считаются по ним же.
+     */
+    BF.winnerSide = function(b, winnerId) {
+        if (!b || !winnerId) return null;
+        if (b.challenger_player_id && winnerId === b.challenger_player_id) return 1;
+        if (b.opponent_player_id && winnerId === b.opponent_player_id) return 2;
+        return null;
+    };
+
+    /**
+     * Подпись состояния словами. Считает состояние этот модуль, НАЗЫВАЕТ —
+     * js/tournament-status.js, где лестница состояний выбрана Костей 28.09
+     * и переведена на три языка. Свой набор слов здесь не заводится.
+     */
+    BF.stateLabel = function(b) {
+        var S = window.KSLT_STATUS;
+        if (!S) return '';
+        var ключ = { upcoming: 'upcoming', live: 'ongoing', done: 'completed' }[BF.state(b)];
+        return S.подпись(ключ, lang());
+    };
 })();
