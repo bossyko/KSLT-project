@@ -47,7 +47,116 @@ const PARTS = [
         start: '<!-- HEADER:START -->', end: '<!-- HEADER:END -->',
         grab: /[ \t]*<header[\s\S]*?<\/header>\n?/,
     },
+    {
+        key: 'csp', title: 'Политика безопасности',
+        start: '<!-- CSP:START -->', end: '<!-- CSP:END -->',
+        grab: /[ \t]*<meta http-equiv="Content-Security-Policy"[^>]*>\n?/,
+        /* У восьми страниц политики нет вовсе — вставляем её после viewport,
+           а не пропускаем файл. */
+        after: /[ \t]*<meta name="viewport"[^>]*>\n?/,
+    },
 ];
+
+/* ══ ПОЛИТИКА БЕЗОПАСНОСТИ — ОДНО ОБЪЯВЛЕНИЕ НА 92 СТРАНИЦЫ ═════════════
+ *
+ * Померено 13.10: политика была написана руками в каждой странице, и это
+ * дало ВОСЕМЬ разных вариантов плюс ВОСЕМЬ страниц без политики вовсе —
+ * девять состояний одного понятия. Без политики стояли три страницы входа
+ * и английская админка.
+ *
+ * Та же беда, что была с шапкой и подвалом: текст, скопированный в 92
+ * файла, расходится сам. Лечится тем же — одним объявлением и машиной.
+ *
+ * БАЗА плюс НАДОБНОСТИ. Страница не пишет политику, а называет, что ей
+ * нужно: карты, ролики, живой счёт, вход, таблицы. Чего не названо — того
+ * в политике нет.
+ */
+
+const CSP_БАЗА = {
+    'default-src': ["'self'"],
+    'script-src':  ["'self'", "'unsafe-inline'", 'https://www.googletagmanager.com',
+                    'https://unpkg.com', 'https://cdnjs.cloudflare.com',
+                    'https://accounts.google.com'],
+    'style-src':   ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com',
+                    'https://cdnjs.cloudflare.com', 'https://unpkg.com'],
+    'font-src':    ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
+    'img-src':     ["'self'", 'data:', 'https:'],
+    'connect-src': ["'self'", 'https://www.google-analytics.com',
+                    'https://www.googletagmanager.com', 'https://*.supabase.co',
+                    'https://accounts.google.com'],
+    'media-src':   ["'self'"],
+};
+
+const CSP_НАДОБНОСТИ = {
+    /* Карта заведения и корта — встроенный кадр Google. */
+    карты:   { 'frame-src': ['https://maps.google.com', 'https://www.google.com'] },
+    /* Ролики в новостях: список закрыт в js/kslt-video.js:29-47. */
+    ролики:  { 'frame-src': ['https://www.youtube.com', 'https://www.youtube-nocookie.com',
+                             'https://player.vimeo.com', 'https://www.instagram.com'] },
+    /* Трансляция матча — только YouTube. */
+    ютуб:    { 'frame-src': ['https://www.youtube.com'] },
+    /* Счёт идёт по вебсокету: realtime зовут только live-match.js и scoreboard.js. */
+    живой:   { 'connect-src': ['wss://*.supabase.co'] },
+    /* Вход: Turnstile грузит скрипт, кадр и ходит на свой хост. ИМЕННО
+       ЭТОГО ХОСТА НЕ БЫЛО В ОБЩЕЙ ПОЛИТИКЕ — поэтому страницы входа и
+       остались без неё вовсе, иначе вход бы сломался. */
+    /* ПОПРАВКА К СЕБЕ, 13.10. Первым заходом я дописал сюда
+       `frame-src accounts.google.com` — «Google открывает своё окно сам».
+       Прочитал код: `client.auth.signInWithOAuth` (js/auth.js:1792) уводит
+       на страницу Google ЦЕЛИКОМ, кадра нет. Вход через Telegram идёт своим
+       потоком `functions/v1/telegram-auth` (js/auth.js:1964), виджета
+       telegram.org на странице нет. Кадр на входе нужен ровно один —
+       Turnstile. Лишнее разрешение снято. */
+    вход:    { 'script-src':  ['https://challenges.cloudflare.com'],
+               'frame-src':   ['https://challenges.cloudflare.com'],
+               'connect-src': ['https://challenges.cloudflare.com'] },
+    /* Админка: выгрузка в Excel и перевод пустых полей. */
+    таблицы: { 'script-src':  ['https://cdn.sheetjs.com'],
+               'img-src':     ['blob:'],
+               'connect-src': ['https://api.mymemory.translated.net'] },
+};
+
+/**
+ * Что нужно странице. Ключ — имя БЕЗ языкового хвоста; где язык важен,
+ * стоит полное имя файла и оно сильнее.
+ *
+ * ПОПРАВКА К СЕБЕ, 13.10. Я дал `admin-en.html` всё, что нужно русской
+ * админке: таблицы, переводчик, шесть источников кадров. Прочитал файл —
+ * это 25 строк ПЕРЕНАПРАВЛЕНИЯ на русскую админку, и решение «админка
+ * ведётся только на русском» написано прямо в нём. Скриптов там нет
+ * вообще. Широкая политика на странице-заглушке — ослабление ни за чем,
+ * ровно то, в чём я упрекал лендинги en и kg.
+ */
+const CSP_СТРАНИЦЫ = {
+    'admin-en':    [],
+    'live-match':  ['ютуб', 'живой', 'карты'],
+    'scoreboard':  ['живой'],
+    'news':        ['ролики'],
+    'challenge':   ['карты'],
+    'court':       ['карты'],
+    'tournament':  ['карты'],
+    'admin':       ['карты', 'ролики', 'таблицы'],
+    'auth':        ['вход'],
+};
+
+function cspДляСтраницы(page) {
+    const политика = {};
+    for (const д of Object.keys(CSP_БАЗА)) политика[д] = CSP_БАЗА[д].slice();
+    const надобности = CSP_СТРАНИЦЫ[page.base] || CSP_СТРАНИЦЫ[page.name] || [];
+    for (const н of надобности) {
+        const добавка = CSP_НАДОБНОСТИ[н];
+        for (const д of Object.keys(добавка)) {
+            if (!политика[д]) политика[д] = [];
+            for (const и of добавка[д]) {
+                if (политика[д].indexOf(и) === -1) политика[д].push(и);
+            }
+        }
+    }
+    const текст = Object.keys(политика)
+        .map(д => д + ' ' + политика[д].join(' '))
+        .join('; ') + ';';
+    return '    <meta http-equiv="Content-Security-Policy" content="' + текст + '">\n';
+}
 
 /**
  * Какой пункт меню подсвечен на какой странице.
@@ -98,6 +207,9 @@ function langOf(base) {
 
 const templates = {};
 for (const part of PARTS) {
+    /* У политики безопасности образец не лежит в файле: он СЧИТАЕТСЯ из
+       базы и надобностей страницы. Языка у неё нет. */
+    if (part.key === 'csp') continue;
     templates[part.key] = {};
     for (const lang of ['ru', 'en', 'kg']) {
         templates[part.key][lang] = fs.readFileSync(
@@ -139,8 +251,8 @@ const files = [
         .map(f => path.join(ROOT, 'pages', f)),
 ];
 
-const changed = { footer: 0, header: 0 };
-const skipped = { footer: 0, header: 0 };
+const changed = { footer: 0, header: 0, csp: 0 };
+const skipped = { footer: 0, header: 0, csp: 0 };
 const drift = [];
 
 for (const file of files) {
@@ -159,7 +271,10 @@ for (const file of files) {
     for (const part of PARTS) {
         if (part.key === 'header' && NO_HEADER.has(base)) { skipped.header++; continue; }
 
-        const block = `${part.start}\n${fill(templates[part.key][lang], page)}${part.end}`;
+        const образец = part.key === 'csp'
+            ? cspДляСтраницы(page)
+            : fill(templates[part.key][lang], page);
+        const block = `${part.start}\n${образец}${part.end}`;
         let next;
 
         if (html.includes(part.start) && html.includes(part.end)) {
@@ -168,8 +283,15 @@ for (const file of files) {
         } else {
             // Первый проход: оборачиваем существующий кусок маркерами
             const m = html.match(part.grab);
-            if (!m) { skipped[part.key]++; continue; }
-            next = html.replace(m[0], block + '\n');
+            if (m) {
+                next = html.replace(m[0], block + '\n');
+            } else if (part.after) {
+                /* Политики на странице не было вовсе — ставим её после
+                   viewport, а не пропускаем файл молча. */
+                const a = html.match(part.after);
+                if (!a) { skipped[part.key]++; continue; }
+                next = html.replace(a[0], a[0] + block + '\n');
+            } else { skipped[part.key]++; continue; }
         }
 
         if (next !== html) { changed[part.key]++; html = next; }
@@ -187,7 +309,7 @@ if (check) {
         console.error('\nЗапусти: node tools/build-partials.js');
         process.exit(1);
     }
-    console.log('Шапка и футер совпадают с образцом на всех страницах.');
+    console.log('Шапка, футер и политика безопасности совпадают с образцом на всех страницах.');
 } else {
     for (const part of PARTS) {
         console.log(`${part.title}: обновлено ${changed[part.key]}` +
