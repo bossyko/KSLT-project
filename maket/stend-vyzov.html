@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'none';">
+<title>КСЛТ — стенд страницы баттла</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Экран рисует НАСТОЯЩИЙ js/challenge-detail.js теми
+  же файлами стилей, что и живая страница. Разметка сюда НЕ КОПИРУЕТСЯ —
+  только те же контейнеры, что лежат в pages/challenge.html (строки
+  289–312): всё остальное собирает боевой код.
+
+  ПОЧЕМУ СТЕНД, А НЕ ЖИВАЯ СТРАНИЦА. В боевой базе 13.10 НИ ОДНОГО баттла:
+  обзор отдаёт «—» во всех трёх цифрах и два пустых раздела. Мерить нечего,
+  а экран нужен на пяти видах и трёх языках.
+
+  БАЗЫ ЗДЕСЬ НЕТ. `window.supabaseClient` подменён заглушкой; форма ответа
+  взята из ЖИВОГО объявления `get_battle_public` (снимок базы
+  sql/схема/schema-snapshot.sql, строки 3404–3477), а не придумана.
+  Кнопку голосования НЕ НАЖИМАТЬ: она пишет в базу.
+
+  СЛУЧАИ ВЫБИРАЮТСЯ АДРЕСОМ, и они крайние, а не удобные:
+      ?sluchay=odinochka   — одиночный, голосование открыто (по умолчанию)
+      ?sluchay=para        — парный, длинные фамилии с обеих сторон
+      ?sluchay=zavershyon  — сыгран: счёт, победитель, история встреч
+      ?sluchay=gost        — сыгран, вызвавший — гость со стороны (без id)
+  Дополнительно: &vhod=1 — человек вошёл, &golos=1 — уже проголосовал.
+  Язык: &yazyk=en | kg (боевой код узнаёт язык по адресу, поэтому стенд
+  подменяет только словарь через собственное имя файла — см. ниже).
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=28">
+<link rel="stylesheet" href="../css/style.css?v=410">
+<link rel="stylesheet" href="../css/challenge-detail.css?v=36">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); }
+</style>
+</head>
+<body>
+
+<main>
+    <div class="kslt-back-wrap" id="challengeBreadcrumb"></div>
+    <section class="ch-hero" id="challengeHero" data-stend="страница баттла"></section>
+    <section class="ch-score" id="challengeScore" style="display:none"></section>
+    <section class="ch-duel" id="challengeDuel" style="display:none"></section>
+    <section class="ch-voting" id="challengeVoting" style="display:none"></section>
+    <section class="ch-forecast-sec" id="challengeForecast" style="display:none"></section>
+    <section class="ch-h2h" id="challengeH2H" style="display:none"></section>
+    <section class="ch-details" id="challengeDetails" style="display:none"></section>
+</main>
+
+<script>
+(function() {
+    'use strict';
+    var П = new URLSearchParams(location.search);
+    var СЛУЧАЙ = П.get('sluchay') || 'odinochka';
+    var ВОШЁЛ = П.get('vhod') === '1';
+    var ГОЛОС = П.get('golos') === '1';
+
+    /* ЯЗЫК. Боевой код узнаёт язык по пути файла (`-en` / `-kg` в
+       pathname), поэтому стенд не подменяет код, а подставляет путь:
+       history.replaceState меняет адрес до того, как модуль прочитает его. */
+    var ЯЗЫК = П.get('yazyk') || 'ru';
+    /* Боевой код берёт баттл по `?id=` и без него честно рисует «не
+       найден» — стенд подставляет свой идентификатор сам, иначе он мерил бы
+       экран ошибки. */
+    if (!П.get('id')) П.set('id', 'stend-battle');
+    var путь = ЯЗЫК === 'ru'
+        ? location.pathname
+        : location.pathname.replace(/\.html$/, '-' + ЯЗЫК + '.html');
+    history.replaceState(null, '', путь + '?' + П.toString());
+
+    /* Снимок вместо сети: СЛОМАННОЕ ИЗОБРАЖЕНИЕ ДАЁТ ЧУЖУЮ ГЕОМЕТРИЮ —
+       Chrome меряет его по строке alt, и портрет 120×160 перестаёт быть
+       портретом. */
+    function портрет(цвет) {
+        return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="320">' +
+            '<rect width="240" height="320" fill="' + цвет + '"/></svg>');
+    }
+    var ПОСТЕР = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900">' +
+        '<rect width="1600" height="900" fill="#1d2a38"/>' +
+        '<circle cx="800" cy="450" r="260" fill="#cf0" opacity="0.35"/></svg>');
+
+    /* СОДЕРЖИМОЕ КРАЙНЕЕ. Имена длинные НАМЕРЕНО: длина взята не из базы
+       (в ней баттлов нет вовсе), а назначена — 26 и 28 знаков, чтобы
+       увидеть перенос и равенство половин. Это НАМЕРЕНО, не ПОСЧИТАНО. */
+    var ЗАВТРА = new Date(Date.now() + 36e5 * 30).toISOString().slice(0, 10);
+    var ВЧЕРА  = new Date(Date.now() - 36e5 * 30).toISOString().slice(0, 10);
+
+    var ОБЩЕЕ = {
+        id: 'stend-battle',
+        battle_title: 'Баттл за место в Pro-Masters: Жаныбеков против Токтогулова',
+        banner_url: ПОСТЕР,
+        voting_closed: false,
+        format: 'singles',
+        set_format: 'best_of_3',
+        proposed_venue: 'Теннисный центр «Ала-Тоо», корт № 3, улица Чуй 219/1',
+        proposed_time: '18:30',
+        match_id: null,
+        court_google_maps: '', court_twogis: '',
+        challenger_player_id: 'p1', opponent_player_id: 'p2',
+        challenger_partner_id: null, opponent_partner_id: null,
+        challenger_name: 'Айбек Жаныбеков-Орозов',
+        challenger_name_en: 'Aibek Zhanybekov-Orozov',
+        challenger_name_kg: 'Айбек Жаныбеков-Орозов',
+        challenger_photo: портрет('#3a2b2b'),
+        challenger_country: 'KG', challenger_player_country: 'KG',
+        challenger_cat: 'men-masters', challenger_category: 'men-masters',
+        challenger_wins: 34, challenger_losses: 11, challenger_points: 870,
+        challenger_form: 'WWLWW',
+        challenger_ntrp: null, challenger_player_ntrp: 4.5,
+        challenger_dbl_wins: 12, challenger_dbl_losses: 7,
+        challenger_mix_wins: 3, challenger_mix_losses: 2,
+        opponent_name: 'Эрмек Токтогулов-Садыков',
+        opponent_name_en: 'Ermek Toktogulov-Sadykov',
+        opponent_name_kg: 'Эрмек Токтогулов-Садыков',
+        opponent_photo: портрет('#26324a'),
+        opponent_country: 'KZ', opponent_player_country: 'KZ',
+        opponent_cat: 'men-tour', opponent_category: 'men-tour',
+        opponent_wins: 21, opponent_losses: 19, opponent_points: 450,
+        opponent_form: 'LWLLW',
+        opponent_ntrp: null, opponent_player_ntrp: 4.0,
+        opponent_dbl_wins: 9, opponent_dbl_losses: 9,
+        opponent_mix_wins: 1, opponent_mix_losses: 4,
+        challenger_partner_display: null, opponent_partner_display: null,
+        status: 'published',
+        proposed_date: ЗАВТРА,
+        battle_published_at: ВЧЕРА
+    };
+
+    var БАТТЛ = Object.assign({}, ОБЩЕЕ);
+
+    if (СЛУЧАЙ === 'para') {
+        Object.assign(БАТТЛ, {
+            format: 'doubles',
+            battle_title: 'Парный баттл: Жаныбеков / Орозбеков против Токтогулова / Садыкова',
+            challenger_partner_id: 'm1', opponent_partner_id: 'm2',
+            challenger_partner_display: 'Нурсултан Орозбеков',
+            challenger_partner_photo: портрет('#4a3a26'),
+            challenger_partner_country: 'KG', challenger_partner_cat: 'men-tour',
+            challenger_partner_ntrp: 4.0,
+            challenger_partner_dbl_wins: 15, challenger_partner_dbl_losses: 6,
+            challenger_partner_mix_wins: 2, challenger_partner_mix_losses: 1,
+            opponent_partner_display: 'Бектур Садыков-Асанов',
+            opponent_partner_photo: портрет('#26424a'),
+            opponent_partner_country: 'RU', opponent_partner_cat: 'men-futures',
+            opponent_partner_ntrp: 3.5,
+            opponent_partner_dbl_wins: 4, opponent_partner_dbl_losses: 12,
+            opponent_partner_mix_wins: 0, opponent_partner_mix_losses: 3
+        });
+    }
+
+    if (СЛУЧАЙ === 'zavershyon' || СЛУЧАЙ === 'gost') {
+        Object.assign(БАТТЛ, {
+            status: 'completed',
+            voting_closed: true,
+            proposed_date: ВЧЕРА,
+            match_id: 'match-1'
+        });
+    }
+
+    /* ГОСТЬ СО СТОРОНЫ: вызвавшего нет в базе — `challenger_player_id`
+       пустой, имя приходит из `challenger_external_name` через COALESCE.
+       Этот случай и проверяет находку «победителя назовут не того». */
+    if (СЛУЧАЙ === 'gost') {
+        Object.assign(БАТТЛ, {
+            challenger_player_id: null,
+            challenger_name: 'Сергей Приглашённый-Гость',
+            challenger_name_en: 'Sergey Invited-Guest',
+            challenger_name_kg: 'Сергей Приглашённый-Гость',
+            challenger_wins: null, challenger_losses: null,
+            challenger_points: null, challenger_form: null
+        });
+    }
+
+    var ГОЛОСА = [{ side: 1, votes: 37 }, { side: 2, votes: 24 }];
+
+    var ВСТРЕЧИ = [
+        { id: 'm5', player1_id: 'p1', player2_id: 'p2', winner_id: 'p1',
+          score: '6/4 7/6(11-9)', created_at: '2026-09-28', status: 'completed', match_type: 'duel' },
+        { id: 'm4', player1_id: 'p2', player2_id: 'p1', winner_id: 'p2',
+          score: '7/5 2/6 10-8', created_at: '2026-08-14', status: 'completed', match_type: 'tournament' },
+        { id: 'm3', player1_id: 'p1', player2_id: 'p2', winner_id: 'p1',
+          score: '6/0 6/1', created_at: '2026-07-02', status: 'completed', match_type: 'tournament' },
+        { id: 'm2', player1_id: 'p1', player2_id: 'p2', winner_id: 'p2',
+          score: '4/6 6/4 7-5', created_at: '2026-05-19', status: 'completed', match_type: 'tournament' },
+        { id: 'm1', player1_id: 'p2', player2_id: 'p1', winner_id: 'p1',
+          score: '6/3 6/4', created_at: '2026-04-05', status: 'completed', match_type: 'duel' }
+    ];
+
+    var МАТЧ = { id: 'match-1', player1_id: 'p1', player2_id: 'p2',
+                 winner_id: 'p2', score: '6/4 3/6 7/6(11-9)' };
+
+    /* ПОБЕДИТЕЛЬ-ГОСТЬ. У приглашённого со стороны в базе нет строки в
+       `players`, значит `matches.winner_id` на него указать НЕ МОЖЕТ: если
+       выиграл гость, поле остаётся пустым. `?winner=net` ставит ровно этот
+       случай и показывает, что напишет экран. */
+    if (П.get('winner') === 'net') МАТЧ.winner_id = null;
+
+    /* Заглушка клиента: цепочка возвращает себя и умеет ждаться. */
+    function звено(данные) {
+        var о = {};
+        ['select','eq','neq','in','or','order','limit','maybeSingle','single','is','not']
+            .forEach(function(м) { о[м] = function() { return о; }; });
+        о.then = function(f, g) { return Promise.resolve({ data: данные, error: null }).then(f, g); };
+        о.catch = function(f) { return Promise.resolve({ data: данные, error: null }).catch(f); };
+        return о;
+    }
+
+    window.supabaseClient = {
+        auth: {
+            getUser: function() {
+                return Promise.resolve({ data: { user: ВОШЁЛ ? { id: 'u1' } : null } });
+            },
+            getSession: function() {
+                return Promise.resolve({ data: { session: ВОШЁЛ ? { user: { id: 'u1' } } : null } });
+            }
+        },
+        rpc: function(имя) {
+            if (имя === 'get_battle_public') return Promise.resolve({ data: БАТТЛ, error: null });
+            if (имя === 'get_battle_votes') return Promise.resolve({ data: ГОЛОСА, error: null });
+            return Promise.resolve({ data: null, error: null });
+        },
+        from: function(таблица) {
+            if (таблица === 'matches') {
+                return звено(СЛУЧАЙ === 'zavershyon' || СЛУЧАЙ === 'gost' ? ВСТРЕЧИ : []);
+            }
+            if (таблица === 'challenge_predictions') {
+                return звено(ГОЛОС ? { predicted_side: 1 } : null);
+            }
+            if (таблица === 'profiles') return звено({ telegram_chat_id: null });
+            return звено(null);
+        }
+    };
+
+    /* Счёт матча приходит из `matches` по `id`: отдаём тот же объект, но по
+       одиночному запросу — иначе `single()` вернул бы список встреч. */
+    var изМатчей = window.supabaseClient.from;
+    window.supabaseClient.from = function(таблица) {
+        if (таблица === 'matches') {
+            var первый = true;
+            var о = звено(СЛУЧАЙ === 'zavershyon' || СЛУЧАЙ === 'gost' ? ВСТРЕЧИ : []);
+            var одиночный = звено(МАТЧ);
+            var обёртка = {};
+            ['select','eq','neq','in','or','order','limit','is','not'].forEach(function(м) {
+                обёртка[м] = function(а, б) {
+                    if (м === 'eq' && а === 'id') первый = false;
+                    return обёртка;
+                };
+            });
+            обёртка.single = function() { return одиночный; };
+            обёртка.maybeSingle = function() { return одиночный; };
+            обёртка.then = function(f, g) { return о.then(f, g); };
+            обёртка.catch = function(f) { return о.catch(f); };
+            return обёртка;
+        }
+        return изМатчей(таблица);
+    };
+
+    window.KSLT_STEND = { случай: СЛУЧАЙ, баттл: БАТТЛ, язык: ЯЗЫК };
+})();
+</script>
+
+<script src="../js/match-prediction.js?v=2"></script>
+<script src="../js/country-utils.js?v=4"></script>
+<script src="../js/tournament-status.js?v=1"></script>
+    <script src="../js/battle-format.js?v=4"></script>
+<script src="../js/challenge-detail.js?v=23"></script>
+</body>
+</html>

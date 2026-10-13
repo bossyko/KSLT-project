@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — проба лестницы баттлов, 390</title>
+<!--
+  ПРОБА, А НЕ МАКЕТ. Слева — то, что на сайте сейчас; справа — предложение.
+  Оба столбца это ЖИВЫЕ стенды с настоящим кодом, загруженные на ширине 390;
+  в правый добавлен только лист правок (ниже, целиком видно глазами).
+  Правка в файлы НЕ внесена: это то, на что смотрят до кода.
+-->
+<style>
+  html,body { margin:0; background:#07070a; color:#fff; font-family:Inter,system-ui,sans-serif; }
+  .ряд { display:flex; gap:24px; padding:16px; align-items:flex-start; }
+  .стопка { width:390px; }
+  .шапка { font:700 13px/1.4 Inter,system-ui,sans-serif; letter-spacing:.08em;
+           text-transform:uppercase; padding:6px 2px 10px; color:#cf0; }
+  .шапка.было { color:rgba(255,255,255,.55); }
+  iframe { width:390px; height:1500px; border:1px solid rgba(255,255,255,.12); border-radius:8px; background:#000; }
+</style>
+</head>
+<body>
+<div class="ряд">
+  <div class="стопка"><div class="шапка было">обзор · было</div>
+    <iframe src="stend-battly-obzor.html?sluchay=vse&vhod=1" id="к1"></iframe></div>
+  <div class="стопка"><div class="шапка">обзор · стало</div>
+    <iframe src="stend-battly-obzor.html?sluchay=vse&vhod=1" id="к2"></iframe></div>
+  <div class="стопка"><div class="шапка было">вызов · было</div>
+    <iframe src="stend-vyzov.html?sluchay=odinochka&vhod=1" id="к3"></iframe></div>
+  <div class="стопка"><div class="шапка">вызов · стало</div>
+    <iframe src="stend-vyzov.html?sluchay=odinochka&vhod=1" id="к4"></iframe></div>
+</div>
+
+<script>
+/* ЛИСТ ПРАВОК — то самое, что уйдёт в css, если скажешь «да».
+   Границы только домашние: 640 и 992. Ниже 640 — телефон. */
+var ПРАВКИ = `
+/* --- ЛЕСТНИЦА ОБЛОЖКИ УЖЕ ЗАВЕДЕНА В ТОКЕНАХ, её просто никто тут не звал.
+       --fs-hero 40/32/26, --fs-hero-sub 21/18/16, --fs-hero-num 40/32/21,
+       --fs-hero-cap 14/12/11 (css/tokens.css:171-174, 578-581, 588-591).  --- */
+.bo-hero h1, .ch-battle-title { font-size: var(--fs-hero); line-height: var(--lh-tight); }
+.bo-hero-sub { font-size: var(--fs-hero-sub); line-height: var(--lh-normal); }
+/* ЦИФРУ ОБЛОЖКИ ПРАВИТ ОБЩЕЕ ПРАВИЛО style.css:11398 долями ширины —
+   clamp(1.35rem, 6.4vw, 1.9rem), на 390 это 25. Приём обхода куплен 27.09 и
+   живёт в tokens.css:604 списком семейств; баттлов в том списке нет. */
+.bo-hero .bo-hero-stats .bo-hero-stat-value { font-size: var(--fs-hero-num); }
+.bo-hero .bo-hero-stats .bo-hero-stat-label { font-size: var(--fs-hero-cap); }
+/* --- перебивка строго мельче заголовка на каждом виде --- */
+.ch-vs-text { font-size: var(--fs-2xl); }
+.bo-vs-badge { font-size: var(--fs-base); }
+@media (max-width: 992px) { .ch-vs-text { font-size: var(--fs-xl); } }
+@media (max-width: 640px) {
+    .ch-vs-text { font-size: var(--fs-lg); }
+    .ch-pair .ch-player-photo { width: 80px; height: 110px; }
+}
+/* --- межстрочные на ступени --- */
+.bo-player-name, .bo-player-name.bo-pair-names,
+.bo-strip-sub, .ch-pair .ch-player-name { line-height: var(--lh-snug); }
+.bo-vote-btn, .ch-vote-btn .ch-vote-name,
+.ch-vote-btn .ch-vote-count, .ch-vote-btn .ch-vote-cta { line-height: var(--lh-tight); }
+/* --- цели нажатия: высота свойством, со ступеней 28 36 44 52 --- */
+.bo-featured-link, .bo-more {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: var(--btn-h-sm); padding-block: 0; padding-inline: 24px;
+    line-height: var(--lh-none);
+}
+.bo-vote-btn { min-height: var(--btn-h-sm); padding-block: 0; }
+.bo-meta-venue { position: relative; display: inline-flex; align-items: center;
+    min-height: var(--btn-h-sm); }
+.bo-meta-venue::after { content: ''; position: absolute; left: 0; right: 0; top: 50%;
+    height: var(--btn-h-md); transform: translateY(-50%); }
+/* .ch-vote-btn МИНИМУМ НЕ ЗАДАЁМ — И ЭТО ПОПРАВКА К СЕБЕ.
+   Кнопка на странице вызова стоит flex: 1 1 0 внутри колонки, а у
+   flex-элемента min-height: auto — это и есть защита содержимого. Поставив
+   44, я эту защиту СНЯЛ: высота схлопнулась до 44 при содержимом 96, имя и
+   «нажмите, чтобы голосовать» вылезли за кнопку и наложились на соседнюю.
+   Поймал Костя глазами 13.10, замер этого не увидел — я мерил высоту, а не
+   переполнение. Кнопка и так 118, обе стороны равны; здесь нечего чинить,
+   отношение «обе одной высоты и не ниже 44» стережёт заморозка. */
+@media (max-width: 640px) {
+    .bo-featured-link, .bo-more, .bo-vote-btn, .bo-meta-venue { min-height: var(--btn-h-md); }
+}
+/* --- СОПЕРНИКИ НА ТЕЛЕФОНЕ: ДВА СТОЛБЦА, А НЕ ЛЕНТА ---
+   Сейчас на <=768 блок разворачивается в колонку (.ch-vs-container
+   flex-direction: column), и «кто с кем» растягивается на две высоты
+   экрана: снимок 100x132, имя в три строки, категория, NTRP и победы с
+   поражениями каждое своей строкой — у каждой стороны около 450.
+   Слово Кости 13.10: «какие они удлинённые».
+   Две стороны рядом — так устроен заголовок матча у ATP и ESPN: сравнение
+   читается взглядом, а не прокруткой. Ширина стороны на 390 выходит
+   (358 - 32 поля - 40 на VS) / 2 = 143, и имя 14-м кеглем ложится в две
+   строки. */
+@media (max-width: 640px) {
+    .ch-vs-container { flex-direction: row; align-items: flex-start; gap: 8px; }
+    .ch-player-card { max-width: none; min-width: 0; }
+    .ch-player-photo { width: 72px; height: 96px; }
+    .ch-player-name { font-size: var(--fs-sm); line-height: var(--lh-snug); }
+    .ch-player-cat, .ch-player-ntrp { font-size: var(--fs-2xs); }
+    .ch-player-stats { flex-direction: row; gap: 8px; font-size: var(--fs-xs); }
+    .ch-vs-divider { align-self: center; }
+    .ch-players { padding: 16px; }
+}
+/* --- краска: четыре места ниже 4.5 --- */
+.bo-strip-sub, .bo-empty-slim, .ch-stats-note,
+.ch-vote-btn .ch-vote-count, .ch-forecast-hint { color: var(--text-muted); }
+.ch-bar-left span, .ch-bar-right span { color: #0a0a0a; }
+/* --- значок состояния по компоненту Badge 27:53 --- */
+.bo-status, .bo-strip-badge {
+    display: inline-flex; align-items: center; height: 24px;
+    padding-inline: 8px; font-size: var(--fs-2xs); font-weight: var(--fw-medium);
+    letter-spacing: 0.5px; line-height: var(--lh-none);
+}
+/* --- СЕТКА КАРТОЧЕК: СВОЙ КЛАСС ВМЕСТО ЧУЖОГО ---
+   js баттлов рисует сетку классом ТУРНИРОВ — .to-card-grid
+   (battles-overview.js:445 и :474), а свой .bo-card-grid (css:115) живёт
+   только в заглушке «ничего не найдено» (js:988). В файле турниров на
+   <=992 .to-card-grid сходится в одну колонку (строка 1429), а на <=640
+   витринное правило возвращает ДВЕ (строка 1714) — оно писалось для витрины
+   категорий, и 07.10 там прямо записано: «плитками по две в ряд ими
+   пользуется страница баттлов — её не трогаем».
+   В карточке турнира плитка короткая, а в карточке баттла восемь уровней:
+   значок, название, состав, два снимка, VS, две кнопки, полоса, проценты,
+   дата, место, ссылка. В 175 пикселей это не складывается.
+   В коде правка будет в js — две строки, класс свой; здесь тот же вид. */
+@media (max-width: 640px) {
+    .bo-section .to-card-grid { grid-template-columns: 1fr; }
+}
+/* --- поверхность карточки по компоненту Card 29:65 --- */
+.bo-featured { border-radius: var(--radius-lg); }
+`;
+
+function влить(кадр) {
+    try {
+        var d = кадр.contentDocument;
+        var s = d.createElement('style');
+        s.id = 'proba-pravki';
+        s.textContent = ПРАВКИ;
+        d.head.appendChild(s);
+    } catch (e) {}
+}
+['к2','к4'].forEach(function(id) {
+    var к = document.getElementById(id);
+    к.addEventListener('load', function() { setTimeout(function(){ влить(к); }, 900); });
+});
+/* Текст правок виден и внизу страницы: смотреть глазами, а не искать в коде */
+window.addEventListener('load', function() {
+    var pre = document.createElement('pre');
+    pre.style.cssText = 'white-space:pre-wrap;padding:16px;color:rgba(255,255,255,.6);font-size:12px;line-height:1.5';
+    pre.textContent = 'ЛИСТ ПРАВОК ПРАВОГО СТОЛБЦА:\n' + ПРАВКИ;
+    document.body.appendChild(pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'none';">
+<title>КСЛТ — стенд обзора баттлов</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Обложку, карточки и полосы рисует НАСТОЯЩИЙ
+  js/battles-overview.js теми же файлами стилей, что и живая страница.
+  Разметка сюда НЕ КОПИРУЕТСЯ: взяты только два контейнера из
+  pages/battles-overview.html (строки 290 и 309).
+
+  ПОЛОСА ФИЛЬТРОВ СЮДА НЕ ПЕРЕНЕСЕНА НАМЕРЕННО. Она статическая и живёт на
+  живой странице без данных — её меряю там, а не здесь: скопированная
+  разметка доказывала бы сама себя.
+
+  ПОЧЕМУ СТЕНД. В боевой базе 13.10 НИ ОДНОГО баттла: страница отдаёт «—» во
+  всех трёх цифрах обложки и два пустых раздела.
+
+  БАЗЫ ЗДЕСЬ НЕТ. `window.supabaseClient` подменён; поля взяты из ЖИВОГО
+  запроса страницы (js/battles-overview.js:300–303) и живого объявления
+  `get_battle_votes` (снимок базы, строка 3480). Кнопку голосования НЕ
+  НАЖИМАТЬ: она пишет в базу.
+
+  СЛУЧАИ АДРЕСОМ:
+      ?sluchay=vse     — все четыре разом: идущий, одиночный, парный,
+                         завершённый (по умолчанию)
+      ?sluchay=pusto   — ни одного баттла: то, что сейчас на сайте
+      ?sluchay=mnogo   — 12 завершённых: кнопка «показать ещё»
+  Вход: &vhod=1 — кнопки голосования вместо «войдите».
+  Язык: &yazyk=en | kg.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=28">
+<link rel="stylesheet" href="../css/style.css?v=410">
+<link rel="stylesheet" href="../css/tournaments-overview.css?v=123">
+<link rel="stylesheet" href="../css/battles-overview.css?v=40">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); }
+</style>
+</head>
+<body>
+
+<main>
+    <section class="bo-hero" id="battlesHero" data-stend="обзор баттлов"></section>
+    <div id="battlesContent"></div>
+</main>
+
+<script>
+(function() {
+    'use strict';
+    var П = new URLSearchParams(location.search);
+    var СЛУЧАЙ = П.get('sluchay') || 'vse';
+    var ВОШЁЛ = П.get('vhod') === '1';
+    var ЯЗЫК = П.get('yazyk') || 'ru';
+    if (ЯЗЫК !== 'ru') {
+        history.replaceState(null, '',
+            location.pathname.replace(/\.html$/, '-' + ЯЗЫК + '.html') + '?' + П.toString());
+    }
+
+    /* Снимки вместо сети: СЛОМАННОЕ ИЗОБРАЖЕНИЕ ДАЁТ ЧУЖУЮ ГЕОМЕТРИЮ. */
+    function квадрат(цвет) {
+        return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">' +
+            '<rect width="200" height="200" fill="' + цвет + '"/></svg>');
+    }
+    var АФИША = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900">' +
+        '<rect width="1600" height="900" fill="#1b2a1b"/>' +
+        '<circle cx="800" cy="450" r="300" fill="#cf0" opacity="0.3"/></svg>');
+
+    var ч = 36e5;
+    /* ДАТА И ВРЕМЯ СЧИТАЮТСЯ ПО ОДНИМ ЧАСАМ. Сначала я брал дату через
+       toISOString (это UTC), а время — локальными часами; на поясе +6 цель
+       уезжала на сутки, выходила за 48 часов, и обратный отсчёт не
+       показывался. Падал стенд, а не продукт. */
+    var вБудущем = new Date(Date.now() + ч * 20);
+    var вПрошлом = new Date(Date.now() - ч * 30);
+    var идётСейчас = new Date(Date.now() - ч * 0.5);
+    var дв = n => ('0' + n).slice(-2);
+    var дата = d => d.getFullYear() + '-' + дв(d.getMonth() + 1) + '-' + дв(d.getDate());
+    var время = d => дв(d.getHours()) + ':' + дв(d.getMinutes());
+
+    /* СОДЕРЖИМОЕ КРАЙНЕЕ, А НЕ УДОБНОЕ: длинные имена и длинные названия
+       НАМЕРЕНО — в базе баттлов нет вовсе, длину назначил я. */
+    function баттл(п) {
+        return Object.assign({
+            id: 'b' + Math.random().toString(36).slice(2, 8),
+            battle_title: 'Баттл', status: 'published', voting_closed: false,
+            proposed_date: дата(вБудущем), proposed_time: время(вБудущем),
+            proposed_venue: 'Теннисный центр «Ала-Тоо», корт № 3',
+            challenger_player_id: 'p1', opponent_player_id: 'p2',
+            challenger_external_name: null, opponent_external_name: null,
+            format: 'singles',
+            challenger_partner_id: null, opponent_partner_id: null,
+            challenger_partner_name: null, opponent_partner_name: null,
+            challenger_gender: 'male', opponent_gender: 'male',
+            challenger_partner_gender: null, opponent_partner_gender: null,
+            banner_url: АФИША, battle_published_at: дата(вПрошлом), match_id: null,
+            challenger_country: 'KG', opponent_country: 'KZ',
+            challenger_partner_country: null, opponent_partner_country: null,
+            challenger_photo: null, opponent_photo: null,
+            challenger_partner_photo: null, opponent_partner_photo: null
+        }, п);
+    }
+
+    var ИГРОКИ = [
+        { id: 'p1', name: 'Айбек Жаныбеков-Орозов', name_en: 'Aibek Zhanybekov-Orozov',
+          name_kg: 'Айбек Жаныбеков-Орозов', photo: квадрат('#3a2b2b'),
+          category_id: 'men-masters', country: 'KG' },
+        { id: 'p2', name: 'Эрмек Токтогулов-Садыков', name_en: 'Ermek Toktogulov-Sadykov',
+          name_kg: 'Эрмек Токтогулов-Садыков', photo: квадрат('#26324a'),
+          category_id: 'men-tour', country: 'KZ' },
+        { id: 'm1', name: 'Нурсултан Орозбеков', name_en: 'Nursultan Orozbekov',
+          name_kg: 'Нурсултан Орозбеков', photo: квадрат('#4a3a26'),
+          category_id: 'men-tour', country: 'KG' },
+        { id: 'm2', name: 'Бектур Садыков-Асанов', name_en: 'Bektur Sadykov-Asanov',
+          name_kg: 'Бектур Садыков-Асанов', photo: квадрат('#26424a'),
+          category_id: 'men-futures', country: 'RU' }
+    ];
+
+    var ИДУЩИЙ = баттл({
+        id: 'b-live',
+        battle_title: 'Баттл за место в Pro-Masters: Жаныбеков против Токтогулова',
+        proposed_date: дата(идётСейчас), proposed_time: время(идётСейчас)
+    });
+    var ОДИНОЧНЫЙ = баттл({
+        id: 'b-single',
+        battle_title: 'Вечерний баттл на «Ала-Тоо»'
+    });
+    var ПАРНЫЙ = баттл({
+        id: 'b-pair', format: 'doubles',
+        battle_title: 'Парный баттл: Жаныбеков / Орозбеков против Токтогулова / Садыкова',
+        challenger_partner_id: 'm1', opponent_partner_id: 'm2'
+    });
+    var ЗАВЕРШЁННЫЙ = баттл({
+        id: 'b-done', status: 'completed', voting_closed: true,
+        battle_title: 'ТЕСТ второй категории — Tour мужской одиночный',
+        proposed_date: дата(вПрошлом), proposed_time: время(вПрошлом),
+        match_id: 'match-1'
+    });
+
+    var СПИСОК;
+    if (СЛУЧАЙ === 'pusto') СПИСОК = [];
+    else if (СЛУЧАЙ === 'mnogo') {
+        СПИСОК = [ОДИНОЧНЫЙ];
+        for (var i = 0; i < 12; i++) {
+            СПИСОК.push(баттл({
+                id: 'b-done-' + i, status: 'completed', voting_closed: true,
+                battle_title: 'Завершённый баттл номер ' + (i + 1) + ' — архив сезона',
+                proposed_date: дата(new Date(Date.now() - ч * 24 * (i + 2))),
+                proposed_time: '19:00', match_id: 'match-' + i
+            }));
+        }
+    } else СПИСОК = [ИДУЩИЙ, ОДИНОЧНЫЙ, ПАРНЫЙ, ЗАВЕРШЁННЫЙ];
+
+    var ГОЛОСА = { 'b-live': [{ side: 1, votes: 12 }, { side: 2, votes: 9 }],
+                   'b-single': [{ side: 1, votes: 37 }, { side: 2, votes: 24 }],
+                   'b-pair': [{ side: 1, votes: 5 }, { side: 2, votes: 5 }],
+                   'b-done': [{ side: 1, votes: 61 }, { side: 2, votes: 40 }] };
+
+    function звено(данные) {
+        var о = {};
+        ['select','eq','neq','in','or','order','limit','maybeSingle','single','is','not']
+            .forEach(function(м) { о[м] = function() { return о; }; });
+        о.then = function(f, g) { return Promise.resolve({ data: данные, error: null }).then(f, g); };
+        о.catch = function(f) { return Promise.resolve({ data: данные, error: null }).catch(f); };
+        return о;
+    }
+
+    window.supabaseClient = {
+        auth: {
+            getSession: function() {
+                return Promise.resolve({ data: { session: ВОШЁЛ ? { user: { id: 'u1' } } : null } });
+            },
+            getUser: function() {
+                return Promise.resolve({ data: { user: ВОШЁЛ ? { id: 'u1' } : null } });
+            }
+        },
+        rpc: function(имя, арг) {
+            if (имя === 'get_battle_votes') {
+                return Promise.resolve({ data: ГОЛОСА[арг.p_challenge_id] || [], error: null });
+            }
+            return Promise.resolve({ data: null, error: null });
+        },
+        from: function(таблица) {
+            if (таблица === 'challenges') return звено(СПИСОК);
+            if (таблица === 'players_public') return звено(ИГРОКИ);
+            if (таблица === 'challenge_predictions') return звено([]);
+            return звено(null);
+        }
+    };
+
+    window.KSLT_STEND = { случай: СЛУЧАЙ, список: СПИСОК, язык: ЯЗЫК };
+})();
+</script>
+
+<script src="../js/tournament-status.js?v=1"></script>
+    <script src="../js/battle-format.js?v=4"></script>
+<script src="../js/country-utils.js?v=4"></script>
+<script src="../js/battles-overview.js?v=19"></script>
+</body>
+</html>
