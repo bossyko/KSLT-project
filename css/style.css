@@ -8946,8 +8946,8 @@ body.nav-open {
     flex-wrap: wrap;
 }
 
-.ct-detail-title-row h1,
-.co-detail-title-row h1 {
+.ct-detail-name,
+.co-detail-name {
     margin: 0;
 }
 

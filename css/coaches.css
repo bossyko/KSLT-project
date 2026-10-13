@@ -356,7 +356,9 @@
     flex-shrink: 0;
 }
 
-.co-detail-info h1 {
+/* ИМЯ В КАРТОЧКЕ — КЛАСС, А НЕ ТЕГ. Та же правка, что на странице корта
+   13.10: второй `h1` страницы снят, имя осталось тем же текстом. */
+.co-detail-name {
     font-size: var(--fs-2xl);
     font-weight: 800;
     margin-bottom: 4px;
@@ -636,7 +638,7 @@
         width: 120px;
         height: 120px;
     }
-    .co-detail-info h1 {
+    .co-detail-name {
         font-size: var(--fs-xl);
     }
     .co-detail-court {
@@ -676,7 +678,7 @@
         height: 92px;
     }
 
-    .co-detail-info h1 {
+    .co-detail-name {
         font-size: var(--fs-lg);
     }
 

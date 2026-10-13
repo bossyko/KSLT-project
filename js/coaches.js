@@ -984,7 +984,8 @@
         html += '<div class="co-detail-header co-fade-in">' +
             '<img src="' + esc(coach.photo) + '" alt="' + esc(coach.name) + '" class="co-detail-photo">' +
             '<div class="co-detail-info">' +
-                '<div class="co-detail-title-row"><h1>' + coach.name + '</h1>' +
+                /* ВТОРОЙ `h1` СНЯТ 13.10 — та же правка, что на странице корта. */
+                '<div class="co-detail-title-row"><div class="co-detail-name">' + coach.name + '</div>' +
                 (coach._promoted ? '<span class="kslt-recommended-detail">' + L.recommendedBadge + '</span>' : '') +
                 '</div>' +
                 (coach.specialization ? '<div class="co-detail-spec">' + coach.specialization + '</div>' : '') +

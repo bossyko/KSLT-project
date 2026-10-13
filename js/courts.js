@@ -607,7 +607,11 @@
             google_maps_url: row.google_maps_url || '',
             twogis_url: row.twogis_url || '',
             _additionalServices: row.additional_services || [],
-            _isNew: true,
+            /* «НОВЫЙ» — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ. До 13.10 здесь стояло
+               `true` без условия, и плашку носили ВСЕ 24 опубликованных корта
+               разом: метка, которую носят все, не метит никого. Срок —
+               30 дней, слово Кости 13.10. */
+            _isNew: новыйЛи(row.created_at),
             _isDb: true,
             city: isEn ? (row.city_en || row.city || '') : (isKg ? (row.city_kg || row.city || '') : (row.city || '')),
             _typeDesc: typeDesc,
@@ -1182,6 +1186,16 @@
 
     /* ===== DETAIL PAGE ===== */
 
+    /* Корт считается новым 30 дней со дня заведения. Нет даты — не новый:
+       отсутствие признака не повод рисовать метку. */
+    var ДНЕЙ_НОВИЗНЫ = 30;
+    function новыйЛи(когда) {
+        if (!когда) return false;
+        var д = new Date(когда);
+        if (isNaN(д.getTime())) return false;
+        return (Date.now() - д.getTime()) < ДНЕЙ_НОВИЗНЫ * 24 * 60 * 60 * 1000;
+    }
+
     function initDetailPage() {
         var params = new URLSearchParams(window.location.search);
         var id = params.get('id');
@@ -1266,11 +1280,15 @@
         html += '<div class="ct-detail-header ct-fade-in">' +
             '<img src="' + esc(court.photo || FALLBACK_PHOTO) + '" alt="' + esc(court.name) + '" class="ct-detail-photo">' +
             '<div class="ct-detail-info">' +
-                '<div class="ct-detail-title-row"><h1>' + court.name + '</h1>' +
+                /* ВТОРОЙ `h1` СНЯТ 13.10. Обложка выше уже несёт имя корта заголовком
+                   первого уровня — здесь был ещё один, с тем же текстом: диктор читал
+                   заголовок дважды. Слово Кости: «имя оставляем на H1, на обложке».
+                   Вид не изменился, правило переехало на класс `.ct-detail-name`. */
+                '<div class="ct-detail-title-row"><div class="ct-detail-name">' + court.name + '</div>' +
                 (court._promoted ? '<span class="kslt-recommended-detail">' + L_labels.recommendedBadge + '</span>' : '') +
                 '</div>' +
                 '<div class="ct-detail-type">' + typeLabel + (court.surface ? ' \u00b7 ' + court.surface : '') +
-                    (court.partner ? ' \u00b7 <span style="background:var(--accent);color:#000;font-size:0.72rem;padding:2px 8px;border-radius:100px;font-weight:700;">' + L_labels.partnerBadge + '</span>' : '') +
+                    (court.partner ? ' \u00b7 <span class="ct-partner-badge">' + L_labels.partnerBadge + '</span>' : '') +
                 '</div>' +
                 (court.address ? '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + court.address + '</div>' : '') +
                 (court.phone ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + court.phone.split(',')[0].replace(/\s/g, '') + '">' + esc(prettyPhone(court.phone)) + '</a></div>' : '') +

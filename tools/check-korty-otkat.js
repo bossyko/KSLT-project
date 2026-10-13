@@ -130,16 +130,17 @@ const ОТКАТЫ = [
   [CSS, `    --polosa-shirina: 100%;`, `    --polosa-shirina: 1100px;`,
    'полоса страниц идёт по ширине СВОЕЙ витрины'],
 
-  [CSS, `    aspect-ratio: 4 / 3;
-    object-fit: cover;
-}
-
-.ct-new-badge {`,
-         `    height: 180px;
-    object-fit: cover;
-}
-
-.ct-new-badge {`,
+  /* ЯКОРЬ ПЕРЕПИСАН 13.10. Держался за СОСЕДА — за строку `.ct-new-badge {`
+     сразу под блоком, — и упал, как только плашки свели в одно правило с
+     партнёрской. Теперь держится на содержимом СВОЕГО блока: `display: block`
+     живёт в нём постоянно и поставлен той же правкой, что и отношение. */
+  [CSS, `    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;`,
+         `    display: block;
+    width: 100%;
+    height: 180px;`,
    'фото карточки — ОТНОШЕНИЕМ, а не высотой'],
 
   [CSS, `.ct-card-name {

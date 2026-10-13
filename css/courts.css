@@ -184,18 +184,32 @@
     object-fit: cover;
 }
 
+/* ПЛАШКИ РАЗДЕЛА — ОДНО ОПРЕДЕЛЕНИЕ НА ДВА МЕСТА, И ОНО ИЗ `Badge 27:53`.
+   Компонент говорит прямо: «Height 24px, horizontal padding 8px, radius/full,
+   11px Medium uppercase with 0.5px letter spacing». До 13.10 «Новый» носил
+   своё сочетание (поле 3/10, вес 800, радиус числом 100px), а партнёрская
+   плашка вообще жила инлайн-стилем внутри js (`courts.js`, строка карточки):
+   два написания одной идеи, и ни одно не совпадало с компонентом. */
+.ct-new-badge,
+.ct-partner-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding-inline: 8px;
+    background: var(--accent);
+    color: var(--accent-on);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Место на снимке карточки — у «Нового», и только оно своё */
 .ct-new-badge {
     position: absolute;
     top: 12px;
     left: 12px;
-    background: var(--accent);
-    color: #000;
-    font-size: var(--fs-2xs);
-    font-weight: 800;
-    padding: 3px 10px;
-    border-radius: 100px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     z-index: 2;
 }
 
@@ -532,7 +546,12 @@
     flex-grow: 1;
 }
 
-.ct-detail-info h1 {
+/* ИМЯ В КАРТОЧКЕ — КЛАСС, А НЕ ТЕГ. До 13.10 селектор держался за `h1`, и
+   это был ВТОРОЙ `h1` страницы: первый несёт обложка, а здесь то же имя
+   повторялось заголовком первого уровня. Слово Кости 13.10: «имя оставляем
+   на H1, на обложке». Текст и вид остались прежними, заголовком он быть
+   перестал — значит и правило больше не может держаться за тег. */
+.ct-detail-name {
     font-size: var(--fs-2xl);
     font-weight: 800;
     margin-bottom: 6px;
