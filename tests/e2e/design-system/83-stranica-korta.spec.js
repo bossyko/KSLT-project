@@ -327,7 +327,47 @@ test('фокус на странице корта виден от настоящ
     expect(о.ширина, 'обводка фокуса нулевой ширины — её анимирует transition').toBeGreaterThanOrEqual(2);
 });
 
-/* ══ 8. СТРАНИЦА НЕ ШИРЕ ОКНА ═══════════════════════════════════════════ */
+/* ══ 8. КОЛОНКА ОБЪЕКТА — ОДНА ШИРИНА И ОДИН ЛЕВЫЙ КРАЙ ════════════════ */
+
+for (const [имя, адрес, признак] of [
+    ['корта', КОРТ, '.ct-detail-header'],
+    ['тренера', ТРЕНЕР, '.co-detail-info']
+]) {
+    test('на широком виде страница ' + имя + ' стоит одной колонкой', async ({ page }) => {
+        await открыть(page, адрес, признак);
+        const з = await page.evaluate(() => {
+            /* ПОРОГ С НАЗВАННОЙ ПРИЧИНОЙ: правило живёт от 993, и на телефоне
+               проверять нечего — там колонка во всю ширину по замыслу. */
+            if (window.innerWidth < 993) return { узкий: true };
+            const СЕЛЕКТОРЫ = ['.kslt-back-wrap', '.ct-detail-header, .co-detail-header',
+                               '.ct-section, .co-section', '.ct-types-table', '.ct-map-embed'];
+            const блоки = [];
+            СЕЛЕКТОРЫ.forEach(сел => {
+                const э = document.querySelector(сел);
+                if (!э) return;
+                const r = э.getBoundingClientRect();
+                блоки.push({ сел: сел.split(',')[0], w: Math.round(r.width), x: Math.round(r.left) });
+            });
+            const к = document.querySelector('.kslt-back-wrap');
+            const cs = к ? getComputedStyle(к) : null;
+            const до = к ? getComputedStyle(к, '::before') : null;
+            return { узкий: false, блоки,
+                     подложка: cs ? { фон: cs.backgroundColor, размытие: cs.backdropFilter, до: до.display } : null };
+        });
+        test.skip(з.узкий === true, 'вид уже 993 — колонка объекта там во всю ширину по замыслу');
+        expect(з.блоки.length, 'ПОРОГ: блоков колонки нет — мерить нечего').toBeGreaterThan(2);
+        const ширины = [...new Set(з.блоки.map(б => б.w))];
+        const края = [...new Set(з.блоки.map(б => б.x))];
+        expect(ширины, 'блоки страницы разной ширины: ' + JSON.stringify(з.блоки)).toHaveLength(1);
+        expect(края, 'блоки страницы с разным левым краем: ' + JSON.stringify(з.блоки)).toHaveLength(1);
+        expect(ширины[0], 'колонка объекта должна быть 840 — она выведена из меры абзаца').toBe(840);
+        expect(з.подложка.размытие, 'у возврата осталось размытие — это та самая подложка').toBe('none');
+        expect(['rgba(0, 0, 0, 0)', 'transparent'], 'у возврата осталась заливка').toContain(з.подложка.фон);
+        expect(з.подложка.до, 'у возврата осталась полоса во всю ширину окна').toBe('none');
+    });
+}
+
+/* ══ 9. СТРАНИЦА НЕ ШИРЕ ОКНА ══════════════════════════════════════════ */
 
 for (const [имя, адрес, признак] of [
     ['корта', КОРТ, '.ct-detail-header'],

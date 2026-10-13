@@ -17,11 +17,12 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/courts.css', 'css/coaches.css', 'css/style.css',
-               'js/courts.js', 'js/coaches.js'];
+               'css/tokens.css', 'js/courts.js', 'js/coaches.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
 const К = 'css/courts.css', Т = 'css/coaches.css', С = 'css/style.css';
+const ТОК = 'css/tokens.css';
 const ДК = 'js/courts.js', ДТ = 'js/coaches.js';
 
 const ОТКАТЫ = [
@@ -154,6 +155,44 @@ const ОТКАТЫ = [
  '    .co-fade-in,\n    .co-fade-in.visible {\n        transition: none;\n        transform: none;\n    }',
  '    .co-nope {\n        transition: none;\n    }',
  'движение страницы тренера спрашивает разрешения'],
+
+
+/* ── колонка объекта ──────────────────────────────────────────────────── */
+
+['вернуть ширину колонки числом вместо крутилки', ТОК,
+ '  --stranica-objekta: 840px;',
+ '  --stranica-objekta-nope: 840px;',
+ 'ширина колонки объекта объявлена крутилкой, а не числом'],
+
+['вернуть счёт колонки по коробке', К,
+ '        max-width: var(--stranica-objekta);\n        padding-inline: 0;',
+ '        max-width: calc(var(--stranica-objekta) + var(--gutter) * 2);',
+ 'колонка меряется содержимым, а боковое поле снято'],
+
+['вернуть возврату подложку на широких видах', С,
+ '    .kslt-back-wrap.kslt-back-float::before {\n        display: none;\n    }',
+ '    .kslt-back-wrap.kslt-back-flat-nope {\n        display: none;\n    }',
+ 'возврат на широких видах стоит в колонке без подложки'],
+
+['снять у возврата поле под выступ слоя цели', С,
+ '        padding-block: 12px;\n        padding-inline: 0;',
+ '        padding-block: 8px;\n        padding-inline: 0;',
+ 'у возврата в потоке есть поле под выступ слоя цели'],
+
+['вернуть границу возврата на 1300', С,
+ '@media (max-width: 992px) {\n    .kslt-back-wrap.kslt-back-float {',
+ '@media (max-width: 1300px) {\n    .kslt-back-wrap.kslt-back-float {',
+ 'граница возврата домашняя, а не 1300'],
+
+['вернуть плитке тренера растяжение по колонке', Т,
+ '        grid-template-columns: repeat(auto-fill, 220px);',
+ '        grid-template-columns: repeat(4, 1fr);',
+ 'плитка тренера держит ширину компонента, а не делит колонку'],
+
+['вернуть показателям корта центровку', К,
+ '.ct-detail-stats-single {\n    display: flex;\n    justify-content: flex-start;',
+ '.ct-detail-stats-single {\n    display: flex;\n    justify-content: center;',
+ 'показатели корта стоят по левому краю колонки'],
 
 ];
 

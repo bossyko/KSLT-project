@@ -58,8 +58,11 @@ const ОТКАТЫ = [
   [JS, `'<div class="trn-search-wrap">' +`, `'<div class="co-search-wrap">' +`,
    'назад, поиск и чипы берутся из общего листа'],
 
-  [CSS, `.co-container {`,
-         `#coachesFilters { position: sticky; }\n\n.co-container {`,
+  /* ЯКОРЬ СУЖЕН 13.10: `.co-container {` стало встречаться дважды — у
+     базового правила и внутри медиа колонки объекта. Берём объявление
+     верхнего уровня, то есть с начала строки. */
+  [CSS, `\n.co-container {`,
+         `\n#coachesFilters { position: sticky; }\n\n.co-container {`,
    'полоса фильтров описана ОДИН раз, и не по идентификатору'],
 
   [CSS, `.co-card-img-wrap {`, `.co-search-input { border-radius: 100px; }\n\n.co-card-img-wrap {`,
