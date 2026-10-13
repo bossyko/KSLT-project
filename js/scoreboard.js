@@ -65,6 +65,7 @@
             .then(function(res) {
                 if (res.error || !res.data) return;
                 render(res.data);
+                renderPause(res.data);
                 renderLogos(res.data.sponsor_logo);
             });
     }
@@ -98,20 +99,22 @@
         var setsData = m.sets_data || [];
         var isCompleted = m.status === 'completed';
 
-        // Build sets columns
-        var setsHeaderHtml = '';
+        /* КОЛОНКИ НЕ ПОДПИСЫВАЮТСЯ. До 13.10 здесь собиралась строка
+           setsHeaderHtml с подписями S1/G/P — и НИКУДА не вставлялась:
+           замер дал 0 элементов .sb-col-header в DOM и ни одного селектора
+           в css. Подписи не оживлены, а сняты: в трансляции ATP, Wimbledon
+           и ESPN их нет, смысл несут положение и лайм на двух правых
+           колонках. */
         var setsP1Html = '';
         var setsP2Html = '';
 
-        setsData.forEach(function(s, i) {
-            setsHeaderHtml += '<div class="sb-col-header">S' + (i + 1) + '</div>';
+        setsData.forEach(function(s) {
             setsP1Html += '<div class="sb-set-val">' + s.g1 + '</div>';
             setsP2Html += '<div class="sb-set-val">' + s.g2 + '</div>';
         });
 
         // Current game
         if (!isCompleted) {
-            setsHeaderHtml += '<div class="sb-col-header">G</div>';
             setsP1Html += '<div class="sb-game-val">' + (m.current_game_p1 || 0) + '</div>';
             setsP2Html += '<div class="sb-game-val">' + (m.current_game_p2 || 0) + '</div>';
 
@@ -124,12 +127,13 @@
                 pt1 = m.points_p1 || '0';
                 pt2 = m.points_p2 || '0';
             }
-            setsHeaderHtml += '<div class="sb-col-header">P</div>';
             setsP1Html += '<div class="sb-pts-val">' + pt1 + '</div>';
             setsP2Html += '<div class="sb-pts-val">' + pt2 + '</div>';
         }
 
-        var serveDot = '<span class="sb-serve">🎾</span>';
+        /* ТОЧКА, А НЕ ЭМОДЗИ: встроенный браузер OBS рисует `🎾` своим
+           шрифтом, и где его нет — будет квадрат. */
+        var serveDot = '<span class="sb-serve" aria-hidden="true"></span>';
 
         root.innerHTML =
             '<div class="sb-board">' +
@@ -148,6 +152,44 @@
                     '<div class="sb-scores">' + setsP2Html + '</div>' +
                 '</div>' +
             '</div>';
+    }
+
+    /**
+     * ПЕРЕРЫВ НА ТАБЛО — ДОЛГ С 25.09 ЗАКРЫТ 13.10.
+     *
+     * Словарь причин лежит в js/live-texts.js и до 13.10 его звала ТОЛЬКО
+     * страница матча (js/live-match.js:249). Зритель в зале, который смотрит
+     * на табло, видел замерший счёт и не знал почему.
+     *
+     * ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: состояние читается теми же полями и
+     * в том же порядке, что на странице матча, — `paused` с причиной, затем
+     * перерыв по `break_until` с видом `break_kind`. Своей логики здесь нет.
+     *
+     * ЧИСЛА НЕ ПОКАЗЫВАЕМ по той же причине, что на странице матча: отсчёт
+     * у табло свой не ведётся, а прыгающие цифры читаются как поломка.
+     */
+    function renderPause(m) {
+        var el = document.getElementById('sb-pause');
+        if (!el) return;
+
+        var Т = window.KSLTLiveTexts;
+        if (!Т) {
+            console.error('Не подключён js/live-texts.js — причина перерыва на табло не покажется');
+            el.innerHTML = '';
+            return;
+        }
+
+        var завершён = m.status === 'completed';
+        var наПаузе  = m.status === 'paused';
+        var разминка = m.status === 'warmup';
+        var идётПерерыв = !завершён && !наПаузе && !разминка && Т.остаток(m.break_until) > 0;
+
+        var текст = разминка ? Т.слово('warmup')
+                  : наПаузе ? Т.пауза(m.pause_reason)
+                  : идётПерерыв ? Т.слово(m.break_kind || 'changeover')
+                  : '';
+
+        el.innerHTML = текст ? '<div class="sb-pause">' + esc(текст) + '</div>' : '';
     }
 
     function renderLogos(sponsorLogo) {

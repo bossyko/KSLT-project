@@ -1,0 +1,168 @@
+/* ========================================================================
+   ТАБЛО ДЛЯ OBS — pages/scoreboard.html
+   Накладка поверх кадра трансляции, а не страница сайта.
+
+   ДО 13.10 ВСЯ ВЁРСТКА ЖИЛА ИНЛАЙНОМ: 79 строк <style> в самой странице,
+   `#CCFF00` зашит дважды, кегль 0.95rem (15.2) мимо шкалы, имя обрезано
+   жёсткими 160px на всех пяти видах.
+
+   ПОЧЕМУ У ПОДЛОЖКИ СВОЁ ЗНАЧЕНИЕ. Накладка стоит поверх видео: ей нужна
+   своя полупрозрачная подложка, а токена полупрозрачного фона в системе
+   нет. Объявлена здесь ОДИН раз и больше нигде не повторяется.
+
+   ПОЧЕМУ КОЛОНКИ НЕ ПОДПИСАНЫ. ATP, Wimbledon и ESPN в трансляции подписей
+   не ставят: положение несёт смысл (сеты слева направо, текущий гейм и
+   очко справа), а лайм на двух правых колонках говорит «идёт сейчас».
+   Мёртвый сборщик подписей снят из js, а не оживлён.
+   ======================================================================== */
+
+:root {
+    --sb-podlozhka: rgba(10, 10, 10, 0.88); /* --neutral-950 на 88% поверх видео */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: transparent;
+    font-family: var(--font-sans);
+    overflow: hidden;
+}
+
+#sb-wrapper {
+    position: fixed;
+    bottom: var(--space-5);
+    left: var(--space-5);
+    /* НЕ ВЫЛЕЗАТЬ ЗА ЭКРАН: до 13.10 правый край доски был 410 при 390,
+       и лишние 20px молча съедал overflow: hidden. */
+    max-width: calc(100% - var(--space-10));
+}
+
+/* ── Доска ─────────────────────────────────────────────────────────────── */
+
+.sb-board {
+    background: var(--sb-podlozhka);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+    min-width: 320px;
+}
+
+.sb-row {
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sb-row:last-child { border-bottom: none; }
+
+/* ── Имя ───────────────────────────────────────────────────────────────── */
+
+.sb-name {
+    /* flex: 1 держит обе колонки имён РАВНЫМИ: ширину задаёт доска, а она
+       одна на две строки — иначе счёт в строках разъедется. */
+    flex: 1 1 auto;
+    max-width: 320px;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ПОДАЧА — ТОЧКА, А НЕ ЭМОДЗИ. `🎾` рисует встроенный браузер OBS своим
+   шрифтом: где его нет, будет квадрат. Трансляции ставят точку. */
+.sb-serve {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--text-primary);
+}
+
+/* ── Счёт ──────────────────────────────────────────────────────────────── */
+
+.sb-scores {
+    display: flex;
+    gap: var(--space-1);
+    flex: 0 0 auto;
+}
+
+.sb-set-val,
+.sb-game-val,
+.sb-pts-val {
+    width: 32px;
+    text-align: center;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-extrabold);
+    line-height: var(--lh-none);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    padding: var(--space-1) 0;
+}
+
+.sb-game-val { color: var(--accent); }
+
+.sb-pts-val {
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border-radius: var(--radius-sm);
+}
+
+/* ── Перерыв ───────────────────────────────────────────────────────────── */
+
+/* ДОЛГ С 25.09 ЗАКРЫТ. Словарь причин лежит в js/live-texts.js и до 13.10
+   его звала только страница матча: зритель в зале причину паузы не видел.
+   Геометрия — Badge 27:53: высота 24, поля 8, 11 Medium uppercase, 0.5.
+   Тон Neutral/Subtle: пауза — это состояние, а не опасность и не действие. */
+.sb-pause {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 var(--space-2);
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--alpha-white-12);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-none);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* ── Логотипы ──────────────────────────────────────────────────────────── */
+
+.sb-logos {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+.sb-logo-img {
+    height: 36px;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
+.sb-logo-kslt {
+    height: 32px;
+    opacity: 0.9;
+}
+
+/* ── Телефон ───────────────────────────────────────────────────────────── */
+
+/* ШЕСТЬ КОЛОНОК В 350 НЕ ВЛЕЗАЮТ. Померено 13.10: на 390 имени оставалось
+   92 из 236 — обрезка хуже прежней. Трансляции в узком кадре показывают
+   текущий сет и очко, а сыгранные сеты убирают. Правило оставляет ПОСЛЕДНИЙ
+   сет (у него после себя гейм и очко — две ячейки), а более ранние снимает. */
+@media (max-width: 640px) {
+    .sb-scores .sb-set-val:nth-last-child(n + 4) { display: none; }
+}
