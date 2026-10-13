@@ -72,13 +72,54 @@
         var final = document.querySelector('.sn-final');
         if (!modal) return;
 
+        /* ОКНО ДЕРЖИТ ФОКУС И ВОЗВРАЩАЕТ ЕГО. Разбор 13.10: роли не было,
+           имени не было, Tab уходил на страницу под окном, а закрытие
+           бросало фокус в никуда. Esc и клик по фону уже работали. Правило
+           куплено на окне обмена баллов в кабинете (12.10) и применяется
+           сюда без нового разбора. */
+        var ктоОткрыл = null;
+
+        function фокусируемые() {
+            return [].slice.call(modal.querySelectorAll(
+                'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            )).filter(function(э) { return э.offsetParent !== null; });
+        }
+
+        function открыть(кнопка) {
+            ктоОткрыл = кнопка || null;
+            modal.hidden = false;
+            var поля = фокусируемые();
+            if (поля.length) фокус(поля[0]);
+        }
+
+        function фокус(э) { try { э.focus(); } catch (e) {} }
+
+        function закрыть() {
+            modal.hidden = true;
+            /* ВОЗВРАТ ФОКУСА ТУДА, ОТКУДА ОТКРЫЛИ: иначе человек с
+               клавиатуры оказывается в начале страницы */
+            if (ктоОткрыл) фокус(ктоОткрыл);
+            ктоОткрыл = null;
+        }
+
         document.querySelectorAll('[data-open-contacts]').forEach(function(b) {
-            b.addEventListener('click', function() { modal.hidden = false; });
+            b.addEventListener('click', function() { открыть(b); });
         });
-        document.getElementById('snModalClose').addEventListener('click', function() { modal.hidden = true; });
-        modal.addEventListener('click', function(e) { if (e.target === modal) modal.hidden = true; });
+        document.getElementById('snModalClose').addEventListener('click', закрыть);
+        modal.addEventListener('click', function(e) { if (e.target === modal) закрыть(); });
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !modal.hidden) modal.hidden = true;
+            if (modal.hidden) return;
+            if (e.key === 'Escape') { закрыть(); return; }
+            /* ЛОВУШКА TAB: по кругу внутри окна, а не на страницу под ним */
+            if (e.key !== 'Tab') return;
+            var поля = фокусируемые();
+            if (!поля.length) return;
+            var первый = поля[0], последний = поля[поля.length - 1];
+            if (e.shiftKey && document.activeElement === первый) {
+                e.preventDefault(); фокус(последний);
+            } else if (!e.shiftKey && document.activeElement === последний) {
+                e.preventDefault(); фокус(первый);
+            }
         });
 
         if (!bar) return;
