@@ -230,11 +230,17 @@
     gap: 12px;
     flex-wrap: wrap;
 }
+/* КНОПКА 36 ЗАКОННА, ЕСЛИ У НЕЁ ЕСТЬ СЛОЙ ЦЕЛИ 44 — правило куплено на
+   кнопке страницы (04.10) и на чипе пола (07.10), применяется сюда без
+   нового разбора. Замер 13.10: коробка 39 — такой ступени на шкале кнопок
+   нет вовсе (28 · 36 · 44 · 52), попадание 38. */
 .ct-map-link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 8px 16px;
+    min-height: var(--btn-h-sm);
+    padding-inline: 16px;
     background: rgba(255,255,255,0.06);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -244,6 +250,16 @@
     text-decoration: none;
     transition: background 0.2s;
 }
+.ct-map-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--btn-h-md);
+}
+
 .ct-map-link:hover {
     background: rgba(204,255,0,0.1);
 }
@@ -418,7 +434,7 @@
 .ct-membership-modal p {
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
     margin-bottom: 24px;
 }
 
@@ -583,7 +599,19 @@
     margin-bottom: 16px;
 }
 
+/* ЦЕЛЬ НАЖАТИЯ 44 — ВЫСОТОЙ САМОЙ ССЫЛКИ. Замер 13.10 на 390: коробка 21,
+   попадание 20 — телефон, WhatsApp и Instagram не брались пальцем вовсе.
+   Прозрачный слой `::after` здесь не годится: строка живёт во флексе с
+   иконкой, и слой забрал бы нажатие у иконки.
+   ПЕРВАЯ ПОПЫТКА БЫЛА ХУЖЕ, И ЭТО ПОКАЗАЛ ЗАМЕР: поле 12 с отрицательным
+   отступом −12 дало коробку 45, а попадание всего 36 — соседняя строка
+   контакта наезжала на нижнюю половину зоны. Высота свойством соседей не
+   трогает: строка контакта просто становится 44, как строка в карточке
+   организации у Google. */
 .ct-detail-phone a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--btn-h-md);
     color: var(--text-secondary);
     text-decoration: none;
     transition: color var(--transition-fast);
@@ -667,7 +695,11 @@
     display: grid;
     padding: 10px 16px;
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    /* КОНТРАСТ 3.14 ПРИ НОРМЕ 4.5 — мерено 13.10, единственный провальный
+       уровень страницы (остальные 10.25–16.85). Та же поправка уже записана
+       в описании `Section stat strip 135:170`: «labels moved from text/dim
+       (0.35) to text/muted (0.50)», и причина там названа та же. */
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
@@ -743,10 +775,18 @@
     color: var(--accent);
 }
 
+/* МЕРА АБЗАЦА И СТУПЕНЬ МЕЖСТРОЧНОГО. Замер 13.10: 1.8 — мимо лестницы
+   (1 · 1.1 · 1.3 · 1.5 · 1.65), а строка на 1512 выходила в 125 знаков при
+   норме 45–75: потолка ширины у текста не было вовсе. */
 .ct-about-text {
     color: var(--text-secondary);
     font-size: var(--fs-base);
-    line-height: 1.8;
+    line-height: var(--lh-relaxed);
+    /* 62ch, А НЕ 72ch — ПОТОМУ ЧТО ЕДИНИЦА СЧИТАЕТ НОЛЬ, А НЕ БУКВУ.
+       `ch` — это ширина знака «0», а кириллица у Inter уже него: при 72ch
+       замер дал 85 знаков в строке, то есть мера молча уехала за норму
+       45–75. Число подобрано ЗАМЕРОМ, а не формулой. */
+    max-width: 62ch;
 }
 
 /* Amenities */
@@ -863,6 +903,11 @@
 
 .ct-cta p {
     color: var(--text-secondary);
+    /* Тот же абзац, та же мера: замер 13.10 давал 139 знаков в строке на
+       1512 — вдвое выше нормы. Блок по центру, поэтому ширину держит
+       margin-inline: auto. */
+    max-width: 62ch;
+    margin-inline: auto;
     margin-bottom: 24px;
 }
 
@@ -875,7 +920,13 @@
     font-family: inherit;
     font-size: var(--fs-base);
     font-weight: 700;
-    padding: 14px 36px;
+    /* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЕМ — `Button 17:82`: «Height is set by the
+       height property, never by vertical padding — otherwise it drifts with
+       the line-height of the content». Замер 13.10 давал 41 при ступенях
+       28 · 36 · 44 · 52, и 44 там же названо минимальной целью нажатия на
+       телефоне (Apple HIG). Поле осталось только боковым. */
+    min-height: var(--btn-h-md);
+    padding-inline: 32px;
     border: none;
     border-radius: var(--radius-full);
     cursor: pointer;
@@ -935,7 +986,7 @@
         width: 100%;
         height: 220px;
     }
-    .ct-detail-info h1 {
+    .ct-detail-name {
         font-size: var(--fs-xl);
     }
     .ct-amenities {
@@ -998,7 +1049,7 @@
 
     .ct-about-text {
         font-size: var(--fs-sm);
-        line-height: 1.55;
+        line-height: var(--lh-normal);
     }
 
     .ct-cta {
@@ -1006,16 +1057,19 @@
     }
 
     .ct-cta h3 {
-        font-size: clamp(1.15rem, 5vw, 1.32rem);
+        /* Было clamp(1.15rem, 5vw, 1.32rem) — замер 13.10 на 390 дал 19.5,
+           такой ступени на шкале кеглей нет. */
+        font-size: var(--fs-md);
     }
 
     .ct-cta p {
         font-size: var(--fs-sm);
-        line-height: 1.35;
+        line-height: var(--lh-snug);
     }
 
     .ct-cta-btn {
-        padding: 10px 22px;
+        /* высоту держит min-height у самого правила — одно место на все виды */
+        padding-inline: 20px;
         font-size: var(--fs-sm);
     }
     .ct-amenities {
@@ -1034,7 +1088,7 @@
    (поля тела, кегль имени, высота фото, поля контейнера), отсюда снято:
    у витрины ОДИН уровень на все виды, как у лендинга. */
 @media (max-width: 375px) {
-    .ct-detail-info h1 {
+    .ct-detail-name {
         font-size: var(--fs-lg);
     }
     .ct-detail-stat-num {
@@ -1050,7 +1104,7 @@
         font-size: var(--fs-lg);
     }
     .ct-cta-btn {
-        padding: 12px 28px;
+        padding-inline: 24px;
         font-size: var(--fs-sm);
     }
     .ct-schedule-row {
@@ -1523,5 +1577,42 @@
 
     .ct-types-row {
         font-size: var(--fs-xs);
+    }
+}
+
+
+/* ═══ ДОСТУПНОСТЬ СТРАНИЦЫ КОРТА — ДОБАВЛЕНО 13.10 ════════════════════════
+   Замер 13.10: слова `focus-visible` в этом файле не было НИ РАЗУ, при том
+   что `Button 17:82` требует кольцо прямо: «Focus is a 3px accent/glow ring
+   outside the button. Required on every button: WCAG 2.4.7». Обводка та же,
+   что у чипов и карточек витрины (style.css, 12.10): 2px accent с отступом 2.
+   Переход перечислен поимённо, а не `all`: `all` анимирует outline-width, и
+   замер сразу после Tab видит `0px solid` при горящем фокусе (09.10). */
+.ct-cta-btn:focus-visible,
+.ct-map-link:focus-visible,
+.ct-detail-phone a:focus-visible,
+.ct-gallery-img:focus-visible,
+.kslt-back:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ДВИЖЕНИЕ СПРАШИВАЕТ РАЗРЕШЕНИЯ. Замер 13.10: `prefers-reduced-motion` в
+   этом файле ноль, а `.ct-fade-in` ездит при прокрутке. Три чужих блока с
+   `*` сюда не достают — страница корта грузит только tokens, style и этот
+   файл. Правило куплено на рейтинге (css/players.css) и применяется без
+   нового разбора. */
+@media (prefers-reduced-motion: reduce) {
+
+    .ct-fade-in,
+    .ct-fade-in.visible {
+        transition: none;
+        transform: none;
+    }
+
+    .ct-card,
+    .ct-cta-btn,
+    .ct-map-link {
+        transition: none;
     }
 }
