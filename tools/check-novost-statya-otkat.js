@@ -110,12 +110,12 @@ const ОТКАТЫ = [
 
   [CSS, `    justify-content: center;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;`,
          `    justify-content: center;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;`,
    'подложка галереи — ступень выше карточки'],
@@ -164,12 +164,12 @@ const ОТКАТЫ = [
      сняли вместе с остальными 78 копиями. Держимся за СВОЙ класс. */
   [CSS, `    color: var(--text-secondary);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     cursor: pointer;`,
          `    color: ButtonText;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     cursor: pointer;`,
    'цвет текста кнопки оценки берётся из токена, а не от браузера'],

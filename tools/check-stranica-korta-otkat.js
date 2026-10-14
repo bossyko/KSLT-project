@@ -89,8 +89,8 @@ const ОТКАТЫ = [
  'заголовок призыва на телефоне стоит на ступени'],
 
 ['вернуть шапке таблицы краску text-dim', К,
- '    color: var(--text-muted);\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    font-weight: 600;\n    border-bottom: 1px solid rgba(255,255,255,0.06);',
- '    color: var(--text-dim);\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    font-weight: 600;\n    border-bottom: 1px solid rgba(255,255,255,0.06);',
+ '    color: var(--text-muted);\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    font-weight: 600;\n    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);',
+ '    color: var(--text-dim);\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    font-weight: 600;\n    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);',
  'шапка таблицы кортов красится text-muted'],
 
 /* ── один h1 на страницу ──────────────────────────────────────────────── */

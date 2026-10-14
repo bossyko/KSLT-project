@@ -347,7 +347,7 @@ const коды = ['live','warmup','paused','completed','medical','toilet','weath
 /* ══ ДОСТУПНОСТЬ ══════════════════════════════════════════════════════════ */
 
 правило('у кнопок есть кольцо фокуса',
-    /\.um-btn:focus-visible \{[\s\S]{0,120}outline: 3px solid/.test(CSSч),
+    /\.um-btn:focus-visible \{[\s\S]{0,120}outline: (?:3px|var\(--bw-heavy\)) solid/.test(CSSч),
     'Не было ни у одной. WCAG 2.4.7.');
 
 правило('движение выключается по просьбе системы',

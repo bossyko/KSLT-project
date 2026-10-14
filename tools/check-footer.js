@@ -180,7 +180,7 @@ const css = сжать(читать('css/style.css'));
     'Без своего правила навигация подвала вырастает с 44 до 64.');
 
 проверить('видимый фокус с клавиатуры',
-    /\.footer-bottom-links a:focus-visible \{[^}]*outline: 2px/.test(css),
+    /\.footer-bottom-links a:focus-visible \{[^}]*outline: (?:2px|var\(--bw-thick\))/.test(css),
     'Иначе ссылки выпадают из системы: у .mobile-nav-links и .trn-chip ' +
     'фокус описан, а у подвала работало бы только умолчание браузера.');
 

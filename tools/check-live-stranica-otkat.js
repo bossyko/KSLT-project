@@ -107,7 +107,7 @@ const ОТКАТЫ = [
    'цель нажатия у «назад» дотягивает до 44'],
 
   ['css/live-match.css',
-   '.lm-back-link:focus-visible {\n    outline: 3px solid var(--accent);',
+   '.lm-back-link:focus-visible {\n    outline: var(--bw-heavy) solid var(--accent);',
    '.lm-back-link:focus-visible {\n    outline-offset: 3px;\n    text-decoration: underline;\n    color: inherit;',
    'у «назад» есть кольцо фокуса'],
 
@@ -287,7 +287,7 @@ const ОТКАТЫ = [
 
   ['css/live-match.css',
    '    border-top: 0;\n    background: transparent;',
-   '    border-top: 1px solid var(--border-subtle);',
+   '    border-top: var(--bw-hair) solid var(--border-subtle);',
    'у сведений нет ни рамки, ни подложки'],
 
   ['css/live-match.css',

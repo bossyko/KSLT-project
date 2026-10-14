@@ -265,7 +265,7 @@ const ОБЛ = блок(CSS, '.sv-hero {');
     'Две бесконечные ленты ехали всегда: на 898 строк было НОЛЬ правил.');
 
 правило('у страницы есть своё кольцо фокуса',
-    /\.sv-compact:focus-visible[\s\S]{0,300}outline:\s*3px solid var\(--accent\)/.test(CSS),
+    /\.sv-compact:focus-visible[\s\S]{0,300}outline:\s*(?:3px|var\(--bw-heavy\)) solid var\(--accent\)/.test(CSS),
     'Глобальное кольцо живёт в style.css, но на тёмной карточке теряется.');
 
 /* 07.10 · ПРАВИЛО БЫЛО СЛАБЫМ, поймал прувер: оно искало `--fs-md` ГДЕ

@@ -64,8 +64,8 @@ const ОТКАТЫ = [
         `    min-height: 39px;\n    width: 100%;\n    padding: 10px 16px 10px 42px;`,
    'поле поиска — ступень кнопки, а не 39'],
 
-  [CSS, `    font-size: var(--fs-xs);\n    font-family: var(--font-primary);`,
-        `    font-size: var(--fs-sm);\n    font-family: var(--font-primary);`,
+  [CSS, `    font-size: var(--fs-xs);\n    font-family: var(--font-sans);`,
+        `    font-size: var(--fs-sm);\n    font-family: var(--font-sans);`,
    'кегль чипа один на все виды'],
 
   [CSS, `    line-height: var(--lh-none);\n    min-height: var(--btn-h-md);\n    padding: 8px 18px;`,

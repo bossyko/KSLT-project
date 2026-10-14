@@ -173,9 +173,9 @@ for (const в of виноватые) {
 const style = файлы.filter(f => f.имя === 'style.css')[0].текст
     .replace(/\/\*[\s\S]*?\*\//g, '');
 проверить('у шапки нет невидимой рамки, съедающей пиксель',
-    !/\.floating-header[^{}]*\{[^{}]*border-bottom:\s*1px\s+solid\s+transparent/.test(style),
+    !/\.floating-header[^{}]*\{[^{}]*border-bottom:\s*(?:1px|var\(--bw-hair\))\s+solid\s+transparent/.test(style),
     'Замерено 21.09: шапка 65 при height 64 и 57 при height 56. Лишний ' +
-    'пиксель — border-bottom: 1px solid transparent. Он невидим, но входит ' +
+    'пиксель — border-bottom: (?:1px|var\(--bw-hair\)) solid transparent. Он невидим, но входит ' +
     'в высоту, и из-за него ВСЕ липкие панели на 64 уходят под шапку. ' +
     'Линию под шапкой рисует ::after, рамка не нужна.');
 
@@ -608,7 +608,10 @@ const скриптВвода = fs.readFileSync(path.join(ROOT, 'js', 'script.js'
 (function обводкаФокуса() {
     const правила = [...style.matchAll(/([^{}]*:focus-visible[^{}]*)\{([^{}]*)\}/g)]
         .filter(м => /nav-item|btn-auth|lang-toggle|\.logo|burger-menu|nav-dropdown-item/.test(м[1]));
-    const сОбводкой = правила.filter(м => /outline:\s*\d/.test(м[2]));
+    /* ТОЛЩИНА ОБВОДКИ — СТУПЕНЬ, А НЕ ЧИСЛО (заход B1, 14.10): правило
+       сторожит, что обводка объявлена ОДИН раз, и ей всё равно, числом
+       она записана или ступенью шкалы. */
+    const сОбводкой = правила.filter(м => /outline:\s*(?:\d|var\(--bw-)/.test(м[2]));
     проверить('обводка фокуса в шапке задана одним правилом',
         сОбводкой.length === 1,
         'Правил с outline для элементов шапки: ' + сОбводкой.length + '. ' +
@@ -761,7 +764,7 @@ const скриптВвода = fs.readFileSync(path.join(ROOT, 'js', 'script.js'
 // единственное выделение — лаймовая заливка кнопки.
 проверить('«Войти» — лаймовая заливка, а не рамка',
     /\.btn-auth\s*\{[^{}]*background:\s*var\(--accent\)/.test(style) &&
-    !/\.btn-auth\s*\{[^{}]*border:\s*1px\s+solid\s+var\(--border-light\)/.test(style),
+    !/\.btn-auth\s*\{[^{}]*border:\s*(?:1px|var\(--bw-hair\))\s+solid\\s+var\(--border-light\)/.test(style),
     'У «Войти» должна быть заливка var(--accent) и не должно быть рамки. ' +
     'Рамка делала кнопку тяжелее соседей, не давая взамен внятного призыва ' +
     '(Костя 20.09: «визуально кажется больше»).');

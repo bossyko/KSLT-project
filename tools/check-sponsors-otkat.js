@@ -22,7 +22,7 @@ const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(К
 
 const ОТКАТЫ = [
   ['css/style.css',
-   '    padding: var(--space-2);\n    background: transparent;\n    border: 1px solid transparent;',
+   '    padding: var(--space-2);\n    background: transparent;\n    border: var(--bw-hair) solid transparent;',
    '    padding: var(--space-2);\n    background: transparent;',
    'ячейка одного размера у всех, и её самой не видно'],
 
@@ -42,7 +42,7 @@ const ОТКАТЫ = [
    'высота плитки выше порога нажатия на каждом слое'],
 
   ['css/style.css',
-   '.sponsors-cloud .sponsor-logo-link:focus-visible,\n.sponsor-hero-logo:focus-visible {\n    outline: 3px solid var(--accent);\n    outline-offset: 3px;\n}',
+   '.sponsors-cloud .sponsor-logo-link:focus-visible,\n.sponsor-hero-logo:focus-visible {\n    outline: var(--bw-heavy) solid var(--accent);\n    outline-offset: 3px;\n}',
    '.sponsors-cloud .sponsor-logo-link:focus-visible,\n.sponsor-hero-logo:focus-visible {\n    outline-offset: 3px;\n}',
    'у плитки есть кольцо фокуса'],
 
@@ -67,7 +67,7 @@ const ОТКАТЫ = [
    'крестик и «Закрыть» — высотой-свойством и не ниже порога'],
 
   ['css/style.css',
-   '.spon-modal-close:focus-visible,\n.spon-modal-close-btn:focus-visible,\n.spon-modal-action:focus-visible {\n    outline: 3px solid var(--accent);',
+   '.spon-modal-close:focus-visible,\n.spon-modal-close-btn:focus-visible,\n.spon-modal-action:focus-visible {\n    outline: var(--bw-heavy) solid var(--accent);',
    '.spon-modal-close:focus-visible,\n.spon-modal-close-btn:focus-visible,\n.spon-modal-action:focus-visible {\n    outline-offset: 3px;\n    color: inherit;',
    'у окна есть кольцо фокуса на всех трёх видах управления'],
 

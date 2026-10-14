@@ -213,7 +213,7 @@ const ПОЛЕ  = блок(ADM, 'select.ad-field-input {');
     '          other state is Medium». Было 12 и 600 у всех.');
 
 правило('у полосы вкладок есть черта, по которой они стоят',
-    /border-bottom: 1px solid var\(--border-subtle\)/.test(блок(ADM, '.ad-lang-tabs {')),
+    /border-bottom: (?:1px|var\(--bw-hair\)) solid var\(--border-subtle\)/.test(блок(ADM, '.ad-lang-tabs {')),
     'Без черты подчёркивание активной висит в пустоте.');
 
 /* ══ 5. ПОЛЕ, ПОДСКАЗКА, ПОЛОСА РЕДАКТОРА ═════════════════════════════ */

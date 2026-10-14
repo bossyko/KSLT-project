@@ -203,7 +203,7 @@ const тонЗавершён = (СТИ.match(/\.live-badge\.is-completed \{([^}]
     '          и ширина по тексту, чтобы полоса не ловила чужой палец.');
 
 правило('у «назад» есть кольцо фокуса',
-    /\.lm-back-link:focus-visible \{[\s\S]{0,160}outline: 3px solid var\(--accent\)/.test(БАЗА),
+    /\.lm-back-link:focus-visible \{[\s\S]{0,160}outline: (?:3px|var\(--bw-heavy\)) solid var\(--accent\)/.test(БАЗА),
     'Было объявлено только :hover. WCAG 2.4.7.');
 
 правило('«назад» ведёт на главную и так и называется',
@@ -303,7 +303,7 @@ const тонЗавершён = (СТИ.match(/\.live-badge\.is-completed \{([^}]
     '          на всю страницу. Костя 24.09: «у игроков нет цветов».');
 
 правило('пусто говорит, что появится и как',
-    /lm-empty-title/.test(JSч) && /emptyText/.test(JSч) && /border: 1px dashed/.test(БАЗА),
+    /lm-empty-title/.test(JSч) && /emptyText/.test(JSч) && /border: (?:1px|var\(--bw-hair\)) dashed/.test(БАЗА),
     'Empty state 37:53: «Always say what will appear here and how, never\n' +
     '          just no data». Голое «Нет трансляции» — ровно запрещённая форма.');
 

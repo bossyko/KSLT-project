@@ -257,7 +257,7 @@ const БОКОМ    = блок('(max-height: 500px) and (orientation: landscape)
     'На --text-dim контраст выходил 3.23 при норме 4.5.');
 
 правило('граница поля ввода видна: не --border-subtle',
-    /\.to-search-input \{[\s\S]{0,600}?border:\s*1px solid var\(--alpha-white-35\)/.test(ВЕСЬ),
+    /\.to-search-input \{[\s\S]{0,600}?border:\s*(?:1px|var\(--bw-hair\)) solid var\(--alpha-white-35\)/.test(ВЕСЬ),
     'Граница элемента управления требует 3, а на --border-subtle было 1.25.');
 
 правило('у поля поиска есть имя для диктора на всех трёх языках',

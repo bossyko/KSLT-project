@@ -100,7 +100,7 @@ const ОТКАТЫ = [
    'стрелка и метка объявлены тяжелее общего правила меты'],
 
   ['css/style.css',
-   '.vn-four .coach-card:focus-visible {\n    outline: 3px solid var(--accent);',
+   '.vn-four .coach-card:focus-visible {\n    outline: var(--bw-heavy) solid var(--accent);',
    '.vn-four .coach-card:focus-visible {\n    outline: 0;',
    'кольцо фокуса есть у обеих карточек'],
 

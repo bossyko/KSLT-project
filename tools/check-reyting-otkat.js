@@ -74,8 +74,8 @@ const ОТКАТЫ = [
  'вкладка берёт высоту, поля и кегль у компонента Filter chip 49:77'],
 
 ['снять с вкладки замеренный межстрочный', 'css/style.css',
- '    line-height: var(--lh-snug);\n    border: 1px solid var(--border-light);',
- '    border: 1px solid var(--border-light);',
+ '    line-height: var(--lh-snug);\n    border: var(--bw-hair) solid var(--border-light);',
+ '    border: var(--bw-hair) solid var(--border-light);',
  'у вкладки есть ЗАМЕРЕННЫЙ межстрочный'],
 
 ['вернуть вкладке transition: all', 'css/style.css',
@@ -130,8 +130,8 @@ const ОТКАТЫ = [
  'лайм снят с номеров первой тройки'],
 
 ['вернуть кольцу первого места лайм', 'css/podium.css',
- '    border: 3px solid rgba(233, 184, 36, 0.85);',
- '    border: 3px solid var(--accent);',
+ '    border: var(--bw-heavy) solid rgba(233, 184, 36, 0.85);',
+ '    border: var(--bw-heavy) solid var(--accent);',
  'кольцо первого места золотое, а не лаймовое'],
 
 ['вернуть очкам пьедестала лайм', 'css/podium.css',
@@ -274,8 +274,8 @@ const ОТКАТЫ = [
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
 ['вернуть кнопке страницы радиус 12', 'css/style.css',
- '    border-radius: var(--radius-sm);\n    color: var(--text-secondary);\n    font-family: \'Inter\', sans-serif;',
- '    border-radius: var(--radius-md);\n    color: var(--text-secondary);\n    font-family: \'Inter\', sans-serif;',
+ '    border-radius: var(--radius-sm);\n    color: var(--text-secondary);\n    font-family: var(--font-sans);',
+ '    border-radius: var(--radius-md);\n    color: var(--text-secondary);\n    font-family: var(--font-sans);',
  'кнопка страницы — ступень шкалы и цель нажатия'],
 
 ['вернуть заголовку категории свой плавающий clamp', 'css/players.css',

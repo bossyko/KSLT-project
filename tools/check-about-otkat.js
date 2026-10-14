@@ -74,7 +74,7 @@ const ОТКАТЫ = [
    'вступление стоит на ступени lead 21 · 16'],
 
   ['css/style.css',
-   '.feature:focus-visible {\n    outline: 3px solid var(--accent);',
+   '.feature:focus-visible {\n    outline: var(--bw-heavy) solid var(--accent);',
    '.feature:focus-visible {\n    outline: 0;',
    'кольцо фокуса есть у плитки'],
 

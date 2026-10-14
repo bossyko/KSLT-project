@@ -201,7 +201,7 @@ const витринаПравила = СТИ.split('\n').filter(с => /\.vn-four|
 /* ══ СОСТОЯНИЯ И ДОСТУПНОСТЬ ═════════════════════════════════════════════ */
 
 правило('кольцо фокуса есть у обеих карточек',
-    /\.vn-four \.court-card:focus-visible,\s*\n\.vn-four \.coach-card:focus-visible \{[^}]*outline:\s*3px/.test(СТИ),
+    /\.vn-four \.court-card:focus-visible,\s*\n\.vn-four \.coach-card:focus-visible \{[^}]*outline:\s*(?:3px|var\(--bw-heavy\))/.test(СТИ),
     'До 24.09 во всей секции не было ни одного :focus-visible.\n' +
     '          Описание Button 17:82: кольцо обязательно по WCAG 2.4.7.');
 

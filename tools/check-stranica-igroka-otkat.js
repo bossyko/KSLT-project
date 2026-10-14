@@ -135,8 +135,8 @@ const ОТКАТЫ = [
    'окно держит Tab внутри и возвращает фокус туда, откуда позвали'],
 
   /* ── портрет ── */
-  [CSS, '    border: 3px solid rgba(255, 255, 255, 0.08);',
-        '    border: 4px solid var(--accent);',
+  [CSS, '    border: var(--bw-heavy) solid rgba(255, 255, 255, 0.08);',
+        '    border: var(--bar-accent) solid var(--accent);',
    'портрет не берёт ни акцент, ни цвет статуса'],
 
   /* ── мёртвое ── */
@@ -156,8 +156,10 @@ const ОТКАТЫ = [
        '<script src="../js/player.js?v=9',
    'версия player.js одна на все три языка'],
 
-  [RU, '<link rel="stylesheet" href="../css/kslt-otsechka.css?v=3">',
-       '<link rel="stylesheet" href="../css/kslt-otsechka.css?v=2">',
+  /* ЯКОРЬ ДЕРЖИТСЯ НА ИМЕНИ, А НЕ НА НОМЕРЕ ВЕРСИИ: номер поднимается
+     при каждой правке файла, и якорь на нём отваливается сам собой. */
+  [RU, 'href="../css/kslt-otsechka.css?v=',
+       'href="../css/kslt-otsechka.css?v=9',
    'версия kslt-otsechka.css одна на все три языка'],
 
   /* ── лестница категорий ── */

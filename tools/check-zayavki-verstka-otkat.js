@@ -68,8 +68,8 @@ const ОТКАТЫ = [
    'номер строки без инлайн-отступа'],
 
   ['css/admin.css',
-   '    color: var(--text-muted);\n    border-bottom: 1px solid var(--border-subtle);\n    white-space: nowrap;',
-   '    color: var(--text-dim);\n    border-bottom: 1px solid var(--border-subtle);\n    white-space: nowrap;',
+   '    color: var(--text-muted);\n    border-bottom: var(--bw-hair) solid var(--border-subtle);\n    white-space: nowrap;',
+   '    color: var(--text-dim);\n    border-bottom: var(--bw-hair) solid var(--border-subtle);\n    white-space: nowrap;',
    'шапка таблиц админки читается'],
 
   /* ─── цель нажатия ─── */

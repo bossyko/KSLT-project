@@ -77,7 +77,7 @@ const плитка = блок('.badge-cta-card');
 правило('плитка держит остальное от компонента Card',
     свойство(плитка, 'border-radius') === 'var(--radius-lg)'
         && свойство(плитка, 'background') === 'var(--bg-card)'
-        && /border:\s*1px solid var\(--border-subtle\)/.test(плитка || ''),
+        && /border:\s*(?:1px|var\(--bw-hair\)) solid var\(--border-subtle\)/.test(плитка || ''),
     'Радиус 16, фон bg/card, край border/subtle — это и есть Card 29:65.');
 правило('поля плитки больше нигде не переопределяются',
     !/(?:^|\n)\s*\.badge-cta-card\s*\{[^}]*padding:/.test(СТИ.replace(плитка || '', '')),

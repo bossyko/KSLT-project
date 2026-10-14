@@ -46,7 +46,7 @@ const ОТКАТЫ = [
 
   ['css/style.css',
    '.floating-header {\n    position: fixed;\n    top: 0;',
-   '.floating-header {\n    border-bottom: 1px solid transparent;\n    position: fixed;\n    top: 0;',
+   '.floating-header {\n    border-bottom: var(--bw-hair) solid transparent;\n    position: fixed;\n    top: 0;',
    'у шапки нет невидимой рамки, съедающей пиксель'],
 
   ['css/style.css',

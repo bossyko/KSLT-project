@@ -121,7 +121,7 @@ const ОТКАТЫ = [
     border: 0;
     border-radius: 0;`,
         `    padding: 0 var(--space-sm);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);`,
    'языковая вкладка подчёркивается, а не наливается таблеткой'],
 
@@ -137,7 +137,7 @@ const ОТКАТЫ = [
 
   [ADM, `    /* Черта, по которой стоят вкладки: без неё подчёркивание активной
        висит в пустоте */
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 `,
         ``,
    'у полосы вкладок есть черта, по которой они стоят'],

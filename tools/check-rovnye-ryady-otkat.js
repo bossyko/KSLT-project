@@ -26,7 +26,7 @@ const ОТКАТЫ = [
 
 ['вернуть разделитель ряда бордером', Р,
  '    box-shadow: inset 0 -1px 0 var(--border-subtle);\n    transition: all 0.2s;',
- '    border-bottom: 1px solid var(--border-subtle);\n    transition: all 0.2s;',
+ '    border-bottom: var(--bw-hair) solid var(--border-subtle);\n    transition: all 0.2s;',
  'разделитель ряда не занимает места в потоке'],
 
 ['снимать у последнего ряда не ту линию', Р,

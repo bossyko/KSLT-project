@@ -157,8 +157,8 @@ const ОТКАТЫ = [
         `.to-search-input::placeholder {\n    color: var(--text-dim);\n}`,
    'подсказка поиска читаема: не --text-dim'],
 
-  [CSS, `    border: 1px solid var(--alpha-white-35);`,
-        `    border: 1px solid var(--border-subtle);`,
+  [CSS, `    border: var(--bw-hair) solid var(--alpha-white-35);`,
+        `    border: var(--bw-hair) solid var(--border-subtle);`,
    'граница поля ввода видна: не --border-subtle'],
 
   [HTMLen, `id="overviewSearch" aria-label=`,

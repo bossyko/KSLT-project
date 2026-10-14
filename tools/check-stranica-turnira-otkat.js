@@ -113,8 +113,8 @@ const ОТКАТЫ = [
         '                ficВидимые.push(String(section.label));',
    'подписи ленты берутся по ходу отрисовки, а не вторым списком'],
 
-  [CSS, '    min-height: var(--btn-h-sm);\n    padding: 0 var(--space-md);\n    border: 1px solid var(--border-subtle);\n    border-radius: var(--radius-full);',
-        '    height: 32px;\n    padding: 0 var(--space-md);\n    border: 1px solid var(--border-subtle);\n    border-radius: var(--radius-full);',
+  [CSS, '    min-height: var(--btn-h-sm);\n    padding: 0 var(--space-md);\n    border: var(--bw-hair) solid var(--border-subtle);\n    border-radius: var(--radius-full);',
+        '    height: 32px;\n    padding: 0 var(--space-md);\n    border: var(--bw-hair) solid var(--border-subtle);\n    border-radius: var(--radius-full);',
    'чип ленты стоит на ступени кнопки'],
 
   [CSS, '.td-fic-chip::after {\n    content: \'\';', '.td-fic-chip-net::after {\n    content: \'\';',

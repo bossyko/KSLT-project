@@ -60,7 +60,7 @@ const ОТКАТЫ = [
 
 ['заменить у «скоро» край на рамку', 'css/style.css',
  '    color: var(--info);\n    box-shadow: inset 0 0 0 1px var(--border-light);',
- '    color: var(--info);\n    border: 1px solid var(--border-light);',
+ '    color: var(--info);\n    border: var(--bw-hair) solid var(--border-light);',
  'тон .tc-badge-soon не рисует рамку'],
 
 ['снять с «открыта» край вовсе', 'css/style.css',

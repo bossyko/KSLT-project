@@ -30,6 +30,9 @@ fs.mkdirSync(path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
 
 const ОЧКИ  = 'js/rating-points.js';
+/* СЛОВАРЬ ПЕРЕЕХАЛ В СВОЙ ФАЙЛ (заход B1, 14.10) — откат бьёт по новому
+   месту, но проверяет ТО ЖЕ отношение: одно объявление, три языка. */
+const МЕСТА = 'js/kslt-mesta.js';
 const СЕТКА = 'js/admin/sections/bracket.js';
 const CSS   = 'css/admin.css';
 const СТР   = 'pages/admin.html';
@@ -149,7 +152,7 @@ const ОТКАТЫ = [
    '            хвост[к] = parseInt(к, 10);',
    'неразыгранное место платится по ПОСЛЕДНЕМУ в полосе'],
 
-  [ОЧКИ,
+  [МЕСТА,
    "        kg: { W: 'Жеңүүчү', F: 'Финалист', '3RD': '3-орун', '4TH': '4-орун',",
    "        kgg: { W: 'Жеңүүчү', F: 'Финалист', '3RD': '3-орун', '4TH': '4-орун',",
    'подписи этапа объявлены один раз и на трёх языках'],

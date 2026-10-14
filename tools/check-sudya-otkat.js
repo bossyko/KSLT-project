@@ -247,7 +247,7 @@ const ОТКАТЫ = [
    `                      : идётПерерыв ? Т.слово(m.break_kind || 'changeover') + ' · ' + Т.часы(остатокПерерыва)`,
    'зрителю не показываем отсчёт, которого не можем обновить'],
 
-  [CSS, `    outline: 3px solid var(--um-accent);`,
+  [CSS, `    outline: var(--bw-heavy) solid var(--um-accent);`,
    `    outline: none;`,
    'у кнопок есть кольцо фокуса'],
 

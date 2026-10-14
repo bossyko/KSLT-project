@@ -156,7 +156,7 @@ const ledУзк = узкий ? ступень(свойство(узкий.тек
     '          vertical padding — otherwise it drifts with the line-height».');
 
 правило('у кнопки есть кольцо фокуса',
-    /\.sp-cta-btn:focus-visible \{[^}]*outline:\s*3px/.test(БЛОК),
+    /\.sp-cta-btn:focus-visible \{[^}]*outline:\s*(?:3px|var\(--bw-heavy\))/.test(БЛОК),
     'Единственная ссылка блока была недостижима глазом с клавиатуры. WCAG 2.4.7.');
 
 правило('текст на лайме берётся токеном, а не литералом',
@@ -185,7 +185,7 @@ const коробки = [];
     /* 13.10: правило держалось за ЧИСЛО лайма в рамке, а прозрачность
        акцента переехала на шкалу токенов. Держимся за ОТНОШЕНИЕ: стеклянный
        фон плюс лаймовая рамка, чем бы лайм ни был записан. */
-    const рег = /\.([a-z0-9-]+)\s*\{[^}]*background:\s*var\(--surface-glass\)[^}]*border:\s*1px solid (?:var\(--(?:alpha-lime|accent)|rgba\(204,\s*255,\s*0)/g;
+    const рег = /\.([a-z0-9-]+)\s*\{[^}]*background:\s*var\(--surface-glass\)[^}]*border:\s*(?:1px|var\(--bw-hair\)) solid (?:var\(--(?:alpha-lime|accent)|rgba\(204,\s*255,\s*0)/g;
     let м; while ((м = рег.exec(текст)) !== null) коробки.push(имя + ' → .' + м[1]);
 });
 

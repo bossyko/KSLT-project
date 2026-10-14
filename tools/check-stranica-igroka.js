@@ -223,8 +223,8 @@ const блок = (текст, якорь) => {
 /* ══ 12. ПОРТРЕТ — НЕ ДЕЙСТВИЕ ════════════════════════════════════════ */
 
 правило('портрет не берёт ни акцент, ни цвет статуса',
-    /border:\s*3px solid rgba\(255, 255, 255, 0\.08\)/.test(CSS) &&
-    !/border:\s*4px solid var\(--accent\)/.test(CSS) &&
+    /border:\s*(?:3px|var\(--bw-heavy\)) solid rgba\(255, 255, 255, 0\.08\)/.test(CSS) &&
+    !/border:\s*(?:4px|var\(--bar-accent\)) solid var\(--accent\)/.test(CSS) &&
     // и заглушка портрета тоже: в строке буквы лаймовые, в шапке — тихие
     /color:\s*var\(--text-secondary\)/.test(блок(CSS, '.pp-photo.pp-photo-ph,\n.pp-guest-photo.pp-photo-ph {')),
     'портрету вернули лаймовое кольцо: лайм принадлежит одному главному\n' +

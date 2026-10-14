@@ -64,7 +64,7 @@ const ОТКАТЫ = [
    'высота кнопки — свойством, и это минимальная цель нажатия'],
 
   ['css/style.css',
-   '.sp-cta-btn:focus-visible {\n    outline: 3px solid var(--accent);\n    outline-offset: 3px;\n}',
+   '.sp-cta-btn:focus-visible {\n    outline: var(--bw-heavy) solid var(--accent);\n    outline-offset: 3px;\n}',
    '.sp-cta-btn:focus-visible {\n    outline-offset: 3px;\n}',
    'у кнопки есть кольцо фокуса'],
 
@@ -101,8 +101,8 @@ const ОТКАТЫ = [
    'заголовок блока объявлен ТЕМ ЖЕ правилом, что заголовки разделов'],
 
   ['css/sponsors.css',
-   'border-radius: var(--radius-xl);\n    background: var(--surface-glass); border: 1px solid var(--alpha-lime-20);',
-   'border-radius: var(--radius-lg);\n    background: var(--surface-glass); border: 1px solid var(--alpha-lime-20);',
+   'border-radius: var(--radius-xl);\n    background: var(--surface-glass); border: var(--bw-hair) solid var(--alpha-lime-20);',
+   'border-radius: var(--radius-lg);\n    background: var(--surface-glass); border: var(--bw-hair) solid var(--alpha-lime-20);',
    'обе коробки согласны по радиусу и свечению'],
 
   ['js/stats.js',

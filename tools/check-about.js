@@ -197,7 +197,7 @@ for (const [яз, html] of Object.entries(СТР)) {
     'Шкалы иконок в проекте нет — её задаёт этот компонент.');
 
 правило('кольцо фокуса есть у плитки',
-    /\.feature:focus-visible \{[\s\S]{0,140}outline: 3px solid var\(--accent\)/.test(СТИ),
+    /\.feature:focus-visible \{[\s\S]{0,140}outline: (?:3px|var\(--bw-heavy\)) solid var\(--accent\)/.test(СТИ),
     'До 24.09 во всём разделе не было ни одного :focus-visible. WCAG 2.4.7.');
 
 правило('движение спрашивает разрешения',

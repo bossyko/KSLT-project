@@ -54,7 +54,7 @@ const БЛОК = нач > 0 && кон > нач ? СТИ.slice(нач, кон) : 
    следит за размером и за тем, что поверхность не вернулась сама собой. */
 правило('ячейка одного размера у всех, и её самой не видно',
     /flex: 0 0 /.test(БЛОК) && /background: transparent/.test(БЛОК) &&
-    /border: 1px solid transparent/.test(БЛОК) && /border-radius: var\(--radius-lg\)/.test(БЛОК),
+    /border: (?:1px|var\(--bw-hair\)) solid transparent/.test(БЛОК) && /border-radius: var\(--radius-lg\)/.test(БЛОК),
     'До 24.09 плиток не было вовсе: в ряд стояли сами логотипы. Замерено на\n' +
     '          1280 — ширина от 39 до 140 при одной высоте 44, то есть вес на\n' +
     '          экране втрое разный. Не потому, что кто-то больше заплатил, а\n' +
@@ -79,7 +79,7 @@ const высоты = (БЛОК.match(/height: (\d+)px/g) || []).map(s => Number(
     '          До 24.09 целью был сам логотип: «STRETCH» давал 39 в ширину.');
 
 правило('у плитки есть кольцо фокуса',
-    /\.sponsors-cloud \.sponsor-logo-link:focus-visible,\s*\.sponsor-hero-logo:focus-visible \{[^}]*outline: 3px/.test(БЛОК),
+    /\.sponsors-cloud \.sponsor-logo-link:focus-visible,\s*\.sponsor-hero-logo:focus-visible \{[^}]*outline: (?:3px|var\(--bw-heavy\))/.test(БЛОК),
     'Десять целей были недостижимы глазом с клавиатуры. WCAG 2.4.7.');
 
 правило('движение гасится по просьбе системы',
@@ -171,7 +171,7 @@ const ширины = [...new Set((БЛОК.match(/max-width:\s*(\d+)px/g) || [])
     '          а кнопка ниже порога 44 — на кнопке, которой закрывают окно.');
 
 правило('у окна есть кольцо фокуса на всех трёх видах управления',
-    /\.spon-modal-close:focus-visible,\s*\.spon-modal-close-btn:focus-visible,\s*\.spon-modal-action:focus-visible \{[^}]*outline: 3px/.test(СТИ),
+    /\.spon-modal-close:focus-visible,\s*\.spon-modal-close-btn:focus-visible,\s*\.spon-modal-action:focus-visible \{[^}]*outline: (?:3px|var\(--bw-heavy\))/.test(СТИ),
     'Крестик, кнопка и строки действий.');
 
 /* ══ РАЗМЕТКА, ТРИ ЯЗЫКА ══════════════════════════════════════════════════ */

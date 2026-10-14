@@ -59,7 +59,7 @@ const ОТКАТЫ = [
    'своя навигация подвала не наследует высоту шапки'],
 
   ['css/style.css',
-   '.footer-bottom-links a:focus-visible {\n    outline: 2px solid var(--accent);',
+   '.footer-bottom-links a:focus-visible {\n    outline: var(--bw-thick) solid var(--accent);',
    '.footer-bottom-links a:focus-visible {\n    outline-offset: 2px;\n    border: 0;',
    'видимый фокус с клавиатуры'],
 
