@@ -429,21 +429,16 @@
     }
 
     // ---- Toast notification ----
+    /* ОДНО УВЕДОМЛЕНИЕ НА САЙТ — компонент Toast 30:59 требует этого
+       сам: «four separate notification mechanisms… They should all render
+       this one component». Своя копия снята заходом B1, 14.10.
+       ИМЯ ФУНКЦИИ ОСТАВЛЕНО НА МЕСТЕ: вызовы в этом файле не трогаются,
+       правится одно тело вместо каждого вызова.
+       Перевод тона живёт в модуле — одно определение, а не семь. */
     function showToast(msg) {
-        var existing = document.getElementById('bcToast');
-        if (existing) existing.remove();
-
-        var toast = document.createElement('div');
-        toast.id = 'bcToast';
-        toast.className = 'bc-toast';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-
-        setTimeout(function() { toast.classList.add('bc-toast-show'); }, 10);
-        setTimeout(function() {
-            toast.classList.remove('bc-toast-show');
-            setTimeout(function() { toast.remove(); }, 300);
-        }, 2000);
+        if (window.KSLT_TOAST) {
+            window.KSLT_TOAST.показать(msg, { тон: window.KSLT_TOAST.тон('') });
+        }
     }
 
     // ---- Map modal (venue click) ----

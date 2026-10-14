@@ -331,18 +331,16 @@
     function close(overlay) { if (overlay) overlay.remove(); }
 
     /** Уведомление — то же, что у приглашений: одно на весь сайт. */
+    /* ОДНО УВЕДОМЛЕНИЕ НА САЙТ — компонент Toast 30:59 требует этого
+       сам: «four separate notification mechanisms… They should all render
+       this one component». Своя копия снята заходом B1, 14.10.
+       ИМЯ ФУНКЦИИ ОСТАВЛЕНО НА МЕСТЕ: вызовы в этом файле не трогаются,
+       правится одно тело вместо каждого вызова.
+       Перевод тона живёт в модуле — одно определение, а не семь. */
     function toast(текст, вид) {
-        var old = document.querySelector('.pt-toast');
-        if (old) old.remove();
-        var t = document.createElement('div');
-        t.className = 'pt-toast' + (вид ? ' ' + вид : '');
-        t.textContent = текст;
-        document.body.appendChild(t);
-        requestAnimationFrame(function () { t.classList.add('visible'); });
-        setTimeout(function () {
-            t.classList.remove('visible');
-            setTimeout(function () { t.remove(); }, 300);
-        }, 3000);
+        if (window.KSLT_TOAST) {
+            window.KSLT_TOAST.показать(текст, { тон: window.KSLT_TOAST.тон(вид) });
+        }
     }
 
     function esc(s) {

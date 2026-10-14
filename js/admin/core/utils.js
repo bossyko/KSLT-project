@@ -299,23 +299,16 @@
      * @param {string} message
      * @param {string} [type='success'] - 'success' | 'error' | 'warning' | 'info'
      */
+    /* ОДНО УВЕДОМЛЕНИЕ НА САЙТ — компонент Toast 30:59 требует этого
+       сам: «four separate notification mechanisms… They should all render
+       this one component». Своя копия снята заходом B1, 14.10.
+       ИМЯ ФУНКЦИИ ОСТАВЛЕНО НА МЕСТЕ: вызовы в этом файле не трогаются,
+       правится одно тело вместо каждого вызова.
+       Перевод тона живёт в модуле — одно определение, а не семь. */
     function showToast(message, type) {
-        var existing = document.querySelector('.ad-toast');
-        if (existing) existing.remove();
-
-        var toast = document.createElement('div');
-        toast.className = 'ad-toast ad-toast-' + (type || 'success');
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        requestAnimationFrame(function() {
-            toast.classList.add('ad-toast-show');
-        });
-
-        setTimeout(function() {
-            toast.classList.remove('ad-toast-show');
-            setTimeout(function() { toast.remove(); }, 400);
-        }, 3000);
+        if (window.KSLT_TOAST) {
+            window.KSLT_TOAST.показать(message, { тон: window.KSLT_TOAST.тон(type) });
+        }
     }
 
     /**
