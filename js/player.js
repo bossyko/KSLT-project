@@ -1411,10 +1411,18 @@
     }
 
     function renderTournamentCard(item, isUpcoming, индекс, всего) {
-        var ROUND_LABELS = {
-            'W': LH.winner, 'F': LH.roundF, 'SF': LH.roundSF, 'QF': LH.roundQF,
-            'R16': 'R16', 'R32': 'R32', '3RD': LH.round3rd, '4TH': LH.round4th
-        };
+        /* НАЗВАНИЕ МЕСТА — ОДНО ОПРЕДЕЛЕНИЕ НА ПРОДУКТ, `js/kslt-mesta.js`.
+           Своя карта тут не просто дублировала словарь: `R16` и `R32` в
+           ней НЕ БЫЛИ ПЕРЕВЕДЕНЫ ВОВСЕ — человек видел «R16» вместо
+           «1/8 финала», на всех трёх языках. Копия отстаёт молча, и это
+           ровно тот случай.
+           Кубок остаётся здесь: эмодзи — украшение места показа, а не
+           часть названия, и в словаре ему не место. */
+        var ЯЗЫК = isEn ? 'en' : (isKg ? 'kg' : 'ru');
+        function подписьМеста(код) {
+            var т = window.KSLT_MESTA ? window.KSLT_MESTA.подпись(ЯЗЫК, код) : код;
+            return код === 'W' ? '🏆 ' + т : т;
+        }
         var t = item.tournament;
         var tName = isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
         var dateStr = t.date_start ? t.date_start.slice(8,10) + '.' + t.date_start.slice(5,7) + '.' + t.date_start.slice(0,4) : '';
@@ -1424,7 +1432,7 @@
         if (isUpcoming) {
             result = LH.registered;
         } else {
-            result = item.round_reached ? (ROUND_LABELS[item.round_reached] || item.round_reached) : LH.participated;
+            result = item.round_reached ? (подписьМеста(item.round_reached) || item.round_reached) : LH.participated;
             if (item.points_earned > 0) result += ' · +' + item.points_earned;
         }
         var resultClass = isUpcoming ? ' pp-tournament-upcoming' : (item.round_reached === 'W' ? ' pp-tournament-winner' : '');
