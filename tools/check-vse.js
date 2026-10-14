@@ -91,7 +91,8 @@ const КУСКИ = [
     ['ровные ряды', 'check-rovnye-ryady.js', 'check-rovnye-ryady-otkat.js'],
     ['тихий текст', 'check-tihiy-tekst.js', 'check-tihiy-tekst-otkat.js'],
     ['краска акцента', 'check-kraska-akcenta.js', 'check-kraska-akcenta-otkat.js'],
-    ['лицо без фотографии', 'check-lico.js', 'check-lico-otkat.js']
+    ['лицо без фотографии', 'check-lico.js', 'check-lico-otkat.js'],
+    ['порядок блоков сетки', 'check-poryadok-blokov.js', 'check-poryadok-blokov-otkat.js']
 ];
 
 function прогнать(файл) {
