@@ -92,7 +92,8 @@ const КУСКИ = [
     ['тихий текст', 'check-tihiy-tekst.js', 'check-tihiy-tekst-otkat.js'],
     ['краска акцента', 'check-kraska-akcenta.js', 'check-kraska-akcenta-otkat.js'],
     ['лицо без фотографии', 'check-lico.js', 'check-lico-otkat.js'],
-    ['порядок блоков сетки', 'check-poryadok-blokov.js', 'check-poryadok-blokov-otkat.js']
+    ['порядок блоков сетки', 'check-poryadok-blokov.js', 'check-poryadok-blokov-otkat.js'],
+    ['одно определение на понятие', 'check-odno-opredelenie.js', 'check-odno-opredelenie-otkat.js']
 ];
 
 function прогнать(файл) {
