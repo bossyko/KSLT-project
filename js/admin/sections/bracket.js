@@ -657,7 +657,7 @@
                     .limit(10);
                 var найдены = (res.data || []).filter(function(p) { return !(занятые && занятые[p.id]); });
                 if (!найдены.length) {
-                    список.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.85rem;">' +
+                    список.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:0.85rem;">' +
                         (isEn ? 'No players found' : 'Игроков не найдено') + '</div>';
                     return;
                 }
@@ -676,7 +676,7 @@
                                 ? ' <span style="color:#FFA726;font-size:0.72rem;">' + L.regInQueue + '</span>'
                                 : '') +
                         '</span>' +
-                        (мета ? '<span style="color:var(--text-dim);font-size:0.75rem;">' + A.esc(мета) + '</span>' : '') +
+                        (мета ? '<span style="color:var(--text-muted);font-size:0.75rem;">' + A.esc(мета) + '</span>' : '') +
                     '</div>';
                 });
                 список.innerHTML = html;
@@ -3714,7 +3714,7 @@
                             var чужой = полТурнира && p.gender && p.gender !== полТурнира;
                             var photoHtml = p.photo
                                 ? '<img src="' + A.esc(p.photo) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
-                                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:14px;">—</div>';
+                                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;">—</div>';
                             var nameDisplay = isEn ? (p.name_en || p.name) : p.name;
                             html += '<div data-player-id="' + p.id + '" data-gender="' + (p.gender || '') + '" data-player-name="' + A.esc(nameDisplay) + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:' + (alreadyIn ? 'default' : 'pointer') + ';opacity:' + (alreadyIn ? '0.5' : '1') + ';" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
                                 photoHtml +
@@ -4937,7 +4937,7 @@
                 partnerDisplay = A.esc(reg.partner_external_name) +
                     ' <span class="ad-reg-mark ad-reg-mark-ext">EXT</span>';
             } else {
-                partnerDisplay = '<span style="color:var(--text-dim);font-style:italic;">' + L.doublesNoPartner + '</span>' +
+                partnerDisplay = '<span style="color:var(--text-muted);font-style:italic;">' + L.doublesNoPartner + '</span>' +
                     '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '"' + (заморожено ? ' disabled' : '') + '>+ ' + L.doublesAddPartner + '</button>';
             }
             partnerTd = '<td class="ad-col-partner ad-reg-partner">' + partnerDisplay + '</td>';
@@ -12168,7 +12168,7 @@
             }
 
             html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
-            html += '<span style="min-width:80px;color:var(--text-dim);font-size:0.85rem;">' +
+            html += '<span style="min-width:80px;color:var(--text-muted);font-size:0.85rem;">' +
                 (isEn ? 'Match ' : 'Матч ') + xs.matchOrder +
                 (opponentName ? ' vs ' + A.esc(opponentName) : '') +
                 '</span>';

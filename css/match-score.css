@@ -198,7 +198,7 @@
 
 .ms-hint {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin: 12px 0 16px;
     line-height: 1.45;
 }

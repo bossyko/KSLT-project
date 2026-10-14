@@ -310,7 +310,7 @@
             '<div class="ad-table-wrap">' +
                 '<table class="ad-table">' +
                     '<thead><tr>' + headerHtml + '</tr></thead>' +
-                    '<tbody><tr><td colspan="' + headers.length + '" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                    '<tbody><tr><td colspan="' + headers.length + '" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                 '</table>' +
             '</div>' +
         '</div>';
@@ -446,7 +446,7 @@
             var diff = Math.ceil((expMs - todayMs) / 86400000);
             var dCls = diff <= 3 ? 'ad-days-danger' : diff <= 7 ? 'ad-days-warning' : 'ad-days-caution';
             return '<tr>' +
-                '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:0.7rem;color:var(--text-dim);">' + email + '</div></td>' +
+                '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:0.7rem;color:var(--text-muted);">' + email + '</div></td>' +
                 '<td>' + A.fmtDate(m.expires_at) + '</td>' +
                 '<td class="' + dCls + '">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
             '</tr>';
@@ -459,7 +459,7 @@
             var expMs = m.expires_at ? new Date(m.expires_at).getTime() : 0;
             var diff = Math.ceil((todayMs - expMs) / 86400000);
             return '<tr>' +
-                '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:0.7rem;color:var(--text-dim);">' + email + '</div></td>' +
+                '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:0.7rem;color:var(--text-muted);">' + email + '</div></td>' +
                 '<td style="color:#f44336;">' + A.fmtDate(m.expires_at) + '</td>' +
                 '<td class="ad-days-danger">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
             '</tr>';
@@ -477,7 +477,7 @@
             var trnId = r.tournament_id || '';
             return '<tr>' +
                 '<td style="font-weight:500;"><a href="#" class="ad-dash-player-link" data-player-id="' + A.esc(playerId) + '" style="color:var(--text-primary);text-decoration:none;cursor:pointer;">' + playerName + '</a></td>' +
-                '<td style="font-size:0.85rem;color:var(--text-dim);">' + A.esc(catName) + '</td>' +
+                '<td style="font-size:0.85rem;color:var(--text-muted);">' + A.esc(catName) + '</td>' +
                 '<td style="font-size:0.85rem;text-align:center;">' + pts + '</td>' +
                 '<td><a href="#" class="ad-dash-trn-link" data-trn-id="' + A.esc(trnId) + '" style="color:var(--accent);text-decoration:none;cursor:pointer;">' + trnName + '</a></td>' +
                 '<td>' + A.fmtDate(r.registered_at) + '</td>' +
@@ -499,7 +499,7 @@
                     var trnId = link.dataset.trnId;
                     if (trnId) {
                         var trnContainer = document.getElementById('ad-tournaments');
-                        if (trnContainer) trnContainer.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-dim);">...</div>';
+                        if (trnContainer) trnContainer.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">...</div>';
                         A.switchTab('tournaments', 'bracket', trnId);
                     }
                     return;

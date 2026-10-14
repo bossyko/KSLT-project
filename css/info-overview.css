@@ -475,7 +475,7 @@
     line-height: 1.5;
 }
 
-.io-docrow-arrow { color: var(--text-dim); flex-shrink: 0; display: flex; transition: color 0.2s; }
+.io-docrow-arrow { color: var(--text-muted); flex-shrink: 0; display: flex; transition: color 0.2s; }
 .io-docrow:hover .io-docrow-arrow { color: var(--accent); }
 
 @media (max-width: 640px) {

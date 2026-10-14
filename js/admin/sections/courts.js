@@ -240,14 +240,14 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
-        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.crtViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
+        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.crtViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
 
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="12" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏟️</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCourtsText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noCourtsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -280,7 +280,7 @@
                         '<td>' + cityText + '</td>' +
                         '<td style="text-align:center;">' + partnerHtml + '</td>' +
                         '<td style="text-align:center;">' + promotedHtml + '</td>' +
-                        '<td style="text-align:center;color:var(--text-dim);">' + viewsCell + '</td>' +
+                        '<td style="text-align:center;color:var(--text-muted);">' + viewsCell + '</td>' +
                     '</tr>';
             } else {
                 // First row with rowspan
@@ -299,7 +299,7 @@
                         '<td rowspan="' + rowCount + '" style="vertical-align:middle;">' + cityText + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + partnerHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + promotedHtml + '</td>' +
-                        '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;color:var(--text-dim);">' + viewsCell + '</td>' +
+                        '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;color:var(--text-muted);">' + viewsCell + '</td>' +
                     '</tr>';
 
                 // Sub-rows
@@ -440,7 +440,7 @@
                             crtColHeader('promoted', L.crtPromoted) +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="11" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
                 '<div class="ad-col-dropdown" id="adCrtColDropdown" style="display:none;"></div>' +
@@ -593,23 +593,23 @@
                     ' — ' + (t.price || 0) + ' ' + (isEn ? 'som' : 'сом') +
                 '</span>';
         });
-        if (!typesHtml) typesHtml = '<span style="color:var(--text-dim);">' + L.noData + '</span>';
+        if (!typesHtml) typesHtml = '<span style="color:var(--text-muted);">' + L.noData + '</span>';
 
         // Promoted status
         var promotedHtml = item.promoted
             ? '<span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span>'
-            : '<span style="color:var(--text-dim);">—</span>';
+            : '<span style="color:var(--text-muted);">—</span>';
 
         // Partner
         var partnerHtml = item.partner
             ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + (isEn ? 'Yes' : 'Да')
-            : '<span style="color:var(--text-dim);">' + (isEn ? 'No' : 'Нет') + '</span>';
+            : '<span style="color:var(--text-muted);">' + (isEn ? 'No' : 'Нет') + '</span>';
 
         // Payments table
         var paymentsHtml = '';
         if (payments.length === 0) {
             paymentsHtml =
-                '<div style="text-align:center;padding:30px 20px;color:var(--text-dim);">' +
+                '<div style="text-align:center;padding:30px 20px;color:var(--text-muted);">' +
                     '<div style="font-size:1.5rem;opacity:0.3;margin-bottom:6px;">💰</div>' +
                     L.crtViewNoPayments +
                 '</div>';
@@ -657,21 +657,21 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtViewInfo + '</div>' +
                 '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:0.9rem;">' +
-                    '<span style="color:var(--text-dim);">' + L.crtName + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.crtName + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(item.name || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.crtCity + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.crtCity + '</span>' +
                     '<span style="color:var(--text-secondary);">' + A.esc(item.city || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.crtType + ' / ' + L.crtSurface + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.crtType + ' / ' + L.crtSurface + '</span>' +
                     '<span>' + typesHtml + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.crtPartner + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.crtPartner + '</span>' +
                     '<span>' + partnerHtml + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.crtPromoted + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.crtPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
-                    '<span style="color:var(--text-dim);">' + (isEn ? 'Phone' : 'Телефон') + '</span>' +
+                    '<span style="color:var(--text-muted);">' + (isEn ? 'Phone' : 'Телефон') + '</span>' +
                     '<span style="color:var(--text-secondary);">' + A.esc(item.phone || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">WhatsApp</span>' +
+                    '<span style="color:var(--text-muted);">WhatsApp</span>' +
                     '<span style="color:var(--text-secondary);">' + A.esc(item.whatsapp || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">Instagram</span>' +
+                    '<span style="color:var(--text-muted);">Instagram</span>' +
                     '<span style="color:var(--text-secondary);">' + A.esc(item.instagram || '—') + '</span>' +
                 '</div>' +
             '</div>' +
@@ -984,7 +984,7 @@
 
             // Promoted badge (read-only, managed via Payments)
             (item && item.promoted ?
-                '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span> <span style="color:var(--text-dim);font-size:0.8rem;">' + L.crtPromotedHint + '</span></div>'
+                '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span> <span style="color:var(--text-muted);font-size:0.8rem;">' + L.crtPromotedHint + '</span></div>'
             : '') +
 
             // Name (RU/EN/KG)
@@ -1917,7 +1917,7 @@
         var grid = document.getElementById('adCrtGalleryGrid');
         if (!grid) return;
         if (crtGalleryUrls.length === 0) {
-            grid.innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;padding:8px 0;">' + (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
+            grid.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0;">' + (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
             return;
         }
         var html = '';

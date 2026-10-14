@@ -141,7 +141,7 @@
 .sn-logo {
     height: 120px; display: flex; align-items: center; justify-content: center;
     background: var(--bg-card); border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg); color: var(--text-dim); font-size: var(--fs-sm);
+    border-radius: var(--radius-lg); color: var(--text-muted); font-size: var(--fs-sm);
 }
 .sn-logo.filled {
     transition: transform var(--transition-fast);

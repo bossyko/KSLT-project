@@ -4272,7 +4272,7 @@
                     var modal = dbModal({
                         title: escHtml(n.title || ''),
                         body: '<p style="line-height:1.5;white-space:pre-wrap;">' + escHtml(n.message || '') + '</p>' +
-                              '<p style="margin-top:10px;font-size:0.75rem;color:var(--text-dim);">' +
+                              '<p style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">' +
                               dbFormatDate(n.created_at) + '</p>',
                         actions: isChal ? [
                             { label: L.chalDecline, onClick: function(close) { answerChallenge(n, false, modal, close); } },
@@ -6430,7 +6430,7 @@
                 var date = p.created_at ? p.created_at.split('T')[0].split('-').reverse().join('.') : '—';
                 var amount = (p.amount || 0).toLocaleString() + ' ' + (p.currency || 'KGS');
                 var method = methodLabels[p.payment_method] || p.payment_method || '—';
-                var statusColor = p.status === 'completed' ? 'var(--accent)' : 'var(--text-dim)';
+                var statusColor = p.status === 'completed' ? 'var(--accent)' : 'var(--text-muted)';
                 var statusText = statusLabels[p.status] || p.status || '—';
                 var note = p.note ? escHtml(p.note) : '—';
 

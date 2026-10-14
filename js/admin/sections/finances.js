@@ -323,7 +323,7 @@
                 '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">💰</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.payNoPayments + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.payNoPaymentsText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.payNoPaymentsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -348,7 +348,7 @@
                     '<td style="font-size:0.8rem;white-space:nowrap;">' + periodEnd + '</td>' +
                     '<td>' + methodLabel + '</td>' +
                     '<td>' + statusBadge + '</td>' +
-                    '<td style="font-size:0.8rem;color:var(--text-dim);">' + createdDate + '</td>' +
+                    '<td style="font-size:0.8rem;color:var(--text-muted);">' + createdDate + '</td>' +
                 '</tr>';
         });
 
@@ -493,7 +493,7 @@
                 '<div class="ad-form-card-title">' + (isEn ? 'Period' : 'Период') + '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinPeriodStart" value="' + (item && !isMembership ? item.period_start : '') + '" style="flex:1;">' +
-                    '<span style="color:var(--text-dim);">—</span>' +
+                    '<span style="color:var(--text-muted);">—</span>' +
                     '<input type="date" class="ad-field-input" id="adFinPeriodEnd" value="' + (item && !isMembership ? item.period_end : '') + '" style="flex:1;">' +
                 '</div>' +
             '</div>' +
@@ -509,7 +509,7 @@
                 '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinMemberStart" value="' + (isMembership && item && item._raw ? (item._raw.memberships ? item._raw.memberships.starts_at || '' : '').slice(0, 10) : todayStr) + '" style="flex:1;">' +
-                    '<span style="color:var(--text-dim);">—</span>' +
+                    '<span style="color:var(--text-muted);">—</span>' +
                     '<input type="date" class="ad-field-input" id="adFinMemberEnd" value="' + (isMembership && item && item._raw && item._raw.memberships ? (item._raw.memberships.expires_at || '').slice(0, 10) : '') + '" style="flex:1;">' +
                 '</div>' +
             '</div>' +
@@ -740,7 +740,7 @@
         }
 
         if (items.length === 0) {
-            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-dim);font-size:0.85rem;">' + (isEn ? 'Not found' : 'Не найдено') + '</div>';
+            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:0.85rem;">' + (isEn ? 'Not found' : 'Не найдено') + '</div>';
             resultsDiv.style.display = 'block';
             return;
         }

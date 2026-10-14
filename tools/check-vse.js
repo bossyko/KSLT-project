@@ -88,7 +88,8 @@ const КУСКИ = [
     ['табло и подтверждение ваучера', 'check-tablo-vaucher.js', 'check-tablo-vaucher-otkat.js'],
     ['ссылки вместо div', 'check-ssylki-kartochek.js', 'check-ssylki-kartochek-otkat.js'],
     ['политика безопасности', 'check-csp.js', 'check-csp-otkat.js'],
-    ['ровные ряды', 'check-rovnye-ryady.js', 'check-rovnye-ryady-otkat.js']
+    ['ровные ряды', 'check-rovnye-ryady.js', 'check-rovnye-ryady-otkat.js'],
+    ['тихий текст', 'check-tihiy-tekst.js', 'check-tihiy-tekst-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -194,7 +194,7 @@
 
             html += '<tr>' +
                 '<td>' + A.esc(p1Name) + '</td>' +
-                '<td style="text-align:center;font-weight:700;color:var(--text-dim);">⚔️</td>' +
+                '<td style="text-align:center;font-weight:700;color:var(--text-muted);">⚔️</td>' +
                 '<td>' + A.esc(p2Name) + '</td>' +
                 '<td>' + formatDate(date) + (time ? ' ' + time : '') + '</td>' +
                 '<td>' + A.esc(venue) + '</td>' +
@@ -666,7 +666,7 @@
                             '<label class="ad-field-label">' + L.chalTime + '</label>' +
                             '<div style="display:flex;gap:6px;align-items:center;">' +
                                 '<select class="ad-field-input" id="cbTimeH" style="flex:1;">' + buildHourOptions() + '</select>' +
-                                '<span style="color:var(--text-dim);font-weight:700;">:</span>' +
+                                '<span style="color:var(--text-muted);font-weight:700;">:</span>' +
                                 '<select class="ad-field-input" id="cbTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
                             '</div>' +
                         '</div>' +
@@ -1345,7 +1345,7 @@
                         '<div style="font-weight:600;">' + A.esc(p1Name) + '</div>' +
                         '<div style="color:var(--text-secondary);font-size:12px;margin:4px 0;">VS</div>' +
                         '<div style="font-weight:600;">' + A.esc(p2Name) + '</div>' +
-                        '<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">' + (_setFormat === 'short' ? L.formatShort : L.formatStandard) + '</div>' +
+                        '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">' + (_setFormat === 'short' ? L.formatShort : L.formatStandard) + '</div>' +
                     '</div>' +
                     setRowHtml(1, sv[0]) +
                     setRowHtml(2, sv[1]) +
@@ -1728,7 +1728,7 @@
                             '<label class="ad-field-label">' + L.chalTime + '</label>' +
                             '<div style="display:flex;gap:6px;align-items:center;">' +
                                 '<select class="ad-field-input" id="ebTimeH" style="flex:1;">' + buildHourOptions() + '</select>' +
-                                '<span style="color:var(--text-dim);font-weight:700;">:</span>' +
+                                '<span style="color:var(--text-muted);font-weight:700;">:</span>' +
                                 '<select class="ad-field-input" id="ebTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
                             '</div>' +
                         '</div>' +

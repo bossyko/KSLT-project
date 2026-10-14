@@ -343,7 +343,7 @@
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🎫</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.vchNoVouchers + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.vchNoVouchersText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.vchNoVouchersText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -370,7 +370,7 @@
 
             html +=
                 '<tr>' +
-                    '<td style="color:var(--text-dim);font-size:0.8rem;">' + num + '</td>' +
+                    '<td style="color:var(--text-muted);font-size:0.8rem;">' + num + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(v.player_name || '—') + '</td>' +
                     '<td>' + typeIcon + ' ' + A.esc(v.entity_name || '—') + '</td>' +
                     '<td style="font-size:0.85rem;">' + A.esc(v.service_name || '—') + '</td>' +

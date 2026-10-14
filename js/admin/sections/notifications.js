@@ -75,7 +75,7 @@
                             '<th>' + L.pushFcm + '</th>' +
                             '<th style="width:80px;"></th>' +
                         '</tr></thead>' +
-                        '<tbody id="adPushHistoryBody"><tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody id="adPushHistoryBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -140,14 +140,14 @@
 
         var profiles = res.data || [];
         if (profiles.length === 0) {
-            container.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:0.8rem;">—</div>';
+            container.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:0.8rem;">—</div>';
             return;
         }
 
         container.innerHTML = profiles.map(function(p) {
             return '<div class="ad-push-user-option" data-id="' + A.esc(p.id) + '" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-subtle);font-size:0.85rem;">' +
                 '<div style="font-weight:500;">' + A.esc(p.full_name || '') + '</div>' +
-                '<div style="color:var(--text-dim);font-size:0.75rem;">' + A.esc(p.email || '') + '</div>' +
+                '<div style="color:var(--text-muted);font-size:0.75rem;">' + A.esc(p.email || '') + '</div>' +
             '</div>';
         }).join('');
 
@@ -254,7 +254,7 @@
 
         var rows = res.data || [];
         if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">' + L.pushNoHistory + '</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">' + L.pushNoHistory + '</td></tr>';
             return;
         }
 

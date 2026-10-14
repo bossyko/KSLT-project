@@ -772,7 +772,7 @@
 }
 
 .pl-change-neutral {
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-sm);
 }
 

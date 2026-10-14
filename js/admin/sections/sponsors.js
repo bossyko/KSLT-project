@@ -33,7 +33,7 @@
         data.forEach(function(s) {
             var logoHtml = s.logo
                 ? '<img src="' + A.esc(s.logo) + '" style="width:40px;height:24px;object-fit:contain;border-radius:4px;background:var(--bg-elevated);">'
-                : '<span style="color:var(--text-dim)">—</span>';
+                : '<span style="color:var(--text-muted)">—</span>';
             var urlHtml = s.url
                 ? '<a href="' + A.esc(s.url) + '" target="_blank" style="color:var(--accent)">' + A.esc(s.url.replace(/^https?:\/\//, '').slice(0, 30)) + '</a>'
                 : '—';
@@ -58,7 +58,7 @@
                 '<td style="text-align:center">' + contactsHtml + '</td>' +
                 '<td style="text-align:center">' + heroHtml + '</td>' +
                 '<td style="text-align:center">' + (s.sort_order || 0) + '</td>' +
-                '<td style="text-align:center;color:var(--text-dim)">' + (s.view_count || 0) + '</td>' +
+                '<td style="text-align:center;color:var(--text-muted)">' + (s.view_count || 0) + '</td>' +
                 '<td><button class="ad-btn ad-btn-sm" data-edit="' + s.id + '">' + L.edit + '</button></td>' +
             '</tr>';
         });

@@ -91,19 +91,19 @@
                 // Считаем только сыгранное: предстоящий турнир может не
                 // состояться, и включать его в «всего» — обманывать себя
                 L.trnStatTotal + ': <span id="adTrnStatTotal">...</span>' +
-                '<span style="color:var(--text-dim);">|</span>' +
+                '<span style="color:var(--text-muted);">|</span>' +
                 L.trnStatRating + ': <span id="adTrnStatRating">...</span>' +
-                '<span style="color:var(--text-dim);">|</span>' +
+                '<span style="color:var(--text-muted);">|</span>' +
                 L.trnStatFriendly + ': <span id="adTrnStatFriendly">...</span>' +
-                '<span style="color:var(--text-dim);">|</span>' +
+                '<span style="color:var(--text-muted);">|</span>' +
                 L.trnStatUpcoming + ': <span id="adTrnStatUpcoming">...</span>' +
-                '<span style="color:var(--text-dim);">|</span>' +
+                '<span style="color:var(--text-muted);">|</span>' +
                 L.trnStatCancelled + ': <span id="adTrnStatCancelled">...</span>' +
                 // Черновики в общий счёт не идут: турнира ещё нет, его никто
                 // не видел. Но и прятать совсем нельзя — про недоделанное
                 // забывают, поэтому показываем отдельно и только когда есть
                 '<span id="adTrnStatDraftsWrap" style="display:none;">' +
-                    '<span style="color:var(--text-dim);">|</span>' +
+                    '<span style="color:var(--text-muted);">|</span>' +
                     L.trnStatDrafts + ': <span id="adTrnStatDrafts">0</span>' +
                 '</span>' +
             '</div>' +
@@ -169,7 +169,7 @@
                             trnColHeader('participants', L.trnMaxParticipantsShort) +
                             '<th></th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -450,7 +450,7 @@
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏆</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noTournaments + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noTournamentsText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noTournamentsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -2289,7 +2289,7 @@ function обновитьРасклад() {
         var photo = player.photo || '';
         var photoHtml = photo
             ? '<img src="' + A.esc(photo) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">'
-            : '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-dim);">—</div>';
+            : '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-muted);">—</div>';
         var catId = player.category_id || '';
         var catParts = catId.split('-');
         var catLabel = catParts.length > 1
@@ -2300,7 +2300,7 @@ function обновитьРасклад() {
         if (reg.registered_at) {
             var d = new Date(reg.registered_at);
             regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
-                ' <span style="color:var(--text-dim);">' +
+                ' <span style="color:var(--text-muted);">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
             // Заявка держит место в сетке с момента подачи. Если её долго не
             // разбирать, турнир выглядит полным, а живых участников мало —

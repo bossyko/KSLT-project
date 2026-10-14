@@ -682,7 +682,7 @@
 }
 
 .ct-stat-sep {
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: var(--fs-md);
 }
 

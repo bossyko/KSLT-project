@@ -576,7 +576,7 @@
                             return;
                         }
 
-                        dropdown.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.8rem;">...</div>';
+                        dropdown.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">...</div>';
                         dropdown.style.display = '';
 
                         // Только непрочитанные: колокольчик — про новое. Вся
@@ -596,7 +596,7 @@
 
                             if (items.length === 0) {
                                 dropdown.innerHTML =
-                                    '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' +
+                                    '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.85rem;">' +
                                     L2.empty + '</div>' + foot;
                                 return;
                             }
@@ -615,7 +615,7 @@
                                         refreshCount();
                                         if (!dropdown.querySelector('.site-notif-item')) {
                                             dropdown.innerHTML =
-                                                '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' +
+                                                '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.85rem;">' +
                                                 L2.empty + '</div>' + foot;
                                         }
                                     });
@@ -626,7 +626,7 @@
                             // другим и скрывала пустой ключ на страницах сайта
                             console.warn('[KSLT] notifications:', e);
                             dropdown.innerHTML =
-                                '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">' +
+                                '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.85rem;">' +
                                 (isEn ? 'Failed to load' : isKg ? 'Жүктөлгөн жок' : 'Не удалось загрузить') +
                                 '</div>';
                         });

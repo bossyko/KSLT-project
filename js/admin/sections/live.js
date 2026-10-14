@@ -102,7 +102,7 @@
         if (!content) return;
 
         if (!activeList.length) {
-            content.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:40px;">' + L.liveNoActive + '</p>';
+            content.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">' + L.liveNoActive + '</p>';
             return;
         }
 
@@ -119,7 +119,7 @@
             var p2 = playerName(m.player2_id, m.player2_name);
             var score = buildScoreDisplay(m);
             var statusLabel = m.status === 'warmup' ? 'Warmup' : m.status === 'paused' ? 'Paused' : 'LIVE';
-            var statusStyle = m.status === 'live' ? 'color:#EF5350;font-weight:700;' : 'color:var(--text-dim);';
+            var statusStyle = m.status === 'live' ? 'color:#EF5350;font-weight:700;' : 'color:var(--text-muted);';
 
             var baseUrl = window.location.origin;
             var umpireUrl = baseUrl + '/pages/umpire.html?key=' + m.umpire_key;
@@ -128,7 +128,7 @@
 
             html += '<tr>' +
                 '<td><strong>' + A.esc(p1) + '</strong> vs <strong>' + A.esc(p2) + '</strong>' +
-                    (m.tournament_label ? '<br><span style="font-size:0.8rem;color:var(--text-dim);">' + A.esc(m.tournament_label) + '</span>' : '') +
+                    (m.tournament_label ? '<br><span style="font-size:0.8rem;color:var(--text-muted);">' + A.esc(m.tournament_label) + '</span>' : '') +
                 '</td>' +
                 '<td style="font-family:monospace;font-weight:600;">' + score + '</td>' +
                 '<td style="' + statusStyle + '">' + statusLabel + '</td>' +
@@ -175,7 +175,7 @@
         if (!content) return;
 
         if (!completedList.length) {
-            content.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:40px;">' + L.liveNoCompleted + '</p>';
+            content.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">' + L.liveNoCompleted + '</p>';
             return;
         }
 
@@ -319,7 +319,7 @@
                         '<div style="display:flex;gap:8px;align-items:center;">' +
                             '<button class="ad-btn ad-btn-outline ad-btn-sm" id="liveSponsorUpload" type="button">' + L.liveSponsorUpload + '</button>' +
                             '<input type="file" id="liveSponsorFile" accept="image/*" style="display:none;">' +
-                            '<span id="liveSponsorName" style="font-size:0.8rem;color:var(--text-dim);"></span>' +
+                            '<span id="liveSponsorName" style="font-size:0.8rem;color:var(--text-muted);"></span>' +
                         '</div>' +
                         '<input type="hidden" id="liveSponsorUrl">' +
                         // ИМЯ СПОНСОРА. До 24.09 поля не было: грузили только
@@ -504,7 +504,7 @@
         if (!preview) return;
         preview.innerHTML = '<div style="text-align:center;font-size:1rem;">' +
             '<strong>' + A.esc(p1) + '</strong>' +
-            '<span style="color:var(--text-dim);margin:0 8px;">vs</span>' +
+            '<span style="color:var(--text-muted);margin:0 8px;">vs</span>' +
             '<strong>' + A.esc(p2) + '</strong>' +
         '</div>';
         preview.style.display = '';

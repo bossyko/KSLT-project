@@ -187,7 +187,7 @@
 }
 
 .tournament-search-input::placeholder {
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 
 .tournament-search-input:focus {
@@ -540,7 +540,7 @@
 
 .ranking-header .tournaments-played {
     font-size: var(--fs-2xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
 }
 
 /* Blur overlay for unregistered */
@@ -602,7 +602,7 @@
 
 .trn-strip-sub {
     font-size: var(--fs-xs);
-    color: var(--text-dim);
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

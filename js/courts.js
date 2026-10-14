@@ -1206,7 +1206,7 @@
         if (!court) {
             // Will be retried after Supabase loads
             var container = document.getElementById('courtDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-dim);">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted);">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</div>';
             return;
         }
 

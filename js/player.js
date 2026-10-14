@@ -1095,7 +1095,7 @@
         if (!container) return;
 
         if (!client) {
-            container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
+            container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
             return;
         }
 
@@ -1119,7 +1119,7 @@
             .limit(50);
 
         if (res.error || !res.data || res.data.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
+            container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;font-size:0.9rem;">' + (isEn ? 'No matches yet' : isKg ? 'Матчтар жок' : 'Нет матчей') + '</div>';
             return;
         }
 
@@ -1368,7 +1368,7 @@
             });
 
             if (items.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;font-size:0.9rem;">' +
+                container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;font-size:0.9rem;">' +
                     (isEn ? 'No tournaments yet' : isKg ? 'Турнирлер жок' : 'Нет турниров') + '</div>';
                 return;
             }

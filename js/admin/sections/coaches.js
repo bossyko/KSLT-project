@@ -97,7 +97,7 @@
                             '<th style="text-align:center;">' + L.cchPromoted + '</th>' +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -156,14 +156,14 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
-        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.cchViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
+        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.cchViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
 
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="9" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🎓</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCoaches + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noCoachesText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noCoachesText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -179,7 +179,7 @@
             (row.tags || []).forEach(function(t) {
                 tagsHtml += '<span class="ad-cch-tag-badge">' + (COACH_TAGS[t] || t) + '</span>';
             });
-            if (!tagsHtml) tagsHtml = '<span style="color:var(--text-dim);">—</span>';
+            if (!tagsHtml) tagsHtml = '<span style="color:var(--text-muted);">—</span>';
             var promotedHtml = row.promoted ? '<span style="color:var(--accent);">⭐</span>' : '—';
 
             html += '<tr data-id="' + row.id + '">' +
@@ -191,7 +191,7 @@
                 '<td>' + tagsHtml + '</td>' +
                 '<td style="font-weight:600;color:var(--accent);text-align:center;">' + (row.price || '—') + '</td>' +
                 '<td style="text-align:center;">' + promotedHtml + '</td>' +
-                '<td style="text-align:center;color:var(--text-dim);">' + ((row.view_count || 0) > 0 ? row.view_count : '\u2014') + '</td>' +
+                '<td style="text-align:center;color:var(--text-muted);">' + ((row.view_count || 0) > 0 ? row.view_count : '\u2014') + '</td>' +
             '</tr>';
         });
         tbody.innerHTML = html;
@@ -312,17 +312,17 @@
         (item.tags || []).forEach(function(t) {
             tagsHtml += '<span class="ad-cch-tag-badge" style="margin-right:4px;">' + (COACH_TAGS[t] || t) + '</span>';
         });
-        if (!tagsHtml) tagsHtml = '<span style="color:var(--text-dim);">—</span>';
+        if (!tagsHtml) tagsHtml = '<span style="color:var(--text-muted);">—</span>';
 
         var promotedHtml = item.promoted
             ? '<span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span>'
-            : '<span style="color:var(--text-dim);">—</span>';
+            : '<span style="color:var(--text-muted);">—</span>';
 
         // Payments table
         var paymentsHtml = '';
         if (payments.length === 0) {
             paymentsHtml =
-                '<div style="text-align:center;padding:30px 20px;color:var(--text-dim);">' +
+                '<div style="text-align:center;padding:30px 20px;color:var(--text-muted);">' +
                     '<div style="font-size:1.5rem;opacity:0.3;margin-bottom:6px;">💰</div>' +
                     L.cchViewNoPayments +
                 '</div>';
@@ -370,19 +370,19 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchViewInfo + '</div>' +
                 '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:0.9rem;">' +
-                    '<span style="color:var(--text-dim);">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
+                    '<span style="color:var(--text-muted);">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(fullName.trim()) + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.cchPosition + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.cchPosition + '</span>' +
                     '<span style="color:var(--text-secondary);">' + A.esc(pos || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.cchCourt + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.cchCourt + '</span>' +
                     '<span style="color:var(--text-secondary);">' + A.esc(item.court || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.cchExperience + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.cchExperience + '</span>' +
                     '<span style="color:var(--text-secondary);">' + (item.experience || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.cchPrice + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.cchPrice + '</span>' +
                     '<span style="color:var(--text-secondary);font-weight:600;">' + (item.price || '—') + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.cchTags + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.cchTags + '</span>' +
                     '<span>' + tagsHtml + '</span>' +
-                    '<span style="color:var(--text-dim);">' + L.cchPromoted + '</span>' +
+                    '<span style="color:var(--text-muted);">' + L.cchPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
                 '</div>' +
             '</div>' +
@@ -546,7 +546,7 @@
 
             // Promoted badge (read-only)
             (item && item.promoted
-                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span style="color:var(--text-dim);font-size:0.8rem;">' + L.cchPromotedHint + '</span></div>'
+                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span style="color:var(--text-muted);font-size:0.8rem;">' + L.cchPromotedHint + '</span></div>'
                 : '') +
 
             // Photo
@@ -742,7 +742,7 @@
                     '</div>' +
                     '<div style="margin-top:16px;">' +
                         '<label class="ad-field-label">' + (isEn ? 'Partner Services' : 'Услуги партнёра') + '</label>' +
-                        '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:0.75rem;color:var(--text-dim);">' +
+                        '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:0.75rem;color:var(--text-muted);">' +
                             '<span>' + L.cchServiceName + '</span>' +
                             '<span>' + L.cchDiscount + '</span>' +
                             '<span></span>' +

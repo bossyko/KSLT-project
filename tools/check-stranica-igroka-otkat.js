@@ -151,8 +151,9 @@ const ОТКАТЫ = [
        '<link rel="stylesheet" href="../css/player.css?v=9',
    'версия player.css одна на все три языка'],
 
-  [RU, '<script src="../js/player.js?v=59"></script>',
-       '<script src="../js/player.js?v=58"></script>',
+  /* 13.10: якорь держался за НОМЕР версии. Держимся за имя файла. */
+  [RU, '<script src="../js/player.js?v=',
+       '<script src="../js/player.js?v=9',
    'версия player.js одна на все три языка'],
 
   [RU, '<link rel="stylesheet" href="../css/kslt-otsechka.css?v=3">',

@@ -130,7 +130,7 @@
                             '<th style="cursor:pointer;user-select:none;" id="adUsrSortMem">' + L.usrThMembership + ' <span style="opacity:0.4;">⇅</span></th>' +
                             '<th>' + L.thDate + '</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -312,7 +312,7 @@
                 '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">👥</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.usrNoUsers + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.usrNoUsersText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.usrNoUsersText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -341,7 +341,7 @@
             if (u.role === 'admin' || u.role === 'manager') {
                 // У сотрудников клуба членства нет и быть не может: под этой
                 // почтой они ведут клуб, а не играют. Срок писать нечему
-                memBadge = '<span style="color:var(--text-dim);font-size:0.8rem;">' + L.usrStaffNoMembership + '</span>';
+                memBadge = '<span style="color:var(--text-muted);font-size:0.8rem;">' + L.usrStaffNoMembership + '</span>';
             } else if (mem && mem.status === 'active') {
                 var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
@@ -351,7 +351,7 @@
                 var expFormatted2 = expDate2 ? expDate2[2] + '.' + expDate2[1] + '.' + expDate2[0] : '';
                 memBadge = '<span class="ad-mem-badge ad-mem-expired">' + L.usrExpired + (expFormatted2 ? ' ' + expFormatted2 : '') + '</span>';
             } else {
-                memBadge = '<span style="color:var(--text-dim);font-size:0.8rem;">' + L.usrNone + '</span>';
+                memBadge = '<span style="color:var(--text-muted);font-size:0.8rem;">' + L.usrNone + '</span>';
             }
 
             // Ban status badge
@@ -386,11 +386,11 @@
             if (canClick) tr.style.cursor = 'pointer';
             tr.innerHTML =
                 '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;background:rgba(204,255,0,0.12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
-                '<td style="color:var(--text-dim);font-size:0.85rem;">' + email + '</td>' +
+                '<td style="color:var(--text-muted);font-size:0.85rem;">' + email + '</td>' +
                 '<td>' + roleBadge + безТелеграма + '</td>' +
                 '<td>' + banBadge + '</td>' +
                 '<td>' + memBadge + '</td>' +
-                '<td style="color:var(--text-dim);font-size:0.85rem;">' + regDate + '</td>';
+                '<td style="color:var(--text-muted);font-size:0.85rem;">' + regDate + '</td>';
 
             if (canClick) {
                 tr.addEventListener('click', function(e) {
@@ -478,7 +478,7 @@
         var вестиЧленство = canManageMembership && !сотрудник;
 
         var tgStatus = user.telegram_chat_id ? L.usrTgConnected : L.usrTgNotConnected;
-        var tgColor = user.telegram_chat_id ? '#34c759' : 'var(--text-dim)';
+        var tgColor = user.telegram_chat_id ? '#34c759' : 'var(--text-muted)';
         var lastSeen = user.last_seen ? user.last_seen.split('T')[0] + ' ' + user.last_seen.split('T')[1].substring(0, 5) : '—';
         var regDate = user.created_at ? user.created_at.split('T')[0] + ' ' + user.created_at.split('T')[1].substring(0, 5) : '—';
 
@@ -490,7 +490,7 @@
         // --- Membership section with inline payment ---
         var memHtml = '';
         if (сотрудник) {
-            memHtml = '<div style="color:var(--text-dim);margin-bottom:12px;">' + L.usrStaffNoMembershipHint + '</div>';
+            memHtml = '<div style="color:var(--text-muted);margin-bottom:12px;">' + L.usrStaffNoMembershipHint + '</div>';
         } else if (вестиЧленство) {
             // Status badge
             if (membership && membership.status === 'active') {
@@ -509,7 +509,7 @@
                     '</div>';
             } else {
                 memHtml =
-                    '<div style="color:var(--text-dim);margin-bottom:12px;">' + L.usrNoMembership + '</div>';
+                    '<div style="color:var(--text-muted);margin-bottom:12px;">' + L.usrNoMembership + '</div>';
             }
 
             // Inline payment: period buttons + amount + pay button
@@ -589,7 +589,7 @@
         }
 
         if (isSelf && isAdm) {
-            actionsHtml = '<div style="color:var(--text-dim);font-size:0.85rem;font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
+            actionsHtml = '<div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
         } else if (actionBtns.length > 0) {
             actionsHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actionBtns.join('') + '</div>';
         }
@@ -623,10 +623,10 @@
                     avatarHtml +
                     '<div>' +
                         '<div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">' + A.esc(user.full_name || user.email) + '</div>' +
-                        '<div style="color:var(--text-dim);font-size:0.85rem;">' + A.esc(user.email || '') + '</div>' +
+                        '<div style="color:var(--text-muted);font-size:0.85rem;">' + A.esc(user.email || '') + '</div>' +
                         '<div style="display:flex;gap:8px;margin-top:4px;">' +
                             '<span style="color:' + tgColor + ';font-size:0.8rem;">TG: ' + tgStatus + '</span>' +
-                            '<span style="color:var(--text-dim);font-size:0.8rem;">' + L.usrLastSeen + ': ' + lastSeen + '</span>' +
+                            '<span style="color:var(--text-muted);font-size:0.8rem;">' + L.usrLastSeen + ': ' + lastSeen + '</span>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -1047,7 +1047,7 @@
                     '<div style="margin-bottom:16px;">' +
                         '<label class="ad-field-label">' + L.usrSelectCategory + '</label>' +
                         '<select class="ad-field-input" id="adMemCategory">' + catOpts + '</select>' +
-                        '<div style="color:var(--text-dim);font-size:0.8rem;margin-top:4px;">' + L.usrCategoryHint + '</div>' +
+                        '<div style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">' + L.usrCategoryHint + '</div>' +
                     '</div>'
                 ) +
                 '<div style="margin-bottom:16px;">' +
@@ -1415,7 +1415,7 @@
                         '<input type="text" class="ad-field-input" id="adMgrLastName">' +
                     '</div>' +
                 '</div>' +
-                '<div style="color:var(--text-dim);font-size:0.8rem;margin-bottom:16px;">' + L.usrAddManagerHint + '</div>' +
+                '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:16px;">' + L.usrAddManagerHint + '</div>' +
                 '<div class="ad-confirm-actions">' +
                     '<button class="ad-btn ad-btn-secondary" id="adMgrCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-primary" id="adMgrSubmit">' + L.usrAddManager + '</button>' +
@@ -1902,10 +1902,10 @@
             var к = карточки[z.player_id] || {};
             var ntrp = к.ntrp_singles ? ' · NTRP ' + к.ntrp_singles : '';
             return '<tr>' +
-                '<td>' + A.esc(ч.full_name || '—') + '<div style="font-size:0.75rem;color:var(--text-dim);">' +
+                '<td>' + A.esc(ч.full_name || '—') + '<div style="font-size:0.75rem;color:var(--text-muted);">' +
                     A.esc(ч.email || '') + (ч.phone ? ' · ' + A.esc(ч.phone) : '') + '</div></td>' +
                 '<td>' + A.esc(к.name || z.player_id) +
-                    '<div style="font-size:0.75rem;color:var(--text-dim);">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
+                    '<div style="font-size:0.75rem;color:var(--text-muted);">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
                 '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
                     new Date(z.created_at).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' +
@@ -1956,7 +1956,7 @@
             var окно = box.querySelector('#adLinkHistory');
             if (окно.style.display !== 'none') { окно.style.display = 'none'; return; }
             окно.style.display = '';
-            окно.innerHTML = '<div style="padding:10px;color:var(--text-dim);">…</div>';
+            окно.innerHTML = '<div style="padding:10px;color:var(--text-muted);">…</div>';
 
             var res = await A.client.from('player_link_requests')
                 .select('id, profile_id, player_id, status, note, created_at, decided_at')
@@ -1965,7 +1965,7 @@
                 .limit(30);
             var строки = res.data || [];
             if (!строки.length) {
-                окно.innerHTML = '<div style="padding:10px;color:var(--text-dim);">' + L.linkHistoryEmpty + '</div>';
+                окно.innerHTML = '<div style="padding:10px;color:var(--text-muted);">' + L.linkHistoryEmpty + '</div>';
                 return;
             }
 
@@ -1980,7 +1980,7 @@
             var подпись = {
                 approved: { текст: L.linkStApproved, цвет: '#34c759' },
                 rejected: { текст: L.linkStRejected, цвет: '#ff3b30' },
-                withdrawn: { текст: L.linkStWithdrawn, цвет: 'var(--text-dim)' }
+                withdrawn: { текст: L.linkStWithdrawn, цвет: 'var(--text-muted)' }
             };
 
             окно.innerHTML = '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
@@ -1992,10 +1992,10 @@
                 var когда = z.decided_at || z.created_at;
                 return '<tr>' +
                     '<td>' + A.esc(ч.full_name || '—') +
-                        '<div style="font-size:0.75rem;color:var(--text-dim);">' + A.esc(ч.email || '') + '</div></td>' +
+                        '<div style="font-size:0.75rem;color:var(--text-muted);">' + A.esc(ч.email || '') + '</div></td>' +
                     '<td>' + A.esc(к.name || z.player_id) + '</td>' +
                     '<td style="color:' + п.цвет + ';font-weight:600;">' + п.текст +
-                        (z.note ? '<div style="font-size:0.75rem;color:var(--text-dim);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
+                        (z.note ? '<div style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
                     '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
                         (когда ? new Date(когда).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') : '—') + '</td>' +
                 '</tr>';

@@ -1935,7 +1935,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                         for (var gcol = 0; gcol < ggStandings.length; gcol++) {
                             if (grow === gcol) {
-                                glHtml += '<td style="text-align:center;background:rgba(255,255,255,0.03);color:var(--text-dim);">&times;</td>';
+                                glHtml += '<td style="text-align:center;background:rgba(255,255,255,0.03);color:var(--text-muted);">&times;</td>';
                             } else {
                                 var gOppId = ggStandings[gcol].playerId;
                                 var gMatch = ggMatches.find(function(m) {
@@ -1957,7 +1957,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     }).join(' ') + (gCellOutcome ? ' ' + gCellOutcome : '');
                                     glHtml += '<td style="text-align:center;font-size:0.8rem;' + (gIsWinner ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-secondary);') + '">' + gScoreDisp + '</td>';
                                 } else {
-                                    glHtml += '<td style="text-align:center;color:var(--text-dim);">—</td>';
+                                    glHtml += '<td style="text-align:center;color:var(--text-muted);">—</td>';
                                 }
                             }
                         }
@@ -2156,7 +2156,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                         var matchLabel = isEn ? 'Match ' : (isKg ? 'Матч ' : 'Матч ');
                         плейофф += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
-                        плейофф += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
+                        плейофф += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
                         // P1
                         плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
                         плейофф += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p1Name + '</span>';
@@ -2235,7 +2235,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                         for (var col = 0; col < standings.length; col++) {
                             if (row === col) {
-                                bHtml += '<td style="text-align:center;background:rgba(255,255,255,0.03);color:var(--text-dim);">&times;</td>';
+                                bHtml += '<td style="text-align:center;background:rgba(255,255,255,0.03);color:var(--text-muted);">&times;</td>';
                             } else {
                                 var oppId = standings[col].playerId;
                                 var match = gMatches.find(function(m) {
@@ -2260,7 +2260,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     }
                                     if (cellOutcome) score += ' ' + cellOutcome;
                                     var isWin = match.winner_id === st.playerId;
-                                    bHtml += '<td style="text-align:center;font-size:0.8rem;white-space:nowrap;' + (isWin ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-dim);') + '">' + score + '</td>';
+                                    bHtml += '<td style="text-align:center;font-size:0.8rem;white-space:nowrap;' + (isWin ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-muted);') + '">' + score + '</td>';
                                 } else if (match) {
                                     // Матч есть, счёта ещё нет: клетка несёт номер и имя
                                     // соперника — по ним свой матч заполняется прямо отсюда
@@ -2268,9 +2268,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     var противФам = противName.trim().split(/\s+/).pop();
                                     bHtml += '<td class="td-grp-cell" data-match-id="' + match.id +
                                              '" data-opp="' + противФам +
-                                             '" style="text-align:center;color:var(--text-dim);">—</td>';
+                                             '" style="text-align:center;color:var(--text-muted);">—</td>';
                                 } else {
-                                    bHtml += '<td style="text-align:center;color:var(--text-dim);">—</td>';
+                                    bHtml += '<td style="text-align:center;color:var(--text-muted);">—</td>';
                                 }
                             }
                         }
@@ -3491,7 +3491,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         ? (isEn ? 'permanently' : (isKg ? 'түбөлүккө' : 'навсегда'))
                         : new Date(plRes.data.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
                     var banReasonText = plRes.data.ban_reason
-                        ? '<div style="color:var(--text-dim);font-size:0.85rem;margin-top:4px;">' +
+                        ? '<div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">' +
                             (isEn ? 'Reason: ' : (isKg ? 'Себеби: ' : 'Причина: ')) + plRes.data.ban_reason + '</div>'
                         : '';
                     btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">' +
@@ -3518,7 +3518,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     else if (tournament.ntrp_max) rangeStr = '≤ ' + tournament.ntrp_max;
                     btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">' +
                         '<div style="color:#ff3b30;font-weight:500;">' + ntrpMsg + '</div>' +
-                        (rangeStr ? '<div style="color:var(--text-dim);font-size:0.85rem;margin-top:4px;">' +
+                        (rangeStr ? '<div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">' +
                             (isEn ? 'Required NTRP: ' : (isKg ? 'Талап кылынган NTRP: ' : 'Требуемый NTRP: ')) + rangeStr + '</div>' : '') +
                     '</div>';
                 } else if (!membershipOk) {

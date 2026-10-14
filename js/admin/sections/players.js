@@ -248,7 +248,7 @@
                             '<th>' + L.thWL + '</th>' +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -312,7 +312,7 @@
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📊</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noPlayers + '</div>' +
-                    '<div style="color:var(--text-dim);font-size:0.8rem;">' + L.noPlayersText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noPlayersText + '</div>' +
                 '</td></tr>';
             // Иначе под пустой таблицей остаются кнопки страниц от прошлого отбора
             var stale = document.getElementById('adPlrPagination');
@@ -337,12 +337,12 @@
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
                         (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
-                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-dim);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
+                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
                     '<td>' + (p.wins || 0) + '/' + (p.losses || 0) + '</td>' +
-                    '<td style="text-align:center;color:var(--text-dim);">' + ((p.view_count || 0) > 0 ? p.view_count : '\u2014') + '</td>' +
+                    '<td style="text-align:center;color:var(--text-muted);">' + ((p.view_count || 0) > 0 ? p.view_count : '\u2014') + '</td>' +
                 '</tr>';
         });
 
@@ -577,13 +577,13 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrTelegram + '</label>' +
                         '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item && item._telegram ? A.esc(withAt(item._telegram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                            (item && item._telegram ? A.esc(withAt(item._telegram)) : '<span style="color:var(--text-muted);">\u2014</span>') +
                         '</div>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrInstagram + '</label>' +
                         '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item && item._instagram ? A.esc(withAt(item._instagram)) : '<span style="color:var(--text-dim);">\u2014</span>') +
+                            (item && item._instagram ? A.esc(withAt(item._instagram)) : '<span style="color:var(--text-muted);">\u2014</span>') +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -795,7 +795,7 @@
                 if (isPlayerBanned) {
                     var isPerm = new Date(item.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU'));
-                    var banReasonStr = item.ban_reason ? '<div style="color:var(--text-dim);font-size:0.8rem;margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
+                    var banReasonStr = item.ban_reason ? '<div style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
                     banHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
                         '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banDateStr + '</span>' +
                     '</div>' +
@@ -1569,7 +1569,7 @@
             .limit(10);
 
         if (res.error || !res.data || res.data.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-dim);padding:8px 0;">' + L.plrNoMatches + '</div>';
+            container.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">' + L.plrNoMatches + '</div>';
             return;
         }
 
@@ -1591,7 +1591,7 @@
 
         // Render matches table
         var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">' +
-            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-dim);font-size:0.75rem;">' +
+            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-muted);font-size:0.75rem;">' +
                 '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Date' : 'Дата') + '</th>' +
                 '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Opponent' : 'Соперник') + '</th>' +
                 '<th style="text-align:center;padding:6px 8px;">' + (isEn ? 'Score' : 'Счёт') + '</th>' +
@@ -1645,7 +1645,7 @@
                 '</td>' +
                 '<td style="padding:6px 8px;text-align:center;font-family:monospace;">' + A.esc(score) + '</td>' +
                 '<td style="padding:6px 8px;text-align:center;">' + resultBadge + '</td>' +
-                '<td style="padding:6px 8px;font-size:0.75rem;color:var(--text-dim);">' +
+                '<td style="padding:6px 8px;font-size:0.75rem;color:var(--text-muted);">' +
                     (isDblTrn ? '<span style="font-size:1.1rem;vertical-align:middle;" title="' + (isEn ? 'Doubles' : 'Парный') + '">\uD83D\uDC65</span> ' : '') +
                     A.esc(trnName) + (roundLabel ? ' <span style="opacity:0.6;">(' + A.esc(roundLabel) + ')</span>' : '') +
                 '</td>' +
@@ -1970,7 +1970,7 @@
         var visible = reversed.slice(0, shown);
 
         visible.forEach(function(row) {
-            var ntrpCell = '<span style="color:var(--text-dim);">—</span>';
+            var ntrpCell = '<span style="color:var(--text-muted);">—</span>';
             if (row.ntrp_after != null) {
                 var move = ntrpMoves[row.id] || 0;
                 var arrow = move > 0 ? '<span style="color:#4ade80;">\u2191</span> '
@@ -1982,7 +1982,7 @@
                 '<td>' + A.esc(rhDate(row.recorded_at)) + '</td>' +
                 '<td>' + A.esc(row.tournament_name) + '</td>' +
                 '<td style="text-align:center;color:var(--accent);font-weight:600;">' +
-                    (row.points_earned ? row.points_earned : '<span style="color:var(--text-dim);">—</span>') + '</td>' +
+                    (row.points_earned ? row.points_earned : '<span style="color:var(--text-muted);">—</span>') + '</td>' +
                 '<td style="text-align:center;">' + ntrpCell + '</td>' +
                 '<td style="white-space:nowrap;">' +
                     // Править можно только начисления, заведённые руками.
@@ -2171,7 +2171,7 @@
                 if (A.currentRole === 'admin') {
                     html += '<td>' + (byRule
                         ? '<span title="' + (isEn ? 'Awarded automatically' : 'Начисляется автоматически') +
-                          '" style="color:var(--text-dim);font-size:0.9rem;">\u2699</span>'
+                          '" style="color:var(--text-muted);font-size:0.9rem;">\u2699</span>'
                         : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button>') +
                     '</td>';
                 }
@@ -3146,7 +3146,7 @@
             info.innerHTML = '<div class="ad-import-file-selected">' +
                 '<span>\ud83d\udcc4</span>' +
                 '<span class="file-name">' + A.esc(file.name) + '</span>' +
-                '<span style="color:var(--text-dim);font-size:0.75rem;">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
+                '<span style="color:var(--text-muted);font-size:0.75rem;">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
                 '<button class="file-remove" id="adImportFileRemove">&times;</button>' +
             '</div>';
             info.style.display = '';
