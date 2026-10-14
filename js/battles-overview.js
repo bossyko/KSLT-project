@@ -523,9 +523,11 @@
         var pair = side.names.length > 1;
         var html = '<div class="bo-player-side">' +
             '<div class="bo-player-photos' + (pair ? ' bo-pair' : '') + '">';
-        side.photos.forEach(function(src) {
-            html += '<img class="bo-player-img" src="' +
-                esc(src || 'https://placehold.co/80x80/1a1a1a/666?text=?') + '" alt="">';
+        /* НЕТ ФОТОГРАФИИ — ИНИЦИАЛЫ, А НЕ ЗАПРОС НА ЧУЖОЙ CDN. Здесь стоял
+           адрес placehold.co: серый «?» и один внешний запрос на каждую
+           карточку. Имя для кружка берётся из той же стороны по месту. */
+        side.photos.forEach(function(src, i) {
+            html += window.KSLT_LICO.лицо(src, (side.names || [])[i] || '', 'bo-player-img');
         });
         html += '</div><div class="bo-player-name' + (pair ? ' bo-pair-names' : '') + '">';
         var CU = window.KSLT_COUNTRY;

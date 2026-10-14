@@ -983,12 +983,9 @@
      * Правило взято у кабинета (`js/dashboard.js:3358`) БЕЗ нового разбора:
      * человек видит одни и те же буквы на обеих страницах.
      */
-    function инициалыИмени(имя) {
-        var слова = String(имя || '').trim().split(/\s+/).filter(Boolean);
-        if (слова.length === 0) return '?';
-        if (слова.length === 1) return слова[0].charAt(0).toUpperCase();
-        return (слова[0].charAt(0) + слова[слова.length - 1].charAt(0)).toUpperCase();
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. ЭТО
+       поведение и стало общим: имя плюс фамилия, как у Apple и Linear. */
+    function инициалыИмени(имя) { return window.KSLT_LICO.инициалы(имя); }
 
     /**
      * Кружок игрока: фотография, а без неё — инициалы.

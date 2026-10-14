@@ -248,12 +248,8 @@
         return a;
     }
 
-    function getInitials(name) {
-        if (!name) return '?';
-        var parts = name.trim().split(/\s+/);
-        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-        return parts[0][0].toUpperCase();
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
+    function getInitials(name) { return window.KSLT_LICO.инициалы(name); }
 
     function escHtml(s) {
         if (!s) return '';

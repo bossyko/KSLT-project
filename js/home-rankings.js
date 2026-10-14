@@ -362,10 +362,8 @@
 
     /* Нет фото — рисуем инициалы сами, без запроса на чужой CDN.
        Avatar 29:82. Размер берётся от .rk-player, один на фото и на заглушку. */
-    function инициалы(имя) {
-        return (имя || '').trim().split(/\s+/).slice(0, 2)
-            .map(function (ч) { return ч.charAt(0); }).join('');
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
+    function инициалы(имя) { return window.KSLT_LICO.инициалы(имя); }
     function лицо(p, класс) {
         var к = класс ? класс + ' ' : '';
         return p.photo

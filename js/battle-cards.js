@@ -178,10 +178,9 @@
      * Места на строку, поэтому у пары фотографии наезжают друг на друга,
      * а имена идут в две строки под ними.
      */
-    function инициалыИмени(имя) {
-        return (имя || '').trim().split(/\s+/).slice(0, 2)
-            .map(function (ч) { return ч.charAt(0); }).join('');
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. Здесь не
+       поднимался регистр и пустое имя давало ПУСТОЙ кружок. */
+    function инициалыИмени(имя) { return window.KSLT_LICO.инициалы(имя); }
 
     function sideHtml(side) {
         var ph = '<div class="bc-player-photos' + (side.names.length > 1 ? ' bc-pair' : '') + '">';

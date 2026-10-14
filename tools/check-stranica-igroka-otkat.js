@@ -223,9 +223,12 @@ const ОТКАТЫ = [
         "        return фото\n            ? '<img src=\"' + esc(фото) + '\" class=\"pp-match-opponent-photo\" alt=\"\">'",
    'кружок игрока строится ОДНИМ местом'],
 
-  [JSФ, 'return (слова[0].charAt(0) + слова[слова.length - 1].charAt(0)).toUpperCase();',
-        'return слова[0].charAt(0).toUpperCase();',
-   'инициалы — две буквы, как в кабинете'],
+  /* 13.10: откат держался за САМУ ФОРМУЛУ, а она переехала в общий модуль
+     js/kslt-lico.js. Роняем ОТНОШЕНИЕ: страница перестала звать общее
+     правило и завела своё. */
+  [JSФ, 'function инициалыИмени(имя) { return window.KSLT_LICO.инициалы(имя); }',
+        "function инициалыИмени(имя) { return String(имя || '').charAt(0); }",
+   'инициалы страницы игрока и кабинета считает одно правило'],
 
   [CSS, '    background: rgba(255, 255, 255, 0.06);\n    color: var(--text-secondary);',
         '    background: rgba(255, 255, 255, 0.06);\n    color: var(--accent);',

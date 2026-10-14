@@ -25,10 +25,8 @@
     /* Нет фото — инициалы, а не запрос на чужой CDN. Заглушка берёт ТОТ ЖЕ
        класс, что и фотография, поэтому размер и скругление у них общие —
        второго объявления не появляется. Avatar 29:82. */
-    function инициалы(имя) {
-        return (имя || '').trim().split(/\s+/).slice(0, 2)
-            .map(function (ч) { return ч.charAt(0); }).join('');
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
+    function инициалы(имя) { return window.KSLT_LICO.инициалы(имя); }
     function лицо(p, класс, alt) {
         return p.photo
             ? '<img src="' + esc(p.photo) + '" alt="' + esc(alt || '') + '" class="' + класс + '">'

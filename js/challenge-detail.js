@@ -594,7 +594,8 @@
         }
 
         return '<div class="ch-pair-side">' +
-            '<img class="ch-player-photo" src="' + esc(photo || 'https://placehold.co/120x160/1a1a1a/666?text=?') + '" alt="' + esc(name) + '">' +
+            /* Нет фотографии — инициалы, а не чужой CDN. js/kslt-lico.js */
+            window.KSLT_LICO.лицо(photo, name, 'ch-player-photo') +
             '<div class="ch-player-name">' + (flag ? flag + '\u00A0' : '') + esc(name) + '</div>' +
             (cat ? '<div class="ch-player-cat">' + esc(cat) + '</div>' : '') +
             (ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(ntrp)) + '</div>' : '') +

@@ -234,6 +234,14 @@
     border: 3px solid transparent;
 }
 
+/* ЗАГЛУШКА НОСИТ ТОТ ЖЕ КЛАСС, ЧТО ФОТОГРАФИЯ, — размер и скругление у них
+   общие, второго объявления не появляется (Avatar 29:82). Свой здесь только
+   кегль: умолчальные 11 в круге 80 читаются точкой. */
+.bo-player-img.avatar-initials {
+    border: 3px solid transparent;
+    font-size: var(--fs-2xl);
+}
+
 .bo-player-side:first-child .bo-player-img {
     border-color: #DC2828;
 }

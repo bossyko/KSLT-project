@@ -200,11 +200,8 @@
         return parts[0] + ' ' + parts[1].charAt(0) + '.';
     }
 
-    function initials(name) {
-        var parts = String(name || '').trim().split(/\s+/);
-        return ((parts[0] || '')[0] || '?').toUpperCase() +
-               ((parts[1] || '')[0] || '').toUpperCase();
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
+    function initials(name) { return window.KSLT_LICO.инициалы(name); }
 
     /* ФОРМА — ЧЕТЫРЕ ПУСТЫХ <i>, И ДИКТОР МОЛЧАЛ. Цвет точки был
        единственным носителем смысла. Даём всей полоске роль и подпись

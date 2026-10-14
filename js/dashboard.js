@@ -3401,12 +3401,10 @@
      * в паре два кружка выглядели бы одинаково. Больше двух в кружок не
      * влезает, поэтому у длинных имён берём первое и последнее слово.
      */
-    function dbInitials(name) {
-        var words = String(name || '').trim().split(/\s+/).filter(Boolean);
-        if (words.length === 0) return '?';
-        if (words.length === 1) return words[0].charAt(0).toUpperCase();
-        return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
-    }
+    /* Инициалы — одно определение на продукт: js/kslt-lico.js. ЭТО
+       поведение (имя плюс фамилия, верхним регистром) и стало общим —
+       вместе с рассуждением выше, ради которого оно было выбрано. */
+    function dbInitials(name) { return window.KSLT_LICO.инициалы(name); }
 
     /** Кружок игрока: фото, а без него — инициалы. */
     /**

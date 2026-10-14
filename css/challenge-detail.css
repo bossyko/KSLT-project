@@ -228,6 +228,13 @@
     background: var(--bg-secondary);
     transition: border-color 0.3s;
 }
+
+/* Та же заглушка на месте портрета 120 × 160: прямоугольник, а не круг,
+   поэтому скругление берётся у фотографии, а не у кружка. */
+.ch-player-photo.avatar-initials {
+    border-radius: var(--radius-lg);
+    font-size: var(--fs-3xl);
+}
 .ch-player-card:hover .ch-player-photo {
     border-color: var(--accent);
 }
