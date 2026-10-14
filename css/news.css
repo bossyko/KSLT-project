@@ -92,7 +92,7 @@
        прямым текстом. ЗАМЕР 08.10 давал 146 x 33 при цели нажатия 44. */
     height: 44px;
     padding: 0 var(--space-4);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.22);
     border-radius: 999px;
     background: rgba(10, 10, 10, 0.55);
     backdrop-filter: blur(8px);
@@ -356,7 +356,7 @@ h3.news-heading {
 .news-quote {
     margin: var(--space-lg) 0;
     padding: var(--space-md) var(--space-lg);
-    border-left: 3px solid var(--accent);
+    border-left: var(--bw-heavy) solid var(--accent);
     background: var(--bg-card);
     border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
@@ -405,7 +405,7 @@ h3.news-heading {
     margin: var(--space-lg) 0;
     padding: var(--space-md);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     flex-wrap: wrap;
 }
@@ -461,7 +461,7 @@ h3.news-heading {
     margin: var(--space-lg) 0;
     padding: var(--space-lg);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
 }
 
@@ -483,10 +483,10 @@ h3.news-heading {
     width: 100%;
     padding: var(--space-3) var(--space-4);
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: var(--fs-base);
     font-weight: var(--fw-medium);
     cursor: pointer;
@@ -585,7 +585,7 @@ h3.news-heading {
     height: 28px;
     padding: 0 var(--space-4);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -633,7 +633,7 @@ h3.news-heading {
     padding: var(--space-3) var(--space-4);
     color: var(--text-secondary);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
@@ -708,7 +708,7 @@ h3.news-heading {
 .news-guest-overlay.visible { opacity: 1; }
 .news-guest-modal {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 16px;
     padding: var(--space-8) var(--space-6);
     max-width: 380px;
@@ -798,7 +798,7 @@ body.news-article-page .section-sponsors-compact {
     max-width: var(--container-narrow);
     margin: 0 auto;
     padding: var(--section-y-sm) var(--gutter);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 .news-related .news-section-title {
@@ -814,7 +814,7 @@ body.news-article-page .section-sponsors-compact {
 
 .news-related-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
     text-decoration: none;
@@ -1296,7 +1296,7 @@ body.news-article-page .section-sponsors-compact {
     align-items: center;
     justify-content: center;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .news-carousel-igrat {
@@ -1332,7 +1332,7 @@ body.news-article-page .section-sponsors-compact {
 .news-viewer-nav {
     position: absolute;
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
     color: #fff;
     cursor: pointer;
     border-radius: 50%;
@@ -1431,7 +1431,7 @@ body.news-article-page .section-sponsors-compact {
     align-items: center;
     justify-content: center;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
@@ -1450,7 +1450,7 @@ body.news-article-page .section-sponsors-compact {
 }
 
 .news-carousel-kadr:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -1463,7 +1463,7 @@ body.news-article-page .section-sponsors-compact {
 
 /* Снимок в тексте тоже нажимается с клавиатуры — у него role="button" */
 .news-html figure img:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -1480,7 +1480,7 @@ body.news-article-page .section-sponsors-compact {
     line-height: 1;
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     cursor: pointer;
     transition: background 0.2s;
@@ -1522,7 +1522,7 @@ body.news-article-page .section-sponsors-compact {
     height: 64px;
     aspect-ratio: var(--kadr-shirina-k, 1.3333);
     padding: 0;
-    border: 2px solid transparent;
+    border: var(--bw-thick) solid transparent;
     border-radius: var(--radius-md);
     overflow: hidden;
     background: none;
@@ -1577,7 +1577,7 @@ body.news-article-page .section-sponsors-compact {
     line-height: 1;
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background 0.2s, opacity 0.2s;

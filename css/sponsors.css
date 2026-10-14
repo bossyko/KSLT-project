@@ -50,7 +50,7 @@
     transition: transform 0.2s, box-shadow 0.2s; text-decoration: none;
 }
 .sn-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--alpha-lime-30); }
-.sn-btn.ghost { background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); }
+.sn-btn.ghost { background: transparent; border: var(--bw-hair) solid var(--border-light); color: var(--text-primary); }
 .sn-btn.ghost:hover { border-color: var(--accent); color: var(--accent); box-shadow: none; }
 
 /* ==== 1. Обложка ==== */
@@ -69,7 +69,7 @@
 .sn-nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
 .sn-num {
     padding: 28px 26px; background: var(--surface-glass);
-    border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+    border: var(--bw-hair) solid var(--border-subtle); border-radius: var(--radius-xl);
 }
 .sn-num-val { font-size: var(--fs-3xl); font-weight: 800; color: var(--accent); line-height: var(--lh-none); letter-spacing: -0.02em; }
 .sn-num-cap { display: block; margin-top: 10px; color: var(--text-secondary); font-size: var(--fs-sm); line-height: var(--lh-normal); }
@@ -78,7 +78,7 @@
 .sn-aud { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
 .sn-aud-item {
     padding: 26px 28px; background: var(--bg-card);
-    border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+    border: var(--bw-hair) solid var(--border-subtle); border-radius: var(--radius-lg);
 }
 .sn-aud-item h4 { font-size: var(--fs-base); font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
 .sn-aud-item p { color: var(--text-secondary); font-size: var(--fs-base); line-height: var(--lh-relaxed); }
@@ -87,7 +87,7 @@
 .sn-cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 36px; }
 .sn-case {
     padding: 28px; background: var(--bg-card);
-    border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+    border: var(--bw-hair) solid var(--border-subtle); border-radius: var(--radius-xl);
     display: flex; flex-direction: column;
 }
 .sn-case-year { font-size: var(--fs-xs); font-weight: 700; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 10px; }
@@ -101,32 +101,28 @@
 .sn-tiers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 36px; }
 .sn-tier {
     padding: 32px 34px; background: var(--bg-card);
-    border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+    border: var(--bw-hair) solid var(--border-subtle); border-radius: var(--radius-xl);
     position: relative; overflow: hidden;
 }
 .sn-tier.main { border-color: var(--accent-glow); background: var(--surface-glass); }
 .sn-tier-badge {
     display: inline-block; margin-bottom: 14px; padding: 4px 12px;
     border-radius: var(--radius-full); background: var(--alpha-lime-12);
-    border: 1px solid var(--alpha-lime-20); color: var(--accent);
+    border: var(--bw-hair) solid var(--alpha-lime-20); color: var(--accent);
     font-size: var(--fs-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
 }
 .sn-tier h4 { font-size: var(--fs-lg); font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
 .sn-tier-price { color: var(--text-secondary); font-size: var(--fs-sm); margin-bottom: 20px; }
 .sn-tier ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .sn-tier li { position: relative; padding-left: 26px; color: var(--text-secondary); font-size: var(--fs-base); line-height: var(--lh-normal); }
-.sn-tier li::before {
-    content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 8px;
-    border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
-    transform: rotate(-45deg);
-}
+/* ГАЛОЧКА-МАРКЕР ЖИВЁТ В `style.css` — одно определение на три списка. */
 
 /* ==== 6. Где увидят ==== */
 .sn-places { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
 .sn-place {
     display: flex; gap: 14px; align-items: flex-start;
     padding: 22px 24px; background: var(--bg-card);
-    border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+    border: var(--bw-hair) solid var(--border-subtle); border-radius: var(--radius-lg);
 }
 .sn-place-icon {
     flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-md);
@@ -140,7 +136,7 @@
 .sn-logos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 32px; }
 .sn-logo {
     height: 120px; display: flex; align-items: center; justify-content: center;
-    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg); color: var(--text-muted); font-size: var(--fs-sm);
 }
 .sn-logo.filled {
@@ -157,7 +153,7 @@
 .sn-final {
     display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 40px;
     padding: 32px 36px; border-radius: var(--radius-xl);
-    background: var(--surface-glass); border: 1px solid var(--alpha-lime-20);
+    background: var(--surface-glass); border: var(--bw-hair) solid var(--alpha-lime-20);
     position: relative; overflow: hidden;
 }
 .sn-final::after {
@@ -205,7 +201,7 @@
     background: rgba(12, 12, 12, 0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid var(--alpha-lime-20);
+    border-top: var(--bw-hair) solid var(--alpha-lime-20);
     transform: translateY(110%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -230,7 +226,7 @@
 .snm-overlay[hidden] { display: none; }
 
 .snm {
-    background: var(--bg-card); border: 1px solid var(--border-light);
+    background: var(--bg-card); border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-xl); width: 100%; max-width: 460px;
     padding: 32px; position: relative;
 }
@@ -254,7 +250,7 @@
 .snm-list { display: grid; gap: 10px; margin-bottom: 20px; }
 .snm-row {
     display: flex; align-items: center; gap: 14px;
-    padding: 14px 16px; border: 1px solid var(--border-subtle);
+    padding: 14px 16px; border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg); text-decoration: none; color: inherit;
     transition: border-color 0.2s, background 0.2s;
 }
@@ -299,7 +295,7 @@
 .sn-logo:focus-visible,
 .snm-row:focus-visible,
 .snm-close:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 

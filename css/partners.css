@@ -139,7 +139,7 @@
        слой-ссылка ведёт на профиль, гостю открывается окно регистрации. */
     cursor: pointer;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: var(--space-lg);
     display: flex;
@@ -175,7 +175,7 @@
 }
 
 .pt-card-link > .pt-card-cover:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -220,7 +220,7 @@
    До 24.09 во всём семействе .pt- не было НИ ОДНОГО :focus-visible. */
 .pt-name-link:focus-visible,
 .pt-invite-btn:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -264,7 +264,7 @@
     -webkit-appearance: none;
     background: var(--bg-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
     color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 6px 30px 6px 12px;
     font-size: var(--fs-sm);
@@ -296,7 +296,7 @@
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
 }
 
 /* ЗАГЛУШКА НЕЙТРАЛЬНАЯ — как у компонента Avatar 29:82, перекрашенного
@@ -315,7 +315,7 @@
     color: var(--text-primary);
     font-size: var(--fs-xl);
     font-weight: 700;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
 }
 
 .pt-online-dot {
@@ -326,7 +326,7 @@
     height: 14px;
     border-radius: 50%;
     background: #4caf50;
-    border: 3px solid var(--bg-card);
+    border: var(--bw-heavy) solid var(--bg-card);
 }
 
 /* Name */
@@ -514,7 +514,7 @@
     justify-content: center;
     border-radius: 50%;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-12);
+    border: var(--bw-hair) solid var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -590,6 +590,9 @@
     /* auto прижимает кнопку к низу, прозрачная рамка держит отступ сверху,
        когда карточка самая высокая и свободного места не осталось */
     margin-top: auto;
+    /* НАМЕРЕНО МИМО ШКАЛЫ РАМКИ: это не граница, а прозрачный отступ,
+       который держит кнопку, когда margin-top:auto уже упёрся. Двенадцать
+       здесь — ступень ОТСТУПА (8 · 12 · 16), а не толщины. */
     border-top: 12px solid transparent;
     /* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЯМИ — описание Button 17:82. Ступень md 44
        названа там минимальной целью нажатия по Apple HIG. Замер 24.09 дал
@@ -675,7 +678,7 @@
 .pt-toast.info {
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* Empty state */

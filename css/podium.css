@@ -80,7 +80,7 @@
 .pl-podium-base {
     width: 100%;
     border-radius: 12px 12px 0 0;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-bottom: none;
     padding: var(--space-2);              /* 8 со всех сторон; низ — ниже */
     display: flex;
@@ -243,7 +243,7 @@
 .pl-podium-first .pl-podium-photo {
     width: 110px;
     height: 110px;
-    border: 3px solid rgba(233, 184, 36, 0.85);
+    border: var(--bw-heavy) solid rgba(233, 184, 36, 0.85);
     box-shadow: 0 0 20px rgba(233, 184, 36, 0.18);
 }
 .pl-podium-first .avatar-initials { font-size: var(--fs-3xl); }
@@ -251,14 +251,14 @@
 .pl-podium-second .pl-podium-photo {
     width: 80px;
     height: 80px;
-    border: 3px solid rgba(192, 192, 192, 0.4);
+    border: var(--bw-heavy) solid rgba(192, 192, 192, 0.4);
 }
 .pl-podium-second .avatar-initials { font-size: var(--fs-xl); }
 
 .pl-podium-third .pl-podium-photo {
     width: 72px;
     height: 72px;
-    border: 3px solid rgba(205, 127, 50, 0.4);
+    border: var(--bw-heavy) solid rgba(205, 127, 50, 0.4);
 }
 .pl-podium-third .avatar-initials { font-size: var(--fs-xl); }
 

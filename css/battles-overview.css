@@ -138,7 +138,7 @@
     flex-direction: column;
     justify-content: flex-end;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     cursor: pointer;
     background: var(--bg-card);
 }
@@ -172,7 +172,7 @@
 }
 
 .bo-featured > .bo-featured-cover:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -4px;
 }
 
@@ -231,14 +231,14 @@
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid transparent;
+    border: var(--bw-heavy) solid transparent;
 }
 
 /* ЗАГЛУШКА НОСИТ ТОТ ЖЕ КЛАСС, ЧТО ФОТОГРАФИЯ, — размер и скругление у них
    общие, второго объявления не появляется (Avatar 29:82). Свой здесь только
    кегль: умолчальные 11 в круге 80 читаются точкой. */
 .bo-player-img.avatar-initials {
-    border: 3px solid transparent;
+    border: var(--bw-heavy) solid transparent;
     font-size: var(--fs-2xl);
 }
 
@@ -330,14 +330,14 @@
 .bo-strip-live {
     background: var(--alpha-lime-12);
     color: var(--accent);
-    border: 1px solid var(--alpha-lime-50);
+    border: var(--bw-hair) solid var(--alpha-lime-50);
 }
 
 /* У прошедшего матча цвета спокойные: тревожный оттенок тут ни к чему */
 .bo-strip-done {
     background: rgba(255, 255, 255, 0.07);
     color: var(--text-muted);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .bo-strip-past .to-compact-date .to-day { color: var(--text-secondary); }
@@ -358,7 +358,7 @@
     padding: 26px 20px;
     text-align: center;
     color: var(--text-muted);
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     border-radius: var(--radius-lg);
 }
 
@@ -371,7 +371,7 @@
     min-height: var(--btn-h-sm);
     padding-inline: 24px;
     border-radius: var(--radius-full);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-primary);
     font-size: var(--fs-sm);
@@ -490,7 +490,7 @@
     justify-content: center;
     min-height: var(--btn-h-sm);
     padding-inline: 12px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: var(--bw-hair) solid rgba(255,255,255,0.15);
     border-radius: var(--radius-md);
     background: rgba(255,255,255,0.06);
     color: var(--text-primary);
@@ -600,7 +600,7 @@
 
 .bo-status.active {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid var(--alpha-lime-50);
+    border: var(--bw-hair) solid var(--alpha-lime-50);
     color: var(--accent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -608,7 +608,7 @@
 
 .bo-status.completed {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
     color: var(--text-muted);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -648,7 +648,7 @@
     gap: 8px;
     padding: 6px 14px;
     background: var(--alpha-lime-12);
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     border-radius: var(--radius-md);
     font-size: var(--fs-sm);
     font-weight: 700;
@@ -684,7 +684,7 @@
     align-items: center;
     gap: 6px;
     background: linear-gradient(135deg, rgba(220,38,38,0.9), rgba(185,28,28,0.95));
-    border: 1px solid rgba(255,100,100,0.3);
+    border: var(--bw-hair) solid rgba(255,100,100,0.3);
     border-radius: 8px;
     padding: 6px 12px;
     font-size: var(--fs-sm);
@@ -795,7 +795,7 @@
 
 .bo-map-modal {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: var(--space-lg);
     display: flex;
@@ -973,7 +973,7 @@
 .bo-more:focus-visible,
 .bo-meta-venue:focus-visible,
 .bo-strip:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--radius-md);
 }

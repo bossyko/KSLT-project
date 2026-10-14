@@ -96,12 +96,12 @@
     color: var(--accent);
     margin-bottom: var(--space-4);
     padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     letter-spacing: -0.01em;
 }
 
 .ip-faq-item {
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-2);
     background: var(--surface-glass);
@@ -184,7 +184,7 @@
     gap: var(--space-3);
     align-items: flex-start;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-30);
+    border: var(--bw-hair) solid var(--alpha-lime-30);
     border-radius: var(--radius-lg);
     padding: var(--space-5) var(--space-6);
     margin-bottom: 32px;
@@ -209,7 +209,7 @@
 
 .ip-toc {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-6) var(--space-8);
     margin-bottom: var(--space-10);
@@ -242,7 +242,7 @@
     text-decoration: none;
     font-size: var(--fs-base);
     transition: color var(--transition-fast);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ip-toc-list li:last-child a {
@@ -276,7 +276,7 @@
     font-weight: 700;
     margin-bottom: var(--space-4);
     padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -344,7 +344,7 @@
     display: flex;
     gap: var(--space-3);
     padding: 12px 0;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     color: var(--text-secondary);
     font-size: var(--fs-base);
     line-height: 1.65;
@@ -396,7 +396,7 @@
 
 .ip-mission-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
     text-align: center;
@@ -438,7 +438,7 @@
 
 .ip-stat-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-6) var(--space-5);
     text-align: center;
@@ -494,7 +494,7 @@
     height: 12px;
     border-radius: 50%;
     background: var(--accent);
-    border: 2px solid var(--bg-primary);
+    border: var(--bw-thick) solid var(--bg-primary);
 }
 
 .ip-timeline-year {
@@ -520,7 +520,7 @@
 
 .ip-team-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-6) var(--space-5);
     text-align: center;
@@ -560,7 +560,7 @@
 /* CTA */
 .ip-cta {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: var(--space-10);
     text-align: center;
@@ -783,14 +783,14 @@
    а не вычитывал абзац.
    ======================================== */
 
-.fq-levels { margin-top: var(--space-3); border-top: 1px solid var(--border-subtle); }
+.fq-levels { margin-top: var(--space-3); border-top: var(--bw-hair) solid var(--border-subtle); }
 
 .fq-level {
     display: flex;
     gap: var(--space-5);
     align-items: baseline;
     padding: 12px 0;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .fq-level-cat {
     flex: 0 0 150px;
@@ -833,7 +833,7 @@
     height: 22px;
     border-radius: 50%;
     background: var(--alpha-lime-12);
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     color: var(--accent);
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -948,7 +948,7 @@
 .ip-toc-list a:focus-visible,
 .ip-doc-lead a:focus-visible,
 .ip-rules-list a:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 

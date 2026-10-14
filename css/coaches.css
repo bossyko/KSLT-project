@@ -151,7 +151,7 @@
    описанию `Card 29:65`, ритм задаёт один `gap`. */
 .co-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
     transition: border-color var(--transition-base), transform var(--transition-base);
@@ -335,7 +335,7 @@
 .co-toast.info {
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ---- DETAIL PAGE ---- */
@@ -351,7 +351,12 @@
     height: 160px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid var(--accent);
+    /* ПРАВИЛО СТРАНИЦЫ ИГРОКА, ПРИМЕНЁННОЕ БЕЗ НОВОГО РАЗБОРА
+       (`player.css:85-88`, решение Кости 09.10): лайм принадлежит одному
+       главному действию на экране, а портрет не действие. Там кольцо 4px
+       лаймом уже сняли — здесь оно осталось единственной копией. Толщина
+       встаёт на тяжёлую ступень (3), цвет — та же белая восьмёрка. */
+    border: var(--bw-heavy) solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
 }
 
@@ -421,7 +426,7 @@
    Глаза Кости: «карточки большие какие-то». Компонент был прав раньше нас. */
 .co-detail-stat {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 20px 24px;
     text-align: center;
@@ -450,7 +455,7 @@
     font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .co-section-title span {
@@ -484,7 +489,7 @@
     align-items: center;
     gap: 12px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 14px 18px;
     color: var(--text-secondary);
@@ -512,7 +517,7 @@
     padding: 12px 16px;
     border-radius: var(--radius-sm);
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .co-schedule-day {
@@ -539,7 +544,7 @@
 
 .co-review-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 24px 20px;
 }
@@ -568,7 +573,7 @@
 /* CTA */
 .co-cta {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 48px 40px;
     text-align: center;
@@ -787,7 +792,7 @@
 
 /* === DISCOUNT / VOUCHER === */
 .co-discount-section {
-    border: 1px solid var(--accent-subtle);
+    border: var(--bw-hair) solid var(--accent-subtle);
     border-radius: 16px;
     padding: 24px;
     background: var(--alpha-lime-06);
@@ -805,7 +810,7 @@
     padding: 14px 18px;
     background: rgba(255,255,255,0.04);
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 .co-discount-info {
     display: flex;
@@ -869,7 +874,7 @@
 
 .co-membership-modal {
     background: #1a1a1a;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 32px;
     max-width: 400px;
@@ -950,7 +955,7 @@
 @keyframes coModalFadeIn { to { opacity: 1; } }
 .co-voucher-modal {
     background: rgba(26,26,30,0.95);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid rgba(255,255,255,0.08);
     border-radius: 16px;
     padding: 32px;
     max-width: 400px;
@@ -996,7 +1001,7 @@
     padding: 6px 0;
     font-size: var(--fs-sm);
     color: rgba(255,255,255,0.7);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 .co-voucher-row:last-child { border-bottom: none; }
 .co-voucher-percent {
@@ -1025,7 +1030,7 @@
 .co-voucher-history {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 .co-voucher-history h4 {
     font-size: var(--fs-base);
@@ -1046,7 +1051,7 @@
     padding: 10px 14px;
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: var(--bw-hair) solid rgba(255,255,255,0.04);
     font-size: var(--fs-sm);
 }
 .co-vh-date {
@@ -1084,7 +1089,7 @@
 }
 .co-vh-qr-btn {
     background: none;
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     color: var(--accent);
     padding: 2px 10px;
     border-radius: 6px;
@@ -1120,7 +1125,7 @@
 }
 .co-picker-modal {
     background: rgba(26,26,30,0.95);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid rgba(255,255,255,0.08);
     border-radius: 16px;
     padding: 28px;
     max-width: 380px;
@@ -1157,7 +1162,7 @@
     gap: 12px;
     padding: 12px 14px;
     background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 10px;
     cursor: pointer;
     transition: border-color 0.2s;
@@ -1171,7 +1176,7 @@
 }
 .co-picker-radio {
     width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: var(--bw-thick) solid rgba(255,255,255,0.2);
     border-radius: 50%;
     flex-shrink: 0;
     position: relative;
@@ -1250,7 +1255,7 @@
     padding: 8px 16px;
     border-radius: 8px;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     color: var(--accent);
     text-decoration: none;
     font-size: var(--fs-sm);
@@ -1266,7 +1271,7 @@
     height: 300px;
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid rgba(255,255,255,0.08);
 }
 .co-map-embed iframe {
     width: 100%;
@@ -1344,7 +1349,7 @@
 .co-contact-link:focus-visible,
 .co-card:focus-visible,
 .kslt-back:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 

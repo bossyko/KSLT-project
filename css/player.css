@@ -85,7 +85,7 @@
        прямо. Было кольцо 4px лаймом: лайм принадлежит одному главному
        действию на экране, а портрет не действие. Ступень 2xl 120 заведена в
        компоненте 09.10 по слову Кости — число больше не местное. */
-    border: 3px solid rgba(255, 255, 255, 0.08);
+    border: var(--bw-heavy) solid rgba(255, 255, 255, 0.08);
 }
 
 .pp-online-dot {
@@ -96,7 +96,7 @@
     height: 18px;
     background: #22c55e;
     border-radius: 50%;
-    border: 3px solid var(--bg-primary);
+    border: var(--bw-heavy) solid var(--bg-primary);
     animation: pp-pulse 2s ease-in-out infinite;
 }
 
@@ -194,7 +194,7 @@
     align-items: center;
     gap: 5px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     padding: 4px 12px;
     font-size: var(--fs-xs);
@@ -254,7 +254,7 @@
 
 .pp-action-secondary {
     background: none;
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     color: var(--accent);
 }
 
@@ -404,7 +404,7 @@
     position: relative;
     height: 340px;
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     padding: 16px;
 }
@@ -446,7 +446,7 @@
     margin-top: var(--space-10);
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .pp-section-title span {
@@ -474,7 +474,7 @@
     align-items: center;
     padding: 16px 20px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     transition: border-color var(--transition-fast);
 }
@@ -491,7 +491,7 @@
 /* H2H button in match row */
 .pp-match-h2h {
     background: transparent;
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -682,7 +682,7 @@
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
 }
 
 .pp-match-opponent-name {
@@ -693,7 +693,13 @@
 .pp-match-score {
     font-weight: 700;
     font-size: var(--fs-base);
-    font-family: 'Inter', monospace;
+    /* ШИРИНУ ЦИФР ДЕРЖИТ СВОЙСТВО, А НЕ ВТОРОЕ СЕМЕЙСТВО.
+       Было `'Inter', monospace`: моно включалось только там, где
+       Inter не загрузился, — то есть счёт был либо пропорциональным,
+       либо моно, по удаче. `tabular-nums` даёт одну ширину цифры в
+       самом Inter, и счёт не дёргается при смене цифр. */
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
 }
 
@@ -744,7 +750,7 @@ a.pp-match-opponent-name:hover {
     align-items: center;
     gap: 12px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 16px 18px;
 }
@@ -782,7 +788,7 @@ a.pp-match-opponent-name:hover {
     flex: 1;
     height: 6px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 3px;
     overflow: hidden;
 }
@@ -829,7 +835,7 @@ a.pp-match-opponent-name:hover {
 .pp-badges-expand {
     grid-column: 1 / -1;
     background: none;
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--accent);
     font-size: var(--fs-sm);
@@ -875,7 +881,7 @@ a.pp-match-opponent-name:hover {
     gap: 14px;
     padding: 12px 16px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     text-decoration: none;
     color: inherit;
@@ -898,7 +904,7 @@ a.pp-tournament:hover {
     border-radius: var(--radius-sm);
     object-fit: cover;
     flex-shrink: 0;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .pp-tournament-photo-empty {
@@ -975,7 +981,7 @@ a.pp-tournament:hover {
     width: 100%;
     padding: 14px 20px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: var(--fs-base);
@@ -1027,7 +1033,7 @@ a.pp-tournament:hover {
     align-items: center;
     padding: 16px 20px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
 }
 
@@ -1083,7 +1089,7 @@ a.pp-tournament:hover {
 /* ---- CTA ---- */
 .pp-cta {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 48px 40px;
     text-align: center;
@@ -1316,7 +1322,7 @@ a.pp-tournament:hover {
 /* Modal */
 .h2h-modal {
     background: #1a1a1a;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 36px 32px;
     max-width: 520px;
@@ -1389,7 +1395,7 @@ a.pp-tournament:hover {
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--border-subtle);
+    border: var(--bw-heavy) solid var(--border-subtle);
 }
 
 .h2h-name {
@@ -1432,7 +1438,7 @@ a.pp-tournament:hover {
     flex-direction: column;
     gap: 0;
     margin-bottom: 24px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     overflow: hidden;
 }
@@ -1446,7 +1452,7 @@ a.pp-tournament:hover {
 }
 
 .h2h-stat-row + .h2h-stat-row {
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 .h2h-stat-val {
@@ -1521,7 +1527,13 @@ a.pp-tournament:hover {
 .h2h-match-score {
     font-weight: 700;
     font-size: var(--fs-sm);
-    font-family: 'Inter', monospace;
+    /* ШИРИНУ ЦИФР ДЕРЖИТ СВОЙСТВО, А НЕ ВТОРОЕ СЕМЕЙСТВО.
+       Было `'Inter', monospace`: моно включалось только там, где
+       Inter не загрузился, — то есть счёт был либо пропорциональным,
+       либо моно, по удаче. `tabular-nums` даёт одну ширину цифры в
+       самом Inter, и счёт не дёргается при смене цифр. */
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
     flex-shrink: 0;
 }
@@ -1651,7 +1663,7 @@ a.pp-tournament:hover {
    с лаймовой кнопкой, а она здесь главное действие */
 .pp-chal-modal {
     background: rgba(30,30,30,0.95);
-    border: 1px solid var(--alpha-lime-12);
+    border: var(--bw-hair) solid var(--alpha-lime-12);
     border-radius: 16px;
     padding: 28px 24px;
     max-width: 420px;
@@ -1709,7 +1721,7 @@ a.pp-tournament:hover {
 
 .pp-chal-input {
     background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    border: var(--bw-hair) solid rgba(255,255,255,0.12);
     border-radius: 8px;
     color: #fff;
     padding: 10px 12px;
@@ -1822,7 +1834,7 @@ a.pp-tournament:hover {
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--border-subtle);
+    border: var(--bw-heavy) solid var(--border-subtle);
     filter: blur(4px) grayscale(0.5);
     margin-bottom: 16px;
 }
@@ -1835,7 +1847,7 @@ a.pp-tournament:hover {
 
 .pp-guest-cta {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 40px 32px;
 }
@@ -1915,7 +1927,7 @@ a.pp-tournament:hover {
     align-items: center;
     gap: 8px;
     padding: 9px 14px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     background: var(--bg-elevated);
     color: var(--text-primary);
@@ -1992,7 +2004,7 @@ a.pp-tournament:hover {
 .pp-cat-place {
     margin-left: auto;
     padding: 2px 10px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     background: var(--bg-elevated);
     font-size: var(--fs-xs);
@@ -2155,7 +2167,7 @@ a.pp-tournament:hover {
     display: inline-block;
     margin-top: 6px;
     padding: 3px 10px;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-full);
     font-size: var(--fs-xs);
     font-weight: 500;
@@ -2170,7 +2182,7 @@ a.pp-tournament:hover {
     display: inline-block;
     margin-top: 10px;
     padding: 8px 14px;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     background: var(--surface-glass);
     color: var(--text-muted);
@@ -2371,7 +2383,7 @@ a.pp-tournament:hover {
         z-index: 40;
         padding: 10px 16px;
         background: var(--bg-primary);
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: var(--bw-hair) solid var(--border-subtle);
     }
 }
 
@@ -2462,7 +2474,7 @@ a.pp-tournament:hover {
 .h2h-profile-btn:focus-visible,
 .kslt-back-wrap.pp-back-float .kslt-back:focus-visible,
 .pp-action-btn:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
 }

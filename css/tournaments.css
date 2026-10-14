@@ -150,7 +150,7 @@
 }
 
 .trn-block-empty {
-    border: 1px dashed var(--border-light);
+    border: var(--bw-hair) dashed var(--border-light);
     border-radius: var(--radius-lg);
     padding: 32px 24px;
     text-align: center;
@@ -176,10 +176,10 @@
     background: rgba(255,255,255,0.06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     outline: none;
     transition: all 0.3s;
@@ -206,7 +206,7 @@
 /* Tournament Card */
 .tournament-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -247,7 +247,7 @@
     align-items: center;
     padding: var(--space-md) var(--space-lg);
     background: var(--bg-elevated);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .tournament-date {
@@ -282,7 +282,7 @@
 
 .tournament-status.open {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid var(--alpha-lime-50);
+    border: var(--bw-hair) solid var(--alpha-lime-50);
     color: var(--accent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -290,7 +290,7 @@
 
 .tournament-status.soon {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid rgba(255, 159, 67, 0.5);
+    border: var(--bw-hair) solid rgba(255, 159, 67, 0.5);
     color: #FF9F43;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -298,7 +298,7 @@
 
 .tournament-status.ongoing {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid rgba(0, 163, 255, 0.5);
+    border: var(--bw-hair) solid rgba(0, 163, 255, 0.5);
     color: #00A3FF;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -306,7 +306,7 @@
 
 .tournament-status.closed {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.2);
     color: var(--text-secondary);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -314,7 +314,7 @@
 
 .tournament-status.past {
     background: rgba(0, 0, 0, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
     color: var(--text-muted);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -351,7 +351,7 @@
     border-radius: var(--radius-full);
     background: rgba(0, 0, 0, 0.6);
     color: var(--accent);
-    border: 1px solid var(--alpha-lime-50);
+    border: var(--bw-hair) solid var(--alpha-lime-50);
     white-space: nowrap;
     flex-shrink: 0;
     margin-top: 4px;
@@ -391,7 +391,7 @@
     justify-content: space-evenly;
     gap: 12px;
     padding-top: var(--space-md);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 .detail-item {
@@ -434,7 +434,7 @@
     gap: 8px;
     padding: 12px 16px;
     background: var(--bg-elevated);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     overflow: hidden;
 }
 
@@ -446,7 +446,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-secondary);
@@ -516,7 +516,7 @@
     color: var(--text);
     margin-bottom: var(--space-md);
     padding-bottom: 10px;
-    border-bottom: 2px solid var(--accent);
+    border-bottom: var(--bw-thick) solid var(--accent);
     display: inline-block;
 }
 
@@ -620,7 +620,7 @@
     border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.07);
     color: var(--text-muted);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     white-space: nowrap;
 }
 
@@ -647,11 +647,11 @@
     align-items: center;
     gap: 8px;
     padding: 12px 36px;
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--accent);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
@@ -676,7 +676,7 @@
 
 .past-tournament-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     transition: transform 0.2s ease;
@@ -766,7 +766,7 @@
     align-items: center;
     justify-content: center;
     padding: 8px 12px;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-secondary);
@@ -940,7 +940,7 @@
     align-items: center;
     gap: 6px;
     background: linear-gradient(135deg, rgba(220,38,38,0.9), rgba(185,28,28,0.95));
-    border: 1px solid rgba(255,100,100,0.3);
+    border: var(--bw-hair) solid rgba(255,100,100,0.3);
     border-radius: 8px;
     padding: 6px 12px;
     font-size: var(--fs-sm);
@@ -1034,7 +1034,7 @@
     position: absolute;
     inset: -3px;
     border-radius: 50%;
-    border: 2px solid rgba(74,222,128,0.6);
+    border: var(--bw-thick) solid rgba(74,222,128,0.6);
     animation: toCdSonar 2s ease-out infinite;
 }
 

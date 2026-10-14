@@ -18,7 +18,7 @@
        черта, повешенная на него, уезжала бы вместе с ним; нижняя граница
        обложки есть всегда. Обзорная и категория рисуют одну и ту же обложку
        в #playersHero, поэтому одно объявление закрывает обе страницы. */
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     text-align: center;
     overflow: hidden;
     min-height: var(--oblozhka-pol);
@@ -110,7 +110,7 @@
 
 .pl-search-modal {
     background: #1a1a1a;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 32px;
     max-width: 400px;
@@ -307,10 +307,10 @@
     line-height: var(--lh-none);
     padding: 8px 24px;
     background: transparent;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
     cursor: pointer;
@@ -434,10 +434,10 @@
     min-height: var(--btn-h-sm);
     padding: 0 20px;
     background: transparent;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
     line-height: var(--lh-none);
@@ -483,7 +483,7 @@
     margin-inline: auto;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     background: var(--bg-card);
 }
 
@@ -792,7 +792,7 @@
 
 .pl-btn-message {
     background: transparent;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .pl-btn-message:hover {
@@ -802,7 +802,7 @@
 
 .pl-btn-challenge {
     background: var(--alpha-lime-12);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
 .pl-btn-challenge:hover {
@@ -929,7 +929,7 @@
     justify-content: center;
     border-radius: 50%;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-12);
+    border: var(--bw-hair) solid var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -1202,7 +1202,7 @@
 /* Черта появляется только когда полоса прилипла: до этого под ней стоит
    своё содержимое, и делить нечего */
 .pl-filters-section.pl-cat-mode.stuck {
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* МЁРТВОЕ СНЯТО: ЛИПКАЯ ПОЛОСА ВТОРОЙ КОНСТРУКЦИИ.
@@ -1238,7 +1238,7 @@
     gap: 12px;
     padding: var(--space-md) var(--space-lg);
     margin-top: var(--space-md);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     background: var(--alpha-lime-06);
     color: var(--text-secondary);
@@ -1403,7 +1403,7 @@
         align-items: center;
         padding: 10px 14px;
         margin-bottom: 8px;
-        border: 1px solid var(--border-subtle);
+        border: var(--bw-hair) solid var(--border-subtle);
         border-radius: var(--radius-lg);
         background: var(--bg-card);
         gap: 8px;
@@ -1456,7 +1456,7 @@
         width: 100%;
         justify-content: flex-end;
         padding-top: 8px;
-        border-top: 1px solid var(--border-subtle);
+        border-top: var(--bw-hair) solid var(--border-subtle);
         margin-top: 4px;
     }
 
@@ -1692,7 +1692,7 @@
     display: inline-block;
     margin-left: 8px;
     padding: 1px 7px;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-full);
     font-size: var(--fs-2xs);
     font-weight: 500;

@@ -16,7 +16,7 @@
     padding: var(--section-y) var(--pad-x) var(--section-y-sm);
     overflow: hidden;
     background: linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(20,20,20,0.9) 100%);
-    border-bottom: 1px solid var(--border);
+    border-bottom: var(--bw-hair) solid var(--border);
 }
 
 .ch-hero-bg {
@@ -72,7 +72,7 @@
 /* === СОПЕРНИКИ === */
 .ch-duel {
     padding: var(--section-y-sm) var(--pad-x);
-    border-bottom: 1px solid var(--border);
+    border-bottom: var(--bw-hair) solid var(--border);
 }
 
 /* Слева соперники, справа два блока — страница перестала быть втрое
@@ -92,7 +92,7 @@
     flex-direction: column;
     align-items: stretch;
     justify-content: center;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     background: var(--bg-card);
     padding: 22px;
@@ -102,7 +102,7 @@
 .ch-stats-note {
     margin-top: 14px;
     padding-top: 12px;
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     font-size: var(--fs-xs);
     line-height: var(--lh-normal);
     /* Контраст 3.21 при норме 4.5 — мерено по фактической краске 13.10 */
@@ -171,7 +171,7 @@
 /* === ЧТО ГОВОРЯТ ЧИСЛА === */
 .ch-forecast-sec {
     padding: var(--section-y-sm) var(--pad-x);
-    border-bottom: 1px solid var(--border);
+    border-bottom: var(--bw-hair) solid var(--border);
 }
 
 .ch-forecast-inner {
@@ -224,7 +224,7 @@
     height: 160px;
     border-radius: var(--radius-lg);
     object-fit: cover;
-    border: 2px solid var(--border);
+    border: var(--bw-thick) solid var(--border);
     background: var(--bg-secondary);
     transition: border-color 0.3s;
 }
@@ -335,7 +335,7 @@
 /* === VOTING SECTION === */
 .ch-voting {
     padding: var(--section-y) var(--pad-x);
-    border-bottom: 1px solid var(--border);
+    border-bottom: var(--bw-hair) solid var(--border);
 }
 
 .ch-voting-inner {
@@ -458,7 +458,7 @@
     max-width: 620px;
     margin: 0 auto var(--space-lg);
     padding: 14px 16px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     background: rgba(255,255,255,0.02);
 }
@@ -540,7 +540,7 @@
     gap: 6px;
     padding: 16px 28px;
     border-radius: var(--radius-lg);
-    border: 2px solid rgba(255,255,255,0.15);
+    border: var(--bw-thick) solid rgba(255,255,255,0.15);
     background: rgba(255,255,255,0.06);
     color: var(--text-primary);
     font-size: var(--fs-base);
@@ -639,7 +639,7 @@
     margin-top: 10px;
     padding: 8px 16px;
     background: var(--alpha-lime-12);
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     border-radius: 20px;
     color: var(--accent);
     font-size: var(--fs-sm);
@@ -683,7 +683,7 @@
     display: inline-block;
     padding: 4px 12px;
     background: rgba(248, 113, 113, 0.15);
-    border: 1px solid rgba(248, 113, 113, 0.3);
+    border: var(--bw-hair) solid rgba(248, 113, 113, 0.3);
     border-radius: var(--radius-sm);
     color: #f87171;
     font-size: var(--fs-sm);
@@ -699,7 +699,7 @@
 /* === DETAILS SECTION === */
 .ch-details {
     padding: var(--section-y-sm) var(--pad-x);
-    border-bottom: 1px solid var(--border);
+    border-bottom: var(--bw-hair) solid var(--border);
 }
 
 /* По той же сетке, что соперники выше: раньше блок центрировался в
@@ -726,7 +726,7 @@
     padding: var(--space-sm) var(--space-md);
     background: var(--bg-secondary);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
 }
 .ch-detail-icon {
     font-size: var(--fs-lg);
@@ -763,7 +763,7 @@
 .ch-detail-map {
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
 }
 .ch-detail-map iframe {
     width: 100%;
@@ -778,7 +778,7 @@
    остальные — по кнопке */
 .ch-h2h-box {
     margin-top: var(--space-md);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 14px 18px;
     background: var(--surface-glass);
@@ -824,7 +824,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 8px 0;
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
@@ -864,7 +864,7 @@
     border: none;
     padding: 0;
     color: var(--accent);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
@@ -879,14 +879,14 @@
    на страницу отыгранного баттла. Раньше лежал в самом низу, под картой */
 .ch-score {
     padding: var(--section-y-sm) var(--pad-x);
-    border-bottom: 1px solid var(--border);
+    border-bottom: var(--bw-hair) solid var(--border);
 }
 
 .ch-score-inner {
     max-width: 700px;
     margin: 0 auto;
     text-align: center;
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     background: var(--alpha-lime-06);
     border-radius: var(--radius-lg);
     padding: 22px;
@@ -940,7 +940,7 @@
     gap: 8px;
     padding: 8px 20px;
     background: var(--alpha-lime-12);
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     border-radius: var(--radius-md);
     color: var(--accent);
     font-size: var(--fs-base);
@@ -954,7 +954,7 @@
     padding: var(--space-sm) var(--space-md);
     background: var(--bg-secondary);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     display: inline-block;
 }
 .ch-prediction-result strong {
@@ -1042,7 +1042,7 @@
 .ch-map-link:focus-visible,
 .ch-h2h-more:focus-visible,
 .ch-back-link:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--radius-md);
 }

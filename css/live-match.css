@@ -81,7 +81,7 @@
 }
 .lm-back-link:hover { color: var(--text-primary); }
 .lm-back-link:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 3px;
     border-radius: var(--radius-sm);
 }
@@ -195,7 +195,7 @@
    Коробка — Card 29:65: радиус 16, 1px border/subtle, bg/card. */
 .lm-score-panel {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
@@ -214,7 +214,7 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .lm-player-row:last-child { border-bottom: none; }
 /* КЛЮЧ К ЦВЕТУ ЛЕНТЫ — САМИ СТРОКИ ИГРОКОВ.
@@ -235,7 +235,7 @@
     height: 40px;
     border-radius: var(--radius-full);
 }
-.lm-avatar { object-fit: cover; border: 2px solid var(--border-subtle); }
+.lm-avatar { object-fit: cover; border: var(--bw-thick) solid var(--border-subtle); }
 .lm-avatar-placeholder {
     display: flex; align-items: center; justify-content: center;
     background: var(--surface-glass-hover);
@@ -341,7 +341,7 @@
 .lm-sponsor {
     display: flex; align-items: center; gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     font-size: var(--fs-xs);
     color: var(--text-muted);
 }
@@ -353,7 +353,7 @@
     padding: var(--space-4);
     text-align: center;
     background: var(--accent-subtle);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 .lm-winner-text {
     font-size: var(--fs-base);
@@ -384,7 +384,7 @@
    поэтому рельс обрывается на текущем гейме. */
 .lm-feed {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     /* Воздух снизу тот же, что сверху и по бокам. Было 8: последняя
        строка гейма упиралась в край коробки. Решение Кости 25.09:
@@ -502,7 +502,7 @@
 .lm-chip {
     height: var(--btn-h-sm);
     padding: 0 var(--space-4);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     background: var(--surface-glass);
     color: var(--text-secondary);
@@ -517,7 +517,7 @@
     color: var(--accent-on);
     font-weight: var(--fw-semibold);
 }
-.lm-chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.lm-chip:focus-visible { outline: var(--bw-heavy) solid var(--accent); outline-offset: 3px; }
 
 /* ── ГЕЙМ: ДВЕ СТРОКИ, ВЫРОВНЕННЫЕ ПО КОЛОНКАМ ────────────
    Решение Кости 25.09 по макету.
@@ -532,7 +532,7 @@
    кто есть кто. Так устроен пойнт-бай-пойнт у Уимблдона и ATP. */
 .lm-game {
     padding: var(--space-4) 0 var(--space-2);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 .lm-game:first-of-type { border-top: none; padding-top: 0; }
 
@@ -716,7 +716,7 @@
 .lm-empty {
     padding: var(--space-12) var(--space-5);
     text-align: center;
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     border-radius: var(--radius-lg);
 }
 .lm-empty-title {
@@ -753,7 +753,7 @@
 .lm-sponsors {
     padding: var(--space-4) 0 0;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }

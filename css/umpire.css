@@ -30,7 +30,7 @@
 body {
     background: var(--um-bg);
     color: var(--um-text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: var(--font-sans);
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -93,7 +93,7 @@ body {
     padding: var(--space-3);
     background: var(--accent-subtle);
     border-radius: var(--radius-md);
-    border: 1px solid var(--um-accent);
+    border: var(--bw-hair) solid var(--um-accent);
 }
 
 /* Табло */
@@ -197,7 +197,7 @@ body {
     font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     position: relative;
     padding-left: var(--space-4);
     text-align: left;
@@ -239,7 +239,7 @@ body {
     font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 .um-btn-serve-active {
@@ -252,7 +252,7 @@ body {
 .um-changeover {
     text-align: center;
     background: var(--warning-subtle);
-    border: 1px solid var(--warning);
+    border: var(--bw-hair) solid var(--warning);
     border-radius: var(--radius-lg);
     padding: var(--space-3);
 }
@@ -291,7 +291,7 @@ body {
     font-size: var(--fs-base);
     background: transparent;
     color: var(--warning);
-    border: 1px solid var(--warning);
+    border: var(--bw-hair) solid var(--warning);
 }
 
 /* Мишень */
@@ -345,7 +345,7 @@ body {
     font-size: var(--fs-base);
     background: var(--um-card);
     color: var(--um-text);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ПРИЧИНА ПЕРЕРЫВА. Кнопка «Перерыв» спрашивает, почему остановили:
@@ -385,7 +385,7 @@ body {
     font-size: var(--fs-base);
     background: var(--um-bg);
     color: var(--um-text);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
 }
 .um-btn-why-cancel { background: transparent; border-color: transparent; color: var(--um-dim); }
 
@@ -439,7 +439,7 @@ body {
 /* КОЛЬЦО ФОКУСА. Не было ни у одной кнопки: судья, идущий клавишами или
    внешней клавиатурой, не видел, где он. WCAG 2.4.7. */
 .um-btn:focus-visible {
-    outline: 3px solid var(--um-accent);
+    outline: var(--bw-heavy) solid var(--um-accent);
     outline-offset: 3px;
 }
 

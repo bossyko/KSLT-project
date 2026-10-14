@@ -90,7 +90,7 @@
     flex-direction: column;
     justify-content: flex-end;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     cursor: pointer;
     text-decoration: none;
     color: inherit;
@@ -182,7 +182,7 @@
        карточки нет ни в компоненте, ни на соседних страницах. */
     padding: var(--space-md);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     text-decoration: none;
     cursor: pointer;
@@ -430,7 +430,7 @@
 /* Документы списком: у каждого строка о том, что внутри */
 .io-doclist {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
@@ -443,7 +443,7 @@
     /* Поля строки — ступени шкалы (8 · 12 · 16 · 24 · 32 · 40). Стояло
        20 × 24: вертикаль мимо шкалы. */
     padding: var(--space-4) var(--space-6);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     text-decoration: none;
     color: inherit;
     transition: background 0.2s;
@@ -555,7 +555,7 @@
 .io-card:focus-visible,
 .io-docrow:focus-visible,
 .io-featured-link:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 

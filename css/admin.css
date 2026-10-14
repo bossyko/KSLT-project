@@ -30,7 +30,7 @@ body.ad-page {
     width: 260px;
     height: calc(100vh - var(--header-h));
     background: var(--bg-secondary);
-    border-right: 1px solid var(--border-subtle);
+    border-right: var(--bw-hair) solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     padding: var(--space-md);
@@ -44,7 +44,7 @@ body.ad-page {
     text-align: center;
     padding-bottom: var(--space-md);
     margin-bottom: var(--space-md);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-sidebar-avatar {
@@ -52,7 +52,7 @@ body.ad-page {
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--accent);
+    border: var(--bw-heavy) solid var(--accent);
     margin-bottom: 12px;
     background: var(--bg-elevated);
 }
@@ -61,7 +61,7 @@ body.ad-page {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 3px solid var(--accent);
+    border: var(--bw-heavy) solid var(--accent);
     margin-bottom: 12px;
     background: var(--bg-elevated);
     display: flex;
@@ -94,7 +94,7 @@ body.ad-page {
     border-radius: var(--radius-full);
     background: var(--alpha-lime-12);
     color: var(--accent);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
 /* Sidebar Nav */
@@ -155,7 +155,7 @@ body.ad-page {
     border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-muted);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-sidebar-divider {
@@ -263,7 +263,7 @@ body.ad-page {
 
 .ad-stat-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     padding: 8px 6px;
     text-align: center;
@@ -292,8 +292,11 @@ body.ad-page {
 }
 
 /* Danger card (overdue) */
+/* ПОЛОСА-МЕТКА, А НЕ РАМКА. Четыре пиксела слева красят род сообщения —
+   тревога и предупреждение, — а не обводят карточку. Шкала рамки
+   (1 · 2 · 3) к ней не относится, у неё своё имя `--bar-accent`. */
 .ad-stat-card--danger {
-    border-left: 4px solid #f44336;
+    border-left: var(--bar-accent) solid #f44336;
     background: linear-gradient(135deg, rgba(244, 67, 54, 0.08) 0%, var(--bg-elevated) 100%);
 }
 .ad-stat-card--danger .ad-stat-value { color: #f44336; }
@@ -301,7 +304,7 @@ body.ad-page {
 
 /* Warning card (approaching) */
 .ad-stat-card--warning {
-    border-left: 4px solid #ff9800;
+    border-left: var(--bar-accent) solid #ff9800;
     background: linear-gradient(135deg, rgba(255, 152, 0, 0.08) 0%, var(--bg-elevated) 100%);
 }
 .ad-stat-card--warning .ad-stat-value { color: #ff9800; }
@@ -330,7 +333,7 @@ body.ad-page {
     align-items: center;
     padding-bottom: 12px;
     margin-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-table-card-header .ad-table-card-title {
     margin-bottom: 0;
@@ -440,7 +443,7 @@ body.ad-page {
     height: var(--btn-h-xs);
     padding: 0 var(--space-2);
     background: none;
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-size: var(--fs-base);
@@ -478,7 +481,7 @@ body.ad-page {
     min-width: 150px;
     padding: 4px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     text-align: left;
@@ -496,7 +499,7 @@ body.ad-page {
 .ad-reg-act-vynos {
     height: var(--btn-h-xs);
     padding: 0 var(--space-2);
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     border-radius: var(--radius-sm);
     background: none;
     color: #42a5f5;
@@ -537,7 +540,7 @@ body.ad-page {
 
 .ad-table-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     /* Таблица шире экрана прокручивается внутри карточки, а не тянет за
@@ -552,7 +555,7 @@ body.ad-page {
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-table-wrap {
@@ -580,7 +583,7 @@ body.ad-page {
        колонки не украшение: по ней читают таблицу. `--text-muted` даёт
        5.33. Правило одно на все таблицы админки. */
     color: var(--text-muted);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     white-space: nowrap;
 }
 
@@ -631,7 +634,7 @@ body.ad-page {
     z-index: 100;
     min-width: 140px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     padding: 4px 0;
@@ -641,7 +644,7 @@ body.ad-page {
     align-items: center;
     justify-content: space-between;
     padding: 4px 10px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     margin-bottom: 2px;
 }
 .ad-col-dd-title {
@@ -665,7 +668,7 @@ body.ad-page {
     width: 12px;
     height: 12px;
     min-width: 12px;
-    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border: var(--bw-thick) solid rgba(255, 255, 255, 0.3);
     border-radius: 2px;
     background: transparent;
     cursor: pointer;
@@ -711,7 +714,7 @@ body.ad-page {
     width: 13px;
     height: 13px;
     min-width: 13px;
-    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border: var(--bw-thick) solid rgba(255, 255, 255, 0.3);
     border-radius: 2px;
     background: transparent;
     cursor: pointer;
@@ -740,7 +743,7 @@ body.ad-page {
     /* 8 · 12 — ступени шкалы. Было 10 × 10, мимо неё, и ряд мерился 59 на
        1512 при 48 у компонента `Table row 132:162` */
     padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.04);
     color: var(--text-secondary);
     vertical-align: middle;
 }
@@ -789,7 +792,7 @@ body.ad-page {
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
     background: var(--bg-elevated);
 }
 
@@ -797,7 +800,7 @@ body.ad-page {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
     background: var(--bg-elevated);
     display: flex;
     align-items: center;
@@ -1052,7 +1055,7 @@ body.ad-page {
 .ad-grp-place-select {
     background: var(--accent-subtle);
     color: var(--accent);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: var(--radius-xs);
     font-weight: var(--fw-bold);
     font-size: var(--fs-sm);
@@ -1168,7 +1171,7 @@ body.ad-page {
     aspect-ratio: 1;
     border-radius: var(--radius-sm);
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
 }
 .ad-trn-photo-img { width: 100%; height: 100%; object-fit: cover; }
 /* Крестик снимка: ступень кнопки 28 вместо 22, кегль 16 вместо 14.
@@ -1204,7 +1207,7 @@ body.ad-page {
 .ad-reg-ntrp-zhdut {
     margin-bottom: var(--space-3);
     padding: var(--space-3) var(--space-4);
-    border: 1px solid rgba(255, 179, 0, 0.35);
+    border: var(--bw-hair) solid rgba(255, 179, 0, 0.35);
     border-radius: var(--radius-sm);
     background: rgba(255, 179, 0, 0.08);
     color: #ffb300;
@@ -1299,7 +1302,7 @@ body.ad-page {
     gap: var(--space-1);
     min-height: var(--chip-h);
     padding: 0 var(--space-2);
-    border: 1px solid #ffb300;
+    border: var(--bw-hair) solid #ffb300;
     border-radius: var(--radius-sm);
     background: rgba(255, 179, 0, 0.12);
     color: #ffb300;
@@ -1376,7 +1379,7 @@ body.ad-page {
     margin-top: var(--space-1);
     min-height: var(--chip-h);
     padding: 0 var(--space-2);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: var(--radius-sm);
     background: var(--accent-subtle);
     color: var(--accent);
@@ -1450,25 +1453,25 @@ body.ad-page {
 .ad-role-badge-admin {
     background: var(--alpha-lime-12);
     color: var(--accent);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
 .ad-role-badge-player {
     background: rgba(59, 130, 246, 0.1);
     color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: var(--bw-hair) solid rgba(59, 130, 246, 0.2);
 }
 
 .ad-role-badge-manager {
     background: rgba(168, 85, 247, 0.1);
     color: #a78bfa;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: var(--bw-hair) solid rgba(168, 85, 247, 0.2);
 }
 
 .ad-role-badge-user {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-muted);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ---- Coming Soon Placeholder ---- */
@@ -1541,8 +1544,8 @@ body.ad-page {
        тот же, что у .ad-btn-secondary */
     background: var(--bg-elevated);
     color: var(--text-secondary);
-    border: 1px solid var(--border-subtle);
-    font-family: var(--font-primary);
+    border: var(--bw-hair) solid var(--border-subtle);
+    font-family: var(--font-sans);
     white-space: nowrap;
 }
 
@@ -1692,14 +1695,14 @@ body.ad-page {
 .ad-reg-act-vynos:focus-visible,
 .ad-reg-check-wrap:focus-visible,
 .ad-confirm-cancel:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
 /* ФОКУС НА БАЗОВОМ КЛАССЕ, А НЕ У ИЗБРАННЫХ. Было у двух классов из
    десяти: клавиатурой по админке пройти было нельзя */
 .ad-btn:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -1728,7 +1731,7 @@ body.ad-page {
 .ad-btn-secondary {
     background: var(--bg-elevated);
     color: var(--text-secondary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-btn-secondary:hover {
@@ -1739,7 +1742,7 @@ body.ad-page {
 .ad-btn-danger {
     background: rgba(255, 59, 48, 0.1);
     color: #ff6b6b;
-    border: 1px solid rgba(255, 59, 48, 0.2);
+    border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
 }
 
 .ad-btn-danger:hover {
@@ -1749,7 +1752,7 @@ body.ad-page {
 .ad-btn-warning {
     background: rgba(255, 152, 0, 0.1);
     color: #ffb74d;
-    border: 1px solid rgba(255, 152, 0, 0.2);
+    border: var(--bw-hair) solid rgba(255, 152, 0, 0.2);
 }
 
 .ad-btn-warning:hover {
@@ -1775,7 +1778,7 @@ body.ad-page {
     -webkit-appearance: none;
     width: 18px !important;
     height: 18px !important;
-    border: 2px solid var(--accent);
+    border: var(--bw-thick) solid var(--accent);
     border-radius: 4px;
     background: transparent;
     cursor: pointer;
@@ -1840,7 +1843,7 @@ body.ad-page {
     font-size: var(--fs-xs);
     color: var(--accent);
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
@@ -1877,7 +1880,7 @@ body.ad-page {
     /* Было числом #CCFF00 — одно определение на одно понятие */
     color: var(--accent);
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: var(--transition-fast);
@@ -1895,7 +1898,7 @@ body.ad-page {
 .ad-crt-map-preview iframe {
     width: 100%;
     height: 200px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     margin-top: 10px;
 }
@@ -1942,49 +1945,49 @@ body.ad-page {
 .ad-status-published {
     background: rgba(34, 197, 94, 0.1);
     color: #22c55e;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    border: var(--bw-hair) solid rgba(34, 197, 94, 0.2);
 }
 
 .ad-status-draft {
     background: rgba(255, 193, 7, 0.1);
     color: #ffc107;
-    border: 1px solid rgba(255, 193, 7, 0.2);
+    border: var(--bw-hair) solid rgba(255, 193, 7, 0.2);
 }
 
 .ad-status-upcoming {
     background: rgba(59, 130, 246, 0.1);
     color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: var(--bw-hair) solid rgba(59, 130, 246, 0.2);
 }
 
 .ad-status-registration-open {
     background: rgba(34, 197, 94, 0.1);
     color: #22c55e;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    border: var(--bw-hair) solid rgba(34, 197, 94, 0.2);
 }
 
 .ad-status-registration-closed {
     background: rgba(255, 193, 7, 0.1);
     color: #ffc107;
-    border: 1px solid rgba(255, 193, 7, 0.2);
+    border: var(--bw-hair) solid rgba(255, 193, 7, 0.2);
 }
 
 .ad-status-ongoing {
     background: rgba(168, 85, 247, 0.1);
     color: #a78bfa;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: var(--bw-hair) solid rgba(168, 85, 247, 0.2);
 }
 
 .ad-status-completed {
     background: rgba(107, 114, 128, 0.1);
     color: #9ca3af;
-    border: 1px solid rgba(107, 114, 128, 0.2);
+    border: var(--bw-hair) solid rgba(107, 114, 128, 0.2);
 }
 
 .ad-status-cancelled {
     background: rgba(255, 59, 48, 0.1);
     color: #ff6b6b;
-    border: 1px solid rgba(255, 59, 48, 0.2);
+    border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
 }
 
 /* ---- Category Badge ---- */
@@ -1995,7 +1998,7 @@ body.ad-page {
     border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-muted);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     /* ЗНАЧОК ЖИВЁТ В ОДНУ СТРОКУ — `Badge 27:53`: высота 24, одна строка.
        Замерено 08.10: «Мировой теннис» переносился в колонке 115, значок
        становился 44 высотой, и ряд уезжал с 48 на 56. Каждая четвёртая
@@ -2016,13 +2019,13 @@ body.ad-page {
     border-radius: 4px;
     object-fit: cover;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ---- Form Card ---- */
 .ad-form-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     margin-bottom: var(--space-md);
@@ -2037,7 +2040,7 @@ body.ad-page {
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ---- Form Fields ---- */
@@ -2079,7 +2082,7 @@ body.ad-page {
     width: 100%;
     padding: 12px var(--input-px);
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--input-radius);
     color: var(--text-primary);
     font-size: var(--input-fs);
@@ -2316,7 +2319,7 @@ input[type="date"]::-webkit-datetime-edit {
     display: flex;
     border-radius: var(--radius-md);
     overflow: hidden;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
 }
 
 .ad-form-toggle button {
@@ -2361,7 +2364,7 @@ input[type="date"]::-webkit-datetime-edit {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
-    border: 1.5px solid rgba(255,255,255,0.5);
+    border: var(--bw-thick) solid rgba(255,255,255,0.5);
     border-radius: 3px;
     -webkit-appearance: none;
     appearance: none;
@@ -2390,7 +2393,7 @@ input[type="date"]::-webkit-datetime-edit {
    от выбора зависит, какие поля показать. Список прятал бы это за клик. */
 .ad-seg {
     display: flex;
-    border: 1px solid var(--ad-border, rgba(255,255,255,0.1));
+    border: var(--bw-hair) solid var(--ad-border, rgba(255,255,255,0.1));
     border-radius: 10px;
     overflow: hidden;
 }
@@ -2464,7 +2467,7 @@ input[type="date"]::-webkit-datetime-edit {
     align-items: center;
     justify-content: center;
     padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-full);
     background: rgba(0, 0, 0, 0.55);
     color: #fff;
@@ -2480,7 +2483,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-editor-lenta-nav:hover { background: rgba(0, 0, 0, 0.8); }
 
 .ad-editor-lenta-nav:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -2510,7 +2513,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 150px;
     height: 112px;
     margin: var(--space-2) var(--space-2) 0 0;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     background: var(--bg-elevated);
     overflow: hidden;
@@ -2584,7 +2587,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-editor-media-remove:hover { background: rgba(255, 59, 48, 0.85); }
 
 .ad-editor-media-remove:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -2675,7 +2678,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    border: var(--bw-thick) solid rgba(255, 255, 255, 0.5);
     border-radius: 4px;
     background: transparent;
     position: relative;
@@ -2724,7 +2727,7 @@ input[type="date"]::-webkit-datetime-edit {
     padding: 0 12px;
     height: 44px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
@@ -2739,7 +2742,7 @@ input[type="date"]::-webkit-datetime-edit {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
-    border: 1.5px solid rgba(255,255,255,0.5);
+    border: var(--bw-thick) solid rgba(255,255,255,0.5);
     border-radius: 3px;
     -webkit-appearance: none;
     appearance: none;
@@ -2787,7 +2790,7 @@ input[type="date"]::-webkit-datetime-edit {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-muted);
@@ -2815,7 +2818,7 @@ input[type="date"]::-webkit-datetime-edit {
     height: 80px;
     border-radius: var(--radius-sm);
     overflow: hidden;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-gallery-thumb img {
@@ -2874,7 +2877,7 @@ select.ad-field-input {
     margin-bottom: var(--space-3);
     /* Черта, по которой стоят вкладки: без неё подчёркивание активной
        висит в пустоте */
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-lang-tab {
@@ -2921,7 +2924,7 @@ select.ad-field-input {
 /* ---- Image Upload ---- */
 .ad-image-upload {
     position: relative;
-    border: 2px dashed var(--border-subtle);
+    border: var(--bw-thick) dashed var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 24px;
     text-align: center;
@@ -3061,7 +3064,7 @@ select.ad-field-input {
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-3);
-    border: 2px dashed var(--border-subtle);
+    border: var(--bw-thick) dashed var(--border-subtle);
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-muted);
@@ -3080,7 +3083,7 @@ select.ad-field-input {
 }
 
 .ad-afisha-drop:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -3174,7 +3177,7 @@ select.ad-field-input {
     gap: 4px;
     padding: 10px 18px;
     border-radius: 10px;
-    border: 2px solid var(--border-color);
+    border: var(--bw-thick) solid var(--border-color);
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-secondary);
     cursor: pointer;
@@ -3228,13 +3231,13 @@ select.ad-field-input {
 
 .ad-toast-success {
     background: rgba(34, 197, 94, 0.2);
-    border: 1px solid rgba(34, 197, 94, 0.4);
+    border: var(--bw-hair) solid rgba(34, 197, 94, 0.4);
     color: #22c55e;
 }
 
 .ad-toast-error {
     background: rgba(255, 59, 48, 0.15);
-    border: 1px solid rgba(255, 59, 48, 0.3);
+    border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
     color: #ff6b6b;
 }
 
@@ -3259,7 +3262,7 @@ select.ad-field-input {
    теряться в фоне: подложка окна #0A0A0A темнее фона админки */
 .ad-confirm-modal {
     background: var(--bg-secondary);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     max-width: 400px;
@@ -3449,7 +3452,7 @@ select.ad-field-input {
         right: 0;
         z-index: 999;
         background: var(--bg-secondary);
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: var(--bw-hair) solid var(--border-subtle);
         padding: 12px 16px;
         gap: 8px;
         overflow-x: auto;
@@ -3464,7 +3467,7 @@ select.ad-field-input {
         flex-shrink: 0;
         padding: 8px 16px;
         border-radius: var(--radius-full);
-        border: 1px solid var(--border-subtle);
+        border: var(--bw-hair) solid var(--border-subtle);
         background: transparent;
         color: var(--text-secondary);
         font-size: var(--fs-xs);
@@ -3658,7 +3661,7 @@ select.ad-field-input {
     font-weight: 600;
     margin: 20px 0 8px;
     padding-bottom: 4px;
-    border-bottom: 1px solid var(--alpha-lime-20);
+    border-bottom: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
 .ad-rat-cat-title:first-child {
@@ -3746,7 +3749,7 @@ select.ad-field-input {
 .ad-rat-info-banner {
     padding: 12px 16px;
     background: var(--alpha-lime-12);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     border-radius: 8px;
     color: rgba(255,255,255,0.8);
     font-size: var(--fs-sm);
@@ -3772,7 +3775,7 @@ select.ad-field-input {
 /* Points rules inputs */
 .rat-rule-input {
     background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.15) !important;
+    border: var(--bw-hair) solid rgba(255,255,255,0.15) !important;
     border-radius: 6px;
     color: #fff;
     padding: 6px 8px;
@@ -3918,7 +3921,7 @@ select.ad-field-input {
 }
 
 .ad-tab:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -3936,7 +3939,7 @@ select.ad-field-input {
     left: 50%;
     transform: translateX(-50%);
     background: var(--bg-elevated);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: 12px;
     padding: 12px 24px;
     display: flex;
@@ -4031,38 +4034,18 @@ select.ad-field-input {
 .ad-status-rejected { color: #ef4444; }
 .ad-status-withdrawn { color: var(--text-secondary); }
 
+/* КОРОБКА, ГАЛОЧКА И СОСТОЯНИЕ ОТМЕЧЕННОГО ЖИВУТ В `style.css` —
+   одно определение на продукт, рядом со вторым потребителем (вход).
+   Здесь остаётся только то, что принадлежит админке: цвет системного
+   акцента для нативной отрисовки и выравнивание в строке таблицы.
+   СВОЮ КОПИЮ КОРОБКИ ЗДЕСЬ ЗАВОДИТЬ НЕЛЬЗЯ: `admin.css` грузится
+   после `style.css` и перекроет общее правило молча. Рамка была
+   `--border-light`, общая — `--text-muted`: на лайме отмеченного
+   обе уходят под заливку, а неотмеченный стал чуть заметнее. */
 .ad-reg-check,
 .ad-reg-check-all {
-    width: 16px;
-    height: 16px;
     accent-color: var(--accent);
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    border: 2px solid var(--border-light);
-    border-radius: 3px;
-    background: transparent;
-    position: relative;
     vertical-align: middle;
-}
-
-.ad-reg-check:checked,
-.ad-reg-check-all:checked {
-    background: var(--accent);
-    border-color: var(--accent);
-}
-
-.ad-reg-check:checked::after,
-.ad-reg-check-all:checked::after {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 1px;
-    width: 4px;
-    height: 8px;
-    border: solid #000;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
 }
 
 .ad-reg-columns {
@@ -4140,7 +4123,7 @@ select.ad-field-input {
        состоянии: полоса не касается шапки сайта */
     padding: var(--space-sm) 0 var(--space-3);
     margin-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-trn-sticky-header .ad-section-header,
@@ -4217,7 +4200,7 @@ select.ad-field-input {
     color: var(--accent);
     padding-bottom: 8px;
     margin-bottom: 8px;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.1));
+    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.1));
 }
 
 /* Matches container — space-around aligns vertically */
@@ -4231,7 +4214,7 @@ select.ad-field-input {
 /* Match card */
 .ad-brk-match {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     margin: 4px 0;
     width: 210px;
@@ -4267,7 +4250,7 @@ select.ad-field-input {
     padding: 5px 8px;
     gap: 4px;
     font-size: var(--fs-xs);
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
+    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
     color: var(--text-secondary, #aaa);
 }
 
@@ -4406,7 +4389,7 @@ select.ad-field-input {
     min-width: 0;
 }
 .ad-brk-actions .ad-brk-edit + .ad-brk-edit {
-    border-left: 1px solid var(--border, rgba(255,255,255,0.06));
+    border-left: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
 }
 
 .ad-brk-edit {
@@ -4414,7 +4397,7 @@ select.ad-field-input {
     width: 100%;
     padding: 4px 8px;
     border: none;
-    border-top: 1px solid var(--border, rgba(255,255,255,0.06));
+    border-top: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
     background: var(--alpha-lime-06);
     color: var(--accent);
     font-size: var(--fs-2xs);
@@ -4546,7 +4529,7 @@ select.ad-field-input {
 .ad-fic-section {
     margin-bottom: 28px;
     padding-bottom: 20px;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.08));
 }
 .ad-fic-section:last-child {
     border-bottom: none;
@@ -4582,7 +4565,7 @@ select.ad-field-input {
    выглядеть из разных приложений (см. claude/kslt-formy-i-modalki.md) */
 .ad-modal {
     background: var(--bg-card);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: 16px;
     width: 100%;
     max-height: 90vh;
@@ -4594,7 +4577,7 @@ select.ad-field-input {
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-modal-header h3 {
@@ -4623,7 +4606,7 @@ select.ad-field-input {
 
 .ad-modal-footer {
     padding: 16px 20px;
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     text-align: right;
 }
 
@@ -4640,7 +4623,7 @@ select.ad-field-input {
 }
 
 .ad-import-dropzone {
-    border: 2px dashed var(--border-subtle);
+    border: var(--bw-thick) dashed var(--border-subtle);
     border-radius: 12px;
     padding: 32px 20px;
     text-align: center;
@@ -4682,7 +4665,7 @@ select.ad-field-input {
     gap: 10px;
     padding: 10px 14px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     margin-top: 10px;
 }
@@ -4727,7 +4710,7 @@ select.ad-field-input {
 .ad-import-preview-wrap {
     max-height: 320px;
     overflow-y: auto;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
 }
 
@@ -4913,7 +4896,7 @@ select.ad-field-input {
     padding: 0;
     margin-left: 4px;
     border-radius: 6px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
@@ -4998,7 +4981,7 @@ select.ad-field-input {
     padding: 12px 16px;
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
-    border: 1px solid var(--border, rgba(255,255,255,0.06));
+    border: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
 }
 .ad-mem-profile-row {
     display: flex;
@@ -5011,7 +4994,7 @@ select.ad-field-input {
 }
 
 .ad-mem-profile-payments-section {
-    border-top: 1px solid var(--border, rgba(255,255,255,0.06));
+    border-top: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
     padding-top: 16px;
 }
 
@@ -5025,12 +5008,12 @@ select.ad-field-input {
     color: var(--text-secondary);
     font-weight: 500;
     padding: 6px 8px;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
+    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
 }
 .ad-mem-profile-payments td {
     padding: 6px 8px;
     color: var(--text-primary);
-    border-bottom: 1px solid rgba(255,255,255,0.03);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.03);
 }
 
 /* ---- Draft autosave indicator ---- */
@@ -5074,7 +5057,7 @@ select.ad-field-input {
 
 .ad-news-stat-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-4);
     text-align: center;
@@ -5182,7 +5165,7 @@ select.ad-field-input {
 
 .ad-crt-stat-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 16px 20px;
 }
@@ -5261,7 +5244,7 @@ select.ad-field-input {
     background: var(--bg-primary);
     padding-top: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     margin-bottom: 0;
 }
 
@@ -5282,7 +5265,7 @@ select.ad-field-input {
 .ad-crt-page-btn {
     min-width: 32px;
     height: 30px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     background: var(--bg-elevated);
     color: var(--text-secondary);
@@ -5327,7 +5310,7 @@ select.ad-field-input {
 
 .ad-cch-stat-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 16px 20px;
     display: flex;
@@ -5355,7 +5338,7 @@ select.ad-field-input {
     font-weight: 600;
     background: var(--alpha-lime-12);
     color: var(--accent);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     margin: 1px 2px;
     white-space: nowrap;
 }
@@ -5432,7 +5415,7 @@ select.ad-field-input {
 
 .ad-pay-stat-card {
     background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 10px;
     padding: 16px;
     text-align: center;
@@ -5463,7 +5446,7 @@ select.ad-field-input {
     left: 0;
     right: 0;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     max-height: 200px;
     overflow-y: auto;
@@ -5476,7 +5459,7 @@ select.ad-field-input {
     cursor: pointer;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.04);
     transition: background 0.15s;
 }
 
@@ -5587,7 +5570,7 @@ select.ad-field-input {
     color: var(--accent);
     padding-bottom: 8px;
     margin-bottom: 16px;
-    border-bottom: 2px solid var(--alpha-lime-20);
+    border-bottom: var(--bw-thick) solid var(--alpha-lime-20);
 }
 
 .ad-grp-stage-separator {
@@ -5598,7 +5581,7 @@ select.ad-field-input {
 .ad-grp-block {
     margin-bottom: 24px;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 12px;
     padding: 16px;
 }
@@ -5620,7 +5603,7 @@ select.ad-field-input {
 .ad-grp-matrix th,
 .ad-grp-matrix td {
     padding: 6px 8px;
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     font-size: var(--fs-xs);
 }
 
@@ -5686,7 +5669,7 @@ select.ad-field-input {
 
 .ad-brk-ig-cancelled {
     padding: 6px 8px;
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     color: var(--danger, #ff6b6b);
     font-size: var(--fs-xs);
     text-align: center;
@@ -5726,7 +5709,7 @@ select.ad-field-input {
     gap: 12px;
     padding: 6px 10px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
 }
 
@@ -5739,7 +5722,7 @@ select.ad-field-input {
 .ad-sess-pick {
     padding: 4px 8px;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 6px;
     color: var(--text-primary);
     font-size: var(--fs-xs);
@@ -5784,7 +5767,7 @@ select.ad-field-input {
     background-position: right 7px center;
     -webkit-appearance: none;
     appearance: none;
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: 6px;
     color: var(--accent);
     font-size: var(--fs-xs);
@@ -5823,7 +5806,7 @@ select.ad-field-input {
     max-width: 220px;
     padding: 7px 10px;
     background: var(--bg-elevated);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-size: var(--fs-xs);
@@ -5880,7 +5863,7 @@ select.ad-field-input {
     color: var(--accent);
     padding-bottom: 8px;
     margin-bottom: 8px;
-    border-bottom: 2px solid var(--alpha-lime-20);
+    border-bottom: var(--bw-thick) solid var(--alpha-lime-20);
 }
 
 /* Раздача ширин долями резала содержимое: «Корт 1» превращался в «Корт», а
@@ -5982,7 +5965,7 @@ select.ad-field-input {
 .ad-sched-menu .ad-sched-call {
     margin-top: 4px;
     padding-top: 5px;
-    border-top: 2px solid var(--border-subtle);
+    border-top: var(--bw-thick) solid var(--border-subtle);
 }
 
 /* Пары забирают всё оставшееся место и ужимаются первыми — длинные ФИО
@@ -6028,7 +6011,7 @@ select.ad-field-input {
 .ad-sched-player,
 .ad-sched-court {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     color: var(--text-primary);
     padding: 6px 12px;
@@ -6060,7 +6043,7 @@ select.ad-field-input {
 /* ---- Dashboard Chart ---- */
 .ad-dash-chart-card {
     background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 12px;
     margin-bottom: 24px;
     overflow: hidden;
@@ -6087,7 +6070,7 @@ select.ad-field-input {
     align-items: center;
     gap: 14px;
     background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 12px;
     padding: 18px 20px;
 }
@@ -6170,7 +6153,7 @@ select.ad-field-input {
 
 .ad-vch-stat-big {
     background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 12px;
     padding: 24px;
     text-align: center;
@@ -6205,7 +6188,7 @@ select.ad-field-input {
 
 .ad-vch-stat {
     background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 10px;
     padding: 14px 16px;
     font-size: var(--fs-sm);
@@ -6289,7 +6272,7 @@ select.ad-field-input {
 
 .ad-btn-outline {
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: var(--bw-hair) solid rgba(255,255,255,0.15);
     color: var(--text-secondary);
 }
 
@@ -6316,7 +6299,7 @@ select.ad-field-input {
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 
 .ad-vch-detail-row:last-child {
@@ -6353,7 +6336,7 @@ select.ad-field-input {
     max-height: 240px;
     overflow-y: auto;
     background: var(--bg-card, #1a1a1a);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
@@ -6372,7 +6355,7 @@ select.ad-field-input {
 .ad-dropdown-manual {
     font-size: var(--fs-sm);
     color: var(--accent);
-    border-top: 1px solid var(--border);
+    border-top: var(--bw-hair) solid var(--border);
 }
 
 /* ---- Challenge modal helpers ---- */
@@ -6489,7 +6472,7 @@ select.ad-field-input {
     margin-top: 8px;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
 }
 .ad-chal-banner-preview img {
     width: 100%;
@@ -6501,7 +6484,7 @@ select.ad-field-input {
 .ad-ig-section {
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-matches-grid {
     display: grid;
@@ -6520,7 +6503,7 @@ select.ad-field-input {
 }
 .ad-ig-card {
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -6537,14 +6520,14 @@ select.ad-field-input {
     color: var(--text-muted);
     padding: 6px 12px;
     background: rgba(255,255,255,0.03);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-card-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-card-row:last-child {
     border-bottom: none;
@@ -6618,7 +6601,7 @@ select.ad-field-input {
     padding: 10px 14px;
     border-radius: 8px;
     background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
+    border: var(--bw-hair) solid rgba(255, 193, 7, 0.3);
     color: #ffc107;
     font-size: var(--fs-sm);
 }
@@ -6632,7 +6615,7 @@ select.ad-field-input {
 }
 .anl-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     padding: 20px;
     text-align: center;
@@ -6653,7 +6636,7 @@ select.ad-field-input {
 }
 .anl-chart-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     padding: 20px;
     margin-bottom: 24px;
@@ -6675,7 +6658,7 @@ select.ad-field-input {
 }
 .anl-top-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     padding: 20px;
 }
@@ -6691,7 +6674,7 @@ select.ad-field-input {
 
 /* ---- Визуальный редактор новостей ---- */
 .ad-editor {
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.1));
     border-radius: var(--radius-sm, 8px);
     overflow: hidden;
     background: var(--bg-elevated, #1a1a1a);
@@ -6702,7 +6685,7 @@ select.ad-field-input {
     flex-wrap: wrap;
     gap: 4px;
     padding: 8px;
-    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.1));
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -6719,7 +6702,7 @@ select.ad-field-input {
     line-height: var(--lh-none);
     color: var(--text-secondary, #aaa);
     background: none;
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: color 0.15s, background 0.15s;
@@ -6823,7 +6806,7 @@ select.ad-field-input {
     display: flex;
     flex-direction: column;
     background: var(--bg-card, #141417);
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.1));
     border-radius: 16px;
     overflow: hidden;
 }
@@ -6833,7 +6816,7 @@ select.ad-field-input {
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.08));
 }
 
 .ad-crop-title { font-weight: 600; }
@@ -6876,7 +6859,7 @@ select.ad-field-input {
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 20px 20px;
-    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-top: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.08));
     background: var(--bg-card, #141417);
 }
 
@@ -6960,7 +6943,7 @@ select.ad-field-input {
    Закрытая категория перестаёт принимать заявки, но очки, матчи и история
    рейтинга в ней остаются — поэтому она не убирается, а притухает */
 .ad-cat-card {
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 10px;
     padding: 12px 14px;
     margin-bottom: 10px;
@@ -7059,7 +7042,7 @@ select.ad-field-input {
 .ad-chal-links a {
     color: var(--text-muted);
     text-decoration: none;
-    border-bottom: 1px dotted transparent;
+    border-bottom: var(--bw-hair) dotted transparent;
 }
 
 .ad-chal-links a:hover {
@@ -7110,7 +7093,7 @@ select.ad-field-input {
     padding: 12px 14px;
     border-radius: 10px;
     background: rgba(255, 59, 48, 0.08);
-    border: 1px solid rgba(255, 59, 48, 0.2);
+    border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
     color: #ff6b6b;
     font-size: var(--fs-sm);
     line-height: 1.5;
@@ -7180,7 +7163,7 @@ select.ad-field-input {
     height: 44px;
     padding: 0 12px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -7212,7 +7195,7 @@ select.ad-field-input {
     overflow-y: auto;
     padding: 6px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
     display: none;
@@ -7296,7 +7279,7 @@ select.ad-field-input {
    Показывается над сеткой, только когда есть что смотреть. Спорные идут
    первыми: они держат сетку, пока организатор не разберётся. */
 .ad-score-queue {
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 12px;
     padding: 12px 14px;
     margin-bottom: 14px;
@@ -7320,7 +7303,7 @@ select.ad-field-input {
     gap: 10px;
     padding: 8px 0;
     flex-wrap: wrap;
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-sq-pair {
@@ -7397,7 +7380,7 @@ select.ad-field-input {
 /* Пустая полоса: место держит, вид не занимает */
 .ad-brk-edit-empty {
     background: none;
-    border-top: 1px solid var(--border, rgba(255,255,255,0.06));
+    border-top: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
     pointer-events: none;
 }
 /* Исход матча пишем поверх строки счёта, а не отдельной строкой —
@@ -7506,7 +7489,7 @@ select.ad-field-input {
 
 .ad-sched-note {
     background: rgba(255, 255, 255, 0.04);
-    border-left: 3px solid var(--accent);
+    border-left: var(--bw-heavy) solid var(--accent);
     border-radius: var(--radius-sm);
     /* Было 10 14 и margin-bottom 14 — ни одного числа со шкалы
        8 · 12 · 16 · 24 · 32 · 40 */
@@ -7584,7 +7567,7 @@ select.ad-field-input {
     font-size: var(--fs-xs);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     color: var(--text-primary);
 }
 
@@ -7651,7 +7634,7 @@ select.ad-field-input {
 .ad-btn:focus-visible,
 .ad-reg-act:focus-visible,
 .ad-btn-icon:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -7706,7 +7689,7 @@ select.ad-field-input {
     width: 60px;
     padding: 5px 8px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 6px;
     color: var(--accent);
     font-size: var(--fs-sm);
@@ -7778,7 +7761,7 @@ select.ad-field-input {
 .ad-replace-queue {
     max-height: 220px;
     overflow-y: auto;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     padding: var(--space-1);
 }
@@ -7807,7 +7790,7 @@ select.ad-field-input {
 }
 
 .ad-replace-queue-item:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -7841,7 +7824,7 @@ select.ad-field-input {
 
 .ad-replace-queue-empty {
     padding: var(--space-3);
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     border-radius: var(--radius-sm);
     font-size: var(--fs-xs);
     color: var(--text-muted);
@@ -7849,7 +7832,7 @@ select.ad-field-input {
 
 .ad-mode-switch {
     display: flex;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 4px;
@@ -7871,7 +7854,7 @@ select.ad-field-input {
 }
 
 .ad-mode-switch button + button {
-    border-left: 1px solid var(--border-subtle);
+    border-left: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-mode-switch button.on {
@@ -7880,13 +7863,13 @@ select.ad-field-input {
 }
 
 .ad-mode-switch button:focus { outline: none; }
-.ad-mode-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ad-mode-switch button:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: -2px; }
 
 /* Статус игры — два положения, а не системный список: видно, что можно
    переключить, и нет синей подсветки чужого оформления */
 .ad-sched-switch {
     display: inline-flex;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     overflow: hidden;
     max-width: 100%;
@@ -7911,12 +7894,12 @@ select.ad-field-input {
 }
 
 .ad-sched-switch button:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
 .ad-sched-switch button + button {
-    border-left: 1px solid var(--border-subtle);
+    border-left: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-sched-switch button:hover {
@@ -8384,7 +8367,7 @@ select.ad-field-input {
 .ad-badge-ig {
     background: rgba(255, 179, 0, 0.16);
     color: #ffb300;
-    border: 1px solid rgba(255, 179, 0, 0.3);
+    border: var(--bw-hair) solid rgba(255, 179, 0, 0.3);
     font-size: var(--fs-2xs);
     white-space: nowrap;
 }
@@ -8395,7 +8378,7 @@ select.ad-field-input {
 .ad-badge-out {
     background: transparent;
     color: var(--text-muted);
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     font-size: var(--fs-2xs);
     white-space: nowrap;
 }
@@ -8422,7 +8405,7 @@ select.ad-field-input {
 /* Последняя строка списка — создание. Отделена чертой, чтобы не читалась
    как ещё один корт, и лаймом, потому что это действие, а не запись */
 .ad-venue-add {
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     color: var(--accent);
     font-weight: 600;
 }
@@ -8469,8 +8452,8 @@ select.ad-field-input {
     display: flex; gap: var(--space-3); align-items: flex-start;
     padding: var(--space-3) var(--space-4);
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-left: 3px solid var(--accent);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-left: var(--bw-heavy) solid var(--accent);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-4);
 }
@@ -8532,7 +8515,7 @@ select.ad-field-input {
     background: rgba(255,60,60,0.15); color: #ff4444;
     font-size: var(--fs-sm); cursor: pointer;
 }
-.ad-pts th .set-del-level:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ad-pts th .set-del-level:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }
 .ad-pts td {
     /* ЛИНИЯ СТРОКИ — ТЕНЬЮ, А НЕ РАМКОЙ. Прибор дал 37 там, где объявлено
        36: рамка ячейки таблицы прибавляется к высоте. Внутренняя тень
@@ -8564,7 +8547,7 @@ select.ad-field-input {
     box-sizing: border-box;
     width: 64px; height: 28px; padding: 0 var(--space-2);
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-size: var(--fs-sm); font-weight: 600;    text-align: center; font-variant-numeric: tabular-nums;
@@ -8582,7 +8565,7 @@ select.ad-field-input {
 
 .ad-pts-in:hover { border-color: var(--alpha-white-16, rgba(255,255,255,.16)); }
 .ad-pts-in:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 1px;
+    outline: var(--bw-thick) solid var(--accent); outline-offset: 1px;
     border-color: var(--accent);
 }
 .ad-pts-in[readonly] {
@@ -8624,7 +8607,7 @@ select.ad-field-input {
     background: var(--bg-surface); color: var(--text-muted);
 }
 .ad-pts-ver-pill:hover { color: var(--text-primary); }
-.ad-pts-ver-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ad-pts-ver-pill:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }
 /* Выбранная — чёрным по лайму: контраст 5.30, ПОСЧИТАНО прибором макета */
 .ad-pts-ver-on { background: var(--accent); color: var(--bg-base); font-weight: 600; }
 .ad-pts-ver-more { background: none; text-decoration: underline; }

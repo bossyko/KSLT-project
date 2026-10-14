@@ -150,7 +150,7 @@
 
 .ct-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
     transition: border-color var(--transition-base), transform var(--transition-base);
@@ -222,7 +222,7 @@
 .ct-map-embed iframe {
     width: 100%;
     height: 300px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 12px;
 }
 .ct-map-links {
@@ -242,7 +242,7 @@
     min-height: var(--btn-h-sm);
     padding-inline: 16px;
     background: rgba(255,255,255,0.06);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     color: var(--accent);
     font-size: var(--fs-sm);
@@ -394,7 +394,7 @@
 
 .ct-membership-modal {
     background: #1a1a1a;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 32px;
     max-width: 400px;
@@ -542,7 +542,7 @@
 .ct-toast.info {
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ---- DETAIL PAGE ---- */
@@ -553,7 +553,7 @@
     height: 240px;
     border-radius: var(--radius-lg);
     object-fit: cover;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
     flex-shrink: 0;
 }
 
@@ -630,7 +630,7 @@
 
 .ct-detail-stat {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 24px 16px;
     text-align: center;
@@ -658,7 +658,7 @@
 
 .ct-detail-stat-combined {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     /* ПИЛЮЛЯ СТАЛА НА СТУПЕНЬ МЕНЬШЕ — слово Кости 13.10: «давай сделаем её
        чуть поменьше». Поля 20/32 → 16/24, обе ступени шкалы. Вместе с кеглем
@@ -692,7 +692,7 @@
     background: rgba(255,255,255,0.03);
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 
 .ct-types-header,
@@ -708,7 +708,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 
 .ct-types-header {
@@ -723,7 +723,7 @@
 .ct-services-row {
     display: grid;
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.04);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     align-items: center;
@@ -773,7 +773,7 @@
     font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ct-section-title span {
@@ -806,7 +806,7 @@
     align-items: center;
     gap: 10px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 14px 16px;
     color: var(--text-secondary);
@@ -833,7 +833,7 @@
     padding: 14px 20px;
     border-radius: var(--radius-sm);
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ct-schedule-day {
@@ -857,7 +857,7 @@
     height: 200px;
     object-fit: cover;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     cursor: pointer;
     transition: transform var(--transition-base), border-color var(--transition-base);
 }
@@ -872,7 +872,7 @@
     width: 100%;
     height: 280px;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     overflow: hidden;
 }
 
@@ -889,7 +889,7 @@
 /* CTA */
 .ct-cta {
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 48px 40px;
     text-align: center;
@@ -1142,7 +1142,7 @@
 
 /* === DISCOUNT / VOUCHER === */
 .ct-discount-section {
-    border: 1px solid var(--accent-subtle);
+    border: var(--bw-hair) solid var(--accent-subtle);
     border-radius: 16px;
     padding: 24px;
     background: var(--alpha-lime-06);
@@ -1160,7 +1160,7 @@
     padding: 14px 18px;
     background: rgba(255,255,255,0.04);
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 .ct-discount-info {
     display: flex;
@@ -1218,7 +1218,7 @@
 @keyframes ctModalFadeIn { to { opacity: 1; } }
 .ct-voucher-modal {
     background: rgba(26,26,30,0.95);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid rgba(255,255,255,0.08);
     border-radius: 16px;
     padding: 32px;
     max-width: 400px;
@@ -1264,7 +1264,7 @@
     padding: 6px 0;
     font-size: var(--fs-sm);
     color: rgba(255,255,255,0.7);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 .ct-voucher-row:last-child { border-bottom: none; }
 .ct-voucher-percent {
@@ -1293,7 +1293,7 @@
 .ct-voucher-history {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
 .ct-voucher-history h4 {
     font-size: var(--fs-base);
@@ -1317,7 +1317,7 @@
     padding: 12px 16px;
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: var(--bw-hair) solid rgba(255,255,255,0.04);
     font-size: var(--fs-sm);
 }
 .ct-vh-date {
@@ -1355,7 +1355,7 @@
 }
 .ct-vh-qr-btn {
     background: none;
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     color: var(--accent);
     padding: 2px 10px;
     border-radius: 6px;
@@ -1391,7 +1391,7 @@
 }
 .ct-picker-modal {
     background: rgba(26,26,30,0.95);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid rgba(255,255,255,0.08);
     border-radius: 16px;
     padding: 28px;
     max-width: 380px;
@@ -1428,7 +1428,7 @@
     gap: 12px;
     padding: 12px 14px;
     background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 10px;
     cursor: pointer;
     transition: border-color 0.2s;
@@ -1442,7 +1442,7 @@
 }
 .ct-picker-radio {
     width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: var(--bw-thick) solid rgba(255,255,255,0.2);
     border-radius: 50%;
     flex-shrink: 0;
     position: relative;
@@ -1602,7 +1602,7 @@
 .ct-detail-phone a:focus-visible,
 .ct-gallery-img:focus-visible,
 .kslt-back:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 

@@ -18,7 +18,7 @@
 }
 
 body {
-    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.5;
     color: var(--text-primary);
     background: var(--bg-primary);
@@ -262,7 +262,7 @@ input, button, select, textarea {
     align-items: center;
     gap: 2px;
     padding-left: var(--space-sm);
-    border-left: 1px solid var(--border-subtle);
+    border-left: var(--bw-hair) solid var(--border-subtle);
 }
 
 .sponsor-label {
@@ -442,7 +442,7 @@ input, button, select, textarea {
 .logo:focus-visible,
 .burger-menu:focus-visible,
 .nav-dropdown-item:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -632,7 +632,7 @@ input, button, select, textarea {
        — из-за этого первые строки статьи выглядели тусклыми, хотя текст
        белый и ничего поверх него нет. */
     backdrop-filter: none;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     /* ВЕРХНИЕ УГЛЫ ПРЯМЫЕ. Панель продолжает шапку вниз, а не лежит под
        ней отдельной карточкой. Два отвергнутых варианта (Костя, 20.09):
        с зазором — «как будто отвалилась»; с язычком до низа шапки —
@@ -825,7 +825,7 @@ input, button, select, textarea {
     min-width: 180px;
 
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
 
@@ -961,7 +961,7 @@ input, button, select, textarea {
     align-items: center;
     gap: 8px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     color: var(--text-primary);
     padding: 5px 12px 5px 5px;
     border-radius: var(--radius-full);
@@ -1024,7 +1024,7 @@ input, button, select, textarea {
     right: 0;
     min-width: 200px;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     padding: 6px;
@@ -1047,7 +1047,7 @@ input, button, select, textarea {
     font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--text-muted);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     margin-bottom: 4px;
 }
 
@@ -1110,7 +1110,7 @@ input, button, select, textarea {
 }
 .site-notif-btn {
     background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
+    border: var(--bw-hair) solid rgba(255,255,255,0.12);
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -1173,7 +1173,7 @@ input, button, select, textarea {
        крупное скругление и рамка цветом клуба — приглушённым, чтобы
        обводка не спорила с содержимым */
     background: var(--bg-elevated);
-    border: 1px solid var(--alpha-lime-30);
+    border: var(--bw-hair) solid var(--alpha-lime-30);
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 60px rgba(0,0,0,0.6);
     overflow: hidden;
@@ -1185,7 +1185,7 @@ input, button, select, textarea {
     justify-content: space-between;
     gap: 12px;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255,255,255,0.08));
 }
 
 .site-notif-title {
@@ -1212,7 +1212,7 @@ input, button, select, textarea {
 
 .site-notif-foot {
     padding: 12px 20px;
-    border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+    border-top: var(--bw-hair) solid var(--border-subtle, rgba(255,255,255,0.08));
     text-align: center;
 }
 
@@ -1233,21 +1233,21 @@ input, button, select, textarea {
     max-height: 400px;
     overflow-y: auto;
     background: var(--bg-card, #1a1a2e);
-    border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+    border: var(--bw-hair) solid var(--border-subtle, rgba(255,255,255,0.1));
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     z-index: 1000;
 }
 .site-notif-item {
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255,255,255,0.06));
     transition: background 0.15s;
 }
 .site-notif-item:last-child { border-bottom: none; }
 .site-notif-item:hover { background: rgba(255,255,255,0.04); }
 .site-notif-item.unread {
     background: var(--alpha-lime-06);
-    border-left: 3px solid var(--accent);
+    border-left: var(--bw-heavy) solid var(--accent);
 }
 .site-notif-item-title {
     font-weight: 600;
@@ -1273,7 +1273,7 @@ input, button, select, textarea {
     text-align: left;
     background: none;
     border: none;
-    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255,255,255,0.06));
     color: inherit;
     font: inherit;
     cursor: pointer;
@@ -1286,7 +1286,7 @@ input, button, select, textarea {
 
 /* Непрочитанное в выпадающем списке заметно полосой слева */
 .site-notif-dropdown .site-notif-item.unread {
-    border-left: 3px solid var(--accent);
+    border-left: var(--bw-heavy) solid var(--accent);
     background: var(--alpha-lime-06);
 }
 
@@ -1345,7 +1345,7 @@ input, button, select, textarea {
     align-items: center;
     gap: 4px;
     background: transparent;
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     color: var(--accent);
     text-decoration: none;
 }
@@ -1409,7 +1409,7 @@ input, button, select, textarea {
        с кнопкой. Решение Кости 20.09, вариант 3 на доске 213:145.
        Кегль был 0.8rem = 12.8 — мимо девятиступенчатой шкалы. */
     background: none;
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     color: var(--text-secondary);
     min-height: 36px;
     padding: 0 16px;
@@ -1451,7 +1451,7 @@ input, button, select, textarea {
     min-width: 160px;
 
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
 
@@ -1668,7 +1668,7 @@ section {
 
 section:not(.hero) {
     background: var(--bg-secondary);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 h2 {
@@ -1841,7 +1841,7 @@ h2 {
     align-items: center;
     gap: 8px;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     padding: clamp(6px, 1vh, 10px) clamp(12px, 2vw, 18px);
     border-radius: var(--radius-full);
     font-size: clamp(0.7rem, 1.5vw, 0.85rem);
@@ -1996,7 +1996,7 @@ h2 {
     border-radius: var(--radius-full);
     font-size: var(--fs-base);
     font-weight: 500;
-    border: 1.5px solid var(--border-light);
+    border: var(--bw-thick) solid var(--border-light);
     transition: all var(--transition-base);
 }
 
@@ -2030,7 +2030,12 @@ h2 {
     color: var(--text-primary);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
-    font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+    /* БЫЛО ДРУГОЕ СЕМЕЙСТВО НА ТОМ ЖЕ ЭКРАНЕ: здесь стояло 'SF Pro
+       Display' без Inter — на Маке цифры статистики рисовались не тем
+       шрифтом, что всё вокруг, а на других системах падали на system-ui.
+       Одна запись семейства на продукт; ширину цифр держит
+       `tabular-nums` строкой выше, а не выбор шрифта. */
+    font-family: var(--font-sans);
 }
 
 /* Класс для анимации набега цифр */
@@ -2077,7 +2082,7 @@ h2 {
     border-radius: var(--radius-xl);
     overflow: hidden;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     animation: fadeInUp 0.8s ease 0.2s both;
 }
 
@@ -2107,7 +2112,7 @@ h2 {
     gap: 14px;
 
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 
     padding: 16px 20px;
     border-radius: var(--radius-lg);
@@ -2197,7 +2202,7 @@ h2 {
 .bg-circle {
     position: absolute;
     border-radius: 50%;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .bg-circle-1 {
@@ -2378,7 +2383,7 @@ h2 {
 
 .tournament-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: all var(--transition-base);
@@ -2519,7 +2524,7 @@ h2 {
 
 .live-match {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     /* Card 29:65, Padding=Compact — 16. Было 16/18: восемнадцати нет ни в шкале,
        ни в компоненте. Радиус и рамка с компонентом сходились и раньше. */
@@ -2739,7 +2744,7 @@ h2 {
 
 .btn-watch {
     background: transparent;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     color: var(--text-primary);
     padding: 10px 20px;
     border-radius: var(--radius-full);
@@ -2775,7 +2780,7 @@ h2 {
     gap: var(--space-sm);
     padding: var(--space-lg);
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     text-decoration: none;
     transition: all 0.3s ease;
@@ -2960,7 +2965,7 @@ h2 {
    8 · 12 · 16 · 24 · 32 · 40, тогда как 10 — нет. */
 .badge-cta-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-3);          /* 12 — Padding=Dense */
     display: flex;
@@ -3245,7 +3250,7 @@ h2 {
     flex: 1;
     min-height: var(--btn-h-md);          /* 44 */
     padding: 0 var(--space-4);            /* 16; было 9/14 — не ступень */
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--text-secondary);
@@ -3330,7 +3335,7 @@ h2 {
     /* 1.3. Был normal — единственный из девятнадцати текстовых уровней
        раздела без замеренного межстрочного: замораживать было нечего. */
     line-height: var(--lh-snug);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--text-secondary);
@@ -3365,7 +3370,7 @@ h2 {
 .rankings-panel {
     display: none;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     overflow: hidden;
 }
@@ -3509,7 +3514,7 @@ h2 {
     justify-content: center;
     border-radius: 50%;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-12);
+    border: var(--bw-hair) solid var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -3589,7 +3594,7 @@ h2 {
     align-items: center;
     gap: 8px;
     background: var(--alpha-lime-06);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     padding: 6px 16px;
     border-radius: var(--radius-full);
     font-size: var(--fs-xs);
@@ -3606,7 +3611,7 @@ h2 {
 
 .player-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: var(--space-lg);
     display: flex;
@@ -3627,7 +3632,7 @@ h2 {
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--border-subtle);
+    border: var(--bw-heavy) solid var(--border-subtle);
 }
 
 .player-card:hover .player-photo {
@@ -3837,7 +3842,7 @@ h2 {
    До 24.09 во всей секции не было ни одного :focus-visible */
 .vn-four .court-card:focus-visible,
 .vn-four .coach-card:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -3947,7 +3952,7 @@ h2 {
 
 .court-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: all var(--transition-base);
@@ -4059,7 +4064,7 @@ h2 {
 
 .court-card-details {
     background: none;
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     color: var(--accent);
 }
 
@@ -4082,7 +4087,7 @@ h2 {
     font-weight: 600;
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
@@ -4113,7 +4118,7 @@ h2 {
 
 .coach-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: all var(--transition-base);
@@ -4138,7 +4143,7 @@ h2 {
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border-subtle);
+    border: var(--bw-thick) solid var(--border-subtle);
 }
 
 .coach-card:hover .coach-photo {
@@ -4200,7 +4205,7 @@ h2 {
 
 .coach-card-details {
     background: none;
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     color: var(--accent);
 }
 
@@ -4223,7 +4228,7 @@ h2 {
     font-weight: 600;
     background: rgba(30, 30, 30, 0.95);
     color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
@@ -4335,7 +4340,7 @@ h2 {
        акцентом, и коробка объявляет себя ровно там, где на неё смотрят. */
     padding: var(--space-2);
     background: transparent;
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     border-radius: var(--radius-lg);
     text-decoration: none;
     color: inherit;
@@ -4359,7 +4364,7 @@ h2 {
 
 .sponsors-cloud .sponsor-logo-link:focus-visible,
 .sponsor-hero-logo:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -4446,7 +4451,7 @@ h2 {
 
 .spon-modal {
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     border-radius: var(--radius-xl);
     padding: 32px 28px 24px;
     max-width: 400px;
@@ -4486,7 +4491,7 @@ h2 {
 .spon-modal-close:focus-visible,
 .spon-modal-close-btn:focus-visible,
 .spon-modal-action:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -4547,7 +4552,7 @@ h2 {
     gap: 10px;
     padding: 12px 16px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     text-decoration: none;
@@ -4602,7 +4607,7 @@ h2 {
     height: var(--btn-h-md);
     padding: 0 var(--space-6);
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border);
+    border: var(--bw-hair) solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -4712,7 +4717,7 @@ h2 {
     height: 100px;
     object-fit: contain;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     background: var(--bg-card);
     padding: 12px;
     box-sizing: border-box;
@@ -4900,7 +4905,7 @@ h2 {
 /* Кольцо фокуса обязательно по WCAG 2.4.7 — описание Button 17:82.
    До 24.09 во всей секции не было ни одного :focus-visible */
 .feature:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 4px;
     border-radius: var(--radius-md);
 }
@@ -4921,7 +4926,7 @@ h2 {
         var(--alpha-lime-20),
         var(--alpha-lime-06) 60%,
         rgba(255, 255, 255, 0.02));
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.20),
         inset 0 -10px 16px rgba(0, 0, 0, 0.50),
@@ -5045,7 +5050,7 @@ h2 {
     z-index: 30;
     background: var(--bg-primary);
     padding: 14px 0;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     transition: box-shadow 0.2s;
 }
 
@@ -5123,14 +5128,14 @@ h2 {
     width: 100%;
     padding: 10px 16px 10px 42px;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     /* РАДИУС ИЗ КОМПОНЕНТА, А НЕ ТАБЛЕТКА. `Search field 50:67`: radius 8
        («radius/sm»), как у `Input 25:5`. В коде стояла таблетка — поле
        поиска читалось как чип, а не как поле ввода, и расходилось с полями
        всех форм продукта. Одно объявление на пять разделов с поиском. */
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     outline: none;
     /* не «all»: см. чип выше — outline-width под переход не попадает */
     transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
@@ -5180,7 +5185,7 @@ h2 {
     min-height: var(--btn-h-md);
     padding: 8px 18px;
     background: transparent;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
     /* ЦЕЛЬ НАЖАТИЯ — НАСТОЯЩЕЙ ВЫСОТОЙ, А НЕ СЛОЕМ.
@@ -5197,7 +5202,7 @@ h2 {
        Взята младшая ступень: ряд чипов липкий, и каждый лишний пиксель его
        высоты съедает экран. */
     font-size: var(--fs-xs);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -5256,7 +5261,7 @@ h2 {
 }
 
 .trn-chip:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -5289,11 +5294,11 @@ h2 {
 .trn-chips select {
     padding: 8px 18px;
     background: transparent;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     font-weight: 500;
     cursor: pointer;
 }
@@ -5562,10 +5567,10 @@ h2 {
     height: var(--btn-h-sm);
     padding: 0 8px;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
     line-height: var(--lh-none);
@@ -5687,7 +5692,7 @@ h2 {
     overflow-y: auto;
     padding: 6px;
     background: var(--bg-elevated, #141414);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md, 12px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
     display: none;
@@ -5718,7 +5723,7 @@ h2 {
     border: none;
     border-radius: 8px;
     color: var(--text-secondary);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     text-align: left;
     cursor: pointer;
@@ -5781,7 +5786,7 @@ h2 {
 .pl-page-btn:focus-visible,
 .ct-search-input:focus-visible,
 .co-search-input:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -5837,7 +5842,7 @@ h2 {
     /* Как у остальных окон сайта: плотная подложка и приглушённая рамка
        цветом клуба. Прозрачный фон просвечивал страницу насквозь */
     background: var(--bg-elevated);
-    border: 1px solid var(--alpha-lime-30);
+    border: var(--bw-hair) solid var(--alpha-lime-30);
     border-radius: 16px;
     padding: 22px 18px 20px;
     max-width: 320px;
@@ -5968,7 +5973,7 @@ h2 {
     gap: 4px;
     padding: 12px 8px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     cursor: default;
     opacity: 0.5;
@@ -6120,7 +6125,7 @@ h2 {
 }
 
 .trn-block-head {
-    border-left: 3px solid var(--accent);
+    border-left: var(--bw-heavy) solid var(--accent);
     padding-left: 14px;
     margin-bottom: var(--space-md);
 }
@@ -6179,7 +6184,7 @@ h2 {
     display: flex;
     flex-direction: column;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
     text-decoration: none;
@@ -6519,7 +6524,7 @@ h2 {
     padding: 5px 10px;
     border-radius: 8px;
     background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.95));
-    border: 1px solid rgba(255, 100, 100, 0.3);
+    border: var(--bw-hair) solid rgba(255, 100, 100, 0.3);
     font-size: var(--fs-xs);
     font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
@@ -6544,7 +6549,7 @@ h2 {
     padding: 40px 20px;
     text-align: center;
     color: var(--text-muted);
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     border-radius: var(--radius-lg);
 }
 
@@ -6856,7 +6861,7 @@ h2 {
     text-align: center;
     gap: 6px;
     flex-direction: column;
-    border: 1px dashed var(--border-light);
+    border: var(--bw-hair) dashed var(--border-light);
     border-radius: var(--radius-lg);
     background: var(--surface-glass);
     color: var(--text-primary);
@@ -6894,7 +6899,7 @@ h2 {
     padding: 34px 28px 26px;
     text-align: center;
     background: #121212;
-    border: 1px solid var(--alpha-lime-30);
+    border: var(--bw-hair) solid var(--alpha-lime-30);
     border-radius: 24px;
     box-shadow: 0 0 60px var(--alpha-lime-20);
     animation: achPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
@@ -6937,7 +6942,7 @@ h2 {
     height: 120px;
     margin: -60px 0 0 -60px;
     border-radius: 50%;
-    border: 2px solid var(--accent);
+    border: var(--bw-thick) solid var(--accent);
     pointer-events: none;
     animation: achHalo 1s ease-out 0.25s both;
 }
@@ -7295,7 +7300,7 @@ h2 {
     padding: var(--space-10) var(--space-5);   /* 40 / 20 */
     text-align: center;
     color: var(--text-secondary);              /* было --text-dim */
-    border: 1px dashed var(--border-subtle);
+    border: var(--bw-hair) dashed var(--border-subtle);
     border-radius: var(--radius-lg);
 }
 
@@ -7440,7 +7445,7 @@ h2 {
 
 .site-footer {
     background: var(--bg-primary);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     padding-top: var(--space-lg);
 }
 
@@ -7492,7 +7497,7 @@ h2 {
     width: 32px;
     height: 32px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     transition: all var(--transition-fast);
@@ -7591,7 +7596,7 @@ h2 {
     flex-wrap: wrap;
     gap: var(--space-sm);
     padding: var(--space-md) var(--gutter);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
     padding-inline: var(--pad-x);
 }
 
@@ -7772,7 +7777,7 @@ h2 {
     max-width: 100%;
     height: calc(100dvh - var(--header-h));
     background: var(--bg-primary);
-    border-left: 1px solid var(--border-subtle);
+    border-left: var(--bw-hair) solid var(--border-subtle);
     padding: var(--space-md) var(--space-lg);
     padding-right: calc(var(--space-lg) + env(safe-area-inset-right));
     padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
@@ -7924,7 +7929,7 @@ body.nav-open {
         gap: 5px;
         padding: 7px 10px;
         font-size: 0;
-        border: 1px solid var(--border-subtle);
+        border: var(--bw-hair) solid var(--border-subtle);
     }
 
     .mobile-lang-option .lang-flag {
@@ -7979,7 +7984,7 @@ body.nav-open {
 }
 
 .mobile-nav-links a:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -8045,7 +8050,7 @@ body.nav-open {
 }
 
 .mobile-dropdown-toggle:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -8148,7 +8153,7 @@ body.nav-open {
     gap: var(--space-md);
     padding-top: var(--space-md);
     margin-top: var(--space-md);
-    border-top: 1px solid var(--border-subtle);
+    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 .btn-cta-mobile {
@@ -8170,7 +8175,7 @@ body.nav-open {
     background: rgba(10, 10, 10, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     padding: 10px 24px;
     transform: translateY(-100%);
     opacity: 0;
@@ -8537,7 +8542,7 @@ body.nav-open {
     max-width: 500px;
     background: rgba(20, 20, 20, 0.85);
     backdrop-filter: blur(24px);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 36px;
     z-index: 1;
@@ -8576,7 +8581,7 @@ body.nav-open {
        content-box так не умеет: он режет по паддингу, а паддинг здесь
        разный по осям (16 по горизонтали нужен тексту), и пилюля ужималась
        по бокам на 16 вместо 3. */
-    border: 3px solid transparent;
+    border: var(--bw-heavy) solid transparent;
     background-clip: padding-box;
     padding: 0 13px;
     display: inline-flex;
@@ -8704,7 +8709,7 @@ body.nav-open {
 .pw-rule-reset + .pw-rule-reset {
     margin-left: 6px;
     padding-left: 8px;
-    border-left: 1px solid var(--border-subtle);
+    border-left: var(--bw-hair) solid var(--border-subtle);
 }
 
 .auth-screen-header {
@@ -8797,7 +8802,7 @@ body.nav-open {
     width: 100vw;
     margin-left: -50vw;
     background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
     z-index: -1;
 }
 
@@ -8868,7 +8873,7 @@ body.nav-open {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -8883,7 +8888,7 @@ body.nav-open {
 
 /* Card with promoted highlight */
 .kslt-promoted-card {
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
 /* Image wrapper needs position:relative for badge overlay */
@@ -8908,7 +8913,7 @@ body.nav-open {
     display: inline-flex;
     align-items: center;
     background: var(--alpha-lime-12);
-    border: 1px solid var(--accent);
+    border: var(--bw-hair) solid var(--accent);
     color: var(--accent);
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -8994,7 +8999,7 @@ body.nav-open {
 .auth-modal {
     position: relative;
     background: var(--glass-bg, rgba(30, 30, 30, 0.95));
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 16px;
     padding: 40px 32px 32px;
     max-width: 400px;
@@ -9054,7 +9059,7 @@ body.nav-open {
 .auth-modal-btn-secondary {
     background: transparent;
     color: var(--text-muted);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .auth-modal-btn-secondary:hover {
@@ -9093,7 +9098,7 @@ body.nav-open {
 .auth-input {
     padding: 12px 16px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     /* 16, а не 0.95rem = 15.2. Ниже 16 Safari на iOS зумит страницу при
@@ -9237,13 +9242,13 @@ body.nav-open {
 
 .auth-message-error {
     background: rgba(255, 59, 48, 0.15);
-    border: 1px solid rgba(255, 59, 48, 0.3);
+    border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
     color: #ff6b6b;
 }
 
 .auth-message-success {
     background: var(--alpha-lime-12);
-    border: 1px solid var(--accent-glow);
+    border: var(--bw-hair) solid var(--accent-glow);
     color: var(--accent);
 }
 
@@ -9276,7 +9281,7 @@ body.nav-open {
     gap: 8px;
     padding: 12px;
     background: transparent;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -9342,7 +9347,7 @@ body.nav-open {
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     background: transparent;
     color: var(--text-secondary);
 }
@@ -9375,7 +9380,7 @@ body.nav-open {
     gap: 8px;
     padding: 10px 16px;
     background: var(--surface-glass);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     color: var(--text-primary);
     font-size: var(--fs-sm);
@@ -9412,7 +9417,7 @@ body.nav-open {
     width: 100%;
     min-height: 52px;
     padding: 0 16px;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-secondary);
@@ -9456,7 +9461,7 @@ body.nav-open {
     min-height: 52px;
     padding: 0 16px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     background: transparent;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -9525,7 +9530,7 @@ body.nav-open {
     gap: 8px;
     padding: 10px 16px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -9562,36 +9567,62 @@ body.nav-open {
     cursor: pointer;
 }
 
-.auth-checkbox input[type="checkbox"] {
+/* ══════════════ ЧЕКБОКС — ОДНО ОПРЕДЕЛЕНИЕ НА ПРОДУКТ ══════════════
+   Был нарисован трижды: здесь (вход), в `admin.css:4037` (заявки) и в
+   `dashboard.css:576` (панель). Третья копия оказалась мёртвой — имени
+   `.db-checkbox` нет ни в разметке, ни в скриптах, — и снесена. Две
+   живые стоят здесь, потому что `style.css` подключён и на входе, и в
+   админке, а `admin.css` грузится ПОСЛЕ него: своя копия там перекрыла
+   бы общую молча.
+   Числа вынесены в токены глифа (`tokens.css`): коробка была 16 · 14 ·
+   13, радиус 3 · 3 · 2, штрих 2 · 1.5 · 1.5 — теперь по одной ступени
+   на каждое.
+   ГАЛОЧКА ЦЕНТРИРУЕТСЯ ТРАНСФОРМОМ, А НЕ ПОДОБРАННЫМИ ПИКСЕЛАМИ: было
+   `left: 3.5px; top: 0.5px` и `left: 4px; top: 1px` — два набора
+   подгонок под две коробки. Теперь смещение одно и не зависит от
+   размера коробки; -60% по вертикали, а не -50%, потому что у
+   повёрнутой галочки зрительный центр выше геометрического.
+   Цвет `#000` оставлен как был — голый цвет мимо системы разбирается
+   своим заходом (цвет), а не этим. */
+.auth-checkbox input[type="checkbox"],
+.ad-reg-check,
+.ad-reg-check-all {
     -webkit-appearance: none;
     appearance: none;
-    width: 14px;
-    height: 14px;
-    min-width: 14px;
-    margin-top: 2px;
-    border: 1.5px solid var(--text-muted);
-    border-radius: 3px;
+    width: var(--check-box);
+    height: var(--check-box);
+    min-width: var(--check-box);
+    border: var(--bw-thick) solid var(--text-muted);
+    border-radius: var(--radius-xs);
     background: transparent;
     cursor: pointer;
+    flex-shrink: 0;
     position: relative;
     transition: var(--transition-fast);
 }
 
-.auth-checkbox input[type="checkbox"]:checked {
+/* выравнивание с первой строкой текста — своё у каждого потребителя */
+.auth-checkbox input[type="checkbox"] { margin-top: 2px; }
+
+.auth-checkbox input[type="checkbox"]:checked,
+.ad-reg-check:checked,
+.ad-reg-check-all:checked {
     background: var(--accent);
     border-color: var(--accent);
 }
 
-.auth-checkbox input[type="checkbox"]:checked::after {
+.auth-checkbox input[type="checkbox"]:checked::after,
+.ad-reg-check:checked::after,
+.ad-reg-check-all:checked::after {
     content: '';
     position: absolute;
-    left: 3.5px;
-    top: 0.5px;
-    width: 4px;
-    height: 8px;
+    left: 50%;
+    top: 50%;
+    width: var(--check-mark);
+    height: var(--check-mark-long);
     border: solid #000;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
+    border-width: 0 var(--bw-thick) var(--bw-thick) 0;
+    transform: translate(-50%, -60%) rotate(45deg);
 }
 
 .auth-checkbox a {
@@ -9814,7 +9845,7 @@ body.nav-open {
     margin-bottom: 20px;
     border-radius: var(--radius-md);
     overflow: hidden;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
 }
 
 .otp-method-tab {
@@ -9852,7 +9883,7 @@ body.nav-open {
     min-width: 110px;
     padding: 12px 10px;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: var(--fs-base);
@@ -9886,9 +9917,15 @@ body.nav-open {
     text-align: center;
     font-size: var(--fs-xl);
     font-weight: 700;
-    font-family: 'Inter', monospace;
+    /* ШИРИНУ ЦИФР ДЕРЖИТ СВОЙСТВО, А НЕ ВТОРОЕ СЕМЕЙСТВО.
+       Было `'Inter', monospace`: моно включалось только там, где
+       Inter не загрузился, — то есть счёт был либо пропорциональным,
+       либо моно, по удаче. `tabular-nums` даёт одну ширину цифры в
+       самом Inter, и счёт не дёргается при смене цифр. */
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     background: rgba(255, 255, 255, 0.06);
-    border: 2px solid var(--border-light);
+    border: var(--bw-thick) solid var(--border-light);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     transition: all var(--transition-fast);
@@ -10197,7 +10234,7 @@ img {
     /* Скругление как у кнопок сайта, а не восемь пикселей из ниоткуда */
     border-radius: var(--radius-full);
     cursor: pointer;
-    border: 1px solid var(--border-light);
+    border: var(--bw-hair) solid var(--border-light);
     background: none;
     color: var(--text-muted);
     transition: color 0.15s, background 0.15s, border-color 0.15s;
@@ -10408,7 +10445,7 @@ input:-internal-autofill-previewed {
    подвала работало только умолчание браузера, и они выпадали из системы */
 .footer-bottom-links a:focus { outline: none; }
 .footer-bottom-links a:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
     border-radius: 4px;
 }
@@ -10451,7 +10488,7 @@ input:-internal-autofill-previewed {
 .sp-offer {
     padding: var(--space-6) var(--space-8);
     background: var(--surface-glass);
-    border: 1px solid var(--alpha-lime-20);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
     border-radius: var(--radius-xl);
     position: relative;
     overflow: hidden;
@@ -10535,15 +10572,29 @@ input:-internal-autofill-previewed {
 }
 /* Галочка нарисована рамками: иконочного набора на сайте ещё нет, и таких
    галочек в коде тринадцать штук. Сведение их в одну — отдельный кусок. */
-.sp-gives li::before {
+/* ════════ ГАЛОЧКА-МАРКЕР СПИСКА — ОДНО ОПРЕДЕЛЕНИЕ НА ПРОДУКТ ════════
+   Нарисована трижды: здесь (что даём спонсору), `pricing.css:277` и
+   `sponsors.css:118`. Две были 14×8, эта — 13×7: уехала на пиксель по
+   обеим осям, и на экране галочка в третьем списке мельче остальных.
+   Размер в токенах (`--tick-w` · `--tick-h`), ступень взята по
+   большинству — 14×8.
+   ВЫРАВНИВАНИЕ В ЕМ, А НЕ В ПИКСЕЛАХ: было `top: 6px` у двух и
+   `0.35em` у этой. Шесть пиксел верны только при одном кегле строки;
+   доля кегля едет вместе с ним и потому одна на все три списка.
+   Правило стоит здесь, потому что `style.css` подключён на всех трёх
+   страницах и грузится ПЕРВЫМ — своя копия в `pricing.css` или
+   `sponsors.css` перекрыла бы его молча. */
+.sp-gives li::before,
+.pm-feats li::before,
+.sn-tier li::before {
     content: '';
     position: absolute;
     left: 0;
     top: 0.35em;
-    width: 13px;
-    height: 7px;
-    border-left: 2px solid var(--accent);
-    border-bottom: 2px solid var(--accent);
+    width: var(--tick-w);
+    height: var(--tick-h);
+    border-left: var(--bw-thick) solid var(--accent);
+    border-bottom: var(--bw-thick) solid var(--accent);
     transform: rotate(-45deg);
 }
 
@@ -10569,7 +10620,7 @@ input:-internal-autofill-previewed {
 }
 .sp-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--alpha-lime-20); }
 .sp-cta-btn:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -10652,7 +10703,7 @@ input:-internal-autofill-previewed {
     width: 100%;
     max-width: 460px;
     padding: var(--space-md);
-    border: 1px solid var(--alpha-lime-30);
+    border: var(--bw-hair) solid var(--alpha-lime-30);
     border-radius: var(--radius-lg);
     background: var(--bg-elevated);
     box-shadow: var(--shadow-lg);
@@ -10685,7 +10736,7 @@ input:-internal-autofill-previewed {
     font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     transition: opacity 0.2s ease;
 }
 
@@ -10730,7 +10781,7 @@ input:-internal-autofill-previewed {
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     background: var(--bg-card);
     color: var(--text-primary);
@@ -10782,7 +10833,7 @@ input:-internal-autofill-previewed {
     display: flex;
     flex-direction: column;
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     overflow: hidden;
     text-decoration: none;
@@ -10987,7 +11038,7 @@ input:-internal-autofill-previewed {
     flex-direction: column;
     gap: 6px;
     text-align: center;
-    border: 1px dashed var(--border-light);
+    border: var(--bw-hair) dashed var(--border-light);
     border-radius: var(--radius-lg);
     background: var(--surface-glass);
     color: var(--text-primary);
@@ -11047,7 +11098,7 @@ input:-internal-autofill-previewed {
     gap: 8px;
     padding: 9px 16px;
     border-radius: 10px;
-    border: 1px solid transparent;
+    border: var(--bw-hair) solid transparent;
     font-size: var(--fs-sm);
     font-weight: 700;
     line-height: 1.2;
@@ -11511,7 +11562,7 @@ input:-internal-autofill-previewed {
     }
 
     .footer-acc .footer-block:not(.footer-brand) {
-        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        border-top: var(--bw-hair) solid rgba(255, 255, 255, 0.07);
         padding: 0;
     }
 
@@ -11543,11 +11594,16 @@ input:-internal-autofill-previewed {
         position: absolute;
         top: 50%;
         right: 6px;
-        width: 7px;
-        height: 7px;
+        /* ШЕВРОН НА ШКАЛЕ. Было 7×7 со штрихом 1.5: половину пиксела
+           браузер округляет сам — на обычном экране в 1 или 2 по своему
+           усмотрению, на плотном в три физических. Сторона встаёт на
+           токен, штрих — на толстую ступень рамки; коробка выросла на
+           пиксел, чтобы штрих 2 не съел просвет внутри угла. */
+        width: var(--chevron);
+        height: var(--chevron);
         margin-top: -5px;
-        border-right: 1.5px solid currentColor;
-        border-bottom: 1.5px solid currentColor;
+        border-right: var(--bw-thick) solid currentColor;
+        border-bottom: var(--bw-thick) solid currentColor;
         transform: rotate(45deg);
         transition: transform 0.2s ease;
         opacity: 0.6;
@@ -11708,7 +11764,7 @@ input:-internal-autofill-previewed {
    а от нажатия пальцем или мышью не появляется. */
 
 :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
