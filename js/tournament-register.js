@@ -25,7 +25,7 @@
             '.trn-register-modal-title{font-size:1.3rem;font-weight:600;color:var(--text-primary,#fff);margin:0 0 12px}' +
             '.trn-register-modal-text{font-size:0.95rem;color:var(--text-muted,#888);max-width:340px;margin:0 auto;line-height:1.5}' +
             '.trn-register-modal-note{margin:18px auto 0;max-width:340px;padding:10px 14px;border-radius:8px;background:rgba(204,255,0,0.07);border:1px solid rgba(204,255,0,0.2);color:var(--text-secondary,#aaa);font-size:0.85rem;line-height:1.45}' +
-            '.trn-register-modal-btn{display:inline-block;margin-top:24px;padding:12px 32px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--accent,#CCFF00);color:#000;transition:opacity .2s}' +
+            '.trn-register-modal-btn{display:inline-block;margin-top:24px;padding:12px 32px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--accent);color:#000;transition:opacity .2s}' +
             '.trn-register-modal-btn:hover{opacity:0.9}' +
             '.trn-register-modal-btn.is-error{background:#ff3b30;color:#fff}' +
             '.trn-register-modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}' +

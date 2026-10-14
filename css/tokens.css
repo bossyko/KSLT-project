@@ -230,6 +230,19 @@
   --shadow-lg: 0 8px 32px var(--alpha-black-30);
   --glow-accent: 0 0 24px var(--accent-glow);
 
+  /* ГРАДИЕНТ ЛОГОТИПА — ОДНА СУЩНОСТЬ, А НЕ ТРИ ЧИСЛА В ЧУЖОМ ФАЙЛЕ.
+     Середина — это акцент продукта; края светлее и темнее его, и своих
+     ступеней на шкале лайма у них нет: --lime-400 это #E0FF4D, а здесь
+     #F0FF7A, --lime-600 это #B8E600, а здесь #9ED900. Числа оставлены как
+     есть — менять вид логотипа никто не решал, — но живут они теперь в
+     ОДНОМ месте, и середина берётся токеном. */
+  --lime-logo-svetlyy: #F0FF7A;
+  --lime-logo-tyomnyy: #9ED900;
+  --gradient-logo: linear-gradient(90deg,
+                     var(--lime-logo-svetlyy) 0%,
+                     var(--accent) 40%,
+                     var(--lime-logo-tyomnyy) 100%);
+
   --transition-fast: 0.2s ease;
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;

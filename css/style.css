@@ -79,7 +79,7 @@ input, button, select, textarea {
     background: linear-gradient(90deg,
         transparent,
         rgba(204, 255, 0, 0.2) 20%,
-        rgba(204, 255, 0, 0.3) 50%,
+        var(--accent-glow) 50%,
         rgba(204, 255, 0, 0.2) 80%,
         transparent
     );
@@ -113,9 +113,9 @@ input, button, select, textarea {
     opacity: 1;
     background: linear-gradient(90deg,
         transparent,
-        rgba(204, 255, 0, 0.3) 15%,
+        var(--accent-glow) 15%,
         rgba(204, 255, 0, 0.5) 50%,
-        rgba(204, 255, 0, 0.3) 85%,
+        var(--accent-glow) 85%,
         transparent
     );
 }
@@ -206,7 +206,7 @@ input, button, select, textarea {
     font-weight: 900;
     letter-spacing: -0.02em;
     text-transform: uppercase;
-    background: linear-gradient(90deg, #F0FF7A 0%, #CCFF00 40%, #9ED900 100%);
+    background: var(--gradient-logo);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1124,8 +1124,8 @@ input, button, select, textarea {
     position: relative;
 }
 .site-notif-btn:hover {
-    color: var(--accent, #CCFF00);
-    border-color: rgba(204, 255, 0, 0.3);
+    color: var(--accent);
+    border-color: var(--accent-glow);
     background: rgba(204, 255, 0, 0.08);
 }
 .site-notif-dot {
@@ -1217,7 +1217,7 @@ input, button, select, textarea {
 }
 
 .site-notif-foot a {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
     font-size: var(--fs-sm);
     font-weight: 600;
     text-decoration: none;
@@ -1247,7 +1247,7 @@ input, button, select, textarea {
 .site-notif-item:hover { background: rgba(255,255,255,0.04); }
 .site-notif-item.unread {
     background: rgba(204, 255, 0, 0.04);
-    border-left: 3px solid var(--accent, #CCFF00);
+    border-left: 3px solid var(--accent);
 }
 .site-notif-item-title {
     font-weight: 600;
@@ -1286,7 +1286,7 @@ input, button, select, textarea {
 
 /* Непрочитанное в выпадающем списке заметно полосой слева */
 .site-notif-dropdown .site-notif-item.unread {
-    border-left: 3px solid var(--accent, #CCFF00);
+    border-left: 3px solid var(--accent);
     background: rgba(204,255,0,0.04);
 }
 
@@ -1345,7 +1345,7 @@ input, button, select, textarea {
     align-items: center;
     gap: 4px;
     background: transparent;
-    border: 1px solid rgba(204, 255, 0, 0.3);
+    border: 1px solid var(--accent-glow);
     color: var(--accent);
     text-decoration: none;
 }
@@ -2854,7 +2854,7 @@ h2 {
 }
 
 .preview-status.open {
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
 }
 
@@ -3068,7 +3068,7 @@ h2 {
         var(--accent) 10%,
         transparent 20%,
         transparent 50%,
-        rgba(204, 255, 0, 0.3) 60%,
+        var(--accent-glow) 60%,
         transparent 70%
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -3446,7 +3446,7 @@ h2 {
         var(--accent) 10%,
         transparent 20%,
         transparent 50%,
-        rgba(204, 255, 0, 0.3) 60%,
+        var(--accent-glow) 60%,
         transparent 70%
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -9243,7 +9243,7 @@ body.nav-open {
 
 .auth-message-success {
     background: rgba(204, 255, 0, 0.1);
-    border: 1px solid rgba(204, 255, 0, 0.3);
+    border: 1px solid var(--accent-glow);
     color: var(--accent);
 }
 
@@ -9905,7 +9905,7 @@ body.nav-open {
 .otp-digit:focus {
     border-color: var(--accent);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
 .otp-digit.filled {
@@ -10216,8 +10216,8 @@ img {
 
 .site-notif-yes:hover:not(:disabled) {
     color: #0A0A0A;
-    background: var(--accent, #CCFF00);
-    border-color: var(--accent, #CCFF00);
+    background: var(--accent);
+    border-color: var(--accent);
 }
 
 .site-notif-no:hover:not(:disabled) {

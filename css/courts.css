@@ -864,7 +864,7 @@
 
 .ct-gallery-img:hover {
     transform: scale(1.03);
-    border-color: rgba(204, 255, 0, 0.3);
+    border-color: var(--accent-glow);
 }
 
 /* Mini map on detail */
@@ -1142,7 +1142,7 @@
 
 /* === DISCOUNT / VOUCHER === */
 .ct-discount-section {
-    border: 1px solid rgba(204,255,0,0.15);
+    border: 1px solid var(--accent-subtle);
     border-radius: 16px;
     padding: 24px;
     background: rgba(204,255,0,0.03);
@@ -1342,7 +1342,7 @@
     white-space: nowrap;
 }
 .ct-vh-status-active {
-    background: rgba(204,255,0,0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
 }
 .ct-vh-status-used {
@@ -1355,7 +1355,7 @@
 }
 .ct-vh-qr-btn {
     background: none;
-    border: 1px solid rgba(204,255,0,0.3);
+    border: 1px solid var(--accent-glow);
     color: var(--accent);
     padding: 2px 10px;
     border-radius: 6px;

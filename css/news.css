@@ -647,7 +647,7 @@ h3.news-heading {
 .news-reaction-btn.active {
     border-color: var(--accent);
     background: rgba(204, 255, 0, 0.1);
-    box-shadow: 0 0 10px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 10px var(--accent-subtle);
     cursor: default;
 }
 .news-reaction-btn.active:hover {

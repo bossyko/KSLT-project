@@ -9678,7 +9678,7 @@
             rowsHtml +=
                 '<tr style="border-bottom:1px solid var(--border-subtle, #222);">' +
                     '<td style="padding:8px 10px;color:var(--text-primary, #fff);">' + pName + '</td>' +
-                    '<td style="padding:8px 10px;text-align:center;color:var(--accent, #CCFF00);font-weight:600;">' + groupLetter + '</td>' +
+                    '<td style="padding:8px 10px;text-align:center;color:var(--accent);font-weight:600;">' + groupLetter + '</td>' +
                     '<td style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);">' + c.wins + '-' + (c.losses || 0) + '</td>' +
                     '<td style="padding:8px 10px;">' +
                         '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:13px;background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:6px;cursor:pointer;outline:none;">' +
@@ -9696,7 +9696,7 @@
             '<div class="ad-confirm-modal" style="max-width:540px;text-align:left;">' +
                 '<div class="ad-confirm-title" style="text-align:center;font-size:1.15rem;margin-bottom:12px;">' + L.candidateSelectionTitle + '</div>' +
                 '<p style="text-align:center;color:var(--text-secondary, #aaa);margin-bottom:16px;font-size:14px;">' +
-                    L.candidateFreeSlots + ': <b style="color:var(--accent, #CCFF00);">' + freeSlots + '</b>' +
+                    L.candidateFreeSlots + ': <b style="color:var(--accent);">' + freeSlots + '</b>' +
                 '</p>' +
                 '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">' +
                     '<thead><tr style="border-bottom:2px solid var(--border-subtle, #333);">' +
@@ -11703,7 +11703,7 @@
                 '.ad-outcome-chip:hover{border-color:var(--accent);color:var(--text-primary);}' +
                 '.ad-outcome-chip.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}' +
                 '.ad-retired-btn.active{background:var(--accent) !important;color:#000 !important;border-color:var(--accent) !important;font-weight:600;}' +
-                '.ad-brk-outcome{display:inline-block;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;background:rgba(204,255,0,0.15);color:var(--accent);margin-left:4px;vertical-align:middle;}';
+                '.ad-brk-outcome{display:inline-block;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--accent-subtle);color:var(--accent);margin-left:4px;vertical-align:middle;}';
             document.head.appendChild(styleEl);
         }
 

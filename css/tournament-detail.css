@@ -135,7 +135,7 @@
 }
 
 .td-hero-badges .tournament-gender-badge {
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     border-color: rgba(204, 255, 0, 0.35);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -761,7 +761,7 @@ tr.td-rr-row-dimmed {
     flex-shrink: 0;
     width: 22px;
     margin-right: 4px;
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -811,7 +811,7 @@ tr.td-rr-row-dimmed {
     font-weight: 700;
     padding: 1px 4px;
     border-radius: 3px;
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
     margin-left: 2px;
     vertical-align: middle;
@@ -1711,7 +1711,7 @@ tr.td-rr-row-dimmed {
     width: 110px;
     height: 110px;
     border: 3px solid var(--accent);
-    box-shadow: 0 0 20px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 20px var(--accent-subtle);
 }
 
 .td-podium-2 .td-podium-photo {

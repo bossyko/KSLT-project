@@ -176,7 +176,7 @@
                     {
                         label: 'Site',
                         data: siteValues,
-                        backgroundColor: '#CCFF00',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--accent'),
                         borderRadius: 6,
                         barThickness: 40
                     },
@@ -200,9 +200,9 @@
                     },
                     tooltip: {
                         backgroundColor: 'rgba(20,20,30,0.95)',
-                        titleColor: '#CCFF00',
+                        titleColor: window.KSLT_KRASKA.цвет('--accent'),
                         bodyColor: '#fff',
-                        borderColor: 'rgba(204,255,0,0.3)',
+                        borderColor: 'var(--accent-glow)',
                         borderWidth: 1
                     }
                 },
@@ -243,7 +243,7 @@
                         label: 'Site',
                         data: siteValues,
                         backgroundColor: 'rgba(204,255,0,0.25)',
-                        borderColor: '#CCFF00',
+                        borderColor: window.KSLT_KRASKA.цвет('--accent'),
                         borderWidth: 1,
                         borderRadius: 4,
                         barThickness: 20
@@ -270,7 +270,7 @@
                     },
                     tooltip: {
                         backgroundColor: 'rgba(20,20,30,0.95)',
-                        titleColor: '#CCFF00',
+                        titleColor: window.KSLT_KRASKA.цвет('--accent'),
                         bodyColor: '#fff',
                         callbacks: {
                             title: function(items) {

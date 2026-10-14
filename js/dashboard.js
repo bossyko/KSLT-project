@@ -1656,11 +1656,11 @@
                 ctx.fillRect(0, 0, w, h);
 
                 // Accent top stripe
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, 0, w, 4);
 
                 // Logo
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.font = 'bold 26px Inter, Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('KSLT', w / 2, 42);
@@ -1686,7 +1686,7 @@
                 // Category
                 var catEl = document.getElementById('dbQrCategory');
                 if (catEl && catEl.textContent) {
-                    ctx.fillStyle = '#CCFF00';
+                    ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                     ctx.font = '14px Inter, Arial, sans-serif';
                     ctx.fillText(catEl.textContent, w / 2, 128);
                 }
@@ -1708,7 +1708,7 @@
                 ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
 
                 // Bottom accent stripe
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, h - 4, w, 4);
 
                 // URL footer
@@ -5833,7 +5833,7 @@
             '<style>@keyframes dbModalFadeIn{to{opacity:1}}@keyframes dbModalSlideIn{to{transform:translateY(0) scale(1)}}</style>' +
             '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;max-width:340px;width:100%;text-align:center;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
                 '<button id="dbVQRClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;">&times;</button>' +
-                (voucher.discount_percent ? '<div style="color:#CCFF00;font-size:1.8rem;font-weight:700;margin-bottom:4px;">-' + voucher.discount_percent + '%</div>' : '') +
+                (voucher.discount_percent ? '<div style="color:var(--accent);font-size:1.8rem;font-weight:700;margin-bottom:4px;">-' + voucher.discount_percent + '%</div>' : '') +
                 (voucher.service_name ? '<div style="color:#fff;font-weight:600;font-size:0.95rem;margin-bottom:2px;">' + dbEsc(voucher.service_name) + '</div>' : '') +
                 (voucher.entity_name ? '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:12px;">' + dbEsc(voucher.entity_name) + '</div>' : '') +
                 '<div id="dbVQRCode" style="display:flex;justify-content:center;background:#fff;border-radius:12px;padding:16px;width:fit-content;margin:0 auto 16px;"></div>' +
@@ -5876,10 +5876,10 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, 0, w, 4);
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.font = 'bold 26px Inter, Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('KSLT', w / 2, 42);
@@ -5896,7 +5896,7 @@
                 ctx.stroke();
 
                 if (voucher.discount_percent) {
-                    ctx.fillStyle = '#CCFF00';
+                    ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                     ctx.font = 'bold 32px Inter, Arial, sans-serif';
                     ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
                 }
@@ -5929,7 +5929,7 @@
                     ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
                 }
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, h - 4, w, 4);
 
                 ctx.fillStyle = 'rgba(255,255,255,0.25)';

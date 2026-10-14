@@ -1508,7 +1508,7 @@
 
         var accentIcon = L.divIcon({
             className: 'ct-marker-icon',
-            html: '<div style="width:16px;height:16px;background:#CCFF00;border-radius:50%;border:2px solid #000;box-shadow:0 0 10px rgba(204,255,0,0.6);"></div>',
+            html: '<div style="width:16px;height:16px;background:var(--accent);border-radius:50%;border:2px solid #000;box-shadow:0 0 10px rgba(204,255,0,0.6);"></div>',
             iconSize: [16, 16],
             iconAnchor: [8, 8]
         });
@@ -1802,11 +1802,11 @@
                 ctx.fillRect(0, 0, w, h);
 
                 // Accent top stripe
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, 0, w, 4);
 
                 // Logo
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.font = 'bold 26px Inter, Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('KSLT', w / 2, 42);
@@ -1825,7 +1825,7 @@
                 ctx.stroke();
 
                 // Discount badge
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.font = 'bold 32px Inter, Arial, sans-serif';
                 ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
 
@@ -1861,7 +1861,7 @@
                 ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
 
                 // Bottom accent stripe
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, h - 4, w, 4);
 
                 // URL footer

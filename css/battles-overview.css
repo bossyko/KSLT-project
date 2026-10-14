@@ -420,7 +420,7 @@
     font-weight: 900;
     color: var(--accent);
     flex-shrink: 0;
-    text-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
+    text-shadow: 0 0 20px var(--accent-glow);
 }
 
 /* Vote bar */
@@ -640,7 +640,7 @@
     gap: 8px;
     padding: 6px 14px;
     background: rgba(204, 255, 0, 0.1);
-    border: 1px solid rgba(204, 255, 0, 0.3);
+    border: 1px solid var(--accent-glow);
     border-radius: var(--radius-md);
     font-size: var(--fs-sm);
     font-weight: 700;

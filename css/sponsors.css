@@ -104,7 +104,7 @@
     border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
     position: relative; overflow: hidden;
 }
-.sn-tier.main { border-color: rgba(204,255,0,0.3); background: var(--surface-glass); }
+.sn-tier.main { border-color: var(--accent-glow); background: var(--surface-glass); }
 .sn-tier-badge {
     display: inline-block; margin-bottom: 14px; padding: 4px 12px;
     border-radius: var(--radius-full); background: rgba(204,255,0,0.12);

@@ -360,7 +360,7 @@ body.ad-page {
 }
 .ad-dash-count-badge--danger { background: rgba(244, 67, 54, 0.15); color: #f44336; }
 .ad-dash-count-badge--warning { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
-.ad-dash-count-badge--neutral { background: rgba(204, 255, 0, 0.15); color: var(--accent); }
+.ad-dash-count-badge--neutral { background: var(--accent-subtle); color: var(--accent); }
 
 .ad-days-danger { color: #f44336; font-weight: 700; }
 .ad-days-warning { color: #ff9800; font-weight: 600; }
@@ -1838,7 +1838,7 @@ body.ad-page {
     margin-top: 8px;
     padding: 6px 14px;
     font-size: var(--fs-xs);
-    color: #CCFF00;
+    color: var(--accent);
     background: rgba(204, 255, 0, 0.08);
     border: 1px solid rgba(204, 255, 0, 0.2);
     border-radius: 8px;
@@ -1846,7 +1846,7 @@ body.ad-page {
     transition: all 0.2s;
 }
 .ad-btn-translate:hover {
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     border-color: rgba(204, 255, 0, 0.4);
 }
 .ad-btn-translate:disabled {
@@ -1883,7 +1883,7 @@ body.ad-page {
     transition: var(--transition-fast);
 }
 .ad-btn-translate-all:hover {
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     border-color: rgba(204, 255, 0, 0.4);
 }
 .ad-btn-translate-all:disabled {
@@ -2406,7 +2406,7 @@ input[type="date"]::-webkit-datetime-edit {
 }
 .ad-seg-btn:hover { color: var(--ad-text, #fff); }
 .ad-seg-btn.on {
-    background: var(--ad-accent, #CCFF00);
+    background: var(--ad-accent);
     color: #0A0A0A;
 }
 
@@ -2426,7 +2426,7 @@ input[type="date"]::-webkit-datetime-edit {
     cursor: pointer;
     font-size: var(--fs-sm);
 }
-.ad-chk input { width: 16px; height: 16px; accent-color: var(--ad-accent, #CCFF00); }
+.ad-chk input { width: 16px; height: 16px; accent-color: var(--ad-accent); }
 
 /* ЗАМЕР 08.10: контраст 3.21 при норме 4.5 — единственный провал формы.
    `--text-dim` уходит из текста по решению 06.10: тихих уровней три. */
@@ -3183,7 +3183,7 @@ select.ad-field-input {
     min-width: 70px;
 }
 .ad-reaction-tile:hover {
-    border-color: rgba(204, 255, 0, 0.3);
+    border-color: var(--accent-glow);
     background: rgba(204, 255, 0, 0.05);
 }
 .ad-reaction-tile.active {
@@ -3194,7 +3194,7 @@ select.ad-field-input {
 
 /* ---- Auto-copied hint ---- */
 .ad-auto-copied {
-    border-color: rgba(204, 255, 0, 0.3) !important;
+    border-color: var(--accent-glow) !important;
 }
 
 .ad-image-url-row {
@@ -3622,7 +3622,7 @@ select.ad-field-input {
 }
 
 .ad-rat-tab.active {
-    background: var(--accent, #CCFF00);
+    background: var(--accent);
     color: #000;
     font-weight: 600;
 }
@@ -3653,7 +3653,7 @@ select.ad-field-input {
 
 /* Category titles */
 .ad-rat-cat-title {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
     font-size: var(--fs-base);
     font-weight: 600;
     margin: 20px 0 8px;
@@ -3708,7 +3708,7 @@ select.ad-field-input {
 }
 
 .ad-rat-player-link:hover {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
 }
 
 .ad-rat-trn-row:hover {
@@ -3720,7 +3720,7 @@ select.ad-field-input {
 }
 
 .ad-rat-trn-link {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
     font-weight: 500;
 }
 
@@ -3780,7 +3780,7 @@ select.ad-field-input {
 }
 
 .rat-rule-input:focus {
-    border-color: var(--accent, #CCFF00) !important;
+    border-color: var(--accent) !important;
     outline: none;
 }
 
@@ -4244,7 +4244,7 @@ select.ad-field-input {
 }
 
 .ad-brk-match.completed {
-    border-color: rgba(204,255,0,0.3);
+    border-color: var(--accent-glow);
 }
 
 .ad-brk-match.live {
@@ -4973,7 +4973,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
     font-size: var(--fs-xl);
     font-weight: 700;
@@ -5396,7 +5396,7 @@ select.ad-field-input {
 }
 
 .ad-pay-purpose-promoted {
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
 }
 
@@ -6039,7 +6039,7 @@ select.ad-field-input {
 .ad-sched-court:focus {
     border-color: var(--accent);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 0 2px var(--accent-subtle);
 }
 
 .ad-sched-time:disabled,
@@ -6520,7 +6520,7 @@ select.ad-field-input {
 }
 .ad-ig-card:hover {
     border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 0 1px var(--accent-subtle);
 }
 .ad-ig-card-title {
     font-size: var(--fs-2xs);
@@ -6570,7 +6570,7 @@ select.ad-field-input {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -6718,7 +6718,7 @@ select.ad-field-input {
 }
 
 .ad-editor-btn:hover {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
     background: rgba(204, 255, 0, 0.08);
 }
 
@@ -6757,16 +6757,16 @@ select.ad-field-input {
 }
 
 .ad-editor-area p { margin: 0 0 12px; }
-.ad-editor-area h3 { margin: 20px 0 10px; font-size: var(--fs-base); color: var(--accent, #CCFF00); }
+.ad-editor-area h3 { margin: 20px 0 10px; font-size: var(--fs-base); color: var(--accent); }
 .ad-editor-area ul,
 .ad-editor-area ol { margin: 0 0 12px; padding-left: 22px; }
 .ad-editor-area li { margin-bottom: 4px; }
-.ad-editor-area a { color: var(--accent, #CCFF00); }
+.ad-editor-area a { color: var(--accent); }
 
 /* Предпросмотр новости — примерно то же, что увидит читатель */
 .ad-news-preview-body { font-size: var(--fs-base); line-height: 1.7; color: var(--text-secondary, #ccc); }
 .ad-news-preview-body p { margin: 0 0 12px; }
-.ad-news-preview-body h3 { margin: 18px 0 8px; font-size: var(--fs-base); color: var(--accent, #CCFF00); }
+.ad-news-preview-body h3 { margin: 18px 0 8px; font-size: var(--fs-base); color: var(--accent); }
 .ad-news-preview-body ul,
 .ad-news-preview-body ol { margin: 0 0 12px; padding-left: 22px; }
 .ad-news-preview-body figure { margin: 14px 0; }
@@ -7725,7 +7725,7 @@ select.ad-field-input {
 .ad-reg-seed:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 0 2px var(--accent-subtle);
 }
 
 .ad-reg-seed:disabled {

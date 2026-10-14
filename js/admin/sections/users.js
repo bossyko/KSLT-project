@@ -56,7 +56,7 @@
             // Stats cards — funnel row (4)
             '<div class="ad-usr-cards" id="adUsrStatsGrid">' +
                 '<div class="ad-usr-card" id="adUsrStatTotal">' +
-                    '<div class="ad-usr-card-icon" style="background:rgba(204,255,0,0.12);color:#ccff00;">👥</div>' +
+                    '<div class="ad-usr-card-icon" style="background:rgba(204,255,0,0.12);color:var(--accent);">👥</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTotal + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card" id="adUsrStatPlayers">' +
@@ -327,11 +327,11 @@
 
             var avatarHtml = u.avatar_url
                 ? '<img src="' + A.esc(u.avatar_url) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
-                : '<div style="width:32px;height:32px;border-radius:50%;background:rgba(204,255,0,0.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;">' + initials + '</div>';
+                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;">' + initials + '</div>';
 
             // Role badge
             var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
-            var roleBg = u.role === 'admin' ? 'rgba(255,59,48,0.15)' : u.role === 'manager' ? 'rgba(204,255,0,0.15)' : 'rgba(255,255,255,0.08)';
+            var roleBg = u.role === 'admin' ? 'rgba(255,59,48,0.15)' : u.role === 'manager' ? 'var(--accent-subtle)' : 'rgba(255,255,255,0.08)';
             var roleColor = u.role === 'admin' ? '#ff3b30' : u.role === 'manager' ? 'var(--accent)' : 'var(--text-secondary)';
             var roleBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:' + roleBg + ';color:' + roleColor + ';">' + roleLabel + '</span>';
 
@@ -485,7 +485,7 @@
         var initials = (user.full_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
         var avatarHtml = user.avatar_url
             ? '<img src="' + A.esc(user.avatar_url) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
-            : '<div style="width:64px;height:64px;border-radius:50%;background:rgba(204,255,0,0.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">' + initials + '</div>';
+            : '<div style="width:64px;height:64px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">' + initials + '</div>';
 
         // --- Membership section with inline payment ---
         var memHtml = '';

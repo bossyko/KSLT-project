@@ -73,7 +73,7 @@
                             : 'Вход работает, но профиля в базе нет. Напишите нам — восстановим.') +
                         '</p>' +
                         '<button id="ksltDeadLogout" style="padding:10px 24px;border-radius:999px;' +
-                        'border:1px solid #333;background:#CCFF00;color:#000;font-weight:600;cursor:pointer;">' +
+                        'border:1px solid #333;background:var(--accent);color:var(--accent-on);font-weight:600;cursor:pointer;">' +
                         (isEn ? 'Sign out' : 'Выйти') + '</button>' +
                         '</div></div>';
                     document.getElementById('ksltDeadLogout').addEventListener('click', async function() {

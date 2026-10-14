@@ -1237,7 +1237,7 @@
     padding: 0 var(--space-lg);
     border: none;
     border-radius: var(--radius-full, 999px);
-    background: var(--accent, #CCFF00);
+    background: var(--accent);
     color: #000;
     font-size: var(--fs-sm);
     font-weight: 600;

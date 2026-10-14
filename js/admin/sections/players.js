@@ -2986,7 +2986,7 @@
 
     async function recalcAllPoints() {
         var btn = document.getElementById('ratRecalcAllBtn');
-        var spinner = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#CCFF00;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle"></span> ';
+        var spinner = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle"></span> ';
         function updateBtn(pct) {
             if (btn) btn.innerHTML = spinner + pct + '%';
         }

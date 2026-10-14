@@ -1378,10 +1378,10 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, 0, w, 4);
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.font = 'bold 26px Inter, Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('KSLT', w / 2, 42);
@@ -1397,7 +1397,7 @@
                 ctx.lineTo(w - 40, 75);
                 ctx.stroke();
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.font = 'bold 32px Inter, Arial, sans-serif';
                 ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
 
@@ -1427,7 +1427,7 @@
                 ctx.font = '12px Inter, Arial, sans-serif';
                 ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
 
-                ctx.fillStyle = '#CCFF00';
+                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
                 ctx.fillRect(0, h - 4, w, 4);
 
                 ctx.fillStyle = 'rgba(255,255,255,0.25)';

@@ -879,7 +879,7 @@
         var(--accent) 10%,
         transparent 20%,
         transparent 50%,
-        rgba(204, 255, 0, 0.3) 60%,
+        var(--accent-glow) 60%,
         transparent 70%
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);

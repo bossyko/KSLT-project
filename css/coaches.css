@@ -787,7 +787,7 @@
 
 /* === DISCOUNT / VOUCHER === */
 .co-discount-section {
-    border: 1px solid rgba(204,255,0,0.15);
+    border: 1px solid var(--accent-subtle);
     border-radius: 16px;
     padding: 24px;
     background: rgba(204,255,0,0.03);
@@ -1071,7 +1071,7 @@
     white-space: nowrap;
 }
 .co-vh-status-active {
-    background: rgba(204,255,0,0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
 }
 .co-vh-status-used {
@@ -1084,7 +1084,7 @@
 }
 .co-vh-qr-btn {
     background: none;
-    border: 1px solid rgba(204,255,0,0.3);
+    border: 1px solid var(--accent-glow);
     color: var(--accent);
     padding: 2px 10px;
     border-radius: 6px;
@@ -1258,7 +1258,7 @@
     transition: all 0.2s;
 }
 .co-map-link-btn:hover {
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     border-color: rgba(204, 255, 0, 0.4);
 }
 .co-map-embed {

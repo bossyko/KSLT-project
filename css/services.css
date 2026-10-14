@@ -506,7 +506,7 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: rgba(204, 255, 0, 0.15);
+    background: var(--accent-subtle);
     color: var(--accent);
     display: flex;
     align-items: center;

@@ -72,7 +72,7 @@
     cursor: pointer;
 }
 .bc-card:hover {
-    border-color: var(--accent, #CCFF00);
+    border-color: var(--accent);
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(204,255,0,0.06);
 }
@@ -105,7 +105,7 @@
 }
 .bc-badge {
     display: inline-block;
-    background: var(--accent, #CCFF00);
+    background: var(--accent);
     color: #000;
     font-size: var(--fs-2xs);
     font-weight: 800;
@@ -211,7 +211,7 @@
 .bc-vs {
     font-size: var(--fs-base);
     font-weight: 800;
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
     flex-shrink: 0;
 }
 
@@ -365,7 +365,7 @@
     transition: color 0.2s;
 }
 .bc-details-link:hover {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
 }
 
 /* ---- Toast ---- */
@@ -375,8 +375,8 @@
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: #1a1a1a;
-    border: 1px solid var(--accent, #CCFF00);
-    color: var(--accent, #CCFF00);
+    border: 1px solid var(--accent);
+    color: var(--accent);
     padding: 10px 24px;
     border-radius: 10px;
     font-size: var(--fs-sm);

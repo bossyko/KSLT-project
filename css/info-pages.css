@@ -833,7 +833,7 @@
     height: 22px;
     border-radius: 50%;
     background: rgba(204, 255, 0, 0.12);
-    border: 1px solid rgba(204, 255, 0, 0.3);
+    border: 1px solid var(--accent-glow);
     color: var(--accent);
     font-size: var(--fs-xs);
     font-weight: 700;

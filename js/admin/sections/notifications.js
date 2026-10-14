@@ -43,7 +43,7 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.pushAudience + '</label>' +
                         '<div id="adPushAudienceWrap" style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center;">' +
-                            '<div class="ad-push-audience-opt active" data-value="all" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--accent,#CCFF00);background:rgba(204,255,0,0.08);cursor:pointer;font-size:0.85rem;color:var(--accent,#CCFF00);transition:all 0.2s;user-select:none;">' + L.pushAll + '</div>' +
+                            '<div class="ad-push-audience-opt active" data-value="all" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--accent);background:rgba(204,255,0,0.08);cursor:pointer;font-size:0.85rem;color:var(--accent);transition:all 0.2s;user-select:none;">' + L.pushAll + '</div>' +
                             '<div class="ad-push-audience-opt" data-value="members" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushMembers + '</div>' +
                             '<div class="ad-push-audience-opt" data-value="user" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushUser + '</div>' +
                         '</div>' +
@@ -90,9 +90,9 @@
                     opt.style.color = 'var(--text-secondary, #999)';
                 });
                 this.classList.add('active');
-                this.style.borderColor = 'var(--accent, #CCFF00)';
+                this.style.borderColor = 'var(--accent)';
                 this.style.background = 'rgba(204, 255, 0, 0.08)';
-                this.style.color = 'var(--accent, #CCFF00)';
+                this.style.color = 'var(--accent)';
                 var wrap = document.getElementById('adPushUserWrap');
                 if (wrap) wrap.style.display = this.dataset.value === 'user' ? '' : 'none';
             });

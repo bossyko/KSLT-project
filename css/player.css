@@ -1718,7 +1718,7 @@ a.pp-tournament:hover {
     transition: border-color 0.2s;
 }
 .pp-chal-input:focus {
-    border-color: var(--accent, #CCFF00);
+    border-color: var(--accent);
 }
 
 /* Размер фиксирован: тянущееся поле ломало высоту окна.
@@ -1746,7 +1746,7 @@ a.pp-tournament:hover {
 }
 
 .pp-chal-submit {
-    background: var(--accent, #CCFF00);
+    background: var(--accent);
     color: #000;
     border: none;
     border-radius: 10px;
@@ -1788,7 +1788,7 @@ a.pp-tournament:hover {
     transform: translate(-50%, 0) scale(1);
 }
 .pp-chal-toast-success {
-    background: var(--accent, #CCFF00);
+    background: var(--accent);
     color: #000;
 }
 .pp-chal-toast-error {
@@ -2066,7 +2066,7 @@ a.pp-tournament:hover {
 
 /* Имя соперника — главное в заголовке: видно, кого именно вызываешь */
 .pp-chal-rival {
-    color: var(--accent, #CCFF00);
+    color: var(--accent);
 }
 
 .pp-chal-submit:disabled {

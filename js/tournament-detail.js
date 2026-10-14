@@ -3657,7 +3657,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // Player is already in a team as partner — show status
                     var partnerBtn = document.getElementById('tdRegisterBtn');
                     if (partnerBtn) {
-                        partnerBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:rgba(204,255,0,0.15);color:var(--accent);font-weight:500;">' +
+                        partnerBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:var(--accent-subtle);color:var(--accent);font-weight:500;">' +
                             (isEn ? 'Registered as partner' : (isKg ? 'Өнөктөш катары катталган' : 'Зарегистрирован как партнёр')) + '</span>';
                     }
                 }

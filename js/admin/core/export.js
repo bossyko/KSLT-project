@@ -176,6 +176,9 @@
             '<style>' +
                 'table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt; }' +
                 'th, td { border: 1px solid #999; padding: 4px 8px; vertical-align: middle; }' +
+                /* ЧИСЛО ЗДЕСЬ ЗАКОННО: это отдельный html-документ для выгрузки,
+                   наших таблиц стилей в нём нет, и var(--accent) не из чего
+                   разрешить. Единственное место на продукт. */
                 'th { background: #ccff00; font-weight: bold; text-align: left; }' +
                 'td.раздел { background: #f0f0f0; font-weight: bold; }' +
                 'td.подпись { border: none; padding-top: 12px; }' +

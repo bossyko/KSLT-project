@@ -139,7 +139,7 @@ body.db-page.auth-ready {
 }
 .db-sidebar-qr-btn:hover {
     color: var(--accent);
-    border-color: rgba(204, 255, 0, 0.3);
+    border-color: var(--accent-glow);
     background: rgba(204, 255, 0, 0.08);
 }
 .db-sidebar-qr-btn svg {
@@ -1535,7 +1535,7 @@ select.db-field-input {
 
 .db-match-h2h {
     background: transparent;
-    border: 1px solid rgba(204,255,0,0.3);
+    border: 1px solid var(--accent-glow);
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -1562,7 +1562,7 @@ select.db-field-input {
     margin-top: 10px;
     padding: 10px;
     background: rgba(204, 255, 0, 0.06);
-    border: 1px solid rgba(204, 255, 0, 0.15);
+    border: 1px solid var(--accent-subtle);
     border-radius: var(--radius-md);
     color: var(--accent);
     font-size: var(--fs-sm);
@@ -2269,7 +2269,7 @@ select.db-field-input {
     text-align: center;
     padding: 12px;
     background: rgba(204,255,0,0.06);
-    border: 1px solid rgba(204,255,0,0.15);
+    border: 1px solid var(--accent-subtle);
     border-radius: var(--radius-md);
     color: var(--accent);
     font-size: var(--fs-sm);
@@ -3643,7 +3643,7 @@ select:-webkit-autofill {
    Полоса над архивом матчей. Появляется, только когда есть дела: пустая
    рамка ради пустоты хуже, чем её отсутствие. */
 .mma-box {
-    border: 1px solid rgba(204, 255, 0, 0.3);
+    border: 1px solid var(--accent-glow);
     border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 16px;
@@ -4712,7 +4712,7 @@ select:-webkit-autofill {
     text-align: center;
     padding: 24px 16px 20px;
     background: linear-gradient(135deg, rgba(204, 255, 0, 0.08) 0%, rgba(204, 255, 0, 0.02) 100%);
-    border: 1px solid rgba(204, 255, 0, 0.15);
+    border: 1px solid var(--accent-subtle);
     border-radius: 12px;
 }
 
