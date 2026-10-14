@@ -1913,10 +1913,11 @@ function обновитьРасклад() {
 
                 function уйти() {
                     trnDraftDirty = false;
-                    if (nav === 'regs') A.renderBracketManagement(trnEditingId, 'registrations');
-                    else if (nav === 'bracket') A.renderBracketManagement(trnEditingId, 'bracket');
-                    else if (nav === 'schedule') A.renderBracketManagement(trnEditingId, 'schedule');
-                    else if (nav === 'points') A.renderBracketManagement(trnEditingId, 'results');
+                    /* Экран берётся из общей карты (A.ЭКРАН_ВКЛАДКИ_ТУРНИРА),
+                       а не из списка здесь: список отставал, и вкладка
+                       «Новости» не открывалась вовсе. */
+                    var экран = A.ЭКРАН_ВКЛАДКИ_ТУРНИРА[nav];
+                    if (экран) A.renderBracketManagement(trnEditingId, экран);
                 }
 
                 // Несохранённое стережём и здесь: вкладки турнира — такой же

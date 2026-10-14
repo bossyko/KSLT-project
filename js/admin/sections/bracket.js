@@ -2834,9 +2834,8 @@
             tab.addEventListener('click', function() {
                 var nav = tab.dataset.trnNav;
                 if (nav === 'edit') { A.loadAndEditTournament(tournamentId); return; }
-                // Map nav value → panel tab value
-                var panelTab = (nav === 'regs') ? 'registrations' :
-                               (nav === 'points') ? 'results' : nav;
+                // Ключ → экран: общая карта, одно определение на продукт
+                var panelTab = A.ЭКРАН_ВКЛАДКИ_ТУРНИРА[nav] || nav;
                 // Update active tab highlight
                 container.querySelectorAll('[data-trn-nav]').forEach(function(t) { t.classList.remove('active'); });
                 tab.classList.add('active');

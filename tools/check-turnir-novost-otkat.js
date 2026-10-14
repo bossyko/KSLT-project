@@ -19,9 +19,30 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-turnir-novost-'));
 
 const BRK = 'js/admin/sections/bracket.js';
 const NJS = 'js/admin/sections/news.js';
+const UTL = 'js/admin/core/utils.js';
+const TRN = 'js/admin/sections/tournaments.js';
 const СТД = 'maket/stend-admin-turnir-novost.html';
 
 const ОТКАТЫ = [
+
+  /* ── вкладка открывается с обоих экранов (14.10) ── */
+
+  [UTL, `        news: 'news'`,
+        `        newsNET: 'news'`,
+   'карта «ключ вкладки → экран» одна и знает новости'],
+
+  [TRN, `                    var экран = A.ЭКРАН_ВКЛАДКИ_ТУРНИРА[nav];`,
+        `                    var экран = (nav === 'regs') ? 'registrations' : null;`,
+   'экран редактирования берёт экран из карты'],
+
+  [BRK, `                var panelTab = A.ЭКРАН_ВКЛАДКИ_ТУРНИРА[nav] || nav;`,
+        `                var panelTab = (nav === 'regs') ? 'registrations' : nav;`,
+   'экран сетки берёт экран из той же карты'],
+
+  [UTL, `        points: 'results',
+        news: 'news'`,
+        `        points: 'results'`,
+   'каждая вкладка полосы названа в карте'],
 
   [BRK, `        A.renderNewsForm(статья, {`,
         `        A.renderNewsFormКопия(статья, {`,
