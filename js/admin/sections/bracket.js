@@ -14108,13 +14108,32 @@
         var container = document.getElementById('adBrkNewsContent');
         if (!container) return;
 
-        // Check if article already exists for this tournament
-        var existing = null;
-        var res = await A.client.from('news').select('*').eq('tournament_id', tournament.id).maybeSingle();
-        if (res.data) existing = res.data;
-
         // Generate template content
         var generated = generateArticleContent(tournament, results, playersMap, matches, registrations, isDbl);
+
+        /* СТАТЬЯ ИЩЕТСЯ ДВУМЯ КЛЮЧАМИ, ПОТОМУ ЧТО УНИКАЛЬНОСТЬ У НЕЁ ДРУГАЯ.
+           14.10, беда Кости: «работало в новостях, в турнире не работает».
+           Вкладка искала статью только по `tournament_id`. Если статья была
+           заведена из раздела «Новости», её `tournament_id` пуст — вкладка
+           её НЕ НАХОДИЛА, подставляла заготовку без id и пыталась СОЗДАТЬ
+           новую. База отклоняла: `duplicate key value violates unique
+           constraint "news_slug_key"` — slug-то занят той самой статьёй.
+           Отказ был молчаливый, и на экране висело «Черновик сохранён» от
+           прошлого раза.
+           Теперь: нет по турниру — ищем по slug. Slug уникален, значит
+           найденное и есть та самая статья, и форма открывает ЕЁ, а не
+           плодит вторую. Базу это не трогает: только чтение. */
+        var existing = null;
+        var поТурниру = await A.client.from('news').select('*')
+            .eq('tournament_id', tournament.id).maybeSingle();
+        if (поТурниру.data) {
+            existing = поТурниру.data;
+        } else {
+            var slug = A.slugify(generated.title);
+            var поСлагу = await A.client.from('news').select('*')
+                .eq('slug', slug).maybeSingle();
+            if (поСлагу.data) existing = поСлагу.data;
+        }
 
         // Render the panel
         renderNewsPanel(container, tournament, existing, generated);

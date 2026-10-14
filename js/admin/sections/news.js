@@ -1325,13 +1325,21 @@
                        Человек видел галочку и закрывал вкладку, потеряв
                        написанное. Отказ теперь говорит, и говорит ПРИЧИНУ. */
                     newsDraftDirty = true;
+                    /* САМЫЙ ЧАСТЫЙ ОТКАЗ НАЗЫВАЕТСЯ ПО-ЧЕЛОВЕЧЕСКИ.
+                       `news_slug_key` — это не «ошибка базы», а понятная
+                       вещь: статья с таким адресом уже есть. Человеку надо
+                       знать, что делать, а не читать текст сервера. */
+                    var причина = result.error.message || result.error.code || '';
+                    if (/news_slug_key|duplicate key/i.test(причина)) {
+                        причина = L.draftSlugTaken ||
+                            'статья с таким адресом (slug) уже есть — открой её или измени адрес';
+                    }
                     if (statusEl) {
                         statusEl.classList.add('ad-draft-status-err');
                         statusEl.textContent = '\u26A0 ' + (L.draftFailed || 'Черновик НЕ сохранён') +
-                            ': ' + (result.error.message || result.error.code || '');
+                            ': ' + причина;
                     }
-                    A.showToast((L.draftFailed || 'Черновик НЕ сохранён') + ': ' +
-                        (result.error.message || ''), 'error');
+                    A.showToast((L.draftFailed || 'Черновик НЕ сохранён') + ': ' + причина, 'error');
                 }
             } catch (e) {
                 console.error('Autosave error:', e);
