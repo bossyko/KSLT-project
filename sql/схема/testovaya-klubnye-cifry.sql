@@ -23,13 +23,16 @@
 -- закрыты правилами доступа) — ровно поэтому функция и SECURITY DEFINER:
 -- считает внутри, наружу отдаёт только пять чисел.
 --
--- Определение — КОПИЯ боевого из sql/функции/public-club-stats.sql.
+-- Определение — КОПИЯ боевого из sql/функции/cifry-v-reytinge.sql.
+-- ПОПРАВЛЕНО 14.10: файл отстал — нёс `members`, когда боевая уже
+-- отдавала `ranked`. Базы разошлись схемой, и любая проверка «в
+-- рейтинге» в прогоне врала бы молча.
 -- ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: расходиться этим двум базам нечем,
 -- иначе беда родится ровно на шве. Правишь там — правь и здесь.
 
 CREATE OR REPLACE FUNCTION public.get_club_stats()
 RETURNS TABLE (
-    members      integer,   -- действующие членства
+    ranked       integer,   -- людей в рейтинге (не гость, разряд заполнен)
     users        integer,   -- заведённые учётные записи
     tournaments  integer,   -- завершённые турниры с начала работы сайта
     courts       integer,   -- теннисные центры
@@ -41,8 +44,10 @@ SET search_path = public
 STABLE
 AS $$
     SELECT
-        (SELECT count(*)::integer FROM memberships
-          WHERE status = 'active' AND expires_at >= CURRENT_DATE),
+        -- ТО ЖЕ УСЛОВИЕ, ЧТО В БОЕВОЙ cifry-v-reytinge.sql, И ЭТО
+        -- НАМЕРЕННО: базы расходиться этим не должны.
+        (SELECT count(*)::integer FROM players
+          WHERE is_guest IS NOT TRUE AND category_id IS NOT NULL),
         (SELECT count(*)::integer FROM profiles),
         -- Турниры до 2025 года в базе не заведены: сообщество старше сайта.
         -- Архивную часть прибавляет уже сама страница, здесь только живой счёт
