@@ -430,6 +430,42 @@
     color: var(--text-primary);
 }
 
+/* ПОДЗАГОЛОВОК РАЗДЕЛА — ОДНА СТУПЕНЬ НА ВСЮ СТРАНИЦУ.
+   Замер 14.10 нашёл его в ДВУХ видах: «Основная сетка 10/12» шла 18/600
+   из `.td-participants-subtitle`, а «Групповой этап» и «Плей-офф» —
+   17.6/700 инлайном из js. Ни одно из двух чисел не ступень, и общего
+   правила на широких видах не было вовсе: на ≤768 оно есть с 06.10, а
+   выше h3 брал браузерное умолчание, перебитое инлайном.
+   Лестница 86:10 назначила h3 кегль 21 (`--fs-lg`) и вес Bold.
+   ОТНОШЕНИЕ, А НЕ ЧИСЛО: подзаголовок строго мельче заголовка раздела на
+   каждом виде — 21 против 26 на широких, 16 против 21 на ≤768. */
+.td-section-header h3,
+.td-section h3,
+.td-tab-content h3,
+.td-content h3 {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+}
+
+/* Подзаголовок блока сетки — «Групповой этап» · «Плей-офф» ·
+   «Дополнительные матчи». Класс несёт ТОЛЬКО краску и отступ: кегль, вес
+   и межстрочный приходят от правила выше, одним определением. */
+.td-bracket-subtitle {
+    color: var(--accent);
+    margin-bottom: var(--space-sm);
+}
+
+/* Название группы внутри сетки — заголовок КАРТОЧКИ по лестнице 86:10:
+   16 на широких, 14 на узких. Было 15.2 инлайном, такой ступени нет. */
+.td-group-name {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
 .td-section-subtitle {
     font-size: var(--fs-md);
     font-weight: 600;
@@ -1388,8 +1424,9 @@ tr.td-rr-row-dimmed {
 }
 
 .td-participants-subtitle {
-    font-size: var(--fs-md);
-    font-weight: 600;
+    /* Кегль и вес НЕ объявлены: подзаголовок раздела определён один раз,
+       правилом `.td-section h3` выше. Здесь остаётся только то, что
+       свойственно именно этому подзаголовку. */
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
     display: flex;
@@ -1606,6 +1643,11 @@ tr.td-rr-row-dimmed {
 
 /* Телефон: этап уходит — он производное от места, а место остаётся */
 @media (max-width: 640px) {
+    /* Название группы — ступень ниже, как велит лестница card title. */
+    .td-group-name {
+        font-size: var(--fs-sm);
+    }
+
     .td-res-stage { display: none; }
     .td-res-place { width: 56px; }
 }
@@ -3011,7 +3053,7 @@ tr.td-rr-row-dimmed {
     }
 
     .td-participants-subtitle {
-        font-size: var(--fs-sm);
+        /* Кегль приходит от правила подзаголовка раздела: 16 на ≤768. */
         margin-bottom: 8px;
     }
 
@@ -3199,7 +3241,8 @@ tr.td-rr-row-dimmed {
     .td-tab-content h3,
     .td-content h3 {
         font-size: var(--fs-base);
-        line-height: 1.25;
+        /* 1.25 ступени не было; подзаголовку положен `--lh-snug`. */
+        line-height: var(--lh-snug);
     }
 
     /* Показатели по центру обложки: прижатые к левому краю, они спорили
