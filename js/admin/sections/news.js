@@ -1308,18 +1308,40 @@
                     }
                 }
 
+                var statusEl = document.getElementById('adDraftStatus');
                 if (!result.error) {
                     newsDraftDirty = false;
-                    var statusEl = document.getElementById('adDraftStatus');
                     if (statusEl) {
                         var now = new Date();
                         var hh = String(now.getHours()).padStart(2, '0');
                         var mm = String(now.getMinutes()).padStart(2, '0');
+                        statusEl.classList.remove('ad-draft-status-err');
                         statusEl.textContent = '\u2713 ' + L.draftSaved + ' ' + hh + ':' + mm;
                     }
+                } else {
+                    /* ОТКАЗ НЕ МОЛЧИТ. До 14.10 здесь не было ветки else:
+                       запрос отваливался, а на экране оставалась надпись
+                       «Черновик сохранён» от ПРОШЛОГО раза — с её временем.
+                       Человек видел галочку и закрывал вкладку, потеряв
+                       написанное. Отказ теперь говорит, и говорит ПРИЧИНУ. */
+                    newsDraftDirty = true;
+                    if (statusEl) {
+                        statusEl.classList.add('ad-draft-status-err');
+                        statusEl.textContent = '\u26A0 ' + (L.draftFailed || 'Черновик НЕ сохранён') +
+                            ': ' + (result.error.message || result.error.code || '');
+                    }
+                    A.showToast((L.draftFailed || 'Черновик НЕ сохранён') + ': ' +
+                        (result.error.message || ''), 'error');
                 }
             } catch (e) {
                 console.error('Autosave error:', e);
+                newsDraftDirty = true;
+                var elErr = document.getElementById('adDraftStatus');
+                if (elErr) {
+                    elErr.classList.add('ad-draft-status-err');
+                    elErr.textContent = '\u26A0 ' + (L.draftFailed || 'Черновик НЕ сохранён') +
+                        ': ' + (e.message || '');
+                }
             }
             autosaving = false;
         }
