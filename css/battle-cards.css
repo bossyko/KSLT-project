@@ -74,7 +74,7 @@
 .bc-card:hover {
     border-color: var(--accent);
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(204,255,0,0.06);
+    box-shadow: 0 8px 24px var(--alpha-lime-06);
 }
 
 /* Афиша — по пропорции, а не фиксированной высотой: при широкой карточке

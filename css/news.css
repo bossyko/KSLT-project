@@ -170,7 +170,7 @@
 }
 
 .news-category-results {
-    background: rgba(204, 255, 0, 0.12);
+    background: var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -496,7 +496,7 @@ h3.news-heading {
 
 .news-poll-option:hover {
     border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.05);
+    background: var(--alpha-lime-06);
 }
 
 /* Poll Results */
@@ -646,7 +646,7 @@ h3.news-heading {
 
 .news-reaction-btn.active {
     border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     box-shadow: 0 0 10px var(--accent-subtle);
     cursor: default;
 }

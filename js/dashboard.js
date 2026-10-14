@@ -1671,7 +1671,7 @@
                 ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
 
                 // Divider
-                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.strokeStyle = 'var(--alpha-lime-20)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(40, 75);
@@ -5736,7 +5736,7 @@
 
             var html = '';
             if (totalSaved > 0) {
-                html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:12px 16px;background:rgba(204,255,0,0.06);border-radius:10px;border:1px solid rgba(204,255,0,0.12);">' +
+                html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:12px 16px;background:var(--alpha-lime-06);border-radius:10px;border:1px solid var(--alpha-lime-12);">' +
                     '<span style="font-size:1.2rem;">&#127881;</span>' +
                     '<span style="color:var(--accent);font-weight:600;">' + L.voucherSaved + ': ' + totalSaved + ' ' + (totalSaved === 1 ? (isEn ? 'discount' : (isKg ? 'арзандатуу' : 'скидка')) : (isEn ? 'discounts' : (isKg ? 'арзандатуу' : 'скидок'))) + '</span>' +
                 '</div>';
@@ -5888,7 +5888,7 @@
                 ctx.font = '11px Inter, Arial, sans-serif';
                 ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
 
-                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.strokeStyle = 'var(--alpha-lime-20)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(40, 75);

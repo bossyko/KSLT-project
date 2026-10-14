@@ -1929,7 +1929,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var gIsPL = gst.place <= glPLCut && glAllGroupDone;
                         var gIsCL = gst.place > glPLCut && gst.place <= glQPG && glAllGroupDone;
 
-                        glHtml += '<tr data-player-id="' + gst.playerId + '"' + (gIsPL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : (gIsCL && glAllGroupDone ? ' style="background:rgba(204,255,0,0.03);"' : '')) + '>';
+                        glHtml += '<tr data-player-id="' + gst.playerId + '"' + (gIsPL && glAllGroupDone ? ' style="background:var(--alpha-lime-06);"' : (gIsCL && glAllGroupDone ? ' style="background:var(--alpha-lime-06);"' : '')) + '>';
                         glHtml += '<td style="text-align:center;font-weight:600;">' + (grow + 1) + '</td>';
                         glHtml += '<td style="white-space:nowrap;">' + gpName + gSeedHtml + '</td>';
 
@@ -2158,12 +2158,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         плейофф += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
                         плейофф += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
                         // P1
-                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
+                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:var(--alpha-lime-06);' : '') + '">';
                         плейофф += '<span style="font-size:0.85rem;' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p1Name + '</span>';
                         плейофф += '<span style="font-size:0.8rem;font-weight:600;' + (isP1Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p1Score || '—') + '</span>';
                         плейофф += '</div>';
                         // P2
-                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:rgba(204,255,0,0.06);' : '') + '">';
+                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:var(--alpha-lime-06);' : '') + '">';
                         плейофф += '<span style="font-size:0.85rem;' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p2Name + '</span>';
                         плейофф += '<span style="font-size:0.8rem;font-weight:600;' + (isP2Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p2Score || '—') + '</span>';
                         плейофф += '</div></div>';
@@ -2229,7 +2229,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var seedHtml = st.seed ? ' <span style="color:var(--accent);font-size:0.7rem;">[' + st.seed + ']</span>' : '';
                         var isQualified = st.place <= qualifiers && allGroupDone;
 
-                        bHtml += '<tr data-player-id="' + st.playerId + '"' + (isQualified && allGroupDone ? ' style="background:rgba(204,255,0,0.06);"' : '') + '>';
+                        bHtml += '<tr data-player-id="' + st.playerId + '"' + (isQualified && allGroupDone ? ' style="background:var(--alpha-lime-06);"' : '') + '>';
                         bHtml += '<td style="text-align:center;font-weight:600;">' + (row + 1) + '</td>';
                         bHtml += '<td style="white-space:nowrap;">' + stName + seedHtml + '</td>';
 

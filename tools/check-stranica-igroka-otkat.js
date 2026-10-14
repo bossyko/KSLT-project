@@ -231,8 +231,10 @@ const ОТКАТЫ = [
         '    background: rgba(255, 255, 255, 0.06);\n    color: var(--accent);',
    'портрет не берёт ни акцент, ни цвет статуса'],
 
-  [CSS, '    background: rgba(204, 255, 0, 0.1);\n    color: var(--accent);\n    font-size: var(--fs-sm);',
-        '    background: rgba(204, 255, 0, 0.1);\n    color: var(--text-dim);\n    font-size: var(--fs-sm);',
+  /* 13.10: якорь держался за ЧИСЛО прозрачности лайма — она переехала на
+     шкалу токенов. Держимся за токен. */
+  [CSS, '    background: var(--alpha-lime-12);\n    color: var(--accent);\n    font-size: var(--fs-sm);',
+        '    background: var(--alpha-lime-12);\n    color: var(--text-dim);\n    font-size: var(--fs-sm);',
    'буквы в кружке читаемы и весом из системы'],
 
   [RU, '<script src="../js/kslt-otsechka.js?v=1"></script>',

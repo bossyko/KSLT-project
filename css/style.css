@@ -78,9 +78,9 @@ input, button, select, textarea {
     height: 1px;
     background: linear-gradient(90deg,
         transparent,
-        rgba(204, 255, 0, 0.2) 20%,
+        var(--alpha-lime-20) 20%,
         var(--accent-glow) 50%,
-        rgba(204, 255, 0, 0.2) 80%,
+        var(--alpha-lime-20) 80%,
         transparent
     );
     opacity: 0.5;
@@ -96,7 +96,7 @@ input, button, select, textarea {
         background: rgba(5, 5, 5, 0.92);
         /* Линия видимая и нужная, но нарисована тенью внутрь, а не рамкой:
            рамка входит в высоту и делала шапку 57 вместо 56 и 65 вместо 64. */
-        box-shadow: inset 0 -1px 0 rgba(204, 255, 0, 0.22);
+        box-shadow: inset 0 -1px 0 var(--alpha-lime-20);
     }
 }
 
@@ -106,7 +106,7 @@ input, button, select, textarea {
     -webkit-backdrop-filter: blur(24px);
     box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.3),
-        0 0 40px rgba(204, 255, 0, 0.03);
+        0 0 40px var(--alpha-lime-06);
 }
 
 .floating-header.header-hybrid.scrolled::after {
@@ -114,7 +114,7 @@ input, button, select, textarea {
     background: linear-gradient(90deg,
         transparent,
         var(--accent-glow) 15%,
-        rgba(204, 255, 0, 0.5) 50%,
+        var(--alpha-lime-50) 50%,
         var(--accent-glow) 85%,
         transparent
     );
@@ -210,13 +210,13 @@ input, button, select, textarea {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 20px rgba(204, 255, 0, 0.6));
+    filter: drop-shadow(0 0 20px var(--alpha-lime-50));
 }
 
 .logo-icon {
     font-size: var(--fs-xl);
     margin-left: 0.25rem;
-    filter: drop-shadow(0 0 15px rgba(204, 255, 0, 0.5));
+    filter: drop-shadow(0 0 15px var(--alpha-lime-50));
 }
 
 /* Настоящий знак КСЛТ вместо текстовой надписи. Родной зелёный рассчитан на
@@ -228,7 +228,7 @@ input, button, select, textarea {
     height: 34px;
     width: auto;
     display: block;
-    filter: drop-shadow(0 0 6px rgba(204, 255, 0, 0.35));
+    filter: drop-shadow(0 0 6px var(--alpha-lime-30));
 }
 
 .footer-logo .logo-img {
@@ -236,11 +236,11 @@ input, button, select, textarea {
 }
 
 .logo:hover .logo-text {
-    filter: drop-shadow(0 0 30px rgba(204, 255, 0, 0.8));
+    filter: drop-shadow(0 0 30px var(--alpha-lime-70));
 }
 
 .logo:hover .logo-icon {
-    filter: drop-shadow(0 0 25px rgba(204, 255, 0, 0.7));
+    filter: drop-shadow(0 0 25px var(--alpha-lime-70));
 }
 
 .logo-svg {
@@ -992,7 +992,7 @@ input, button, select, textarea {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(204,255,0,0.2), rgba(204,255,0,0.05));
+    background: linear-gradient(135deg, var(--alpha-lime-20), var(--alpha-lime-06));
     color: var(--accent);
     display: flex;
     align-items: center;
@@ -1126,7 +1126,7 @@ input, button, select, textarea {
 .site-notif-btn:hover {
     color: var(--accent);
     border-color: var(--accent-glow);
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
 }
 .site-notif-dot {
     position: absolute;
@@ -1173,7 +1173,7 @@ input, button, select, textarea {
        крупное скругление и рамка цветом клуба — приглушённым, чтобы
        обводка не спорила с содержимым */
     background: var(--bg-elevated);
-    border: 1px solid rgba(204, 255, 0, 0.28);
+    border: 1px solid var(--alpha-lime-30);
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 60px rgba(0,0,0,0.6);
     overflow: hidden;
@@ -1246,7 +1246,7 @@ input, button, select, textarea {
 .site-notif-item:last-child { border-bottom: none; }
 .site-notif-item:hover { background: rgba(255,255,255,0.04); }
 .site-notif-item.unread {
-    background: rgba(204, 255, 0, 0.04);
+    background: var(--alpha-lime-06);
     border-left: 3px solid var(--accent);
 }
 .site-notif-item-title {
@@ -1287,7 +1287,7 @@ input, button, select, textarea {
 /* Непрочитанное в выпадающем списке заметно полосой слева */
 .site-notif-dropdown .site-notif-item.unread {
     border-left: 3px solid var(--accent);
-    background: rgba(204,255,0,0.04);
+    background: var(--alpha-lime-06);
 }
 
 .site-notif-dropdown .site-notif-foot {
@@ -1351,8 +1351,8 @@ input, button, select, textarea {
 }
 
 .admin-nav-toggle:hover {
-    background: rgba(204, 255, 0, 0.08);
-    border-color: rgba(204, 255, 0, 0.6);
+    background: var(--alpha-lime-06);
+    border-color: var(--alpha-lime-50);
     color: var(--accent);
 }
 
@@ -1508,7 +1508,7 @@ input, button, select, textarea {
 }
 
 .lang-option.active {
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -1610,7 +1610,7 @@ input, button, select, textarea {
 }
 
 .mobile-lang-option.active {
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -1840,15 +1840,15 @@ h2 {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(204, 255, 0, 0.08);
-    border: 1px solid rgba(204, 255, 0, 0.2);
+    background: var(--alpha-lime-06);
+    border: 1px solid var(--alpha-lime-20);
     padding: clamp(6px, 1vh, 10px) clamp(12px, 2vw, 18px);
     border-radius: var(--radius-full);
     font-size: clamp(0.7rem, 1.5vw, 0.85rem);
     color: var(--accent);
     font-weight: 500;
     animation: fadeInUp 0.6s ease;
-    box-shadow: 0 0 20px rgba(204, 255, 0, 0.1);
+    box-shadow: 0 0 20px var(--alpha-lime-12);
 }
 
 .badge-dot {
@@ -2784,7 +2784,7 @@ h2 {
 .tournament-preview-card:hover {
     border-color: var(--accent);
     transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(204, 255, 0, 0.1);
+    box-shadow: 0 8px 30px var(--alpha-lime-12);
 }
 
 .preview-date {
@@ -2820,7 +2820,7 @@ h2 {
 .preview-category {
     display: inline-block;
     padding: 4px 10px;
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     border-radius: var(--radius-full);
     font-size: var(--fs-2xs);
     font-weight: 600;
@@ -2986,12 +2986,12 @@ h2 {
    а не по кругу на главной */
 .badge-cta-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(204, 255, 0, 0.35);
+    border-color: var(--alpha-lime-30);
 }
 
 .badge-cta-card:hover .badge-cta-emoji {
     transform: scale(1.15);
-    filter: drop-shadow(0 0 10px rgba(204, 255, 0, 0.55));
+    filter: drop-shadow(0 0 10px var(--alpha-lime-50));
 }
 
 /* ПОДПИСЬ ЗНАЧКА НЕЙТРАЛЬНА. Решение Кости 24.09. Была лаймовой на каждой из
@@ -3034,7 +3034,7 @@ h2 {
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 24px rgba(204, 255, 0, 0.2), 0 0 60px rgba(204, 255, 0, 0.06);
+    box-shadow: 0 0 24px var(--alpha-lime-20), 0 0 60px var(--alpha-lime-06);
 }
 
 /* Коробка вокруг кнопки — тот же вид, что у карточки «Весь рейтинг виден
@@ -3082,7 +3082,7 @@ h2 {
 .badges-cta-btn:hover {
     background: var(--accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(204, 255, 0, 0.2);
+    box-shadow: 0 8px 24px var(--alpha-lime-20);
 }
 
 /* ЗДЕСЬ ЛЕЖАЛИ ТРИ МЁРТВЫХ СЛОЯ, убраны 24.09.
@@ -3489,7 +3489,7 @@ h2 {
     transform: translateX(-50%);
     width: 180px;
     height: 180px;
-    background: radial-gradient(circle, rgba(204, 255, 0, 0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--alpha-lime-12) 0%, transparent 70%);
     border-radius: 50%;
     z-index: -1;
     animation: guest-glow-pulse 3s ease-in-out infinite;
@@ -3508,8 +3508,8 @@ h2 {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(204, 255, 0, 0.06);
-    border: 1px solid rgba(204, 255, 0, 0.12);
+    background: var(--alpha-lime-06);
+    border: 1px solid var(--alpha-lime-12);
     color: var(--accent);
 }
 
@@ -3541,7 +3541,7 @@ h2 {
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 24px rgba(204, 255, 0, 0.2), 0 0 60px rgba(204, 255, 0, 0.06);
+    box-shadow: 0 0 24px var(--alpha-lime-20), 0 0 60px var(--alpha-lime-06);
     overflow: hidden;
 }
 
@@ -3564,7 +3564,7 @@ h2 {
 
 .guest-cta-btn:hover {
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 0 32px rgba(204, 255, 0, 0.35), 0 8px 40px rgba(204, 255, 0, 0.12);
+    box-shadow: 0 0 32px var(--alpha-lime-30), 0 8px 40px var(--alpha-lime-12);
 }
 
 /* ТЕЛЕФОН — единственная вторая ступень плашки, и тоже с числами эталона.
@@ -3588,14 +3588,14 @@ h2 {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(204, 255, 0, 0.08);
-    border: 1px solid rgba(204, 255, 0, 0.2);
+    background: var(--alpha-lime-06);
+    border: 1px solid var(--alpha-lime-20);
     padding: 6px 16px;
     border-radius: var(--radius-full);
     font-size: var(--fs-xs);
     color: var(--accent);
     font-weight: 500;
-    box-shadow: 0 0 20px rgba(204, 255, 0, 0.1);
+    box-shadow: 0 0 20px var(--alpha-lime-12);
 }
 
 .players-grid {
@@ -4557,7 +4557,7 @@ h2 {
 }
 
 .spon-modal-action:hover {
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     border-color: var(--accent);
     color: var(--accent);
 }
@@ -4721,7 +4721,7 @@ h2 {
 
 .carousel-slide-infinite:hover img {
     border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(204, 255, 0, 0.2);
+    box-shadow: 0 0 20px var(--alpha-lime-20);
 }
 
 .carousel-slide-infinite span {
@@ -4918,10 +4918,10 @@ h2 {
     justify-content: center;
     color: var(--accent);
     background: linear-gradient(145deg,
-        rgba(204, 255, 0, 0.20),
-        rgba(204, 255, 0, 0.05) 60%,
+        var(--alpha-lime-20),
+        var(--alpha-lime-06) 60%,
         rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(204, 255, 0, 0.24);
+    border: 1px solid var(--alpha-lime-20);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.20),
         inset 0 -10px 16px rgba(0, 0, 0, 0.50),
@@ -4940,12 +4940,12 @@ h2 {
 .feature:hover .feature-icon,
 .feature:focus-visible .feature-icon {
     transform: translateY(-2px) rotate(-3deg);
-    border-color: rgba(204, 255, 0, 0.50);
+    border-color: var(--alpha-lime-50);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.28),
         inset 0 -10px 16px rgba(0, 0, 0, 0.45),
         0 10px 26px rgba(0, 0, 0, 0.55),
-        0 0 22px rgba(204, 255, 0, 0.18);
+        0 0 22px var(--alpha-lime-20);
 }
 
 /* Плашка двигается — значит, спрашиваем разрешения */
@@ -5143,7 +5143,7 @@ h2 {
 .trn-search-input:focus {
     border-color: var(--accent);
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
+    box-shadow: 0 0 0 3px var(--alpha-lime-12);
 }
 
 .trn-chips {
@@ -5244,7 +5244,7 @@ h2 {
 
 /* Подсветка по общему правилу сайта: лаймовая, а не белая */
 .trn-chip:hover {
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     border-color: var(--accent);
     color: var(--accent);
 }
@@ -5726,7 +5726,7 @@ h2 {
 
 .f-dd-item:hover,
 .ct-dd-item:hover {
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     color: var(--accent);
 }
 
@@ -5837,7 +5837,7 @@ h2 {
     /* Как у остальных окон сайта: плотная подложка и приглушённая рамка
        цветом клуба. Прозрачный фон просвечивал страницу насквозь */
     background: var(--bg-elevated);
-    border: 1px solid rgba(204, 255, 0, 0.28);
+    border: 1px solid var(--alpha-lime-30);
     border-radius: 16px;
     padding: 22px 18px 20px;
     max-width: 320px;
@@ -5994,7 +5994,7 @@ h2 {
     font-weight: 700;
     text-transform: uppercase;
     color: var(--accent);
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     padding: 1px 5px;
     border-radius: 4px;
     letter-spacing: 0.5px;
@@ -6188,7 +6188,7 @@ h2 {
 }
 
 .tc:hover {
-    border-color: rgba(204, 255, 0, 0.25);
+    border-color: var(--alpha-lime-20);
     transform: translateY(-3px);
 }
 
@@ -6894,9 +6894,9 @@ h2 {
     padding: 34px 28px 26px;
     text-align: center;
     background: #121212;
-    border: 1px solid rgba(204, 255, 0, 0.35);
+    border: 1px solid var(--alpha-lime-30);
     border-radius: 24px;
-    box-shadow: 0 0 60px rgba(204, 255, 0, 0.18);
+    box-shadow: 0 0 60px var(--alpha-lime-20);
     animation: achPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
@@ -7970,7 +7970,7 @@ body.nav-open {
 .mobile-nav-links a:hover,
 .mobile-nav-links a:focus-visible,
 .mobile-dropdown-menu li a:hover {
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     color: var(--accent);
 }
 
@@ -8051,7 +8051,7 @@ body.nav-open {
 
 .mobile-dropdown-toggle:hover,
 .mobile-nav-dropdown.active > .mobile-dropdown-toggle {
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     color: var(--accent);
 }
 
@@ -8529,7 +8529,7 @@ body.nav-open {
 
 .auth-header .logo:hover {
     transform: none;
-    filter: drop-shadow(0 0 20px rgba(204, 255, 0, 0.8)) brightness(1.2);
+    filter: drop-shadow(0 0 20px var(--alpha-lime-70)) brightness(1.2);
 }
 
 .auth-card {
@@ -8883,7 +8883,7 @@ body.nav-open {
 
 /* Card with promoted highlight */
 .kslt-promoted-card {
-    border: 1px solid rgba(204, 255, 0, 0.25);
+    border: 1px solid var(--alpha-lime-20);
 }
 
 /* Image wrapper needs position:relative for badge overlay */
@@ -8907,7 +8907,7 @@ body.nav-open {
 .kslt-recommended-detail {
     display: inline-flex;
     align-items: center;
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     border: 1px solid var(--accent);
     color: var(--accent);
     font-size: var(--fs-xs);
@@ -9110,7 +9110,7 @@ body.nav-open {
 
 .auth-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
+    box-shadow: 0 0 0 3px var(--alpha-lime-12);
 }
 
 .auth-input:-webkit-autofill,
@@ -9242,7 +9242,7 @@ body.nav-open {
 }
 
 .auth-message-success {
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     border: 1px solid var(--accent-glow);
     color: var(--accent);
 }
@@ -9535,7 +9535,7 @@ body.nav-open {
 
 .auth-gender-option:has(input:checked) {
     border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     color: var(--accent);
 }
 
@@ -9833,7 +9833,7 @@ body.nav-open {
 }
 
 .otp-method-tab.active {
-    background: rgba(204, 255, 0, 0.12);
+    background: var(--alpha-lime-12);
     color: var(--accent);
     font-weight: 600;
 }
@@ -9910,7 +9910,7 @@ body.nav-open {
 
 .otp-digit.filled {
     border-color: var(--accent);
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
 }
 
 .otp-timer {
@@ -10451,7 +10451,7 @@ input:-internal-autofill-previewed {
 .sp-offer {
     padding: var(--space-6) var(--space-8);
     background: var(--surface-glass);
-    border: 1px solid rgba(204, 255, 0, 0.2);
+    border: 1px solid var(--alpha-lime-20);
     border-radius: var(--radius-xl);
     position: relative;
     overflow: hidden;
@@ -10466,7 +10466,7 @@ input:-internal-autofill-previewed {
     width: 250px;
     height: 250px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(204, 255, 0, 0.11), transparent 70%);
+    background: radial-gradient(circle, var(--alpha-lime-12), transparent 70%);
     pointer-events: none;
 }
 .sp-offer > * { position: relative; z-index: 1; }
@@ -10567,7 +10567,7 @@ input:-internal-autofill-previewed {
     text-decoration: none;
     transition: transform 0.2s, box-shadow 0.2s;
 }
-.sp-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(204, 255, 0, 0.25); }
+.sp-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--alpha-lime-20); }
 .sp-cta-btn:focus-visible {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
@@ -10652,7 +10652,7 @@ input:-internal-autofill-previewed {
     width: 100%;
     max-width: 460px;
     padding: var(--space-md);
-    border: 1px solid rgba(204, 255, 0, 0.28);
+    border: 1px solid var(--alpha-lime-30);
     border-radius: var(--radius-lg);
     background: var(--bg-elevated);
     box-shadow: var(--shadow-lg);
@@ -11066,8 +11066,8 @@ input:-internal-autofill-previewed {
 
 /* В сетке — свой лайм: человек играет */
 .kslt-status-draw {
-    background: rgba(204, 255, 0, 0.14);
-    border-color: rgba(204, 255, 0, 0.45);
+    background: var(--alpha-lime-12);
+    border-color: var(--alpha-lime-50);
     color: var(--accent);
 }
 
@@ -11665,7 +11665,7 @@ input:-internal-autofill-previewed {
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(204, 255, 0, 0.35) rgba(255, 255, 255, 0.04);
+    scrollbar-color: var(--alpha-lime-30) rgba(255, 255, 255, 0.04);
 }
 
 *::-webkit-scrollbar {
@@ -11679,12 +11679,12 @@ input:-internal-autofill-previewed {
 }
 
 *::-webkit-scrollbar-thumb {
-    background: rgba(204, 255, 0, 0.35);
+    background: var(--alpha-lime-30);
     border-radius: 3px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background: rgba(204, 255, 0, 0.6);
+    background: var(--alpha-lime-50);
 }
 
 /* Скрытая полоса остаётся скрытой: ленты вкладок и фильтров листают

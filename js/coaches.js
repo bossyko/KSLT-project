@@ -1390,7 +1390,7 @@
                 ctx.font = '11px Inter, Arial, sans-serif';
                 ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
 
-                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.strokeStyle = 'var(--alpha-lime-20)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(40, 75);

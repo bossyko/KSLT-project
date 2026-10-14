@@ -49,7 +49,7 @@
     font-size: var(--fs-base); font-weight: 700; cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s; text-decoration: none;
 }
-.sn-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(204, 255, 0, 0.28); }
+.sn-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--alpha-lime-30); }
 .sn-btn.ghost { background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); }
 .sn-btn.ghost:hover { border-color: var(--accent); color: var(--accent); box-shadow: none; }
 
@@ -58,7 +58,7 @@
 .sn-hero-bg {
     position: absolute; inset: 0;
     background: linear-gradient(115deg, #10140a 0%, #0a0a0a 55%),
-                radial-gradient(circle at 75% 30%, rgba(204,255,0,0.16), transparent 55%);
+                radial-gradient(circle at 75% 30%, var(--alpha-lime-12), transparent 55%);
 }
 .sn-hero-inner { position: relative; z-index: 1; max-width: var(--container-narrow); margin: 0 auto; padding: 0 var(--gutter); width: 100%; }
 .sn-hero h1 { font-size: var(--fs-3xl); font-weight: 900; color: var(--text-primary); line-height: var(--lh-tight); margin-bottom: 18px; max-width: 620px; letter-spacing: -0.03em; }
@@ -107,8 +107,8 @@
 .sn-tier.main { border-color: var(--accent-glow); background: var(--surface-glass); }
 .sn-tier-badge {
     display: inline-block; margin-bottom: 14px; padding: 4px 12px;
-    border-radius: var(--radius-full); background: rgba(204,255,0,0.12);
-    border: 1px solid rgba(204,255,0,0.22); color: var(--accent);
+    border-radius: var(--radius-full); background: var(--alpha-lime-12);
+    border: 1px solid var(--alpha-lime-20); color: var(--accent);
     font-size: var(--fs-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
 }
 .sn-tier h4 { font-size: var(--fs-lg); font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
@@ -130,7 +130,7 @@
 }
 .sn-place-icon {
     flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-md);
-    background: rgba(204,255,0,0.1); color: var(--accent);
+    background: var(--alpha-lime-12); color: var(--accent);
     display: flex; align-items: center; justify-content: center;
 }
 .sn-place h5 { font-size: var(--fs-base); font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
@@ -157,13 +157,13 @@
 .sn-final {
     display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 40px;
     padding: 32px 36px; border-radius: var(--radius-xl);
-    background: var(--surface-glass); border: 1px solid rgba(204,255,0,0.25);
+    background: var(--surface-glass); border: 1px solid var(--alpha-lime-20);
     position: relative; overflow: hidden;
 }
 .sn-final::after {
     content: ''; position: absolute; top: -90px; right: -60px;
     width: 300px; height: 300px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(204,255,0,0.13), transparent 70%); pointer-events: none;
+    background: radial-gradient(circle, var(--alpha-lime-12), transparent 70%); pointer-events: none;
 }
 .sn-final > * { position: relative; z-index: 1; }
 .sn-final h3 { font-size: var(--fs-lg); font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
@@ -205,7 +205,7 @@
     background: rgba(12, 12, 12, 0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(204, 255, 0, 0.22);
+    border-top: 1px solid var(--alpha-lime-20);
     transform: translateY(110%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -258,10 +258,10 @@
     border-radius: var(--radius-lg); text-decoration: none; color: inherit;
     transition: border-color 0.2s, background 0.2s;
 }
-.snm-row:hover { border-color: var(--accent); background: rgba(204, 255, 0, 0.04); }
+.snm-row:hover { border-color: var(--accent); background: var(--alpha-lime-06); }
 .snm-icon {
     flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-md);
-    background: rgba(204, 255, 0, 0.1); color: var(--accent);
+    background: var(--alpha-lime-12); color: var(--accent);
     display: flex; align-items: center; justify-content: center;
 }
 .snm-name { font-weight: 600; color: var(--text-primary); font-size: var(--fs-base); }

@@ -95,8 +95,8 @@
 }
 
 .td-fee-note-member {
-    background: rgba(204, 255, 0, 0.12);
-    border-color: rgba(204, 255, 0, 0.35);
+    background: var(--alpha-lime-12);
+    border-color: var(--alpha-lime-30);
     color: var(--accent);
 }
 
@@ -136,7 +136,7 @@
 
 .td-hero-badges .tournament-gender-badge {
     background: var(--accent-subtle);
-    border-color: rgba(204, 255, 0, 0.35);
+    border-color: var(--alpha-lime-30);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     padding: 5px 14px;
@@ -175,7 +175,7 @@
 }
 
 .td-status-badge.upcoming {
-    background: rgba(204, 255, 0, 0.18);
+    background: var(--alpha-lime-20);
     color: var(--accent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -184,7 +184,7 @@
 /* Registration open / ongoing / closed / cancelled */
 .td-status-badge.registration_open,
 .td-status-badge.open {
-    background: rgba(204, 255, 0, 0.18);
+    background: var(--alpha-lime-20);
     color: var(--accent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -693,7 +693,7 @@
 .td-match-highlight,
 .td-ig-match.td-match-highlight {
     border-color: var(--accent) !important;
-    box-shadow: 0 0 10px rgba(204, 255, 0, 0.25);
+    box-shadow: 0 0 10px var(--alpha-lime-20);
 }
 
 .td-match-dimmed,
@@ -702,7 +702,7 @@
 }
 
 tr.td-rr-row-highlight {
-    background: rgba(204, 255, 0, 0.08) !important;
+    background: var(--alpha-lime-06) !important;
     outline: 1px solid var(--accent);
     outline-offset: -1px;
 }
@@ -730,7 +730,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-match-player.winner {
-    background: rgba(204, 255, 0, 0.05);
+    background: var(--alpha-lime-06);
 }
 
 .td-match-player.winner .td-player-name {
@@ -1331,7 +1331,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-status-pill.upcoming {
-    background: rgba(204, 255, 0, 0.08);
+    background: var(--alpha-lime-06);
     color: var(--accent-dim);
 }
 
@@ -1577,7 +1577,7 @@ tr.td-rr-row-dimmed {
 .td-res-stage { color: var(--text-secondary); }
 .td-res-pts { width: 80px; text-align: right; font-weight: 700; color: var(--accent); }
 .td-results-table th.td-res-pts { text-align: right; }
-.td-res-winner td { background: rgba(204, 255, 0, 0.08); font-weight: 600; }
+.td-res-winner td { background: var(--alpha-lime-06); font-weight: 600; }
 
 /* ПОБЕДИТЕЛЬ НЕ ТЕРЯЕТ ВЕС В КОЛОНКЕ ОЧКОВ.
    Замер 02.10 прогоном: в строке победителя очки шли весом 600, а у всех
@@ -1672,8 +1672,8 @@ tr.td-rr-row-dimmed {
 
 .td-podium-1::after {
     height: 120px;
-    background: linear-gradient(to top, rgba(204, 255, 0, 0.08), rgba(204, 255, 0, 0.02));
-    border: 1px solid rgba(204, 255, 0, 0.2);
+    background: linear-gradient(to top, var(--alpha-lime-06), var(--alpha-lime-06));
+    border: 1px solid var(--alpha-lime-20);
     border-bottom: none;
 }
 
@@ -2188,7 +2188,7 @@ tr.td-rr-row-dimmed {
 }
 
 .td-pred-fav {
-    background: linear-gradient(90deg, var(--accent), rgba(204,255,0,0.7));
+    background: linear-gradient(90deg, var(--accent), var(--alpha-lime-70));
     color: #000;
 }
 
@@ -2405,8 +2405,8 @@ tr.td-rr-row-dimmed {
 
 .td-league-title-premier {
     color: var(--accent);
-    background: rgba(204, 255, 0, 0.08);
-    border: 1px solid rgba(204, 255, 0, 0.2);
+    background: var(--alpha-lime-06);
+    border: 1px solid var(--alpha-lime-20);
 }
 
 .td-league-title-consolation {
@@ -2468,13 +2468,13 @@ tr.td-rr-row-dimmed {
    сливаются в одну полосу, и непонятно, где какой матч. */
 .td-grp-mine {
     cursor: pointer;
-    background: rgba(204, 255, 0, 0.14);
+    background: var(--alpha-lime-12);
     border: 1px solid var(--accent);
     padding: 4px 6px !important;
     line-height: 1.15;
 }
 
-.td-grp-mine:hover { background: rgba(204, 255, 0, 0.22); }
+.td-grp-mine:hover { background: var(--alpha-lime-20); }
 
 .td-grp-act {
     display: block;

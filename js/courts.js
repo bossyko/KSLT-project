@@ -1508,7 +1508,7 @@
 
         var accentIcon = L.divIcon({
             className: 'ct-marker-icon',
-            html: '<div style="width:16px;height:16px;background:var(--accent);border-radius:50%;border:2px solid #000;box-shadow:0 0 10px rgba(204,255,0,0.6);"></div>',
+            html: '<div style="width:16px;height:16px;background:var(--accent);border-radius:50%;border:2px solid #000;box-shadow:0 0 10px var(--alpha-lime-50);"></div>',
             iconSize: [16, 16],
             iconAnchor: [8, 8]
         });
@@ -1817,7 +1817,7 @@
                 ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
 
                 // Divider line
-                ctx.strokeStyle = 'rgba(204,255,0,0.2)';
+                ctx.strokeStyle = 'var(--alpha-lime-20)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(40, 75);

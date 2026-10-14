@@ -56,7 +56,7 @@
             // Stats cards — funnel row (4)
             '<div class="ad-usr-cards" id="adUsrStatsGrid">' +
                 '<div class="ad-usr-card" id="adUsrStatTotal">' +
-                    '<div class="ad-usr-card-icon" style="background:rgba(204,255,0,0.12);color:var(--accent);">👥</div>' +
+                    '<div class="ad-usr-card-icon" style="background:var(--alpha-lime-12);color:var(--accent);">👥</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTotal + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card" id="adUsrStatPlayers">' +
@@ -385,7 +385,7 @@
             var tr = document.createElement('tr');
             if (canClick) tr.style.cursor = 'pointer';
             tr.innerHTML =
-                '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;background:rgba(204,255,0,0.12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
+                '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;background:var(--alpha-lime-12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
                 '<td style="color:var(--text-muted);font-size:0.85rem;">' + email + '</td>' +
                 '<td>' + roleBadge + безТелеграма + '</td>' +
                 '<td>' + banBadge + '</td>' +
@@ -1590,11 +1590,11 @@
                     {
                         label: L.usrChartNet,
                         data: netData,
-                        borderColor: 'rgba(204, 255, 0, 0.9)',
-                        backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                        borderColor: 'var(--accent)',
+                        backgroundColor: 'var(--alpha-lime-12)',
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointBackgroundColor: 'rgba(204, 255, 0, 1)',
+                        pointBackgroundColor: 'var(--accent)',
                         tension: 0.3,
                         fill: false
                     }

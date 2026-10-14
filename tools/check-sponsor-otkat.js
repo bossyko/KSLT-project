@@ -101,8 +101,8 @@ const ОТКАТЫ = [
    'заголовок блока объявлен ТЕМ ЖЕ правилом, что заголовки разделов'],
 
   ['css/sponsors.css',
-   'border-radius: var(--radius-xl);\n    background: var(--surface-glass); border: 1px solid rgba(204,255,0,0.25);',
-   'border-radius: var(--radius-lg);\n    background: var(--surface-glass); border: 1px solid rgba(204,255,0,0.25);',
+   'border-radius: var(--radius-xl);\n    background: var(--surface-glass); border: 1px solid var(--alpha-lime-20);',
+   'border-radius: var(--radius-lg);\n    background: var(--surface-glass); border: 1px solid var(--alpha-lime-20);',
    'обе коробки согласны по радиусу и свечению'],
 
   ['js/stats.js',

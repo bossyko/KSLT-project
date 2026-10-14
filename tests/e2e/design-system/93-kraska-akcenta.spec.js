@@ -112,3 +112,34 @@ test('цвет акцента в браузере — тот же, что в т�
     expect(р.градиент, 'градиент логотипа потерял акцент: ' + р.градиент)
         .toContain(р.accent.replace('#', '').length ? р.accent : '#');
 });
+
+test('прозрачность акцента в браузере стоит на ступенях', async ({ page }) => {
+    await открыть(page, '/index.html');
+    const р = await page.evaluate(() => {
+        const СТУПЕНИ = [0, 0.06, 0.12, 0.2, 0.3, 0.5, 0.7, 1];
+        const лайм = s => {
+            const м = (s || '').match(/rgba?\(\s*204\s*,\s*255\s*,\s*0\s*(?:,\s*([\d.]+))?\s*\)/);
+            return м ? (м[1] === undefined ? 1 : parseFloat(м[1])) : null;
+        };
+        const мимо = [];
+        let нашлось = 0;
+        [...document.querySelectorAll('body *')].forEach(э => {
+            const с = getComputedStyle(э);
+            [с.backgroundColor, с.borderTopColor, с.borderBottomColor,
+             с.borderLeftColor, с.borderRightColor, с.color, с.boxShadow, с.backgroundImage]
+                .forEach(зн => {
+                    const a = лайм(зн);
+                    if (a === null) return;
+                    нашлось++;
+                    if (!СТУПЕНИ.some(с2 => Math.abs(с2 - a) < 0.005))
+                        мимо.push({ a, кл: (э.className || '').toString().slice(0, 36) });
+                });
+        });
+        return { нашлось, мимо: мимо.length, примеры: мимо.slice(0, 6) };
+    });
+    /* ПОРОГ: лайма на лендинге быть обязано — иначе мерить нечего. */
+    expect(р.нашлось, 'ПОРОГ: лаймовых значений на странице нет').toBeGreaterThan(5);
+    /* ОТНОШЕНИЕ: число между ступенями глаз не отличает, а шкалу ломает.
+       Ноль — не ступень, а «совсем прозрачно»: он законен в кадре анимации. */
+    expect(р.мимо, 'прозрачность мимо шкалы: ' + JSON.stringify(р.примеры)).toBe(0);
+});

@@ -10,7 +10,8 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/style.css', 'css/pricing.css', 'js/kslt-kraska.js',
-               'js/courts.js', 'js/admin/core/export.js', 'pages/courts.html'];
+               'js/courts.js', 'js/admin/core/export.js', 'pages/courts.html',
+               'css/tokens.css'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -52,7 +53,17 @@ const ОТКАТЫ = [
 ['вернуть число вместо токена прозрачности', С,
  'var(--accent-subtle)',
  'rgba(204, 255, 0, 0.15)',
- 'прозрачности, у которых есть токен, записаны токеном']
+ 'прозрачности, у которых есть токен, записаны токеном'],
+
+['вернуть прозрачность мимо шкалы', С,
+ 'var(--alpha-lime-12)',
+ 'rgba(204, 255, 0, 0.11)',
+ 'прозрачность акцента берётся со шкалы'],
+
+['слепить две соседние ступени', 'css/tokens.css',
+ '  --alpha-lime-12:   rgba(204, 255, 0, 0.12);',
+ '  --alpha-lime-12:   rgba(204, 255, 0, 0.08);',
+ 'ступени прозрачности не слипаются']
 
 ];
 

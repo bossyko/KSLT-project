@@ -319,7 +319,7 @@
             '.de-label-block{display:block;margin:14px 0 8px}',
             '.de-me{font-weight:600;color:var(--text-primary,#fff)}',
             '.de-limit{padding:8px 12px;border-radius:8px;font-size:.82rem;color:var(--accent);',
-            'background:rgba(204,255,0,.08);border:1px solid rgba(204,255,0,.2)}',
+            'background:var(--alpha-lime-06);border:1px solid var(--alpha-lime-20)}',
             '.de-switch{display:flex;border:1px solid var(--border-subtle,#262626);border-radius:10px;overflow:hidden;margin-bottom:12px}',
             '.de-switch button{flex:1;padding:10px 6px;background:transparent;border:none;color:var(--text-secondary,#aaa);',
             'font-weight:600;font-size:.82rem;white-space:nowrap;cursor:pointer}',

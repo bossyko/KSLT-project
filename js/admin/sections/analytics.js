@@ -242,7 +242,7 @@
                     {
                         label: 'Site',
                         data: siteValues,
-                        backgroundColor: 'rgba(204,255,0,0.25)',
+                        backgroundColor: 'var(--alpha-lime-20)',
                         borderColor: window.KSLT_KRASKA.цвет('--accent'),
                         borderWidth: 1,
                         borderRadius: 4,

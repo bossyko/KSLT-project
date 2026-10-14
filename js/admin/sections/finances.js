@@ -1136,7 +1136,7 @@
         var labels = months.map(function(m) { return m.label; });
 
         var colors = {
-            membership: { border: 'rgba(204, 255, 0, 0.9)', bg: 'rgba(204, 255, 0, 0.1)', point: 'rgba(204, 255, 0, 1)' },
+            membership: { border: 'var(--accent)', bg: 'var(--alpha-lime-12)', point: 'var(--accent)' },
             court:      { border: 'rgba(76, 175, 80, 1)',    bg: 'rgba(76, 175, 80, 0.1)',  point: 'rgba(76, 175, 80, 1)' },
             coach:      { border: 'rgba(255, 214, 0, 1)',    bg: 'rgba(255, 214, 0, 0.1)',  point: 'rgba(255, 214, 0, 1)' },
             club:       { border: 'rgba(33, 150, 243, 1)',   bg: 'rgba(33, 150, 243, 0.1)', point: 'rgba(33, 150, 243, 1)' }

@@ -182,7 +182,10 @@ const сырые = (БЛОК.match(/(padding|margin|gap|row-gap|column-gap)(-top
 
 const коробки = [];
 [['css/style.css', СТИ], ['css/sponsors.css', СПОН]].forEach(([имя, текст]) => {
-    const рег = /\.([a-z0-9-]+)\s*\{[^}]*background:\s*var\(--surface-glass\)[^}]*border:\s*1px solid rgba\(204,\s*255,\s*0/g;
+    /* 13.10: правило держалось за ЧИСЛО лайма в рамке, а прозрачность
+       акцента переехала на шкалу токенов. Держимся за ОТНОШЕНИЕ: стеклянный
+       фон плюс лаймовая рамка, чем бы лайм ни был записан. */
+    const рег = /\.([a-z0-9-]+)\s*\{[^}]*background:\s*var\(--surface-glass\)[^}]*border:\s*1px solid (?:var\(--(?:alpha-lime|accent)|rgba\(204,\s*255,\s*0)/g;
     let м; while ((м = рег.exec(текст)) !== null) коробки.push(имя + ' → .' + м[1]);
 });
 
@@ -197,8 +200,11 @@ const коробки = [];
 правило('обе коробки согласны по радиусу и свечению',
     /\.sp-offer \{[\s\S]{0,300}border-radius: var\(--radius-xl\)/.test(БЛОК) &&
     /\.sn-final[\s\S]{0,300}border-radius: var\(--radius-xl\)/.test(СПОН) &&
-    /\.sp-offer::after \{[\s\S]{0,400}radial-gradient\(circle, rgba\(204, 255, 0/.test(БЛОК) &&
-    /\.sn-final::after[\s\S]{0,400}radial-gradient\(circle, rgba\(204,\s*255,\s*0/.test(СПОН),
+    /* 13.10: свечение искалось по ЧИСЛУ лайма, а прозрачность акцента
+       переехала на шкалу токенов. Ищем ОТНОШЕНИЕ: круглое свечение лаймом,
+       чем бы лайм ни был записан. */
+    /\.sp-offer::after \{[\s\S]{0,400}radial-gradient\(circle, (?:var\(--(?:alpha-lime|accent)|rgba\(204,\s*255,\s*0)/.test(БЛОК) &&
+    /\.sn-final::after[\s\S]{0,400}radial-gradient\(circle, (?:var\(--(?:alpha-lime|accent)|rgba\(204,\s*255,\s*0)/.test(СПОН),
     'Расхождение между двумя копиями — это и есть болезнь, ради которой\n' +
     '          сторож стоит. Эталон — .sp-offer.');
 

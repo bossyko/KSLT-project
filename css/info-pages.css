@@ -114,7 +114,7 @@
 }
 
 .ip-faq-item.active {
-    border-color: rgba(204, 255, 0, 0.2);
+    border-color: var(--alpha-lime-20);
 }
 
 .ip-faq-question {
@@ -183,8 +183,8 @@
     display: flex;
     gap: var(--space-3);
     align-items: flex-start;
-    background: rgba(204, 255, 0, 0.06);
-    border: 1px solid rgba(204, 255, 0, 0.28);
+    background: var(--alpha-lime-06);
+    border: 1px solid var(--alpha-lime-30);
     border-radius: var(--radius-lg);
     padding: var(--space-5) var(--space-6);
     margin-bottom: 32px;
@@ -286,7 +286,7 @@
     color: var(--accent);
     font-size: var(--fs-sm);
     font-weight: 700;
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-sm);
 }
@@ -404,7 +404,7 @@
 }
 
 .ip-mission-card:hover {
-    border-color: rgba(204, 255, 0, 0.2);
+    border-color: var(--alpha-lime-20);
     transform: translateY(-4px);
 }
 
@@ -446,7 +446,7 @@
 }
 
 .ip-stat-card:hover {
-    border-color: rgba(204, 255, 0, 0.2);
+    border-color: var(--alpha-lime-20);
 }
 
 .ip-stat-num {
@@ -528,7 +528,7 @@
 }
 
 .ip-team-card:hover {
-    border-color: rgba(204, 255, 0, 0.2);
+    border-color: var(--alpha-lime-20);
     transform: translateY(-4px);
 }
 
@@ -832,7 +832,7 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: rgba(204, 255, 0, 0.12);
+    background: var(--alpha-lime-12);
     border: 1px solid var(--accent-glow);
     color: var(--accent);
     font-size: var(--fs-xs);

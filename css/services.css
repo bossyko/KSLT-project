@@ -416,7 +416,7 @@
     width: 44px;
     height: 44px;
     border-radius: var(--radius-md);
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -560,7 +560,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(204, 255, 0, 0.1);
+    background: var(--alpha-lime-12);
     color: var(--accent);
     display: flex;
     align-items: center;
