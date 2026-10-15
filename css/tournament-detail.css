@@ -167,8 +167,8 @@
 }
 
 .td-status-badge.live {
-    background: rgba(239, 68, 68, 0.25);
-    color: #ef4444;
+    background: rgba(255, 71, 87, 0.25);
+    color: var(--danger);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     animation: pulse-glow 2s ease-in-out infinite;
@@ -742,8 +742,8 @@ tr.td-rr-row-highlight {
 }
 
 .td-match.live {
-    border-color: rgba(239, 68, 68, 0.5);
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.1);
+    border-color: rgba(255, 71, 87, 0.5);
+    box-shadow: 0 0 12px rgba(255, 71, 87, 0.1);
 }
 
 .td-match-player {
@@ -832,7 +832,7 @@ tr.td-rr-row-highlight {
 }
 
 .td-match-score.live-score {
-    color: #ef4444;
+    color: var(--danger);
     font-size: var(--fs-xs);
 }
 
@@ -1271,7 +1271,7 @@ tr.td-rr-row-highlight {
 }
 
 .td-schedule-match.live {
-    border-color: rgba(239, 68, 68, 0.4);
+    border-color: rgba(255, 71, 87, 0.4);
 }
 
 .td-schedule-time {
@@ -1345,8 +1345,8 @@ tr.td-rr-row-highlight {
 }
 
 .td-status-pill.live {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    background: var(--danger-subtle);
+    color: var(--danger);
 }
 
 .td-status-pill.upcoming {

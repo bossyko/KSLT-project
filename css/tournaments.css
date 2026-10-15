@@ -601,15 +601,23 @@
 }
 
 .to-cd-live {
-    background: linear-gradient(135deg, rgba(22,163,74,0.9), rgba(21,128,61,0.95));
-    border-color: rgba(74,222,128,0.3);
-    color: var(--neutral-white);
+    /* ПЛОТНАЯ ЗАЛИВКА, А НЕ ГРАДИЕНТ — и это решение ГЛАЗ, а не чисел.
+       Градиентный вариант проходил AA (4.97), но вставал рядом с
+       отсчётом `.to-cd`, который тоже красный и тоже градиентный: два
+       значка схлопывались в один вид, и «идёт сейчас» переставало
+       отличаться от «до начала» иначе как текстом. Плоский против
+       градиентного разводит их формой, а не только краской.
+       Пара взята у эталона `.live-badge.is-live`: белый на #FF4757 даёт
+       3.34 при норме 4.5, почти-чёрный на той же заливке — 5.93. */
+    background: var(--danger);
+    border-color: transparent;
+    color: var(--danger-on);
     gap: 8px;
     font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    box-shadow: 0 2px 12px rgba(22,163,74,0.3);
+    box-shadow: 0 2px 12px rgba(255,71,87,0.3);
 }
 
 .to-cd-live::after {
@@ -621,7 +629,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--danger-on);
     z-index: 1;
 }
 
@@ -630,7 +638,7 @@
     position: absolute;
     inset: -3px;
     border-radius: 50%;
-    border: var(--bw-thick) solid rgba(74,222,128,0.6);
+    border: var(--bw-thick) solid rgba(255,71,87,0.6);
     animation: toCdSonar 2s ease-out infinite;
 }
 

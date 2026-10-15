@@ -459,9 +459,9 @@ input, button, select, textarea {
 .live-dot {
     width: 8px;
     height: 8px;
-    background: #FF3B30;
+    background: var(--danger);
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+    box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
     display: none;
 }
 
@@ -481,12 +481,12 @@ input, button, select, textarea {
 }
 
 .nav-item-live.is-live {
-    color: #FF3B30 !important;
+    color: var(--danger) !important;
     font-weight: 600;
 }
 
 .nav-item-live.is-live:hover {
-    color: #FF6961 !important;
+    color: var(--danger-hover) !important;
 }
 
 @keyframes livePulse {
@@ -2317,11 +2317,11 @@ h2 {
     display: inline-block;
     width: 10px;
     height: 10px;
-    background: #FF3B30;
+    background: var(--danger);
     border-radius: 50%;
     margin-right: 8px;
     animation: livePulse 1.5s ease-in-out infinite;
-    box-shadow: 0 0 15px rgba(255, 59, 48, 0.5);
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
 }
 
 /* Карточка живого матча компактнее: в ней всего два имени и счёт, а
@@ -5603,7 +5603,7 @@ h2 {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #ff3b30;
+    background: var(--danger);
     margin-right: 8px;
     vertical-align: middle;
     animation: trnLivePulse 1.6s infinite;
@@ -7456,7 +7456,7 @@ body.nav-open {
 }
 
 .mobile-nav-links a.is-live {
-    color: #FF3B30 !important;
+    color: var(--danger) !important;
     font-weight: 600;
 }
 
