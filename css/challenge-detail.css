@@ -342,18 +342,18 @@
     justify-content: center;
     font-size: var(--fs-sm);
     font-weight: 700;
-    color: #fff;
+    color: var(--neutral-white);
     transition: width 0.5s ease;
     min-width: 0;
 }
 .ch-bar-right {
-    background: #3b82f6;
+    background: var(--blue-500);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: var(--fs-sm);
     font-weight: 700;
-    color: #fff;
+    color: var(--neutral-white);
     transition: width 0.5s ease;
     min-width: 0;
 }
@@ -362,7 +362,7 @@
    «Solid takes NEAR-BLACK text, not white. White on danger measures 3.34 and
    fails». У нас на красной половине полосы вышло 3.76 — замер 13.10. */
 .ch-bar-left span, .ch-bar-right span {
-    color: #0a0a0a;
+    color: var(--neutral-950);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -452,7 +452,7 @@
     height: 22px;
     border-radius: var(--radius-full);
     overflow: hidden;
-    background: rgba(255,255,255,0.04);
+    background: var(--alpha-white-04);
 }
 
 .ch-forecast-bar i {
@@ -617,7 +617,7 @@
 }
 
 .ch-vote-dot-red { color: #ef4444; }
-.ch-vote-dot-blue { color: #3b82f6; }
+.ch-vote-dot-blue { color: var(--blue-500); }
 
 .ch-voting-total {
     font-size: var(--fs-sm);

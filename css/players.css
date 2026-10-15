@@ -109,7 +109,7 @@
 }
 
 .pl-search-modal {
-    background: #1a1a1a;
+    background: var(--neutral-800);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 32px;
@@ -170,7 +170,7 @@
     align-items: center;
     gap: 8px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-base);
     font-weight: 700;
     padding: 12px 32px;
@@ -289,7 +289,7 @@
 .pl-gender-tab.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
 }
 
 /* Три колонки поровну: центральная всегда ровно по середине страницы —
@@ -428,7 +428,7 @@
 .pl-category-pill.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 600;
 }
 
@@ -838,8 +838,8 @@
         var(--accent-glow) 60%,
         transparent 70%
     );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(var(--neutral-white) 0 0) content-box, linear-gradient(var(--neutral-white) 0 0);
+    mask: linear-gradient(var(--neutral-white) 0 0) content-box, linear-gradient(var(--neutral-white) 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     animation: pl-border-spin 4s linear infinite;
@@ -892,7 +892,7 @@
 .pl-guest-title {
     font-size: var(--fs-lg);
     font-weight: 800;
-    color: #fff;
+    color: var(--neutral-white);
     margin-bottom: var(--space-2);       /* 8; было 10 — не ступень */
     letter-spacing: -0.02em;
 }
@@ -919,7 +919,7 @@
     height: var(--btn-h-md);             /* 44 */
     padding: 0 var(--space-8);           /* 32 */
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 800;
     font-size: var(--fs-sm);             /* 14; было 16 */
     border-radius: 12px;

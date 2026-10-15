@@ -85,7 +85,7 @@
        прямо. Было кольцо 4px лаймом: лайм принадлежит одному главному
        действию на экране, а портрет не действие. Ступень 2xl 120 заведена в
        компоненте 09.10 по слову Кости — число больше не местное. */
-    border: var(--bw-heavy) solid rgba(255, 255, 255, 0.08);
+    border: var(--bw-heavy) solid var(--alpha-white-08);
 }
 
 .pp-online-dot {
@@ -238,7 +238,7 @@
 
 .pp-action-primary {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
 }
 
@@ -255,7 +255,7 @@
 
 .pp-action-secondary:hover {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
 }
 
 /* ---- STATS ROW ---- */
@@ -377,7 +377,7 @@
     position: relative;
     height: 340px;
     background: rgba(255, 255, 255, 0.02);
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.08);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 14px;
     padding: 16px;
 }
@@ -492,7 +492,7 @@
 
 .pp-match-h2h:hover {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     transform: scale(1.05);
 }
 
@@ -630,7 +630,7 @@
 }
 .pp-tag-rating   { background: var(--alpha-lime-12); color: var(--accent); }
 .pp-tag-friendly { background: rgba(255,255,255,0.10); color: var(--text-muted); }
-.pp-tag-battle   { background: rgba(255,159,67,0.16); color: #FF9F43; }
+.pp-tag-battle   { background: rgba(255,159,67,0.16); color: var(--orange-500); }
 .pp-tag-doubles  { background: rgba(59,130,246,0.16); color: #6EA8FE; }
 .pp-tag-mixed    { background: rgba(168,85,247,0.18); color: #C084FC; }
 
@@ -1013,7 +1013,7 @@ a.pp-tournament:hover {
     align-items: center;
     gap: 8px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-base);
     font-weight: 700;
     padding: 14px 36px;
@@ -1208,7 +1208,7 @@ a.pp-tournament:hover {
 
 /* Modal */
 .h2h-modal {
-    background: #1a1a1a;
+    background: var(--neutral-800);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 36px 32px;
@@ -1451,7 +1451,7 @@ a.pp-tournament:hover {
     text-align: center;
     padding: 14px 24px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 700;
     font-size: var(--fs-sm);
     border: none;
@@ -1577,12 +1577,12 @@ a.pp-tournament:hover {
     padding: 4px;
     line-height: 1;
 }
-.pp-chal-close:hover { color: #fff; }
+.pp-chal-close:hover { color: var(--neutral-white); }
 
 .pp-chal-title {
     font-size: var(--fs-md);
     font-weight: 600;
-    color: #fff;
+    color: var(--neutral-white);
     margin: 0 0 20px;
     /* По центру: крестик прижат вправо, и заголовок слева выглядел
        сдвинутым относительно поля и кнопки под ним */
@@ -1602,9 +1602,9 @@ a.pp-tournament:hover {
 
 .pp-chal-input {
     background: rgba(255,255,255,0.06);
-    border: var(--bw-hair) solid rgba(255,255,255,0.12);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: 8px;
-    color: #fff;
+    color: var(--neutral-white);
     padding: 10px 12px;
     font-size: var(--fs-sm);
     outline: none;
@@ -1640,7 +1640,7 @@ a.pp-tournament:hover {
 
 .pp-chal-submit {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     border-radius: 10px;
     padding: 12px;
@@ -1682,11 +1682,11 @@ a.pp-tournament:hover {
 }
 .pp-chal-toast-success {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
 }
 .pp-chal-toast-error {
     background: #ff4444;
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 @media (max-width: 480px) {
@@ -1753,7 +1753,7 @@ a.pp-tournament:hover {
     display: inline-block;
     padding: 12px 36px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-base);
     font-weight: 700;
     border-radius: var(--radius-full);
@@ -1834,8 +1834,8 @@ a.pp-tournament:hover {
 .pp-contact:hover svg { color: var(--accent); }
 .pp-contact-wa:hover { border-color: #25D366; }
 .pp-contact-wa:hover svg { color: #25D366; }
-.pp-contact-tg:hover { border-color: #2AABEE; }
-.pp-contact-tg:hover svg { color: #2AABEE; }
+.pp-contact-tg:hover { border-color: var(--brand-telegram); }
+.pp-contact-tg:hover svg { color: var(--brand-telegram); }
 .pp-contact-ig:hover { border-color: #E1306C; }
 .pp-contact-ig:hover svg { color: #E1306C; }
 

@@ -298,7 +298,7 @@
 
 .ct-card-partner {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 3px 8px;
@@ -393,7 +393,7 @@
 }
 
 .ct-membership-modal {
-    background: #1a1a1a;
+    background: var(--neutral-800);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 32px;
@@ -417,7 +417,7 @@
 }
 
 .ct-membership-close:hover {
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 .ct-membership-icon {
@@ -443,7 +443,7 @@
     align-items: center;
     gap: 6px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 700;
     font-size: var(--fs-base);
     padding: 12px 32px;
@@ -463,7 +463,7 @@
     top: 12px;
     right: 12px;
     background: rgba(220, 38, 38, 0.9);
-    color: #fff;
+    color: var(--neutral-white);
     font-size: var(--fs-xs);
     font-weight: 700;
     padding: 4px 10px;
@@ -677,7 +677,7 @@
 .ct-services-row {
     display: grid;
     padding: 12px 16px;
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.04);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-04);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     align-items: center;
@@ -875,7 +875,7 @@
     align-items: center;
     gap: 8px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-base);
     font-weight: 700;
     /* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЕМ — `Button 17:82`: «Height is set by the
@@ -1106,7 +1106,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 14px 18px;
-    background: rgba(255,255,255,0.04);
+    background: var(--alpha-white-04);
     border-radius: 12px;
     border: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
@@ -1128,7 +1128,7 @@
 }
 .ct-discount-btn {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     padding: 8px 20px;
     border-radius: 8px;
@@ -1166,7 +1166,7 @@
 @keyframes ctModalFadeIn { to { opacity: 1; } }
 .ct-voucher-modal {
     background: rgba(26,26,30,0.95);
-    border: var(--bw-hair) solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 16px;
     padding: 32px;
     max-width: 400px;
@@ -1195,7 +1195,7 @@
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
-    background: #fff;
+    background: var(--neutral-white);
     border-radius: 12px;
     padding: 16px;
     width: fit-content;
@@ -1226,7 +1226,7 @@
 }
 .ct-voucher-download {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     padding: 10px 24px;
     border-radius: 10px;
@@ -1265,7 +1265,7 @@
     padding: 12px 16px;
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
-    border: var(--bw-hair) solid rgba(255,255,255,0.04);
+    border: var(--bw-hair) solid var(--alpha-white-04);
     font-size: var(--fs-sm);
 }
 .ct-vh-date {
@@ -1295,7 +1295,7 @@
 }
 .ct-vh-status-used {
     background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.35);
+    color: var(--alpha-white-35);
 }
 .ct-vh-status-expired {
     background: rgba(255,100,100,0.1);
@@ -1339,7 +1339,7 @@
 }
 .ct-picker-modal {
     background: rgba(26,26,30,0.95);
-    border: var(--bw-hair) solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 16px;
     padding: 28px;
     max-width: 380px;
@@ -1375,7 +1375,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    background: rgba(255,255,255,0.04);
+    background: var(--alpha-white-04);
     border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 10px;
     cursor: pointer;
@@ -1420,7 +1420,7 @@
     width: 100%;
     padding: 12px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     border-radius: 10px;
     font-weight: 700;

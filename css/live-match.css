@@ -457,8 +457,8 @@
     background-image: url('../images/live-fony/panel-raketka.webp');
     background-size: cover;
     background-position: 50% 100%;
-    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,.62) 58%, rgba(0,0,0,.34) 100%);
-    mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,.62) 58%, rgba(0,0,0,.34) 100%);
+    -webkit-mask-image: linear-gradient(to top, var(--neutral-black) 0%, rgba(0,0,0,.62) 58%, rgba(0,0,0,.34) 100%);
+    mask-image: linear-gradient(to top, var(--neutral-black) 0%, rgba(0,0,0,.62) 58%, rgba(0,0,0,.34) 100%);
 }
 
 .lm-feed-title {

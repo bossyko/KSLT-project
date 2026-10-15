@@ -291,7 +291,7 @@
        главному действию на экране, а портрет не действие. Там кольцо 4px
        лаймом уже сняли — здесь оно осталось единственной копией. Толщина
        встаёт на тяжёлую ступень (3), цвет — та же белая восьмёрка. */
-    border: var(--bw-heavy) solid rgba(255, 255, 255, 0.08);
+    border: var(--bw-heavy) solid var(--alpha-white-08);
     flex-shrink: 0;
 }
 
@@ -537,7 +537,7 @@
     align-items: center;
     gap: 8px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-base);
     font-weight: 700;
     /* ВЫСОТА СВОЙСТВОМ, А НЕ ПОЛЕМ — `Button 17:82`. Та же правка, что на
@@ -737,7 +737,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 14px 18px;
-    background: rgba(255,255,255,0.04);
+    background: var(--alpha-white-04);
     border-radius: 12px;
     border: var(--bw-hair) solid rgba(255,255,255,0.06);
 }
@@ -759,7 +759,7 @@
 }
 .co-discount-btn {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     padding: 8px 20px;
     border-radius: 8px;
@@ -802,7 +802,7 @@
 }
 
 .co-membership-modal {
-    background: #1a1a1a;
+    background: var(--neutral-800);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 40px 32px;
@@ -826,7 +826,7 @@
 }
 
 .co-membership-close:hover {
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 .co-membership-icon {
@@ -852,7 +852,7 @@
     align-items: center;
     gap: 6px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 700;
     font-size: var(--fs-base);
     padding: 12px 32px;
@@ -884,7 +884,7 @@
 @keyframes coModalFadeIn { to { opacity: 1; } }
 .co-voucher-modal {
     background: rgba(26,26,30,0.95);
-    border: var(--bw-hair) solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 16px;
     padding: 32px;
     max-width: 400px;
@@ -913,7 +913,7 @@
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
-    background: #fff;
+    background: var(--neutral-white);
     border-radius: 12px;
     padding: 16px;
     width: fit-content;
@@ -944,7 +944,7 @@
 }
 .co-voucher-download {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     padding: 10px 24px;
     border-radius: 10px;
@@ -980,7 +980,7 @@
     padding: 10px 14px;
     background: rgba(255,255,255,0.03);
     border-radius: 10px;
-    border: var(--bw-hair) solid rgba(255,255,255,0.04);
+    border: var(--bw-hair) solid var(--alpha-white-04);
     font-size: var(--fs-sm);
 }
 .co-vh-date {
@@ -1010,7 +1010,7 @@
 }
 .co-vh-status-used {
     background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.35);
+    color: var(--alpha-white-35);
 }
 .co-vh-status-expired {
     background: rgba(255,100,100,0.1);
@@ -1054,7 +1054,7 @@
 }
 .co-picker-modal {
     background: rgba(26,26,30,0.95);
-    border: var(--bw-hair) solid rgba(255,255,255,0.08);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 16px;
     padding: 28px;
     max-width: 380px;
@@ -1090,7 +1090,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    background: rgba(255,255,255,0.04);
+    background: var(--alpha-white-04);
     border: var(--bw-hair) solid rgba(255,255,255,0.06);
     border-radius: 10px;
     cursor: pointer;
@@ -1135,7 +1135,7 @@
     width: 100%;
     padding: 12px;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     border-radius: 10px;
     font-weight: 700;

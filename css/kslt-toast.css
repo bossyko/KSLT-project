@@ -48,7 +48,7 @@
 .kslt-toast--info .kslt-toast-dot { background: var(--accent); }
 .kslt-toast--ok   .kslt-toast-dot { background: var(--status-success, #22c55e); }
 .kslt-toast--warn .kslt-toast-dot { background: var(--status-warning, #ffb020); }
-.kslt-toast--err  .kslt-toast-dot { background: var(--status-danger, #ff4757); }
+.kslt-toast--err  .kslt-toast-dot { background: var(--status-danger, var(--red-500)); }
 
 .kslt-toast-body {
     flex: 1;
