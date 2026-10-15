@@ -462,8 +462,13 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(220, 38, 38, 0.9);
-    color: var(--neutral-white);
+    /* СКИДКА ГОВОРИТ ЛАЙМОМ — так она уже сказана в шести местах из девяти:
+       `.ct-discount-percent`, `.co-vh-discount`, `.ct-svc-discount`,
+       `.vr-discount-badge` и другие. Красным она была только на трёх
+       обложках, и это второе определение одного понятия. Красный к тому
+       же занят отказом и эфиром: выгода не должна выглядеть тревогой. */
+    background: var(--accent);
+    color: var(--neutral-black);
     font-size: var(--fs-xs);
     font-weight: 700;
     padding: 4px 10px;

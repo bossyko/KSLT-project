@@ -535,19 +535,29 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, rgba(220,38,38,0.9), rgba(185,28,28,0.95));
-    border: var(--bw-hair) solid rgba(255,100,100,0.3);
+    /* ОТСЧЁТ ДО НАЧАЛА — НЕ ТРЕВОГА, А ОЖИДАНИЕ, и красная плашка здесь
+       была двумя бедами сразу. Первая: «срочно» (`-urgent`) отличалось от
+       обычного на 1.39 — градация не работала, а белый на ярком красном
+       давал 4.09 при норме 4.5, то есть САМОЕ СРОЧНОЕ читалось хуже
+       обычного. Вторая: красный отсчёт стоял в 1.70 от эфира и схлопывался
+       с ним — ровно то, что Костя отверг по снимку в 2б.
+       Приём взят у страницы турнира (`.td-cd-box` + `.td-cd-num`), где он
+       был с самого начала: нейтральная плашка, акцентные цифры, красный
+       оставлен ТОЛЬКО для срочного. Померено: 14.19 против 5.69 у
+       обычного, разница с срочным 2.84 против 1.39. */
+    background: var(--alpha-white-08);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: 8px;
     padding: 6px 12px;
     font-size: var(--fs-sm);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: var(--neutral-white);
+    color: var(--accent);
     line-height: 1;
     position: relative;
     overflow: hidden;
     animation: toCdAppear 0.4s ease-out;
-    box-shadow: 0 2px 12px rgba(220,38,38,0.25);
+    box-shadow: none;
 }
 
 .to-cd::after {
@@ -590,14 +600,17 @@
 }
 
 .to-cd-urgent {
-    background: linear-gradient(135deg, rgba(239,68,68,0.95), rgba(220,38,38,1));
-    box-shadow: 0 2px 16px rgba(239,68,68,0.4);
+    /* СРОЧНО — вот теперь это тревога, и она одна такая на карточке. */
+    background: var(--danger-subtle);
+    border-color: var(--danger);
+    color: var(--danger);
+    box-shadow: 0 2px 16px rgba(255,71,87,0.25);
     animation: toCdAppear 0.4s ease-out, toCdUrgentPulse 2s ease-in-out infinite;
 }
 
 @keyframes toCdUrgentPulse {
-    0%, 100% { box-shadow: 0 2px 12px rgba(239,68,68,0.3); }
-    50% { box-shadow: 0 2px 24px rgba(239,68,68,0.6); }
+    0%, 100% { box-shadow: 0 2px 12px rgba(255,71,87,0.3); }
+    50% { box-shadow: 0 2px 24px rgba(255,71,87,0.6); }
 }
 
 .to-cd-live {

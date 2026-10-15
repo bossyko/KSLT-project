@@ -5979,24 +5979,35 @@ h2 {
     align-self: flex-start;
     padding: 5px 10px;
     border-radius: 8px;
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.95));
-    border: var(--bw-hair) solid rgba(255, 100, 100, 0.3);
+    /* Прежний комментарий говорил: «красной плашкой — белым он терялся
+       среди прочего текста». Довод верный, вывод оказался неверен:
+       нейтральная плашка с акцентными цифрами даёт 14.19 против 5.69 у
+       белого на красном, то есть теряется ЕЩЁ меньше. А красный тут стоял
+       в 1.70 от эфира и мешал «идёт сейчас» отличаться от «до начала». */
+    background: var(--alpha-white-08);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     font-size: var(--fs-xs);
     font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    color: var(--neutral-white);
+    color: var(--accent);
 }
 
 .tc-cd-label {
     font-weight: var(--fw-semibold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-secondary);
 }
 
 .tc-countdown small { font-weight: var(--fw-medium); opacity: 0.6; }
-.tc-cd-urgent { box-shadow: 0 0 0 2px rgba(255, 100, 100, 0.25); }
+/* СРОЧНО — единственная тревога на карточке. */
+.tc-cd-urgent {
+    background: var(--danger-subtle);
+    border-color: var(--danger);
+    color: var(--danger);
+    box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.25);
+}
 
 /* Правило по номеру ребёнка сильнее правила по классу — иначе сообщение
    встаёт в колонку главной карточки и занимает половину ряда */
