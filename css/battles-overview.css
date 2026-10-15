@@ -39,8 +39,8 @@
     inset: 0;
     background: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0.55) 0%,
-        rgba(0, 0, 0, 0.8) 100%
+        var(--alpha-black-50) 0%,
+        var(--alpha-black-85) 100%
     );
     z-index: 1;
 }
@@ -145,7 +145,7 @@
 
 .bo-featured:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 40px var(--alpha-black-30);
 }
 
 /* ═══ СЛОЙ-ССЫЛКА КРУПНОЙ КАРТОЧКИ ═══════════════════════════════════════
@@ -198,7 +198,7 @@
 .bo-featured-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%);
+    background: linear-gradient(to top, var(--alpha-black-85) 0%, var(--alpha-black-50) 50%, var(--alpha-black-20) 100%);
     z-index: 1;
 }
 
@@ -297,7 +297,7 @@
 .bo-strip h4,
 .bo-strip .bo-strip-sub,
 .bo-strip .to-compact-date {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    text-shadow: 0 1px 3px var(--alpha-black-90);
 }
 
 .bo-strip-sub {
@@ -335,7 +335,7 @@
 
 /* У прошедшего матча цвета спокойные: тревожный оттенок тут ни к чему */
 .bo-strip-done {
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--alpha-white-08);
     color: var(--text-muted);
     border: var(--bw-hair) solid var(--border-subtle);
 }
@@ -492,7 +492,7 @@
     padding-inline: 12px;
     border: var(--bw-hair) solid rgba(255,255,255,0.15);
     border-radius: var(--radius-md);
-    background: rgba(255,255,255,0.06);
+    background: var(--alpha-white-08);
     color: var(--text-primary);
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -599,7 +599,7 @@
 }
 
 .bo-status.active {
-    background: rgba(0, 0, 0, 0.65);
+    background: var(--alpha-black-60);
     border: var(--bw-hair) solid var(--alpha-lime-50);
     color: var(--accent);
     backdrop-filter: blur(8px);
@@ -607,8 +607,8 @@
 }
 
 .bo-status.completed {
-    background: rgba(0, 0, 0, 0.65);
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
+    background: var(--alpha-black-60);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     color: var(--text-muted);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -756,7 +756,7 @@
 .bo-map-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: var(--modal-bg-heavy);
     z-index: 9998;
     display: flex;
     align-items: center;
@@ -811,7 +811,7 @@
 }
 
 .bo-map-cancel {
-    background: rgba(255,255,255,0.1);
+    background: var(--alpha-white-12);
     color: var(--text-secondary);
 }
 

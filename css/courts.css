@@ -28,7 +28,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 60%, var(--bg-primary) 100%);
+    background: linear-gradient(180deg, var(--modal-bg-heavy) 0%, var(--alpha-black-85) 60%, var(--bg-primary) 100%);
     z-index: 1;
 }
 
@@ -241,7 +241,7 @@
     gap: 4px;
     min-height: var(--btn-h-sm);
     padding-inline: 16px;
-    background: rgba(255,255,255,0.06);
+    background: var(--alpha-white-08);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     color: var(--accent);
@@ -373,7 +373,7 @@
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--modal-bg-heavy);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -410,7 +410,7 @@
     top: 12px; right: 16px;
     background: none;
     border: none;
-    color: rgba(255,255,255,0.5);
+    color: var(--alpha-white-50);
     font-size: var(--fs-xl);
     cursor: pointer;
     transition: color 0.2s;
@@ -648,10 +648,10 @@
 /* Court Types & Services tables */
 .ct-types-table,
 .ct-services-table {
-    background: rgba(255,255,255,0.03);
+    background: var(--alpha-white-04);
     border-radius: 12px;
     overflow: hidden;
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid var(--alpha-white-08);
 }
 
 .ct-types-header,
@@ -667,7 +667,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
 
 .ct-types-header {
@@ -1113,7 +1113,7 @@
     padding: 14px 18px;
     background: var(--alpha-white-04);
     border-radius: 12px;
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    border: var(--bw-hair) solid var(--alpha-white-08);
 }
 .ct-discount-info {
     display: flex;
@@ -1123,7 +1123,7 @@
 }
 .ct-discount-name {
     font-size: var(--fs-base);
-    color: rgba(255,255,255,0.85);
+    color: var(--alpha-white-72);
 }
 .ct-discount-percent {
     font-size: var(--fs-md);
@@ -1148,7 +1148,7 @@
 }
 .ct-discount-hint {
     font-size: var(--fs-xs);
-    color: rgba(255,255,255,0.4);
+    color: var(--text-muted);
     margin: 0;
     text-align: right;
 }
@@ -1157,7 +1157,7 @@
 .ct-voucher-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: var(--alpha-black-60);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -1187,7 +1187,7 @@
     top: 12px; right: 16px;
     background: none;
     border: none;
-    color: rgba(255,255,255,0.5);
+    color: var(--alpha-white-50);
     font-size: var(--fs-xl);
     cursor: pointer;
 }
@@ -1216,8 +1216,8 @@
     justify-content: space-between;
     padding: 6px 0;
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.7);
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
+    color: var(--alpha-white-72);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
 .ct-voucher-row:last-child { border-bottom: none; }
 .ct-voucher-percent {
@@ -1246,12 +1246,12 @@
 .ct-voucher-history {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: var(--bw-hair) solid rgba(255,255,255,0.06);
+    border-top: var(--bw-hair) solid var(--alpha-white-08);
 }
 .ct-voucher-history h4 {
     font-size: var(--fs-base);
     font-weight: 600;
-    color: rgba(255,255,255,0.7);
+    color: var(--alpha-white-72);
     margin-bottom: 12px;
 }
 .ct-vh-list {
@@ -1268,18 +1268,18 @@
        сторожем при правке пилюли 13.10: правило искало пару по всему файлу
        и нашло её здесь. */
     padding: 12px 16px;
-    background: rgba(255,255,255,0.03);
+    background: var(--alpha-white-04);
     border-radius: 10px;
     border: var(--bw-hair) solid var(--alpha-white-04);
     font-size: var(--fs-sm);
 }
 .ct-vh-date {
-    color: rgba(255,255,255,0.4);
+    color: var(--text-muted);
     white-space: nowrap;
     min-width: 50px;
 }
 .ct-vh-service {
-    color: rgba(255,255,255,0.7);
+    color: var(--alpha-white-72);
     flex: 1;
 }
 .ct-vh-discount {
@@ -1299,7 +1299,7 @@
     color: var(--accent);
 }
 .ct-vh-status-used {
-    background: rgba(255,255,255,0.06);
+    background: var(--alpha-white-08);
     color: var(--alpha-white-35);
 }
 .ct-vh-status-expired {
@@ -1322,7 +1322,7 @@
     background: var(--alpha-lime-12);
 }
 .ct-vh-empty {
-    color: rgba(255,255,255,0.25);
+    color: var(--text-muted);
     font-size: var(--fs-sm);
     padding: 8px 0;
 }
@@ -1331,7 +1331,7 @@
 .ct-picker-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: var(--alpha-black-60);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -1358,7 +1358,7 @@
     top: 10px; right: 14px;
     background: none;
     border: none;
-    color: rgba(255,255,255,0.5);
+    color: var(--alpha-white-50);
     font-size: var(--fs-lg);
     cursor: pointer;
 }
@@ -1395,7 +1395,11 @@
 }
 .ct-picker-radio {
     width: 18px; height: 18px;
-    border: var(--bw-thick) solid rgba(255,255,255,0.2);
+    /* ЗНАЧЕНИЕ НЕ МЕНЯЕТСЯ, меняется запись: ступень --alpha-white-20
+       завелась кругом B3. Граница элемента управления в лестницу B3 не
+       входит — её планка WCAG 1.4.11 (3:1), и 0.20 даёт 1.7: это находка
+       следующего круга, а не правка этого */
+    border: var(--bw-thick) solid var(--alpha-white-20);
     border-radius: 50%;
     flex-shrink: 0;
     position: relative;
@@ -1414,7 +1418,7 @@
 .ct-picker-label {
     flex: 1;
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.8);
+    color: var(--alpha-white-72);
 }
 .ct-picker-percent {
     color: var(--accent);

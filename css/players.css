@@ -37,7 +37,7 @@
 .pl-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, var(--bg-primary) 100%);
+    background: linear-gradient(to bottom, var(--modal-bg-heavy) 0%, var(--bg-primary) 100%);
     z-index: 1;
 }
 
@@ -93,7 +93,7 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--modal-bg-heavy);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -899,7 +899,7 @@
 
 .pl-guest-text {
     font-size: var(--fs-sm);
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--alpha-white-50);
     max-width: 340px;
     margin: 0 auto var(--space-6);       /* 24; было 28 — не ступень */
     line-height: var(--lh-normal);       /* 1.5; было 1.6 и 1.3 на телефоне */
@@ -936,7 +936,7 @@
     left: -60%;
     width: 40%;
     height: 200%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, var(--alpha-white-12), transparent);
     transform: skewX(-20deg);
     animation: pl-shimmer 3s ease-in-out infinite;
 }

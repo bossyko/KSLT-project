@@ -153,7 +153,7 @@ body.ad-page {
     letter-spacing: 0.5px;
     padding: 2px 8px;
     border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--alpha-white-08);
     color: var(--text-muted);
     border: var(--bw-hair) solid var(--border-subtle);
 }
@@ -317,7 +317,7 @@ body.ad-page {
 }
 .ad-stat-card[data-scroll-to]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px var(--alpha-black-30);
 }
 
 /* ---- Dashboard Activity Grid ---- */
@@ -483,7 +483,7 @@ body.ad-page {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 24px var(--alpha-black-50);
     text-align: left;
 }
 
@@ -636,7 +636,7 @@ body.ad-page {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px var(--alpha-black-50);
     padding: 4px 0;
 }
 .ad-col-dd-title-row {
@@ -694,7 +694,7 @@ body.ad-page {
     color: var(--text-secondary);
     cursor: pointer;
 }
-.ad-col-dd-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+.ad-col-dd-item:hover { background: var(--alpha-white-04); color: var(--text-primary); }
 .ad-col-dd-sort { color: var(--text-muted); }
 .ad-col-dd-reset { color: var(--accent); }
 .ad-col-dd-divider { height: 1px; background: var(--border-subtle); margin: 3px 0; }
@@ -707,7 +707,7 @@ body.ad-page {
     color: var(--text-secondary);
     cursor: pointer;
 }
-.ad-col-dd-check:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
+.ad-col-dd-check:hover { background: var(--alpha-white-08); color: var(--text-primary); }
 .ad-col-dd-check input[type="checkbox"] {
     -webkit-appearance: none;
     appearance: none;
@@ -743,7 +743,7 @@ body.ad-page {
     /* 8 · 12 — ступени шкалы. Было 10 × 10, мимо неё, и ряд мерился 59 на
        1512 при 48 у компонента `Table row 132:162` */
     padding: var(--space-2) var(--space-3);
-    border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.04);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
     color: var(--text-secondary);
     vertical-align: middle;
 }
@@ -784,7 +784,7 @@ body.ad-page {
 }
 
 .ad-table tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--alpha-white-04);
 }
 
 .ad-table-avatar {
@@ -1120,7 +1120,7 @@ body.ad-page {
 .ad-league-th-place { width: 50px; text-align: center; }
 /* Строка утешительной лиги на общем экране: подложка ещё слабее, чем у
    выбранной строки группы — она лишь разделяет два списка. */
-.ad-league-row-cl { background: rgba(255, 255, 255, 0.03); }
+.ad-league-row-cl { background: var(--alpha-white-04); }
 .ad-dual-league-row { display: flex; gap: var(--space-6); margin-top: var(--space-6); }
 .ad-league-col { flex: 1; min-width: 0; }
 .ad-grp-section-title--pl { color: var(--accent); }
@@ -1187,7 +1187,7 @@ body.ad-page {
     height: var(--btn-h-xs);
     border: none;
     border-radius: var(--radius-full);
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--alpha-black-60);
     color: #fff;
     font-size: var(--fs-base);
     line-height: var(--lh-none);
@@ -1469,7 +1469,7 @@ body.ad-page {
 }
 
 .ad-role-badge-user {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--alpha-white-04);
     color: var(--text-muted);
     border: var(--bw-hair) solid var(--border-subtle);
 }
@@ -1996,7 +1996,7 @@ body.ad-page {
     font-size: var(--fs-2xs);
     padding: 2px 8px;
     border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--alpha-white-08);
     color: var(--text-muted);
     border: var(--bw-hair) solid var(--border-subtle);
     /* ЗНАЧОК ЖИВЁТ В ОДНУ СТРОКУ — `Badge 27:53`: высота 24, одна строка.
@@ -2364,7 +2364,7 @@ input[type="date"]::-webkit-datetime-edit {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
-    border: var(--bw-thick) solid rgba(255,255,255,0.5);
+    border: var(--bw-thick) solid var(--alpha-white-50);
     border-radius: 3px;
     -webkit-appearance: none;
     appearance: none;
@@ -2393,7 +2393,7 @@ input[type="date"]::-webkit-datetime-edit {
    от выбора зависит, какие поля показать. Список прятал бы это за клик. */
 .ad-seg {
     display: flex;
-    border: var(--bw-hair) solid var(--ad-border, rgba(255,255,255,0.1));
+    border: var(--bw-hair) solid var(--ad-border, var(--alpha-white-12));
     border-radius: 10px;
     overflow: hidden;
 }
@@ -2403,7 +2403,7 @@ input[type="date"]::-webkit-datetime-edit {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--ad-text-secondary, rgba(255,255,255,0.6));
+    color: var(--ad-text-secondary, var(--alpha-white-50));
     font: 600 0.84rem inherit;
     transition: background 0.15s, color 0.15s;
 }
@@ -2419,7 +2419,7 @@ input[type="date"]::-webkit-datetime-edit {
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
-    color: var(--ad-text-secondary, rgba(255,255,255,0.6));
+    color: var(--ad-text-secondary, var(--alpha-white-50));
 }
 
 .ad-chk {
@@ -2467,9 +2467,9 @@ input[type="date"]::-webkit-datetime-edit {
     align-items: center;
     justify-content: center;
     padding: 0;
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: var(--radius-full);
-    background: rgba(0, 0, 0, 0.55);
+    background: var(--alpha-black-50);
     color: #fff;
     font-size: var(--fs-base);
     /* Круг 28 задаёт высоту — строке остаётся не быть выше него */
@@ -2480,7 +2480,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-editor-lenta-nav--nazad { left: 0; order: -1; }
 .ad-editor-lenta-nav--vpered { right: 0; }
 
-.ad-editor-lenta-nav:hover { background: rgba(0, 0, 0, 0.8); }
+.ad-editor-lenta-nav:hover { background: var(--alpha-black-85); }
 
 .ad-editor-lenta-nav:focus-visible {
     outline: var(--bw-thick) solid var(--accent);
@@ -2547,7 +2547,7 @@ input[type="date"]::-webkit-datetime-edit {
     right: 0;
     bottom: 0;
     padding: var(--space-1) var(--space-2);
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--alpha-black-50);
     color: var(--text-secondary);
     font-size: var(--fs-2xs);
     line-height: var(--lh-snug);
@@ -2575,7 +2575,7 @@ input[type="date"]::-webkit-datetime-edit {
     padding: 0;
     border: 0;
     border-radius: var(--radius-full);
-    background: rgba(0, 0, 0, 0.65);
+    background: var(--alpha-black-60);
     color: #fff;
     font-size: var(--fs-base);
     /* Высота задана кругом 28 — строке остаётся не быть выше него */
@@ -2678,7 +2678,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    border: var(--bw-thick) solid rgba(255, 255, 255, 0.5);
+    border: var(--bw-thick) solid var(--alpha-white-50);
     border-radius: 4px;
     background: transparent;
     position: relative;
@@ -2742,7 +2742,7 @@ input[type="date"]::-webkit-datetime-edit {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
-    border: var(--bw-thick) solid rgba(255,255,255,0.5);
+    border: var(--bw-thick) solid var(--alpha-white-50);
     border-radius: 3px;
     -webkit-appearance: none;
     appearance: none;
@@ -2834,7 +2834,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.7);
+    background: var(--alpha-black-60);
     color: #FF6B6B;
     border: none;
     font-size: var(--fs-xs);
@@ -2969,7 +2969,7 @@ select.ad-field-input {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--alpha-black-60);
     color: #fff;
     border: none;
     cursor: pointer;
@@ -3024,7 +3024,7 @@ select.ad-field-input {
     width: auto;
     border-radius: var(--radius-sm);
     /* Поле по краям вписанной афиши — то же, что на карточке сайта */
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--alpha-white-04);
 }
 
 .ad-afisha-pane--crop .ad-afisha-img {
@@ -3178,7 +3178,7 @@ select.ad-field-input {
     padding: 10px 18px;
     border-radius: 10px;
     border: var(--bw-thick) solid var(--border-color);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--alpha-white-04);
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -3251,7 +3251,7 @@ select.ad-field-input {
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--alpha-black-60);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3599,7 +3599,7 @@ select.ad-field-input {
     display: flex;
     gap: 4px;
     margin-bottom: 20px;
-    background: rgba(255,255,255,0.05);
+    background: var(--alpha-white-04);
     border-radius: 8px;
     padding: 4px;
     overflow-x: auto;
@@ -3610,7 +3610,7 @@ select.ad-field-input {
     padding: 10px 16px;
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.5);
+    color: var(--alpha-white-50);
     font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
@@ -3620,8 +3620,8 @@ select.ad-field-input {
 }
 
 .ad-rat-tab:hover {
-    color: rgba(255,255,255,0.8);
-    background: rgba(255,255,255,0.05);
+    color: var(--alpha-white-72);
+    background: var(--alpha-white-04);
 }
 
 .ad-rat-tab.active {
@@ -3650,7 +3650,7 @@ select.ad-field-input {
 
 .ad-rat-hint {
     font-size: var(--fs-xs);
-    color: rgba(255,255,255,0.4);
+    color: var(--text-muted);
     font-style: italic;
 }
 
@@ -3730,11 +3730,11 @@ select.ad-field-input {
 /* Level badge */
 .ad-rat-level-badge {
     padding: 10px 16px;
-    background: rgba(255,255,255,0.05);
+    background: var(--alpha-white-04);
     border-radius: 8px;
     margin-bottom: 16px;
     font-size: var(--fs-sm);
-    color: rgba(255,255,255,0.7);
+    color: var(--alpha-white-72);
 }
 
 /* Actions bar */
@@ -3751,7 +3751,7 @@ select.ad-field-input {
     background: var(--alpha-lime-12);
     border: var(--bw-hair) solid var(--alpha-lime-20);
     border-radius: 8px;
-    color: rgba(255,255,255,0.8);
+    color: var(--alpha-white-72);
     font-size: var(--fs-sm);
     margin-bottom: 16px;
 }
@@ -3774,7 +3774,7 @@ select.ad-field-input {
 
 /* Points rules inputs */
 .rat-rule-input {
-    background: rgba(255,255,255,0.08) !important;
+    background: var(--alpha-white-08) !important;
     border: var(--bw-hair) solid rgba(255,255,255,0.15) !important;
     border-radius: 6px;
     color: #fff;
@@ -3871,7 +3871,7 @@ select.ad-field-input {
 .ad-tabs {
     display: flex;
     gap: 4px;
-    background: rgba(255,255,255,0.05);
+    background: var(--alpha-white-04);
     border-radius: 10px;
     padding: 4px;
 }
@@ -3906,7 +3906,7 @@ select.ad-field-input {
 
 .ad-tab:hover {
     color: var(--text-primary);
-    background: rgba(255,255,255,0.05);
+    background: var(--alpha-white-04);
 }
 
 .ad-tab.active {
@@ -3946,7 +3946,7 @@ select.ad-field-input {
     align-items: center;
     gap: 16px;
     z-index: 1000;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 32px var(--alpha-black-50);
     animation: adFloatUp 0.25s ease-out;
 }
 .ad-reg-floating-count {
@@ -3967,7 +3967,7 @@ select.ad-field-input {
     font-size: var(--fs-xs);
     padding: 2px 6px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.1);
+    background: var(--alpha-white-12);
 }
 
 /* КУДА ИДЁТ ИГРОК ПОСЛЕ ГРУППЫ — СЛОВОМ.
@@ -3996,7 +3996,7 @@ select.ad-field-input {
 /* Утешительная — тихой поверхностью, но текст обычный, а не приглушённый:
    это подпись, а не шум. */
 .ad-league-cl {
-    background: rgba(255,255,255,0.08);
+    background: var(--alpha-white-08);
     color: var(--text-secondary);
 }
 
@@ -4200,7 +4200,7 @@ select.ad-field-input {
     color: var(--accent);
     padding-bottom: 8px;
     margin-bottom: 8px;
-    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.1));
+    border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-12));
 }
 
 /* Matches container — space-around aligns vertically */
@@ -4223,7 +4223,7 @@ select.ad-field-input {
 }
 
 .ad-brk-match:hover {
-    border-color: rgba(255,255,255,0.2);
+    border-color: var(--alpha-white-20);
 }
 
 .ad-brk-match.completed {
@@ -4238,7 +4238,7 @@ select.ad-field-input {
 /* Schedule info above players */
 .ad-brk-schedule {
     font-size: var(--fs-2xs);
-    color: var(--text-dim, rgba(255,255,255,0.45));
+    color: var(--text-dim, var(--alpha-white-50));
     padding: 3px 8px 0;
     white-space: nowrap;
 }
@@ -4250,7 +4250,7 @@ select.ad-field-input {
     padding: 5px 8px;
     gap: 4px;
     font-size: var(--fs-xs);
-    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
     color: var(--text-secondary, #aaa);
 }
 
@@ -4301,7 +4301,7 @@ select.ad-field-input {
 .ad-brk-notice-dup {
     background: var(--danger);
     color: var(--danger-on);
-    box-shadow: inset 0 1px 0 var(--border-light, rgba(255,255,255,0.12));
+    box-shadow: inset 0 1px 0 var(--border-light, var(--alpha-white-12));
 }
 
 /* Земляков разводят дважды — при раскладке меток и при подстановке имён.
@@ -4389,7 +4389,7 @@ select.ad-field-input {
     min-width: 0;
 }
 .ad-brk-actions .ad-brk-edit + .ad-brk-edit {
-    border-left: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border-left: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 
 .ad-brk-edit {
@@ -4397,7 +4397,7 @@ select.ad-field-input {
     width: 100%;
     padding: 4px 8px;
     border: none;
-    border-top: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border-top: var(--bw-hair) solid var(--border, var(--alpha-white-08));
     background: var(--alpha-lime-06);
     color: var(--accent);
     font-size: var(--fs-2xs);
@@ -4421,7 +4421,7 @@ select.ad-field-input {
    кегле 11. */
 .ad-brk-clear {
     color: var(--text-secondary);
-    background: rgba(255,255,255,0.03);
+    background: var(--alpha-white-04);
 }
 .ad-brk-clear:hover {
     color: var(--danger);
@@ -4477,7 +4477,7 @@ select.ad-field-input {
     left: 0;
     right: 50%;
     height: 1px;
-    background: var(--border-light, rgba(255,255,255,0.15));
+    background: var(--border-light, var(--alpha-white-12));
 }
 
 .ad-brk-conn-top::before {
@@ -4487,7 +4487,7 @@ select.ad-field-input {
     bottom: 0;
     left: 50%;
     width: 1px;
-    background: var(--border-light, rgba(255,255,255,0.15));
+    background: var(--border-light, var(--alpha-white-12));
 }
 
 .ad-brk-conn-bottom::after {
@@ -4497,7 +4497,7 @@ select.ad-field-input {
     left: 0;
     right: 50%;
     height: 1px;
-    background: var(--border-light, rgba(255,255,255,0.15));
+    background: var(--border-light, var(--alpha-white-12));
 }
 
 .ad-brk-conn-bottom::before {
@@ -4507,7 +4507,7 @@ select.ad-field-input {
     bottom: 50%;
     left: 50%;
     width: 1px;
-    background: var(--border-light, rgba(255,255,255,0.15));
+    background: var(--border-light, var(--alpha-white-12));
 }
 
 .ad-brk-conn-mid {
@@ -4522,14 +4522,14 @@ select.ad-field-input {
     left: 50%;
     right: 0;
     height: 1px;
-    background: var(--border-light, rgba(255,255,255,0.15));
+    background: var(--border-light, var(--alpha-white-12));
 }
 
 /* FIC bracket sections */
 .ad-fic-section {
     margin-bottom: 28px;
     padding-bottom: 20px;
-    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.08));
+    border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 .ad-fic-section:last-child {
     border-bottom: none;
@@ -4552,7 +4552,7 @@ select.ad-field-input {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.6);
+    background: var(--alpha-black-60);
     backdrop-filter: blur(4px);
     z-index: 9999;
     display: flex;
@@ -4979,9 +4979,9 @@ select.ad-field-input {
     gap: 8px;
     margin-bottom: 20px;
     padding: 12px 16px;
-    background: rgba(255,255,255,0.03);
+    background: var(--alpha-white-04);
     border-radius: 10px;
-    border: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 .ad-mem-profile-row {
     display: flex;
@@ -4994,7 +4994,7 @@ select.ad-field-input {
 }
 
 .ad-mem-profile-payments-section {
-    border-top: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border-top: var(--bw-hair) solid var(--border, var(--alpha-white-08));
     padding-top: 16px;
 }
 
@@ -5008,12 +5008,12 @@ select.ad-field-input {
     color: var(--text-secondary);
     font-weight: 500;
     padding: 6px 8px;
-    border-bottom: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 .ad-mem-profile-payments td {
     padding: 6px 8px;
     color: var(--text-primary);
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.03);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
 
 /* ---- Draft autosave indicator ---- */
@@ -5223,7 +5223,7 @@ select.ad-field-input {
 .ad-crt-stat-bar-wrap {
     flex: 1;
     height: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--alpha-white-08);
     border-radius: 2px;
     margin: 0 10px;
     overflow: hidden;
@@ -5274,7 +5274,7 @@ select.ad-field-input {
     transition: all 0.15s;
 }
 .ad-crt-page-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--alpha-white-08);
     color: var(--text-primary);
 }
 .ad-crt-page-btn:disabled {
@@ -5414,8 +5414,8 @@ select.ad-field-input {
 }
 
 .ad-pay-stat-card {
-    background: rgba(255,255,255,0.03);
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    background: var(--alpha-white-04);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 10px;
     padding: 16px;
     text-align: center;
@@ -5459,7 +5459,7 @@ select.ad-field-input {
     cursor: pointer;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.04);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
     transition: background 0.15s;
 }
 
@@ -5608,13 +5608,13 @@ select.ad-field-input {
 }
 
 .ad-grp-matrix th {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--alpha-white-04);
     font-weight: 600;
     white-space: nowrap;
 }
 
 .ad-grp-diag {
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: var(--alpha-white-04) !important;
     color: var(--text-secondary);
     text-align: center;
     font-weight: 600;
@@ -5812,7 +5812,7 @@ select.ad-field-input {
     font-size: var(--fs-xs);
     line-height: 1.35;
     text-align: left;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 6px 20px var(--alpha-black-50);
     pointer-events: none;
 }
 
@@ -6042,8 +6042,8 @@ select.ad-field-input {
 
 /* ---- Dashboard Chart ---- */
 .ad-dash-chart-card {
-    background: rgba(255,255,255,0.03);
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    background: var(--alpha-white-04);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 12px;
     margin-bottom: 24px;
     overflow: hidden;
@@ -6069,8 +6069,8 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     gap: 14px;
-    background: rgba(255,255,255,0.03);
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    background: var(--alpha-white-04);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 12px;
     padding: 18px 20px;
 }
@@ -6152,8 +6152,8 @@ select.ad-field-input {
 }
 
 .ad-vch-stat-big {
-    background: rgba(255,255,255,0.03);
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    background: var(--alpha-white-04);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 12px;
     padding: 24px;
     text-align: center;
@@ -6187,8 +6187,8 @@ select.ad-field-input {
 }
 
 .ad-vch-stat {
-    background: rgba(255,255,255,0.03);
-    border: var(--bw-hair) solid rgba(255,255,255,0.06);
+    background: var(--alpha-white-04);
+    border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 10px;
     padding: 14px 16px;
     font-size: var(--fs-sm);
@@ -6255,7 +6255,7 @@ select.ad-field-input {
 }
 
 .ad-btn-icon:hover {
-    background: rgba(255,255,255,0.08);
+    background: var(--alpha-white-08);
 }
 
 .ad-btn-danger-icon:hover {
@@ -6272,12 +6272,12 @@ select.ad-field-input {
 
 .ad-btn-outline {
     background: transparent;
-    border: var(--bw-hair) solid rgba(255,255,255,0.15);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     color: var(--text-secondary);
 }
 
 .ad-btn-outline:hover {
-    background: rgba(255,255,255,0.06);
+    background: var(--alpha-white-08);
     color: var(--text-primary);
 }
 
@@ -6299,7 +6299,7 @@ select.ad-field-input {
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
 
 .ad-vch-detail-row:last-child {
@@ -6338,7 +6338,7 @@ select.ad-field-input {
     background: var(--bg-card, #1a1a1a);
     border: var(--bw-hair) solid var(--border);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 24px var(--alpha-black-50);
 }
 .ad-dropdown-item {
     display: flex;
@@ -6519,7 +6519,7 @@ select.ad-field-input {
     letter-spacing: 0.5px;
     color: var(--text-muted);
     padding: 6px 12px;
-    background: rgba(255,255,255,0.03);
+    background: var(--alpha-white-04);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-card-row {
@@ -6674,7 +6674,7 @@ select.ad-field-input {
 
 /* ---- Визуальный редактор новостей ---- */
 .ad-editor {
-    border: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-12));
     border-radius: var(--radius-sm, 8px);
     overflow: hidden;
     background: var(--bg-elevated, #1a1a1a);
@@ -6685,8 +6685,8 @@ select.ad-field-input {
     flex-wrap: wrap;
     gap: 4px;
     padding: 8px;
-    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-    background: rgba(255, 255, 255, 0.02);
+    border-bottom: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-12));
+    background: var(--alpha-white-04);
 }
 
 /* ВЫСОТУ ДЕРЖИТ СТУПЕНЬ, А НЕ ПОЛЯ. ЗАМЕР 08.10: 29 — числа нет ни на
@@ -6793,7 +6793,7 @@ select.ad-field-input {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--alpha-black-85);
     backdrop-filter: blur(4px);
 }
 
@@ -6806,7 +6806,7 @@ select.ad-field-input {
     display: flex;
     flex-direction: column;
     background: var(--bg-card, #141417);
-    border: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-12));
     border-radius: 16px;
     overflow: hidden;
 }
@@ -6816,7 +6816,7 @@ select.ad-field-input {
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-bottom: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-08));
 }
 
 .ad-crop-title { font-weight: 600; }
@@ -6859,7 +6859,7 @@ select.ad-field-input {
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 20px 20px;
-    border-top: var(--bw-hair) solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-top: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-08));
     background: var(--bg-card, #141417);
 }
 
@@ -6894,7 +6894,7 @@ select.ad-field-input {
     margin: 10px 0 6px;
     border-radius: 3px;
     overflow: hidden;
-    background: rgba(255,255,255,0.07);
+    background: var(--alpha-white-08);
 }
 
 .ad-cat-bar-w,
@@ -6976,7 +6976,7 @@ select.ad-field-input {
 .ad-cat-closed-tag {
     padding: 2px 8px;
     border-radius: var(--radius-full);
-    background: rgba(255,255,255,0.06);
+    background: var(--alpha-white-08);
     color: var(--text-muted);
     font-size: var(--fs-2xs);
     font-weight: 500;
@@ -7197,7 +7197,7 @@ select.ad-field-input {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 32px var(--alpha-black-50);
     display: none;
 }
 
@@ -7222,7 +7222,7 @@ select.ad-field-input {
 }
 
 .kslt-cc-item:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--alpha-white-08);
     color: var(--text-primary);
 }
 
@@ -7270,7 +7270,7 @@ select.ad-field-input {
 .ad-btn-translate-all.is-done {
     opacity: 1;
     color: var(--text-secondary);
-    border-color: rgba(255,255,255,0.14);
+    border-color: var(--alpha-white-12);
     background: transparent;
     cursor: default;
 }
@@ -7344,7 +7344,7 @@ select.ad-field-input {
 }
 .ad-brk-scroll::-webkit-scrollbar { height: 8px; }
 .ad-brk-scroll::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--alpha-white-04);
     border-radius: 4px;
 }
 .ad-brk-scroll::-webkit-scrollbar-thumb {
@@ -7380,7 +7380,7 @@ select.ad-field-input {
 /* Пустая полоса: место держит, вид не занимает */
 .ad-brk-edit-empty {
     background: none;
-    border-top: var(--bw-hair) solid var(--border, rgba(255,255,255,0.06));
+    border-top: var(--bw-hair) solid var(--border, var(--alpha-white-08));
     pointer-events: none;
 }
 /* Исход матча пишем поверх строки счёта, а не отдельной строкой —
@@ -7488,7 +7488,7 @@ select.ad-field-input {
 }
 
 .ad-sched-note {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--alpha-white-04);
     border-left: var(--bw-heavy) solid var(--accent);
     border-radius: var(--radius-sm);
     /* Было 10 14 и margin-bottom 14 — ни одного числа со шкалы
@@ -7566,7 +7566,7 @@ select.ad-field-input {
     padding: 4px 8px;
     font-size: var(--fs-xs);
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--border-subtle);
     color: var(--text-primary);
 }
@@ -7742,12 +7742,12 @@ select.ad-field-input {
    понимать, на какое он нажмёт, ещё до нажатия. Обводка — цветом самой
    кнопки, чтобы «Отклонить» не путали с «Снять» */
 .ad-reg-act:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.10);
+    background: var(--alpha-white-12);
     box-shadow: inset 0 0 0 1px currentColor;
 }
 
 .ad-reg-act:active:not(:disabled) {
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--alpha-white-12);
 }
 
 /* Выбор способа в окнах: «Из базы» или «Гость». Тот же вид, что у статуса
@@ -7779,7 +7779,7 @@ select.ad-field-input {
 }
 
 .ad-replace-queue-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--alpha-white-04);
 }
 
 /* Выбранная строка — акцентом, как и выбранное положение переключателя
@@ -7904,7 +7904,7 @@ select.ad-field-input {
 
 .ad-sched-switch button:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--alpha-white-04);
 }
 
 .ad-sched-switch button.on {
@@ -7913,7 +7913,7 @@ select.ad-field-input {
 }
 
 .ad-sched-switch button.on[data-status="upcoming"] {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--alpha-white-08);
     color: var(--text-primary);
 }
 
@@ -8521,11 +8521,11 @@ select.ad-field-input {
        36: рамка ячейки таблицы прибавляется к высоте. Внутренняя тень
        рисует ту же линию и высоты не меняет. Померено, не придумано. */
     height: 36px; padding: 0 var(--space-3);
-    box-shadow: inset 0 -1px 0 rgba(255,255,255,.04);
+    box-shadow: inset 0 -1px 0 var(--alpha-white-04);
     text-align: center; vertical-align: middle;
 }
 .ad-pts tr:last-child td { box-shadow: none; }
-.ad-pts tr:hover td { background: rgba(255,255,255,.02); }
+.ad-pts tr:hover td { background: var(--alpha-white-04); }
 .ad-pts-place {
     position: sticky; left: 0; z-index: 1;
     background: var(--bg-card);
@@ -8629,7 +8629,7 @@ select.ad-field-input {
    не семнадцатью правками в разметке. */
 .ad-brk-zavershyon .ad-brk-edit,
 .ad-brk-zavershyon .ad-sq-fix {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--alpha-white-04);
     color: var(--text-muted);
 }
 
@@ -8638,6 +8638,6 @@ select.ad-field-input {
 .ad-brk-zavershyon .ad-sq-fix:hover,
 .ad-brk-zavershyon .ad-brk-edit:focus-visible,
 .ad-brk-zavershyon .ad-sq-fix:focus-visible {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--alpha-white-08);
     color: var(--text-primary);
 }

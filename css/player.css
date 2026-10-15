@@ -29,7 +29,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 60%, var(--bg-primary) 100%);
+    background: linear-gradient(180deg, var(--modal-bg-heavy) 0%, var(--alpha-black-85) 60%, var(--bg-primary) 100%);
     z-index: 1;
 }
 
@@ -376,7 +376,7 @@
 .pp-chart-box {
     position: relative;
     height: 340px;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 14px;
     padding: 16px;
@@ -582,7 +582,7 @@
    Здесь буквы тихие, на том же сером, что и обводка портрета. */
 .pp-photo.pp-photo-ph,
 .pp-guest-photo.pp-photo-ph {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--alpha-white-08);
     color: var(--text-secondary);
     font-size: var(--fs-3xl);
 }
@@ -629,7 +629,7 @@
     white-space: nowrap;
 }
 .pp-tag-rating   { background: var(--alpha-lime-12); color: var(--accent); }
-.pp-tag-friendly { background: rgba(255,255,255,0.10); color: var(--text-muted); }
+.pp-tag-friendly { background: var(--alpha-white-12); color: var(--text-muted); }
 .pp-tag-battle   { background: rgba(255,159,67,0.16); color: var(--orange-500); }
 .pp-tag-doubles  { background: rgba(59,130,246,0.16); color: #6EA8FE; }
 .pp-tag-mixed    { background: rgba(168,85,247,0.18); color: #C084FC; }
@@ -1191,7 +1191,7 @@ a.pp-tournament:hover {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--modal-bg-heavy);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -1534,7 +1534,7 @@ a.pp-tournament:hover {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0,0,0,0.7);
+    background: var(--modal-bg-heavy);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -1559,10 +1559,10 @@ a.pp-tournament:hover {
     max-height: 90vh;
     overflow-y: auto;
     box-shadow:
-        0 30px 90px rgba(0, 0, 0, 0.7),
+        0 30px 90px var(--modal-bg-heavy),
         0 0 50px 8px var(--alpha-lime-12),
         0 0 150px 45px var(--alpha-lime-06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        inset 0 1px 0 var(--alpha-white-04);
 }
 
 .pp-chal-close {
@@ -1601,7 +1601,7 @@ a.pp-tournament:hover {
 }
 
 .pp-chal-input {
-    background: rgba(255,255,255,0.06);
+    background: var(--alpha-white-08);
     border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: 8px;
     color: var(--neutral-white);
@@ -1667,7 +1667,7 @@ a.pp-tournament:hover {
     left: 50%;
     transform: translate(-50%, -12px) scale(0.98);
     padding: 14px 26px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px var(--alpha-black-50);
     border-radius: 10px;
     font-size: var(--fs-sm);
     font-weight: 500;
@@ -1886,7 +1886,7 @@ a.pp-tournament:hover {
     margin: 10px 0 6px;
     border-radius: 3px;
     overflow: hidden;
-    background: rgba(255,255,255,0.07);
+    background: var(--alpha-white-08);
 }
 
 .pp-cat-bar-w,

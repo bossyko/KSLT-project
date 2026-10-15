@@ -50,7 +50,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.85) 60%, var(--bg-primary) 100%);
+    background: linear-gradient(180deg, var(--modal-bg-heavy) 0%, var(--alpha-black-85) 60%, var(--bg-primary) 100%);
     z-index: 1;
 }
 
@@ -407,7 +407,7 @@
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background: rgba(0, 0, 0, 0.75);
+    background: var(--alpha-black-85);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     display: flex;

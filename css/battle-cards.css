@@ -82,7 +82,7 @@
     aspect-ratio: 16 / 9;
     height: auto;
     object-fit: cover;
-    border-bottom: var(--bw-hair) solid rgba(255,255,255,0.06);
+    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
 
 .bc-card-inner {
@@ -179,7 +179,7 @@
     border-radius: 50%;
     object-fit: cover;
     border: var(--bw-thick) solid var(--alpha-white-12);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px var(--alpha-black-30);
 }
 
 /* Пара: места на строку не больше, чем у одиночного баттла, поэтому
@@ -200,7 +200,7 @@
     font-size: var(--fs-sm);
     font-weight: 600;
     text-align: center;
-    color: rgba(255,255,255,0.9);
+    color: var(--alpha-white-72);
     max-width: 160px;
     word-wrap: break-word;
     line-height: 1.2;
@@ -222,8 +222,8 @@
     padding: 9px 12px;
     border-radius: 10px;
     border: var(--bw-thick) solid var(--alpha-white-12);
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.85);
+    background: var(--alpha-white-08);
+    color: var(--alpha-white-72);
     font-size: var(--fs-xs);
     font-weight: 600;
     cursor: pointer;
@@ -272,7 +272,7 @@
     text-align: center;
     font-size: var(--fs-xs);
     font-weight: 600;
-    color: rgba(255,255,255,0.5);
+    color: var(--alpha-white-50);
     margin-bottom: 2px;
 }
 
@@ -281,7 +281,7 @@
 .bc-vote-closed-msg {
     text-align: center;
     font-size: var(--fs-xs);
-    color: rgba(255,255,255,0.4);
+    color: var(--text-muted);
     padding: 6px 0;
 }
 
@@ -319,7 +319,7 @@
 .bc-pct-p1 { color: var(--player-1); }
 .bc-pct-p2 { color: var(--player-2); }
 .bc-total {
-    color: rgba(255,255,255,0.4);
+    color: var(--text-muted);
     font-size: var(--fs-2xs);
 }
 
@@ -329,7 +329,7 @@
     flex-wrap: wrap;
     gap: 10px;
     font-size: var(--fs-xs);
-    color: rgba(255,255,255,0.45);
+    color: var(--alpha-white-50);
 }
 .bc-meta-item {
     white-space: nowrap;
@@ -347,7 +347,7 @@
     transition: color 0.2s;
 }
 .bc-meta-venue:hover {
-    color: rgba(255,255,255,0.8);
+    color: var(--alpha-white-72);
 }
 
 /* ---- Details link ---- */
@@ -356,7 +356,7 @@
     text-align: center;
     font-size: var(--fs-xs);
     font-weight: 600;
-    color: rgba(255,255,255,0.45);
+    color: var(--alpha-white-50);
     text-decoration: none;
     padding: 6px 0 2px;
     transition: color 0.2s;
@@ -370,7 +370,7 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0,0,0,0.7);
+    background: var(--modal-bg-heavy);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -412,7 +412,7 @@
 .bc-map-btn:hover { opacity: 0.85; }
 .bc-map-2gis { background: #3DB83A; color: var(--neutral-white); }
 .bc-map-google { background: #4285F4; color: var(--neutral-white); }
-.bc-map-cancel { background: var(--alpha-white-08); color: rgba(255,255,255,0.6); }
+.bc-map-cancel { background: var(--alpha-white-08); color: var(--alpha-white-50); }
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {

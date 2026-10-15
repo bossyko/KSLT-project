@@ -92,7 +92,7 @@
        прямым текстом. ЗАМЕР 08.10 давал 146 x 33 при цели нажатия 44. */
     height: 44px;
     padding: 0 var(--space-4);
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.22);
+    border: var(--bw-hair) solid var(--alpha-white-20);
     border-radius: 999px;
     background: rgba(10, 10, 10, 0.55);
     backdrop-filter: blur(8px);
@@ -216,7 +216,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 45%);
+    background: linear-gradient(to top, var(--alpha-black-50), rgba(0, 0, 0, 0) 45%);
     pointer-events: none;
 }
 
@@ -696,7 +696,7 @@ h3.news-heading {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--alpha-black-60);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -911,7 +911,7 @@ body.news-article-page .section-sponsors-compact {
 
 .news-hero-overlay-list {
     /* Ровное затемнение: текст лежит по центру снимка, а не у нижнего края */
-    background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0,0,0,0.72) 45%, rgba(0,0,0,0.6) 100%);
+    background: linear-gradient(to top, var(--bg-primary) 0%, var(--alpha-black-60) 45%, var(--alpha-black-60) 100%);
 }
 
 .news-hero-content-list {
@@ -1316,7 +1316,7 @@ body.news-article-page .section-sponsors-compact {
     align-items: center;
     justify-content: center;
     padding: var(--space-10);
-    background: rgba(0, 0, 0, 0.92);
+    background: var(--alpha-black-85);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
@@ -1332,7 +1332,7 @@ body.news-article-page .section-sponsors-compact {
 .news-viewer-nav {
     position: absolute;
     background: var(--alpha-white-08);
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     color: var(--neutral-white);
     cursor: pointer;
     border-radius: 50%;
@@ -1343,7 +1343,7 @@ body.news-article-page .section-sponsors-compact {
 }
 
 .news-viewer-close:hover,
-.news-viewer-nav:hover { background: rgba(255, 255, 255, 0.18); }
+.news-viewer-nav:hover { background: var(--alpha-white-12); }
 
 .news-viewer-close {
     top: var(--space-6);
@@ -1374,7 +1374,7 @@ body.news-article-page .section-sponsors-compact {
     left: 0;
     right: 0;
     text-align: center;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--alpha-white-50);
     font-size: var(--fs-sm);
 }
 
@@ -1479,15 +1479,15 @@ body.news-article-page .section-sponsors-compact {
     font-size: var(--fs-xl);
     line-height: 1;
     color: var(--neutral-white);
-    background: rgba(0, 0, 0, 0.55);
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
+    background: var(--alpha-black-50);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: 50%;
     cursor: pointer;
     transition: background 0.2s;
     z-index: 1;
 }
 
-.news-carousel-nav:hover { background: rgba(0, 0, 0, 0.8); }
+.news-carousel-nav:hover { background: var(--alpha-black-85); }
 .news-carousel-prev { left: var(--space-3); }
 .news-carousel-next { right: var(--space-3); }
 
@@ -1497,8 +1497,8 @@ body.news-article-page .section-sponsors-compact {
     bottom: var(--space-3);
     padding: var(--space-1) var(--space-3);
     font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.85);
-    background: rgba(0, 0, 0, 0.55);
+    color: var(--alpha-white-72);
+    background: var(--alpha-black-50);
     border-radius: var(--radius-full);
 }
 
@@ -1576,13 +1576,13 @@ body.news-article-page .section-sponsors-compact {
     font-size: var(--fs-md);
     line-height: 1;
     color: var(--neutral-white);
-    background: rgba(0, 0, 0, 0.55);
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.15);
+    background: var(--alpha-black-50);
+    border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background 0.2s, opacity 0.2s;
 }
-.news-thumbs-nav:hover:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+.news-thumbs-nav:hover:not(:disabled) { background: var(--alpha-black-85); }
 .news-thumbs-nav:disabled { opacity: 0.3; cursor: default; }
 
 .news-thumbs-row.news-thumbs-fits .news-thumbs-nav { display: none; }
