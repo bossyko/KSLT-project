@@ -52,8 +52,8 @@ const ОТКАТЫ = [
         '@media (max-width: 768px) {\n    .ip-mission-grid {',
    'границ ровно две — 640 и 992'],
 
-  [CSS, '.ip-doc-revision {\n    color: rgba(255, 255, 255, 0.6);',
-        '.ip-doc-revision {\n    margin-top: 28px;\n    color: rgba(255, 255, 255, 0.6);',
+  [CSS, '.ip-doc-revision {\n    color: var(--alpha-white-50);',
+        '.ip-doc-revision {\n    margin-top: 28px;\n    color: var(--alpha-white-50);',
    'ни одного отступа мимо шкалы'],
 
   [CSS, '.ip-cta-btn:focus-visible,', '.ip-cta-btn:focus-net,',
@@ -65,12 +65,12 @@ const ОТКАТЫ = [
   /* ОТКАТ, КОТОРЫЙ НЕ ПРАВИТ, А ВОЗВРАЩАЕТ СНЯТОЕ: мёртвое правило. */
   /* Якорь взят с соседней строкой: сам по себе `.ip-doc-lead {` встречается
      в файле дважды — в базовом правиле и в узком блоке. */
-  [CSS, '.ip-doc-lead {\n    color: rgba(255, 255, 255, 0.8);',
-        '.ip-team-photo { width: 96px; height: 96px; }\n\n.ip-doc-lead {\n    color: rgba(255, 255, 255, 0.8);',
+  [CSS, '.ip-doc-lead {\n    color: var(--alpha-white-72);',
+        '.ip-team-photo { width: 96px; height: 96px; }\n\n.ip-doc-lead {\n    color: var(--alpha-white-72);',
    'мёртвые правила не вернулись'],
 
-  [CSS, '.ip-doc-revision {\n    color: rgba(255, 255, 255, 0.6);\n    font-size: var(--fs-base);',
-        '.ip-doc-revision {\n    color: rgba(255, 255, 255, 0.6);',
+  [CSS, '.ip-doc-revision {\n    color: var(--alpha-white-50);\n    font-size: var(--fs-base);',
+        '.ip-doc-revision {\n    color: var(--alpha-white-50);',
    'кегль вводного абзаца и строки о редакции задан классами'],
 
   /* Второе объявление кегля перебивки — ровно то, что стояло в блоке ≤992

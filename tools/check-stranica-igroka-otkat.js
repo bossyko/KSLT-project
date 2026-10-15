@@ -236,8 +236,8 @@ const ОТКАТЫ = [
         "function инициалыИмени(имя) { return String(имя || '').charAt(0); }",
    'инициалы страницы игрока и кабинета считает одно правило'],
 
-  [CSS, '    background: rgba(255, 255, 255, 0.06);\n    color: var(--text-secondary);',
-        '    background: rgba(255, 255, 255, 0.06);\n    color: var(--accent);',
+  [CSS, '    background: var(--alpha-white-08);\n    color: var(--text-secondary);',
+        '    background: var(--alpha-white-08);\n    color: var(--accent);',
    'портрет не берёт ни акцент, ни цвет статуса'],
 
   /* 13.10: якорь держался за ЧИСЛО прозрачности лайма — она переехала на

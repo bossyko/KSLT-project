@@ -82,7 +82,7 @@ const ОТКАТЫ = [
   [СЕТКА, "L.doneEditWarn", "L.tournamentDone",
    'завершённый турнир предупреждает о цене правки словом'],
 
-  [АДМИН_CSS, '.ad-brk-zavershyon .ad-brk-edit,\n.ad-brk-zavershyon .ad-sq-fix {\n    background: rgba(255, 255, 255, 0.03);\n    color: var(--text-muted);',
+  [АДМИН_CSS, '.ad-brk-zavershyon .ad-brk-edit,\n.ad-brk-zavershyon .ad-sq-fix {\n    background: var(--alpha-white-04);\n    color: var(--text-muted);',
               '.ad-brk-zavershyon .ad-brk-edit,\n.ad-brk-zavershyon .ad-sq-fix {\n    background: rgba(204,255,0,0.05);\n    color: var(--accent);',
    'клетки завершённого турнира перестают звать лаймом'],
 

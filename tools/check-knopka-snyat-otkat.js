@@ -27,7 +27,7 @@ const ОТКАТЫ = [
        положение, в котором она лежала до 01.10 и проигрывала. Текст в
        файле есть, глазами всё хорошо, а кнопка лаймовая. */
     [CSS,
-     '.ad-brk-clear {\n    color: var(--text-secondary);\n    background: rgba(255,255,255,0.03);\n}',
+     '.ad-brk-clear {\n    color: var(--text-secondary);\n    background: var(--alpha-white-04);\n}',
      '',
      'краска «Снять» объявлена ниже краски «Изм.»'],
 
