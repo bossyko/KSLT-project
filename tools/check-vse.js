@@ -94,7 +94,8 @@ const КУСКИ = [
     ['лицо без фотографии', 'check-lico.js', 'check-lico-otkat.js'],
     ['порядок блоков сетки', 'check-poryadok-blokov.js', 'check-poryadok-blokov-otkat.js'],
     ['одно определение на понятие', 'check-odno-opredelenie.js', 'check-odno-opredelenie-otkat.js'],
-    ['мёртвое и лишнее', 'check-mertvoe.js', 'check-mertvoe-otkat.js']
+    ['мёртвое и лишнее', 'check-mertvoe.js', 'check-mertvoe-otkat.js'],
+    ['цвет с именем', 'check-cvet-imenem.js', 'check-cvet-imenem-otkat.js']
 ];
 
 function прогнать(файл) {
