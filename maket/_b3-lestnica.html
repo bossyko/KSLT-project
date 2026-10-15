@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B3 — лестница прозрачности, места группы D</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/battle-cards.css">
+<link rel="stylesheet" href="../css/coaches.css">
+<link rel="stylesheet" href="../css/courts.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/news.css">
+<link rel="stylesheet" href="../css/players.css">
+<style>
+/* СТЕНД, не продукт: только раскладка самого стенда */
+body { background: var(--bg-primary); padding: 24px; }
+.st-h { font: 600 12px/1.4 system-ui; color: var(--accent); letter-spacing:.08em; text-transform:uppercase; margin: 32px 0 8px; }
+.st-n { font: 400 11px/1.5 system-ui; color: var(--text-muted); margin: 0 0 12px; }
+.st-box { border: 1px solid var(--alpha-white-12); border-radius: 12px; padding: 16px; margin-bottom: 8px; max-width: 520px; }
+</style></head>
+<body>
+
+<div class="st-h">1 · имена игроков на карточке баттла &nbsp;.bc-player-name</div>
+<div class="st-n">было белый 0.90 · станет 0.72</div>
+<div class="st-box"><div class="bc-card"><div class="bc-card-inner">
+  <div class="bc-title">Весенний баттл</div>
+  <div class="bc-vs-row">
+    <div class="bc-side"><span class="bc-player-name"><span>Айбек Жумабаев</span></span></div>
+    <span class="bc-vs">VS</span>
+    <div class="bc-side"><span class="bc-player-name"><span>Костя Хан</span></span></div>
+  </div>
+  <div class="bc-vote-buttons">
+    <button class="bc-vote-btn bc-vote-btn-p1">Айбек</button>
+    <button class="bc-vote-btn bc-vote-btn-p2">Костя</button>
+  </div>
+  <div class="bc-vote-bar"><div class="bc-bar-p1" style="width:62%"></div><div class="bc-bar-p2" style="width:38%"></div></div>
+  <div class="bc-vote-stats"><span class="bc-pct bc-pct-p1">62%</span><span class="bc-total">148 голосов</span><span class="bc-pct bc-pct-p2">38%</span></div>
+</div></div></div>
+
+<div class="st-h">2 · кнопка голоса &nbsp;.bc-vote-btn</div>
+<div class="st-n">было белый 0.85 · станет 0.72</div>
+
+<div class="st-h">3 · название услуги со скидкой &nbsp;.co-discount-name / .ct-discount-name</div>
+<div class="st-n">было белый 0.85 · станет 0.72</div>
+<div class="st-box"><div class="co-discount-list">
+  <div class="co-discount-item"><div class="co-discount-info">
+    <span class="co-discount-name">Индивидуальная тренировка</span>
+    <span class="co-discount-percent">-15%</span>
+  </div><button class="co-discount-btn">Получить ваучер</button></div>
+  <div class="co-discount-item"><div class="co-discount-info">
+    <span class="co-discount-name">Аренда корта, час</span>
+    <span class="co-discount-percent">-10%</span>
+  </div><p class="co-discount-hint">Доступно зарегистрированным</p></div>
+</div></div>
+
+<div class="st-h">4 · счётчик кадров в карусели новости &nbsp;.news-carousel-count</div>
+<div class="st-n">было белый 0.85 · станет 0.72</div>
+<div class="st-box" style="position:relative;height:120px;background:#1a1a1a;">
+  <div class="news-carousel-count" style="position:absolute;right:12px;bottom:12px;">1 / 5</div>
+</div>
+
+<div class="st-h">5 · название в ваучере кабинета &nbsp;.db-voucher-name</div>
+<div class="st-n">было белый 0.90 · станет 0.72</div>
+<div class="st-box"><div class="db-invite-card db-voucher-item"><div class="db-voucher-row"><div class="db-voucher-main">
+  <div class="db-voucher-name">Теннисный центр «Ала-Тоо»</div>
+  <div class="db-voucher-service">Аренда корта · -10%</div>
+</div></div></div></div>
+
+<div class="st-h">6 · текст в окне входа &nbsp;.auth-modal-text</div>
+<div class="st-n">было белый 0.85 · станет 0.72</div>
+<div class="st-box"><p class="auth-modal-text">Войдите, чтобы голосовать за участников баттла и получать ваучеры.</p></div>
+
+<div class="st-h">7 · подсветка кнопки гостя &nbsp;.pl-guest-btn::after / .guest-cta-btn::after</div>
+<div class="st-n">блик по кнопке: было белый 0.30 · станет 0.12</div>
+<div class="st-box"><a href="#" class="pl-guest-btn">Войти и найти партнёра</a></div>
+
+<div class="st-h">8 · затемнение героя &nbsp;.sv-hero-overlay / .ch-hero-overlay</div>
+<div class="st-n">верх затемнения: было чёрный 0.35 · станет 0.50 (низ 0.88 не трогается)</div>
+<div class="sv-hero" id="svHero" style="max-width:520px;height:220px;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+  <div class="sv-hero-bg"><img src="../images/heroes/services.jpg" alt=""></div>
+  <div class="sv-hero-overlay"></div>
+  <div class="sv-hero-content"><h1>Ваш теннис начинается здесь</h1><p>Корты, тренеры и партнёры по игре</p></div>
+</div>
+
+</body></html>
