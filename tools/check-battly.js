@@ -150,7 +150,7 @@ const границы = т => (т.match(/@media \(max-width: (\d+)px\)/g) || [])
     '«голосов» на кнопке 3.14 при норме 4.5');
 
 правило('процент в полосе голосования красится тёмным',
-    /\.ch-bar-left span, \.ch-bar-right span \{\s*color: #0a0a0a/.test(ВЫЗ),
+    /\.ch-bar-left span, \.ch-bar-right span \{\s*color: (?:#0a0a0a|var\(--neutral-950\))/i.test(ВЫЗ),
     'компонент `Badge 27:53` говорит прямо: «Solid takes NEAR-BLACK text,\n' +
     'not white. White on danger measures 3.34 and fails». У нас на красной\n' +
     'половине вышло 3.76');

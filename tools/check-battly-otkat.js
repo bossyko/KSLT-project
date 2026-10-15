@@ -103,8 +103,9 @@ const ОТКАТЫ = [
  '    color: var(--text-dim);',
  'краски text-dim в обоих файлах не осталось'],
 
+/* 15.10 (B3 круг 1): `#0a0a0a` записан именем `--neutral-950`. */
 ['вернуть проценту в полосе белую краску', В,
- '.ch-bar-left span, .ch-bar-right span {\n    color: #0a0a0a;',
+ '.ch-bar-left span, .ch-bar-right span {\n    color: var(--neutral-950);',
  '.ch-bar-left span, .ch-bar-right span {\n    color: #ffffff;',
  'процент в полосе голосования красится тёмным'],
 
