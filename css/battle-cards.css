@@ -237,24 +237,24 @@
    идёт в полосе голосования и на странице баттлов. Раньше обе кнопки
    светлели одинаково, и было не видно, за кого голосуешь */
 .bc-vote-btn-p1:hover:not(.bc-vote-closed):not(.bc-vote-locked) {
-    border-color: #DC2828;
-    background: rgba(220, 40, 40, 0.12);
+    border-color: var(--player-1);
+    background: rgba(79, 195, 247, 0.12);
 }
 
 .bc-vote-btn-p2:hover:not(.bc-vote-closed):not(.bc-vote-locked) {
-    border-color: #2563EB;
-    background: rgba(37, 99, 235, 0.12);
+    border-color: var(--player-2);
+    background: rgba(208, 80, 247, 0.12);
 }
 .bc-vote-btn-p1.bc-vote-selected {
-    background: rgba(220,40,40,0.12);
-    border-color: #DC2828;
-    color: #B91C1C;
+    background: rgba(79, 195, 247, 0.12);
+    border-color: var(--player-1);
+    color: var(--player-1);
     font-weight: 700;
 }
 .bc-vote-btn-p2.bc-vote-selected {
-    background: rgba(37,99,235,0.12);
-    border-color: #2563EB;
-    color: #1D4ED8;
+    background: rgba(208, 80, 247, 0.12);
+    border-color: var(--player-2);
+    color: var(--player-2);
     font-weight: 700;
 }
 .bc-vote-btn.bc-vote-closed,
@@ -295,13 +295,13 @@
 }
 .bc-bar-p1 {
     height: 100%;
-    background: #DC2828;
+    background: var(--player-1);
     border-radius: 4px 0 0 4px;
     transition: width 0.5s ease;
 }
 .bc-bar-p2 {
     height: 100%;
-    background: #2563EB;
+    background: var(--player-2);
     border-radius: 0 4px 4px 0;
     transition: width 0.5s ease;
 }
@@ -316,8 +316,8 @@
 .bc-pct {
     font-weight: 700;
 }
-.bc-pct-p1 { color: #B91C1C; }
-.bc-pct-p2 { color: #1D4ED8; }
+.bc-pct-p1 { color: var(--player-1); }
+.bc-pct-p2 { color: var(--player-2); }
 .bc-total {
     color: rgba(255,255,255,0.4);
     font-size: var(--fs-2xs);

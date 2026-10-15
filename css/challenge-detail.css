@@ -336,7 +336,7 @@
 }
 
 .ch-bar-left {
-    background: #ef4444;
+    background: var(--player-1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -347,7 +347,7 @@
     min-width: 0;
 }
 .ch-bar-right {
-    background: var(--blue-500);
+    background: var(--player-2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -537,15 +537,15 @@
    голосования и на странице баттлов. Раньше обе подсвечивались лаймом,
    и было не видно, за кого голосуешь */
 .ch-vote-btn.ch-vote-p1:hover:not(.disabled) {
-    border-color: #DC2828;
-    background: rgba(220, 40, 40, 0.12);
-    box-shadow: 0 4px 16px rgba(220, 40, 40, 0.18);
+    border-color: var(--player-1);
+    background: rgba(79, 195, 247, 0.12);
+    box-shadow: 0 4px 16px rgba(79, 195, 247, 0.18);
 }
 
 .ch-vote-btn.ch-vote-p2:hover:not(.disabled) {
-    border-color: #2563EB;
-    background: rgba(37, 99, 235, 0.12);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.18);
+    border-color: var(--player-2);
+    background: rgba(208, 80, 247, 0.12);
+    box-shadow: 0 4px 16px rgba(208, 80, 247, 0.18);
 }
 .ch-vote-btn:hover:not(.disabled) .ch-vote-cta {
     opacity: 1;
@@ -616,8 +616,8 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-.ch-vote-dot-red { color: #ef4444; }
-.ch-vote-dot-blue { color: var(--blue-500); }
+.ch-vote-dot-red { color: var(--player-1); }
+.ch-vote-dot-blue { color: var(--player-2); }
 
 .ch-voting-total {
     font-size: var(--fs-sm);

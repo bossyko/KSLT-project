@@ -243,11 +243,11 @@
 }
 
 .bo-player-side:first-child .bo-player-img {
-    border-color: #DC2828;
+    border-color: var(--player-1);
 }
 
 .bo-player-side:last-child .bo-player-img {
-    border-color: #2563EB;
+    border-color: var(--player-2);
 }
 
 /* Имя переносится, а не обрезается многоточием: «Айсулуу Чокоева»
@@ -442,13 +442,13 @@
 }
 
 .bo-bar-p1 {
-    background: linear-gradient(90deg, #DC2828, #EF4444);
+    background: var(--player-1);
     transition: width 0.5s ease;
     border-radius: 3px 0 0 3px;
 }
 
 .bo-bar-p2 {
-    background: linear-gradient(90deg, var(--blue-500), #2563EB);
+    background: var(--player-2);
     transition: width 0.5s ease;
     border-radius: 0 3px 3px 0;
 }
@@ -462,12 +462,12 @@
 }
 
 .bo-pct-p1 {
-    color: #EF4444;
+    color: var(--player-1);
     font-weight: 700;
 }
 
 .bo-pct-p2 {
-    color: var(--blue-500);
+    color: var(--player-2);
     font-weight: 700;
 }
 
@@ -513,13 +513,13 @@
 }
 
 .bo-vote-btn.bo-vote-btn-p1:hover:not(:disabled) {
-    border-color: #DC2828;
-    background: rgba(220, 40, 40, 0.12);
+    border-color: var(--player-1);
+    background: rgba(79, 195, 247, 0.12);
 }
 
 .bo-vote-btn.bo-vote-btn-p2:hover:not(:disabled) {
-    border-color: #2563EB;
-    background: rgba(37, 99, 235, 0.12);
+    border-color: var(--player-2);
+    background: rgba(208, 80, 247, 0.12);
 }
 
 .bo-vote-btn:disabled {
