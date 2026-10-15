@@ -211,7 +211,10 @@ const витринаПравила = СТИ.split('\n').filter(с => /\.vn-four|
     '          и сам сдвиг: без второго карточка всё равно прыгает.');
 
 правило('кнопки-обманки в витрине нет ни в css, ни в разметке',
-    /\.vn-four \.court-card-actions,\s*\n\.vn-four \.coach-card-actions \{ display: none/.test(СТИ) &&
+    /* 14.10 (B2): имена снесены из css вовсе — прятать стало нечего.
+       Правило сторожит ОТСУТСТВИЕ кнопки-обманки, а не её гашение. */
+    СТИ.indexOf('court-card-details') === -1 &&
+    СТИ.indexOf('coach-card-details') === -1 &&
     ДЖС_Ч.indexOf('court-card-details') === -1 &&
     ДЖС_Ч.indexOf('coach-card-details') === -1,
     '«Подробнее» был <span>: выглядел кнопкой, но диктор читал его как текст,\n' +

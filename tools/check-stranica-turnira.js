@@ -391,7 +391,9 @@ const ГЕНЕРАТОР = безКом(чит('js/tournament-generator.js'));
 
 правило('кегль заголовка раздела на узких видах — ступень, а не clamp',
     (() => {
-        const узкий = CSS.indexOf('.td-content h2');
+        /* якорь переведён с `.td-content h2` (снят как мёртвый 14.10) на
+           живой `.td-section h2` — отношение то же: кегль ступенью */
+        const узкий = CSS.indexOf('.td-section h2');
         if (узкий === -1) return false;
         const окно = CSS.slice(узкий, узкий + 400);
         return /font-size:\s*var\(--fs-lg\)/.test(окно) &&

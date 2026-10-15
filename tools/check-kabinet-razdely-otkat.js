@@ -46,8 +46,9 @@ const ОТКАТЫ = [
    'кнопка Телеграма стоит на ступени'],
 
   /* ── чужая шкала ── */
-  [ОБЩ, '    .hn-card-btn.hn-card-btn {\n        min-height: 40px;',
-        '    .hn-card-btn.hn-card-btn,\n    .db-btn.db-btn {\n        min-height: 40px;',
+  /* `.hn-card-btn` снят 14.10 как мёртвый; ступень держит .btn-secondary */
+  [ОБЩ, '    .btn-secondary.btn-secondary{\n        min-height: 40px;',
+        '    .btn-secondary.btn-secondary,\n    .db-btn.db-btn {\n        min-height: 40px;',
    'кнопка кабинета вынута из чужой шкалы кнопок сайта'],
 
   [ОБЩ, '    /* .db-chip ВЫНУТ 12.10 — шестой записью',

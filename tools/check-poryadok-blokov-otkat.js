@@ -63,8 +63,10 @@ const ОТКАТЫ = [
  'две лиги: сетки и группы копятся отдельно'],
 
 ['снять общее правило кегля подзаголовка', C,
- '.td-section-header h3,\n.td-section h3,\n.td-tab-content h3,\n.td-content h3 {\n    font-size: var(--fs-lg);',
- '.td-section-header h3,\n.td-section h3,\n.td-tab-content h3,\n.td-content h3 {\n    font-size: 1.1rem;',
+ /* два селектора из четырёх (.td-tab-content, .td-content) сняты 14.10
+   как мёртвые: класса нет в продукте, он жил только в этом списке */
+ '.td-section-header h3,\n.td-section h3{\n    font-size: var(--fs-lg);',
+ '.td-section-header h3,\n.td-section h3{\n    font-size: 1.1rem;',
  'кегль подзаголовка раздела объявлен один раз на широких видах'],
 
 ['вернуть кегль классу блока сетки', C,

@@ -186,7 +186,7 @@ const блок = (текст, якорь) => {
 
 правило('мелкие кнопки добирают цель нажатия 44 прозрачным слоем',
     /\.pp-match-h2h::after,/.test(CSS) &&
-    /min-height:\s*44px/.test(блок(CSS, '.pp-tournament-link::after {')),
+    /min-height:\s*44px/.test(блок(CSS, '.pp-match-h2h::after,')),
     'слой цели нажатия снят: H2H снова 23 в высоту, и таких на странице\n' +
     '          десять');
 

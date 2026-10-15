@@ -74,8 +74,10 @@ const ОТКАТЫ = [
    'высота кнопки задана свойством, а не полями'],
 
   ['css/style.css',
-   '    .btn-secondary.btn-secondary,\n    .ct-card-btn.ct-card-btn,',
-   '    .btn-secondary.btn-secondary,\n    .pt-invite-btn.pt-invite-btn,\n    .ct-card-btn.ct-card-btn,',
+   /* список кнопок похудел 14.10: .ct-card-btn, .cch-card-btn и
+      .hn-card-btn оказались мёртвыми и сняты заходом B2 */
+   '    .btn-secondary.btn-secondary{',
+   '    .pt-invite-btn.pt-invite-btn,\n    .btn-secondary.btn-secondary{',
    'кнопка не ловит общую ступень «обычной» из блока 768'],
 
   ['css/partners.css',

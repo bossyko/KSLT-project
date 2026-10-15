@@ -18,7 +18,14 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
-const ПЕСОЧНИЦА = path.join(ROOT, 'tests', 'reports', '_otkat-vhod');
+const os = require('os');
+/* ПЕСОЧНИЦА ЖИВЁТ ВНЕ ПРОЕКТА. До 14.10 она лежала в
+   `tests/reports/_otkat-vhod`, то есть ВНУТРИ дерева, и чистилась только
+   при успешном прогоне. Один упавший прогон — и 14 МБ копий кода
+   оставались в проекте; сторож `check-rovnye-ryady` честно нашёл в них
+   три копии пробной витрины вместо одной и упал на СВОЁМ ЖЕ МУСОРЕ.
+   Временная папка не может попасть ни в счёт, ни в коммит. */
+const ПЕСОЧНИЦА = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vhod-'));
 
 /** [имя правила, файл, что вернуть, на что] */
 const ОТКАТЫ = [

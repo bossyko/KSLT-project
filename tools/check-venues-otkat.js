@@ -109,9 +109,11 @@ const ОТКАТЫ = [
    '',
    'движение спрашивает разрешения'],
 
+  /* 14.10 (B2): имена снесены из css вовсе, прятать стало нечего. Откат
+     ВОЗВРАЩАЕТ мёртвое имя — правило сторожит отсутствие, а не гашение. */
   ['css/style.css',
-   '.vn-four .court-card-actions,\n.vn-four .coach-card-actions { display: none; }',
-   '',
+   '.vn-four .coach-info .vn-partner {',
+   '.vn-four .court-card-details { display: none; }\n.vn-four .coach-info .vn-partner {',
    'кнопки-обманки в витрине нет ни в css, ни в разметке'],
 
   ['css/style.css',
@@ -129,9 +131,10 @@ const ОТКАТЫ = [
    '@media (max-width: 560px) {\n    .courts-grid.vn-four,',
    'у витрины нет ни одной границы мимо лестницы 640 · 992'],
 
+  /* якорь был на `.court-price` — он сам снят 14.10 как мёртвый */
   ['css/style.css',
-   '.court-price {\n    color: var(--text-primary) !important;',
-   '.court-card-cta:hover {\n    opacity: 0.85;\n}\n\n.court-price {\n    color: var(--text-primary) !important;',
+   '.vn-four .coach-photo { object-position: 50% top; }',
+   '.court-card-cta:hover {\n    opacity: 0.85;\n}\n.vn-four .coach-photo { object-position: 50% top; }',
    'мёртвых .court-card-cta и .coach-card-cta нет нигде'],
 
   ['js/home-courts-coaches.js',

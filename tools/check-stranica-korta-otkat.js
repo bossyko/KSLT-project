@@ -142,7 +142,7 @@ const ОТКАТЫ = [
  'у страницы корта есть видимый фокус'],
 
 ['снять видимый фокус со страницы тренера', Т,
- '.co-cta-btn:focus-visible,\n.co-contact-link:focus-visible,',
+ '.co-cta-btn:focus-visible,\n.co-card:focus-visible,',
  '.co-nope:focus-visible,',
  'у страницы тренера есть видимый фокус'],
 

@@ -102,7 +102,10 @@ const собратьТесты = (кат, список) => {
     fs.readdirSync(path.join(КОРЕНЬ, кат), { withFileTypes: true }).forEach(д => {
         const п = кат + '/' + д.name;
         if (д.isDirectory()) собратьТесты(п, список);
-        else if (/\.js$/.test(д.name)) список.push(п);
+        /* `tests/reports` — артефакты прогона, а не код: там лежат копии
+           файлов, сделанные пруверами. Считать их копиями понятия значит
+           падать на собственном мусоре. */
+        else if (/\.js$/.test(д.name) && !/[\\/]reports[\\/]/.test(п)) список.push(п);
     });
     return список;
 };

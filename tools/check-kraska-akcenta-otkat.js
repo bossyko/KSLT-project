@@ -20,9 +20,11 @@ const С = 'css/style.css', Ц = 'css/pricing.css', Ч = 'js/kslt-kraska.js',
 
 const ОТКАТЫ = [
 
+/* якорь был на `.logo-text` — классе, снятом заходом B2 как мёртвый.
+   Отношение то же: число акцента в коде — второе определение понятия. */
 ['вернуть число акцента в css', С,
- '    background: var(--gradient-logo);',
- '    background: linear-gradient(90deg, #F0FF7A 0%, #CCFF00 40%, #9ED900 100%);',
+ '    outline: var(--bw-thick) solid var(--accent);',
+ '    outline: var(--bw-thick) solid #CCFF00;',
  'числа акцента в коде нет'],
 
 ['вернуть число акцента на холст', К,
