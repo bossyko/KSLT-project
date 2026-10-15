@@ -430,19 +430,17 @@
     color: var(--text-primary);
 }
 
-/* ПОДЗАГОЛОВОК РАЗДЕЛА — ОДНА СТУПЕНЬ НА ВСЮ СТРАНИЦУ.
-   Замер 14.10 нашёл его в ДВУХ видах: «Основная сетка 10/12» шла 18/600
-   из `.td-participants-subtitle`, а «Групповой этап» и «Плей-офф» —
-   17.6/700 инлайном из js. Ни одно из двух чисел не ступень, и общего
-   правила на широких видах не было вовсе: на ≤768 оно есть с 06.10, а
-   выше h3 брал браузерное умолчание, перебитое инлайном.
-   Лестница 86:10 назначила h3 кегль 21 (`--fs-lg`) и вес Bold.
-   ОТНОШЕНИЕ, А НЕ ЧИСЛО: подзаголовок строго мельче заголовка раздела на
-   каждом виде — 21 против 26 на широких, 16 против 21 на ≤768. */
+                                                       
+                                                                        
+                                                                    
+                                                                      
+                                                                      
+                                                         
+                                                               
+                                                                         
+                                                                  
 .td-section-header h3,
-.td-section h3,
-.td-tab-content h3,
-.td-content h3 {
+.td-section h3{
     font-size: var(--fs-lg);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
@@ -741,10 +739,6 @@ tr.td-rr-row-highlight {
     background: var(--alpha-lime-06) !important;
     outline: var(--bw-hair) solid var(--accent);
     outline-offset: -1px;
-}
-
-tr.td-rr-row-dimmed {
-    opacity: 0.3;
 }
 
 .td-match.live {
@@ -1237,17 +1231,6 @@ tr.td-rr-row-dimmed {
         aspect-ratio: 16 / 9;
         min-height: 200px;
     }
-}
-
-/* === SCHEDULE === */
-.td-schedule-filters {
-    display: flex;
-    gap: 8px;
-    margin-bottom: var(--space-lg);
-    flex-wrap: wrap;
-    max-width: var(--container-max);
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .td-schedule-day {
@@ -2177,18 +2160,12 @@ tr.td-rr-row-dimmed {
     .td-hero-meta {
         font-size: var(--fs-sm);
     }
-    .td-container {
-        padding: 32px 12px 48px;
-    }
     .td-match {
         width: 150px;
         min-width: 150px;
     }
     .td-bracket-round {
         min-width: 160px;
-    }
-    .td-info-stat-num {
-        font-size: var(--fs-lg);
     }
 }
 
@@ -2548,7 +2525,6 @@ tr.td-rr-row-dimmed {
    раздел «Полосы прокрутки». Здесь ничего объявлять не нужно. */
 
 
-
 /* ---- Одинаковая высота блоков сетки ----
    Та же беда, что в админке: блок с W/O был выше, блок без счёта ниже,
    и позиция матчей следующего круга накапливала расхождение. */
@@ -2588,14 +2564,6 @@ tr.td-rr-row-dimmed {
     background: var(--bg-primary);
     padding: 6px 0;
 }
-.td-bracket--big {
-    transform-origin: top left;
-}
-.td-bracket--big .td-match {
-    width: 168px;
-    font-size: var(--fs-xs);
-}
-.td-bracket--big .td-bracket-round { min-width: 178px; }
 
 /* ---- Сетка помещается на экран ----
    Прокрутки вдоль не нужно: сетка ужимается по ширине окна. Блоки уже,
@@ -2684,15 +2652,6 @@ tr.td-rr-row-dimmed {
 .td-sched-court {
     max-width: var(--container-max);
     margin: 0 0 var(--space-xl);
-}
-
-.td-sched-court-title {
-    font-size: var(--fs-base);
-    font-weight: 700;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
 }
 
 .td-sched-table {
@@ -2900,14 +2859,13 @@ tr.td-rr-row-dimmed {
 
     .td-bracket-match { margin-bottom: 8px; }
 
-    /* Карточка не шире своей колонки: при круге в 150 пикселей она выходила
-       на 170 и заезжала на полосу с соединительными линиями — линия шла
-       прямо по именам */
-    /* Ширина карточки задана числом в нескольких местах (170 в медиа для
-       планшета, 168 у крупной сетки) — поэтому не проценты, а число: иначе
-       правило ниже по файлу всё равно вернёт 170 */
-    .td-match,
-    .td-bracket--big .td-match {
+                                                                            
+                                                                        
+                         
+                                                                         
+                                                                           
+                                                    
+    .td-match{
         box-sizing: border-box;
         width: 150px;
         min-width: 150px;
@@ -2928,8 +2886,7 @@ tr.td-rr-row-dimmed {
         gap: 8px !important;
     }
 
-    .td-ig-match,
-    .td-ig-card {
+    .td-ig-match{
         font-size: var(--fs-2xs);
     }
 
@@ -3090,11 +3047,6 @@ tr.td-rr-row-dimmed {
         min-width: 480px;
     }
 
-    .td-ig-title,
-    .td-ig-match-title {
-        font-size: var(--fs-2xs);
-    }
-
     /* ─── Расписание запусков вписано в экран ───
        Таблица была 500 пикселей при 390 доступных: номер, время, раунд,
        две пары, корт и состояние. Убираем то, что можно узнать иначе, и
@@ -3160,15 +3112,6 @@ tr.td-rr-row-dimmed {
         padding: 6px 4px;
     }
 
-    /* Любая таблица на странице прокручивается вбок: расписание и очки
-       шире экрана, и без этого их нельзя было досмотреть */
-    .td-table-wrap,
-    .td-sched-wrap,
-    .td-points-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
     /* Карточка места занимала 477 пикселей — больше половины экрана, хотя
        в ней всего название, адрес и две ссылки. Виноваты отступы в 40
        пикселей по кругу и крупное название */
@@ -3216,13 +3159,11 @@ tr.td-rr-row-dimmed {
         min-height: 150px;
     }
 
-    /* Заголовки разделов — по общему стандарту телефона: 1.3rem, вес 700
-       (см. style.css, «Стандарт заголовка раздела»). Здесь они шли по 24
-       пикселя, то есть крупнее, чем на главной и в категориях турниров */
+                                                                         
+                                                                         
+                                                                          
     .td-section-header h2,
-    .td-section h2,
-    .td-tab-content h2,
-    .td-content h2 {
+    .td-section h2{
         /* БЫЛО `clamp(1.15rem, 5vw, 1.32rem)` — плавающий кегль, который на
            390 давал 20: такого числа на шкале 11 · 12 · 14 · 16 · 18 · 21 ·
            26 нет. Ступень `--fs-lg` это 21, то есть верх прежнего clamp:
@@ -3235,15 +3176,9 @@ tr.td-rr-row-dimmed {
         line-height: var(--lh-tight);
     }
 
-    /* Подзаголовки внутри раздела — «Плей-офф», «Групповой этап» */
+                                                                    
     .td-section-header h3,
     .td-section h3,
-    .td-tab-content h3,
-    .td-content h3 {
-        font-size: var(--fs-base);
-        /* 1.25 ступени не было; подзаголовку положен `--lh-snug`. */
-        line-height: var(--lh-snug);
-    }
 
     /* Показатели по центру обложки: прижатые к левому краю, они спорили
        с названием турнира, которое тоже идёт слева */

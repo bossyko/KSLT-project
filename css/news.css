@@ -1801,17 +1801,16 @@ body.news-article-page .section-sponsors-compact {
         animation: none;
     }
 
-    .news-hero-bg img,
-    .news-carousel-track {
+    .news-hero-bg img{
         transform: none;
         transition: none;
     }
 
     .news-grid > .tc,
     .news-grid > .tc:hover,
-    /* Кнопки полосы рисует общий компонент (js/polosa-stranic.js:83),
-       свой выключатель у него живёт в css/players.css — на этой странице
-       тот файл не подключён, поэтому гасим здесь */
+                                                                      
+                                                                         
+                                                    
     .news-pagination .pl-page-btn,
     .news-pagination button,
     .news-not-found-btn,
@@ -1819,8 +1818,7 @@ body.news-article-page .section-sponsors-compact {
     .news-carousel-nav,
     .news-carousel-thumb,
     .news-thumbs-nav,
-    .news-progress-bar,
-    .news-reading-progress {
+    .news-progress-bar{
         transition: none;
         transform: none;
     }

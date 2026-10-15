@@ -135,7 +135,6 @@
 }
 
 
-
 /* Search — sticky bar */
 .to-search-wrap {
     position: sticky;
@@ -1019,7 +1018,6 @@
 }
 
 
-
 .to-compact-status.open {
     background: rgba(0, 0, 0, 0.6);
     border: var(--bw-hair) solid var(--alpha-lime-50);
@@ -1070,13 +1068,6 @@
 /* ========================================
    RESPONSIVE
    ======================================== */
-
-
-
-
-
-
-
 
 
 /* === COMPACT COUNTDOWN (cards) === */
@@ -1378,7 +1369,6 @@
    Правила живут здесь, а не в style.css: этот файл подключается после
    него, и мобильная правка выигрывает по порядку — без подпорок вида
    main .to-featured и без !important. */
-
 
 
 /* ОБЛОЖКА НА НИЗКОМ ГОРИЗОНТАЛЬНОМ ЭКРАНЕ — ТАК ЖЕ, КАК НА ГЛАВНОЙ.
@@ -1768,11 +1758,6 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-
-    /* На двух колонках в карточке остаются дата, состояние, название и
-       кнопка. Описание, место, взнос и призовой фонд — на странице турнира */
-    .to-featured-desc,
-    .to-featured-venue,
     .to-featured-details,
     .to-featured-meta {
         display: none;

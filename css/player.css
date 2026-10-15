@@ -133,11 +133,6 @@
     font-size: var(--fs-md);
 }
 
-.pp-meta-category {
-    color: var(--accent);
-    font-weight: 600;
-}
-
 .pp-ratings {
     display: flex;
     flex-direction: column;
@@ -371,28 +366,6 @@
 .pp-pair-tag-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
 /* Полоса идёт сразу под числами, без отступа сверху от блока категорий */
 .pp-pair-block .pp-stats { margin-bottom: 10px; }
-
-/* ---- FORM DOTS ---- */
-.pp-form {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    margin-top: 8px;
-}
-
-.pp-form-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-.pp-form-dot.win {
-    background: #22c55e;
-}
-
-.pp-form-dot.loss {
-    background: #ef4444;
-}
 
 /* ---- SECTIONS ---- */
 .pp-section {
@@ -860,12 +833,6 @@ a.pp-match-opponent-name:hover {
     background: var(--alpha-lime-06);
 }
 
-.pp-badge-more {
-    background: var(--bg-elevated) !important;
-    color: var(--accent) !important;
-    font-weight: 700;
-}
-
 /* ---- TOURNAMENTS ---- */
 .pp-tournaments {
     display: grid;
@@ -1016,76 +983,6 @@ a.pp-tournament:hover {
     max-height: 0;
 }
 
-/* .pp-show-all-btn снят 09.10: отсечка переехала на общий .kslt-more
-   (css/kslt-otsechka.css). Проверено поиском по js, html и тестам —
-   класс не встречался нигде, кроме этих двух правил. */
-
-/* ---- CHALLENGES ---- */
-.pp-challenges {
-    display: grid;
-    gap: 8px;
-}
-
-.pp-challenge {
-    display: grid;
-    grid-template-columns: 80px 1fr auto auto;
-    gap: 16px;
-    align-items: center;
-    padding: 16px 20px;
-    background: var(--surface-glass);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-md);
-}
-
-.pp-challenge-date {
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-    font-weight: 500;
-}
-
-.pp-challenge-opponent {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.pp-challenge-opp-name {
-    font-weight: 600;
-    font-size: var(--fs-base);
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: color var(--transition-fast);
-}
-
-.pp-challenge-opp-name:hover {
-    color: var(--accent);
-}
-
-.pp-challenge-venue {
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-}
-
-.pp-challenge-status {
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-align: center;
-}
-
-.pp-challenge-status.accepted {
-    background: rgba(234, 179, 8, 0.15);
-    color: #eab308;
-}
-
-.pp-challenge-status.completed {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-}
-
 /* ---- CTA ---- */
 .pp-cta {
     background: var(--surface-glass);
@@ -1206,16 +1103,6 @@ a.pp-tournament:hover {
     }
     .pp-achievements {
         grid-template-columns: 1fr;
-    }
-    .pp-challenge {
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-    }
-    .pp-challenge-date {
-        grid-column: 1 / -1;
-    }
-    .pp-challenge-opponent {
-        grid-column: 1 / -1;
     }
     .pp-cta {
         padding: 36px 24px;
@@ -1705,12 +1592,6 @@ a.pp-tournament:hover {
 
 .pp-chal-form { display: flex; flex-direction: column; gap: 14px; }
 
-.pp-chal-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
 .pp-chal-field { display: flex; flex-direction: column; gap: 4px; }
 
 .pp-chal-label {
@@ -1811,9 +1692,6 @@ a.pp-tournament:hover {
 @media (max-width: 480px) {
     .pp-chal-modal {
         padding: 20px 16px;
-    }
-    .pp-chal-row {
-        grid-template-columns: 1fr;
     }
 }
 
@@ -1990,17 +1868,6 @@ a.pp-tournament:hover {
     color: var(--accent);
 }
 
-/* Закрытая категория: заявок туда больше нет, но очки и матчи заработаны
-   и остаются на виду */
-.pp-cat-closed {
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    background: rgba(255,255,255,0.06);
-    color: var(--text-muted);
-    font-size: var(--fs-2xs);
-    font-weight: 500;
-}
-
 .pp-cat-place {
     margin-left: auto;
     padding: 2px 10px;
@@ -2056,18 +1923,6 @@ a.pp-tournament:hover {
 .pp-cat-rate {
     font-weight: 600;
     color: var(--text-secondary);
-}
-
-
-/* Серия и форма — по всем матчам сразу, а не по категориям. Отдельной
-   строкой перед блоками категорий: внизу карточка висела в одиночестве */
-.pp-form-line {
-    display: flex;
-    margin-bottom: 20px;
-}
-
-.pp-form-line .pp-stat {
-    min-width: 160px;
 }
 
 
@@ -2437,18 +2292,17 @@ a.pp-tournament:hover {
 }
 
 
-/* ============================================
-   ЦЕЛИ НАЖАТИЯ, ФОКУС И ДВИЖЕНИЕ — 09.10
-   ============================================ */
+                                               
+                                         
+                                                  
 
-/* ЗАМЕР 09.10: 44 нажимаемых места в main, 25 из них ниже цели 44 — ссылки
-   на турниры и игроков голой высотой 18, кнопка H2H 47 x 23, ссылка
-   «назад» 139 x 21, раскрывашка значков 43. Красится ступень, нажимается
-   палец: слой не знает высоты элемента и не меняет вид. */
+                                                                           
+                                                                    
+                                                                         
+                                                           
 .pp-match-h2h::after,
 .kslt-back-wrap.pp-back-float .kslt-back::after,
-.pp-badges-expand::after,
-.pp-tournament-link::after {
+.pp-badges-expand::after{
     content: '';
     position: absolute;
     top: 50%;

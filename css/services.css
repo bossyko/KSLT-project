@@ -486,21 +486,6 @@
     margin: 0;
 }
 
-/* Игроки ровной сеткой: сколько поместится по ширине, столько и в ряд */
-.sv-partners-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 14px;
-    margin-top: 14px;
-}
-
-.sv-partners-grid .sv-compact {
-    width: auto;
-    min-width: 0;
-    max-width: none;
-    height: auto;
-}
-
 /* Partner initials (featured) */
 .sv-partner-initials {
     width: 56px;
@@ -547,39 +532,6 @@
 
 .sv-partner-status.offline .sv-partner-dot {
     background: var(--text-muted);
-}
-
-/* Compact partner — avatar with online dot */
-.sv-compact-partner-head {
-    position: relative;
-    width: 44px;
-    margin-bottom: var(--space-sm);
-}
-
-.sv-compact-initials {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--alpha-lime-12);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    border: var(--bw-thick) solid var(--border-subtle);
-}
-
-.sv-compact-online-dot {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #4ade80;
-    border: var(--bw-thick) solid var(--bg-card);
-    box-shadow: 0 0 4px rgba(74, 222, 128, 0.5);
 }
 
 /* Empty state */
@@ -655,11 +607,6 @@
    и своё объявление спорило бы с общей крутилкой. */
 @media (max-width: 992px) {
 
-    .sv-carousel-arrow {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
     .sv-columns {
         gap: var(--space-lg);
         grid-template-columns: 1fr;
@@ -688,19 +635,6 @@
        там 768, у нас 992, и планшет 768 попадает в ту же сторону. */
     .sv-carousel {
         --sv-shag: 11s;
-    }
-
-    .sv-carousel-arrow {
-        width: 32px;
-        height: 32px;
-    }
-
-    .sv-carousel-arrow.sv-arrow-left {
-        left: -8px;
-    }
-
-    .sv-carousel-arrow.sv-arrow-right {
-        right: -8px;
     }
 }
 
@@ -921,11 +855,6 @@
     line-height: var(--lh-snug);
 }
 
-.sv-player-gender {
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
 .sv-player-level {
     font-size: var(--fs-xs);
     color: var(--text-secondary);
@@ -1098,8 +1027,7 @@
    `prefers-reduced-motion` на 898 строк. Тот же приём, что на лендинге.
    ───────────────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-    .sv-carousel,
-    .sv-carousel-track {
+    .sv-carousel{
         animation: none !important;
     }
 
@@ -1120,18 +1048,17 @@
     }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   КОЛЬЦО ФОКУСА — СВОЁ, А НЕ ТОЛЬКО ОБЩЕЕ.
-   Глобальное правило живёт в css/style.css, но на тёмной карточке оно
-   теряется: кольцо берёт акцент и отступ, как на лендинге.
-   ───────────────────────────────────────────────────────────────────── */
+                                                                        
+                                           
+                                                                      
+                                                           
+                                                                           
 .sv-compact:focus-visible,
 .sv-player:focus-visible,
 .sv-featured:focus-visible,
 .sv-view-all:focus-visible,
 .sv-featured-link:focus-visible,
-.sv-player-btn:focus-visible,
-.sv-carousel-arrow:focus-visible {
+.sv-player-btn:focus-visible{
     outline: var(--bw-heavy) solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--radius-md);

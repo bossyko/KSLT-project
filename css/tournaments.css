@@ -1,12 +1,4 @@
-/* ========================================
-   TOURNAMENTS PAGE STYLES
-   ======================================== */
 
-/* Back link */
-/* ЦЕЛЬ НАЖАТИЯ — НАСТОЯЩЕЙ ВЫСОТОЙ, А НЕ СЛОЕМ. Замер 06.10: ссылка
-   «Все турниры» отдавала 21 при норме 44 — на телефоне в неё надо целиться.
-   Высоту даёт сама ссылка, поля сверху остаются полем страницы. */
-.trn-back-link,
 .trn-back {
     display: inline-flex;
     align-items: center;
@@ -18,10 +10,6 @@
     font-weight: 600;
     padding: 20px var(--pad-x) 0;
     transition: color var(--transition-fast);
-}
-
-.trn-back-link:hover {
-    color: var(--accent);
 }
 
 /* Tournament Hero
@@ -170,32 +158,6 @@
     font-weight: 600;
 }
 
-/* Tournament Search Input */
-.tournament-search-input {
-    padding: 8px 18px;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    font-size: var(--fs-sm);
-    outline: none;
-    transition: all 0.3s;
-    min-width: 140px;
-}
-
-.tournament-search-input::placeholder {
-    color: var(--text-muted);
-}
-
-.tournament-search-input:focus {
-    border-color: var(--accent);
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 0 0 3px var(--alpha-lime-12);
-}
-
 /* Tournament Grid */
 .tournaments-grid {
     display: grid;
@@ -241,15 +203,6 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
-.tournament-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-md) var(--space-lg);
-    background: var(--bg-elevated);
-    border-bottom: var(--bw-hair) solid var(--border-subtle);
-}
-
 .tournament-date {
     display: flex;
     flex-direction: column;
@@ -257,19 +210,7 @@
     line-height: 1;
 }
 
-.date-day {
-    font-size: var(--fs-xl);
-    font-weight: 800;
-    color: var(--accent);
-}
 
-.date-month {
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-}
 
 .tournament-status {
     padding: 6px 14px;
@@ -320,29 +261,6 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
-.tournament-card-body {
-    padding: var(--space-lg);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.tournament-card-body .tournament-details {
-    margin-top: auto;
-}
-
-.tournament-title-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: var(--space-sm);
-}
-
-.tournament-title-row h3 {
-    flex: 1;
-    min-width: 0;
-}
-
 .tournament-gender-badge {
     display: inline-block;
     font-size: var(--fs-2xs);
@@ -357,13 +275,6 @@
     margin-top: 4px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-}
-
-.tournament-card-body h3 {
-    font-size: var(--fs-lg);
-    font-weight: 700;
-    margin-bottom: 0;
-    color: var(--text-primary);
 }
 
 .tournament-meta {
@@ -384,14 +295,6 @@
 .tournament-meta svg {
     color: var(--text-muted);
     flex-shrink: 0;
-}
-
-.tournament-details {
-    display: flex;
-    justify-content: space-evenly;
-    gap: 12px;
-    padding-top: var(--space-md);
-    border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
 .detail-item {
@@ -422,20 +325,6 @@
 
 .detail-value.prize {
     color: var(--accent);
-}
-
-.detail-reg .detail-value {
-    color: var(--accent);
-}
-
-.tournament-card-footer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: var(--bg-elevated);
-    border-top: var(--bw-hair) solid var(--border-subtle);
-    overflow: hidden;
 }
 
 .btn-calendar {
@@ -487,154 +376,6 @@
     transform: translateY(-1px);
 }
 
-/* Tournament Ranking Section */
-.section-tournament-ranking {
-    padding: var(--section-y) var(--pad-x);
-    background: var(--bg-secondary);
-}
-
-.ranking-note {
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
-}
-
-/* Two-column Rankings Layout */
-.ranking-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-top: var(--space-lg);
-}
-
-.ranking-column {
-    position: relative;
-}
-
-.ranking-column-title {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: var(--space-md);
-    padding-bottom: 10px;
-    border-bottom: var(--bw-thick) solid var(--accent);
-    display: inline-block;
-}
-
-.ranking-column .rankings-panel {
-    display: block;
-}
-
-.ranking-column .ranking-row {
-    grid-template-columns: 40px 1fr 50px 70px 45px;
-}
-
-.ranking-table-wrap .ranking-row {
-    grid-template-columns: 50px 1fr 60px 80px 80px 50px;
-}
-
-.tournaments-played {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-}
-
-.ranking-header .tournaments-played {
-    font-size: var(--fs-2xs);
-    color: var(--text-muted);
-}
-
-/* Blur overlay for unregistered */
-.ranking-blur-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 280px;
-    background: linear-gradient(to bottom, transparent 0%, var(--bg-secondary) 30%);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: var(--space-lg);
-    z-index: 10;
-}
-
-.blur-content {
-    text-align: center;
-}
-
-.blur-content svg {
-    color: var(--accent);
-    margin-bottom: var(--space-sm);
-}
-
-.blur-content p {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-md);
-}
-
-.ranking-row.blurred {
-    filter: blur(6px);
-    user-select: none;
-    pointer-events: none;
-}
-
-/* Past Tournaments */
-/* Прошедшие турниры идут полосами, а не карточками: на завершённый
-   смотрят ради результата, ему не нужны крупная афиша и кнопка
-   регистрации. Две в ряд — столько же, сколько на странице баттлов */
-.past-tournaments-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-md);
-}
-
-/* Постеры бывают светлыми, и подпись по ним не читалась: затемняем фон
-   сильнее и даём тексту тень */
-.trn-strip[style*="background-image"]::before {
-    background: rgba(10, 10, 10, 0.93);
-}
-.trn-strip h4,
-.trn-strip .trn-strip-sub,
-.trn-strip .to-compact-date {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-}
-.trn-strip .to-compact-date .to-day { color: var(--text-secondary); }
-
-.trn-strip-sub {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.trn-strip-right { text-align: right; }
-
-.trn-strip-badge {
-    display: inline-block;
-    font-size: var(--fs-2xs);
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.07);
-    color: var(--text-muted);
-    border: var(--bw-hair) solid var(--border-subtle);
-    white-space: nowrap;
-}
-
-.trn-strip-gender {
-    font-size: var(--fs-2xs);
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: var(--radius-full);
-    background: var(--alpha-lime-12);
-    color: var(--accent);
-    margin-left: 6px;
-    vertical-align: middle;
-}
-
 /* Show More Button */
 .trn-show-more {
     display: flex;
@@ -674,131 +415,15 @@
     transform: translateY(2px);
 }
 
-.past-tournament-card {
-    background: var(--bg-card);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    transition: transform 0.2s ease;
-}
-
-.past-tournament-card:hover {
-    transform: translateY(-2px);
-}
-
-.past-tournament-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-sm);
-}
-
-.past-date {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-}
-
-.past-status.completed {
-    padding: 4px 10px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-full);
-    font-size: var(--fs-2xs);
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.past-tournament-card h4 {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-md);
-}
-
-.past-winner {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm);
-    background: var(--bg-elevated);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-md);
-}
-
-.past-winner img {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.winner-info {
-    flex: 1;
-}
-
-.winner-label {
-    display: block;
-    font-size: var(--fs-2xs);
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.winner-name {
-    font-size: var(--fs-base);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.winner-trophy {
-    font-size: var(--fs-xl);
-}
-
-.past-stats {
-    display: flex;
-    gap: 8px;
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    margin-bottom: var(--space-md);
-}
-
-.btn-view-bracket {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-    border: var(--bw-hair) solid var(--border-light);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: var(--fs-xs);
-    white-space: nowrap;
-    font-weight: 500;
-    text-align: center;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.btn-view-bracket:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
 /* Responsive */
 @media (max-width: 992px) {
-    .tournaments-grid,
-    .past-tournaments-grid {
+    .tournaments-grid{
         grid-template-columns: repeat(2, 1fr);
-    }
-
-    .ranking-columns {
-        grid-template-columns: 1fr;
-        gap: 40px;
     }
 }
 
 @media (max-width: 600px) {
-    .tournaments-grid,
-    .past-tournaments-grid {
+    .tournaments-grid{
         grid-template-columns: 1fr;
     }
 }
@@ -894,41 +519,12 @@
     .tournaments-grid {
         grid-template-columns: 1fr;
     }
-
-    .ranking-column .ranking-row {
-        grid-template-columns: 35px 1fr 45px 60px 40px;
-        font-size: var(--fs-sm);
-    }
 }
 
 @media (max-width: 480px) {
-    .tournament-details {
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-    }
-
-    .ranking-table-wrap .ranking-row {
-        grid-template-columns: 30px 1fr 40px 50px 40px;
-    }
-
-    .tournaments-played {
-        display: none;
-    }
 }
 
 @media (max-width: 375px) {
-    .tournament-list-header h1 {
-        font-size: var(--fs-lg);
-    }
-    .tournament-card-content {
-        padding: 16px;
-    }
-    .tournament-card-title {
-        font-size: var(--fs-base);
-    }
-    .tournament-details {
-        gap: var(--space-sm);
-    }
     .detail-item {
         font-size: var(--fs-sm);
     }
@@ -1075,25 +671,6 @@
 
 @media (max-width: 768px) {
 
-    /* Карточка на телефоне: крупная афиша и короткая подпись.
-       Полное название занимало шесть строк, описание — ещё пять, и от
-       карточки оставалась колонка текста без картинки */
-    .tournament-card .tournament-title {
-        font-size: var(--fs-sm);
-        line-height: 1.25;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    /* Описание на телефоне не показываем: название и дата уже всё сказали,
-       подробности — на странице турнира */
-    .tournament-card .tournament-desc,
-    .tournament-card .tournament-description {
-        display: none;
-    }
-
     .tournament-card .tournament-date {
         font-size: var(--fs-2xs);
     }
@@ -1114,9 +691,8 @@
         font-size: var(--fs-xs);
     }
 
-    /* Кнопка во всю ширину карточки и мельче: она была шире колонки */
-    .tournament-card .btn-primary,
-    .tournament-card .tournament-btn {
+                                                                       
+    .tournament-card .btn-primary{
         width: 100%;
         padding: 8px 10px;
         font-size: var(--fs-xs);

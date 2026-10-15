@@ -13,9 +13,6 @@
     background: var(--bg-secondary, #111);
     border-top: var(--bw-hair) solid var(--border-subtle, rgba(255,255,255,0.08));
 }
-.bc-overview-section {
-    padding: 0 var(--pad-x) var(--space-lg, 2rem);
-}
 
 /* ---- Grid ----
    Верхняя граница у колонки обязательна: при одном баттле карточка
@@ -368,29 +365,6 @@
     color: var(--accent);
 }
 
-/* ---- Toast ---- */
-.bc-toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #1a1a1a;
-    border: var(--bw-hair) solid var(--accent);
-    color: var(--accent);
-    padding: 10px 24px;
-    border-radius: 10px;
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    z-index: 9998;
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    pointer-events: none;
-}
-.bc-toast-show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
 /* ---- Map modal ---- */
 .bc-map-overlay {
     position: fixed;
@@ -444,9 +418,6 @@
 @media (max-width: 768px) {
     .bc-section {
         padding: var(--space-lg, 2rem) var(--pad-x);
-    }
-    .bc-overview-section {
-        padding: 0 var(--pad-x) var(--space-md, 1.5rem);
     }
 }
 @media (max-width: 480px) {

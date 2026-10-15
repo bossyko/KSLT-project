@@ -600,16 +600,7 @@
   margin-inline: auto;
 }
 
-/* Вырваться за пределы контейнера на всю ширину окна */
-.full-bleed {
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
-}
-
 .measure { max-width: var(--measure); }
-
-/* Секция: фон во всю ширину, содержимое — по линии */
-.section-pad { padding-inline: var(--pad-x); }
 
 
 /* ============================================================================

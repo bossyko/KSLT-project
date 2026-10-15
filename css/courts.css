@@ -512,39 +512,6 @@
     opacity: 0.85;
 }
 
-/* Toast */
-.ct-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    z-index: 10000;
-    padding: 12px 24px;
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    color: #000;
-    background: var(--accent);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    white-space: nowrap;
-    max-width: 90vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.ct-toast.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-.ct-toast.info {
-    background: rgba(30, 30, 30, 0.95);
-    color: var(--text-primary);
-    border: var(--bw-hair) solid var(--border-subtle);
-}
-
 /* ---- DETAIL PAGE ---- */
 
 /* Back links — sticky */
@@ -634,19 +601,6 @@
     border-radius: var(--radius-lg);
     padding: 24px 16px;
     text-align: center;
-}
-
-.ct-detail-stat-num {
-    font-size: var(--fs-2xl);
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1;
-    margin-bottom: 6px;
-}
-
-.ct-detail-stat-label {
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
 }
 
 /* Combined stat card */
@@ -1038,9 +992,6 @@
     .ct-detail-stat {
         padding: 16px 12px;
     }
-    .ct-detail-stat-num {
-        font-size: var(--fs-xl);
-    }
 
     /* Кегль заголовка обложки отсюда убран: его держит `--fs-hero` в
        tokens.css, и своё объявление спорило бы с общей крутилкой.
@@ -1093,9 +1044,6 @@
    у витрины ОДИН уровень на все виды, как у лендинга. */
 @media (max-width: 375px) {
     .ct-detail-name {
-        font-size: var(--fs-lg);
-    }
-    .ct-detail-stat-num {
         font-size: var(--fs-lg);
     }
     .ct-gallery-img {

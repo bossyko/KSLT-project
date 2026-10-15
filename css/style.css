@@ -201,24 +201,6 @@ input, button, select, textarea {
     transform: scale(1.08);
 }
 
-.logo-text {
-    font-size: var(--fs-xl);
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    background: var(--gradient-logo);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 20px var(--alpha-lime-50));
-}
-
-.logo-icon {
-    font-size: var(--fs-xl);
-    margin-left: 0.25rem;
-    filter: drop-shadow(0 0 15px var(--alpha-lime-50));
-}
-
 /* Настоящий знак КСЛТ вместо текстовой надписи. Родной зелёный рассчитан на
    светлый фон tennis.kg, поэтому перекрашен в лайм. Оттенок плотнее нашего
    акцентного: в акцентном фигурка теннисиста по светлоте совпадала с белыми
@@ -233,19 +215,6 @@ input, button, select, textarea {
 
 .footer-logo .logo-img {
     height: 30px;
-}
-
-.logo:hover .logo-text {
-    filter: drop-shadow(0 0 30px var(--alpha-lime-70));
-}
-
-.logo:hover .logo-icon {
-    filter: drop-shadow(0 0 25px var(--alpha-lime-70));
-}
-
-.logo-svg {
-    height: 38px;
-    width: auto;
 }
 
 /* Nav Left - Logo + Sponsor */
@@ -296,12 +265,6 @@ input, button, select, textarea {
     transform: scale(1.1);
 }
 
-/* Анимация теннисного мяча: отскок + вращение */
-.tennis-ball {
-    transform-origin: 120px 18px;
-    animation: ballBounce 2.5s ease-in-out infinite, ballSpin 6s linear infinite;
-}
-
 @keyframes ballBounce {
     0%, 100% {
         transform: translateY(0);
@@ -318,11 +281,6 @@ input, button, select, textarea {
     100% {
         transform: rotate(360deg);
     }
-}
-
-/* При наведении — ускорение анимации */
-.logo:hover .tennis-ball {
-    animation: ballBounce 1s ease-in-out infinite, ballSpin 2s linear infinite;
 }
 
 /* ========================================
@@ -790,12 +748,6 @@ input, button, select, textarea {
     color: var(--text-primary);
 }
 
-.dropdown-icon {
-    font-size: var(--fs-md);
-    width: 24px;
-    text-align: center;
-}
-
 /* ========================================
    DROPDOWN MENUS
    ======================================== */
@@ -865,29 +817,6 @@ input, button, select, textarea {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-}
-
-.city-selector {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.city-selector:hover {
-    color: var(--text-primary);
-    background: var(--bg-secondary);
-}
-
-.city-selector svg {
-    opacity: 0.6;
 }
 
 /* Контурная кнопка Войти (не отвлекает от CTA) */
@@ -1619,30 +1548,6 @@ input, button, select, textarea {
     display: none;
 }
 
-/* CTA Button - Join Tournament */
-.btn-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--accent);
-    color: #000000;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    transition: all var(--transition-fast);
-    box-shadow: 0 0 20px var(--accent-glow);
-}
-
-.btn-cta:hover {
-    background: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 0 30px var(--accent-glow);
-}
-
 main {
     padding-top: var(--header-h);
 }
@@ -2076,34 +1981,6 @@ h2 {
     max-width: 440px;
 }
 
-.hero-image-placeholder {
-    width: 100%;
-    aspect-ratio: 4/5;
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    background: var(--bg-elevated);
-    border: var(--bw-hair) solid var(--border-subtle);
-    animation: fadeInUp 0.8s ease 0.2s both;
-}
-
-.hero-image-placeholder svg {
-    width: 100%;
-    height: 100%;
-}
-
-.hero-image-placeholder svg rect {
-    fill: var(--bg-elevated);
-}
-
-.hero-image-placeholder svg circle,
-.hero-image-placeholder svg path {
-    stroke: var(--border-light);
-}
-
-.hero-image-placeholder svg text {
-    fill: var(--text-dim);
-}
-
 /* Floating Cards — чистый стиль без glow */
 .floating-card {
     position: absolute;
@@ -2184,48 +2061,6 @@ h2 {
     50% {
         transform: translateY(-8px);
     }
-}
-
-/* ========================================
-   HERO BACKGROUND ELEMENTS
-   ======================================== */
-
-.hero-bg-elements {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-.bg-circle {
-    position: absolute;
-    border-radius: 50%;
-    border: var(--bw-hair) solid var(--border-subtle);
-}
-
-.bg-circle-1 {
-    width: 500px;
-    height: 500px;
-    top: -150px;
-    right: -80px;
-}
-
-.bg-circle-2 {
-    width: 350px;
-    height: 350px;
-    bottom: -80px;
-    left: -80px;
-}
-
-.bg-line {
-    display: none; /* Убираем линии для чистоты */
-}
-
-.bg-line-1,
-.bg-line-2 {
-    display: none;
 }
 
 /* Animations */
@@ -2334,12 +2169,6 @@ h2 {
 .section-header h2 {
     font-size: var(--fs-xl);
     margin-bottom: 0;
-}
-
-.section-desc {
-    color: var(--text-secondary);
-    font-size: var(--fs-md);
-    margin-top: -var(--space-md);
 }
 
 .link-all {
@@ -2742,155 +2571,10 @@ h2 {
     margin-right: 6px;
 }
 
-.btn-watch {
-    background: transparent;
-    border: var(--bw-hair) solid var(--border-light);
-    color: var(--text-primary);
-    padding: 10px 20px;
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    font-weight: 500;
-    text-align: center;
-    transition: all var(--transition-fast);
-}
-
-.btn-watch:hover {
-    background: var(--accent);
-    color: #000;
-    border-color: var(--accent);
-}
-
-/* ========================================
-   TOURNAMENTS PREVIEW (Main Page)
-   ======================================== */
-
-.section-tournaments-preview {
-    background: var(--bg-secondary);
-}
-
-.tournaments-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
-}
-
-.tournament-preview-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    padding: var(--space-lg);
-    background: var(--bg-card);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.tournament-preview-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px var(--alpha-lime-12);
-}
-
-.preview-date {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 60px;
-    padding: var(--space-sm);
-    background: var(--bg-elevated);
-    border-radius: var(--radius-md);
-    text-align: center;
-}
-
-.preview-day {
-    font-size: var(--fs-xl);
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1;
-}
-
-.preview-month {
-    font-size: var(--fs-2xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-}
-
-.preview-info {
-    flex: 1;
-}
-
-.preview-category {
-    display: inline-block;
-    padding: 4px 10px;
-    background: var(--alpha-lime-12);
-    border-radius: var(--radius-full);
-    font-size: var(--fs-2xs);
-    font-weight: 600;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-
-.preview-info h4 {
-    font-size: var(--fs-base);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-    line-height: 1.3;
-}
-
-.preview-location {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-}
-
-.preview-status {
-    padding: 6px 12px;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-2xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    text-align: center;
-    letter-spacing: 0.5px;
-}
-
-.preview-status.open {
-    background: var(--accent-subtle);
-    color: var(--accent);
-}
-
-.preview-status.soon {
-    background: rgba(255, 159, 67, 0.15);
-    color: #FF9F43;
-}
-
 @media (max-width: 1200px) {
-    .tournaments-preview-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (max-width: 600px) {
-    .tournaments-preview-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .tournament-preview-card {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .preview-date {
-        flex-shrink: 0;
-    }
-
-    .preview-status {
-        display: none;
-    }
 }
 
 /* ========================================
@@ -3223,10 +2907,6 @@ h2 {
     text-align: center;
     font-weight: 600;
     font-size: var(--fs-sm);
-}
-
-.change.positive {
-    color: var(--accent);
 }
 
 .change.negative {
@@ -3603,12 +3283,6 @@ h2 {
     box-shadow: 0 0 20px var(--alpha-lime-12);
 }
 
-.players-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-lg);
-}
-
 .player-card {
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle);
@@ -3655,36 +3329,6 @@ h2 {
     color: var(--accent);
     font-weight: 600;
     font-size: var(--fs-sm);
-}
-
-.player-location,
-.player-time {
-    color: var(--text-muted);
-    font-size: var(--fs-xs);
-}
-
-.btn-invite {
-    background: var(--accent);
-    color: #000;
-    padding: 10px 24px;
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: var(--fs-sm);
-    transition: all var(--transition-fast);
-}
-
-.btn-invite:hover {
-    background: var(--accent-hover);
-    transform: scale(1.05);
-}
-
-/* ========================================
-   COURTS SECTION
-   ======================================== */
-
-.section-courts {
-    background: var(--bg-primary);
 }
 
 /* ============================================
@@ -3855,12 +3499,6 @@ h2 {
     .vn-four .coach-card:hover { transform: none; }
 }
 
-/* «Подробнее» был <span>: выглядел кнопкой, но диктор читал его как текст, и
-   табом до него было не дойти. Нажимается вся карточка — кнопка внутри неё
-   создавала вторую цель там, где смысл один */
-.vn-four .court-card-actions,
-.vn-four .coach-card-actions { display: none; }
-
 /* Метка партнёра ушла из угла фотографии в строку: Badge 27:53 Subtle —
    умолчание для карточек, а лаймовая заливка — снова акцент не на действии.
    Плюс правило: в углу карточки с портретом свободного угла нет */
@@ -3993,121 +3631,9 @@ h2 {
     color: var(--text-muted);
 }
 
-.court-price {
-    color: var(--text-primary) !important;
-    font-weight: 600;
-}
-
-.court-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500 !important;
-}
-
-.court-status::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.court-status.available::before {
-    background: var(--accent);
-}
-
-.court-status.available {
-    color: var(--accent) !important;
-}
-
-.court-status.limited::before {
-    background: #FF9500;
-}
-
-.court-status.limited {
-    color: #FF9500 !important;
-}
-
-.court-status.busy::before {
-    background: #FF3B30;
-}
-
-.court-status.busy {
-    color: #FF3B30 !important;
-}
-
 .court-surface {
     color: var(--accent) !important;
     font-weight: 500;
-}
-
-.court-card-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 0 var(--space-lg) var(--space-lg);
-}
-
-.court-card-details {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--transition-fast);
-}
-
-.court-card-details {
-    background: none;
-    border: var(--bw-hair) solid var(--accent);
-    color: var(--accent);
-}
-
-.court-card-details:hover {
-    background: var(--accent);
-    color: #000;
-}
-
-
-/* Court toast */
-.court-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    z-index: 10000;
-    padding: 12px 24px;
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    background: rgba(30, 30, 30, 0.95);
-    color: var(--text-primary);
-    border: var(--bw-hair) solid var(--border-subtle);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    white-space: nowrap;
-    max-width: 90vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.court-toast.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* ========================================
-   COACHES SECTION
-   ======================================== */
-
-.section-coaches {
-    background: var(--bg-secondary);
 }
 
 .coaches-grid {
@@ -4169,8 +3695,7 @@ h2 {
     font-weight: 500;
 }
 
-.coach-experience,
-.coach-level {
+.coach-experience{
     font-size: var(--fs-sm);
     color: var(--text-muted);
 }
@@ -4179,68 +3704,6 @@ h2 {
     font-size: var(--fs-sm);
     color: var(--text-primary);
     font-weight: 600;
-}
-
-.coach-card-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: auto;
-    width: 100%;
-}
-
-.coach-card-details {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--transition-fast);
-}
-
-.coach-card-details {
-    background: none;
-    border: var(--bw-hair) solid var(--accent);
-    color: var(--accent);
-}
-
-.coach-card-details:hover {
-    background: var(--accent);
-    color: #000;
-}
-
-
-/* Coach toast */
-.coach-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    z-index: 10000;
-    padding: 12px 24px;
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    background: rgba(30, 30, 30, 0.95);
-    color: var(--text-primary);
-    border: var(--bw-hair) solid var(--border-subtle);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    white-space: nowrap;
-    max-width: 90vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.coach-toast.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
 }
 
 /* ========================================
@@ -4766,10 +4229,6 @@ h2 {
 
     .carousel-track-infinite {
         animation-duration: 110s;
-    }
-
-    .players-grid {
-        grid-template-columns: 1fr;
     }
 }
 
@@ -5635,7 +5094,6 @@ h2 {
 }
 
 
-
 /* ========================================
    ВЫПАДАЮЩИЙ ФИЛЬТР В ПОЛОСЕ — один на весь сайт
    Кнопка выглядит как чип, по нажатию — список значений со счётчиками.
@@ -5770,22 +5228,20 @@ h2 {
     margin-left: 0;
 }
 
-/* ФОКУС ВИДЕН — ЗАМЕР 12.10 ПОКАЗАЛ, ЧТО ЕГО НЕТ ВОВСЕ.
-   У чипов, карточек кортов и тренеров и у кнопок полосы страниц обводка
-   была `3px none` и до `.focus()`, и после: человек с клавиатуры не видел,
-   где стоит. В `courts.css` и `coaches.css` слова `focus-visible` не
-   встречалось ни разу.
-   ПОЛОСА СТРАНИЦ ОБЩАЯ — правило чинит её сразу на рейтинге, новостях,
-   поиске игрока и в кабинете, а не только здесь.
-   Обводка та же, что у шапки выше по файлу: 2px accent с отступом 2. */
+                                                        
+                                                                        
+                                                                           
+                                                                     
+                       
+                                                                       
+                                                 
+                                                                        
 .ct-dd-toggle:focus-visible,
 .ct-dd-item:focus-visible,
 .f-dd-item:focus-visible,
 .ct-card:focus-visible,
 .co-card:focus-visible,
-.pl-page-btn:focus-visible,
-.ct-search-input:focus-visible,
-.co-search-input:focus-visible {
+.pl-page-btn:focus-visible{
     outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
@@ -6616,11 +6072,10 @@ h2 {
         max-height: none;
     }
 
-    /* Описание убираем у всех карточек, включая крупную: у неё своё правило
-       с родителем, и одиночный класс ему проигрывал */
+                                                                            
+                                                       
     .tournaments-grid .tc .tc-desc,
-    .tournaments-grid .tc-featured .tc-desc,
-    .tc-text, .tc-venue, .tc-place { display: none; }
+    .tournaments-grid .tc-featured .tc-desc{ display: none; }
 
     /* Место проведения на карточке не показываем: оно приходит подписью без
        класса и занимало три строки из четырёх. Всё это есть на странице
@@ -6645,7 +6100,9 @@ h2 {
        Размеры отсюда убраны 23.09: кегль и поля задаёт компонент, один на все
        ширины. Раньше здесь стояли font-size и padding: 3px 7px — они ломали
        высоту 24 и делали бейдж на телефоне другим компонентом. */
-    .tc-status, .tc-badge {
+    /* `.tc-status` снят 14.10 (B2): на сайте его не ставит никто —
+       имя живёт в мобильном приложении, и у того СВОЙ app.css. */
+    .tc-badge {
         top: 6px;
         left: 6px;
         right: 6px;
@@ -7426,8 +6883,6 @@ h2 {
     #players .pg-record { display: none; }
 
 
-
-
     /* Размер кнопки задаёт общая вторая ступень ниже в этом же файле.
        Здесь остаётся то, что относится к тесной карточке на главной:
        во всю ширину и без разрядки. Раньше тут стояли поля 7×4 и кегль
@@ -7466,15 +6921,6 @@ h2 {
     display: flex;
     align-items: center;
     margin-bottom: var(--space-sm);
-}
-
-.footer-logo .logo-text {
-    font-size: var(--fs-lg);
-}
-
-.footer-logo .logo-icon {
-    font-size: var(--fs-base);
-    margin-left: 0.25rem;
 }
 
 .footer-desc {
@@ -7598,11 +7044,6 @@ h2 {
     padding: var(--space-md) var(--gutter);
     border-top: var(--bw-hair) solid var(--border-subtle);
     padding-inline: var(--pad-x);
-}
-
-.footer-copyright {
-    color: var(--text-muted);
-    font-size: var(--fs-xs);
 }
 
 .footer-legal {
@@ -8156,12 +7597,6 @@ body.nav-open {
     border-top: var(--bw-hair) solid var(--border-subtle);
 }
 
-.btn-cta-mobile {
-    width: 100%;
-    justify-content: center;
-    padding: 14px 24px;
-}
-
 /* ========================================
    STICKY BACK BAR — Fixed back button on scroll
    ======================================== */
@@ -8284,15 +7719,6 @@ body.nav-open {
         font-size: var(--fs-sm);
     }
 
-    /* Переключение шапки на бургер отсюда УНЕСЕНО в собственный блок 992 —
-       искать по «ГРАНИЦА МЕЖДУ ШАПКОЙ И БУРГЕРОМ». Здесь оно жило среди
-       десятка чужих правил про логотип, героя и кнопки, и любой, кто менял
-       бы эту границу ради другой задачи, переключил бы заодно и шапку. */
-
-    .logo-svg {
-        height: 32px;
-    }
-
     .btn-auth {
         padding: 8px 16px;
         font-size: var(--fs-xs);
@@ -8356,10 +7782,6 @@ body.nav-open {
 
     .hero-stats {
         flex-wrap: wrap;
-    }
-
-    .stat-divider {
-        display: none;
     }
 
     .floating-card {
@@ -8465,10 +7887,6 @@ body.nav-open {
 
     .live-matches {
         grid-template-columns: 1fr;
-    }
-
-    .players-grid {
-        grid-template-columns: repeat(2, 1fr);
     }
 
     .courts-grid {
@@ -8806,17 +8224,6 @@ body.nav-open {
     z-index: -1;
 }
 
-/* На страницах-списках (тренеры, корты, поиск игрока) возврат не прилипает.
-   Прилипание работает в пределах родителя, а он кончается вместе с блоком
-   фильтров — полоса уезжала при первой же прокрутке, и между баннером и
-   поиском оставалась дыра в сотню пикселей */
-.kslt-back-wrap.kslt-back-flat {
-    position: static;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-bottom: none;
-}
-
 .kslt-back-wrap .kslt-back-sep {
     margin: 0 6px;
 }
@@ -8855,12 +8262,6 @@ body.nav-open {
 .kslt-back-sep {
     color: var(--text-muted);
     font-size: var(--fs-sm);
-}
-
-/* Back link inside sticky filters (no separate sticky wrapper) */
-.kslt-back-inside {
-    align-self: flex-start;
-    margin-bottom: -6px;
 }
 
 /* ---- PROMOTED / RECOMMENDED BADGE ---- */
@@ -9162,32 +8563,6 @@ body.nav-open {
     color: var(--text-secondary);
 }
 
-.auth-phone-row {
-    display: flex;
-    gap: 10px;
-}
-
-.auth-phone-code option {
-    background: #141414;
-    color: #FFFFFF;
-}
-
-.auth-phone-code {
-    width: 120px;
-    flex-shrink: 0;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='%23888' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-}
-
-.auth-phone-number {
-    flex: 1;
-}
-
 /* Цель нажатия 44 по высоте (WCAG 2.5.5). Была 19 — высота строки текста.
    Отрицательное поле справа держит текст прижатым к краю колонки,
    а не сдвинутым внутрь на паддинг цели. */
@@ -9302,12 +8677,6 @@ body.nav-open {
 .auth-social-btn:hover {
     background: var(--surface-glass-hover);
     border-color: var(--border-light);
-}
-
-.auth-tg-widget {
-    display: flex;
-    justify-content: center;
-    margin-top: 12px;
 }
 
 /* Signup option buttons (Google / Telegram / Form) */
@@ -10054,14 +9423,6 @@ body.nav-open {
         padding: 0 var(--pad-x);
     }
 
-    /* nav { height: 56px } убран: вторую высоту теперь задаёт токен
-       --header-h в tokens.css, и её видят все двадцать с лишним мест,
-       которые от шапки отсчитываются. Правило здесь видел только сам nav. */
-
-    .logo-text {
-        font-size: var(--fs-md);
-    }
-
     .btn-auth {
         padding: 6px 12px;
         font-size: var(--fs-xs);
@@ -10073,11 +9434,6 @@ body.nav-open {
 
     .hero-subtitle {
         font-size: var(--fs-sm);
-    }
-
-    .hero-buttons {
-        flex-direction: column;
-        gap: 10px;
     }
 
     .btn-primary, .btn-secondary {
@@ -10174,9 +9530,6 @@ section.pt-filters {
 
 /* Fix players-grid cascade: 480px rule was overridden by later 768px rule */
 @media (max-width: 480px) {
-    .players-grid {
-        grid-template-columns: 1fr;
-    }
 
     .live-matches {
         grid-template-columns: 1fr;
@@ -10266,13 +9619,6 @@ img {
     padding: 0 20px 18px;
     font-size: var(--fs-sm);
     color: var(--text-muted, #8A8A8F);
-}
-
-/* Возврат внутри прилипающей полосы с поиском и фильтрами: он должен
-   ездить вместе с ней, а не оставаться в баннере наверху */
-.kslt-back.kslt-back-inline {
-    align-self: flex-start;
-    margin: 0;
 }
 
 /* ---- Автоподстановка Chrome ----
@@ -11078,14 +10424,6 @@ input:-internal-autofill-previewed {
     }
 }
 
-/* Подсказка под полем в форме входа: пояснение, а не ошибка */
-.auth-hint {
-    margin-top: 6px;
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    line-height: 1.4;
-}
-
 /* ========================================
    СОСТОЯНИЕ ЗАЯВКИ — ОДИН ВИД НА ВЕСЬ САЙТ
    Карточка на главной, карточка в списках, страница турнира.
@@ -11441,8 +10779,6 @@ input:-internal-autofill-previewed {
     }
 
 
-
-
     /* Шапка на телефоне висит поверх страницы, и название «КСЛТ» уезжало
        под неё: первый экран начинался с половины буквы. Отводим под шапку
        её высоту с запасом, а низ ужимаем — содержимое и так длиннее экрана */
@@ -11706,7 +11042,6 @@ input:-internal-autofill-previewed {
 }
 
 
-
 /* ============================================================
    Полосы прокрутки — один вид на всём сайте
    ============================================================
@@ -11743,11 +11078,10 @@ input:-internal-autofill-previewed {
     background: var(--alpha-lime-50);
 }
 
-/* Скрытая полоса остаётся скрытой: ленты вкладок и фильтров листают
-   пальцем, полоса там только мешает */
+                                                                    
+                                       
 .rankings-tabs::-webkit-scrollbar,
-.td-tabs::-webkit-scrollbar,
-.hn-scroll::-webkit-scrollbar {
+.td-tabs::-webkit-scrollbar{
     display: none;
 }
 
@@ -11909,7 +11243,6 @@ input:-internal-autofill-previewed {
     .ip-rules-section-title.ip-rules-section-title,
     .news-section-title.news-section-title,
     .pp-section-title.pp-section-title,
-    .pr-section-title.pr-section-title,
     .td-fic-section-title.td-fic-section-title,
     .trn-block-title.trn-block-title {
         font-size: var(--fs-lg);
@@ -11935,46 +11268,41 @@ input:-internal-autofill-previewed {
    побеждало бы правило оттуда */
 
 @media (max-width: 768px) {
-    /* 1. Главная кнопка */
-    /* .guest-cta-btn ОТСЮДА УБРАН 24.09, четвёртым случаем после
-       .badges-cta-btn, .rankings-tab и .pt-invite-btn. Ступень «главная»
-       давала min-height 48 — не ступень Button 17:82. Высоту задаёт
-       собственное правило кнопки, md = 44. */
-    .btn-primary.btn-primary,
-    .sponsor-cta-btn.sponsor-cta-btn,
-    .hero-btn.hero-btn {
+                           
+                                                                 
+                                                                         
+                                                                    
+                                              
+    .btn-primary.btn-primary{
         min-height: 48px;
         padding: 14px 24px;
         font-size: var(--fs-base);
     }
 
-    /* 2. Обычная кнопка.
-       .badges-cta-btn ОТСЮДА УБРАН 24.09: это главный призыв своего экрана, а
-       ступень «обычная» давала ему min-height 40, из чего выходило 43 — ниже
-       порога цели нажатия 44. Высоту теперь задаёт его собственное правило,
-       ступенью компонента md = 44.
-       НАЙДЕНО ПО ДОРОГЕ, в долг по кнопкам: ступени этого блока 48 / 40 / 32
-       не совпадают со ступенями компонента Button 17:82 (28 / 36 / 44 / 52),
-       а .guest-cta-btn — кнопка той же роли в такой же коробке-гейте — стоит
-       в первой ступени, 48. Две одинаковые по роли кнопки в разных ступенях. */
-    /* .pt-invite-btn ОТСЮДА УБРАН 24.09, третьим случаем после .badges-cta-btn
-       и .rankings-tab. Ступень «обычная» давала min-height 40 и поля 11×16,
-       из чего на 768 и 375 выходила высота 51 — мимо ступеней компонента
-       Button 17:82 (28 · 36 · 44 · 52) и мимо собственного правила кнопки,
-       где высота задана свойством, а не полями. Высоту теперь задаёт
-       .pt-invite-btn в partners.css, ступенью md = 44, на всех пяти видах. */
-    /* .db-btn ОТСЮДА УБРАН 12.10, ЧЕТВЁРТЫМ случаем после .badges-cta-btn,
-       .rankings-tab и .pt-invite-btn — и по той же причине, что названа
-       выше: ступени этого блока 48 / 40 / 32 не совпадают со ступенями
-       компонента Button 17:82 (28 · 36 · 44 · 52). Удвоенный класс бил
-       собственное правило кнопки кабинета по весу, и min-height 44,
-       заведённый в dashboard.css, молча проигрывал: замер 12.10 давал 40
-       у всех 45 кнопок кабинета — в профиле, настройках и списках игр.
-       Высоту теперь задаёт .db-btn ступенью md = 44, как велит компонент. */
-    .btn-secondary.btn-secondary,
-    .ct-card-btn.ct-card-btn,
-    .cch-card-btn.cch-card-btn,
-    .hn-card-btn.hn-card-btn {
+                         
+                                                                              
+                                                                             
+                                                                            
+                                   
+                                                                             
+                                                                             
+                                                                             
+                                                                                
+                                                                               
+                                                                            
+                                                                         
+                                                                           
+                                                                     
+                                                                              
+                                                                           
+                                                                        
+                                                                       
+                                                                       
+                                                                    
+                                                                         
+                                                                       
+                                                                             
+    .btn-secondary.btn-secondary{
         min-height: 40px;
         padding: 11px 16px;
         font-size: var(--fs-sm);

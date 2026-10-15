@@ -641,26 +641,6 @@
     transform: translateY(-1px);
 }
 
-/* Score badge for completed battles */
-.bo-score-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: var(--alpha-lime-12);
-    border: var(--bw-hair) solid var(--accent-glow);
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--accent);
-}
-
-.bo-winner-name {
-    font-size: var(--fs-xs);
-    color: var(--accent);
-    font-weight: 600;
-}
-
 /* Empty state */
 .bo-empty {
     grid-column: 1 / -1;
@@ -757,29 +737,6 @@
     position: relative;
     z-index: 1;
     margin-right: 4px;
-}
-
-/* Toast */
-.bo-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--accent);
-    color: #000;
-    padding: 10px 24px;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    z-index: 9999;
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    pointer-events: none;
-}
-
-.bo-toast-show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
 }
 
 /* Map modal */
@@ -990,8 +947,7 @@
     .bo-featured,
     .bo-bar-p1,
     .bo-bar-p2,
-    .bo-featured-link,
-    .bo-toast {
+    .bo-featured-link{
         transition: none;
     }
     .bo-featured:hover {

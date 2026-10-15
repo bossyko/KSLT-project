@@ -78,38 +78,6 @@
     padding: var(--section-y) var(--pad-x) var(--section-y);
 }
 
-/* ---- FILTERS ---- */
-/* Полоса ведёт себя как на кортах и в турнирах: содержимое идёт от левого
-   края по сетке страницы. Раньше здесь стояла колонка с центрированием —
-   поиск и фильтры висели посреди экрана, не совпадая с остальными
-   разделами. Раскладку внутри задаёт .trn-filters-inner из style.css */
-/* СВОЕГО ОПРЕДЕЛЕНИЯ У ПОЛОСЫ БОЛЬШЕ НЕТ. Здесь лежала ВТОРАЯ копия
-   компонента `.trn-filters` (css/style.css:5037) — тем же набором
-   свойств, но селектором по идентификатору, вес (1,0,0) против (0,1,0).
-   Она молча перебивала исключение общего правила «НА НИЗКОМ
-   ГОРИЗОНТАЛЬНОМ ПОЛОСА НЕ ЛИПНЕТ» (решение 05.10, замер: липкая полоса
-   съедала сорок процентов окна при 844 × 390).
-   Замер 07.10 показал расхождение числом: на кортах при 844 × 390
-   закреплено намертво 64 — шестнадцать процентов экрана, у тренеров 137
-   — тридцать пять. Слово Кости 07.10: не липнет. ВЕС ПРАВИЛА РЕШАЕТ, А НЕ
-   НАМЕРЕНИЕ, и разметка берёт класс `trn-filters` (js/coaches.js:437). */
-
-/* СВОЕЙ ПОЛОСЫ ПОИСКА У ТРЕНЕРОВ НЕТ. Разметка берёт общие классы
-   `trn-filters`, `trn-back`, `trn-search-wrap`, `trn-chips` из style.css,
-   а выпадашки — общий компонент `.f-dd` / `.ct-dd`. Отсюда снесены семь
-   классов второй полосы (`co-search-wrap`, `-icon`, `-input` и его два
-   состояния, `co-back-link.co-back-service` и её липкий вариант): в них
-   поле поиска было таблеткой на 480. МЁРТВЫМ КОД НАЗВАН ПОСЛЕ ПРОВЕРКИ —
-   ни одного из них нет ни в одной разметке и ни в одном скрипте. */
-
-.co-filters {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    justify-content: center;
-}
-
 
 /* ---- COACHES GRID ---- */
 /* ЧИСЛО КОЛОНОК — СЛЕДСТВИЕ ШИРИНЫ КАРТОЧКИ, А НЕ ГРАНИЦЫ ЭКРАНА, и
@@ -303,39 +271,6 @@
 
 .co-card-cta:hover {
     opacity: 0.85;
-}
-
-/* Toast */
-.co-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    z-index: 10000;
-    padding: 12px 24px;
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    color: #000;
-    background: var(--accent);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    white-space: nowrap;
-    max-width: 90vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.co-toast.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-.co-toast.info {
-    background: rgba(30, 30, 30, 0.95);
-    color: var(--text-primary);
-    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 /* ---- DETAIL PAGE ---- */
@@ -745,12 +680,6 @@
         /* высоту держит min-height у самого правила — одно место на все виды */
         padding-inline: 20px;
         font-size: var(--fs-sm);
-    }
-
-    .co-detail-desc,
-    .co-about-text {
-        font-size: var(--fs-sm);
-        line-height: var(--lh-normal);
     }
 }
 
@@ -1266,24 +1195,8 @@
     background: var(--accent-subtle);
     border-color: var(--alpha-lime-50);
 }
-.co-map-embed {
-    width: 100%;
-    height: 300px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: var(--bw-hair) solid rgba(255,255,255,0.08);
-}
-.co-map-embed iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    filter: invert(0.9) hue-rotate(180deg) brightness(0.95) contrast(1.1);
-}
 
 @media (max-width: 480px) {
-    .co-map-embed {
-        height: 220px;
-    }
     .co-map-links-section {
         flex-wrap: wrap;
     }
@@ -1341,12 +1254,11 @@
     }
 }
 
-/* ═══ ДОСТУПНОСТЬ СТРАНИЦЫ ТРЕНЕРА — ДОБАВЛЕНО 13.10 ══════════════════════
-   Замер 13.10: `focus-visible` в этом файле ноль, `prefers-reduced-motion`
-   ноль при живой анимации `.co-fade-in`. Оба правила куплены раньше и
-   применяются без нового разбора. */
+                                                                            
+                                                                           
+                                                                      
+                                     
 .co-cta-btn:focus-visible,
-.co-contact-link:focus-visible,
 .co-card:focus-visible,
 .kslt-back:focus-visible {
     outline: var(--bw-thick) solid var(--accent);
