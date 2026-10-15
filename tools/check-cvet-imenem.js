@@ -85,7 +85,20 @@ function норма(v) {
     if (м) return '#' + м[1].split('').map(c => c + c).join('');
     if (/^#[0-9a-f]{6}$/.test(s)) return s;
     м = /^rgba?\(([^)]+)\)$/.exec(s);
-    if (м) return 'rgba(' + м[1].split(/[,\s/]+/).filter(Boolean).join(',') + ')';
+    if (м) {
+        /* ЧИСЛА ПРИВОДЯТСЯ К ЧИСЛАМ, А НЕ К СТРОКАМ. Первая редакция
+           склеивала части как есть, и `0.60` из tokens.css не совпадало с
+           `0.6` из кода: одно и то же число считалось двумя разными.
+           Круг 1 из-за этого пропустил 42 места с ТОЧНЫМ совпадением —
+           `--alpha-black-60`, `--alpha-white-50`, `--alpha-black-30`,
+           `--alpha-black-20`. Нашлось только в круге 3, когда прозрачные
+           слои считал другой прибор и цифры разошлись. */
+        const ч = м[1].split(/[,\s/]+/).filter(Boolean).map(x => {
+            const n = parseFloat(x);
+            return Number.isFinite(n) ? String(n) : x;
+        });
+        return 'rgba(' + ч.join(',') + ')';
+    }
     return null;
 }
 const цветной = v => норма(v) !== null;
