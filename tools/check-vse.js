@@ -96,7 +96,8 @@ const КУСКИ = [
     ['одно определение на понятие', 'check-odno-opredelenie.js', 'check-odno-opredelenie-otkat.js'],
     ['мёртвое и лишнее', 'check-mertvoe.js', 'check-mertvoe-otkat.js'],
     ['цвет с именем', 'check-cvet-imenem.js', 'check-cvet-imenem-otkat.js'],
-    ['отказ одной краской', 'check-otkaz-odnoy-kraskoy.js', 'check-otkaz-odnoy-kraskoy-otkat.js']
+    ['отказ одной краской', 'check-otkaz-odnoy-kraskoy.js', 'check-otkaz-odnoy-kraskoy-otkat.js'],
+    ['эфир одной краской', 'check-efir-odnoy-kraskoy.js', 'check-efir-odnoy-kraskoy-otkat.js']
 ];
 
 function прогнать(файл) {
