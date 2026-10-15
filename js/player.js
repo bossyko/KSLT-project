@@ -52,9 +52,126 @@
     }
 
     // ---- Labels ----
-    var L = window.playerProfileLabels || {
-        heroTitle: 'Профиль игрока',
-        backToRankings: 'Назад к рейтингу',
+    /* ════════ МЕТКИ СТРАНИЦЫ — НА ТРЁХ ЯЗЫКАХ, КАК LH НИЖЕ ════════
+       Здесь стояло `window.playerProfileLabels || { …по-русски… }`, и
+       сам файл об этом знал: «словарь на этой странице всегда русский —
+       window.playerProfileLabels нигде не заводится, померено 11.10 на
+       player-en.html». Так и было: на английской и киргизской странице
+       человек читал «Профиль игрока» и «Вызвать на матч» по-русски.
+       ЗАПИСЬ ГОВОРИЛА «СЛОВАРЬ МЁРТВ» — он не мёртв, он ЖИВ И РАБОТАЕТ
+       НЕПРАВИЛЬНО, а это разные беды и чинятся они по-разному.
+
+       Приём взят не со стороны, а из этого же файла: LH ниже сделан
+       правильно с самого начала — `isEn ? {…} : isKg ? {…} : {…}`.
+       ОДНО ПОНЯТИЕ, ДВА ПОВЕДЕНИЯ В ОДНОМ ФАЙЛЕ: один словарь знал три
+       языка, другой — ни одного.
+
+       Снято 26 ключей, не встречавшихся в коде ни разу: heroTitle,
+       backToRankings, statsStreak, sectionMatches, sectionTournaments,
+       sectionChallenges, challengeCompleted, tournament, showAll,
+       collapse, tagRating, tagFriendly, tagDoubles, tagMixed, tagBattle,
+       veteran, dominant, victories, winRateLabel, joined, positionsMonth,
+       winsThisSeason, monthName — и три, обслуживавших выдуманные
+       турниры: matchDates, tournamentNames, tournamentResults.
+       `window.playerProfileLabels` оставлен первым: подмена меток снаружи
+       работала и продолжает работать, теперь поверх нужного языка. */
+    var L = window.playerProfileLabels || (isEn ? {
+        online: 'Online',
+        message: 'Message',
+        challenge: 'Challenge to a match',
+        invite: 'Invite to play',
+        statsPoints: 'Rating',
+        statsWins: 'Wins',
+        statsLosses: 'Losses',
+        statsWinRate: 'Win %',
+        pairsTitle: 'Doubles', mixedTitle: 'Mixed', pairsTag: 'doubles', mixedTag: 'mixed',
+        pairsNote: 'not counted in the rating', pairsMatches: 'Matches', pairsWinRate: 'wins',
+        sectionGames: 'My games',
+        subsectionTournaments: 'Tournaments',
+        subsectionMatches: 'Matches',
+        subsectionChallenges: 'Challenges',
+        sectionAchievements: 'Achievements',
+        sectionRatingHistory: 'Rating history',
+        chartPoints: 'Points',
+        challengeAccepted: 'Accepted',
+        statsNote: 'Statistics for rating singles tournaments',
+        ctaTitle: 'Want to <span>play</span>?',
+        ctaText: 'Sign up for KSLT to challenge players and enter tournaments',
+        ctaBtn: 'Sign up',
+        win: 'W',
+        loss: 'L',
+        playerNotFound: 'Player not found',
+        playerNotFoundText: 'The link may be out of date, or the player was removed',
+        challengeModalTitle: 'Send a challenge',
+        challengeMessage: 'Message',
+        challengeMsgHint: 'For example: shall we play at the weekend?',
+        challengeSend: 'Send challenge',
+        challengeSending: 'Sending…',
+        challengeSent: 'Challenge sent!',
+        challengeSentText: 'Your opponent will get a notification and can accept or decline.\nWe wait 10 days for an answer. After that the challenge expires.',
+        challengeError: 'Could not send',
+        challengeLimit: 'Three challenges are already waiting for an answer. Wait for at least one of them.',
+        challengeMatchPending: 'A match with this player is already scheduled. Wait until it has been played.',
+        challengeBtnWaiting: 'Challenge sent',
+        challengeBtnMatchSet: 'Match scheduled',
+        challengeNotMember: 'Only a KSLT member can send a challenge',
+        challengePending: 'Active challenge',
+        challengePendingText: 'You already have a challenge to this player.\nWait for an answer or for it to expire — 10 days.\nYou can withdraw it in your dashboard, section «Battles».',
+        challengeSelf: 'You cannot challenge yourself',
+        challengeLoginRequired: 'Sign in',
+        challengeLoginText: 'You need to sign in to send a challenge',
+        challengeMemberRequired: 'Get a membership',
+        challengeMemberText: 'A KSLT membership is required to send a challenge',
+        challengeNoPlayer: 'Link a player profile to send challenges'
+    } : isKg ? {
+        online: 'Онлайн',
+        message: 'Жазуу',
+        challenge: 'Матчка чакыруу',
+        invite: 'Оюнга чакыруу',
+        statsPoints: 'Рейтинг',
+        statsWins: 'Жеңиштер',
+        statsLosses: 'Жеңилиштер',
+        statsWinRate: 'Жеңиш %',
+        pairsTitle: 'Жуптук', mixedTitle: 'Микст', pairsTag: 'жуп', mixedTag: 'микст',
+        pairsNote: 'рейтингге кирбейт', pairsMatches: 'Матчтар', pairsWinRate: 'жеңиш',
+        sectionGames: 'Менин оюндарым',
+        subsectionTournaments: 'Турнирлер',
+        subsectionMatches: 'Матчтар',
+        subsectionChallenges: 'Чакырыктар',
+        sectionAchievements: 'Жетишкендиктер',
+        sectionRatingHistory: 'Рейтинг тарыхы',
+        chartPoints: 'Упайлар',
+        challengeAccepted: 'Кабыл алынды',
+        statsNote: 'Рейтингдик жекече турнирлер боюнча статистика',
+        ctaTitle: '<span>Ойногуң</span> келеби?',
+        ctaText: 'Оюнчуларга чакырык таштоо жана турнирлерге катышуу үчүн KSLT-ке катталыңыз',
+        ctaBtn: 'Катталуу',
+        win: 'Ж',
+        loss: 'У',
+        playerNotFound: 'Оюнчу табылган жок',
+        playerNotFoundText: 'Шилтеме эскирген болушу мүмкүн же оюнчу өчүрүлгөн',
+        challengeModalTitle: 'Чакырык таштоо',
+        challengeMessage: 'Билдирүү',
+        challengeMsgHint: 'Мисалы: дем алышта ойнойбузбу?',
+        challengeSend: 'Чакырык жөнөтүү',
+        challengeSending: 'Жөнөтүлүүдө…',
+        challengeSent: 'Чакырык жөнөтүлдү!',
+        challengeSentText: 'Атаандашыңыз билдирме алат жана чакырыкты кабыл алат же четке кагат.\nЖообун 10 күн күтөбүз. Андан кийин чакырык күйүп кетет.',
+        challengeError: 'Жөнөтүү катасы',
+        challengeLimit: 'Үч чакырык жооп күтүүдө. Жок дегенде бирине жооп күтүңүз.',
+        challengeMatchPending: 'Бул оюнчу менен матч мурун эле дайындалган. Ал ойнолгонго чейин күтүңүз.',
+        challengeBtnWaiting: 'Чакырык жөнөтүлдү',
+        challengeBtnMatchSet: 'Матч дайындалды',
+        challengeNotMember: 'Чакырык таштоого KSLT мүчөсү гана укуктуу',
+        challengePending: 'Жандуу чакырык',
+        challengePendingText: 'Сизде бул оюнчуга чакырык бар.\nЖоопту же мөөнөттүн бүтүшүн күтүңүз — 10 күн.\nЧакырыкты кабинеттеги «Баттлдар» бөлүмүнөн кайра алса болот.',
+        challengeSelf: 'Өзүңүздү чакыра албайсыз',
+        challengeLoginRequired: 'Аккаунтка кириңиз',
+        challengeLoginText: 'Чакырык жөнөтүү үчүн авторизациядан өтүү керек',
+        challengeMemberRequired: 'Мүчөлүктү тариздеңиз',
+        challengeMemberText: 'Чакырык жөнөтүү үчүн KSLT мүчөлүгү керек',
+        challengeNoPlayer: 'Чакырык жөнөтүү үчүн оюнчу профилин байлаңыз'
+    } : {
         online: 'Онлайн',
         message: 'Написать',
         challenge: 'Вызвать на матч',
@@ -65,24 +182,14 @@
         statsWinRate: '% Побед',
         pairsTitle: 'Парные', mixedTitle: 'Микст', pairsTag: 'пары', mixedTag: 'микст',
         pairsNote: 'в рейтинг не идут', pairsMatches: 'Матчей', pairsWinRate: 'побед',
-        statsStreak: 'Серия',
         sectionGames: 'Мои игры',
         subsectionTournaments: 'Турниры',
         subsectionMatches: 'Матчи',
         subsectionChallenges: 'Вызовы',
-        sectionMatches: 'История матчей',
         sectionAchievements: 'Достижения',
         sectionRatingHistory: 'История рейтинга',
         chartPoints: 'Очки',
-        sectionTournaments: 'Турниры',
-        sectionChallenges: 'Вызовы',
         challengeAccepted: 'Принят',
-        challengeCompleted: 'Сыгран',
-        tournament: 'Турнир',
-        showAll: 'Показать все',
-        collapse: 'Свернуть',
-        tagRating: 'рейтинг', tagFriendly: 'дружеский', tagDoubles: 'пары',
-        tagMixed: 'микст', tagBattle: 'баттл',
         statsNote: 'Статистика по рейтинговым одиночным турнирам',
         ctaTitle: 'Хочешь <span>сыграть</span>?',
         ctaText: 'Зарегистрируйся в KSLT, чтобы бросить вызов игрокам и участвовать в турнирах',
@@ -91,22 +198,11 @@
         loss: 'L',
         playerNotFound: 'Игрок не найден',
         playerNotFoundText: 'Возможно, ссылка устарела или игрок был удалён',
-        veteran: 'Ветеран',
-        dominant: 'Доминирование',
-        victories: 'побед',
-        winRateLabel: 'побед',
-        joined: 'С декабря 2025',
-        positionsMonth: 'позиций за месяц',
-        winsThisSeason: 'побед в сезоне',
-        monthName: 'Январь 2026',
-        matchDates: ['14 Фев', '7 Фев', '28 Янв', '21 Янв', '14 Янв', '5 Янв', '28 Дек', '20 Дек'],
-        tournamentNames: ['KSLT Open 2026', 'Winter Cup 2025', 'Autumn Classic 2025', 'KSLT Summer Series 2025'],
-        tournamentResults: ['Четвертьфинал', 'Полуфинал', '1/8 финала', 'Финалист', 'Победитель'],
         challengeModalTitle: 'Бросить вызов',
         challengeMessage: 'Сообщение',
         challengeMsgHint: 'Например: сыграем в выходные?',
         challengeSend: 'Отправить вызов',
-        challengeSending: 'Отправка...',
+        challengeSending: 'Отправка…',
         challengeSent: 'Вызов отправлен!',
         challengeSentText: 'Соперник получит уведомление и сможет принять или отклонить вызов.\nОтвета ждём 10 дней. Дальше вызов сгорает.',
         challengeError: 'Ошибка отправки',
@@ -116,14 +212,14 @@
         challengeBtnMatchSet: 'Матч назначен',
         challengeNotMember: 'Вызвать на баттл может только член KSLT',
         challengePending: 'Активный вызов',
-        challengePendingText: 'У вас уже есть вызов этому игроку.\nДождитесь ответа или истечения срока \u2014 10\u00A0дней.\nОтозвать вызов можно в кабинете, раздел \u00ABБаттлы\u00BB.',
+        challengePendingText: 'У вас уже есть вызов этому игроку.\nДождитесь ответа или истечения срока — 10 дней.\nОтозвать вызов можно в кабинете, раздел «Баттлы».',
         challengeSelf: 'Нельзя вызвать самого себя',
         challengeLoginRequired: 'Войдите в аккаунт',
         challengeLoginText: 'Для отправки вызова необходимо авторизоваться',
         challengeMemberRequired: 'Оформите членство',
         challengeMemberText: 'Для отправки вызова необходимо членство KSLT',
         challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов'
-    };
+    });
 
     // ---- H2H Labels ----
     var LH = isEn ? {
@@ -170,44 +266,6 @@
     }
 
     // ---- Generate mock match history (fallback) ----
-    function generateMatchHistory(data) {
-        var player = data.player;
-        var cat = data.category;
-        var seed = hashStr(player.id);
-        var opponents = (cat.players || []).filter(function (p) { return p.id !== player.id; });
-        if (opponents.length === 0) return [];
-        var matches = [];
-
-        var results = (player.form || []).slice();
-        for (var i = results.length; i < 8; i++) {
-            results.push(seededRandom(seed + i * 7) > 0.45 ? 'W' : 'L');
-        }
-
-        var winScores = [
-            ['6:4', '6:3'], ['6:2', '7:5'], ['7:6', '6:4'],
-            ['6:3', '6:1'], ['6:4', '7:5'], ['7:5', '6:2'],
-            ['6:1', '6:4'], ['6:3', '4:6', '6:2']
-        ];
-        var lossScores = [
-            ['4:6', '3:6'], ['5:7', '4:6'], ['6:7', '4:6'],
-            ['3:6', '1:6'], ['5:7', '2:6'], ['6:4', '3:6', '2:6']
-        ];
-
-        for (var j = 0; j < results.length; j++) {
-            var oppIdx = Math.floor(seededRandom(seed + j * 13) * opponents.length);
-            var opp = opponents[oppIdx];
-            var scores = results[j] === 'W'
-                ? winScores[Math.floor(seededRandom(seed + j * 17) * winScores.length)]
-                : lossScores[Math.floor(seededRandom(seed + j * 19) * lossScores.length)];
-            matches.push({
-                date: L.matchDates[j] || L.matchDates[L.matchDates.length - 1],
-                opponent: opp,
-                score: scores.join(', '),
-                result: results[j]
-            });
-        }
-        return matches;
-    }
 
     // ---- Badge data (loaded from Supabase) ----
     var _earnedBadges = [];
@@ -338,14 +396,6 @@
     }
 
     // ---- Generate mock tournaments (fallback) ----
-    function generateTournaments(data) {
-        var seed = hashStr(data.player.id);
-        var results = L.tournamentResults;
-        return L.tournamentNames.map(function (name, i) {
-            var resIdx = Math.floor(seededRandom(seed + i * 23) * results.length);
-            return { name: name, result: results[resIdx] };
-        });
-    }
 
     // ---- Calculate current streak ----
     function calcStreak(form) {
@@ -1253,23 +1303,6 @@
         window.KSLT_OTSECHKA.включить(container);
     }
 
-    function renderMockMatches(container, data) {
-        var matches = generateMatchHistory(data);
-        var html = '';
-        matches.forEach(function(m) {
-            html += '<div class="pp-match">';
-            html += '<div class="pp-match-date">' + m.date + '</div>';
-            html += '<div class="pp-match-tournament"></div>';
-            html += '<div class="pp-match-opponent">';
-            html += кружокИгрока(m.opponent.name, m.opponent.photo);
-            html += '<span class="pp-match-opponent-name">' + m.opponent.name + '</span>';
-            html += '</div>';
-            html += '<div class="pp-match-score">' + m.score + '</div>';
-            html += '<div class="pp-match-result ' + (m.result === 'W' ? 'win' : 'loss') + '">' + (m.result === 'W' ? L.win : L.loss) + '</div>';
-            html += '</div>';
-        });
-        container.innerHTML = html;
-    }
 
     function attachMatchClickHandlers(container) {
         // Строка матча выглядит нажимаемой — пусть и ведёт куда-то: в сетку
@@ -1304,8 +1337,17 @@
         var container = document.getElementById('ppTournamentsContainer');
         if (!container) return;
 
+        /* ВЫДУМАННЫХ ТУРНИРОВ БОЛЬШЕ НЕТ. Пока базы нет, здесь рисовались
+           четыре придуманных турнира с придуманными результатами —
+           «KSLT Open 2026», «Winter Cup 2025» — и человек не мог отличить
+           их от настоящих. Пустое говорит, ПОЧЕМУ пусто (Empty state
+           37:53: «never just no data»), а не показывает выдумку.
+           УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ. */
         if (!client) {
-            renderMockTournaments(container, data);
+            container.innerHTML = '<div class="pp-badges-empty">' +
+                (isEn ? 'Tournaments are not available right now'
+                      : (isKg ? 'Турнирлер учурда жеткиликсиз'
+                              : 'Турниры сейчас недоступны')) + '</div>';
             return;
         }
 
@@ -1458,18 +1500,6 @@
         return html;
     }
 
-    function renderMockTournaments(container, data) {
-        var tournaments = generateTournaments(data);
-        var html = '';
-        tournaments.forEach(function(t) {
-            html += '<div class="pp-tournament">';
-            html += '<div class="pp-tournament-photo pp-tournament-photo-empty">\uD83C\uDFBE</div>';
-            html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + t.name + '</span></div>';
-            html += '<span class="pp-tournament-result">' + t.result + '</span>';
-            html += '</div>';
-        });
-        container.innerHTML = html;
-    }
 
     // ================================================
     // SUPABASE: Player Challenges
