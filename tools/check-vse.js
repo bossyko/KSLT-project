@@ -97,7 +97,8 @@ const КУСКИ = [
     ['мёртвое и лишнее', 'check-mertvoe.js', 'check-mertvoe-otkat.js'],
     ['цвет с именем', 'check-cvet-imenem.js', 'check-cvet-imenem-otkat.js'],
     ['отказ одной краской', 'check-otkaz-odnoy-kraskoy.js', 'check-otkaz-odnoy-kraskoy-otkat.js'],
-    ['эфир одной краской', 'check-efir-odnoy-kraskoy.js', 'check-efir-odnoy-kraskoy-otkat.js']
+    ['эфир одной краской', 'check-efir-odnoy-kraskoy.js', 'check-efir-odnoy-kraskoy-otkat.js'],
+    ['сторона игрока', 'check-storona-odno-opredelenie.js', 'check-storona-odno-opredelenie-otkat.js']
 ];
 
 function прогнать(файл) {
