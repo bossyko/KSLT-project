@@ -711,7 +711,7 @@
 }
 
 .pl-form-loss {
-    background: #ef4444;
+    background: var(--danger);
 }
 
 /* Change */
@@ -722,7 +722,7 @@
 }
 
 .pl-change-down {
-    color: #ef4444;
+    color: var(--danger);
     font-weight: 600;
     font-size: var(--fs-sm);
 }

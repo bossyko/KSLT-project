@@ -205,8 +205,8 @@
 }
 
 .td-status-badge.cancelled {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
+    background: rgba(255, 71, 87, 0.2);
+    color: var(--danger);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }

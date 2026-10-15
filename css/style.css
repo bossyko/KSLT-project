@@ -1018,12 +1018,12 @@ input, button, select, textarea {
 }
 
 .user-dropdown-logout {
-    color: #ff6b6b;
+    color: var(--danger);
 }
 
 .user-dropdown-logout:hover {
-    background: rgba(255, 107, 107, 0.1);
-    color: #ff6b6b;
+    background: rgba(255, 71, 87, 0.1);
+    color: var(--danger);
 }
 
 .user-dropdown-logout svg {
@@ -2910,7 +2910,7 @@ h2 {
 }
 
 .change.negative {
-    color: #FF3B30;
+    color: var(--danger);
 }
 
 /* Rankings: columns, tabs, panels */
@@ -6716,7 +6716,7 @@ h2 {
 }
 
 .pg-form .w { background: #22c55e; }
-.pg-form .l { background: #ef4444; }
+.pg-form .l { background: var(--danger); }
 
 /* Приглушённая строка. --text-dim здесь давал те же 3.14 : 1, что и подпись
    раздела: один и тот же провал дважды в одной секции. */
@@ -8036,7 +8036,7 @@ body.nav-open {
 }
 
 .auth-required {
-    color: #ff4d4d;
+    color: var(--danger);
     font-weight: 600;
 }
 
@@ -8071,7 +8071,7 @@ body.nav-open {
 
 .pw-rule.pw-rule-error,
 .pw-rule-reset.pw-rule-error {
-    color: #ef4444;
+    color: var(--danger);
     animation: pw-rule-shake 0.5s ease;
 }
 
@@ -8108,7 +8108,7 @@ body.nav-open {
 
 .auth-pw-detail li::before {
     content: '✕ ';
-    color: #ef4444;
+    color: var(--danger);
     font-weight: 700;
 }
 
@@ -8616,9 +8616,9 @@ body.nav-open {
 }
 
 .auth-message-error {
-    background: rgba(255, 59, 48, 0.15);
-    border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
-    color: #ff6b6b;
+    background: var(--danger-subtle);
+    border: var(--bw-hair) solid rgba(255, 71, 87, 0.3);
+    color: var(--danger);
 }
 
 .auth-message-success {
@@ -9357,7 +9357,7 @@ body.nav-open {
 }
 
 .otp-inputs.shake .otp-digit {
-    border-color: #ff6b6b;
+    border-color: var(--danger);
 }
 
 @media (max-width: 480px) {
@@ -9611,8 +9611,8 @@ img {
 }
 
 .site-notif-no:hover:not(:disabled) {
-    color: #ff6b6b;
-    border-color: rgba(255, 107, 107, 0.5);
+    color: var(--danger);
+    border-color: rgba(255, 71, 87, 0.5);
 }
 
 .site-notif-answered {
@@ -10469,9 +10469,9 @@ input:-internal-autofill-previewed {
 
 /* Отказ — красный, молчать о нём нельзя */
 .kslt-status-refused {
-    background: rgba(244, 67, 54, 0.14);
-    border-color: rgba(244, 67, 54, 0.45);
-    color: #f44336;
+    background: rgba(255, 71, 87, 0.14);
+    border-color: rgba(255, 71, 87, 0.45);
+    color: var(--danger);
 }
 
 /* На карточках состояние стоит вместо кнопки записи */

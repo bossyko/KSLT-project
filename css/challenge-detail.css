@@ -255,7 +255,7 @@
     color: var(--text-secondary);
 }
 .ch-stat-w { color: #4ade80; }
-.ch-stat-l { color: #f87171; }
+.ch-stat-l { color: var(--danger); }
 
 /* VS divider */
 .ch-vs-divider {

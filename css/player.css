@@ -321,7 +321,7 @@
 }
 
 .pp-stat-change.down {
-    color: #ef4444;
+    color: var(--danger);
 }
 
 .pp-stat-change.neutral {
@@ -693,8 +693,8 @@
 }
 
 .pp-match-result.loss {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    background: var(--danger-subtle);
+    color: var(--danger);
 }
 
 .pp-match-result.accepted {
@@ -1441,8 +1441,8 @@ a.pp-tournament:hover {
 }
 
 .h2h-match-result.loss {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    background: var(--danger-subtle);
+    color: var(--danger);
 }
 
 /* ---- Profile button ---- */
@@ -1629,7 +1629,7 @@ a.pp-tournament:hover {
 }
 
 .pp-chal-req {
-    color: #ff6b6b;
+    color: var(--danger);
 }
 
 .pp-chal-counter {
@@ -1685,7 +1685,7 @@ a.pp-tournament:hover {
     color: var(--neutral-black);
 }
 .pp-chal-toast-error {
-    background: #ff4444;
+    background: var(--danger);
     color: var(--neutral-white);
 }
 
@@ -1896,7 +1896,7 @@ a.pp-tournament:hover {
 }
 
 .pp-cat-bar-w { background: #4ade80; }
-.pp-cat-bar-l { background: #ff6b62; }
+.pp-cat-bar-l { background: var(--danger); }
 
 .pp-cat-legend {
     display: flex;
@@ -1918,7 +1918,7 @@ a.pp-tournament:hover {
 }
 
 .pp-cat-mark-w { background: #4ade80; }
-.pp-cat-mark-l { background: #ff6b62; margin-left: 10px; }
+.pp-cat-mark-l { background: var(--danger); margin-left: 10px; }
 
 .pp-cat-rate {
     font-weight: 600;
@@ -2003,7 +2003,7 @@ a.pp-tournament:hover {
 
 /* Отказ — красным: удачная отправка и запрет выглядели одинаково белым */
 .pp-chal-title.pp-chal-title-warn {
-    color: #ff6b6b;
+    color: var(--danger);
 }
 
 
