@@ -91,7 +91,8 @@ input, button, select, textarea {
    Она держалась на `backdrop-filter`, а фон был прозрачным на 60%. В Safari
    размытие срывается, когда за элементом идёт анимированная картинка —
    и шапка просто исчезала на фоне тёмного первого экрана. */
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ — 16.10, кусок 75 */
+@media (max-width: 992px) {
     .floating-header.header-hybrid {
         background: rgba(5, 5, 5, 0.92);
         /* Линия видимая и нужная, но нарисована тенью внутрь, а не рамкой:
@@ -4187,7 +4188,8 @@ h2 {
 }
 
 /* Мобильные стили */
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: плитка ленты логотипов мельче уже на планшете. */
+@media (max-width: 992px) {
     .carousel-slide-infinite {
         width: 160px;
         margin: 0 var(--space-sm);
@@ -7688,7 +7690,8 @@ body.nav-open {
     }
 }
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ — 16.10, кусок 75 */
+@media (max-width: 992px) {
     .floating-header.header-hybrid {
         padding: 0 var(--pad-x);
     }
@@ -8348,7 +8351,8 @@ body.nav-open {
     }
 }
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: поля ссылки «назад». */
+@media (max-width: 992px) {
     .kslt-back-wrap {
         padding: 12px 16px;
     }
@@ -11098,7 +11102,9 @@ input:-internal-autofill-previewed {
    Раньше такая правка лежала в блоке для экранов до 375 — то есть на
    обычном телефоне не работала вовсе. */
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ — 16.10: мобильное меню открывается и на планшете —
+   его порог 992 задан отдельно, здесь только размеры пунктов. */
+@media (max-width: 992px) {
     .mobile-nav {
         padding: 20px 24px;
     }
@@ -11161,7 +11167,8 @@ input:-internal-autofill-previewed {
 /* Кегли по общей шкале: заголовок был крупнее, чем у разделов кабинета,
    а список висел на 400 пикселей независимо от высоты экрана */
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: окно уведомлений во всю ширину там, где узко. */
+@media (max-width: 992px) {
     .site-notif-dropdown {
         max-height: 60vh;
     }
@@ -11246,7 +11253,8 @@ input:-internal-autofill-previewed {
    дважды: style.css подключается раньше файлов страниц, и при равном весе
    побеждало бы правило оттуда */
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ — 16.10: кнопки по шкале узкого экрана. */
+@media (max-width: 992px) {
                            
                                                                  
                                                                          
