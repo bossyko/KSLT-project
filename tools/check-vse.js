@@ -101,7 +101,8 @@ const КУСКИ = [
     ['сторона игрока', 'check-storona-odno-opredelenie.js', 'check-storona-odno-opredelenie-otkat.js'],
     ['отсчёт и скидка', 'check-otschet-ozhidanie.js', 'check-otschet-ozhidanie-otkat.js'],
     ['лестница прозрачности', 'check-lestnica-prozrachnosti.js', 'check-lestnica-prozrachnosti-otkat.js'],
-    ['версии файлов', 'check-versii-fajlov.js', 'check-versii-fajlov-otkat.js']
+    ['версии файлов', 'check-versii-fajlov.js', 'check-versii-fajlov-otkat.js'],
+    ['движение и межстрочные', 'check-dvizhenie-i-mezhstrochnye.js', 'check-dvizhenie-i-mezhstrochnye-otkat.js']
 ];
 
 function прогнать(файл) {
