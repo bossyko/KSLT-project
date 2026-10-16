@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Корт — 768 и 844 после разбора границы</title>
+<style>body{margin:0;background:#111;color:#fff;font:13px system-ui,sans-serif}
+h1{font-size:14px;margin:10px 14px 2px;color:#CCFF00;letter-spacing:.04em}
+p{margin:0 14px 8px;color:#999}
+.ряд{display:flex;gap:14px;padding:0 14px 14px;align-items:flex-start}
+.б{font-size:11px;color:#CCFF00;margin:0 0 4px}
+.рамка{border:1px solid #333;overflow:hidden}
+iframe{border:0;display:block}</style></head><body>
+<h1>СТРАНИЦА КОРТА — ГРАНИЦА 768 РАЗЛОЖЕНА</h1>
+<p>Слева планшет стоя 768: шапка снова в ряд, фото 280 вместо всей ширины. Справа телефон лёжа 844: имя 26 вместо 32, текст на ступень мельче.</p>
+<div class="ряд">
+  <div><div class="б">768 × 1024</div><div class="рамка" style="width:768px;height:700px"><iframe src="../pages/court.html?id=olimpus&amp;a=1" style="width:768px;height:700px"></iframe></div></div>
+  <div><div class="б">844 × 390</div><div class="рамка" style="width:600px;height:700px"><iframe src="../pages/court.html?id=olimpus&amp;b=1" style="width:844px;height:700px;transform:scale(0.711);transform-origin:0 0"></iframe></div></div>
+</div>
+<script>
+/* прокручиваем обе рамки к шапке корта — именно её разбирали */
+addEventListener('load', () => setTimeout(() => {
+  document.querySelectorAll('iframe').forEach(f => {
+    const э = f.contentDocument.querySelector('.ct-detail-header') ||
+              f.contentDocument.querySelector('.ct-detail-name');
+    if (э) э.scrollIntoView({block:'start'});
+  });
+}, 2500));
+</script>
+</body></html>

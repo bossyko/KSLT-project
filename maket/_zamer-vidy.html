@@ -20,7 +20,12 @@ window.замерить = async (страницы, виды) => {
     вых[стр] = {};
     for (const [w,h] of виды) {
       r.style.width = w+'px'; r.style.height = h+'px';
-      await new Promise(res => { r.onload = res; r.src = '../'+стр+'?замер='+w+'_'+Date.now(); });
+      /* РАЗДЕЛИТЕЛЬ ВЫБИРАЕТСЯ ПО АДРЕСУ. Первая версия всегда лепила «?замер=»,
+         и страница с собственным параметром — court.html?id=olimpus — грузилась
+         как «?id=olimpus?замер=…», то есть без корта вовсе. Прибор при этом
+         честно говорил «различий нет»: сравнивать было нечего. */
+      const разд = стр.indexOf('?') === -1 ? '?' : '&';
+      await new Promise(res => { r.onload = res; r.src = '../'+стр+разд+'замер='+w+'_'+Date.now(); });
       await new Promise(res => setTimeout(res, 450));
       const d = r.contentWindow, doc = r.contentDocument;
       const карта = {};

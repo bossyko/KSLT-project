@@ -415,7 +415,9 @@
 .bc-map-cancel { background: var(--alpha-white-08); color: var(--alpha-white-50); }
 
 /* ---- Responsive ---- */
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ — 16.10, кусок 75: поля секции ужимаются уже на планшете,
+   как у всех прочих секций продукта. */
+@media (max-width: 992px) {
     .bc-section {
         padding: var(--space-lg, 2rem) var(--pad-x);
     }
