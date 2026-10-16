@@ -100,7 +100,8 @@ const КУСКИ = [
     ['эфир одной краской', 'check-efir-odnoy-kraskoy.js', 'check-efir-odnoy-kraskoy-otkat.js'],
     ['сторона игрока', 'check-storona-odno-opredelenie.js', 'check-storona-odno-opredelenie-otkat.js'],
     ['отсчёт и скидка', 'check-otschet-ozhidanie.js', 'check-otschet-ozhidanie-otkat.js'],
-    ['лестница прозрачности', 'check-lestnica-prozrachnosti.js', 'check-lestnica-prozrachnosti-otkat.js']
+    ['лестница прозрачности', 'check-lestnica-prozrachnosti.js', 'check-lestnica-prozrachnosti-otkat.js'],
+    ['версии файлов', 'check-versii-fajlov.js', 'check-versii-fajlov-otkat.js']
 ];
 
 function прогнать(файл) {
