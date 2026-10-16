@@ -103,6 +103,7 @@ const КУСКИ = [
     ['лестница прозрачности', 'check-lestnica-prozrachnosti.js', 'check-lestnica-prozrachnosti-otkat.js'],
     ['версии файлов', 'check-versii-fajlov.js', 'check-versii-fajlov-otkat.js'],
     ['точки останова', 'check-tochki-ostanova.js', 'check-tochki-ostanova-otkat.js'],
+    ['посев: половины', 'check-posev-polovin.js', 'check-posev-polovin-otkat.js'],
     ['движение и межстрочные', 'check-dvizhenie-i-mezhstrochnye.js', 'check-dvizhenie-i-mezhstrochnye-otkat.js']
 ];
 
