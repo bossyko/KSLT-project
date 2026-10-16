@@ -521,9 +521,6 @@
     }
 }
 
-@media (max-width: 480px) {
-}
-
 @media (max-width: 375px) {
     .detail-item {
         font-size: var(--fs-sm);

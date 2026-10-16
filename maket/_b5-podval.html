@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<title>Подвал на 1024 — после самосборки колонок</title>
+<style>
+  body { margin:0; background:#111; color:#fff; font:13px/1.4 system-ui,sans-serif; }
+  h1 { font-size:14px; margin:10px 14px 4px; color:#CCFF00; letter-spacing:.04em; }
+  p  { margin:0 14px 10px; color:#aaa; }
+  .ramka { width:1024px; height:860px; margin:0 14px 20px; border:1px solid #333; overflow:hidden; }
+  iframe { width:1024px; height:860px; border:0; }
+</style></head><body>
+<h1>ПОДВАЛ НА 1024 — ПОСЛЕ</h1>
+<p>Колонки набираются сами (<code>auto-fit, minmax(170px, 1fr)</code>). Граница 1200 снесена. Пол дорожки 170 — замерен: при 140 всё в один ряд, но почтовый адрес ломается посреди слова.</p>
+<div class="ramka"><iframe id="r" src="../index.html?stand1792172257"></iframe></div>
+<script>
+  const r = document.getElementById('r');
+  r.addEventListener('load', () => {
+    setTimeout(() => {
+      const d = r.contentWindow;
+      d.scrollTo(0, d.document.body.scrollHeight);
+      /* Шапка становится непрозрачной по классу .scrolled, который вешает
+         js на событие прокрутки. Снимок, сделанный сразу после прыжка,
+         ловит шапку ещё полупрозрачной, и сквозь неё светит лаймовая
+         кнопка спонсорского блока. Это беда СТЕНДА, а не страницы: живой
+         человек доезжает до подвала прокруткой, и класс уже стоит.
+         Проверено: даже при заходе по якорю #contacts класс встаёт. */
+    }, 700);
+  });
+</script>
+</body></html>
