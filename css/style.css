@@ -2204,11 +2204,11 @@ h2 {
     background: var(--bg-primary);
 }
 
-.tournaments-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-}
+/* ОПРЕДЕЛЕНИЕ СЕТКИ ТУРНИРОВ СНЕСЕНО ОТСЮДА 16.10. Оно давало две
+   колонки, но ниже по этому же файлу стоит второе — двенадцать колонок,
+   — и при равной силе выигрывало оно, всегда. Понятие одно, определение
+   теперь тоже одно: `.tournaments-grid` живёт в разделе карточки турнира.
+   Сторож: tools/check-turniry-vidy.js. */
 
 .tournament-card {
     background: var(--bg-card);

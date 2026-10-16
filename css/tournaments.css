@@ -159,11 +159,6 @@
 }
 
 /* Tournament Grid */
-.tournaments-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-lg);
-}
 
 /* Tournament Card */
 .tournament-card {
@@ -417,9 +412,6 @@
 
 /* Responsive */
 @media (max-width: 992px) {
-    .tournaments-grid{
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 /* Блок 600 снесён 16.10: он ставил ту же одну колонку, что и блок ниже,
@@ -520,13 +512,6 @@
         white-space: normal;
     }
 
-}
-
-/* ТОЛЬКО ТЕЛЕФОН: одна колонка. Лестница 3 · 2 · 1 — домашняя. */
-@media (max-width: 640px) {
-    .tournaments-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 @media (max-width: 640px) {
