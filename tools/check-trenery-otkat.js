@@ -44,11 +44,23 @@ const ОТКАТЫ = [
    'в обложке не осталось ни одного clamp'],
 
   /* Откат ВОЗВРАЩАЕТ блок ≤480 со своим кеглем — ровно то, что было */
-  [CSS, `@media (max-width: 375px) {`,
-         `@media (max-width: 375px) {
-    .co-hero-title {
+  /* Якорь был на `@media (max-width: 375px)`, а 16.10 граница 375 ушла:
+     её вторые ступени стали непрерывными, остальное переехало на 640.
+     Держимся за СОДЕРЖИМОЕ блока — за селектор, который в нём живёт. */
+  [CSS, `    .co-detail-stat-label {
+        font-size: var(--fs-xs);
+    }
+
+    .co-cta {`,
+         `    .co-hero-title {
         font-size: clamp(1.35rem, 5.8vw, 1.7rem);
-    }`,
+    }
+
+    .co-detail-stat-label {
+        font-size: var(--fs-xs);
+    }
+
+    .co-cta {`,
    'кегль обложки не переопределяется ширинами'],
 
   [JS, `        container.className = 'trn-filters';`,

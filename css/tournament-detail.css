@@ -2108,12 +2108,12 @@ tr.td-rr-row-highlight {
 
 @media (max-width: 640px) {
     .td-match {
-        width: 170px;
-        min-width: 170px;
+        width: clamp(150px, 40vw, 170px);
+        min-width: clamp(150px, 40vw, 170px);
     }
 
     .td-bracket-round {
-        min-width: 180px;
+        min-width: clamp(160px, 42.7vw, 180px);
     }
 
     .td-tabs {
@@ -2148,16 +2148,9 @@ tr.td-rr-row-highlight {
     }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     .td-hero-meta {
         font-size: var(--fs-sm);
-    }
-    .td-match {
-        width: 150px;
-        min-width: 150px;
-    }
-    .td-bracket-round {
-        min-width: 160px;
     }
 }
 

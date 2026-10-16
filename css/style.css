@@ -4207,7 +4207,7 @@ h2 {
 
 @media (max-width: 640px) {
     .carousel-slide-infinite {
-        width: 140px;
+        width: clamp(110px, 29.3vw, 140px);
     }
 
     .carousel-track-infinite {
@@ -4886,7 +4886,7 @@ h2 {
     }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     /* На узком телефоне полоса всего 324 пикселя, и со счётчиками строка
        не сходится. Цифры не теряются: то же число стоит в подзаголовке
        блока — «8 турниров в архиве» */
@@ -8354,7 +8354,7 @@ body.nav-open {
     }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     .kslt-back-wrap {
         padding: 10px 12px;
     }
@@ -8999,7 +8999,7 @@ body.nav-open {
 
 @media (max-width: 640px) {
     .auth-card {
-        padding: 28px 20px;
+        padding: clamp(24px, 6.4vw, 28px) clamp(16px, 4.3vw, 20px);
         border-radius: var(--radius-lg);
     }
 }
@@ -9446,14 +9446,6 @@ body.nav-open {
 
     .mobile-dropdown-menu li a {
         padding: 10px 14px;
-    }
-
-    .carousel-slide-infinite {
-        width: 110px;
-    }
-
-    .auth-card {
-        padding: 24px 16px;
     }
 
     .scroll-to-top {

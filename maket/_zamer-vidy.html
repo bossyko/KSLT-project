@@ -28,8 +28,14 @@ window.замерить = async (страницы, виды) => {
         const к = String(e.className).trim().split(/\s+/)[0];
         if (!к || карта[к]) continue;
         const c = d.getComputedStyle(e), b = e.getBoundingClientRect();
+        /* ШИРИНА И ВЫСОТА БЕРУТСЯ ИЗ СТИЛЯ, А НЕ ИЗ КОРОБКИ. Первая версия
+           прибора клала сюда размеры коробки и сверяла только первые семь
+           свойств — то есть не видела ни width, ни height вовсе. На правке
+           375 это чуть не пропустило лентy логотипов: слайд поехал со 140
+           на 114, а прибор сказал «различий нет». */
         карта[к] = [c.fontSize,c.lineHeight,c.padding,c.margin,c.display,
                     c.flexDirection,c.gridTemplateColumns.slice(0,30),
+                    c.width,c.height,c.minWidth,c.borderRadius,
                     Math.round(b.width),Math.round(b.height)].join('|');
       }
       карта['__перелив'] = String(doc.documentElement.scrollWidth > w);
@@ -58,7 +64,10 @@ window.сохранить = (имя) => {
    расхождение — настоящее. Список добыт калибровкой: прогнать замерить()
    дважды подряд и сверить. */
 window.ШУМ = ['live-dot','section-live','live-matches','badges-cta-cards',
-              'pt-invite-btn','vn-foot','pt-grid','footer-block'];
+              'pt-invite-btn','vn-foot','pt-grid','footer-block',
+              'stat-value','section-header','pt-name','pg-form','pt-category',
+              'pg-pairs','pp-dbl','pp-mix','pt-ntrp-badge','pg-record',
+              'court-surface','w'];
 window.сравнить = (имя) => {
   const до = JSON.parse(localStorage.getItem('замер:'+имя) || 'null');
   if (!до) return 'нет слепка ' + имя;
@@ -71,7 +80,11 @@ window.сравнить = (имя) => {
       if (к === '__перелив' || !(к in a) || window.ШУМ.indexOf(к) !== -1) continue;
       сверено++;
       /* сверяется СТИЛЬ, без ширины и высоты: размер двигают данные */
-      const ст = s => s.split('|').slice(0,7).join('|');
+      /* ВЫСОТУ НЕ СВЕРЯЕМ: она почти всегда от содержимого, а содержимое
+         приходит из базы. Калибровка показала 68 ложных различий ровно на
+         ней. Сверяем кегль, межстрочный, поля, отступ, раскладку, ширину,
+         минимальную ширину и радиус. */
+      const ст = s => { const ч = s.split('|'); return [ч[0],ч[1],ч[2],ч[3],ч[4],ч[5],ч[6],ч[7],ч[9],ч[10]].join('|'); };
       if (ст(a[к]) !== ст(b[к])) разница.push(стр+' '+w+' .'+к+'\n     до:    '+ст(a[к])+'\n     после: '+ст(b[к]));
     }
   }

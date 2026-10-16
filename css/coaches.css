@@ -683,22 +683,12 @@
     }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     
     /* Кегль обложки, поля витрины и кегль имени отсюда убраны: обложку
        держат крутилки, а у витрины ОДИН уровень на все виды. */
     .co-detail-stat-num {
         font-size: var(--fs-lg);
-    }
-    .co-cta {
-        padding: 28px 16px;
-    }
-    .co-cta h3 {
-        font-size: var(--fs-lg);
-    }
-    .co-cta-btn {
-        padding-inline: 24px;
-        font-size: var(--fs-sm);
     }
 }
 

@@ -1137,7 +1137,7 @@ a.pp-tournament:hover {
     }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     .pp-hero,
     .pp-container { --pp-gutter: 12px; }
     .pp-hero {
@@ -1469,7 +1469,7 @@ a.pp-tournament:hover {
 /* ---- H2H Responsive ---- */
 @media (max-width: 640px) {
     .h2h-modal {
-        padding: 28px 20px;
+        padding: clamp(24px, 6.4vw, 28px) clamp(16px, 4.3vw, 20px);
         border-radius: var(--radius-lg);
     }
 
@@ -1478,12 +1478,12 @@ a.pp-tournament:hover {
     }
 
     .h2h-photo {
-        width: 56px;
-        height: 56px;
+        width: clamp(48px, 12.8vw, 56px);
+        height: clamp(48px, 12.8vw, 56px);
     }
 
     .h2h-score {
-        font-size: var(--fs-xl);
+        font-size: clamp(1.3125rem, 5.6vw, 1.625rem);
     }
 
     .h2h-name {
@@ -1508,22 +1508,9 @@ a.pp-tournament:hover {
     }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     .h2h-overlay {
         padding: 12px;
-    }
-
-    .h2h-modal {
-        padding: 24px 16px;
-    }
-
-    .h2h-photo {
-        width: 48px;
-        height: 48px;
-    }
-
-    .h2h-score {
-        font-size: var(--fs-lg);
     }
 }
 

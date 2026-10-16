@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>375 — лента и карточка входа на 390</title>
+<style>body{margin:0;background:#111;color:#fff;font:13px system-ui,sans-serif}
+h1{font-size:14px;margin:10px 14px 2px;color:#CCFF00;letter-spacing:.04em}
+p{margin:0 14px 8px;color:#999}
+.ряд{display:flex;gap:16px;padding:0 14px 16px}
+.рамка{width:390px;height:720px;border:1px solid #333;overflow:hidden}
+iframe{width:390px;height:720px;border:0}</style></head><body>
+<h1>ГРАНИЦА 375 УБРАНА — ВИД 390</h1>
+<p>Слева главная: лента логотипов. Справа вход: карточка. Было на 390 — слайд 140, поля карточки 28/20. Стало — слайд 114, поля 24.96/16.77.</p>
+<div class="ряд">
+  <div class="рамка"><iframe id="a" src="../index.html?s375a"></iframe></div>
+  <div class="рамка"><iframe id="b" src="../pages/auth.html?s375b"></iframe></div>
+</div>
+<script>
+document.getElementById('a').addEventListener('load', () => {
+  setTimeout(() => { const d = document.getElementById('a').contentWindow;
+    const э = d.document.querySelector('.sponsors-carousel-infinite') || d.document.querySelector('.hero-sponsors-section');
+    if (э) э.scrollIntoView({block:'center'}); }, 900);
+});
+</script>
+</body></html>

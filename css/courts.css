@@ -1039,7 +1039,7 @@
         grid-template-columns: 1fr;
     }
     .ct-gallery-img {
-        height: 200px;
+        height: clamp(160px, 42.7vw, 200px);
     }
 }
 
@@ -1047,22 +1047,9 @@
    мерен и в этот заход не трогается. Всё, что принадлежало витрине
    (поля тела, кегль имени, высота фото, поля контейнера), отсюда снято:
    у витрины ОДИН уровень на все виды, как у лендинга. */
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     .ct-detail-name {
         font-size: var(--fs-lg);
-    }
-    .ct-gallery-img {
-        height: 160px;
-    }
-    .ct-cta {
-        padding: 28px 16px;
-    }
-    .ct-cta h3 {
-        font-size: var(--fs-lg);
-    }
-    .ct-cta-btn {
-        padding-inline: 24px;
-        font-size: var(--fs-sm);
     }
     .ct-schedule-row {
         flex-direction: column;
