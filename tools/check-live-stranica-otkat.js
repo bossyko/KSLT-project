@@ -126,11 +126,7 @@ const ОТКАТЫ = [
    '',
    'табло объявлено живой областью'],
 
-  ['css/live-match.css',
-   '    .live-badge.is-live { animation: none; }',
-   '    .live-badge.is-live { opacity: 1; }',
-   'движение выключается у того, кто просил систему его убрать'],
-
+  
   ['js/live-match.js',
    '    function loadPoints() {',
    '    function loadList() { return null; }\n\n    function loadPoints() {',
@@ -348,7 +344,7 @@ const ОТКАТЫ = [
   ['css/live-match.css',
    '{ width: 120px; margin: 0 var(--space-3); gap: 0; }\n    .lm-sponsors .carousel-slide-infinite img { height: 56px; padding: 6px; }',
    '{ width: 100px; margin: 0 var(--space-3); gap: 0; }\n    .lm-sponsors .carousel-slide-infinite img { height: 56px; padding: 6px; }',
-   'СТОРОЖ: полоса спонсоров на узких видах совпадает с is-strip'],
+   'СТОРОЖ: полоса спонсоров на узких видах совпадает с is-strip']
 
 ];
 

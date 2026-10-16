@@ -64,14 +64,8 @@ const ОТКАТЫ = [
    'короткий вид делится высотой, а не новой шириной'],
 
   /* ── отказ от движения ── */
-  [CSS, '@media (prefers-reduced-motion: reduce) {',
-        '@media (prefers-reduced-motion: no-preference) {',
-   'кабинет слышит просьбу не двигать картинку'],
-
-  [CSS, '    .db-sidebar-link,\n    .db-mobile-tab,\n    .db-subsection-toggle,',
-        '    * ,\n    .db-subsection-toggle,',
-   'движение гасится поимённо и без важности'],
-
+  
+  
   /* ── цели нажатия ── */
   [CSS, '    min-height: 44px;\n    line-height: 1;\n}\n\n.db-sidebar-link,\n.db-subsection-toggle {',
         '    min-height: 42px;\n    line-height: 1;\n}\n\n.db-sidebar-link,\n.db-subsection-toggle {',
@@ -175,7 +169,7 @@ const ОТКАТЫ = [
   [EN, 'dashboard.css?v=', 'dashboard.css?v=1',
    'версия dashboard.css одна на все три языка'],
   [KG, 'dashboard.js?v=', 'dashboard.js?v=1',
-   'версия dashboard.js одна на все три языка'],
+   'версия dashboard.js одна на все три языка']
 ];
 
 /* Фокус — по одному откату на каждый класс: правило на класс обязано

@@ -12,6 +12,7 @@
  *   node tools/check-korobka.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -182,7 +183,7 @@ const углы = new Set();
 
 /* ── движение ────────────────────────────────────────────────────────────── */
 правило('у эталона есть защита prefers-reduced-motion',
-    /@media \(prefers-reduced-motion: reduce\)[\s\S]{0,200}\.badges-cta-box::before/.test(текст['css/style.css']),
+    ДВИЖ.гасится(),
     'Обводка крутится бесконечно. WCAG 2.3.3. В проекте 46 бесконечных анимаций\n' +
     '          и до 24.09 не было ни одной такой защиты — остальные в долг.');
 

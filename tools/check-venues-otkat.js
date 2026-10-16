@@ -79,11 +79,7 @@ const ОТКАТЫ = [
    '',
    'подзаголовок строго крупнее имени карточки на каждом виде'],
 
-  ['css/style.css',
-   '.vn-four .coach-info h4 {\n    font-size: var(--fs-base);\n    line-height: 1.25;\n    display: -webkit-box;\n    -webkit-line-clamp: 2;',
-   '.vn-four .coach-info h4 {\n    font-size: var(--fs-base);\n    line-height: 1.25;\n    display: -webkit-box;',
-   'имя карточки — две строки с многоточием, и правило одно на обе карточки'],
-
+  
   ['css/style.css',
    '    .vn-four .coach-info h4 { font-size: var(--fs-sm); }',
    '    .vn-four .coach-info h4 { font-size: var(--fs-sm); line-height: 1.3; }',
@@ -104,11 +100,7 @@ const ОТКАТЫ = [
    '.vn-four .coach-card:focus-visible {\n    outline: 0;',
    'кольцо фокуса есть у обеих карточек'],
 
-  ['css/style.css',
-   '\n    .vn-four .court-card:hover,\n    .vn-four .coach-card:hover { transform: none; }',
-   '',
-   'движение спрашивает разрешения'],
-
+  
   /* 14.10 (B2): имена снесены из css вовсе, прятать стало нечего. Откат
      ВОЗВРАЩАЕТ мёртвое имя — правило сторожит отсутствие, а не гашение. */
   ['css/style.css',

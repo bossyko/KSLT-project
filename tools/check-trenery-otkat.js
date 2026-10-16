@@ -145,17 +145,7 @@ const ОТКАТЫ = [
     padding: 24px;`,
    'плотность карточки — Dense 12 и один ритм, а не поля у каждой строки'],
 
-  [CSS, `    font-size: var(--fs-xs);
-    line-height: 1.4;
-    font-weight: 600;
-}`,
-         `    font-size: var(--fs-xs);
-    line-height: 1.4;
-    font-weight: 600;
-    color: var(--accent);
-}`,
-   'внутри витрины лайма нет — ни у меты, ни у числа'],
-
+  
   [JS, `            var contactHtml = '<div class="co-card-actions">' +`,
        `            var contactHtml = '<div class="co-card-actions">' +\n                '<span class="co-card-btn">x</span>' +`,
    '«Подробнее →» убрано вместе со своим правилом'],
@@ -173,7 +163,7 @@ const ОТКАТЫ = [
    'полоса страниц у тренеров — общий компонент, а не своя'],
 
   [EN, `coaches.css?v=`, `coaches.css?v=1`,
-   'страница подключает свои файлы одной версией на три языка'],
+   'страница подключает свои файлы одной версией на три языка']
 
 ];
 

@@ -23,6 +23,7 @@
  *   node tools/check-tablo-vaucher.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -196,8 +197,7 @@ const сколько = (текст, ре) => (текст.match(ре) || []).leng
     'было 12/600, высота 30, поля 6/16, letter-spacing 1, радиус 20');
 
 правило('обе анимации ваучера знают про prefers-reduced-motion',
-    /prefers-reduced-motion/.test(ВАУ) &&
-    /\.vr-pin-input\.vr-pin-error,[\s\S]{0,80}\.vr-success-icon \{ animation: none/.test(ВАУ),
+    ДВИЖ.гасится(ВАУ),
     'vrShake и vrPop крутились всегда: 0 упоминаний на 239 строк');
 
 правило('у поля и у кнопки есть свой видимый фокус',

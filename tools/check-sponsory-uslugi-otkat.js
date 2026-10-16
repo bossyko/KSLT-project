@@ -12,7 +12,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['css/sponsors.css', 'css/services.css', 'js/sponsors-page.js',
+const ФАЙЛЫ = ['css/tokens.css', 'css/sponsors.css', 'css/services.css', 'js/sponsors-page.js',
                'pages/sponsors.html', 'pages/sponsors-en.html', 'pages/sponsors-kg.html'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
@@ -86,19 +86,22 @@ const ОТКАТЫ = [
  '.sn-btn:focus-visible,',
  '.sn-btn-nope:focus-visible,',
  'у страницы спонсоров есть видимый фокус'],
-
-['снять спрос разрешения на движение', С,
- '@media (prefers-reduced-motion: reduce) {',
- '@media (prefers-reduced-motion-nope: reduce) {',
+['снять общий отказ от движения', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
  'движение страницы спонсоров спрашивает разрешения'],
 
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-spons-'));
 fs.mkdirSync(path.join(песок, 'css'), { recursive: true });
+/* Общий блок отказа от движения живёт в tokens.css, и правило читает
+   его по соседству — без копии песочница не проходит сама по себе. */
+fs.copyFileSync(path.join(__dirname, '..', 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
 fs.mkdirSync(path.join(песок, 'js'), { recursive: true });
 fs.mkdirSync(path.join(песок, 'pages'), { recursive: true });
 fs.mkdirSync(path.join(песок, 'tools'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-sponsory-uslugi.js'),
                  fs.readFileSync(path.join(__dirname, 'check-sponsory-uslugi.js')));
 

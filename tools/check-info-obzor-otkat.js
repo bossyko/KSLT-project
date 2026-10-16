@@ -85,15 +85,13 @@ const ОТКАТЫ = [
   [CSS, '.io-featured:focus-visible,', '.io-featured:focus-net,',
    'фокус с клавиатуры виден'],
 
-  [CSS, '@media (prefers-reduced-motion: reduce) {', '@media (prefers-reduced-motion: net) {',
-   'движение спрашивает системную настройку'],
-
+  
   ['pages/info-en.html', 'info-overview.css?v=', 'info-overview.css?v=11&bylo=',
    'версия стиля поднята и одинакова на трёх языках'],
 
   [JS, "        heroSub: 'an amateur tennis community platform',",
        "        heroSub: 'an amateur tennis community platform',\n        heroSubRu: 'площадка любительского тенниса',\n        heroSub: 'дубль',",
-   'четвёртая строка обложки — только у английского словаря'],
+   'четвёртая строка обложки — только у английского словаря']
 ];
 
 function прогон() {

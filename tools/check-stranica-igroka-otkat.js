@@ -121,10 +121,7 @@ const ОТКАТЫ = [
         '    transition: all 0.2s ease; /*',
    'переходы перечислены поимённо, а не «all»'],
 
-  [CSS, '@media (prefers-reduced-motion: reduce)',
-        '@media (prefers-reduced-motion: reduce-net)',
-   'у страницы есть отказ от движения'],
-
+  
   /* ── окно H2H ── */
   [JSФ, "        overlay.setAttribute('role', 'dialog');",
         "        overlay.className = 'h2h-overlay';",
@@ -248,7 +245,7 @@ const ОТКАТЫ = [
 
   [RU, '<script src="../js/kslt-otsechka.js?v=1"></script>',
        '<script src="../js/kslt-otsechka.js?v=2"></script>',
-   'версия kslt-otsechka.js одна на все три языка'],
+   'версия kslt-otsechka.js одна на все три языка']
 ];
 
 function прогон() {

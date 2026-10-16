@@ -8,7 +8,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['css/style.css', 'js/home-badges.js'];
+const ФАЙЛЫ = ['css/tokens.css', 'css/style.css', 'js/home-badges.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-znachki.js'), 'utf8');
@@ -66,8 +66,8 @@ const ОТКАТЫ = [
  'кегль подзаголовка перебивки задан ровно дважды: база и одна граница'],
 
 ['вернуть подписи значка кегль 11 на телефоне', 'css/style.css',
- '    .badge-cta-name {\n        font-size: var(--fs-sm);\n        line-height: 1.2;',
- '    .badge-cta-name {\n        font-size: var(--fs-2xs);\n        line-height: 1.2;',
+ '    .badge-cta-name {\n        font-size: var(--fs-sm);\n        line-height: 1.1;',
+ '    .badge-cta-name {\n        font-size: var(--fs-2xs);\n        line-height: 1.1;',
  'подпись значка на телефоне — телефонная ступень card title'],
 
 ['вернуть кнопке высоту из полей', 'css/style.css',
@@ -143,10 +143,9 @@ const ОТКАТЫ = [
  '    padding: var(--space-6) var(--space-8);   /* 24 / 32 */',
  '    padding: 22px 34px;',
  'поля коробки встали на шкалу'],
-
-['убрать защиту от движения', 'css/style.css',
- '@media (prefers-reduced-motion: reduce) {\n    .badges-cta-box::before,',
- '@media (prefers-reduced-motion: no-preference) {\n    .badges-cta-box::before,',
+['снять общий отказ от движения', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
  'движение выключается тем, кто попросил его выключить'],
 
 ['вернуть эмодзи в дерево доступности', 'js/home-badges.js',
@@ -167,8 +166,12 @@ const ОТКАТЫ = [
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'znachki-otkat-'));
 fs.mkdirSync(path.join(песок, 'css'));
+/* Общий блок отказа от движения живёт в tokens.css, и правило читает
+   его по соседству — без копии песочница не проходит сама по себе. */
+fs.copyFileSync(path.join(__dirname, '..', 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
 fs.mkdirSync(path.join(песок, 'js'));
 fs.mkdirSync(path.join(песок, 'tools'));
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-znachki.js'), ПРАВИЛО);
 
 function прогон(замена) {

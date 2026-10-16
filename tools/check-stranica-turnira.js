@@ -20,6 +20,7 @@
  *   node tools/check-stranica-turnira.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -228,10 +229,7 @@ const чип = блок(CSS, '.td-fic-chip');
        знаков дотягивалось от первого блока до ОБЫЧНОГО правила чипа ниже
        по файлу, и переименование селектора внутри media проходило
        незамеченным. ПРАВИЛО СМОТРИТ В СВОЙ БЛОК. */
-    (() => {
-        const тела = блокиОтказаОтДвижения(CSS).join('\n');
-        return /\.td-fic-chip\s*[,{]/.test(тела) && /\.td-sched-ranshe\s*[,{]/.test(тела);
-    })(),
+    ДВИЖ.гасится(CSS),
     'В файле было НОЛЬ prefers-reduced-motion при трёх анимациях и\n' +
     '          девятнадцати переходах. Свои переходы отказ несут.');
 

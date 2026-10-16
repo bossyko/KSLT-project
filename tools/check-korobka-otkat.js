@@ -61,15 +61,16 @@ const ОТКАТЫ = [
  'from var(--pt-angle-2, 0deg),',
  'имён у переменной угла не больше двух — и оба известны'],
 
-['убрать защиту от движения у эталона', 'css/style.css',
- '@media (prefers-reduced-motion: reduce) {\n    .badges-cta-box::before,',
- '@media (prefers-reduced-motion: no-preference) {\n    .badges-cta-box::before,',
- 'у эталона есть защита prefers-reduced-motion']
+['снять общий отказ от движения — эталон живёт им', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
+ 'у эталона есть защита prefers-reduced-motion'],
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'korobka-otkat-'));
 fs.mkdirSync(path.join(песок, 'css'));
 fs.mkdirSync(path.join(песок, 'tools'));
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-korobka.js'), ПРАВИЛО);
 
 function прогон(замена) {

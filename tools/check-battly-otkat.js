@@ -92,10 +92,9 @@ const ОТКАТЫ = [
  '.bo-featured > .bo-featured-cover:focus-visible {',
  '.bo-featured > .bo-featured-cover:hover {',
  'видимый фокус есть у каждого, кто берёт фокус'],
-
-['снять у обзора спрос разрешения на движение', О,
- '@media (prefers-reduced-motion: reduce) {\n    .bo-cd,',
- '@media (min-width: 0px) {\n    .bo-cd,',
+['снять общий отказ от движения — баттлы живут им', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
  'движение спрашивает разрешения в обоих файлах'],
 
 ['вернуть подписи полосы краску text-dim', О,
@@ -178,6 +177,7 @@ const ОТКАТЫ = [
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-battly-'));
 ['css', 'js', 'tools'].forEach(д => fs.mkdirSync(path.join(песок, д), { recursive: true }));
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-battly.js'),
                  fs.readFileSync(path.join(__dirname, 'check-battly.js')));
 

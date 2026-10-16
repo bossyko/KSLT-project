@@ -46,11 +46,7 @@ const ОТКАТЫ = [
    '.sponsors-cloud .sponsor-logo-link:focus-visible,\n.sponsor-hero-logo:focus-visible {\n    outline-offset: 3px;\n}',
    'у плитки есть кольцо фокуса'],
 
-  ['css/style.css',
-   '    .sponsor-hero-logo:hover,\n    .sponsors-cloud .sponsor-logo-link:hover { transform: none; }',
-   '    .sponsor-hero-logo:hover { transform: none; }',
-   'движение гасится по просьбе системы'],
-
+  
   ['css/style.css',
    '    color: var(--text-muted);\n}\n\n/* ── СТЕНА ЛОГОТИПОВ',
    '    color: var(--accent);\n}\n\n/* ── СТЕНА ЛОГОТИПОВ',
@@ -119,7 +115,7 @@ const ОТКАТЫ = [
   ['css/style.css',
    '    border-color: var(--accent);\n    box-shadow: 0 0 0 1px var(--accent);',
    '    border-color: var(--border-light);',
-   'наведение подсвечивает плитку акцентом'],
+   'наведение подсвечивает плитку акцентом']
 
 ];
 

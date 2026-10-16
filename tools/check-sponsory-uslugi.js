@@ -15,6 +15,7 @@
  *   node tools/check-sponsory-uslugi.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -136,7 +137,7 @@ const всеВхождения = (т, рег) => (т.match(рег) || []).length
     '`Button 17:82` требует кольцо прямо');
 
 правило('движение страницы спонсоров спрашивает разрешения',
-    /@media \(prefers-reduced-motion: reduce\)/.test(СПО),
+    ДВИЖ.гасится(),
     'в файле четыре перехода `transform` и `box-shadow`, а блока не было\n' +
     'вовсе');
 

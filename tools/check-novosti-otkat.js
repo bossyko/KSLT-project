@@ -148,6 +148,7 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'novosti-otkat-'));
 fs.mkdirSync(path.join(песок, 'css'));
 fs.mkdirSync(path.join(песок, 'js'));
 fs.mkdirSync(path.join(песок, 'tools'));
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-novosti.js'), ПРАВИЛО);
 
 function прогон(замена) {

@@ -22,6 +22,7 @@
  *   node tools/check-sudya.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -351,7 +352,7 @@ const коды = ['live','warmup','paused','completed','medical','toilet','weath
     'Не было ни у одной. WCAG 2.4.7.');
 
 правило('движение выключается по просьбе системы',
-    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]{0,320}\.um-status-live \{ animation: none/.test(CSSч),
+    ДВИЖ.гасится(),
     'Полоса LIVE пульсирует бесконечно и висит перед судьёй весь матч.');
 
 правило('табло — живая область: диктор читает изменившийся счёт',

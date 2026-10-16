@@ -16,7 +16,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = [
+const ФАЙЛЫ = ['css/tokens.css', 
     'css/scoreboard.css', 'pages/scoreboard.html', 'js/scoreboard.js',
     'css/verify.css', 'pages/verify.html', 'pages/verify-en.html',
     'pages/verify-kg.html', 'js/verify.js',
@@ -167,9 +167,9 @@ const ОТКАТЫ = [
  '    font-size: 11px;\n    font-weight: var(--fw-medium);\n    line-height: var(--lh-none);\n    letter-spacing: 0.5px;\n    text-transform: uppercase;\n    margin-bottom: var(--space-5);',
  '    font-size: var(--fs-xs);\n    font-weight: var(--fw-medium);\n    line-height: var(--lh-none);\n    letter-spacing: 0.5px;\n    text-transform: uppercase;\n    margin-bottom: var(--space-5);',
  'плашка ваучера стоит на геометрии Badge 27:53'],
-
-['убрать блок движения из ваучера', ВАУ,
- '@media (prefers-reduced-motion: reduce) {', '@media (min-width: 1px) {',
+['снять общий отказ от движения', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
  'обе анимации ваучера знают про prefers-reduced-motion'],
 
 ['снять видимый фокус с кнопки', ВАУ,
@@ -246,12 +246,16 @@ const ОТКАТЫ = [
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-tablo-'));
 ['css', 'js', 'tools', 'pages'].forEach(д => fs.mkdirSync(path.join(песок, д), { recursive: true }));
+/* Общий блок отказа от движения живёт в tokens.css, и правило читает
+   его по соседству — без копии песочница не проходит сама по себе. */
+fs.copyFileSync(path.join(__dirname, '..', 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
 
 /* Сторож покрытия читает ВСЮ папку pages и ВСЕ чекеры — копируем их. */
 fs.readdirSync(path.join(КОРЕНЬ, 'pages')).filter(ф => ф.endsWith('.html')).forEach(ф => {
     fs.copyFileSync(path.join(КОРЕНЬ, 'pages', ф), path.join(песок, 'pages', ф));
 });
 fs.readdirSync(path.join(КОРЕНЬ, 'tools')).filter(ф => /^check-.*\.js$/.test(ф)).forEach(ф => {
+fs.copyFileSync(path.join(КОРЕНЬ, 'tools', 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
     fs.copyFileSync(path.join(КОРЕНЬ, 'tools', ф), path.join(песок, 'tools', ф));
 });
 

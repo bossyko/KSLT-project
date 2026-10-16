@@ -87,9 +87,7 @@ const ОТКАТЫ = [
   [CSS, '.pmm-go:focus-visible {', '.pmm-go:focus {',
    'фокус с клавиатуры виден у всех пяти нажимаемых'],
 
-  [CSS, '@media (prefers-reduced-motion: reduce) {', '@media (min-width: 1px) {',
-   'движение спрашивает системную настройку'],
-
+  
   [CSS, '    transition: border-color var(--transition-base);\n}\n\n.pmm-opt:hover',
         '    transition: all var(--transition-base);\n}\n\n.pmm-opt:hover',
    'transition: all не вернулся'],
@@ -170,7 +168,7 @@ const ОТКАТЫ = [
      доказательство умирает молча. Держимся за имя файла, а ломаем
      ОДИНАКОВОСТЬ — вставкой нуля в номер. */
   [EN, 'pricing.css?v=', 'pricing.css?v=0',
-   'версия стиля поднята и одинакова на всех трёх страницах'],
+   'версия стиля поднята и одинакова на всех трёх страницах']
 ];
 
 function прогон() {

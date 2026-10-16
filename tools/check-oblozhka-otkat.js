@@ -275,6 +275,7 @@ const копия = (отн) => {
 fs.readdirSync(path.join(КОРЕНЬ, 'pages')).filter(ф => ф.endsWith('.html')).forEach(ф => копия('pages/' + ф));
 fs.readdirSync(КОРЕНЬ).filter(ф => /^index.*\.html$/.test(ф)).forEach(копия);
 fs.mkdirSync(path.join(ВРЕМ, 'tools'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(ВРЕМ, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(ВРЕМ, 'tools', 'check-oblozhka.js'), ПРАВИЛО);
 
 const исходник = {};

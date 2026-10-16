@@ -24,6 +24,7 @@
  *   node tools/check-info-stranicy.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -121,7 +122,7 @@ const ФОКУСНЫЕ = ['.ip-faq-question:focus-visible', '.ip-cta-btn:focus-v
     ' — было ноль при 140 правилах, и это шесть страниц сразу');
 
 правило('движение спрашивает системную настройку',
-    /@media \(prefers-reduced-motion: reduce\)/.test(CSSч),
+    ДВИЖ.гасится(),
     'снято уважение к «меньше движения» при двадцати движущихся правилах');
 
 /* ─────────── МЁРТВОЕ ─────────── */

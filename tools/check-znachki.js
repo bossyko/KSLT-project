@@ -16,6 +16,7 @@
  *   node tools/check-znachki.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -253,7 +254,7 @@ const коробка = блок('.badges-cta-box');
 
 /* ── движение и доступность ──────────────────────────────────────────────── */
 правило('движение выключается тем, кто попросил его выключить',
-    /@media \(prefers-reduced-motion: reduce\)[\s\S]{0,200}\.badges-cta-box::before/.test(СТИ),
+    ДВИЖ.гасится(),
     'Обводка коробки крутится бесконечно. WCAG 2.3.3. В проекте 46 бесконечных\n' +
     '          анимаций и до 24.09 не было ни одного такого блока.');
 const js = безКом(чит('js/home-badges.js'));

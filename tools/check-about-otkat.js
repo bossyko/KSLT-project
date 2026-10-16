@@ -78,11 +78,7 @@ const ОТКАТЫ = [
    '.feature:focus-visible {\n    outline: 0;',
    'кольцо фокуса есть у плитки'],
 
-  ['css/style.css',
-   '\n    .feature:hover .feature-icon,\n    .feature:focus-visible .feature-icon { transform: none; }',
-   '',
-   'движение спрашивает разрешения'],
-
+  
   ['css/style.css',
    '.about-features > li {\n    display: flex;\n}\n\n',
    '',

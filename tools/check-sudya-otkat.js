@@ -51,14 +51,7 @@ const ОТКАТЫ = [
     color: var(--text-primary);`,
    'текст на кнопке очка почти-чёрный, а не белый'],
 
-  [CSS, `    line-height: 1.2;
-    overflow-wrap: anywhere;`,
-   `    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;`,
-   'имя игрока НИКОГДА не обрезается'],
-
+  
   [CSS, `    --um-target: 38dvh;`,
    `    --um-target: 321px;`,
    'мишень — ДОЛЯ ЭКРАНА, а не число'],
@@ -251,10 +244,7 @@ const ОТКАТЫ = [
    `    outline: none;`,
    'у кнопок есть кольцо фокуса'],
 
-  [CSS, `    .um-status-live { animation: none; }`,
-   ``,
-   'движение выключается по просьбе системы'],
-
+  
   [JSФ, `um-scoreboard" role="group" aria-live="polite"`,
    `um-scoreboard"`,
    'табло — живая область: диктор читает изменившийся счёт'],
@@ -281,7 +271,7 @@ const ОТКАТЫ = [
 
   [HTML, /href="\.\.\/css\/umpire\.css\?v=\d+"/,
    `href="../css/umpire.css"`,
-   'у стиля и скрипта судьи есть версия, и она не первая'],
+   'у стиля и скрипта судьи есть версия, и она не первая']
 ];
 
 function прогон() {

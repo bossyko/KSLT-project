@@ -24,6 +24,7 @@
  *   node tools/check-ceny.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -151,7 +152,7 @@ const фокусные = ['.pm-btn:focus-visible', '.pmm-close:focus-visible', '
     ' — до правки правило было ОДНО на 157 блоков');
 
 правило('движение спрашивает системную настройку',
-    /@media \(prefers-reduced-motion: reduce\)/.test(CSSч),
+    ДВИЖ.гасится(),
     'снято уважение к «меньше движения» при 24 движущихся правилах');
 
 правило('transition: all не вернулся',

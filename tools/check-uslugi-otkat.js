@@ -17,6 +17,7 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-uslugi-'));
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
 const CSS = 'css/services.css';
+const ТОК = 'css/tokens.css';
 const JS  = 'js/services.js';
 const EN  = 'pages/services-en.html';
 
@@ -150,9 +151,8 @@ const ОТКАТЫ = [
     color: var(--text-muted);`,
         `    color: var(--text-dim);`,
    'тихого текста 3.21 на странице не осталось'],
-
-  [CSS, `@media (prefers-reduced-motion: reduce) {`,
-        `@media (prefers-reduced-motion: no-preference-staroe) {`,
+  [ТОК, '    *,\n    *::before,\n    *::after {',
+        '    .db-mobile-tab,\n    .site-header {',
    'движение — с разрешения'],
 
   [CSS, `.sv-compact:focus-visible,`, `.sv-compact-staroe:focus-visible,`,

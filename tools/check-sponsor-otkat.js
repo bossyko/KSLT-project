@@ -75,11 +75,7 @@ const ОТКАТЫ = [
    '    background: var(--accent);\n    color: #0a0a0a;\n    font-size: var(--fs-sm);',
    'текст на лайме берётся токеном, а не литералом'],
 
-  ['css/style.css',
-   '    .sp-cta-btn { transition: none; }\n    .sp-cta-btn:hover { transform: none; }',
-   '    .sp-cta-btn { transition: none; }',
-   'движение гасится по просьбе системы'],
-
+  
   ['css/style.css',
    '    .sp-offer { padding: var(--space-4); }',
    '    .sp-offer { padding: 16px 14px; }',
@@ -93,7 +89,7 @@ const ОТКАТЫ = [
   ['css/style.css',
    '@media (orientation: landscape) and (max-height: 500px) {\n    .sp-offer { padding: var(--space-4) var(--space-6); }\n    .sp-offer-lead { margin-bottom: var(--space-4); }\n    .sp-nums { margin-bottom: var(--space-4); }\n    .sp-gives { margin-bottom: var(--space-4); }\n}',
    '',
-   'слоёв ровно четыре: ≤768, ≤640, поворот и движение'],
+   'слоёв ровно три: ≤768, ≤640 и поворот'],
 
   ['css/style.css',
    '    .sp-offer h2,\n',
@@ -139,7 +135,7 @@ const ОТКАТЫ = [
   ['index.html',
    ВЕРСИЯ_СЕЙЧАС,
    ВЕРСИЯ_НАЗАД,
-   'версии подняты'],
+   'версии подняты']
 ];
 
 function прогон() {

@@ -17,6 +17,7 @@
  *   node tools/check-uslugi.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -261,7 +262,7 @@ const ОБЛ = блок(CSS, '.sv-hero {');
     '`--text-dim` даёт 3.21 при норме 4.5. WCAG не делает скидки тихому тексту.');
 
 правило('движение — с разрешения',
-    /@media \(prefers-reduced-motion: reduce\)[\s\S]{0,400}animation:\s*none/.test(CSS),
+    ДВИЖ.гасится(),
     'Две бесконечные ленты ехали всегда: на 898 строк было НОЛЬ правил.');
 
 правило('у страницы есть своё кольцо фокуса',

@@ -243,6 +243,7 @@ fs.mkdirSync(path.join(песок, 'tools'));
    песочница эту систему повторяла. */
 fs.cpSync(path.join(КОРЕНЬ, 'images', 'live-fony'),
           path.join(песок, 'images', 'live-fony'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-live.js'), ПРАВИЛО);
 
 function прогон(замена) {

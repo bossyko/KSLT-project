@@ -17,6 +17,7 @@
  *   node tools/check-stranica-igroka.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -202,7 +203,7 @@ const блок = (текст, якорь) => {
     '          нуля вместо того, чтобы появиться сразу');
 
 правило('у страницы есть отказ от движения',
-    /@media \(prefers-reduced-motion: reduce\)/.test(CSS),
+    ДВИЖ.гасится(),
     'страница снова двигается у того, кто движение выключил');
 
 /* ══ 11. ОКНО H2H — НАСТОЯЩЕЕ ОКНО ════════════════════════════════════ */

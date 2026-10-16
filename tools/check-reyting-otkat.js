@@ -435,6 +435,7 @@ fs.mkdirSync(path.join(песок, 'css'));
 fs.mkdirSync(path.join(песок, 'js'));
 fs.mkdirSync(path.join(песок, 'pages'));
 fs.mkdirSync(path.join(песок, 'tools'));
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-reyting.js'), ПРАВИЛО);
 /* Разметку правило только читает, поэтому кладём как есть. */
 fs.writeFileSync(path.join(песок, 'index.html'), fs.readFileSync(path.join(КОРЕНЬ, 'index.html')));

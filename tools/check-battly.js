@@ -22,6 +22,7 @@
  *   node tools/check-battly.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -139,8 +140,7 @@ const границы = т => (т.match(/@media \(max-width: (\d+)px\)/g) || [])
     'при двух кнопках голоса, ссылке карточки, кнопке «ещё», месте и картах');
 
 правило('движение спрашивает разрешения в обоих файлах',
-    /@media \(prefers-reduced-motion: reduce\)/.test(ОБЗ) &&
-    /@media \(prefers-reduced-motion: reduce\)/.test(ВЫЗ),
+    ДВИЖ.гасится(ОБЗ) && ДВИЖ.гасится(ВЫЗ),
     'три анимации у обзора и две у вызова, из них три бесконечные: блик\n' +
     'отсчёта, пульс срочности и пульс кнопки голоса');
 

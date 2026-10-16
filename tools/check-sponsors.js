@@ -15,6 +15,7 @@
  *   node tools/check-sponsors.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -83,7 +84,7 @@ const высоты = (БЛОК.match(/height: (\d+)px/g) || []).map(s => Number(
     'Десять целей были недостижимы глазом с клавиатуры. WCAG 2.4.7.');
 
 правило('движение гасится по просьбе системы',
-    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]{0,300}\.sponsors-cloud \.sponsor-logo-link:hover \{ transform: none/.test(БЛОК),
+    ДВИЖ.гасится(),
     'Плитка поднимается при наведении — гасим и переход, и сдвиг.');
 
 /* ══ ЛАЙМ ═════════════════════════════════════════════════════════════════ */

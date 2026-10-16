@@ -76,10 +76,10 @@ const ОТКАТЫ = [
  '    margin-bottom: 24px;',
  'у текста призыва тоже есть мера'],
 
-['вернуть четвёртое межстрочное числом', К,
+['вернуть межстрочное числом', К,
  '.ct-membership-modal p {\n    color: var(--text-secondary);\n    font-size: var(--fs-sm);\n    line-height: var(--lh-relaxed);',
  '.ct-membership-modal p {\n    color: var(--text-secondary);\n    font-size: var(--fs-sm);\n    line-height: 1.6;',
- 'межстрочных мимо лестницы в двух файлах не больше трёх'],
+ 'межстрочных мимо лестницы в двух файлах не осталось'],
 
 /* ── ступень кегля и контраст ─────────────────────────────────────────── */
 
@@ -145,15 +145,13 @@ const ОТКАТЫ = [
  '.co-cta-btn:focus-visible,\n.co-card:focus-visible,',
  '.co-nope:focus-visible,',
  'у страницы тренера есть видимый фокус'],
-
-['снять у страницы корта спрос разрешения на движение', К,
- '    .ct-fade-in,\n    .ct-fade-in.visible {\n        transition: none;\n        transform: none;\n    }',
- '    .ct-nope {\n        transition: none;\n    }',
+['снять общий отказ от движения — страница корта живёт им', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
  'движение страницы корта спрашивает разрешения'],
-
-['снять у страницы тренера спрос разрешения на движение', Т,
- '    .co-fade-in,\n    .co-fade-in.visible {\n        transition: none;\n        transform: none;\n    }',
- '    .co-nope {\n        transition: none;\n    }',
+['снять общий отказ от движения — страница тренера живёт им', 'css/tokens.css',
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
  'движение страницы тренера спрашивает разрешения'],
 
 
@@ -195,6 +193,7 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-korta-'));
 fs.mkdirSync(path.join(песок, 'css'), { recursive: true });
 fs.mkdirSync(path.join(песок, 'js'), { recursive: true });
 fs.mkdirSync(path.join(песок, 'tools'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-stranica-korta.js'),
                  fs.readFileSync(path.join(__dirname, 'check-stranica-korta.js')));
 

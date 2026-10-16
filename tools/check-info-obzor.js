@@ -18,6 +18,7 @@
  *   node tools/check-info-obzor.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -136,7 +137,7 @@ function блок(текст, селектор) {
     'пропал :focus-visible: ходящий по странице с клавиатуры снова не видит, где он');
 
 правило('движение спрашивает системную настройку',
-    /@media \(prefers-reduced-motion: reduce\)/.test(CSSч),
+    ДВИЖ.гасится(),
     'снято уважение к «меньше движения» при тринадцати движущихся правилах');
 
 /* ─────────── ТРИ ЯЗЫКА ─────────── */

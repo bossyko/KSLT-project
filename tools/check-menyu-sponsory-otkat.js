@@ -128,6 +128,7 @@ const ПРОПУСК = ['убрать с диска киргизскую стр�
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-menyu-'));
 ['css', 'js', 'pages', 'partials', 'tools'].forEach(д =>
     fs.mkdirSync(path.join(песок, д), { recursive: true }));
+fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-menyu-sponsory.js'),
                  fs.readFileSync(path.join(__dirname, 'check-menyu-sponsory.js')));
 

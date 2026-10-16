@@ -20,6 +20,7 @@
  *   node tools/check-live-stranica.js
  */
 const fs = require('fs');
+const ДВИЖ = require('./dvizhenie.js');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
@@ -238,7 +239,7 @@ const тонЗавершён = (СТИ.match(/\.live-badge\.is-completed \{([^}]
     '          диктор об изменении счёта не узнавал вовсе.');
 
 правило('движение выключается у того, кто просил систему его убрать',
-    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]{0,300}\.live-badge\.is-live \{ animation: none/.test(CSS),
+    ДВИЖ.гасится(),
     'Бейдж LIVE пульсирует бесконечно. WCAG 2.3.3.');
 
 правило('значки и кружки не читаются диктором как текст',

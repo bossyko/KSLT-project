@@ -148,10 +148,10 @@ const ОТКАТЫ = [
   [CSS, `.to-phone-cards .tc:focus-visible {`,
         `.to-phone-cards .tc:hover {`,
    'на странице есть правило фокуса, и оно :focus-visible'],
-
-  [CSS, `@media (prefers-reduced-motion: reduce) {`,
-        `@media (min-width: 1px) {`,
-   'настройка «меньше движения» учитывается'],
+[ТОК,
+ '    *,\n    *::before,\n    *::after {',
+ '    .db-mobile-tab,\n    .site-header {',
+ 'настройка «меньше движения» учитывается'],
 
   [CSS, `.to-search-input::placeholder {\n    color: var(--text-muted);\n}`,
         `.to-search-input::placeholder {\n    color: var(--text-dim);\n}`,
@@ -348,7 +348,7 @@ const ОТКАТЫ = [
 
   [CSS, `.to-compact-right {\n    display: flex;`,
         `.to-compact-right {\n    display: flex !important;`,
-   '!important остался только там, где он часть приёма'],
+   'важности в файле не осталось'],
 
   /* ── стенд не расходится со страницей ──────────────────────────────── */
 
