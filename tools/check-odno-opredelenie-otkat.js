@@ -20,6 +20,7 @@ const ФАЙЛЫ = [
     'css/pricing.css', 'css/sponsors.css', 'css/player.css',
     'js/kslt-mesta.js', 'js/rating-points.js', 'js/player.js',
     'js/kslt-toast.js', 'js/courts.js',
+    'js/tournament-generator.js', 'js/admin/sections/bracket.js',
     'pages/player.html', 'pages/courts.html'
 ];
 const исходник = {};
@@ -29,7 +30,8 @@ const T = 'css/tokens.css', S = 'css/style.css', A = 'css/admin.css',
       D = 'css/dashboard.css', PR = 'css/pricing.css', SP = 'css/sponsors.css',
       PC = 'css/player.css', M = 'js/kslt-mesta.js', RP = 'js/rating-points.js',
       PJ = 'js/player.js', TJ = 'js/kslt-toast.js', CJ = 'js/courts.js',
-      PH = 'pages/player.html', CH = 'pages/courts.html';
+      PH = 'pages/player.html', CH = 'pages/courts.html',
+      TG = 'js/tournament-generator.js', BR = 'js/admin/sections/bracket.js';
 
 const ОТКАТЫ = [
 
@@ -194,8 +196,28 @@ const ОТКАТЫ = [
 ['снять стиль уведомления со страницы кортов', CH,
  'css/kslt-toast.css',
  'css/НЕТ-ТАКОГО-ФАЙЛА.css',
- 'у модуля уведомления подключён его стиль']
+ 'у модуля уведомления подключён его стиль'],
 
+/* ── позиции сеяных (сведено 16.10) ── */
+['завести второе объявление позиций сеяных', BR,
+ '    var A = window.KSLT_ADMIN;',
+ '    var A = window.KSLT_ADMIN;\n    var SEED_POSITIONS = { 8: [1, 8, 5, 4] };',
+ 'позиции сеяных объявлены ровно один раз'],
+
+['вернуть чтение с запасным списком', BR,
+ '        var позицииПосева = SEED_POSITIONS[размер] || [];',
+ '        var позицииПосева = (typeof SEED_POSITIONS !== \'undefined\' && SEED_POSITIONS[размер])\n            ? SEED_POSITIONS[размер] : [9, 9];',
+ 'позиции сеяных читаются без запасного списка'],
+
+['вернуть литерал позиций в потребителя', BR,
+ '        var seedPositions = SEED_POSITIONS[drawSize] || [];\n\n        // Build draw array',
+ '        var seedPositions = SEED_POSITIONS[drawSize] || [1, 16, 9, 8, 5];\n\n        // Build draw array',
+ 'списка позиций сеяных нет нигде, кроме его дома'],
+
+['убрать сетку 4 из дома — запасных списков больше нет', TG,
+ '    4:  [1, 4, 3, 2],                       // 4 сеяных',
+ '',
+ 'в доме есть позиции для всех размеров сетки'],
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-odno-'));

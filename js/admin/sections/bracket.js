@@ -7624,10 +7624,9 @@
             seedCount = Math.min(seedCount, approved.length);
         }
 
-        // Seed positions from SEED_POSITIONS (global from tournament-generator.js)
-        var seedPositions = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[drawSize])
-            ? SEED_POSITIONS[drawSize]
-            : (drawSize === 8 ? [1, 8, 5, 4] : [1, 16, 9, 8]);
+        // ОДНО ОПРЕДЕЛЕНИЕ: позиции сеяных живут в SEED_POSITIONS
+        // (js/tournament-generator.js), запасного списка здесь нет
+        var seedPositions = SEED_POSITIONS[drawSize] || [];
 
         // Build draw array
         var draw = new Array(drawSize);
@@ -8623,10 +8622,8 @@
         var все = прямые.concat(черезДоп);
         var byeCount = Math.max(0, размер - все.length);
 
-        var позицииПосева = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[размер])
-            ? SEED_POSITIONS[размер]
-            : (размер === 16 ? [1, 16, 9, 8, 5, 12, 13, 4]
-                : (размер === 8 ? [1, 8, 5, 4] : (размер === 4 ? [1, 4, 3, 2] : [1, 2])));
+        // ОДНО ОПРЕДЕЛЕНИЕ: позиции сеяных живут в SEED_POSITIONS
+        var позицииПосева = SEED_POSITIONS[размер] || [];
 
         var сетка = new Array(размер);
         for (var и = 0; и < размер; и++) сетка[и] = null;
@@ -9940,10 +9937,8 @@
             // 5. Build SE playoff bracket
             var totalRounds = Math.log2(drawSize);
 
-            // Seed positions
-            var seedPositions = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[drawSize])
-                ? SEED_POSITIONS[drawSize]
-                : (drawSize === 16 ? [1, 16, 9, 8, 5, 12, 13, 4] : (drawSize === 8 ? [1, 8, 5, 4] : (drawSize === 4 ? [1, 4, 3, 2] : [1, 2])));
+            // ОДНО ОПРЕДЕЛЕНИЕ: позиции сеяных живут в SEED_POSITIONS
+            var seedPositions = SEED_POSITIONS[drawSize] || [];
 
             // Separate 1st-place finishers (seeds), 2nd-place, and auto-pass (3rd)
             var firstPlaces = directQualifiers.filter(function(q) { return q.place === 1; });
@@ -10360,10 +10355,8 @@
             var seedCount = Math.min(groupCount, drawSize);
 
             // 3. Cross-seeding: 1st places are seeds, rest fill remaining slots
-            // Seed positions from SEED_POSITIONS
-            var seedPositions = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[drawSize])
-                ? SEED_POSITIONS[drawSize]
-                : (drawSize === 16 ? [1, 16, 9, 8, 5, 12, 13, 4] : (drawSize === 8 ? [1, 8, 5, 4] : (drawSize === 4 ? [1, 4, 3, 2] : [1, 2])));
+            // ОДНО ОПРЕДЕЛЕНИЕ: позиции сеяных живут в SEED_POSITIONS
+            var seedPositions = SEED_POSITIONS[drawSize] || [];
 
             // Separate 1st-place finishers (seeds) and rest
             var firstPlaces = allQualified.filter(function(q) { return q.place === 1; });
@@ -13202,9 +13195,8 @@
 
         var seedCount = Math.min(seeds.length, drawSize);
 
-        var seedPositions = (typeof SEED_POSITIONS !== 'undefined' && SEED_POSITIONS[drawSize])
-            ? SEED_POSITIONS[drawSize]
-            : (drawSize === 8 ? [1, 8, 5, 4] : (drawSize === 4 ? [1, 4, 3, 2] : [1, 2]));
+        // ОДНО ОПРЕДЕЛЕНИЕ: позиции сеяных живут в SEED_POSITIONS
+        var seedPositions = SEED_POSITIONS[drawSize] || [];
 
         // Build draw array
         var draw = new Array(drawSize);
