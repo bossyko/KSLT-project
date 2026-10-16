@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>КСЛТ — стенд блока записи</title>
+<link rel="stylesheet" href="../css/tokens.css?v=68">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/tournament-detail.css?v=150">
+<style>
+/* ЛЕСА СТЕНДА, а не страницы. Ни одного правила на .td-* здесь нет. */
+.st-shapka{position:sticky;top:0;z-index:9;padding:var(--space-3) var(--space-4);
+  background:#0a0a0a;border-bottom:1px solid var(--border-subtle);
+  font-size:var(--fs-sm);color:var(--text-secondary)}
+.st-ryad{display:flex;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-4)}
+.st-sluchay{flex:1 1 360px;min-width:300px}
+.st-podpis{font-size:var(--fs-xs);color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-2)}
+/* ОБЛОЖКА КРАЙНЯЯ, А НЕ УДОБНАЯ: светлая картинка под градиентом — ровно
+   тот случай, где прозрачный тинт давал 3.88 и 1.15 */
+.st-oblozhka{position:relative;border-radius:var(--radius-sm);overflow:hidden;
+  background:linear-gradient(135deg,#e8e8e8 0%,#ffffff 45%,#cfd4d8 100%);
+  padding:var(--space-6) var(--space-4) var(--space-4)}
+.st-oblozhka::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,var(--bg-primary) 0%,var(--alpha-black-85) 50%,var(--alpha-black-50) 100%)}
+.st-oblozhka > *{position:relative}
+.st-temno{background:var(--bg-base);border-radius:var(--radius-sm);
+  padding:var(--space-6) var(--space-4) var(--space-4)}
+</style>
+</head>
+<body>
+<!--
+  СТЕНД БЛОКА ЗАПИСИ НА ТУРНИР. Ветка C, круг 2.
+  Разметку и классы берём ТЕ ЖЕ, что рисует js/tournament-detail.js
+  (renderRegistrationButton), краски — настоящий css/tournament-detail.css.
+  Базы здесь нет: это чистая разметка, нажимать нечего.
+  СОДЕРЖИМОЕ КРАЙНЕЕ: длинная причина отказа, длинный NTRP-диапазон,
+  обложка светлая — то есть худший фон, а не удобный тёмный.
+-->
+<div class="st-shapka">КСЛТ · СТЕНД БЛОКА ЗАПИСИ · обложка светлая — худший фон, а не удобный тёмный</div>
+
+<!-- БЫЛО: ровно те инлайны, что стояли в js до правки. Оставлены ЗДЕСЬ и
+     только здесь — чтобы разницу было видно глазами, а не на слово. -->
+<div class="st-ryad">
+  <div class="st-sluchay">
+    <div class="st-podpis">БЫЛО · отказ на светлой обложке · контраст 3.88</div>
+    <div class="st-oblozhka">
+      <div style="margin-top:var(--space-md);display:flex;flex-direction:column;align-items:flex-start;gap:10px;">
+        <div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">
+          <div style="color:#ff3b30;font-weight:500;margin-bottom:4px;">Вы заблокированы для участия в турнирах до 12.11.2026</div>
+          <div style="color:var(--text-muted);font-size:var(--fs-sm);margin-top:4px;">Причина: неявка на матч второго круга без предупреждения организатора</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="st-sluchay">
+    <div class="st-podpis">СТАЛО · то же место · контраст 5.16</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <div class="td-zapis-plashka td-zapis-plashka-otkaz">
+          <div class="td-zapis-plashka-title">Вы заблокированы для участия в турнирах до 12.11.2026</div>
+          <div class="td-zapis-note-pod">Причина: неявка на матч второго круга без предупреждения организатора</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="st-sluchay">
+    <div class="st-podpis">БЫЛО · внимание · тинт 10 %</div>
+    <div class="st-oblozhka">
+      <div style="margin-top:var(--space-md);display:flex;flex-direction:column;align-items:flex-start;gap:10px;">
+        <div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">
+          <div style="color:#ffc107;font-weight:500;margin-bottom:4px;">Требуется активное членство KSLT</div>
+          <a href="#" style="color:var(--accent);font-size:var(--fs-sm);">Узнать о членстве →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="st-sluchay">
+    <div class="st-podpis">СТАЛО · то же место</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <div class="td-zapis-plashka td-zapis-plashka-vnimanie">
+          <div class="td-zapis-plashka-title">Требуется активное членство KSLT</div>
+          <a href="#" class="td-zapis-plashka-link">Узнать о членстве →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="st-ryad">
+  <div class="st-sluchay">
+    <div class="st-podpis">1 · отказ: бан</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <div class="td-zapis-plashka td-zapis-plashka-otkaz">
+          <div class="td-zapis-plashka-title">Вы заблокированы для участия в турнирах до 12.11.2026</div>
+          <div class="td-zapis-note-pod">Причина: неявка на матч второго круга без предупреждения организатора</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">2 · отказ: NTRP</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <div class="td-zapis-plashka td-zapis-plashka-otkaz">
+          <div class="td-zapis-plashka-title">Ваш NTRP (3.5) не соответствует требованиям турнира</div>
+          <div class="td-zapis-note-pod">Требуемый NTRP: 4.0 – 5.5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">3 · внимание: нужно членство</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <div class="td-zapis-plashka td-zapis-plashka-vnimanie">
+          <div class="td-zapis-plashka-title">Требуется активное членство KSLT</div>
+          <a href="#" class="td-zapis-plashka-link">Узнать о членстве →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">4 · внимание: оплатите</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <div class="td-zapis-plashka td-zapis-plashka-vnimanie">
+          <div class="td-zapis-plashka-title">Оплатите членство для записи на турнир</div>
+          <a href="#" class="td-zapis-plashka-link">Перейти к оплате →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">5 · можно записаться</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <button class="td-register-btn">Записаться на турнир</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">6 · в сетке + кнопки</div>
+    <div class="st-oblozhka">
+      <div class="td-registration-area td-zapis-area">
+        <span class="kslt-status kslt-status-draw">Вы в основной сетке</span>
+        <div class="td-zapis-note">В основной сетке · напарника-гостя подтверждает менеджер</div>
+        <div class="td-zapis-btns">
+          <button class="td-zapis-btn-kontur">Выйти из пары</button>
+          <button class="td-zapis-btn-kontur td-zapis-btn-kontur-accent">Заменить напарника</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">7 · отказ клуба — на тёмном низу</div>
+    <div class="st-temno">
+      <div class="td-registration-area td-zapis-area">
+        <span class="kslt-status kslt-status-refused">Заявка отклонена</span>
+        <div class="td-zapis-note">Заявку закрыл клуб. Чтобы вернуться в турнир, обратитесь к менеджеру</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-sluchay">
+    <div class="st-podpis">8 · партнёр — на тёмном низу</div>
+    <div class="st-temno">
+      <div class="td-registration-area td-zapis-area">
+        <span class="td-reg-status">Зарегистрирован как партнёр</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

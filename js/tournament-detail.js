@@ -3416,8 +3416,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
 
                 // Сверху статус, под ним пояснение, ещё ниже — кнопки. Так
                 // читается сверху вниз: что со мной, почему, что могу сделать
-                var btnHtml = '<div class="td-registration-area" style="margin-top:var(--space-md);' +
-                    'display:flex;flex-direction:column;align-items:flex-start;gap:10px;">';
+                var btnHtml = '<div class="td-registration-area td-zapis-area">';
 
                 // Ban check
                 var playerBanned = plRes.data.banned_until && new Date(plRes.data.banned_until) > new Date();
@@ -3451,7 +3450,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         var местоТекст = alreadyRegistered.status === 'waitlist'
                             ? (isEn ? 'On the waiting list' : (isKg ? 'Күтүү тизмесинде' : 'В листе ожидания'))
                             : (isEn ? 'In the main draw' : (isKg ? 'Негизги сеткада' : 'В основной сетке'));
-                        btnHtml += '<div style="flex-basis:100%;max-width:520px;color:var(--text-muted);font-size:var(--fs-sm);line-height:1.5;">' +
+                        btnHtml += '<div class="td-zapis-note">' +
                             местоТекст + ' \u00B7 ' +
                             (isEn ? 'the guest partner is confirmed by the manager'
                                   : (isKg ? 'конок өнөктөштү менеджер ырастайт'
@@ -3459,7 +3458,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         '</div>';
                     }
                     if (isRefused && alreadyRegistered.block_reason) {
-                        btnHtml += '<div style="flex-basis:100%;max-width:520px;color:var(--text-muted);font-size:var(--fs-sm);line-height:1.5;">' +
+                        btnHtml += '<div class="td-zapis-note">' +
                             alreadyRegistered.block_reason + '</div>';
                     }
                     // Снять заявку — пока не проведена жеребьёвка. После неё игрок
@@ -3474,7 +3473,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         var вПаре = !!(alreadyRegistered.partner_id || alreadyRegistered.partner_external_name);
                         кнопкиHtml += '<button id="tdWithdrawBtn" data-reg="' + alreadyRegistered.id + '"' +
                             (вПаре ? ' data-leave="1"' : '') +
-                            ' style="padding:8px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:transparent;color:var(--text-muted);font-weight:500;cursor:pointer;font-size:var(--fs-sm);">' +
+                            ' class="td-zapis-btn-kontur">' +
                             (вПаре
                                 ? (isEn ? 'Leave the pair' : (isKg ? 'Жуптан чыгуу' : 'Выйти из пары'))
                                 : (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку'))) + '</button>';
@@ -3493,7 +3492,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var isTournamentDoublesCheck = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
                     if (isTournamentDoublesCheck && !мертва) {
                         var естьНапарник = alreadyRegistered.partner_id || alreadyRegistered.partner_external_name;
-                        кнопкиHtml += '<button id="tdAddPartnerBtn" style="padding:8px 16px;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);font-weight:500;cursor:pointer;font-size:var(--fs-sm);">' +
+                        кнопкиHtml += '<button id="tdAddPartnerBtn" class="td-zapis-btn-kontur td-zapis-btn-kontur-accent">' +
                             (естьНапарник
                                 ? (isEn ? 'Change partner' : (isKg ? 'Өнөктөштү алмаштыруу' : 'Заменить напарника'))
                                 : (isEn ? 'Add Partner' : (isKg ? 'Өнөктөш кошуу' : 'Добавить партнёра'))) + '</button>';
@@ -3503,8 +3502,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // может. Вернуть её вправе только тот, кто отказал — иначе
                     // решение клуба ничего не значило бы
                     if (alreadyRegistered.status === 'rejected') {
-                        btnHtml += '<div style="flex-basis:100%;max-width:520px;color:var(--text-muted);' +
-                            'font-size:var(--fs-sm);line-height:1.5;">' +
+                        btnHtml += '<div class="td-zapis-note">' +
                             (isEn ? 'The club closed this entry. To return to the tournament, contact a manager'
                                   : (isKg ? 'Арызды клуб жапты. Мелдешке кайра кирүү үчүн менеджерге кайрылыңыз'
                                           : 'Заявку закрыл клуб. Чтобы вернуться в турнир, обратитесь к менеджеру')) +
@@ -3512,7 +3510,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     }
 
                     if (кнопкиHtml) {
-                        btnHtml += '<div style="display:flex;gap:12px;flex-wrap:wrap;">' + кнопкиHtml + '</div>';
+                        btnHtml += '<div class="td-zapis-btns">' + кнопкиHtml + '</div>';
                     }
                 } else if (playerBanned) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
@@ -3520,11 +3518,11 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         ? (isEn ? 'permanently' : (isKg ? 'түбөлүккө' : 'навсегда'))
                         : new Date(plRes.data.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
                     var banReasonText = plRes.data.ban_reason
-                        ? '<div style="color:var(--text-muted);font-size:var(--fs-sm);margin-top:4px;">' +
+                        ? '<div class="td-zapis-note-pod">' +
                             (isEn ? 'Reason: ' : (isKg ? 'Себеби: ' : 'Причина: ')) + plRes.data.ban_reason + '</div>'
                         : '';
-                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">' +
-                        '<div style="color:#ff3b30;font-weight:500;margin-bottom:4px;">' +
+                    btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-otkaz">' +
+                        '<div class="td-zapis-plashka-title">' +
                             (isEn ? 'You are banned from tournaments until ' + banDateStr
                                 : (isKg ? 'Сиз мелдештерден ' + banDateStr + ' чейин бөгөттөлгөнсүз'
                                 : 'Вы заблокированы для участия в турнирах до ' + banDateStr)) +
@@ -3536,7 +3534,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var genderMsg = tGender === 'men'
                         ? (isEn ? 'This tournament is for men only' : (isKg ? 'Бул мелдеш эркектер үчүн гана' : 'Этот турнир только для мужчин'))
                         : (isEn ? 'This tournament is for women only' : (isKg ? 'Бул мелдеш аялдар үчүн гана' : 'Этот турнир только для женщин'));
-                    btnHtml += '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' + genderMsg + '</span>';
+                    btnHtml += '<span class="td-zapis-note">' + genderMsg + '</span>';
                 } else if (ntrpBlocked) {
                     var ntrpMsg = isEn ? 'Your NTRP (' + (playerNtrp || '?') + ') does not meet tournament requirements'
                         : (isKg ? 'Сиздин NTRP (' + (playerNtrp || '?') + ') мелдеш талаптарына туура келбейт'
@@ -3545,26 +3543,26 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     if (tournament.ntrp_min && tournament.ntrp_max) rangeStr = tournament.ntrp_min + ' – ' + tournament.ntrp_max;
                     else if (tournament.ntrp_min) rangeStr = '≥ ' + tournament.ntrp_min;
                     else if (tournament.ntrp_max) rangeStr = '≤ ' + tournament.ntrp_max;
-                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);">' +
-                        '<div style="color:#ff3b30;font-weight:500;">' + ntrpMsg + '</div>' +
-                        (rangeStr ? '<div style="color:var(--text-muted);font-size:var(--fs-sm);margin-top:4px;">' +
+                    btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-otkaz">' +
+                        '<div class="td-zapis-plashka-title">' + ntrpMsg + '</div>' +
+                        (rangeStr ? '<div class="td-zapis-note-pod">' +
                             (isEn ? 'Required NTRP: ' : (isKg ? 'Талап кылынган NTRP: ' : 'Требуемый NTRP: ')) + rangeStr + '</div>' : '') +
                     '</div>';
                 } else if (!membershipOk) {
-                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
-                        '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
+                    btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-vnimanie">' +
+                        '<div class="td-zapis-plashka-title">' +
                             (isEn ? 'Active KSLT membership required' : (isKg ? 'KSLT активдүү мүчөлүгү талап кылынат' : 'Требуется активное членство KSLT')) +
                         '</div>' +
-                        '<a href="' + pricingUrl + '" style="color:var(--accent);font-size:var(--fs-sm);">' +
+                        '<a href="' + pricingUrl + '" class="td-zapis-plashka-link">' +
                             (isEn ? 'View membership plans →' : (isKg ? 'Мүчөлүк жөнүндө билүү →' : 'Узнать о членстве →')) +
                         '</a>' +
                     '</div>';
                 } else if (!paidOk) {
-                    btnHtml += '<div style="padding:12px 20px;border-radius:8px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);">' +
-                        '<div style="color:#ffc107;font-weight:500;margin-bottom:4px;">' +
+                    btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-vnimanie">' +
+                        '<div class="td-zapis-plashka-title">' +
                             (isEn ? 'Please pay your membership to register' : (isKg ? 'Каттоо үчүн мүчөлүк төлөмүн төлөңүз' : 'Оплатите членство для записи на турнир')) +
                         '</div>' +
-                        '<a href="' + pricingUrl + '" style="color:var(--accent);font-size:var(--fs-sm);">' +
+                        '<a href="' + pricingUrl + '" class="td-zapis-plashka-link">' +
                             (isEn ? 'Go to payment →' : (isKg ? 'Төлөмгө өтүү →' : 'Перейти к оплате →')) +
                         '</a>' +
                     '</div>';
@@ -3572,7 +3570,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // Кнопка одна и та же независимо от заполненности сетки.
                     // Что вышло — заявка в сетку или в лист ожидания — скажет модалка
                     // после нажатия, по ответу сервера.
-                    btnHtml += '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;font-size:var(--fs-base);">' +
+                    btnHtml += '<button class="td-register-btn" id="tdRegisterBtn">' +
                         (isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир')) + '</button>';
                 }
 
@@ -3686,7 +3684,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // Player is already in a team as partner — show status
                     var partnerBtn = document.getElementById('tdRegisterBtn');
                     if (partnerBtn) {
-                        partnerBtn.outerHTML = '<span class="td-reg-status" style="display:inline-block;padding:8px 16px;border-radius:8px;background:var(--accent-subtle);color:var(--accent);font-weight:500;">' +
+                        partnerBtn.outerHTML = '<span class="td-reg-status">' +
                             (isEn ? 'Registered as partner' : (isKg ? 'Өнөктөш катары катталган' : 'Зарегистрирован как партнёр')) + '</span>';
                     }
                 }

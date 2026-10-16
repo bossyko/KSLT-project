@@ -3222,3 +3222,148 @@ tr.td-rr-row-highlight {
     .td-hero-content { padding-top: var(--space-4); padding-bottom: var(--space-4); gap: var(--space-2); }
     .td-hero-stats { gap: var(--space-3); }
 }
+
+/* ═══ ЗАПИСЬ НА ТУРНИР ═══════════════════════════════════════════════
+   ИМЯ `td-zapis-`, А НЕ `td-reg-`: второе уже занято ДРУГИМ понятием —
+   таблицей заявок участников (`.td-reg-table`, `.td-reg-columns`,
+   `.td-reg-photo`, 43 места в этом файле). Первая редакция села в чужое
+   пространство имён, и поймал это прибор: он насчитал два медиазапроса
+   на «мои» классы, которых я не писал. ИМЯ, УЖЕ ЗАНЯТОЕ ДРУГИМ ПОНЯТИЕМ,
+   НЕ ПЕРЕИСПОЛЬЗУЕТСЯ.
+   Ветка C, круг 2, 16.10. Блок записи рисовался ДВАДЦАТЬЮ инлайнами в
+   `js/tournament-detail.js`, и классы `.td-registration-area`,
+   `.td-register-btn`, `.td-reg-status` стояли в разметке, не имея в css
+   НИ ОДНОГО объявления: они выглядели точкой входа, а не красили ничего.
+
+   ПОЧЕМУ ЭТО БЫЛО НЕ ТОЛЬКО НЕОПРЯТНО. Плашки отказа и внимания стояли
+   на прозрачном тинте 10 % — а блок живёт на ОБЛОЖКЕ турнира под
+   градиентом, то есть фон у него разный от турнира к турниру. Замер
+   16.10: на тёмном низу градиента отказ давал 5.18, на светлой обложке
+   под чёрным 85 % — 3.88, в середине градиента — 1.15. Текст пропадал.
+   ПРОЗРАЧНАЯ КРАСКА СМЕШИВАЕТСЯ С ФОНОМ — ровно вывод 12.10 из кабинета,
+   где ту же беду нашли на трёх подложках. Непрозрачная ступень роли даёт
+   5.16 и 7.96 НЕЗАВИСИМО от обложки.
+
+   Числа — ступени: отступы 4 · 8 · 12 · 16 · 24, цель нажатия 44. */
+
+.td-zapis-area {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+/* Пояснение под статусом: мера чтения своя, а не на всю ширину обложки */
+.td-zapis-note {
+    flex-basis: 100%;
+    /* 520 — ширина формы средней длины (`--modal-w-md`), та же мера
+       чтения: строка не растягивается на всю обложку */
+    max-width: var(--modal-w-md);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+}
+
+/* Строка под заголовком плашки — причина отказа, требуемый NTRP */
+.td-zapis-note-pod {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    margin-top: var(--space-1);
+}
+
+/* ---- Плашка: одно понятие, две роли ---- */
+.td-zapis-plashka {
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-sm);
+    border: var(--bw-hair) solid transparent;
+}
+
+.td-zapis-plashka-title {
+    font-weight: 500;
+    margin-bottom: var(--space-1);
+}
+
+/* Заголовок без строки под ним не несёт нижнего воздуха */
+.td-zapis-plashka-title:last-child { margin-bottom: 0; }
+
+.td-zapis-plashka-otkaz {
+    background: var(--danger-surface);
+    border-color: var(--danger-subtle);
+}
+.td-zapis-plashka-otkaz .td-zapis-plashka-title { color: var(--danger); }
+
+.td-zapis-plashka-vnimanie {
+    background: var(--warning-surface);
+    border-color: var(--warning-subtle);
+}
+.td-zapis-plashka-vnimanie .td-zapis-plashka-title { color: var(--warning); }
+
+.td-zapis-plashka-link {
+    color: var(--accent);
+    font-size: var(--fs-sm);
+}
+
+/* ---- Кнопки ---- */
+.td-zapis-btns {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+/* ЦЕЛЬ НАЖАТИЯ 44 — обе кнопки её не держали: контурная давала 34 по
+   высоте, главная 45 по случаю, а не по решению. */
+.td-register-btn,
+.td-zapis-btn-kontur {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* ВЫСОТА — ТОКЕН, А НЕ ЧИСЛО. Я написал было `44px`, решив, что
+       токена нет; он есть и стоит строкой выше в этом же файле у
+       `.td-tab` — `--btn-h-md`. Искать ответ в продукте ДО того, как
+       писать своё. */
+    min-height: var(--btn-h-md);
+    border-radius: var(--radius-sm);
+    /* МЕЖСТРОЧНЫЙ У КНОПОК ОСТАЁТСЯ `normal` НАМЕРЕННО: высота задана
+       токеном `--btn-h-md`, текст центрируется флексом, и отношение
+       межстрочного тут ничего не держит. Замер 16.10 на 1280, 768 и 375:
+       высота 44 на всех трёх. Лестница межстрочных (заход B4) работает
+       там, где строк больше одной.
+       ШРИФТ НЕ ПОВТОРЯЕТСЯ ПОШТУЧНО: общее правило живёт в
+       `css/tokens.css` и доезжает всем управлениям (заход B5, 79 копий
+       снято). Своя строка здесь была бы восьмидесятой. */
+    cursor: pointer;
+}
+
+.td-register-btn {
+    padding: var(--space-3) var(--space-6);
+    border: none;
+    background: var(--accent);
+    color: var(--accent-on);
+    font-weight: 600;
+    font-size: var(--fs-base);
+}
+
+.td-zapis-btn-kontur {
+    padding: var(--space-2) var(--space-4);
+    border: var(--bw-hair) solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: var(--fs-sm);
+}
+
+.td-zapis-btn-kontur-accent {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Статус «зарегистрирован как партнёр» — не кнопка, нажимать нечего */
+.td-reg-status {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: var(--accent-subtle);
+    color: var(--accent);
+    font-weight: 500;
+}
