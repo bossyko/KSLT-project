@@ -1049,7 +1049,19 @@ a.pp-tournament:hover {
     }
 }
 
-@media (max-width: 768px) {
+/* ГРАНИЦА 768 РАЗЛОЖЕНА ПО ДВУМ ДОМАШНИМ — 16.10, кусок 75.
+   Правило уходит туда, где то же свойство задано соседней ступенью.
+   Лестницы страницы игрока после разбора (все монотонные):
+     обложка   300 · 280 · 240        поле жёлоба  24 · 16 · 12
+     имя        32 ·  26 ·  21        призыв    48/40 · 32/24 · 28/16
+   ЧЕМ ПЛАТИМ: у пилюли показателей ступеней было ЧЕТЫРЕ — 108/104,
+   96/92, 84/78 и четыре равные доли. Домашних границ две, и средняя
+   ступень 84/78 снята: от 641 до 768 работает 96/92. Посчитано: ряд
+   занимает 96 + 3 × 92 + 3 × 6 = 390 при ширине тела 736 — помещается
+   с запасом. */
+
+/* ПЛАНШЕТ И УЖЕ */
+@media (max-width: 992px) {
     .pp-hero,
     .pp-container { --pp-gutter: 16px; }
     .pp-hero {
@@ -1059,27 +1071,11 @@ a.pp-tournament:hover {
     .pp-container {
         padding: 40px var(--pp-gutter) 60px;
     }
-    .pp-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-    .pp-meta {
-        justify-content: center;
-    }
-    .pp-badges {
-        justify-content: center;
-    }
-    .pp-actions {
-        justify-content: center;
-    }
     .pp-name {
         font-size: var(--fs-xl);
     }
-    .pp-stats {
-        grid-template-columns: 84px repeat(3, 78px);
-        gap: 0 6px;
-    }
+    /* Строка матча перестраивается: на планшете четыре колонки рабочего
+       стола (80 + 190 + остаток + 96) оставляют сопернику полоску. */
     .pp-match {
         grid-template-columns: 1fr auto;
         gap: 10px;
@@ -1101,11 +1097,33 @@ a.pp-tournament:hover {
         grid-column: 1 / -1;
         justify-self: end;
     }
+    .pp-cta {
+        /* было 36/24 — 36 не ступень шкалы отступов */
+        padding: 32px 24px;
+    }
+}
+
+/* ТОЛЬКО ТЕЛЕФОН. Шапка игрока складывается в колонку и встаёт по центру;
+   вместе с ней по центру встают мета, значки и кнопки. На планшете стоя
+   портрет и сведения помещаются в ряд. Достижения в одну колонку — тоже
+   телефонное: на планшете их две по 350. */
+@media (max-width: 640px) {
+    .pp-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+    .pp-meta {
+        justify-content: center;
+    }
+    .pp-badges {
+        justify-content: center;
+    }
+    .pp-actions {
+        justify-content: center;
+    }
     .pp-achievements {
         grid-template-columns: 1fr;
-    }
-    .pp-cta {
-        padding: 36px 24px;
     }
 }
 
@@ -2045,7 +2063,9 @@ a.pp-tournament:hover {
 
    Разрешаем сжиматься и показываем название двумя строками целиком. */
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: строка турнира и карточка матча ужимаются уже на
+   планшете — на 768 их десктопные размеры растили карточку вдвое. */
+@media (max-width: 992px) {
     .pp-tournament {
         min-width: 0;
         gap: 10px;
@@ -2218,7 +2238,9 @@ a.pp-tournament:hover {
    И делаем липкой под шапкой, как полоса фильтров на разделах: вернуться
    к рейтингу можно с любого места страницы, а не только с самого верха.
    Подложка непрозрачная — под ссылкой едет содержимое */
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: ссылка «назад» липнет к шапке там, где страница
+   длинная, а экран короткий, — это и планшет тоже. */
+@media (max-width: 992px) {
     .kslt-back-wrap.pp-back-float {
         position: sticky;
         top: var(--header-h);
@@ -2236,7 +2258,8 @@ a.pp-tournament:hover {
 /* Была 78 пикселей при полях 16×18 и значке в 24 — вдвое крупнее записи
    матча рядом. Приводим к общей шкале: имя 0.85rem, подпись 0.72rem */
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: карточка достижения по общей шкале. */
+@media (max-width: 992px) {
     .pp-achievement {
         padding: 10px 12px;
         gap: 10px;
@@ -2268,7 +2291,9 @@ a.pp-tournament:hover {
    отступа секции и ещё 60 снизу у контейнера. На широком экране это
    дыхание, на телефоне — пустой экран */
 
-@media (max-width: 768px) {
+/* ПЛАНШЕТ И УЖЕ: 108 пикселей воздуха внизу — дыхание на широком
+   экране и пустой экран на всём, что уже. */
+@media (max-width: 992px) {
     .pp-section {
         margin-bottom: 24px;
     }
