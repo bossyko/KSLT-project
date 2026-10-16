@@ -1109,7 +1109,7 @@ a.pp-tournament:hover {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .pp-photo {
         width: 96px;
         height: 96px;
@@ -1467,7 +1467,7 @@ a.pp-tournament:hover {
 }
 
 /* ---- H2H Responsive ---- */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .h2h-modal {
         padding: 28px 20px;
         border-radius: var(--radius-lg);
@@ -1689,7 +1689,7 @@ a.pp-tournament:hover {
     color: var(--neutral-white);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .pp-chal-modal {
         padding: 20px 16px;
     }
@@ -1775,7 +1775,7 @@ a.pp-tournament:hover {
     box-shadow: 0 8px 24px var(--alpha-lime-20);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .pp-guest-block {
         margin: 40px auto;
     }
@@ -1839,7 +1839,7 @@ a.pp-tournament:hover {
 .pp-contact-ig:hover { border-color: #E1306C; }
 .pp-contact-ig:hover svg { color: #E1306C; }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .pp-contact { font-size: var(--fs-sm); padding: 8px 12px; }
 }
 

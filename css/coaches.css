@@ -624,7 +624,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .co-detail-stats {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
@@ -1153,7 +1153,7 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .co-discount-item {
         flex-direction: column;
         align-items: flex-start;
@@ -1200,7 +1200,7 @@
     border-color: var(--alpha-lime-50);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .co-map-links-section {
         flex-wrap: wrap;
     }

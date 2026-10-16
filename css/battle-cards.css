@@ -420,7 +420,7 @@
         padding: var(--space-lg, 2rem) var(--pad-x);
     }
 }
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .bc-grid {
         grid-template-columns: 1fr;
     }

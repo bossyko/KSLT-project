@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Прибор замера видов</title>
+<style>body{margin:0;background:#111;color:#CCFF00;font:12px monospace}
+#r{position:fixed;left:-20000px;top:0;border:0}
+#s{padding:10px}</style></head><body>
+<div id="s">готов</div><iframe id="r"></iframe>
+<script>
+/* ПРИБОР ЗАМЕРА ВИДОВ.
+   Грузит страницу в рамке ЗАДАННОЙ ШИРИНЫ — именно грузит, а не сжимает
+   уже загруженное: ширина рамки ставится ДО src, и на каждый вид идёт
+   новая загрузка. Снимает слепок: по одному представителю на класс,
+   девять свойств. Результат лежит в window.РЕЗУЛЬТАТ. */
+const ВИДЫ = [[390,844],[480,900],[540,900],[640,900],[768,1024],[844,390],[1024,768],[1512,900]];
+window.РЕЗУЛЬТАТ = null;
+window.замерить = async (страницы, виды) => {
+  виды = виды || ВИДЫ;
+  const r = document.getElementById('r'), s = document.getElementById('s');
+  const вых = {};
+  for (const стр of страницы) {
+    вых[стр] = {};
+    for (const [w,h] of виды) {
+      r.style.width = w+'px'; r.style.height = h+'px';
+      await new Promise(res => { r.onload = res; r.src = '../'+стр+'?замер='+w+'_'+Date.now(); });
+      await new Promise(res => setTimeout(res, 450));
+      const d = r.contentWindow, doc = r.contentDocument;
+      const карта = {};
+      for (const e of doc.querySelectorAll('[class]')) {
+        const к = String(e.className).trim().split(/\s+/)[0];
+        if (!к || карта[к]) continue;
+        const c = d.getComputedStyle(e), b = e.getBoundingClientRect();
+        карта[к] = [c.fontSize,c.lineHeight,c.padding,c.margin,c.display,
+                    c.flexDirection,c.gridTemplateColumns.slice(0,30),
+                    Math.round(b.width),Math.round(b.height)].join('|');
+      }
+      карта['__перелив'] = String(doc.documentElement.scrollWidth > w);
+      вых[стр][w] = карта;
+      s.textContent = стр+' '+w+' — классов '+(Object.keys(карта).length);
+    }
+  }
+  window.РЕЗУЛЬТАТ = вых;
+  s.textContent = 'ГОТОВО';
+  return 'готово';
+};
+
+/* Слепок «до» переживает перезагрузку: он лежит в localStorage стенда.
+   Порядок работы — замерить(), сохранить('до'), правка css, замерить(),
+   сравнить('до'). Сравниваются только классы, которые есть в обоих
+   слепках на одном виде: содержимое страниц приходит из базы и набор
+   классов от загрузки к загрузке может отличаться, это не правка css. */
+window.сохранить = (имя) => {
+  localStorage.setItem('замер:'+имя, JSON.stringify(window.РЕЗУЛЬТАТ));
+  return 'сохранено ' + имя;
+};
+/* ШУМ ПРИБОРА ЗАМЕРЕН, А НЕ УГАДАН. Два прогона подряд БЕЗ единой правки
+   css дали 21 различие из 4513 — это живые данные: по классу берётся один
+   представитель, а какой именно, зависит от того, что успело прийти из
+   базы. Классы ниже шумят постоянно и из сверки вычитаются; всё остальное
+   расхождение — настоящее. Список добыт калибровкой: прогнать замерить()
+   дважды подряд и сверить. */
+window.ШУМ = ['live-dot','section-live','live-matches','badges-cta-cards',
+              'pt-invite-btn','vn-foot','pt-grid','footer-block'];
+window.сравнить = (имя) => {
+  const до = JSON.parse(localStorage.getItem('замер:'+имя) || 'null');
+  if (!до) return 'нет слепка ' + имя;
+  const после = window.РЕЗУЛЬТАТ, разница = [];
+  let сверено = 0;
+  for (const стр in после) for (const w in после[стр]) {
+    const a = (до[стр]||{})[w], b = после[стр][w];
+    if (!a) continue;
+    for (const к in b) {
+      if (к === '__перелив' || !(к in a) || window.ШУМ.indexOf(к) !== -1) continue;
+      сверено++;
+      /* сверяется СТИЛЬ, без ширины и высоты: размер двигают данные */
+      const ст = s => s.split('|').slice(0,7).join('|');
+      if (ст(a[к]) !== ст(b[к])) разница.push(стр+' '+w+' .'+к+'\n     до:    '+ст(a[к])+'\n     после: '+ст(b[к]));
+    }
+  }
+  return {сверено, различий: разница.length, список: разница.slice(0, 40)};
+};
+</script></body></html>

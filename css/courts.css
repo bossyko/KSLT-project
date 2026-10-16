@@ -969,7 +969,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .ct-types-header {
         grid-template-columns: 1fr 1fr 50px 90px;
         padding: 8px 12px;
@@ -1443,7 +1443,7 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .ct-discount-item {
         flex-direction: column;
         align-items: flex-start;

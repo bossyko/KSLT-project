@@ -2106,7 +2106,7 @@ tr.td-rr-row-highlight {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .td-match {
         width: 170px;
         min-width: 170px;
@@ -2235,7 +2235,7 @@ tr.td-rr-row-highlight {
 }
 
 /* Responsive prediction */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .td-prediction {
         padding: 4px 6px 3px;
     }
@@ -2371,7 +2371,7 @@ tr.td-rr-row-highlight {
     color: var(--warning);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .td-cd-box {
         min-width: 50px;
         padding: 8px 10px;

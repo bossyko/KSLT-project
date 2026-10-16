@@ -227,7 +227,7 @@
 
 .ms-row2 { display: flex; gap: 10px; }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .ms-cell { width: 48px; }
     .ms-in { width: 40px; }
     .ms-vs b { font-size: var(--fs-sm); }

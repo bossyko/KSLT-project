@@ -4053,7 +4053,7 @@ h2 {
     color: var(--text-primary);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .spon-modal {
         padding: 24px 20px 20px;
     }
@@ -4205,7 +4205,7 @@ h2 {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .carousel-slide-infinite {
         width: 140px;
     }
@@ -4818,7 +4818,7 @@ h2 {
 
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     /* Поля потеснее и счётчик вплотную: четыре фильтра состояния должны
        встать одной строкой. С прежними 12 они занимали 359 пикселей при
        полосе в 351 — «Прошедшие» срывались вниз. Теперь 326 */
@@ -8335,7 +8335,7 @@ body.nav-open {
     margin: 0;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .kslt-recommended-badge {
         font-size: var(--fs-2xs);
         padding: 3px 8px;
@@ -8997,7 +8997,7 @@ body.nav-open {
     text-decoration: underline;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .auth-card {
         padding: 28px 20px;
         border-radius: var(--radius-lg);
@@ -9354,7 +9354,7 @@ body.nav-open {
     border-color: var(--danger);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     /* КЛЕТКИ КОДА ТЯНУТСЯ ПО РЯДУ, А НЕ СТОЯТ ФИКСИРОВАННЫМИ 42.
 
        Замер 21.09 живьём: на телефоне клетка 42x50 — шесть целей ниже 44
@@ -10097,7 +10097,7 @@ input:-internal-autofill-previewed {
     text-align: right;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .ar-actions { flex-direction: column-reverse; }
     .ar-btn { width: 100%; }
     .ar-note { text-align: center; }
