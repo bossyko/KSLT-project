@@ -50,6 +50,12 @@ const ОТКАТЫ = [
  '    border: var(--bw-hair) solid var(--alpha-white-72);\n    font-size: var(--fs-sm);',
  'ступень берётся по РОЛИ, а не одна на всё'],
 
+/* ── лайм живёт тем же принципом ── */
+['дать лаймовой границе ступень подложки', C,
+ '.co-card:hover {\n    border-color: var(--alpha-lime-20);\n    transform: translateY(-4px);',
+ '.co-card:hover {\n    border-color: var(--alpha-lime-06);\n    transform: translateY(-4px);',
+ 'ступень берётся по РОЛИ, а не одна на всё'],
+
 /* ── текст ниже порога ── */
 ['опустить имя игрока на тихую ступень', B,
  '    color: var(--alpha-white-72);\n}',

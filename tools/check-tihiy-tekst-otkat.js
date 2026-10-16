@@ -24,6 +24,14 @@ const ОТКАТЫ = [
 
 /* ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ БЛОКА: имя `.pl-guest-mark` встречается в
    файле дважды — объявление и медиазапрос. */
+/* ФОЛБЭК НЕ ПРЯЧЕТ КРАСКУ. Правило искало точное `var(--text-dim)` и
+   не видело записи с запасным значением — три места жили мимо решения
+   06.10, а сторож молчал. */
+['спрятать dim за фолбэком', С,
+ '.site-notif-item-time {\n    font-size: var(--fs-2xs);\n    color: var(--text-muted);',
+ '.site-notif-item-time {\n    font-size: var(--fs-2xs);\n    color: var(--text-dim, #666);',
+ 'тихий текст не красится --text-dim'],
+
 ['завести неактивное мимо списка', И,
  '.pl-guest-mark {\n    display: inline-block;',
  '.pl-nekto-novoe { color: var(--text-dim); }\n\n.pl-guest-mark {\n    display: inline-block;',

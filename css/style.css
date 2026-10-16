@@ -1240,7 +1240,7 @@ input, button, select, textarea {
 }
 .site-notif-item-time {
     font-size: var(--fs-2xs);
-    color: var(--text-dim, #666);
+    color: var(--text-muted);
     margin-top: 4px;
 }
 @media (max-width: 600px) {
