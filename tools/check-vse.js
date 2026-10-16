@@ -104,6 +104,7 @@ const КУСКИ = [
     ['версии файлов', 'check-versii-fajlov.js', 'check-versii-fajlov-otkat.js'],
     ['точки останова', 'check-tochki-ostanova.js', 'check-tochki-ostanova-otkat.js'],
     ['посев: половины', 'check-posev-polovin.js', 'check-posev-polovin-otkat.js'],
+    ['инлайн-стили в js', 'check-inlayn-stili.js', 'check-inlayn-stili-otkat.js'],
     ['движение и межстрочные', 'check-dvizhenie-i-mezhstrochnye.js', 'check-dvizhenie-i-mezhstrochnye-otkat.js']
 ];
 
