@@ -952,30 +952,4 @@
     outline-offset: 2px;
 }
 
-/* ════════════════════════════════════════════════════════════════════════
-   МЕНЬШЕ ДВИЖЕНИЯ — ЗНАЧИТ МЕНЬШЕ ДВИЖЕНИЯ
 
-   Двадцать правил этого файла двигают, поднимают и раскрывают, и ни одно
-   не спрашивало системную настройку. Раскрывашка FAQ остаётся рабочей —
-   снимается только анимация высоты, а не само раскрытие.
-   ════════════════════════════════════════════════════════════════════════ */
-
-@media (prefers-reduced-motion: reduce) {
-    .ip-mission-card,
-    .ip-mission-card:hover,
-    .ip-stat-card,
-    .ip-stat-card:hover,
-    .ip-team-card,
-    .ip-team-card:hover,
-    .ip-cta-btn,
-    .ip-cta-btn:hover,
-    .ip-faq-item,
-    .ip-faq-question,
-    .ip-faq-icon,
-    .ip-faq-answer,
-    .ip-fade-in {
-        transition: none;
-        transform: none;
-        animation: none;
-    }
-}

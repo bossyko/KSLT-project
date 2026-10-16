@@ -694,14 +694,4 @@
     }
 }
 
-/* Движение спрашивает системную настройку. Его не было вовсе при 24
-   движущихся правилах */
-@media (prefers-reduced-motion: reduce) {
-    .pm-btn,
-    .pmm-opt,
-    .pmm-way,
-    .pm-btn:hover {
-        transition: none;
-        transform: none;
-    }
-}
+

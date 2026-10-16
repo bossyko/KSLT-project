@@ -299,17 +299,4 @@
     outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
 
-    .sn-btn,
-    .sn-logo,
-    .snm-row,
-    .sn-bar {
-        transition: none;
-    }
-
-    .sn-btn:hover,
-    .sn-logo:hover {
-        transform: none;
-    }
-}

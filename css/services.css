@@ -303,6 +303,23 @@
     overflow: hidden;
 }
 
+/* ТО ЖЕ, ЧТО У ЛЕНТЫ ЛОГОТИПОВ: лента везёт карточки услуг, и родитель
+   режет всё за краем. Движение снимается, прокрутка отдаётся пальцу,
+   затемнение краёв гасится — иначе оно прячет то, что теперь листают. */
+@media (prefers-reduced-motion: reduce) {
+    .sv-carousel {
+        animation: none !important;
+        transform: none !important;
+    }
+    .sv-carousel-wrap {
+        overflow-x: auto;
+    }
+    .sv-carousel-wrap::before,
+    .sv-carousel-wrap::after {
+        display: none;
+    }
+}
+
 /* Fade edges */
 .sv-carousel-wrap::before,
 .sv-carousel-wrap::after {
@@ -1023,32 +1040,6 @@
     }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   ДВИЖЕНИЕ — С РАЗРЕШЕНИЯ, А НЕ ПО УМОЛЧАНИЮ.
-   Две бесконечные ленты ехали всегда: у страницы было НОЛЬ правил
-   `prefers-reduced-motion` на 898 строк. Тот же приём, что на лендинге.
-   ───────────────────────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-    .sv-carousel{
-        animation: none !important;
-    }
-
-    .sv-compact,
-    .sv-player,
-    .sv-featured,
-    .sv-view-all,
-    .sv-view-all svg,
-    .sv-featured-link,
-    .sv-player-btn {
-        transition: none !important;
-    }
-
-    .sv-compact:hover,
-    .sv-player:hover,
-    .sv-featured:hover {
-        transform: none !important;
-    }
-}
 
                                                                         
                                            

@@ -1187,7 +1187,7 @@ input, button, select, textarea {
 .site-notif-item-msg {
     font-size: var(--fs-xs);
     color: var(--text-secondary, #999);
-    line-height: 1.4;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -1788,7 +1788,7 @@ h2 {
     margin-top: var(--space-3);
     font-size: clamp(2rem, 4.8vw, 3.7rem);
     font-weight: 900;
-    line-height: 0.95;
+    line-height: 1;
     letter-spacing: -0.04em;
     color: var(--text-primary);
     animation: fadeInUp 0.6s ease 0.1s both;
@@ -2608,7 +2608,7 @@ h2 {
 .badges-cta-text h2 {
     font-size: var(--fs-lg);
     font-weight: var(--fw-bold);
-    line-height: 1.25;
+    line-height: 1.3;
     letter-spacing: 0;
     color: var(--text-primary);
     margin-bottom: 6px;
@@ -2697,7 +2697,7 @@ h2 {
 .badge-cta-desc {
     font-size: var(--fs-xs);
     color: var(--text-muted);
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .badges-cta-btn {
@@ -2828,7 +2828,7 @@ h2 {
 @media (max-width: 640px) {
     .badge-cta-name {
         font-size: var(--fs-sm);
-        line-height: 1.2;
+        line-height: 1.1;
         text-align: center;
     }
 }
@@ -3152,18 +3152,6 @@ h2 {
     to { --guest-angle: 360deg; }
 }
 
-/* ДВИЖЕНИЕ ВЫКЛЮЧАЕТСЯ ТЕМ, КТО ПОПРОСИЛ СИСТЕМУ ЕГО ВЫКЛЮЧИТЬ. WCAG 2.3.3.
-   Обводка коробки крутится бесконечно; для prefers-reduced-motion она замирает,
-   но остаётся видимой — гаснет движение, а не элемент.
-   НАЙДЕНО ПО ДОРОГЕ: в проекте 46 бесконечных анимаций и НИ ОДНОГО такого
-   блока. Здесь закрыта только эта, остальные — долгом: выключать чужие
-   анимации, которых Костя не смотрел, я не вправе. */
-@media (prefers-reduced-motion: reduce) {
-    .badges-cta-box::before,
-    .guest-cta-card::before {
-        animation: none;
-    }
-}
 
 /* Ambient glow */
 .guest-cta-card::after {
@@ -3425,7 +3413,7 @@ h2 {
 .vn-four .court-info h4,
 .vn-four .coach-info h4 {
     font-size: var(--fs-base);
-    line-height: 1.25;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -3437,7 +3425,7 @@ h2 {
 .vn-four .court-info span,
 .vn-four .coach-info span {
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    line-height: 1.3;
     color: var(--text-muted);
 }
 
@@ -3491,13 +3479,7 @@ h2 {
 }
 
 /* Карточка двигается при наведении — значит, спрашиваем разрешения */
-@media (prefers-reduced-motion: reduce) {
-    .vn-four .court-card,
-    .vn-four .coach-card { transition: none; }
 
-    .vn-four .court-card:hover,
-    .vn-four .coach-card:hover { transform: none; }
-}
 
 /* Метка партнёра ушла из угла фотографии в строку: Badge 27:53 Subtle —
    умолчание для карточек, а лаймовая заливка — снова акцент не на действии.
@@ -3849,12 +3831,6 @@ h2 {
     display: block;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .sponsor-hero-logo,
-    .sponsors-cloud .sponsor-logo-link { transition: none; }
-    .sponsor-hero-logo:hover,
-    .sponsors-cloud .sponsor-logo-link:hover { transform: none; }
-}
 
 /* Колонок меньше — плитка та же. Число колонок это свойство экрана,
    а размер плитки — свойство карточки. */
@@ -3982,7 +3958,7 @@ h2 {
 .spon-modal-desc {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    line-height: 1.55;
+    line-height: 1.5;
     margin-bottom: 16px;
     /* Описание вводят в админке в несколько строк, а браузер по умолчанию
        склеивает их в одну. Сохраняем переносы как набраны */
@@ -4132,17 +4108,30 @@ h2 {
     animation: scrollCarousel 90s linear infinite;
 }
 
+/* ДВИЖЕНИЕ, КОТОРОЕ ВЕЗЁТ СОДЕРЖИМОЕ, НЕ ПРОСТО ОСТАНАВЛИВАЮТ. Лента едет
+   90 с, и родитель держит `overflow: hidden`: останови её — и логотипы за
+   краем экрана станут недоступны НИКАК. До 15.10 здесь стояло
+   `animation: none`, и у того, кто выключил анимации, лента замирала на
+   первом кадре вместе с половиной спонсоров.
+   Поэтому движение снимается, а взамен даётся прокрутка пальцем. Маска
+   краёв тоже снимается: за ней прячется начало содержимого, которое
+   теперь листают руками. WCAG 2.3.3 и 1.4.2. */
+@media (prefers-reduced-motion: reduce) {
+    .carousel-track-infinite {
+        animation: none !important;
+        transform: none !important;
+    }
+    .sponsors-carousel-infinite {
+        overflow-x: auto;
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+}
+
 .sponsors-carousel-infinite:hover .carousel-track-infinite {
     animation-play-state: paused;
 }
 
-/* ДОРОЖКА ЕДЕТ 90 СЕКУНД БЕЗ ОСТАНОВКИ — значит, спрашиваем разрешения.
-   Заведено 24.09, когда карусель встала ещё и внизу страницы матча: на
-   лендинге она живёт в шапке, где её проматывают, а на странице матча
-   висит перед глазами, пока человек смотрит счёт. WCAG 2.3.3. */
-@media (prefers-reduced-motion: reduce) {
-    .carousel-track-infinite { animation: none; }
-}
 
 @keyframes scrollCarousel {
     0% {
@@ -4280,7 +4269,7 @@ h2 {
     grid-column: 1;
     grid-row: 1;
     font-size: var(--fs-lg);
-    line-height: 1.7;
+    line-height: 1.65;
     color: var(--text-secondary);
     /* Ширину ограничиваем не из вредности: строка длиннее ~90 знаков
        читается тяжело — глаз не находит начало следующей. Замер: 70 */
@@ -4413,19 +4402,14 @@ h2 {
 }
 
 /* Плашка двигается — значит, спрашиваем разрешения */
-@media (prefers-reduced-motion: reduce) {
-    .feature-icon { transition: none; }
 
-    .feature:hover .feature-icon,
-    .feature:focus-visible .feature-icon { transform: none; }
-}
 
 /* Ступень card title по лестнице 86:10: заголовок КАРТОЧКИ, не раздела.
    Было 16 — ровно кегль строки под ним, разница только в весе */
 .feature h3 {
     font-size: var(--fs-base);
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
     color: var(--text-primary);
     margin: 0;
 }
@@ -5343,7 +5327,7 @@ h2 {
 
 .pt-modal-title {
     font-size: clamp(1.05rem, 4.6vw, 1.2rem);
-    line-height: 1.25;
+    line-height: 1.3;
     font-weight: 800;
     color: var(--neutral-white);
     margin-bottom: 10px;
@@ -5352,7 +5336,7 @@ h2 {
 .pt-modal-text {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    line-height: 1.35;
+    line-height: 1.3;
     margin-bottom: 18px;
 }
 
@@ -5506,7 +5490,7 @@ h2 {
     font-size: var(--fs-xs);
     color: var(--text-muted);
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .pt-modal-pay .pt-modal-disclaimer {
@@ -5534,7 +5518,7 @@ h2 {
 
     .pt-modal-text {
         font-size: var(--fs-sm);
-        line-height: 1.55;
+        line-height: 1.5;
         margin-bottom: 24px;
     }
 
@@ -5907,7 +5891,7 @@ h2 {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    line-height: 1.25;
+    line-height: 1.3;
 }
 
 .tc-desc {
@@ -6074,7 +6058,7 @@ h2 {
     .tournaments-grid .tc .tc-title,
     .tournaments-grid .tc-featured .tc-title {
         font-size: var(--fs-sm);
-        line-height: 1.25;
+        line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -6272,7 +6256,7 @@ h2 {
     .tournaments-grid .tc .tc-title,
     .tournaments-grid .tc-featured .tc-title {
         font-size: var(--fs-sm);
-        line-height: 1.25;
+        line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -8156,7 +8140,7 @@ body.nav-open {
 .auth-screen-subtitle {
     font-size: var(--fs-sm);
     color: var(--text-muted);
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .auth-screen-subtitle strong {
@@ -8293,7 +8277,7 @@ body.nav-open {
     text-transform: uppercase;
     padding: 4px 10px;
     border-radius: 6px;
-    line-height: 1.2;
+    line-height: 1.1;
     z-index: 2;
     pointer-events: none;
 }
@@ -8333,7 +8317,7 @@ body.nav-open {
     text-transform: uppercase;
     padding: 4px 12px;
     border-radius: 6px;
-    line-height: 1.2;
+    line-height: 1.1;
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -8439,7 +8423,7 @@ body.nav-open {
 .auth-modal-text {
     font-size: var(--fs-base);
     color: var(--alpha-white-72);
-    line-height: 1.6;
+    line-height: 1.65;
     margin-bottom: 24px;
 }
 
@@ -9792,7 +9776,7 @@ input:-internal-autofill-previewed {
 .footer-bottom-links a {
     color: var(--text-secondary);
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    line-height: 1.3;
     transition: color var(--transition-base);
 }
 
@@ -9909,7 +9893,7 @@ input:-internal-autofill-previewed {
     margin-top: var(--space-2);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .sp-gives {
@@ -9925,7 +9909,7 @@ input:-internal-autofill-previewed {
     padding-left: var(--space-6);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    line-height: 1.45;
+    line-height: 1.5;
 }
 /* Галочка нарисована рамками: иконочного набора на сайте ещё нет, и таких
    галочек в коде тринадцать штук. Сведение их в одну — отдельный кусок. */
@@ -9981,10 +9965,6 @@ input:-internal-autofill-previewed {
     outline-offset: 3px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .sp-cta-btn { transition: none; }
-    .sp-cta-btn:hover { transform: none; }
-}
 
 /* Телефон. Граница та же, на которой переключается заголовок раздела:
    заголовок и число читаются парой и обязаны ехать одной границей.
@@ -10077,7 +10057,7 @@ input:-internal-autofill-previewed {
     margin: 0 0 var(--space-md);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    line-height: 1.6;
+    line-height: 1.65;
 }
 
 .ar-actions {
@@ -10276,7 +10256,7 @@ input:-internal-autofill-previewed {
     /* Ступень card title лестницы 86:10 — Bold, а не Semi Bold. Было 600,
        и новости расходились с турнирами на один вес. Решение Кости 23.09. */
     font-weight: var(--fw-bold);
-    line-height: 1.35;
+    line-height: 1.3;
     color: var(--text-primary);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -10450,7 +10430,7 @@ input:-internal-autofill-previewed {
     border: var(--bw-hair) solid transparent;
     font-size: var(--fs-sm);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.1;
     white-space: nowrap;
     cursor: default;
 }
@@ -10562,7 +10542,7 @@ input:-internal-autofill-previewed {
        две: подпись новости длиннее названия турнира. */
     .hn-card h3 {
         font-size: var(--fs-sm);
-        line-height: 1.25;
+        line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
@@ -10663,7 +10643,7 @@ input:-internal-autofill-previewed {
         font-size: var(--fs-lg);   /* 21 */
         font-weight: 800;          /* Extra Bold */
         letter-spacing: -0.03em;
-        line-height: 1.2;
+        line-height: 1.1;
     }
 
     /* Шапка раздела: заголовок слева, ссылка «Все турниры» справа —
@@ -10784,7 +10764,7 @@ input:-internal-autofill-previewed {
     .bo-hero-stats .bo-hero-stat-label,
     .bo-hero-stats .hero-stat-label {
         font-size: clamp(0.6rem, 2.7vw, 0.72rem);
-        line-height: 1.25;
+        line-height: 1.3;
         letter-spacing: 0.04em;
         text-align: center;
     }
@@ -10843,7 +10823,7 @@ input:-internal-autofill-previewed {
         line-height: 1.5;
     }
 
-    .footer-desc { line-height: 1.4; }
+    .footer-desc { line-height: 1.3; }
 
     /* Нижняя полоса: три строки по центру превращались в 157 пикселей */
     .footer-bottom {
@@ -11550,7 +11530,7 @@ main > section:first-child:not(.hero) {
 
     .hero-stats .stat-label {
         font-size: clamp(0.6rem, 2.7vw, 0.72rem);
-        line-height: 1.25;
+        line-height: 1.3;
         letter-spacing: 0.04em;
     }
 

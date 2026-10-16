@@ -1090,10 +1090,4 @@
     .lm-video-idet .lm-back-link { position: fixed; top: var(--space-3); left: var(--space-3); z-index: 3; }
 }
 
-/* Бесконечной анимации у бейджа не должно быть у того, кто попросил
-   систему убрать движение. WCAG 2.3.3. */
-@media (prefers-reduced-motion: reduce) {
-    .live-badge.is-live { animation: none; }
-    .lm-back-link,
-    .lm-chip { transition: none; }
-}
+

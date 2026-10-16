@@ -1031,21 +1031,4 @@
     cursor: default;
 }
 
-/* ═══ ДВИЖЕНИЕ СПРАШИВАЕТ РАЗРЕШЕНИЯ ═════════════════════════════════════
-   Две анимации, из них бесконечный пульс кнопки голоса. */
-@media (prefers-reduced-motion: reduce) {
-    .ch-vote-btn:not(.disabled):not(.selected),
-    .ch-vote-toast {
-        animation: none;
-    }
-    .ch-forecast-bar i,
-    .ch-bar-left,
-    .ch-bar-right,
-    .ch-player-photo,
-    .ch-vote-btn {
-        transition: none;
-    }
-    .ch-vote-btn:hover:not(.disabled) {
-        transform: none;
-    }
-}
+

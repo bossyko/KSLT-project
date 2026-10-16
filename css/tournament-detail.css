@@ -555,13 +555,6 @@
     transform: translateY(-50%) rotate(0deg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .td-sched-ranshe,
-    .td-sched-ranshe-znak::before,
-    .td-sched-ranshe-znak::after {
-        transition: none;
-    }
-}
 
 /* ───────── ЛЕНТА ВЫБОРА БЛОКА СЕТКИ ─────────
 
@@ -641,11 +634,6 @@
     display: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .td-fic-chip {
-        transition: none;
-    }
-}
 
 /* === SINGLE ELIMINATION BRACKET === */
 .td-bracket-scroll {
@@ -799,7 +787,7 @@ tr.td-rr-row-highlight {
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.3;
     border-radius: 3px;
     text-align: center;
 }
@@ -1042,7 +1030,7 @@ tr.td-rr-row-highlight {
 .td-rr-cell {
     font-size: var(--fs-xs);
     vertical-align: middle;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .td-rr-win {
@@ -1773,7 +1761,7 @@ tr.td-rr-row-highlight {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 4px;
-    line-height: 1.25;
+    line-height: 1.3;
     overflow-wrap: break-word;
     max-width: 100%;
 }
@@ -2298,7 +2286,7 @@ tr.td-rr-row-highlight {
     font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
-    line-height: 1.2;
+    line-height: 1.1;
     font-variant-numeric: tabular-nums;
     transition: color 0.3s;
 }
@@ -2494,7 +2482,7 @@ tr.td-rr-row-highlight {
     background: var(--alpha-lime-12);
     border: var(--bw-hair) solid var(--accent);
     padding: 4px 6px !important;
-    line-height: 1.15;
+    line-height: 1.1;
 }
 
 .td-grp-mine:hover { background: var(--alpha-lime-20); }
@@ -2710,7 +2698,7 @@ tr.td-rr-row-highlight {
 
 .td-sched-p {
     /* Пара пишется целиком, поэтому строка переносится, а не обрезается */
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .td-sched-vs {
@@ -2849,7 +2837,7 @@ tr.td-rr-row-highlight {
     }
 
     .td-match-player .td-player-name {
-        line-height: 1.2;
+        line-height: 1.1;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -2991,7 +2979,7 @@ tr.td-rr-row-highlight {
 
     /* Имя пары занимает две строки — это его нормальный вид, а не перенос */
     .td-reg-table td:nth-child(3) {
-        line-height: 1.25;
+        line-height: 1.3;
         word-break: break-word;
     }
 
@@ -3107,7 +3095,7 @@ tr.td-rr-row-highlight {
 
     .td-sched-table .td-sched-p {
         font-size: var(--fs-2xs);
-        line-height: 1.2;
+        line-height: 1.1;
         word-break: break-word;
     }
 
@@ -3136,7 +3124,7 @@ tr.td-rr-row-highlight {
 
     .td-venue-name {
         font-size: var(--fs-base);
-        line-height: 1.25;
+        line-height: 1.3;
         margin-bottom: 4px;
     }
 

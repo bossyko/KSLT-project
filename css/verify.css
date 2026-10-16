@@ -296,14 +296,6 @@
    данных, а не разметки. */
 .vr-pin-error-msg:empty { display: none; }
 
-/* ── Движение ──────────────────────────────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-    .vr-pin-input.vr-pin-error,
-    .vr-success-icon { animation: none; }
-    .vr-pin-input,
-    .vr-confirm-btn { transition: none; }
-}
 
 /* ── Телефон ───────────────────────────────────────────────────────────── */
 

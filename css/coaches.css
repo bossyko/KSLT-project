@@ -176,7 +176,7 @@
 .co-card-name {
     font-size: var(--fs-base);
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -189,7 +189,7 @@
 .co-card-spec {
     color: var(--text-secondary);
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    line-height: 1.3;
     font-weight: 600;
 }
 
@@ -227,7 +227,7 @@
 
 .co-card-price {
     font-size: var(--fs-xs);
-    line-height: 1.4;
+    line-height: 1.3;
     color: var(--text-secondary);
 }
 
@@ -1269,16 +1269,4 @@
     outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
 
-    .co-fade-in,
-    .co-fade-in.visible {
-        transition: none;
-        transform: none;
-    }
-
-    .co-card,
-    .co-cta-btn {
-        transition: none;
-    }
-}

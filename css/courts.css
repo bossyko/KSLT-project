@@ -1563,22 +1563,4 @@
     outline-offset: 2px;
 }
 
-/* ДВИЖЕНИЕ СПРАШИВАЕТ РАЗРЕШЕНИЯ. Замер 13.10: `prefers-reduced-motion` в
-   этом файле ноль, а `.ct-fade-in` ездит при прокрутке. Три чужих блока с
-   `*` сюда не достают — страница корта грузит только tokens, style и этот
-   файл. Правило куплено на рейтинге (css/players.css) и применяется без
-   нового разбора. */
-@media (prefers-reduced-motion: reduce) {
 
-    .ct-fade-in,
-    .ct-fade-in.visible {
-        transition: none;
-        transform: none;
-    }
-
-    .ct-card,
-    .ct-cta-btn,
-    .ct-map-link {
-        transition: none;
-    }
-}

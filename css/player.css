@@ -2333,24 +2333,4 @@ a.pp-tournament:hover {
     border-radius: var(--radius-sm);
 }
 
-/* ДВИЖЕНИЕ СПРАШИВАЕТ СИСТЕМНУЮ НАСТРОЙКУ: было 28 правил с анимацией и
-   переходами и ноль упоминаний настройки. Пульсация точки «в сети» и
-   увеличение кнопки по наведению — ровно то, от чего эта настройка
-   защищает. */
-@media (prefers-reduced-motion: reduce) {
-    .pp-online-dot {
-        animation: none;
-    }
 
-    .pp-match-h2h:hover,
-    .pp-tournament:hover {
-        transform: none;
-    }
-
-    .h2h-overlay,
-    .h2h-modal,
-    .pp-fade-in {
-        transition: none;
-        animation: none;
-    }
-}

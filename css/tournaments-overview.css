@@ -2013,16 +2013,13 @@
     }
 }
 
+/* ЗДЕСЬ ЖИВЁТ ТОЛЬКО ТО, ЧЕГО ОБЩИЙ СБРОС НЕ ДЕЛАЕТ. Гашение анимаций и
+   переходов стояло и тут — тем же приёмом 0.01ms, но лишь для трёх
+   секций. 15.10 оно переехало в общий блок (css/tokens.css, заход B4) и
+   накрывает весь продукт звёздочкой; здесь это была бы копия, которая
+   стареет вместе с файлом. Прилипание прокрутки общий сброс не трогает:
+   это не движение, а поведение ленты. */
 @media (prefers-reduced-motion: reduce) {
-    .to-categories *,
-    .to-hero *,
-    .to-search-wrap * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-
     /* Лента перестаёт «доезжать» рывком: палец ведёт её сам */
     .to-phone-cards {
         scroll-snap-type: none;

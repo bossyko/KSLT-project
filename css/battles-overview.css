@@ -948,25 +948,6 @@
     border-radius: var(--radius-md);
 }
 
-/* ═══ ДВИЖЕНИЕ СПРАШИВАЕТ РАЗРЕШЕНИЯ ═════════════════════════════════════
-   Три анимации, из них две бесконечные: блик обратного отсчёта и пульс
-   срочности. Блока `prefers-reduced-motion` в файле не было вовсе. */
-@media (prefers-reduced-motion: reduce) {
-    .bo-cd,
-    .bo-cd::after,
-    .bo-cd-urgent {
-        animation: none;
-    }
-    .bo-featured,
-    .bo-bar-p1,
-    .bo-bar-p2,
-    .bo-featured-link{
-        transition: none;
-    }
-    .bo-featured:hover {
-        transform: none;
-    }
-}
 
 /* ═══ ЦЕЛЬ 44 НА ТЕЛЕФОНЕ ════════════════════════════════════════════════
    Ступень 36 остаётся мыши, пальцу — 44. Граница домашняя. */

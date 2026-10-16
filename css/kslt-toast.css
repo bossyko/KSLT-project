@@ -113,6 +113,4 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .kslt-toast--uhodit { transition: none; }
-}
+
