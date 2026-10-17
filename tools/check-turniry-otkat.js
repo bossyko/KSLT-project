@@ -49,12 +49,12 @@ const ОТКАТЫ = [
         `    min-height: var(--to-featured-h);`,
    'у соседа остаётся запасное значение везде, где переменную ЧИТАЮТ'],
 
-  [CSS, `    grid-template-rows: repeat(3, minmax(var(--to-slot), auto));`,
+  [CSS, `    grid-template-rows: repeat(3, var(--to-slot));`,
         `    grid-auto-rows: var(--to-slot);`,
-   'столб — сетка с ПОСТОЯННЫМ числом рядов, а ступень слота — их ПОЛ'],
+   'столб — сетка с ПОСТОЯННЫМ числом рядов, и ряд берёт ступень слота'],
 
-  [CSS, `        grid-template-rows: repeat(2, minmax(var(--to-slot), auto));`,
-        `        grid-template-rows: repeat(3, minmax(var(--to-slot), auto));`,
+  [CSS, `        grid-template-rows: repeat(2, var(--to-slot));`,
+        `        grid-template-rows: repeat(3, var(--to-slot));`,
    'на планшете рядов ДВА — целые ряды по два, а не три с хвостом'],
 
   [CSS, `    .to-categories .to-card-grid {\n        --to-featured-h: 320px;\n    }`,
@@ -235,7 +235,7 @@ const ОТКАТЫ = [
         `        grid-template-columns: minmax(0, 1fr);\n        align-content: start;\n    }\n    .to-side-stack .to-compact-thumb {\n        grid-template-columns: minmax(0, 1fr);\n        align-content: start;`,
    'плитка описана ОДИН раз, а не отдельно под каждый планшет'],
 
-  [CSS, `        --to-slot: 216px;`,
+  [CSS, `        --to-slot: 224px;`,
         `        --to-slot: 160px;`,
    'ступень слота на планшете поднята, а кнопка записи не сжата'],
 
