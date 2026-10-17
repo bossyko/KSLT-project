@@ -90,7 +90,10 @@ function sum(ф) { return сколько(безКом(чит(ф)), /<a class="[a
 
 const семьи = [
     ['поиск игрока',        CSS_П, '.pt-card-link > *',        '.pt-card-link > .pt-card-cover',       '.pt-card .pt-invite-btn'],
-    ['крупный баттл',       CSS_Б, '.bo-featured > .bo-featured-bg,\n.bo-featured > .bo-featured-content', '.bo-featured > .bo-featured-cover', null],
+    /* У крупного баттла содержимое — это ФОН: короб `.bo-featured-content`
+       нарочно БЕЗ z-index (см. правило о слое наложения ниже), иначе своё
+       действие внутри него не всплывает над слоем. 17.10. */
+    ['крупный баттл',       CSS_Б, '.bo-featured > .bo-featured-bg', '.bo-featured > .bo-featured-cover', '.bo-featured .bo-meta-venue'],
     ['карточка баттла',     CSS_К, '.bc-card > .bc-card-inner,\n.bc-card > .bc-banner',                '.bc-card > .bc-card-cover',            null],
     ['крупный турнир',      CSS_Т, '.to-featured > .to-featured-bg,\n.to-featured > .to-featured-overlay,\n.to-featured > .to-featured-content', '.to-featured > .to-featured-cover', null],
     ['игрок на «Услугах»',  CSS_У, '.sv-player > *',           '.sv-player > .sv-player-cover',        '.sv-player > .sv-player-btn']
@@ -121,6 +124,35 @@ const семьи = [
             'иначе слой съедает кнопку: нажатие на «Пригласить» уводило бы\n' +
             'на страницу игрока');
     }
+});
+
+/* ══ КОРОБ СОДЕРЖИМОГО НЕ ЗАВОДИТ СВОЕГО СЛОЯ НАЛОЖЕНИЯ ═════════════════
+   НАЙДЕНО ПРОБОЙ 17.10, И ЭТО БЫЛА НАСТОЯЩАЯ БЕДА: у крупного баттла
+   `.bo-featured-content` был объявлен ДВАЖДЫ — с z-index 1 и с z-index 2,
+   — побеждало то, что точнее, и короб заводил свой слой наложения.
+   Внутри него `z-index: 3` у места и кнопки голоса считался СРЕДИ СВОИХ:
+   они стояли третьими в коробе, а весь короб лежал под слоем-ссылкой.
+   Место перестало нажиматься, окно карты не открывалось вовсе.
+   След прогона сказал прямо: «<a class="bo-featured-cover"> intercepts
+   pointer events».
+   ОТНОШЕНИЕ, КОТОРОЕ ЗАМОРОЖЕНО: если внутри короба живёт СВОЁ ДЕЙСТВИЕ,
+   короб обязан оставаться без z-index — иначе действие заперто в нём. */
+const коробаСДействием = [
+    ['крупный баттл', CSS_Б, '.bo-featured-content']
+];
+коробаСДействием.forEach(([имя, css, короб]) => {
+    const все = css.split('\n').join('\n');
+    const куски = [];
+    const ре = new RegExp('(^|\\})\\s*[^{}]*' + короб.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+                          '\\s*\\{([^{}]*)\\}', 'g');
+    let м;
+    while ((м = ре.exec(все))) куски.push(м[2]);
+    правило('короб содержимого не заводит своего слоя наложения: ' + имя,
+        куски.length > 0 && куски.every(к => !/z-index:/.test(к)),
+        'Найдено объявлений короба: ' + куски.length + ', с z-index: ' +
+        куски.filter(к => /z-index:/.test(к)).length + '.\n' +
+        'Короб с z-index запирает в себе своё действие: `z-index: 3` у места\n' +
+        'считается среди соседей по коробу, а короб целиком уходит под слой.');
 });
 
 /* ══ ПЕРЕХОД РОВНО ОДИН ═════════════════════════════════════════════════ */

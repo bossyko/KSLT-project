@@ -81,6 +81,13 @@ const ОТКАТЫ = [
  '.bo-featured > .bo-featured-cover {\n    position: absolute;\n    inset: 0;\n    z-index: 0;',
  'слой лежит ВЫШЕ содержимого: крупный баттл'],
 
+/* ОТКАТ К БЕДЕ 17.10: короб содержимого снова заводит свой слой
+   наложения — и запирает в себе место и кнопку голоса. */
+['вернуть коробу крупного баттла свой слой наложения', CБ,
+ '.bo-featured-content {\n    padding: var(--space-lg);\n}',
+ '.bo-featured-content {\n    position: relative;\n    z-index: 2;\n    padding: var(--space-lg);\n}',
+ 'короб содержимого не заводит своего слоя наложения: крупный баттл'],
+
 ['снять кольцо фокуса у слоя крупного баттла', CБ,
  '.bo-featured > .bo-featured-cover:focus-visible {',
  '.bo-featured > .bo-featured-cover:active {',
