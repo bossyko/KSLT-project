@@ -8617,7 +8617,7 @@ body.nav-open {
 
 .auth-message-error {
     background: var(--danger-subtle);
-    border: var(--bw-hair) solid rgba(255, 71, 87, 0.3);
+    border: var(--bw-hair) solid var(--alpha-red-30);
     color: var(--danger);
 }
 

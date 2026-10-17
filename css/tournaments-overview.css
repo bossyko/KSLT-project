@@ -1152,7 +1152,7 @@
 }
 
 @keyframes toCdUrgentPulse {
-    0%, 100% { box-shadow: 0 2px 12px rgba(255,71,87,0.3); }
+    0%, 100% { box-shadow: 0 2px 12px var(--alpha-red-30); }
     50% { box-shadow: 0 2px 24px rgba(255,71,87,0.6); }
 }
 
@@ -1174,7 +1174,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    box-shadow: 0 2px 12px rgba(255,71,87,0.3);
+    box-shadow: 0 2px 12px var(--alpha-red-30);
 }
 
 .to-cd-live::after {
