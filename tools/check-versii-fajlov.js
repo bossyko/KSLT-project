@@ -37,11 +37,26 @@ const П = (...ч) => path.join(КОРЕНЬ, ...ч);
 
 /* ── свои файлы: всё, что лежит у нас, а не на чужом адресе ──────────── */
 const СВОИ = new Map();
-['js', 'css', 'data', path.join('js', 'sections')].forEach(д => {
+/* КЛЮЧ — ПУТЬ, А НЕ ИМЯ ФАЙЛА. 17.10 прибор свёл `js/players.js` и
+   `js/admin/sections/players.js` в один «файл» — у них совпадает
+   базовое имя — и объявил расхождение версий там, где это РАЗНЫЕ файлы
+   с разной судьбой. Пока их номера случайно совпадали, беда молчала.
+   Заодно обход стал рекурсивным: `js/admin/**` в список своих файлов не
+   входил вовсе, то есть версии всего слоя админки не сторожились. */
+(function обойти(д) {
+    const полный = П(д);
+    if (!fs.existsSync(полный)) return;
+    fs.readdirSync(полный, { withFileTypes: true }).forEach(э => {
+        const п = path.join(д, э.name);
+        if (э.isDirectory()) обойти(п);
+        else if (/\.(js|css)$/.test(э.name)) СВОИ.set(п.split(path.sep).join('/'), п);
+    });
+})('js');
+['css', 'data'].forEach(д => {
     const полный = П(д);
     if (!fs.existsSync(полный)) return;
     fs.readdirSync(полный).forEach(ф => {
-        if (/\.(js|css)$/.test(ф) && !СВОИ.has(ф)) СВОИ.set(ф, path.join(д, ф));
+        if (/\.(js|css)$/.test(ф)) СВОИ.set(д + '/' + ф, path.join(д, ф));
     });
 });
 
@@ -68,9 +83,13 @@ const дубли = [];
     let м;
     ПОДКЛ.lastIndex = 0;
     while ((м = ПОДКЛ.exec(т)) !== null) {
-        const путь = м[1], имя = м[2], вер = м[4];
+        const путь = м[1], вер = м[4];
         /* Чужая библиотека: внешний адрес. Её номер живёт в адресе CDN. */
         if (/^https?:/.test(путь) || /^\/\//.test(путь)) continue;
+        /* ИМЯ ФАЙЛА — ЭТО ЕГО ПУТЬ. `../js/players.js` и
+           `../js/admin/sections/players.js` — разные файлы, и у каждого
+           своя версия. */
+        const имя = путь.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '');
         if (!СВОИ.has(имя)) continue;
         насчитано.set(имя, (насчитано.get(имя) || 0) + 1);
         if (вер) {
