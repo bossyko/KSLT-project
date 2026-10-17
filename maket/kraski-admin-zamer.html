@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: лестница роли после сведения</title>
+<link rel="stylesheet" href="../css/tokens.css?v=69">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<style>
+body { background: var(--bg-base); padding-bottom: var(--space-8); }
+.st-shapka { position: sticky; top: 0; z-index: 9; padding: var(--space-3) var(--space-4);
+  background: var(--bg-base); border-bottom: var(--bw-hair) solid var(--border-subtle);
+  font-size: var(--fs-sm); color: var(--text-secondary); }
+.st-rol { padding: var(--space-4); max-width: 1100px; }
+.st-imya { font-size: var(--fs-xs); color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: var(--space-2); }
+.st-karta { background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: var(--space-3); }
+.st-ryad { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.zn { display: inline-block; padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm); font-size: var(--fs-2xs); font-weight: var(--fw-semibold);
+  white-space: nowrap; }
+.po { padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-xs);
+  min-width: 160px; }
+.kl { display: inline-block; width: 20px; height: 20px; border-radius: var(--radius-sm);
+  text-align: center; line-height: 20px; font-size: var(--fs-2xs); font-weight: 700; }
+
+.r-ok  { color: var(--success);      background: var(--success-subtle);
+         border: var(--bw-hair) solid var(--success-border); }
+.r-vn  { color: var(--warning);      background: var(--warning-subtle);
+         border: var(--bw-hair) solid var(--warning-border); }
+.r-in  { color: var(--info);         background: var(--info-subtle);
+         border: var(--bw-hair) solid var(--info-border); }
+.r-op  { color: var(--danger);       background: var(--danger-subtle);
+         border: var(--bw-hair) solid var(--danger-border); }
+.r-mn  { color: var(--role-manager); background: var(--role-manager-subtle);
+         border: var(--bw-hair) solid var(--role-manager-border); }
+.r-zv  { color: var(--text-muted);   background: var(--surface-glass);
+         border: var(--bw-hair) solid var(--border-subtle); }
+
+.f-ok { background: var(--success-faint); color: var(--success); }
+.f-vn { background: var(--warning-faint); color: var(--warning); }
+.f-in { background: var(--info-faint);    color: var(--info); }
+.f-op { background: var(--danger-faint);  color: var(--danger); }
+.f-mn { background: var(--role-manager-faint); color: var(--role-manager); }
+
+.z-ok { background: var(--success); color: var(--success-on); }
+.z-op { background: var(--danger);  color: var(--danger-on); }
+</style>
+</head>
+<body>
+<!-- СТЕНД ПОСЛЕ СВЕДЕНИЯ, круг 5 ветки D. Три ступени на роль:
+     тускло 0.06 (полоса строки), подложка 0.15 (бейдж), граница 0.30. -->
+<div class="st-shapka">КСЛТ · ЛЕСТНИЦА РОЛИ ПОСЛЕ СВЕДЕНИЯ · подложка · граница · тускло · сплошная</div>
+
+<div class="st-rol">
+  <div class="st-imya">бейдж: текст на подложке, рамка на ступень выше</div>
+  <div class="st-karta"><div class="st-ryad">
+    <span class="zn r-ok">оплачено</span><span class="zn r-vn">ожидает</span>
+    <span class="zn r-in">вынос</span><span class="zn r-op">отказ</span>
+    <span class="zn r-mn">менеджер</span><span class="zn r-zv">завершён</span>
+  </div></div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">тускло: полоса строки и градиент карточки</div>
+  <div class="st-karta"><div class="st-ryad">
+    <div class="po f-ok">успех, тускло</div><div class="po f-vn">внимание, тускло</div>
+    <div class="po f-in">сведения, тускло</div><div class="po f-op">опасность, тускло</div>
+    <div class="po f-mn">менеджер, тускло</div>
+  </div></div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">сплошная заливка: клетка формы «выиграл / проиграл»</div>
+  <div class="st-karta"><div class="st-ryad">
+    <span class="kl z-ok">В</span><span class="kl z-op">П</span>
+  </div></div>
+</div>
+</body>
+</html>
