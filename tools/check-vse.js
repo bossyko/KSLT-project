@@ -105,6 +105,7 @@ const КУСКИ = [
     ['точки останова', 'check-tochki-ostanova.js', 'check-tochki-ostanova-otkat.js'],
     ['посев: половины', 'check-posev-polovin.js', 'check-posev-polovin-otkat.js'],
     ['инлайн-стили в js', 'check-inlayn-stili.js', 'check-inlayn-stili-otkat.js'],
+    ['адрес сайта', 'check-adres-sayta.js', 'check-adres-sayta-otkat.js'],
     ['движение и межстрочные', 'check-dvizhenie-i-mezhstrochnye.js', 'check-dvizhenie-i-mezhstrochnye-otkat.js']
 ];
 

@@ -26,6 +26,11 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+/* АДРЕС САЙТА — ИЗ ОКРУЖЕНИЯ, по образцу send-email/index.ts:85.
+   Было зашито строкой; при переезде на свой домен такие места
+   молчат: ссылка ведёт на старый адрес, пока он жив. */
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
+
 // ============================================
 // ТЕКСТЫ УВЕДОМЛЕНИЙ
 // ============================================
@@ -173,7 +178,7 @@ await загрузитьТексты(supabase)
         const text =
           `Здравствуйте${name ? ', ' + name : ''}! Ваше членство KSLT истекает через 7 дней (${expiresFormatted}).\n` +
           `Для продления оплатите 1000 сом/мес.\n` +
-          `Подробнее: https://kslt.netlify.app/pages/pricing.html`
+          `Подробнее: ${SITE_URL}/pages/pricing.html`
 
         const success = await sendMessage(profile.telegram_chat_id, text)
         if (success) { sent++; notified = true }

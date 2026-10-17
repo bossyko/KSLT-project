@@ -1315,7 +1315,7 @@
            только русский адрес: обе переведённые страницы были недостижимы.
            Язык здесь уже известен — им подписан сам QR. */
         var verifySuffix = isEn ? '-en' : (isKg ? '-kg' : '');
-        var verifyUrl = 'https://kslt.netlify.app/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
+        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
         var expiresDate = new Date(voucher.expires_at);
         var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
@@ -1427,7 +1427,7 @@
 
                 ctx.fillStyle = 'rgba(255,255,255,0.25)';
                 ctx.font = '10px Inter, Arial, sans-serif';
-                ctx.fillText('kslt.netlify.app', w / 2, h - 14);
+                ctx.fillText(window.KSLT_SAYT.подпись, w / 2, h - 14);
 
                 var link = document.createElement('a');
                 link.download = 'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png';

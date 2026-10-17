@@ -1,3 +1,8 @@
+
+/* АДРЕС САЙТА — ИЗ ОКРУЖЕНИЯ, по образцу send-email/index.ts:85.
+   Было зашито строкой; при переезде на свой домен такие места
+   молчат: ссылка ведёт на старый адрес, пока он жив. */
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
         // ============================================
         // KSLT — Telegram Webhook Handler
         // Supabase Edge Function
@@ -245,7 +250,7 @@
               if (existing) {
                 await sendMessage(chatId, т('link_again', языкСтарта))
               } else {
-                await sendMessage(chatId, т('welcome', 'ru', { 'ссылка': 'https://kslt.netlify.app/pages/dashboard.html' }))
+                await sendMessage(chatId, т('welcome', 'ru', { 'ссылка': SITE_URL + '/pages/dashboard.html' }))
               }
               return new Response('ok', { status: 200 })
             }
@@ -876,7 +881,7 @@
                       { text: `📊 Голосов: ${total}`, callback_data: `bn:${challengeId}` }
                     ],
                     [
-                      { text: '🎾 Подробнее', url: `https://kslt.netlify.app/pages/challenge.html?id=${challengeId}` }
+                      { text: '🎾 Подробнее', url: `${SITE_URL}/pages/challenge.html?id=${challengeId}` }
                     ]
                   ]
                 }
@@ -904,7 +909,7 @@
             .single()
     
           if (!profile) {
-            await sendMessage(chatId, т('link_first', await языкЧата(создатьКлиент(), chatId), { 'ссылка': 'https://kslt.netlify.app/pages/dashboard.html' }))
+            await sendMessage(chatId, т('link_first', await языкЧата(создатьКлиент(), chatId), { 'ссылка': SITE_URL + '/pages/dashboard.html' }))
             return
           }
     
@@ -1033,7 +1038,7 @@
                 .update({ months, amount: price, status: 'pending_receipt', updated_at: new Date().toISOString() })
                 .eq('id', req.id)
     
-              await sendMessage(chatId, т('mem_price', await языкЧата(supabase, chatId), { 'сумма': price, 'месяцев': months, 'ссылка': 'https://kslt.netlify.app/pages/pricing.html' }))
+              await sendMessage(chatId, т('mem_price', await языкЧата(supabase, chatId), { 'сумма': price, 'месяцев': months, 'ссылка': SITE_URL + '/pages/pricing.html' }))
               await answerCallbackQuery(token, query.id, `${months} мес — ${price} сом`)
             } else {
               // No player card → need category selection
@@ -1054,7 +1059,7 @@
                 await db.from('membership_requests')
                   .update({ status: 'pending_receipt', updated_at: new Date().toISOString() })
                   .eq('id', req.id)
-                await sendMessage(chatId, т('mem_price', await языкЧата(supabase, chatId), { 'сумма': price, 'месяцев': months, 'ссылка': 'https://kslt.netlify.app/pages/pricing.html' }))
+                await sendMessage(chatId, т('mem_price', await языкЧата(supabase, chatId), { 'сумма': price, 'месяцев': months, 'ссылка': SITE_URL + '/pages/pricing.html' }))
                 await answerCallbackQuery(token, query.id, `${months} мес — ${price} сом`)
                 return
               }
@@ -1117,7 +1122,7 @@
               .update({ category_id: categoryId, status: 'pending_receipt', updated_at: new Date().toISOString() })
               .eq('id', req.id)
     
-            await sendMessage(chatId, т('mem_price', await языкЧата(создатьКлиент(), chatId), { 'сумма': req.amount, 'месяцев': req.months, 'ссылка': 'https://kslt.netlify.app/pages/pricing.html' }))
+            await sendMessage(chatId, т('mem_price', await языкЧата(создатьКлиент(), chatId), { 'сумма': req.amount, 'месяцев': req.months, 'ссылка': SITE_URL + '/pages/pricing.html' }))
             await answerCallbackQuery(token, query.id, 'Отправьте скриншот чека')
             return
           }

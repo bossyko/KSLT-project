@@ -13,7 +13,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const TELEGRAM_API = 'https://api.telegram.org/bot'
-const SITE_URL = 'https://kslt.netlify.app'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

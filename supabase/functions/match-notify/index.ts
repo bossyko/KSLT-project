@@ -81,7 +81,7 @@ async function языкПрофиля(supabase: any, profileId: string): Promise
 }
 
   const TELEGRAM_API = 'https://api.telegram.org/bot'
-  const SITE_URL = 'https://kslt.netlify.app'
+  const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
   const BISHKEK_OFFSET = 6 // UTC+6
 
   const corsHeaders = {

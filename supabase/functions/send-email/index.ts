@@ -221,7 +221,7 @@ ${content}
 <tr><td style="padding:20px 32px;border-top:1px solid #e6e8eb;background-color:#fafbfc;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
 <td style="font-size:12px;color:#7a828c;line-height:1.4;">
-<a href="${SITE_URL}" style="color:#4e6b00;text-decoration:none;">kslt.netlify.app</a><br>
+<a href="${SITE_URL}" style="color:#4e6b00;text-decoration:none;">${SITE_URL.replace(/^https?:\/\//, '')}</a><br>
 <a href="${SITE_URL}/pages/dashboard.html#notifications" style="color:#7a828c;text-decoration:underline;">Настройки уведомлений</a>
 <div style="margin-top:10px;color:#8a919b;">Ответить на это письмо можно — оно придёт на
 <a href="mailto:${REPLY_TO}" style="color:#7a828c;text-decoration:underline;">${REPLY_TO}</a></div>

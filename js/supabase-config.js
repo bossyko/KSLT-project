@@ -30,6 +30,27 @@ var SUPABASE_ANON_KEY = (window.KSLT_DB && window.KSLT_DB.key) ||
  */
 window.KSLT_APPLE = window.KSLT_APPLE || false;
 
+/**
+ * АДРЕС САЙТА — ОДНО ОПРЕДЕЛЕНИЕ НА ВЕСЬ ПРОДУКТ.
+ *
+ * Было 27 живых мест с зашитым `https://kslt.netlify.app`, и число росло:
+ * 25 в замере 03.10, 27 к 17.10. Три из них — QR-ваучера (`dashboard.js`,
+ * `courts.js`, `coaches.js`), ещё 11 — серверные функции в письмах и
+ * телеграме. При переезде на свой домен каждое пришлось бы искать руками,
+ * а пропущенное молчит: ссылка ведёт на старый адрес и работает, пока
+ * старый домен жив.
+ *
+ * Адрес берётся У БРАУЗЕРА, а не вписывается: на каком домене открыли
+ * страницу, туда и ведёт ваучер. Это верно и на боевом домене, и на
+ * тестовом прогоне, и после переезда — без единой правки.
+ *
+ * `подпись` — тот же адрес без протокола, для печати на картинке ваучера.
+ */
+window.KSLT_SAYT = {
+    get адрес() { return window.location.origin; },
+    get подпись() { return window.location.host; }
+};
+
 /** @type {string} Telegram bot username (for deep link: t.me/BOT?start=PROFILE_ID) */
 window.KSLT_TG_BOT = 'KSLTennisBot';
 
