@@ -2573,7 +2573,7 @@
         try {
             var нс = await A.client.from('app_settings').select('value').eq('key', 'free_access_until').maybeSingle();
             var до = нс.data && нс.data.value ? String(нс.data.value).replace(/"/g, '') : '';
-            бесплатно = !!до && до !== 'null' && new Date().toISOString().slice(0, 10) <= до;
+            бесплатно = !!до && до !== 'null' && KSLT_VREMYA.сегодня() <= до;
         } catch (e) { /* настройки нет — работаем по членству */ }
 
         // Load membership status for debt labels

@@ -845,8 +845,8 @@
             var endDate = new Date(startDate);
             endDate.setMonth(endDate.getMonth() + _selectedPeriod);
 
-            var startStr = startDate.toISOString().split('T')[0];
-            var endStr = endDate.toISOString().split('T')[0];
+            var startStr = KSLT_VREMYA.деньПоБишкеку(startDate);
+            var endStr = KSLT_VREMYA.деньПоБишкеку(endDate);
 
             // 1. Create membership
             var memResult = await A.client.from('memberships').insert({
@@ -1776,7 +1776,7 @@
                 '</tr>';
         });
 
-        var reportDate = fmtUsrDate(now.toISOString().slice(0, 10));
+        var reportDate = fmtUsrDate(KSLT_VREMYA.деньПоБишкеку(now));
 
         var win = window.open('', '_blank');
         if (!win) return;
@@ -1861,7 +1861,7 @@
     function exportUsrExcel() {
         var items = usrAllItems;
         var memMap = usrMemMap;
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
 
         var headers = ['№', L.thUser, L.thEmail, L.thRole, isEn ? 'Membership' : 'Членство', isEn ? 'Player' : 'Игрок', 'Telegram', L.thDate];
         var rows = items.map(function(u, i) {

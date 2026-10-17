@@ -253,7 +253,7 @@
         var когда = (r.data && r.data.updated_at)
             ? new Date(r.data.updated_at).toLocaleString(isEn ? 'en-US' : 'ru-RU') : '';
 
-        var сегодня = new Date().toISOString().split('T')[0];
+        var сегодня = KSLT_VREMYA.сегодня();
         var идёт = дата && сегодня <= дата;
 
         panel.innerHTML =
@@ -911,9 +911,11 @@
      * и два семейства на одном экране — шов.
      */
     function окноНовойВерсии(правки) {
-        var завтра = new Date(A.сегодняБишкек() + 'T12:00:00Z');
-        завтра.setUTCDate(завтра.getUTCDate() + 1);
-        var минимум = завтра.toISOString().slice(0, 10);
+        /* ЗАВТРА ПО БИШКЕКУ. Полдень взят нарочно: от него сутки вперёд
+           не перепрыгивают границу дня ни в какой зоне, а день читается
+           обратно тем же домом. */
+        var минимум = KSLT_VREMYA.деньПоБишкеку(
+            new Date(new Date(KSLT_VREMYA.сегодня() + 'T12:00:00Z').getTime() + 24 * 3600 * 1000));
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';
@@ -1254,7 +1256,7 @@
             to_category_id: toCatId,
             season: season,
             status: 'eligible',
-            eligible_date: new Date().toISOString().slice(0, 10)
+            eligible_date: KSLT_VREMYA.сегодня()
         });
         if (res.error) { A.showToast(res.error.message, 'error'); return; }
         A.showToast(L.ratPromoted, 'success');
@@ -1271,7 +1273,7 @@
             var pr = prRes.data;
             var upd = await A.client.from('player_promotions').update({
                 status: 'completed',
-                completed_date: new Date().toISOString().slice(0, 10)
+                completed_date: KSLT_VREMYA.сегодня()
             }).eq('id', promotionId);
             if (upd.error) { A.showToast(upd.error.message, 'error'); return; }
             // Move player to new category, reset stats

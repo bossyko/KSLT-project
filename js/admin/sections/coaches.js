@@ -254,8 +254,11 @@
         var promoted = cchAllData.filter(function(c) { return c.promoted; }).length;
 
         // New this month
-        var now = new Date();
-        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+        /* ПЕРВОЕ ЧИСЛО МЕСЯЦА — ПО БИШКЕКУ, А НЕ ПО БРАУЗЕРУ. Было
+           `new Date(год, месяц, 1)` от местного времени смотрящего: у
+           Кости в Чикаго первого числа до 11 утра это давало ПРОШЛЫЙ
+           месяц, и счётчик «новые за месяц» считал не тот отрезок. */
+        var monthStart = KSLT_VREMYA.сегодня().slice(0, 7) + '-01';
         var newCount = cchAllData.filter(function(c) {
             return c.created_at && c.created_at.slice(0, 10) >= monthStart;
         }).length;
@@ -302,7 +305,7 @@
         var container = document.getElementById('ad-coaches');
         if (!container) return;
 
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
 
         var fullName = isEn
             ? ((item.last_name_en || item.last_name || '') + ' ' + (item.first_name_en || item.first_name || ''))
@@ -414,7 +417,7 @@
 
     async function syncAllExpiredPromotedCoaches() {
         if (!A.client) return;
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
 
         var promoted = await A.client.from('coaches').select('id').eq('promoted', true);
         var ids = (promoted.data || []).map(function(c) { return String(c.id); });

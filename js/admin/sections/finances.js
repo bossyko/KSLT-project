@@ -216,7 +216,7 @@
     }
 
     function applyFinFilters() {
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         var filtered = finAllData.slice();
 
         // Type filter
@@ -264,7 +264,7 @@
     }
 
     function updateFinStats(data) {
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         var now = new Date();
         var monthStart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
 
@@ -328,7 +328,7 @@
             return;
         }
 
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         var html = '';
         items.forEach(function(p) {
             var isActive = p.period_end >= today;
@@ -420,7 +420,7 @@
         var initType = item ? item.entity_type : 'court';
         var isMembership = source === 'membership' || initType === 'membership';
         var isClub = initType === 'club';
-        var todayStr = new Date().toISOString().slice(0, 10);
+        var todayStr = KSLT_VREMYA.сегодня();
 
         var entityTypeOptions = '';
         Object.keys(A.PAYMENT_ENTITY_TYPES).forEach(function(k) {
@@ -942,7 +942,7 @@
 
     async function syncPromotedStatus(entityType, entityId) {
         if (entityType !== 'court' && entityType !== 'coach') return;
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         var check = await A.client.from('entity_payments')
             .select('id')
             .eq('entity_type', entityType)
@@ -973,7 +973,7 @@
 
     // ---- PDF ----
     function openFinPdfReport() {
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         var filtered = finAllData.slice();
         if (finDateFrom) {
             filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) >= finDateFrom; });
@@ -1012,7 +1012,7 @@
                 '</tr>';
         });
 
-        var reportDate = A.formatPayDate(new Date().toISOString().slice(0, 10));
+        var reportDate = A.formatPayDate(KSLT_VREMYA.сегодня());
 
         var win = window.open('', '_blank');
         if (!win) return;
@@ -1078,7 +1078,7 @@
 
     // ---- Excel Export ----
     function exportFinExcel() {
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         var filtered = finAllData.slice();
         if (finDateFrom) {
             filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) >= finDateFrom; });

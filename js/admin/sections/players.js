@@ -1352,7 +1352,7 @@
                             points_earned: 0,
                             ntrp_before: prevNtrp,
                             ntrp_after: data.ntrp_singles,
-                            recorded_at: new Date().toISOString().slice(0, 10)
+                            recorded_at: KSLT_VREMYA.сегодня()
                         });
                         if (ntrpRow.error) {
                             A.showToast('NTRP: ' + ntrpRow.error.message, 'error');
@@ -3033,7 +3033,7 @@
             var catName = cat ? (isEn ? cat.name_en : cat.name) : (p.category_id || '');
             return [i + 1, p.name || '', p.name_en || '', catName, p.points || 0, p.wins || 0, p.losses || 0, p.ntrp_singles || '', p.country || ''];
         });
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         A.exportCsv('kslt-players-' + today + '.csv', headers, rows);
     }
 

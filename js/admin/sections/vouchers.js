@@ -698,7 +698,7 @@
     // ---- Excel Export ----
     function exportVchExcel() {
         var data = vchFilteredData;
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
 
         var headers = ['№', L.vchPlayer, L.vchEntity, L.vchServiceType, L.vchDiscount + '%', L.vchDate, L.vchStatus];
         var rows = data.map(function(v, i) {

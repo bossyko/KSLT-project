@@ -134,7 +134,8 @@ const ОТКАТЫ = [
        'var ч = String(до).slice(0, 10).split(\'-\'); var _ = new Date(до);',
    'дата блока разбирается по частям, а не через Date'],
 
-  [VREM, 'var СМЕЩЕНИЕ_МИНУТ = 6 * 60;', 'var СМЕЩЕНИЕ_МИНУТ = 0;',
+  /* 17.10 · дом считает по ИМЕНИ зоны, а не зашитым смещением. */
+  [VREM, 'timeZone: ЗОНА', 'timeZone: undefined',
    'день считается по Бишкеку, а не по Гринвичу'],
 
   [RU, 'var r = await window.supabaseClient.auth.getSession();',

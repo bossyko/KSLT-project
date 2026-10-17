@@ -1994,7 +1994,7 @@ function обновитьРасклад() {
                                 throw new Error(result.error || 'HTTP ' + res.status);
                             }
                             A.showToast(isEn ? 'Notification sent!' : 'Рассылка отправлена!', 'success');
-                            var today = new Date().toISOString().split('T')[0];
+                            var today = KSLT_VREMYA.сегодня();
                             notifyBtn.textContent = '📢 ' + L.trnNotifySent + ' ' + today;
                         } catch (err) {
                             A.showToast(err.message || 'Error', 'error');

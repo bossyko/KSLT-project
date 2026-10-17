@@ -1413,7 +1413,7 @@
             }
 
             // Split into upcoming and past
-            var today = new Date().toISOString().slice(0, 10);
+            var today = KSLT_VREMYA.сегодня();
             var upcoming = [];
             var past = [];
             items.forEach(function(item) {

@@ -343,10 +343,10 @@
 
         var isAdm = A.currentRole === 'admin';
         var now = new Date();
-        var today = now.toISOString().split('T')[0];
+        var today = KSLT_VREMYA.деньПоБишкеку(now);
         var plus10 = new Date(now);
         plus10.setDate(plus10.getDate() + 10);
-        var todayPlus10 = plus10.toISOString().split('T')[0];
+        var todayPlus10 = KSLT_VREMYA.деньПоБишкеку(plus10);
         var todayMs = new Date(today).getTime();
 
         var results = await Promise.allSettled([

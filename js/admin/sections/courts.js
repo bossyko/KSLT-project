@@ -492,7 +492,7 @@
 
     async function syncAllExpiredPromoted() {
         if (!A.client) return;
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
 
         // Find courts that are promoted but have no active promoted payment
         var promoted = await A.client.from('courts').select('id').eq('promoted', true);
@@ -579,7 +579,7 @@
         var container = document.getElementById('ad-courts');
         if (!container) return;
 
-        var today = new Date().toISOString().slice(0, 10);
+        var today = KSLT_VREMYA.сегодня();
 
         // Court types info
         var typesHtml = '';

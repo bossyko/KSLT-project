@@ -1219,7 +1219,7 @@
             challenger_gender: p1.gender || null,
             opponent_gender: p2.gender || null,
             opponent_profile_id: null,
-            proposed_date: date || new Date().toISOString().slice(0, 10),
+            proposed_date: date || KSLT_VREMYA.сегодня(),
             proposed_time: time || '18:00',
             proposed_venue: venue || null,
             proposed_court_id: courtId || null,
