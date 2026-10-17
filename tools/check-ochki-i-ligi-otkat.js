@@ -301,10 +301,13 @@ const ОТКАТЫ = [
    '    font-size: 0.65rem;\n    font-weight: 600;\n    padding: 2px 8px;',
    'бейдж лиги стоит на шкале и не раздвигает строку'],
 
+  /* ЯКОРЬ ПЕРЕЕХАЛ НА РОЛЬ (17.10): было `color: #0A0A0A` числом, стало
+     `var(--accent-on)` — то же значение, названное своим именем. Откат
+     подставляет белый: на лайме он даёт 1.4 и правило падает. */
   [CSS,
-   '.ad-league-pl {\n    background: var(--accent);\n    color: #0A0A0A;\n}',
-   '.ad-league-pl {\n    background: var(--accent);\n    color: #FFFFFF;\n}',
-   'высшая лига красится акцентом с почти-чёрным текстом'],
+   '.ad-league-pl {\n    background: var(--accent);\n    color: var(--accent-on);\n}',
+   '.ad-league-pl {\n    background: var(--accent);\n    color: var(--neutral-white);\n}',
+   'высшая лига красится акцентом с текстом своей роли'],
 
   /* Стенд остался на прежней версии, страница ушла вперёд: глазами на
      странице всё хорошо, а стенд меряет вчерашний файл. */

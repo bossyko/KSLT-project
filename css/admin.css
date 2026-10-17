@@ -686,7 +686,7 @@ body.ad-page {
     transform: translate(-50%, -50%);
     font-size: var(--fs-2xs);
     font-weight: 700;
-    color: #000;
+    color: var(--neutral-black);
 }
 .ad-col-dd-item {
     padding: 4px 10px;
@@ -736,7 +736,7 @@ body.ad-page {
     transform: translate(-50%, -50%);
     font-size: var(--fs-2xs);
     font-weight: 700;
-    color: #000;
+    color: var(--neutral-black);
 }
 
 .ad-table td {
@@ -1188,7 +1188,7 @@ body.ad-page {
     border: none;
     border-radius: var(--radius-full);
     background: var(--alpha-black-60);
-    color: #fff;
+    color: var(--neutral-white);
     font-size: var(--fs-base);
     line-height: var(--lh-none);
     cursor: pointer;
@@ -1458,7 +1458,7 @@ body.ad-page {
 
 .ad-role-badge-player {
     background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
+    color: var(--blue-400);
     border: var(--bw-hair) solid rgba(59, 130, 246, 0.2);
 }
 
@@ -1714,7 +1714,7 @@ body.ad-page {
 
 .ad-btn-primary {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
 }
 
 .ad-btn-primary:hover {
@@ -1815,7 +1815,7 @@ body.ad-page {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-xs);
     font-weight: 700;
 }
@@ -1827,7 +1827,7 @@ body.ad-page {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-xs);
     font-weight: 700;
 }
@@ -1956,7 +1956,7 @@ body.ad-page {
 
 .ad-status-upcoming {
     background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
+    color: var(--blue-400);
     border: var(--bw-hair) solid rgba(59, 130, 246, 0.2);
 }
 
@@ -2336,12 +2336,12 @@ input[type="date"]::-webkit-datetime-edit {
 
 .ad-form-btn-w.active {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
 }
 
 .ad-form-btn-l.active {
     background: #FF6B6B;
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 /* Players — Badges Grid */
@@ -2383,7 +2383,7 @@ input[type="date"]::-webkit-datetime-edit {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: var(--fs-2xs);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 700;
 }
 
@@ -2407,10 +2407,10 @@ input[type="date"]::-webkit-datetime-edit {
     font: 600 0.84rem inherit;
     transition: background 0.15s, color 0.15s;
 }
-.ad-seg-btn:hover { color: var(--ad-text, #fff); }
+.ad-seg-btn:hover { color: var(--ad-text, var(--neutral-white)); }
 .ad-seg-btn.on {
     background: var(--ad-accent);
-    color: #0A0A0A;
+    color: var(--neutral-950);
 }
 
 /* Кого ищем в напарники — подсказка у самого поля, а не в сообщении об
@@ -2470,7 +2470,7 @@ input[type="date"]::-webkit-datetime-edit {
     border: var(--bw-hair) solid var(--alpha-white-12);
     border-radius: var(--radius-full);
     background: var(--alpha-black-50);
-    color: #fff;
+    color: var(--neutral-white);
     font-size: var(--fs-base);
     /* Круг 28 задаёт высоту — строке остаётся не быть выше него */
     line-height: var(--lh-none);
@@ -2576,7 +2576,7 @@ input[type="date"]::-webkit-datetime-edit {
     border: 0;
     border-radius: var(--radius-full);
     background: var(--alpha-black-60);
-    color: #fff;
+    color: var(--neutral-white);
     font-size: var(--fs-base);
     /* Высота задана кругом 28 — строке остаётся не быть выше него */
     line-height: var(--lh-none);
@@ -2630,7 +2630,7 @@ input[type="date"]::-webkit-datetime-edit {
     height: 24px;
     border-radius: 50%;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-size: var(--fs-xs);
     font-weight: 700;
 }
@@ -2701,7 +2701,7 @@ input[type="date"]::-webkit-datetime-edit {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: var(--fs-xs);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 700;
 }
 
@@ -2761,7 +2761,7 @@ input[type="date"]::-webkit-datetime-edit {
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-size: var(--fs-2xs);
-    color: #0A0A0A;
+    color: var(--neutral-950);
     font-weight: 700;
 }
 
@@ -2848,7 +2848,7 @@ input[type="date"]::-webkit-datetime-edit {
 
 .ad-gallery-remove:hover {
     background: #FF6B6B;
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 /* Select styling */
@@ -2970,7 +2970,7 @@ select.ad-field-input {
     height: 28px;
     border-radius: 50%;
     background: var(--alpha-black-60);
-    color: #fff;
+    color: var(--neutral-white);
     border: none;
     cursor: pointer;
     font-size: var(--fs-base);
@@ -3626,7 +3626,7 @@ select.ad-field-input {
 
 .ad-rat-tab.active {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     font-weight: 600;
 }
 
@@ -3687,12 +3687,12 @@ select.ad-field-input {
 
 .ad-rat-form-w {
     background: #4caf50;
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 .ad-rat-form-l {
     background: #f44336;
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 .ad-rat-form-clickable {
@@ -3777,7 +3777,7 @@ select.ad-field-input {
     background: var(--alpha-white-08) !important;
     border: var(--bw-hair) solid rgba(255,255,255,0.15) !important;
     border-radius: 6px;
-    color: #fff;
+    color: var(--neutral-white);
     padding: 6px 8px;
     font-size: var(--fs-sm);
 }
@@ -3952,7 +3952,7 @@ select.ad-field-input {
 .ad-reg-floating-count {
     font-size: var(--fs-sm);
     font-weight: 600;
-    color: var(--text-primary, #fff);
+    color: var(--text-primary, var(--neutral-white));
     white-space: nowrap;
 }
 @keyframes spin {
@@ -3990,7 +3990,7 @@ select.ad-field-input {
    не проверено — стенда с лигами нет. */
 .ad-league-pl {
     background: var(--accent);
-    color: #0A0A0A;
+    color: var(--accent-on);
 }
 
 /* Утешительная — тихой поверхностью, но текст обычный, а не приглушённый:
@@ -4096,7 +4096,7 @@ select.ad-field-input {
 }
 
 .ad-trn-status-field.ad-status-draft { color: #ffc107; }
-.ad-trn-status-field.ad-status-upcoming { color: #60a5fa; }
+.ad-trn-status-field.ad-status-upcoming { color: var(--blue-400); }
 .ad-trn-status-field.ad-status-registration-open { color: #22c55e; }
 .ad-trn-status-field.ad-status-registration-closed { color: #f59e0b; }
 .ad-trn-status-field.ad-status-ongoing { color: var(--accent); }
@@ -4263,7 +4263,7 @@ select.ad-field-input {
 }
 
 .ad-brk-player.winner .ad-brk-name {
-    color: var(--text-primary, #fff);
+    color: var(--text-primary, var(--neutral-white));
     font-weight: 600;
 }
 
@@ -4726,7 +4726,7 @@ select.ad-field-input {
 }
 
 .ad-import-status-update {
-    color: #4fc3f7;
+    color: var(--player-1);
     font-size: var(--fs-base);
 }
 
@@ -5283,7 +5283,7 @@ select.ad-field-input {
 }
 .ad-crt-page-active {
     background: var(--accent) !important;
-    color: #000 !important;
+    color: var(--neutral-black) !important;
     border-color: var(--accent) !important;
     font-weight: 600;
 }
@@ -6335,7 +6335,7 @@ select.ad-field-input {
     z-index: 50;
     max-height: 240px;
     overflow-y: auto;
-    background: var(--bg-card, #1a1a1a);
+    background: var(--bg-card, var(--neutral-800));
     border: var(--bw-hair) solid var(--border);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     box-shadow: 0 8px 24px var(--alpha-black-50);
@@ -6677,7 +6677,7 @@ select.ad-field-input {
     border: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-12));
     border-radius: var(--radius-sm, 8px);
     overflow: hidden;
-    background: var(--bg-elevated, #1a1a1a);
+    background: var(--bg-elevated, var(--neutral-800));
 }
 
 .ad-editor-toolbar {
@@ -6729,7 +6729,7 @@ select.ad-field-input {
     padding: var(--space-4);
     font-size: var(--fs-base);
     line-height: var(--lh-relaxed);
-    color: var(--text-primary, #fff);
+    color: var(--text-primary, var(--neutral-white));
     outline: none;
 }
 
@@ -6996,7 +6996,7 @@ select.ad-field-input {
     justify-content: center;
     border-radius: 10px;
     background: var(--accent);
-    color: #0A0A0A;
+    color: var(--neutral-950);
     font-size: var(--fs-xs);
     font-weight: 700;
 }
@@ -7011,7 +7011,7 @@ select.ad-field-input {
     padding: 0 5px;
     border-radius: 9px;
     background: var(--accent);
-    color: #0A0A0A;
+    color: var(--neutral-950);
     font-size: var(--fs-2xs);
     font-weight: 700;
 }
@@ -7029,7 +7029,7 @@ select.ad-field-input {
 }
 
 .ad-chal-who {
-    color: var(--text-primary, #fff);
+    color: var(--text-primary, var(--neutral-white));
     font-weight: 600;
     white-space: nowrap;
 }
@@ -7399,7 +7399,7 @@ select.ad-field-input {
     position: sticky;
     top: 0;
     z-index: 2;
-    background: var(--bg-card, #111);
+    background: var(--bg-card, var(--neutral-900));
     padding: 6px 0;
 }
 .ad-brk-grid--big .ad-brk-match {
@@ -7428,7 +7428,7 @@ select.ad-field-input {
 /* Победителя называет человек: нажал на имя — оно и записано */
 .ad-winner-btn.active {
     background: var(--accent);
-    color: #111;
+    color: var(--neutral-900);
     border-color: var(--accent);
 }
 
@@ -7786,7 +7786,7 @@ select.ad-field-input {
    выше: одно состояние «выбрано» на всё окно */
 .ad-replace-queue-item.on {
     background: var(--accent);
-    color: #0A0A0A;
+    color: var(--neutral-950);
 }
 
 .ad-replace-queue-item:focus-visible {
@@ -7859,7 +7859,7 @@ select.ad-field-input {
 
 .ad-mode-switch button.on {
     background: var(--accent);
-    color: #0A0A0A;
+    color: var(--neutral-950);
 }
 
 .ad-mode-switch button:focus { outline: none; }
@@ -7970,8 +7970,8 @@ select.ad-field-input {
         left: 0;
         width: 100%;
         padding: 0;
-        background: #fff;
-        color: #000;
+        background: var(--neutral-white);
+        color: var(--neutral-black);
     }
 
     /* Кнопки выгрузки, служебные колонки и рабочие подсказки на лист не идут:
@@ -8037,7 +8037,7 @@ select.ad-field-input {
        нечитаемого серого */
     body.ad-printing .ad-print-area,
     body.ad-printing .ad-print-area * {
-        color: #000 !important;
+        color: var(--neutral-black) !important;
         background: transparent !important;
         text-shadow: none !important;
         box-shadow: none !important;
@@ -8052,8 +8052,8 @@ select.ad-field-input {
         gap: 8pt;
         padding-bottom: 6pt;
         margin-bottom: 10pt;
-        border-bottom: 1pt solid #000;
-        color: #000;
+        border-bottom: 1pt solid var(--neutral-black);
+        color: var(--neutral-black);
     }
 
     body.ad-printing .ad-print-logo {
@@ -8078,7 +8078,7 @@ select.ad-field-input {
            ссылок на вторую строку. */
         margin-bottom: 16mm;
         padding-top: 8pt;
-        border-top: 1pt solid #000;
+        border-top: 1pt solid var(--neutral-black);
         page-break-inside: avoid;
     }
 
@@ -8100,7 +8100,7 @@ select.ad-field-input {
 
     /* Линия для подписи: имя печатается под ней, как в протоколах */
     body.ad-printing .ad-print-sign-line {
-        border-bottom: 0.5pt solid #000;
+        border-bottom: 0.5pt solid var(--neutral-black);
         margin-bottom: 2pt;
     }
 
@@ -8152,7 +8152,7 @@ select.ad-field-input {
         bottom: 0;
         padding-top: 4pt;
         border-top: 0.5pt solid #999;
-        background: #fff !important;
+        background: var(--neutral-white) !important;
         font-size: 9pt;
         line-height: 1.3;
         text-align: center;
@@ -8214,8 +8214,8 @@ select.ad-field-input {
     body.ad-printing .ad-print-area td,
     body.ad-printing .ad-print-area h3,
     body.ad-printing .ad-print-area h4 {
-        background: #fff !important;
-        color: #000 !important;
+        background: var(--neutral-white) !important;
+        color: var(--neutral-black) !important;
         border-color: #999 !important;
     }
 
@@ -8230,7 +8230,7 @@ select.ad-field-input {
 
     body.ad-printing .ad-print-area th {
         font-weight: 700;
-        border-bottom: 1pt solid #000;
+        border-bottom: 1pt solid var(--neutral-black);
     }
 
     /* Заголовок раздела — «Основная сетка», «Лист ожидания»: на листе это
@@ -8256,7 +8256,7 @@ select.ad-field-input {
     body.ad-printing .ad-print-area .ad-brk-match {
         border: 0.8pt solid #333 !important;
         border-radius: 4pt;
-        background: #fff !important;
+        background: var(--neutral-white) !important;
         break-inside: avoid;
     }
 
@@ -8317,7 +8317,7 @@ select.ad-field-input {
     body.ad-printing .ad-print-area .ad-brk-seed,
     body.ad-printing .ad-print-area .ad-brk-set,
     body.ad-printing .ad-print-area .ad-brk-schedule {
-        color: #000 !important;
+        color: var(--neutral-black) !important;
     }
 
     /* Круг целиком не разрывается между страницами, если помещается */
