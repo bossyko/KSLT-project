@@ -297,17 +297,17 @@ body.ad-page {
    (1 · 2 · 3) к ней не относится, у неё своё имя `--bar-accent`. */
 .ad-stat-card--danger {
     border-left: var(--bar-accent) solid var(--danger);
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.08) 0%, var(--bg-elevated) 100%);
+    background: linear-gradient(135deg, var(--danger-faint) 0%, var(--bg-elevated) 100%);
 }
 .ad-stat-card--danger .ad-stat-value { color: var(--danger); }
 .ad-stat-card--danger .ad-stat-icon { opacity: 1; }
 
 /* Warning card (approaching) */
 .ad-stat-card--warning {
-    border-left: var(--bar-accent) solid #ff9800;
-    background: linear-gradient(135deg, rgba(255, 152, 0, 0.08) 0%, var(--bg-elevated) 100%);
+    border-left: var(--bar-accent) solid var(--warning);
+    background: linear-gradient(135deg, var(--warning-faint) 0%, var(--bg-elevated) 100%);
 }
-.ad-stat-card--warning .ad-stat-value { color: #ff9800; }
+.ad-stat-card--warning .ad-stat-value { color: var(--warning); }
 .ad-stat-card--warning .ad-stat-icon { opacity: 1; }
 
 /* Clickable stat card */
@@ -361,13 +361,13 @@ body.ad-page {
     margin-left: 8px;
     vertical-align: middle;
 }
-.ad-dash-count-badge--danger { background: rgba(244, 67, 54, 0.15); color: var(--danger); }
-.ad-dash-count-badge--warning { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
+.ad-dash-count-badge--danger { background: var(--danger-subtle); color: var(--danger); }
+.ad-dash-count-badge--warning { background: var(--warning-subtle); color: var(--warning); }
 .ad-dash-count-badge--neutral { background: var(--accent-subtle); color: var(--accent); }
 
 .ad-days-danger { color: var(--danger); font-weight: 700; }
-.ad-days-warning { color: #ff9800; font-weight: 600; }
-.ad-days-caution { color: #ffc107; font-weight: 600; }
+.ad-days-warning { color: var(--warning); font-weight: 600; }
+.ad-days-caution { color: var(--warning); font-weight: 600; }
 
 .ad-dash-empty {
     text-align: center;
@@ -412,15 +412,15 @@ body.ad-page {
    уже занят пометкой о задолженности, которая может стоять у того же
    человека. Краска та же, что у самой кнопки «Решить», — #FFA726. */
 .ad-reg-row-reshenie > td:first-child {
-    box-shadow: inset 3px 0 0 #FFA726;
+    box-shadow: inset 3px 0 0 var(--warning);
 }
 
 .ad-reg-row-reshenie > td {
-    background: rgba(255, 167, 38, 0.06);
+    background: var(--warning-faint);
 }
 
 .ad-reg-row-dolg > td {
-    background: rgba(244, 67, 54, 0.04);
+    background: var(--danger-faint);
 }
 
 /* КОЛОНКА «МЕСТО». Было инлайном: 0.65rem — кегля 10.4 в шкале нет.
@@ -502,7 +502,7 @@ body.ad-page {
     border: var(--bw-hair) solid transparent;
     border-radius: var(--radius-sm);
     background: none;
-    color: #42a5f5;
+    color: var(--info);
     font-size: var(--fs-xs);
     font-weight: 600;
     line-height: 1.1;
@@ -513,17 +513,17 @@ body.ad-page {
 /* «Решить» — та же вынесенная кнопка, только краской беды: тем же
    #FFA726, что у полосы слева у этой строки. Контраст 10.19. */
 .ad-reg-act-reshit {
-    color: #FFA726;
+    color: var(--warning);
 }
 
 .ad-reg-act-reshit:hover:not(:disabled) {
-    border-color: #FFA726;
-    background: rgba(255, 167, 38, 0.12);
+    border-color: var(--warning);
+    background: var(--warning-subtle);
 }
 
 .ad-reg-act-vynos:hover:not(:disabled) {
-    border-color: #42a5f5;
-    background: rgba(66, 165, 245, 0.1);
+    border-color: var(--info);
+    background: var(--info-subtle);
 }
 
 .ad-reg-menu-list .ad-reg-act {
@@ -608,7 +608,7 @@ body.ad-page {
     height: 44px;
 }
 .ad-col-header:hover { color: var(--accent); }
-.set-del-level:hover { background: rgba(255,60,60,0.35) !important; }
+.set-del-level:hover { background: var(--danger-border) !important; }
 .ad-col-active { color: var(--accent); }
 .ad-sort-arrow { font-size: var(--fs-2xs); opacity: 0.7; }
 .ad-col-filter-btn {
@@ -1207,10 +1207,10 @@ body.ad-page {
 .ad-reg-ntrp-zhdut {
     margin-bottom: var(--space-3);
     padding: var(--space-3) var(--space-4);
-    border: var(--bw-hair) solid rgba(255, 179, 0, 0.35);
+    border: var(--bw-hair) solid var(--warning-border);
     border-radius: var(--radius-sm);
-    background: rgba(255, 179, 0, 0.08);
-    color: #ffb300;
+    background: var(--warning-faint);
+    color: var(--warning);
     font-size: var(--fs-sm);
     line-height: var(--lh-normal);
     font-weight: var(--fw-semibold);
@@ -1259,8 +1259,8 @@ body.ad-page {
    записи был верен по сути: чистый #f44336 давал 4.70 / 4.44 / 4.30 и не
    проходил, поэтому брали осветлённый #ff6b6b (6.24 / 5.89 / 5.70). Роль
    держит то же требование одним именем вместо девяти написаний. */
-.ad-reg-mark-dolg { background: rgba(244, 67, 54, 0.15); color: var(--danger); }
-.ad-reg-mark-ext  { background: rgba(33, 150, 243, 0.15); color: #64b5f6; }
+.ad-reg-mark-dolg { background: var(--danger-subtle); color: var(--danger); }
+.ad-reg-mark-ext  { background: var(--info-subtle); color: var(--info); }
 .ad-reg-mark-seed { background: var(--accent-subtle); color: var(--accent); }
 
 /* ПРЕДПОКАЗ СЕЯНЫХ. Список внутри подсказки: три-шесть строк, читаются
@@ -1290,6 +1290,7 @@ body.ad-page {
    остаётся сиреневой, но одним определением, а не тремя копиями в
    разметке. Решение Кости 03.10: личные NTRP важнее суммы, поэтому эти
    две колонки на узком виде НЕ прячутся. */
+/* Сиреневый у парного рейтинга — различитель колонки, не состояние. */
 .ad-reg-ntrp {
     text-align: center;
     font-size: var(--fs-sm);
@@ -1306,10 +1307,10 @@ body.ad-page {
     gap: var(--space-1);
     min-height: var(--chip-h);
     padding: 0 var(--space-2);
-    border: var(--bw-hair) solid #ffb300;
+    border: var(--bw-hair) solid var(--warning);
     border-radius: var(--radius-sm);
-    background: rgba(255, 179, 0, 0.12);
-    color: #ffb300;
+    background: var(--warning-subtle);
+    color: var(--warning);
     cursor: pointer;
     font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
@@ -1370,9 +1371,9 @@ body.ad-page {
    `opacity:0.35;cursor:not-allowed`. */
 .ad-reg-act-tone[disabled] { opacity: 0.35; cursor: not-allowed; }
 
-.ad-reg-act-wait    { color: #FFA726; }
+.ad-reg-act-wait    { color: var(--warning); }
 .ad-reg-act-reject  { color: var(--danger); }
-.ad-reg-act-approve { color: #66bb6a; }
+.ad-reg-act-approve { color: var(--success); }
 
 /* «Добавить напарника» — та же болезнь: инлайн 0.7rem (11.2) и отступ
    3x10. Кегль 11 ступенью, отступ 4 и 8 — по шкале чипа. */
@@ -1461,15 +1462,15 @@ body.ad-page {
 }
 
 .ad-role-badge-player {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--blue-400);
-    border: var(--bw-hair) solid rgba(59, 130, 246, 0.2);
+    background: var(--info-subtle);
+    color: var(--info);
+    border: var(--bw-hair) solid var(--info-border);
 }
 
 .ad-role-badge-manager {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a78bfa;
-    border: var(--bw-hair) solid rgba(168, 85, 247, 0.2);
+    background: var(--role-manager-subtle);
+    color: var(--role-manager);
+    border: var(--bw-hair) solid var(--role-manager-border);
 }
 
 .ad-role-badge-user {
@@ -1744,23 +1745,23 @@ body.ad-page {
 }
 
 .ad-btn-danger {
-    background: rgba(255, 59, 48, 0.1);
+    background: var(--danger-subtle);
     color: var(--danger);
-    border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
+    border: var(--bw-hair) solid var(--danger-border);
 }
 
 .ad-btn-danger:hover {
-    background: rgba(255, 59, 48, 0.2);
+    background: var(--danger-border);
 }
 
 .ad-btn-warning {
-    background: rgba(255, 152, 0, 0.1);
-    color: #ffb74d;
-    border: var(--bw-hair) solid rgba(255, 152, 0, 0.2);
+    background: var(--warning-subtle);
+    color: var(--warning);
+    border: var(--bw-hair) solid var(--warning-border);
 }
 
 .ad-btn-warning:hover {
-    background: rgba(255, 152, 0, 0.2);
+    background: var(--warning-border);
 }
 
 .ad-bulk-actions {
@@ -1947,51 +1948,51 @@ body.ad-page {
 }
 
 .ad-status-published {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    border: var(--bw-hair) solid rgba(34, 197, 94, 0.2);
+    background: var(--success-subtle);
+    color: var(--success);
+    border: var(--bw-hair) solid var(--success-border);
 }
 
 .ad-status-draft {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-    border: var(--bw-hair) solid rgba(255, 193, 7, 0.2);
+    background: var(--warning-subtle);
+    color: var(--warning);
+    border: var(--bw-hair) solid var(--warning-border);
 }
 
 .ad-status-upcoming {
-    background: rgba(59, 130, 246, 0.1);
+    background: var(--info-subtle);
     color: var(--blue-400);
-    border: var(--bw-hair) solid rgba(59, 130, 246, 0.2);
+    border: var(--bw-hair) solid var(--info-border);
 }
 
 .ad-status-registration-open {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    border: var(--bw-hair) solid rgba(34, 197, 94, 0.2);
+    background: var(--success-subtle);
+    color: var(--success);
+    border: var(--bw-hair) solid var(--success-border);
 }
 
 .ad-status-registration-closed {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-    border: var(--bw-hair) solid rgba(255, 193, 7, 0.2);
+    background: var(--warning-subtle);
+    color: var(--warning);
+    border: var(--bw-hair) solid var(--warning-border);
 }
 
 .ad-status-ongoing {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a78bfa;
-    border: var(--bw-hair) solid rgba(168, 85, 247, 0.2);
+    background: var(--role-manager-subtle);
+    color: var(--role-manager);
+    border: var(--bw-hair) solid var(--role-manager-border);
 }
 
 .ad-status-completed {
-    background: rgba(107, 114, 128, 0.1);
-    color: #9ca3af;
-    border: var(--bw-hair) solid rgba(107, 114, 128, 0.2);
+    background: var(--surface-glass);
+    color: var(--text-muted);
+    border: var(--bw-hair) solid var(--border-subtle);
 }
 
 .ad-status-cancelled {
-    background: rgba(255, 59, 48, 0.1);
+    background: var(--danger-subtle);
     color: var(--danger);
-    border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
+    border: var(--bw-hair) solid var(--danger-border);
 }
 
 /* ---- Category Badge ---- */
@@ -2588,7 +2589,7 @@ input[type="date"]::-webkit-datetime-edit {
     transition: var(--transition-fast);
 }
 
-.ad-editor-media-remove:hover { background: rgba(255, 59, 48, 0.85); }
+.ad-editor-media-remove:hover { background: var(--danger); }
 
 .ad-editor-media-remove:focus-visible {
     outline: var(--bw-thick) solid var(--accent);
@@ -2616,6 +2617,10 @@ input[type="date"]::-webkit-datetime-edit {
     text-transform: uppercase;
 }
 
+/* КРЫТЫЙ / ОТКРЫТЫЙ — ЭТО КАТЕГОРИЯ, А НЕ СОСТОЯНИЕ: синий здесь значит
+   «такой тип корта», а не «сведения», зелёный — «другой тип», а не
+   «успех». Поэтому краски ролей сюда не ставятся, а числа остаются до
+   отдельной палитры категорий (находка 17.10, пункт в трекере). */
 .ad-type-indoor {
     background: rgba(100, 180, 255, 0.15);
     color: #64B4FF;
@@ -2988,7 +2993,7 @@ select.ad-field-input {
 }
 
 .ad-image-upload-remove:hover {
-    background: rgba(255, 59, 48, 0.8);
+    background: var(--danger);
 }
 
 /* ---- Обложка турнира: два представления в одном окне ---- */
@@ -3234,14 +3239,14 @@ select.ad-field-input {
 }
 
 .ad-toast-success {
-    background: rgba(34, 197, 94, 0.2);
-    border: var(--bw-hair) solid rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    background: var(--success-border);
+    border: var(--bw-hair) solid var(--success-border);
+    color: var(--success);
 }
 
 .ad-toast-error {
-    background: rgba(255, 59, 48, 0.15);
-    border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
+    background: var(--danger-subtle);
+    border: var(--bw-hair) solid var(--danger-border);
     color: var(--danger);
 }
 
@@ -3690,8 +3695,8 @@ select.ad-field-input {
 }
 
 .ad-rat-form-w {
-    background: #4caf50;
-    color: var(--neutral-white);
+    background: var(--success);
+    color: var(--success-on);
 }
 
 .ad-rat-form-l {
@@ -3773,7 +3778,7 @@ select.ad-field-input {
 }
 
 .rat-delete-row:hover {
-    background: rgba(244,67,54,0.15);
+    background: var(--danger-subtle);
 }
 
 /* Points rules inputs */
@@ -3803,19 +3808,22 @@ select.ad-field-input {
 
 /* Status badges for promotions */
 .ad-status-eligible {
-    background: rgba(33,150,243,0.15);
-    color: #64b5f6;
+    background: var(--info-subtle);
+    color: var(--info);
 }
 
 .ad-status-transition {
-    background: rgba(255,152,0,0.15);
-    color: #ffb74d;
+    background: var(--warning-subtle);
+    color: var(--warning);
 }
 
-.ad-status-completed {
-    background: rgba(156,163,175,0.15);
-    color: #9ca3af;
-}
+/* `.ad-status-completed` ЗДЕСЬ БЫЛ ВТОРЫМ ОБЪЯВЛЕНИЕМ. До сведения два
+   блока расходились краской (#9ca3af на rgba(156,163,175,.15) здесь
+   против rgba(107,114,128,…) выше) — одно понятие, два определения, и
+   «завершён» выглядел по-разному в двух таблицах. После сведения обоих
+   на приглушённый нейтральный блок стал буква в букву повторять верхний
+   (admin.css:1986) и не менял ничего: ПРОВЕРЕНО СЛИЧЕНИЕМ ЗНАЧЕНИЙ, а
+   не на глаз. Снят. Определение — одно, выше. */
 
 /* Promotion tables alignment */
 .ad-promo-table {
@@ -4013,28 +4021,28 @@ select.ad-field-input {
    никогда: все висели одинаково серыми, и «завершён» не отличался от
    «голосование закрыто» */
 .ad-badge-green {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
+    background: var(--success-subtle);
+    color: var(--success);
 }
 
 .ad-badge-yellow {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    background: var(--warning-subtle);
+    color: var(--warning);
 }
 
 .ad-badge-blue {
-    background: rgba(96, 165, 250, 0.15);
-    color: #93c5fd;
+    background: var(--info-subtle);
+    color: var(--info);
 }
 
 .ad-badge-red {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--danger-subtle);
     color: var(--danger);
 }
 
 /* Status badges for registrations */
-.ad-status-pending { color: #f59e0b; }
-.ad-status-approved { color: #22c55e; }
+.ad-status-pending { color: var(--warning); }
+.ad-status-approved { color: var(--success); }
 .ad-status-rejected { color: var(--danger); }
 .ad-status-withdrawn { color: var(--text-secondary); }
 
@@ -4099,10 +4107,10 @@ select.ad-field-input {
     letter-spacing: 0.5px;
 }
 
-.ad-trn-status-field.ad-status-draft { color: #ffc107; }
+.ad-trn-status-field.ad-status-draft { color: var(--warning); }
 .ad-trn-status-field.ad-status-upcoming { color: var(--blue-400); }
-.ad-trn-status-field.ad-status-registration-open { color: #22c55e; }
-.ad-trn-status-field.ad-status-registration-closed { color: #f59e0b; }
+.ad-trn-status-field.ad-status-registration-open { color: var(--success); }
+.ad-trn-status-field.ad-status-registration-closed { color: var(--warning); }
 .ad-trn-status-field.ad-status-ongoing { color: var(--accent); }
 .ad-trn-status-field.ad-status-completed { color: var(--text-secondary); }
 .ad-trn-status-field.ad-status-cancelled { color: var(--danger); }
@@ -4235,8 +4243,8 @@ select.ad-field-input {
 }
 
 .ad-brk-match.live {
-    border-color: #f59e0b;
-    box-shadow: 0 0 8px rgba(245,158,11,0.2);
+    border-color: var(--warning);
+    box-shadow: 0 0 8px var(--warning-border);
 }
 
 /* Schedule info above players */
@@ -4429,7 +4437,7 @@ select.ad-field-input {
 }
 .ad-brk-clear:hover {
     color: var(--danger);
-    background: rgba(255,71,87,0.10);
+    background: var(--danger-subtle);
 }
 
 /* ГРОМЧЕ ТАМ, ГДЕ СНЯТИЕ И ЕСТЬ НАЗВАННОЕ ЛЕЧЕНИЕ. Клетка с дублем или
@@ -4444,7 +4452,7 @@ select.ad-field-input {
 }
 .ad-brk-clear.ad-brk-clear-hot:hover {
     color: var(--warning);
-    background: rgba(255,159,67,0.18);
+    background: var(--warning-border);
 }
 
 /* === BRACKET CONNECTORS === */
@@ -4836,32 +4844,32 @@ select.ad-field-input {
 }
 
 .ad-mem-active {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4caf50;
+    background: var(--success-subtle);
+    color: var(--success);
 }
 
 .ad-mem-expired {
-    background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
+    background: var(--warning-subtle);
+    color: var(--warning);
 }
 
 .ad-mem-cancelled {
-    background: rgba(244, 67, 54, 0.15);
+    background: var(--danger-subtle);
     color: var(--danger);
 }
 
 .ad-mem-expiring {
-    background: rgba(255, 152, 0, 0.15);
-    color: #ff9800;
+    background: var(--warning-subtle);
+    color: var(--warning);
 }
 
 .ad-mem-paid {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4caf50;
+    background: var(--success-subtle);
+    color: var(--success);
 }
 
 .ad-mem-unpaid {
-    background: rgba(244, 67, 54, 0.15);
+    background: var(--danger-subtle);
     color: var(--danger);
 }
 
@@ -4909,13 +4917,13 @@ select.ad-field-input {
 }
 
 .ad-btn-extend:hover {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4caf50;
-    border-color: #4caf50;
+    background: var(--success-subtle);
+    color: var(--success);
+    border-color: var(--success);
 }
 
 .ad-btn-cancel-mem:hover {
-    background: rgba(244, 67, 54, 0.15);
+    background: var(--danger-subtle);
     color: var(--danger);
     border-color: var(--danger);
 }
@@ -5366,15 +5374,18 @@ select.ad-field-input {
 }
 
 .ad-pay-active {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4caf50;
+    background: var(--success-subtle);
+    color: var(--success);
 }
 
 .ad-pay-expired {
-    background: rgba(244, 67, 54, 0.15);
+    background: var(--danger-subtle);
     color: var(--danger);
 }
 
+/* ЗА ЧТО ПЛАТЯТ И ЗАЧЕМ — ТОЖЕ КАТЕГОРИИ, а не состояния: корт, тренер,
+   игрок, спонсорство, аренда различаются краской, но ни одна из них не
+   значит «успех» или «внимание». Ждут палитры категорий. */
 .ad-pay-type-court {
     background: rgba(33, 150, 243, 0.15);
     color: #2196f3;
@@ -5406,8 +5417,8 @@ select.ad-field-input {
 }
 
 .ad-pay-purpose-other {
-    background: rgba(158, 158, 158, 0.15);
-    color: #9e9e9e;
+    background: var(--surface-glass);
+    color: var(--text-muted);
 }
 
 .ad-pay-stats-grid {
@@ -6229,22 +6240,22 @@ select.ad-field-input {
 }
 
 .ad-vch-badge-active {
-    background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
+    background: var(--warning-subtle);
+    color: var(--warning);
 }
 
 .ad-vch-badge-used {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4caf50;
+    background: var(--success-subtle);
+    color: var(--success);
 }
 
 .ad-vch-badge-expired {
-    background: rgba(158, 158, 158, 0.15);
-    color: #9e9e9e;
+    background: var(--surface-glass);
+    color: var(--text-muted);
 }
 
 .ad-vch-badge-cancelled {
-    background: rgba(244, 67, 54, 0.15);
+    background: var(--danger-subtle);
     color: var(--danger);
 }
 
@@ -6263,7 +6274,7 @@ select.ad-field-input {
 }
 
 .ad-btn-danger-icon:hover {
-    background: rgba(244, 67, 54, 0.15);
+    background: var(--danger-subtle);
 }
 
 /* ВТОРОЕ ОПРЕДЕЛЕНИЕ .ad-btn-sm УБРАНО 28.09. Их было два: одно на :886,
@@ -6604,9 +6615,9 @@ select.ad-field-input {
 .ad-alert-warning {
     padding: 10px 14px;
     border-radius: 8px;
-    background: rgba(255, 193, 7, 0.1);
-    border: var(--bw-hair) solid rgba(255, 193, 7, 0.3);
-    color: #ffc107;
+    background: var(--warning-subtle);
+    border: var(--bw-hair) solid var(--warning-border);
+    color: var(--warning);
     font-size: var(--fs-sm);
 }
 
@@ -6907,7 +6918,7 @@ select.ad-field-input {
     height: 100%;
 }
 
-.ad-cat-bar-w { background: #4ade80; }
+.ad-cat-bar-w { background: var(--success); }
 .ad-cat-bar-l { background: var(--danger); }
 
 .ad-cat-legend {
@@ -6930,7 +6941,7 @@ select.ad-field-input {
 }
 
 .ad-cat-mark-l { margin-left: 10px; }
-.ad-cat-mark-w { background: #4ade80; }
+.ad-cat-mark-w { background: var(--success); }
 .ad-cat-mark-l { background: var(--danger); }
 
 
@@ -7096,8 +7107,8 @@ select.ad-field-input {
     margin: 0;
     padding: 12px 14px;
     border-radius: 10px;
-    background: rgba(255, 59, 48, 0.08);
-    border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
+    background: var(--danger-faint);
+    border: var(--bw-hair) solid var(--danger-border);
     color: var(--danger);
     font-size: var(--fs-sm);
     line-height: 1.5;
@@ -7250,7 +7261,7 @@ select.ad-field-input {
 /* Поле с неверным вводом: подсветка и строка-объяснение под ним */
 .ad-field-input.ad-input-error {
     border-color: var(--danger);
-    background: rgba(255, 59, 48, 0.06);
+    background: var(--danger-faint);
 }
 
 .ad-input-hint {
@@ -7484,11 +7495,11 @@ select.ad-field-input {
    действие, а возможность обойтись без матча */
 .ad-brk-edit.ad-brk-ig-cancel {
     color: var(--danger);
-    border-color: rgba(244, 67, 54, 0.35);
+    border-color: var(--danger-border);
 }
 
 .ad-brk-edit.ad-brk-ig-cancel:hover {
-    background: rgba(244, 67, 54, 0.12);
+    background: var(--danger-subtle);
 }
 
 .ad-sched-note {
@@ -7563,7 +7574,7 @@ select.ad-field-input {
 }
 
 .ad-sched-row-live td {
-    background: rgba(255, 179, 0, 0.06);
+    background: var(--warning-faint);
 }
 
 .ad-sched-status {
@@ -7649,7 +7660,7 @@ select.ad-field-input {
 }
 
 .ad-confirm-warn {
-    border-color: rgba(244, 67, 54, 0.35);
+    border-color: var(--danger-border);
 }
 
 /* Окно «Кого заменить?»: игроки рядом, пара отдельной строкой снизу */
@@ -7912,8 +7923,8 @@ select.ad-field-input {
 }
 
 .ad-sched-switch button.on {
-    background: rgba(255, 179, 0, 0.15);
-    color: #ffb300;
+    background: var(--warning-subtle);
+    color: var(--warning);
 }
 
 .ad-sched-switch button.on[data-status="upcoming"] {
@@ -8369,9 +8380,9 @@ select.ad-field-input {
    получено, в отличие от прошедших напрямую. */
 
 .ad-badge-ig {
-    background: rgba(255, 179, 0, 0.16);
-    color: #ffb300;
-    border: var(--bw-hair) solid rgba(255, 179, 0, 0.3);
+    background: var(--warning-subtle);
+    color: var(--warning);
+    border: var(--bw-hair) solid var(--warning-border);
     font-size: var(--fs-2xs);
     white-space: nowrap;
 }
@@ -8516,7 +8527,7 @@ select.ad-field-input {
     position: absolute; top: 2px; right: 2px;
     width: 28px; height: 28px; line-height: 28px; padding: 0;
     border: 0; border-radius: 50%;
-    background: rgba(255,60,60,0.15); color: var(--danger);
+    background: var(--danger-subtle); color: var(--danger);
     font-size: var(--fs-sm); cursor: pointer;
 }
 .ad-pts th .set-del-level:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }
@@ -8567,7 +8578,10 @@ select.ad-field-input {
 .ad-pts-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .ad-pts-in { -moz-appearance: textfield; appearance: textfield; }
 
-.ad-pts-in:hover { border-color: var(--alpha-white-16, rgba(255,255,255,.16)); }
+/* Было `var(--alpha-white-16, …)`: имя, которого в системе нет, и запасное
+   значение 0.16, которого нет на лестнице границ (0.08 · 0.12 · 0.20).
+   Наведение должно усиливать границу — берём верхнюю ступень. */
+.ad-pts-in:hover { border-color: var(--alpha-white-20); }
 .ad-pts-in:focus-visible {
     outline: var(--bw-thick) solid var(--accent); outline-offset: 1px;
     border-color: var(--accent);

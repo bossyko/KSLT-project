@@ -460,7 +460,7 @@
             var diff = Math.ceil((todayMs - expMs) / 86400000);
             return '<tr>' +
                 '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:var(--fs-2xs);color:var(--text-muted);">' + email + '</div></td>' +
-                '<td style="color:#f44336;">' + A.fmtDate(m.expires_at) + '</td>' +
+                '<td style="color:var(--danger);">' + A.fmtDate(m.expires_at) + '</td>' +
                 '<td class="ad-days-danger">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
             '</tr>';
         }, L.noOverdue);
@@ -482,8 +482,8 @@
                 '<td><a href="#" class="ad-dash-trn-link" data-trn-id="' + A.esc(trnId) + '" style="color:var(--accent);text-decoration:none;cursor:pointer;">' + trnName + '</a></td>' +
                 '<td>' + A.fmtDate(r.registered_at) + '</td>' +
                 '<td style="white-space:nowrap;text-align:right;">' +
-                    '<button class="ad-dash-reg-approve" data-reg-id="' + r.id + '" title="' + L.regApproved + '" style="background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.4);color:#4caf50;border-radius:6px;padding:5px 10px;cursor:pointer;margin-right:8px;font-size:var(--fs-base);">✓</button>' +
-                    '<button class="ad-dash-reg-reject" data-reg-id="' + r.id + '" title="' + L.regRejected + '" style="background:rgba(244,67,54,0.15);border:1px solid rgba(244,67,54,0.4);color:#f44336;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:var(--fs-base);">✗</button>' +
+                    '<button class="ad-dash-reg-approve" data-reg-id="' + r.id + '" title="' + L.regApproved + '" style="background:var(--success-subtle);border:1px solid var(--success-border);color:var(--success);border-radius:6px;padding:5px 10px;cursor:pointer;margin-right:8px;font-size:var(--fs-base);">✓</button>' +
+                    '<button class="ad-dash-reg-reject" data-reg-id="' + r.id + '" title="' + L.regRejected + '" style="background:var(--danger-subtle);border:1px solid var(--danger-border);color:var(--danger);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:var(--fs-base);">✗</button>' +
                 '</td>' +
             '</tr>';
         }, L.noPendingRegs);

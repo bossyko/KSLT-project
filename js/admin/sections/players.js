@@ -28,13 +28,13 @@
         var el = document.getElementById(inputId);
         if (!el) return;
         var hint = document.createElement('div');
-        hint.style.cssText = 'color:#ff4444;font-size:var(--fs-xs);margin-top:2px;display:none;';
+        hint.style.cssText = 'color:var(--danger);font-size:var(--fs-xs);margin-top:2px;display:none;';
         hint.textContent = hintText;
         el.parentNode.appendChild(hint);
         el.addEventListener('input', function() {
             var v = el.value.trim();
             var bad = v.length > 0 && !regex.test(v);
-            el.style.borderColor = bad ? '#ff4444' : '';
+            el.style.borderColor = bad ? 'var(--danger)' : '';
             hint.style.display = bad ? '' : 'none';
         });
     }
@@ -335,7 +335,7 @@
                     (isAdm ? A.bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
-                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
+                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
                         (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
                     '</td>' +
@@ -797,10 +797,10 @@
                     var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU'));
                     var banReasonStr = item.ban_reason ? '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
                     banHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
-                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banDateStr + '</span>' +
+                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">' + banDateStr + '</span>' +
                     '</div>' +
                     banReasonStr +
-                    '<button class="ad-btn ad-btn-sm" id="adPlrUnban" style="margin-top:8px;background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.plrUnbanPlayer + '</button>';
+                    '<button class="ad-btn ad-btn-sm" id="adPlrUnban" style="margin-top:8px;background:var(--success-subtle);color:var(--success);border:1px solid var(--success-border);">' + L.plrUnbanPlayer + '</button>';
                 } else {
                     banHtml += '<button class="ad-btn ad-btn-danger ad-btn-sm" id="adPlrBan">' + L.plrBanPlayer + '</button>';
                 }
@@ -1606,8 +1606,8 @@
             var oppName = isEn ? (opp.name_en || opp.name) : opp.name;
             var isWin = m.winner_id === playerId;
             var resultBadge = isWin
-                ? '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:rgba(52,199,89,0.15);color:#34c759;">W</span>'
-                : '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:rgba(255,59,48,0.15);color:#ff3b30;">L</span>';
+                ? '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:var(--success-subtle);color:var(--success);">W</span>'
+                : '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:var(--danger-subtle);color:var(--danger);">L</span>';
 
             // Format score (flip if player is p2 so their sets come first)
             var score = m.score || '';
@@ -1973,8 +1973,8 @@
             var ntrpCell = '<span style="color:var(--text-muted);">—</span>';
             if (row.ntrp_after != null) {
                 var move = ntrpMoves[row.id] || 0;
-                var arrow = move > 0 ? '<span style="color:#4ade80;">\u2191</span> '
-                          : move < 0 ? '<span style="color:#ff6b62;">\u2193</span> ' : '';
+                var arrow = move > 0 ? '<span style="color:var(--success);">\u2191</span> '
+                          : move < 0 ? '<span style="color:var(--danger);">\u2193</span> ' : '';
                 ntrpCell = arrow + '<strong>' + ntrpText(row.ntrp_after) + '</strong>';
             }
 
@@ -2538,7 +2538,7 @@
         var oppName = playerNameMap[oppId] || ('ID: ' + oppId);
         var isWin = m.winner_id === pid;
         var resultText = isWin ? L.ratWin : L.ratLoss;
-        var resultColor = isWin ? '#4caf50' : '#f44336';
+        var resultColor = isWin ? 'var(--success)' : 'var(--danger)';
         var trnName = '';
         if (m.tournaments) {
             trnName = isEn ? (m.tournaments.title_en || m.tournaments.title) : m.tournaments.title;
@@ -2703,7 +2703,7 @@
 
         var levelHtml = levelName
             ? '<div class="ad-rat-level-badge">' + L.ratTournamentLevel + ': <strong>' + A.esc(levelName) + '</strong></div>'
-            : '<div class="ad-rat-level-badge" style="color:#f44336;">' + L.ratTournamentLevel + ': ' + (isEn ? 'Not set! Edit tournament to assign level.' : 'Не задан! Отредактируйте турнир для назначения уровня.') + '</div>';
+            : '<div class="ad-rat-level-badge" style="color:var(--danger);">' + L.ratTournamentLevel + ': ' + (isEn ? 'Not set! Edit tournament to assign level.' : 'Не задан! Отредактируйте турнир для назначения уровня.') + '</div>';
 
         var plrOpts = '<option value="">' + L.ratSelectPlayer + '</option>';
         allPlayers.forEach(function(p) {

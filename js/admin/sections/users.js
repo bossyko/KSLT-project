@@ -60,7 +60,7 @@
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTotal + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card" id="adUsrStatPlayers">' +
-                    '<div class="ad-usr-card-icon" style="background:rgba(52,199,89,0.12);color:#34c759;">🎾</div>' +
+                    '<div class="ad-usr-card-icon" style="background:var(--success-subtle);color:var(--success);">🎾</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatPlayers + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card" id="adUsrStatConversion">' +
@@ -76,7 +76,7 @@
             // Stats cards — detail row (4)
             '<div class="ad-usr-cards" id="adUsrBreakdown">' +
                 '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatMembers">' +
-                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(52,199,89,0.10);color:#34c759;">🏅</div>' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:var(--success-subtle);color:var(--success);">🏅</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatMembers + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatTg">' +
@@ -84,11 +84,11 @@
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatTelegram + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card ad-usr-card--sm" id="adUsrBrkDeletedCard">' +
-                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(255,59,48,0.10);color:#ff3b30;">🗑️</div>' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:var(--danger-subtle);color:var(--danger);">🗑️</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkDeleted">0</div><div class="ad-usr-card-label">' + L.usrStatDeleted + '</div></div>' +
                 '</div>' +
                 '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatBanned">' +
-                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(255,59,48,0.10);color:#ff3b30;">🚫</div>' +
+                    '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:var(--danger-subtle);color:var(--danger);">🚫</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatBanned + '</div></div>' +
                 '</div>' +
             '</div>' +
@@ -331,8 +331,13 @@
 
             // Role badge
             var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
-            var roleBg = u.role === 'admin' ? 'rgba(255,59,48,0.15)' : u.role === 'manager' ? 'var(--accent-subtle)' : 'rgba(255,255,255,0.08)';
-            var roleColor = u.role === 'admin' ? '#ff3b30' : u.role === 'manager' ? 'var(--accent)' : 'var(--text-secondary)';
+            // КРАСКИ ТЕ ЖЕ, ЧТО У `.ad-role-badge-*` в admin.css: роль
+            // пользователя рисуется в двух местах (здесь и в layout.js
+            // классами), и до 17.10 менеджер был тут лаймовым, а там —
+            // фиолетовым. ФОРМА пока расходится (кегль и скругление) —
+            // находка в трекере, ждёт стенда.
+            var roleBg = u.role === 'admin' ? 'var(--danger-subtle)' : u.role === 'manager' ? 'var(--role-manager-subtle)' : 'var(--surface-glass-hover)';
+            var roleColor = u.role === 'admin' ? 'var(--danger)' : u.role === 'manager' ? 'var(--role-manager)' : 'var(--text-secondary)';
             var roleBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:' + roleBg + ';color:' + roleColor + ';">' + roleLabel + '</span>';
 
             // Membership badge with expiry date
@@ -362,14 +367,14 @@
                 var banLabel = isPermanent
                     ? L.usrBannedForever
                     : L.usrBannedUntil + ' ' + u.banned_until.split('T')[0];
-                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banLabel + '</span>';
+                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">' + banLabel + '</span>';
             } else {
-                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(52,199,89,0.15);color:#34c759;">' + L.usrStatusActive + '</span>';
+                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--success-subtle);color:var(--success);">' + L.usrStatusActive + '</span>';
             }
 
             // Online indicator
             var isOnline = u.last_seen && (now - new Date(u.last_seen).getTime()) < 5 * 60 * 1000;
-            var onlineDot = isOnline ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34c759;margin-left:6px;" title="' + L.usrOnline + '"></span>' : '';
+            var onlineDot = isOnline ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--success);margin-left:6px;" title="' + L.usrOnline + '"></span>' : '';
 
             var regDate = u.created_at ? u.created_at.split('T')[0] : '—';
 
@@ -478,7 +483,7 @@
         var вестиЧленство = canManageMembership && !сотрудник;
 
         var tgStatus = user.telegram_chat_id ? L.usrTgConnected : L.usrTgNotConnected;
-        var tgColor = user.telegram_chat_id ? '#34c759' : 'var(--text-muted)';
+        var tgColor = user.telegram_chat_id ? 'var(--success)' : 'var(--text-muted)';
         var lastSeen = user.last_seen ? user.last_seen.split('T')[0] + ' ' + user.last_seen.split('T')[1].substring(0, 5) : '—';
         var regDate = user.created_at ? user.created_at.split('T')[0] + ' ' + user.created_at.split('T')[1].substring(0, 5) : '—';
 
@@ -529,7 +534,7 @@
                     '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrPayBtn" disabled style="opacity:0.5;">' + L.usrProcessPayment + '</button>' +
                 '</div>' +
                 '<div id="adUsrPayInfo" style="margin-top:8px;font-size:var(--fs-xs);">' +
-                    (_lastPaymentInfo ? '<span style="color:#34c759;">' + _lastPaymentInfo + '</span>' : '') +
+                    (_lastPaymentInfo ? '<span style="color:var(--success);">' + _lastPaymentInfo + '</span>' : '') +
                 '</div>';
             _lastPaymentInfo = ''; // clear after showing
         }
@@ -567,7 +572,7 @@
         // Ban / Unban
         if (canModerate) {
             if (isUserBanned) {
-                actionBtns.push('<button class="ad-btn ad-btn-sm" id="adUsrUnban" style="background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.usrUnbanUser + '</button>');
+                actionBtns.push('<button class="ad-btn ad-btn-sm" id="adUsrUnban" style="background:var(--success-subtle);color:var(--success);border:1px solid var(--success-border);">' + L.usrUnbanUser + '</button>');
             } else {
                 actionBtns.push('<button class="ad-btn ad-btn-danger ad-btn-sm" id="adUsrBan">' + L.usrBanUser + '</button>');
             }
@@ -602,7 +607,7 @@
             var banReasonStr = user.ban_reason ? ' — ' + A.esc(user.ban_reason) : '';
             banInfoHtml =
                 '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
-                    '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + L.usrBanned + ': ' + banDateStr + banReasonStr + '</span>' +
+                    '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">' + L.usrBanned + ': ' + banDateStr + banReasonStr + '</span>' +
                 '</div>';
         }
 
@@ -719,7 +724,7 @@
                                 try {
                                     await A.adminAction('unblock_otp', { user_id: user.id });
                                     A.showToast(isEn ? 'OTP unblocked' : 'OTP разблокирован');
-                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:#34c759;">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
+                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:var(--success);">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
                                 } catch (e) {
                                     A.showToast(isEn ? 'Error' : 'Ошибка', 'error');
                                     this.disabled = false;
@@ -1916,11 +1921,11 @@
         }).join('');
 
         box.innerHTML =
-            '<div class="ad-table-card" style="border-color:rgba(255,179,0,0.35);">' +
+            '<div class="ad-table-card" style="border-color:var(--warning-border);">' +
                 '<div class="ad-table-card-header">' +
                     // Строка должна бросаться в глаза: это единственное здесь,
                     // что требует решения человека
-                    '<div class="ad-table-card-title" style="color:#ffb300;">\u26A0 ' +
+                    '<div class="ad-table-card-title" style="color:var(--warning);">\u26A0 ' +
                         L.linkRequests + ' — ' + заявки.length + '</div>' +
                 '</div>' +
                 '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +

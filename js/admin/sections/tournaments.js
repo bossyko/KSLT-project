@@ -2213,7 +2213,7 @@ function обновитьРасклад() {
         // Left column: Main Draw
         html += '<div>';
         html += '<h4 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span>' +
-            (staleCount > 0 ? ' <span style="color:#FFB020;font-size:var(--fs-xs);font-weight:500;">\u23F3 ' + L.regStaleCount.replace('{n}', staleCount) + '</span>' : '') +
+            (staleCount > 0 ? ' <span style="color:var(--warning);font-size:var(--fs-xs);font-weight:500;">\u23F3 ' + L.regStaleCount.replace('{n}', staleCount) + '</span>' : '') +
         '</h4>';
         if (mainDraw.length > 0) {
             html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
@@ -2310,9 +2310,9 @@ function обновитьРасклад() {
                     (Date.now() - d.getTime()) > STALE_REG_DAYS * 24 * 60 * 60 * 1000;
         }
         var staleMark = stale
-            ? ' <span title="' + L.regStaleHint + '" style="color:#FFB020;">\u23F3</span>'
+            ? ' <span title="' + L.regStaleHint + '" style="color:var(--warning);">\u23F3</span>'
             : '';
-        return '<tr' + (stale ? ' style="background:rgba(255,176,32,0.07);"' : '') + '>' +
+        return '<tr' + (stale ? ' style="background:var(--warning-faint);"' : '') + '>' +
             '<td><input type="checkbox" class="ad-reg-check" data-group="' + group + '" data-reg-id="' + reg.id + '" data-player-name="' + A.esc(pName) + '"></td>' +
             '<td>' + num + '</td>' +
             '<td>' + photoHtml + '</td>' +

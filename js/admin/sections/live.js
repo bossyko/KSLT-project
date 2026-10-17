@@ -119,7 +119,7 @@
             var p2 = playerName(m.player2_id, m.player2_name);
             var score = buildScoreDisplay(m);
             var statusLabel = m.status === 'warmup' ? 'Warmup' : m.status === 'paused' ? 'Paused' : 'LIVE';
-            var statusStyle = m.status === 'live' ? 'color:#EF5350;font-weight:700;' : 'color:var(--text-muted);';
+            var statusStyle = m.status === 'live' ? 'color:var(--danger);font-weight:700;' : 'color:var(--text-muted);';
 
             var baseUrl = window.location.origin;
             var umpireUrl = baseUrl + '/pages/umpire.html?key=' + m.umpire_key;

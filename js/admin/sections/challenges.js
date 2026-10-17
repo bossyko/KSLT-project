@@ -2089,21 +2089,21 @@
                     '</div>' +
                     '<p style="color:var(--text-secondary);margin-bottom:16px;font-size:var(--fs-sm);">' + L.chalDeleteOrCancelDesc + '</p>' +
                     // Cancel battle — card-style button
-                    '<div id="dcCancel" style="cursor:pointer;padding:16px;margin-bottom:10px;border-radius:10px;border:1px solid rgba(255,193,7,0.35);background:rgba(255,193,7,0.06);transition:all 0.2s;">' +
+                    '<div id="dcCancel" style="cursor:pointer;padding:16px;margin-bottom:10px;border-radius:10px;border:1px solid var(--warning-border);background:var(--warning-faint);transition:all 0.2s;">' +
                         '<div style="display:flex;align-items:center;gap:12px;">' +
                             '<span style="font-size:24px;">🚫</span>' +
                             '<div>' +
-                                '<div style="font-weight:600;font-size:var(--fs-sm);color:#ffc107;">' + L.chalCancelBattle + '</div>' +
+                                '<div style="font-weight:600;font-size:var(--fs-sm);color:var(--warning);">' + L.chalCancelBattle + '</div>' +
                                 '<div style="font-size:var(--fs-xs);color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle will be unpublished but kept in history' : 'Баттл будет снят с публикации, но сохранён в истории') + '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
                     // Delete forever — card-style button
-                    '<div id="dcDelete" style="cursor:pointer;padding:16px;border-radius:10px;border:1px solid rgba(244,67,54,0.3);background:rgba(244,67,54,0.05);transition:all 0.2s;">' +
+                    '<div id="dcDelete" style="cursor:pointer;padding:16px;border-radius:10px;border:1px solid var(--danger-border);background:var(--danger-faint);transition:all 0.2s;">' +
                         '<div style="display:flex;align-items:center;gap:12px;">' +
                             '<span style="font-size:24px;">🗑</span>' +
                             '<div>' +
-                                '<div style="font-weight:600;font-size:var(--fs-sm);color:#f44336;">' + L.chalDeleteForever + '</div>' +
+                                '<div style="font-weight:600;font-size:var(--fs-sm);color:var(--danger);">' + L.chalDeleteForever + '</div>' +
                                 '<div style="font-size:var(--fs-xs);color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle and all votes will be permanently deleted' : 'Баттл и все голоса будут удалены навсегда') + '</div>' +
                             '</div>' +
                         '</div>' +

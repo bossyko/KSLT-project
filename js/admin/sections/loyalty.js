@@ -477,10 +477,10 @@
             var pointsStyle = '';
             var pointsPrefix = '';
             if (t.type === 'earn' || (t.type === 'admin_adjust' && t.points > 0)) {
-                pointsStyle = 'color:#4caf50;';
+                pointsStyle = 'color:var(--success);';
                 pointsPrefix = '+';
             } else if (t.type === 'redeem' || t.type === 'expire' || (t.type === 'admin_adjust' && t.points < 0)) {
-                pointsStyle = 'color:#f44336;';
+                pointsStyle = 'color:var(--danger);';
                 pointsPrefix = '-';
             }
 

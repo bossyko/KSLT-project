@@ -673,7 +673,7 @@
                         'display:flex;justify-content:space-between;align-items:center;">' +
                         '<span>' + A.esc(имя) +
                             (вОчереди && вОчереди[p.id]
-                                ? ' <span style="color:#FFA726;font-size:var(--fs-xs);">' + L.regInQueue + '</span>'
+                                ? ' <span style="color:var(--warning);font-size:var(--fs-xs);">' + L.regInQueue + '</span>'
                                 : '') +
                         '</span>' +
                         (мета ? '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + A.esc(мета) + '</span>' : '') +
@@ -3719,7 +3719,7 @@
                                 photoHtml +
                                 '<div style="flex:1;">' +
                                     '<div style="font-weight:500;color:var(--text-primary);">' + A.esc(nameDisplay) + '</div>' +
-                                    '<div style="font-size:var(--fs-xs);color:' + (чужой ? '#ffb300' : 'var(--text-secondary)') + ';">' +
+                                    '<div style="font-size:var(--fs-xs);color:' + (чужой ? 'var(--warning)' : 'var(--text-secondary)') + ';">' +
                                         (полLabel ? полLabel + ' · ' : '') + catLabel + (ntrpLabel ? ' · ' + ntrpLabel : '') + '</div>' +
                                 '</div>' +
                                 (alreadyIn ? '<span style="font-size:var(--fs-xs);color:var(--accent);">' + L.regAlreadyRegistered + '</span>' : '') +
@@ -9789,7 +9789,7 @@
                     '<tbody>' + rowsHtml + '</tbody>' +
                 '</table>' +
                 '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-sm);margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:6px;"></div>' +
-                '<div id="adCandidateError" style="text-align:center;color:var(--danger, #ff4444);font-size:var(--fs-sm);margin-bottom:8px;display:none;"></div>' +
+                '<div id="adCandidateError" style="text-align:center;color:var(--danger, var(--danger));font-size:var(--fs-sm);margin-bottom:8px;display:none;"></div>' +
                 '<div class="ad-confirm-actions" style="margin-top:16px;">' +
                     '<button class="ad-btn ad-btn-primary" id="adCandidateConfirm">' + L.candidateConfirm + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adCandidateCancel">' + L.cancel + '</button>' +
