@@ -296,10 +296,10 @@ body.ad-page {
    тревога и предупреждение, — а не обводят карточку. Шкала рамки
    (1 · 2 · 3) к ней не относится, у неё своё имя `--bar-accent`. */
 .ad-stat-card--danger {
-    border-left: var(--bar-accent) solid #f44336;
+    border-left: var(--bar-accent) solid var(--danger);
     background: linear-gradient(135deg, rgba(244, 67, 54, 0.08) 0%, var(--bg-elevated) 100%);
 }
-.ad-stat-card--danger .ad-stat-value { color: #f44336; }
+.ad-stat-card--danger .ad-stat-value { color: var(--danger); }
 .ad-stat-card--danger .ad-stat-icon { opacity: 1; }
 
 /* Warning card (approaching) */
@@ -361,11 +361,11 @@ body.ad-page {
     margin-left: 8px;
     vertical-align: middle;
 }
-.ad-dash-count-badge--danger { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+.ad-dash-count-badge--danger { background: rgba(244, 67, 54, 0.15); color: var(--danger); }
 .ad-dash-count-badge--warning { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
 .ad-dash-count-badge--neutral { background: var(--accent-subtle); color: var(--accent); }
 
-.ad-days-danger { color: #f44336; font-weight: 700; }
+.ad-days-danger { color: var(--danger); font-weight: 700; }
 .ad-days-warning { color: #ff9800; font-weight: 600; }
 .ad-days-caution { color: #ffc107; font-weight: 600; }
 
@@ -1253,9 +1253,13 @@ body.ad-page {
     white-space: nowrap;
 }
 
-/* Тона: подложка тоном в 15%, текст — осветлённым тоном. Чистый #f44336
-   на своей подложке даёт 4.44 — ниже 4.5; осветлённый #ff6b6b даёт 6.1. */
-.ad-reg-mark-dolg { background: rgba(244, 67, 54, 0.15); color: #ff6b6b; }
+/* Тона: подложка тоном в 15%, текст — ролью `--danger`.
+   ЗАМЕРЕНО 17.10 на трёх подложках админки (#0A0A0A, #111111, #141414):
+   `--danger` даёт 5.19 / 4.90 / 4.74 — проходит AA везде. Прежний выбор
+   записи был верен по сути: чистый #f44336 давал 4.70 / 4.44 / 4.30 и не
+   проходил, поэтому брали осветлённый #ff6b6b (6.24 / 5.89 / 5.70). Роль
+   держит то же требование одним именем вместо девяти написаний. */
+.ad-reg-mark-dolg { background: rgba(244, 67, 54, 0.15); color: var(--danger); }
 .ad-reg-mark-ext  { background: rgba(33, 150, 243, 0.15); color: #64b5f6; }
 .ad-reg-mark-seed { background: var(--accent-subtle); color: var(--accent); }
 
@@ -1367,7 +1371,7 @@ body.ad-page {
 .ad-reg-act-tone[disabled] { opacity: 0.35; cursor: not-allowed; }
 
 .ad-reg-act-wait    { color: #FFA726; }
-.ad-reg-act-reject  { color: #ff6b6b; }
+.ad-reg-act-reject  { color: var(--danger); }
 .ad-reg-act-approve { color: #66bb6a; }
 
 /* «Добавить напарника» — та же болезнь: инлайн 0.7rem (11.2) и отступ
@@ -1741,7 +1745,7 @@ body.ad-page {
 
 .ad-btn-danger {
     background: rgba(255, 59, 48, 0.1);
-    color: #ff6b6b;
+    color: var(--danger);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
 }
 
@@ -1986,7 +1990,7 @@ body.ad-page {
 
 .ad-status-cancelled {
     background: rgba(255, 59, 48, 0.1);
-    color: #ff6b6b;
+    color: var(--danger);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
 }
 
@@ -2305,7 +2309,7 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 .ad-change-down {
-    color: #FF6B6B;
+    color: var(--danger);
     font-weight: 600;
 }
 
@@ -2340,8 +2344,8 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 .ad-form-btn-l.active {
-    background: #FF6B6B;
-    color: var(--neutral-white);
+    background: var(--danger);
+    color: var(--danger-on);
 }
 
 /* Players — Badges Grid */
@@ -2594,7 +2598,7 @@ input[type="date"]::-webkit-datetime-edit {
 /* Перебор предела: подзаголовок длиннее, чем влезает в шапку новости.
    Цвет тревоги берём у системы, а не числом */
 .ad-schet-perebor {
-    color: var(--danger, #ff453a);
+    color: var(--danger, var(--danger));
 }
 
 .ad-field-hint {
@@ -2800,8 +2804,8 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 .ad-btn-icon:hover {
-    border-color: #FF6B6B;
-    color: #FF6B6B;
+    border-color: var(--danger);
+    color: var(--danger);
 }
 
 /* Gallery thumbnails */
@@ -2835,7 +2839,7 @@ input[type="date"]::-webkit-datetime-edit {
     height: 20px;
     border-radius: 50%;
     background: var(--alpha-black-60);
-    color: #FF6B6B;
+    color: var(--danger);
     border: none;
     font-size: var(--fs-xs);
     cursor: pointer;
@@ -2847,8 +2851,8 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 .ad-gallery-remove:hover {
-    background: #FF6B6B;
-    color: var(--neutral-white);
+    background: var(--danger);
+    color: var(--danger-on);
 }
 
 /* Select styling */
@@ -3238,7 +3242,7 @@ select.ad-field-input {
 .ad-toast-error {
     background: rgba(255, 59, 48, 0.15);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
-    color: #ff6b6b;
+    color: var(--danger);
 }
 
 .ad-toast-show {
@@ -3691,8 +3695,8 @@ select.ad-field-input {
 }
 
 .ad-rat-form-l {
-    background: #f44336;
-    color: var(--neutral-white);
+    background: var(--danger);
+    color: var(--danger-on);
 }
 
 .ad-rat-form-clickable {
@@ -3760,7 +3764,7 @@ select.ad-field-input {
 .rat-delete-row {
     background: none;
     border: none;
-    color: #f44336;
+    color: var(--danger);
     font-size: var(--fs-lg);
     cursor: pointer;
     padding: 2px 6px;
@@ -4025,13 +4029,13 @@ select.ad-field-input {
 
 .ad-badge-red {
     background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
+    color: var(--danger);
 }
 
 /* Status badges for registrations */
 .ad-status-pending { color: #f59e0b; }
 .ad-status-approved { color: #22c55e; }
-.ad-status-rejected { color: #ef4444; }
+.ad-status-rejected { color: var(--danger); }
 .ad-status-withdrawn { color: var(--text-secondary); }
 
 /* КОРОБКА, ГАЛОЧКА И СОСТОЯНИЕ ОТМЕЧЕННОГО ЖИВУТ В `style.css` —
@@ -4101,7 +4105,7 @@ select.ad-field-input {
 .ad-trn-status-field.ad-status-registration-closed { color: #f59e0b; }
 .ad-trn-status-field.ad-status-ongoing { color: var(--accent); }
 .ad-trn-status-field.ad-status-completed { color: var(--text-secondary); }
-.ad-trn-status-field.ad-status-cancelled { color: #ef4444; }
+.ad-trn-status-field.ad-status-cancelled { color: var(--danger); }
 
 /* ---- Bracket Management: Sticky Header ---- */
 
@@ -4687,7 +4691,7 @@ select.ad-field-input {
 }
 
 .ad-import-file-selected .file-remove:hover {
-    color: #ff4444;
+    color: var(--danger);
 }
 
 .ad-import-map-row {
@@ -4736,7 +4740,7 @@ select.ad-field-input {
 }
 
 .ad-import-status-error {
-    color: #ff4444;
+    color: var(--danger);
     font-size: var(--fs-base);
 }
 
@@ -4843,7 +4847,7 @@ select.ad-field-input {
 
 .ad-mem-cancelled {
     background: rgba(244, 67, 54, 0.15);
-    color: #f44336;
+    color: var(--danger);
 }
 
 .ad-mem-expiring {
@@ -4858,7 +4862,7 @@ select.ad-field-input {
 
 .ad-mem-unpaid {
     background: rgba(244, 67, 54, 0.15);
-    color: #f44336;
+    color: var(--danger);
 }
 
 .ad-mem-tg {
@@ -4912,8 +4916,8 @@ select.ad-field-input {
 
 .ad-btn-cancel-mem:hover {
     background: rgba(244, 67, 54, 0.15);
-    color: #f44336;
-    border-color: #f44336;
+    color: var(--danger);
+    border-color: var(--danger);
 }
 
 .ad-btn-edit-mem:hover {
@@ -5368,7 +5372,7 @@ select.ad-field-input {
 
 .ad-pay-expired {
     background: rgba(244, 67, 54, 0.15);
-    color: #f44336;
+    color: var(--danger);
 }
 
 .ad-pay-type-court {
@@ -5670,7 +5674,7 @@ select.ad-field-input {
 .ad-brk-ig-cancelled {
     padding: 6px 8px;
     border-top: var(--bw-hair) solid var(--border-subtle);
-    color: var(--danger, #ff6b6b);
+    color: var(--danger, var(--danger));
     font-size: var(--fs-xs);
     text-align: center;
     text-transform: lowercase;
@@ -6241,7 +6245,7 @@ select.ad-field-input {
 
 .ad-vch-badge-cancelled {
     background: rgba(244, 67, 54, 0.15);
-    color: #f44336;
+    color: var(--danger);
 }
 
 .ad-btn-icon {
@@ -6904,7 +6908,7 @@ select.ad-field-input {
 }
 
 .ad-cat-bar-w { background: #4ade80; }
-.ad-cat-bar-l { background: #ff6b62; }
+.ad-cat-bar-l { background: var(--danger); }
 
 .ad-cat-legend {
     display: flex;
@@ -6927,7 +6931,7 @@ select.ad-field-input {
 
 .ad-cat-mark-l { margin-left: 10px; }
 .ad-cat-mark-w { background: #4ade80; }
-.ad-cat-mark-l { background: #ff6b62; }
+.ad-cat-mark-l { background: var(--danger); }
 
 
 /* Погашенная кнопка должна выглядеть погашенной: без этого она остаётся
@@ -7094,7 +7098,7 @@ select.ad-field-input {
     border-radius: 10px;
     background: rgba(255, 59, 48, 0.08);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
-    color: #ff6b6b;
+    color: var(--danger);
     font-size: var(--fs-sm);
     line-height: 1.5;
 }
@@ -7245,13 +7249,13 @@ select.ad-field-input {
 
 /* Поле с неверным вводом: подсветка и строка-объяснение под ним */
 .ad-field-input.ad-input-error {
-    border-color: #ff3b30;
+    border-color: var(--danger);
     background: rgba(255, 59, 48, 0.06);
 }
 
 .ad-input-hint {
     margin-top: 5px;
-    color: #ff3b30;
+    color: var(--danger);
     font-size: var(--fs-xs);
     line-height: 1.3;
 }
@@ -7295,7 +7299,7 @@ select.ad-field-input {
     margin: 6px 0 8px;
 }
 
-.ad-sq-title-hot { color: #ff6b6b; }
+.ad-sq-title-hot { color: var(--danger); }
 
 .ad-sq-row {
     display: flex;
@@ -7328,7 +7332,7 @@ select.ad-field-input {
     font-style: italic;
 }
 
-.ad-sq-hot .ad-sq-score { color: #ff6b6b; }
+.ad-sq-hot .ad-sq-score { color: var(--danger); }
 
 .ad-sq-hint {
     color: var(--text-muted);
@@ -7479,7 +7483,7 @@ select.ad-field-input {
 /* Отмена доп. матча — рядом с кнопкой счёта, но тише её: это не основное
    действие, а возможность обойтись без матча */
 .ad-brk-edit.ad-brk-ig-cancel {
-    color: #f44336;
+    color: var(--danger);
     border-color: rgba(244, 67, 54, 0.35);
 }
 
@@ -7641,7 +7645,7 @@ select.ad-field-input {
 /* Окно-предупреждение: заголовок красный, а не лаймовый — лайм в админке
    означает «всё хорошо, жми», и на отказе он сбивает с толку */
 .ad-confirm-warn .ad-confirm-title {
-    color: #f44336;
+    color: var(--danger);
 }
 
 .ad-confirm-warn {
@@ -8512,7 +8516,7 @@ select.ad-field-input {
     position: absolute; top: 2px; right: 2px;
     width: 28px; height: 28px; line-height: 28px; padding: 0;
     border: 0; border-radius: 50%;
-    background: rgba(255,60,60,0.15); color: #ff4444;
+    background: rgba(255,60,60,0.15); color: var(--danger);
     font-size: var(--fs-sm); cursor: pointer;
 }
 .ad-pts th .set-del-level:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }

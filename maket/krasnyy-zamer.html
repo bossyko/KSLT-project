@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: девять красных админки</title>
+<link rel="stylesheet" href="../css/tokens.css?v=68">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<style>
+body { background: var(--bg-base); padding: 0 0 var(--space-8); }
+.st-shapka { position: sticky; top: 0; z-index: 9; padding: var(--space-3) var(--space-4);
+  background: #0a0a0a; border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm); color: var(--text-secondary); }
+.st-stolbcy { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);
+  padding: var(--space-4); max-width: 1000px; }
+.st-zag { font-size: var(--fs-xs); color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: var(--space-3); }
+.st-karta { background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: var(--space-4); }
+.st-ryad { display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle); }
+.st-ryad:last-child { border-bottom: none; }
+.st-rol { font-size: var(--fs-xs); color: var(--text-muted); }
+.st-obrazec { font-weight: 600; font-size: var(--fs-sm); white-space: nowrap; }
+.st-polosa { height: 10px; width: 64px; border-radius: 3px; flex-shrink: 0; }
+/* ── КАК СЕЙЧАС: девять написаний ── */
+.c1 { color: #ff6b6b; } .c2 { color: #f44336; } .c3 { color: #ff4444; }
+.c4 { color: #ef4444; } .c6 { color: #ff453a; } .c7 { color: #f87171; }
+.c8 { color: #ff3b30; }
+.p5 { background: #ff6b62; }
+/* ── КАК СТАНЕТ: одно имя ── */
+.d { color: var(--danger); }
+.pd { background: var(--danger); }
+</style>
+</head>
+<body>
+<!--
+  СТЕНД: ДЕВЯТЬ КРАСНЫХ АДМИНКИ. Ветка D, круг 4.
+  Слева — как сейчас, каждое написание в своей роли из css/admin.css.
+  Справа — то же, но одним именем --danger.
+  Все девять проходят AA на подложках админки (5.00-7.16), поэтому
+  это вопрос единообразия, а не читаемости.
+-->
+<div class="st-shapka">КСЛТ · ДЕВЯТЬ КРАСНЫХ АДМИНКИ · слева как сейчас, справа одним именем --danger</div>
+<div class="st-stolbcy">
+  <div>
+    <div class="st-zag">как сейчас — 9 написаний, 38 мест</div>
+    <div class="st-karta">
+      <div class="st-ryad"><span class="st-rol">долг, отказ, кнопка опасности ×14</span><span class="st-obrazec c1">#ff6b6b</span></div>
+      <div class="st-ryad"><span class="st-rol">карточка «опасно», счётчик ×13</span><span class="st-obrazec c2">#f44336</span></div>
+      <div class="st-ryad"><span class="st-rol">ошибка импорта, удаление ×3</span><span class="st-obrazec c3">#ff4444</span></div>
+      <div class="st-ryad"><span class="st-rol">заявка отклонена, отменён ×2</span><span class="st-obrazec c4">#ef4444</span></div>
+      <div class="st-ryad"><span class="st-rol">полоса категории (фон) ×2</span><span class="st-polosa p5"></span></div>
+      <div class="st-ryad"><span class="st-rol">перебор в счёте ×1</span><span class="st-obrazec c6">#ff453a</span></div>
+      <div class="st-ryad"><span class="st-rol">красный значок ×1</span><span class="st-obrazec c7">#f87171</span></div>
+      <div class="st-ryad"><span class="st-rol">ошибка поля, подсказка ×2</span><span class="st-obrazec c8">#ff3b30</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="st-zag">как станет — одно имя --danger</div>
+    <div class="st-karta">
+      <div class="st-ryad"><span class="st-rol">долг, отказ, кнопка опасности ×14</span><span class="st-obrazec d">--danger</span></div>
+      <div class="st-ryad"><span class="st-rol">карточка «опасно», счётчик ×13</span><span class="st-obrazec d">--danger</span></div>
+      <div class="st-ryad"><span class="st-rol">ошибка импорта, удаление ×3</span><span class="st-obrazec d">--danger</span></div>
+      <div class="st-ryad"><span class="st-rol">заявка отклонена, отменён ×2</span><span class="st-obrazec d">--danger</span></div>
+      <div class="st-ryad"><span class="st-rol">полоса категории (фон) ×2</span><span class="st-polosa pd"></span></div>
+      <div class="st-ryad"><span class="st-rol">перебор в счёте ×1</span><span class="st-obrazec d">--danger</span></div>
+      <div class="st-ryad"><span class="st-rol">красный значок ×1</span><span class="st-obrazec d">--danger</span></div>
+      <div class="st-ryad"><span class="st-rol">ошибка поля, подсказка ×2</span><span class="st-obrazec d">--danger</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
