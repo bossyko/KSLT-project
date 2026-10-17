@@ -398,7 +398,7 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
         if (ri < plRounds.length - 1) {
             var pc = Math.floor(round.matches.length / 2);
             bHtml += '<div class="td-connector-column">';
-            bHtml += '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>';
+            bHtml += '<div class="td-round-title td-round-title-spacer">&nbsp;</div>';
             bHtml += '<div class="td-connector-inner">';
             for (var ci = 0; ci < pc; ci++) {
                 bHtml += '<div class="td-connector-pair"><div class="td-conn-top"></div><div class="td-conn-mid"></div><div class="td-conn-bottom"></div></div>';
@@ -556,7 +556,7 @@ function renderSingleEliminationBracket(tournament, predOpts) {
         if (roundIndex < rounds.length - 1) {
             var pairCount = Math.floor(round.matches.length / 2);
             html += '<div class="td-connector-column">' +
-                '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>' +
+                '<div class="td-round-title td-round-title-spacer">&nbsp;</div>' +
                 '<div class="td-connector-inner">';
             for (var i = 0; i < pairCount; i++) {
                 html += '<div class="td-connector-pair">' +
@@ -1916,32 +1916,32 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     });
 
                     var ggLetter = KSLT_RULES.букваГруппы(gg) || String(gg);
-                    группыЛиг += '<div style="margin-bottom:24px;">';
+                    группыЛиг += '<div class="td-gt-block">';
                     группыЛиг += '<div class="td-group-name">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + ggLetter + '</div>';
-                    группыЛиг += '<div style="overflow-x:auto;"><table class="td-group-table">';
+                    группыЛиг += '<div class="td-gt-scroll"><table class="td-group-table">';
                     группыЛиг += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
-                    for (var gc = 0; gc < ggStandings.length; gc++) группыЛиг += '<th style="text-align:center;min-width:48px;white-space:nowrap;">' + (gc + 1) + '</th>';
-                    группыЛиг += '<th style="text-align:center;width:32px;">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
-                    группыЛиг += '<th style="text-align:center;width:44px;white-space:nowrap;">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
-                    группыЛиг += '<th style="text-align:center;width:40px;">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
+                    for (var gc = 0; gc < ggStandings.length; gc++) группыЛиг += '<th class="td-gt-opp">' + (gc + 1) + '</th>';
+                    группыЛиг += '<th class="td-gt-wins">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
+                    группыЛиг += '<th class="td-gt-games">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
+                    группыЛиг += '<th class="td-gt-place">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
                     группыЛиг += '</tr></thead><tbody>';
 
                     for (var grow = 0; grow < ggStandings.length; grow++) {
                         var gst = ggStandings[grow];
                         var gpName = pName(gst.playerId);
-                        var gSeedHtml = gst.seed ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + gst.seed + ']</span>' : '';
+                        var gSeedHtml = gst.seed ? ' <span class="td-gt-seed">[' + gst.seed + ']</span>' : '';
                         var glQPG = t.qualifiers_per_group || 4;
                         var glPLCut = Math.floor(Math.min(glQPG, ggStandings.length) / 2);
                         var gIsPL = gst.place <= glPLCut && glAllGroupDone;
                         var gIsCL = gst.place > glPLCut && gst.place <= glQPG && glAllGroupDone;
 
-                        группыЛиг += '<tr data-player-id="' + gst.playerId + '"' + (gIsPL && glAllGroupDone ? ' style="background:var(--alpha-lime-06);"' : (gIsCL && glAllGroupDone ? ' style="background:var(--alpha-lime-06);"' : '')) + '>';
-                        группыЛиг += '<td style="text-align:center;font-weight:600;">' + (grow + 1) + '</td>';
-                        группыЛиг += '<td style="white-space:nowrap;">' + gpName + gSeedHtml + '</td>';
+                        группыЛиг += '<tr data-player-id="' + gst.playerId + '"' + ((gIsPL || gIsCL) && glAllGroupDone ? ' class="td-gt-qual"' : '') + '>';
+                        группыЛиг += '<td class="td-gt-num">' + (grow + 1) + '</td>';
+                        группыЛиг += '<td class="td-gt-name">' + gpName + gSeedHtml + '</td>';
 
                         for (var gcol = 0; gcol < ggStandings.length; gcol++) {
                             if (grow === gcol) {
-                                группыЛиг += '<td style="text-align:center;background:rgba(255,255,255,0.03);color:var(--text-muted);">&times;</td>';
+                                группыЛиг += '<td class="td-gt-self">&times;</td>';
                             } else {
                                 var gOppId = ggStandings[gcol].playerId;
                                 var gMatch = ggMatches.find(function(m) {
@@ -1961,15 +1961,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                         if (!pp) return s;
                                         return gNeedFlip ? pp[2] + ':' + pp[1] : pp[1] + ':' + pp[2];
                                     }).join(' ') + (gCellOutcome ? ' ' + gCellOutcome : '');
-                                    группыЛиг += '<td style="text-align:center;font-size:var(--fs-xs);' + (gIsWinner ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-secondary);') + '">' + gScoreDisp + '</td>';
+                                    группыЛиг += '<td class="td-gt-score' + (gIsWinner ? ' td-gt-win' : '') + '">' + gScoreDisp + '</td>';
                                 } else {
-                                    группыЛиг += '<td style="text-align:center;color:var(--text-muted);">—</td>';
+                                    группыЛиг += '<td class="td-gt-empty">—</td>';
                                 }
                             }
                         }
 
                         var glLot = ggGroupDone ? почемуМесто(gst, isEn, isKg) : '';
-                        группыЛиг += '<td style="text-align:center;font-weight:600;">' + gst.wins + '</td>';
+                        группыЛиг += '<td class="td-gt-total">' + gst.wins + '</td>';
                         /* ПРОЦЕНТ ГЕЙМОВ — ТОЛЬКО У СПОРНЫХ, как в админке.
                            `разбор` заполняется лишь у тех, кого разводил
                            расчёт при равных победах. У кого спора не было —
@@ -1978,12 +1978,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                            Числа — ТЕ ЖЕ, ЧТО У МЕНЕДЖЕРА: встречи между
                            равными, а не по всей группе. */
                         var glДоли = KSLT_GROUPS.долиГеймов(gst.разбор);
-                        группыЛиг += '<td style="text-align:center;font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
+                        группыЛиг += '<td class="td-gt-ratio">' +
                             (ggHasResults && glДоли
                                 ? gst.разбор.gamesWon + '-' + gst.разбор.gamesLost +
-                                  '<br><span style="opacity:0.7;">' + glДоли.процент + '</span>'
+                                  '<br><span class="td-gt-ratio-pct">' + glДоли.процент + '</span>'
                                 : '—') + '</td>';
-                        группыЛиг += '<td style="text-align:center;font-weight:700;white-space:nowrap;' + (gIsPL ? 'color:var(--accent);' : '') + '">' +
+                        группыЛиг += '<td class="td-gt-pos' + (gIsPL ? ' td-gt-win' : '') + '">' +
                             (ggHasResults ? gst.place : '—') + glLot + '</td>';
                         группыЛиг += '</tr>';
                     }
@@ -2129,7 +2129,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         if (ri < plRounds.length - 1) {
                             var pc = Math.floor(round.matches.length / 2);
                             плейофф += '<div class="td-connector-column">';
-                            плейофф += '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>';
+                            плейофф += '<div class="td-round-title td-round-title-spacer">&nbsp;</div>';
                             плейофф += '<div class="td-connector-inner">';
                             for (var ci = 0; ci < pc; ci++) {
                                 плейофф += '<div class="td-connector-pair"><div class="td-conn-top"></div><div class="td-conn-mid"></div><div class="td-conn-bottom"></div></div>';
@@ -2139,7 +2139,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     });
                     плейофф += '</div></div>';
 
-                    плейофф += '<div style="margin-bottom:32px;"></div>';
+                    /* ПУСТОЙ DIV ТОЛЬКО РАДИ ОТСТУПА — так было и так осталось: отступ
+                       правильнее отдать соседнему блоку, но это уже раскладка, а
+                       круг 3 чистит оформление. Имя у распорки теперь есть,
+                       находка записана. */
+                    плейофф += '<div class="td-razdelitel-blokov"></div>';
                 }
 
                 // Inter-group matches section
@@ -2147,7 +2151,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     плейофф += '<h3 class="td-bracket-subtitle">' + (isEn ? 'Additional Matches' : (isKg ? 'Кошумча матчтар' : 'Дополнительные матчи')) + '</h3>';
                     // Класс нужен, чтобы на телефоне поставить карточки по две
                     // в ряд: минимум в 220 пикселей оставлял их по одной
-                    плейофф += '<div class="td-ig-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;">';
+                    плейофф += '<div class="td-ig-grid">';
                     igMatches.sort(function(a, b) { return a.match_order - b.match_order; });
                     igMatches.forEach(function(m, idx) {
                         var p1Name = pName(m.player1_id);
@@ -2169,17 +2173,17 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         }
 
                         var matchLabel = isEn ? 'Match ' : (isKg ? 'Матч ' : 'Матч ');
-                        плейофф += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">';
-                        плейофф += '<div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">' + matchLabel + (idx + 1) + '</div>';
+                        плейофф += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '">';
+                        плейофф += '<div class="td-ig-head">' + matchLabel + (idx + 1) + '</div>';
                         // P1
-                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);' + (isP1Winner ? 'background:var(--alpha-lime-06);' : '') + '">';
-                        плейофф += '<span style="font-size:var(--fs-sm);' + (isP1Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p1Name + '</span>';
-                        плейофф += '<span style="font-size:var(--fs-xs);font-weight:600;' + (isP1Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p1Score || '—') + '</span>';
+                        плейофф += '<div class="td-ig-row' + (isP1Winner ? ' td-ig-won' : '') + '">';
+                        плейофф += '<span class="td-ig-name">' + p1Name + '</span>';
+                        плейофф += '<span class="td-ig-score">' + (p1Score || '—') + '</span>';
                         плейофф += '</div>';
                         // P2
-                        плейофф += '<div style="display:flex;justify-content:space-between;padding:8px 12px;' + (isP2Winner ? 'background:var(--alpha-lime-06);' : '') + '">';
-                        плейофф += '<span style="font-size:var(--fs-sm);' + (isP2Winner ? 'color:var(--accent);font-weight:700;' : 'color:var(--text-primary);') + '">' + p2Name + '</span>';
-                        плейофф += '<span style="font-size:var(--fs-xs);font-weight:600;' + (isP2Winner ? 'color:var(--accent);' : 'color:var(--text-secondary);') + '">' + (p2Score || '—') + '</span>';
+                        плейофф += '<div class="td-ig-row' + (isP2Winner ? ' td-ig-won' : '') + '">';
+                        плейофф += '<span class="td-ig-name">' + p2Name + '</span>';
+                        плейофф += '<span class="td-ig-score">' + (p2Score || '—') + '</span>';
                         плейофф += '</div></div>';
                     });
                     плейофф += '</div>';
@@ -2227,29 +2231,29 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     });
 
                     var letter = KSLT_RULES.букваГруппы(g) || String(g);
-                    группы += '<div style="margin-bottom:24px;">';
+                    группы += '<div class="td-gt-block">';
                     группы += '<div class="td-group-name">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + letter + '</div>';
-                    группы += '<div style="overflow-x:auto;"><table class="td-group-table">';
+                    группы += '<div class="td-gt-scroll"><table class="td-group-table">';
                     группы += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
-                    for (var c = 0; c < standings.length; c++) группы += '<th style="text-align:center;min-width:48px;white-space:nowrap;">' + (c + 1) + '</th>';
-                    группы += '<th style="text-align:center;width:32px;">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
-                    группы += '<th style="text-align:center;width:44px;white-space:nowrap;">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
-                    группы += '<th style="text-align:center;width:40px;">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
+                    for (var c = 0; c < standings.length; c++) группы += '<th class="td-gt-opp">' + (c + 1) + '</th>';
+                    группы += '<th class="td-gt-wins">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
+                    группы += '<th class="td-gt-games">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
+                    группы += '<th class="td-gt-place">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
                     группы += '</tr></thead><tbody>';
 
                     for (var row = 0; row < standings.length; row++) {
                         var st = standings[row];
                         var stName = pName(st.playerId);
-                        var seedHtml = st.seed ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + st.seed + ']</span>' : '';
+                        var seedHtml = st.seed ? ' <span class="td-gt-seed">[' + st.seed + ']</span>' : '';
                         var isQualified = st.place <= qualifiers && allGroupDone;
 
                         группы += '<tr data-player-id="' + st.playerId + '"' + (isQualified && allGroupDone ? ' style="background:var(--alpha-lime-06);"' : '') + '>';
-                        группы += '<td style="text-align:center;font-weight:600;">' + (row + 1) + '</td>';
-                        группы += '<td style="white-space:nowrap;">' + stName + seedHtml + '</td>';
+                        группы += '<td class="td-gt-num">' + (row + 1) + '</td>';
+                        группы += '<td class="td-gt-name">' + stName + seedHtml + '</td>';
 
                         for (var col = 0; col < standings.length; col++) {
                             if (row === col) {
-                                группы += '<td style="text-align:center;background:rgba(255,255,255,0.03);color:var(--text-muted);">&times;</td>';
+                                группы += '<td class="td-gt-self">&times;</td>';
                             } else {
                                 var oppId = standings[col].playerId;
                                 var match = gMatches.find(function(m) {
@@ -2274,24 +2278,31 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     }
                                     if (cellOutcome) score += ' ' + cellOutcome;
                                     var isWin = match.winner_id === st.playerId;
-                                    группы += '<td style="text-align:center;font-size:var(--fs-xs);white-space:nowrap;' + (isWin ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-muted);') + '">' + score + '</td>';
+                                    /* ПРОИГРАННЫЙ СЧЁТ — ОДНА КРАСКА НА ОБЕ ТАБЛИЦЫ. Здесь стоял
+                                       `--text-muted` (0.50), в таблице лиги строкой выше —
+                                       `--text-secondary` (0.72): одно понятие, два значения.
+                                       Оба проходят AA (5.33 и 9.52), поэтому выбор по роли:
+                                       счёт — это ДАННЫЕ, а не подпись, и `--text-muted`
+                                       остаётся за «матч не сыгран». */
+                                    группы += '<td class="td-gt-score' + (isWin ? ' td-gt-win' : '') + '">' + score + '</td>';
                                 } else if (match) {
                                     // Матч есть, счёта ещё нет: клетка несёт номер и имя
                                     // соперника — по ним свой матч заполняется прямо отсюда
                                     var противName = pName(oppId).replace(/<[^>]*>/g, '');
                                     var противФам = противName.trim().split(/\s+/).pop();
-                                    группы += '<td class="td-grp-cell" data-match-id="' + match.id +
-                                             '" data-opp="' + противФам +
-                                             '" style="text-align:center;color:var(--text-muted);">—</td>';
+                                    /* ОДИН АТРИБУТ `class`: оба имени в нём, а не два атрибута подряд —
+                                       браузер взял бы первый и выбросил второй. */
+                                    группы += '<td class="td-grp-cell td-gt-empty" data-match-id="' + match.id +
+                                             '" data-opp="' + противФам + '">—</td>';
                                 } else {
-                                    группы += '<td style="text-align:center;color:var(--text-muted);">—</td>';
+                                    группы += '<td class="td-gt-empty">—</td>';
                                 }
                             }
                         }
 
                         var sbPlaceDisplay = sbGroupHasResults ? st.place : '—';
                         var sbLot = sbGroupDone ? почемуМесто(st, isEn, isKg) : '';
-                        группы += '<td style="text-align:center;font-weight:600;">' + st.wins + '</td>';
+                        группы += '<td class="td-gt-total">' + st.wins + '</td>';
                         /* ПРОЦЕНТ ГЕЙМОВ — ТОЛЬКО У СПОРНЫХ, как в админке.
                            `разбор` заполняется лишь у тех, кого разводил
                            расчёт при равных победах. У кого спора не было —
@@ -2300,12 +2311,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                            Числа — ТЕ ЖЕ, ЧТО У МЕНЕДЖЕРА: встречи между
                            равными, а не по всей группе. */
                         var sbДоли = KSLT_GROUPS.долиГеймов(st.разбор);
-                        группы += '<td style="text-align:center;font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
+                        группы += '<td class="td-gt-ratio">' +
                             (sbGroupHasResults && sbДоли
                                 ? st.разбор.gamesWon + '-' + st.разбор.gamesLost +
-                                  '<br><span style="opacity:0.7;">' + sbДоли.процент + '</span>'
+                                  '<br><span class="td-gt-ratio-pct">' + sbДоли.процент + '</span>'
                                 : '—') + '</td>';
-                        группы += '<td style="text-align:center;font-weight:700;white-space:nowrap;' + (isQualified ? 'color:var(--accent);' : '') + '">' +
+                        группы += '<td class="td-gt-pos' + (isQualified ? ' td-gt-win' : '') + '">' +
                             sbPlaceDisplay + sbLot + '</td>';
                         группы += '</tr>';
                     }
@@ -2426,7 +2437,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var первыйКруг = section.rounds[0].roundNum;
                 for (var пусто = 1; пусто < первыйКруг; пусто++) {
                     bHtml += '<div class="td-bracket-round td-round-spacer">' +
-                             '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>' +
+                             '<div class="td-round-title td-round-title-spacer">&nbsp;</div>' +
                              '<div class="td-bracket-matches"></div></div>';
                     // И столбец под соединительные линии: в основной сетке
                     // он есть между кругами, и без него блоки за места
@@ -2458,7 +2469,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var pc = Math.floor(roundMatches.length / 2);
                         if (pc > 0) {
                             bHtml += '<div class="td-connector-column">';
-                            bHtml += '<div class="td-round-title" style="visibility:hidden;">&nbsp;</div>';
+                            bHtml += '<div class="td-round-title td-round-title-spacer">&nbsp;</div>';
                             bHtml += '<div class="td-connector-inner">';
                             for (var ci = 0; ci < pc; ci++) {
                                 bHtml += '<div class="td-connector-pair"><div class="td-conn-top"></div><div class="td-conn-mid"></div><div class="td-conn-bottom"></div></div>';
@@ -2480,9 +2491,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         // Сдвиг считаем после отрисовки, по месту: между
                         // кругами стоят столбцы с линиями, и на глаз ширину
                         // не угадать — матч за место уезжал левее финала.
+                        /* ОДИН АТРИБУТ `class`, А НЕ ДВА. 17.10 я заменил здесь `style=` на
+                           второй `class=` — браузер берёт ПЕРВЫЙ и молча выбрасывает
+                           второй, поэтому `max-width` пропал, карточка стала шире,
+                           предел сдвига схлопнулся в ноль, и все матчи за места
+                           уехали к левому краю. Поймала проба, а не глаз. */
                         bHtml += '<div class="td-place-match" data-round="' +
-                                 section.placeMatch.roundNum + '" ' +
-                                 'style="margin-top:12px;max-width:200px;">';
+                                 section.placeMatch.roundNum + '">';
                         bHtml += '<div class="td-round-title">' + section.placeMatch.label + '</div>';
                         bHtml += renderMatch(ficTournObj, {
                             matchId: pm.id, player1Id: pm.player1_id, player2Id: pm.player2_id,
@@ -2775,7 +2790,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 partHtml += '</tbody></table></div>';
                 partHtml += кнопкаОтсечки(waitlist.length);
             } else {
-                partHtml += '<div class="td-no-results" style="padding:var(--space-md) 0;"><p>' + (isEn ? 'No waitlisted players' : (isKg ? 'Күтүү тизмесинде оюнчулар жок' : 'Нет игроков в листе ожидания')) + '</p></div>';
+                partHtml += '<div class="td-no-results"><p>' + (isEn ? 'No waitlisted players' : (isKg ? 'Күтүү тизмесинде оюнчулар жок' : 'Нет игроков в листе ожидания')) + '</p></div>';
             }
             partHtml += '</div>';
 

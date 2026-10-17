@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>КСЛТ — стенд таблицы групп</title>
+<link rel="stylesheet" href="../css/tokens.css?v=68">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/tournament-detail.css?v=153">
+<style>
+.st-shapka{position:sticky;top:0;z-index:9;padding:var(--space-3) var(--space-4);
+  background:#0a0a0a;border-bottom:1px solid var(--border-subtle);
+  font-size:var(--fs-sm);color:var(--text-secondary)}
+.st-podpis{font-size:var(--fs-xs);color:var(--text-muted);text-transform:uppercase;
+  letter-spacing:.08em;margin:var(--space-4) 0 var(--space-2)}
+.st-obertka{padding:0 var(--space-4) var(--space-8);max-width:1100px}
+</style>
+</head>
+<body>
+<!--
+  СТЕНД ТАБЛИЦЫ ГРУПП И КАРТОЧКИ ДОП. МАТЧА. Ветка C, круг 3.
+  Разметка и классы — ТЕ ЖЕ, что собирает js/tournament-detail.js
+  (renderSupabaseTournament). Базы здесь нет.
+  СОДЕРЖИМОЕ КРАЙНЕЕ: длинные имена, группа из пяти, несыгранные матчи,
+  доля геймов второй строкой, посев у имени, двое прошедших.
+-->
+<div class="st-shapka">КСЛТ · СТЕНД ТАБЛИЦЫ ГРУПП · содержимое крайнее: длинные имена, несыгранные матчи, доля геймов</div>
+
+<div class="st-obertka">
+  <div class="st-podpis">группа из пяти · двое прошли · у одного спор по геймам</div>
+  <div class="td-gt-block">
+    <div class="td-group-name">Группа A</div>
+    <div class="td-gt-scroll"><table class="td-group-table">
+      <thead><tr>
+        <th>№</th><th>Игрок</th>
+        <th class="td-gt-opp">1</th><th class="td-gt-opp">2</th><th class="td-gt-opp">3</th>
+        <th class="td-gt-opp">4</th><th class="td-gt-opp">5</th>
+        <th class="td-gt-wins">П</th><th class="td-gt-games">Геймы</th><th class="td-gt-place">М</th>
+      </tr></thead>
+      <tbody>
+        <tr class="td-gt-qual">
+          <td class="td-gt-num">1</td>
+          <td class="td-gt-name">Абдыкадыров Улукбек <span class="td-gt-seed">[1]</span></td>
+          <td class="td-gt-self">&times;</td>
+          <td class="td-gt-score td-gt-win">6:4 6:2</td>
+          <td class="td-gt-score td-gt-win">6:3 7:5</td>
+          <td class="td-gt-score td-gt-win">6:0 6:1</td>
+          <td class="td-gt-score">4:6 3:6</td>
+          <td class="td-gt-total">3</td>
+          <td class="td-gt-ratio">34-21<br><span class="td-gt-ratio-pct">61.8%</span></td>
+          <td class="td-gt-pos td-gt-win">1</td>
+        </tr>
+        <tr class="td-gt-qual">
+          <td class="td-gt-num">2</td>
+          <td class="td-gt-name">Сыдыков Эрмек-Бакытбекович <span class="td-gt-seed">[2]</span></td>
+          <td class="td-gt-score td-gt-win">6:4 6:3</td>
+          <td class="td-gt-self">&times;</td>
+          <td class="td-gt-score">5:7 4:6</td>
+          <td class="td-gt-score td-gt-win">7:6 6:4</td>
+          <td class="td-gt-score td-gt-win">6:2 6:2</td>
+          <td class="td-gt-total">3</td>
+          <td class="td-gt-ratio">33-24<br><span class="td-gt-ratio-pct">57.9%</span></td>
+          <td class="td-gt-pos td-gt-win">2</td>
+        </tr>
+        <tr>
+          <td class="td-gt-num">3</td>
+          <td class="td-gt-name">Ли Александр</td>
+          <td class="td-gt-score">3:6 5:7</td>
+          <td class="td-gt-score td-gt-win">7:5 6:4</td>
+          <td class="td-gt-self">&times;</td>
+          <td class="td-gt-empty">—</td>
+          <td class="td-gt-score">2:6 4:6</td>
+          <td class="td-gt-total">1</td>
+          <td class="td-gt-ratio">—</td>
+          <td class="td-gt-pos">3</td>
+        </tr>
+        <tr>
+          <td class="td-gt-num">4</td>
+          <td class="td-gt-name">Орозбеков Нурсултан</td>
+          <td class="td-gt-score">0:6 1:6</td>
+          <td class="td-gt-score">6:7 4:6</td>
+          <td class="td-gt-empty">—</td>
+          <td class="td-gt-self">&times;</td>
+          <td class="td-gt-empty">—</td>
+          <td class="td-gt-total">0</td>
+          <td class="td-gt-ratio">—</td>
+          <td class="td-gt-pos">4</td>
+        </tr>
+        <tr>
+          <td class="td-gt-num">5</td>
+          <td class="td-gt-name">Ким Виктор <span class="td-gt-seed">[3]</span></td>
+          <td class="td-gt-score td-gt-win">6:4 6:3</td>
+          <td class="td-gt-score">2:6 2:6</td>
+          <td class="td-gt-score td-gt-win">6:2 6:4</td>
+          <td class="td-gt-empty">—</td>
+          <td class="td-gt-self">&times;</td>
+          <td class="td-gt-total">2</td>
+          <td class="td-gt-ratio">28-25<br><span class="td-gt-ratio-pct">52.8%</span></td>
+          <td class="td-gt-pos">5</td>
+        </tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="st-podpis">доп. матчи — карточки</div>
+  <div class="td-ig-grid">
+    <div class="td-ig-match">
+      <div class="td-ig-head">Матч 1</div>
+      <div class="td-ig-row td-ig-won"><span class="td-ig-name">Ли Александр</span><span class="td-ig-score">6:4 6:2</span></div>
+      <div class="td-ig-row"><span class="td-ig-name">Орозбеков Нурсултан</span><span class="td-ig-score">4:6 2:6</span></div>
+    </div>
+    <div class="td-ig-match">
+      <div class="td-ig-head">Матч 2</div>
+      <div class="td-ig-row"><span class="td-ig-name">Сыдыков Эрмек-Бакытбекович</span><span class="td-ig-score">—</span></div>
+      <div class="td-ig-row"><span class="td-ig-name">Ким Виктор</span><span class="td-ig-score">—</span></div>
+    </div>
+    <div class="td-ig-match">
+      <div class="td-ig-head">Матч 3</div>
+      <div class="td-ig-row td-ig-won"><span class="td-ig-name">Абдыкадыров Улукбек</span><span class="td-ig-score">7:6 7:5</span></div>
+      <div class="td-ig-row"><span class="td-ig-name">Токтосунов Жаныбек-Асанович</span><span class="td-ig-score">6:7 5:7</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

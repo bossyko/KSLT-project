@@ -94,15 +94,23 @@ const ОТКАТЫ = [
  '<h3 class="td-bracket-subtitle" style="font-size:1.1rem;">',
  'инлайновых кеглей блока сетки в js не осталось'],
 
-['вернуть кегль числом', J,
- 'font-size:var(--fs-xs)',
- 'font-size:0.8rem',
- 'кеглей числом мимо токенов в js не осталось'],
+/* ЯКОРЬ ПЕРЕЕХАЛ В CSS ВСЛЕД ЗА ЧИСЛАМИ (круг 3 ветки C, 17.10):
+   инлайновых кеглей в js больше нет, и откат, прибитый к ним, перестал
+   находить своё место молча. */
+['вернуть кегль числом', C,
+ '.td-group-table .td-gt-score { font-size: var(--fs-xs);',
+ '.td-group-table .td-gt-score { font-size: 0.8rem;',
+ 'кеглей числом мимо токенов не осталось'],
 
-['вернуть ширину мимо шкалы', J,
- 'min-width:48px',
- 'min-width:46px',
+['вернуть ширину мимо шкалы', C,
+ '.td-group-table .td-gt-opp { text-align: center; min-width: 48px;',
+ '.td-group-table .td-gt-opp { text-align: center; min-width: 46px;',
  'ширины шапки таблицы стоят на шкале'],
+
+['снять имя у колонки таблицы групп', C,
+ '.td-group-table .td-gt-wins {',
+ '.td-group-table .td-gt-pobedy {',
+ 'колонки таблицы групп названы по назначению'],
 
 ['разорвать пару «гашение + короткая подпись»', C,
  '    .td-sched-round::after,\n    .td-sched-court-cell::after {\n        content: attr(data-short);',

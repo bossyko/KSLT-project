@@ -3367,3 +3367,159 @@ tr.td-rr-row-highlight {
     color: var(--accent);
     font-weight: 500;
 }
+
+/* ═══ ТАБЛИЦА ГРУПП: ЯЧЕЙКИ ═══════════════════════════════════════════
+   Ветка C, круг 3, 17.10. Каркас таблицы (`.td-group-table`) в css был с
+   самого начала, а ЯЧЕЙКИ красились инлайном из js — 23 раза
+   `text-align:center`, 11 раз `white-space:nowrap`, ширины колонок
+   числами. И красились ДВАЖДЫ: обычные группы и группы лиги собираются
+   двумя разными кусками кода (`группы` и `группыЛиг`, сходство 41.7 %),
+   каждый со своей копией инлайнов.
+
+   ПРОЗРАЧНОСТИ ПОСТАВЛЕНЫ НА СТУПЕНИ. Диагональ таблицы стояла на
+   `rgba(255,255,255,0.03)`, граница карточки доп. матча — на 0.06;
+   лестница белых прозрачностей знает 0.04 · 0.08 · 0.12
+   (`--surface-glass`, `--border-subtle`, `--alpha-white-12`). Соседняя
+   строка того же файла уже брала `--border-subtle` — то есть одно
+   понятие держалось двух значений на расстоянии одной строки. */
+
+/* Обёртка: таблица шире экрана едет пальцем, а не ломает страницу */
+.td-gt-scroll { overflow-x: auto; }
+
+/* Блок одной группы в столбце групп */
+.td-gt-block { margin-bottom: var(--space-md); }
+
+/* Колонки ПО НАЗНАЧЕНИЮ, а не по номеру: номер колонки зависит от числа
+   игроков в группе, назначение — нет */
+.td-group-table .td-gt-opp { text-align: center; min-width: 48px; white-space: nowrap; }
+.td-group-table .td-gt-wins { text-align: center; width: 32px; }
+.td-group-table .td-gt-games { text-align: center; width: 44px; white-space: nowrap; }
+.td-group-table .td-gt-place { text-align: center; width: 40px; }
+
+/* Ячейки строки */
+.td-group-table .td-gt-num { text-align: center; font-weight: 600; }
+.td-group-table .td-gt-name { white-space: nowrap; }
+.td-group-table .td-gt-score { text-align: center; white-space: nowrap; }
+
+/* Сам против себя — клетка, которой не бывает */
+.td-group-table .td-gt-self {
+    text-align: center;
+    background: var(--surface-glass);
+    color: var(--text-muted);
+}
+
+/* Матч не сыгран */
+.td-group-table .td-gt-empty { text-align: center; color: var(--text-muted); }
+
+/* Прошёл дальше — подсветка строки */
+.td-group-table .td-gt-qual { background: var(--alpha-lime-06); }
+
+/* Номер посева у имени */
+.td-gt-seed { color: var(--accent); font-size: var(--fs-2xs); }
+
+/* Счёт встречи в клетке: выиграл — акцентом, проиграл — тише.
+   Состояние живёт КЛАССОМ, а не веткой в строке разметки: до правки
+   краска победителя писалась тернарником прямо в `style=`, по два раза
+   на каждую из двух таблиц. */
+.td-group-table .td-gt-score { font-size: var(--fs-xs); color: var(--text-secondary); }
+.td-group-table .td-gt-score.td-gt-win { color: var(--accent); font-weight: 600; }
+
+/* Итоговые колонки строки */
+.td-group-table .td-gt-total { text-align: center; font-weight: 600; }
+.td-group-table .td-gt-ratio {
+    text-align: center;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.td-group-table .td-gt-pos { text-align: center; font-weight: 700; white-space: nowrap; }
+.td-group-table .td-gt-pos.td-gt-win { color: var(--accent); }
+
+/* Доля геймов второй строкой — тише основного числа. То же значение и
+   то же понятие, что у менеджера: `.ad-grp-dolya` в `css/admin.css:1043`.
+   Я было написал `var(--alpha-text-70, 0.7)` — такого токена нет, и с
+   запасным значением вид получился бы верный при вранье в имени. Ровно
+   то, подо что 16.10 заведено правило «каждая переменная где-то
+   объявлена»; поймал себя до прогона, но поймало бы и оно. */
+.td-gt-ratio-pct { opacity: 0.7; }
+
+/* ═══ КАРТОЧКА ДОП. МАТЧА ═══════════════════════════════════════════════
+   Ветка C, круг 3, 17.10. Карточка рисовалась восемью инлайнами, а её
+   внутренние блоки не имели имён вовсе — поэтому css в медиа 992 цеплялся
+   за СТРУКТУРУ (`> div:first-child`, `> div:not(:first-child)`) и держался
+   на шести `!important`: структурный селектор слабее инлайна, и иначе он
+   не выигрывал. Имена дают правилам ту же силу без подпорок. */
+
+.td-ig-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+}
+
+.td-ig-match {
+    background: var(--bg-card);
+    border: var(--bw-hair) solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+/* Шапка карточки — номер доп. матча */
+.td-ig-head {
+    font-size: var(--fs-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-glass);
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+
+/* Строка игрока */
+.td-ig-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+}
+.td-ig-row + .td-ig-row { border-top: var(--bw-hair) solid var(--border-subtle); }
+.td-ig-row.td-ig-won { background: var(--alpha-lime-06); }
+
+/* ДЛИННОЕ ИМЯ НЕ ВЫТАЛКИВАЕТ СЧЁТ. Найдено ГЛАЗАМИ на стенде 17.10, а
+   не числами: у «Сыдыков Эрмек-Бакытбекович» имя упиралось в счёт вплотную,
+   а у «Токтосунов Жаныбек-Асанович» счёт 6:7 5:7 разрывался на две строки.
+   Имя сжимается и переносится (`min-width: 0` — иначе flex не даёт
+   элементу стать уже содержимого), счёт не сжимается и не переносится. */
+.td-ig-name {
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.td-ig-score {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-left: var(--space-2);
+}
+.td-ig-won .td-ig-name { color: var(--accent); font-weight: 700; }
+.td-ig-won .td-ig-score { color: var(--accent); }
+
+/* Распорка на месте заголовка круга: место держим, текст не показываем */
+.td-round-title-spacer { visibility: hidden; }
+
+/* Матч за место под сеткой. Правила живут на САМОМ `.td-place-match`:
+   отдельный класс-обёртка был лишней сущностью — элемент тот же, и из-за
+   него в разметке оказалось два атрибута `class`. */
+.td-place-match { margin-top: var(--space-3); max-width: 200px; }
+
+/* Распорка между блоком доп. матчей и сеткой. Пустой элемент ради
+   отступа — не лучший приём; отступ правильнее отдать соседу, но это уже
+   раскладка, а не оформление. Имя дано, находка записана. */
+.td-razdelitel-blokov { margin-bottom: var(--space-8); }
+
+/* Пусто — «нет участников в листе ожидания» */
+.td-no-results { padding: var(--space-md) 0; }
