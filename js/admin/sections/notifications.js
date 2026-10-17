@@ -50,7 +50,7 @@
                     '</div>' +
                 '</div>' +
                 // User search (hidden by default)
-                '<div class="ad-field" id="adPushUserWrap" style="display:none;">' +
+                '<div class="ad-field ad-skryt" id="adPushUserWrap">' +
                     '<label class="ad-field-label">' + L.pushSearchUser + '</label>' +
                     '<input type="text" id="adPushUserSearch" class="ad-field-input" placeholder="' + L.pushSearchUser + '">' +
                     '<input type="hidden" id="adPushUserId">' +
@@ -75,7 +75,7 @@
                             '<th>' + L.pushFcm + '</th>' +
                             '<th style="width:80px;"></th>' +
                         '</tr></thead>' +
-                        '<tbody id="adPushHistoryBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody id="adPushHistoryBody"><tr><td class="ad-tablica-pusto" colspan="7">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -147,7 +147,7 @@
         container.innerHTML = profiles.map(function(p) {
             return '<div class="ad-push-user-option" data-id="' + A.esc(p.id) + '" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-subtle);font-size:var(--fs-sm);">' +
                 '<div style="font-weight:500;">' + A.esc(p.full_name || '') + '</div>' +
-                '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + A.esc(p.email || '') + '</div>' +
+                '<div class="ad-podpis">' + A.esc(p.email || '') + '</div>' +
             '</div>';
         }).join('');
 
@@ -254,7 +254,7 @@
 
         var rows = res.data || [];
         if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">' + L.pushNoHistory + '</td></tr>';
+            tbody.innerHTML = '<tr><td class="ad-tablica-pusto" colspan="6">' + L.pushNoHistory + '</td></tr>';
             return;
         }
 
@@ -299,8 +299,8 @@
                 '</td>' +
                 '<td>' + (audienceLabels[r.audience] || r.audience || '—') + '</td>' +
                 '<td>' + (typeLabels[r.type] || r.type || '—') + '</td>' +
-                '<td style="text-align:center;">' + (r.recipients_count || 0) + '</td>' +
-                '<td style="text-align:center;">' + (r.fcm_sent || 0) + '</td>' +
+                '<td class="ad-centr">' + (r.recipients_count || 0) + '</td>' +
+                '<td class="ad-centr">' + (r.fcm_sent || 0) + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' + actions + '</td>' +
             '</tr>';
         }).join('');

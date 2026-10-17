@@ -248,7 +248,7 @@
                             '<th>' + L.thWL + '</th>' +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td class="ad-tablica-pusto" colspan="6">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -312,7 +312,7 @@
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">📊</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noPlayers + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noPlayersText + '</div>' +
+                    '<div class="ad-podpis">' + L.noPlayersText + '</div>' +
                 '</td></tr>';
             // Иначе под пустой таблицей остаются кнопки страниц от прошлого отбора
             var stale = document.getElementById('adPlrPagination');
@@ -478,7 +478,7 @@
                 '<div class="ad-image-upload' + hasImageClass + '" id="adPlrImgZone" style="width:140px;height:180px;border-radius:12px;margin:0 auto 16px;border:2px solid var(--accent);overflow:hidden;">' +
                     imagePreviewHtml +
                 '</div>' +
-                '<input type="file" accept="image/jpeg,image/png" id="adPlrImgInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adPlrImgInput">' +
                 '<div class="ad-image-url-row">' +
                     '<input type="text" class="ad-field-input" id="adPlrImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (plrImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrImgUrlBtn">' + L.applyUrl + '</button>' +
@@ -577,13 +577,13 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrTelegram + '</label>' +
                         '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item && item._telegram ? A.esc(withAt(item._telegram)) : '<span style="color:var(--text-muted);">\u2014</span>') +
+                            (item && item._telegram ? A.esc(withAt(item._telegram)) : '<span class="ad-tiho">\u2014</span>') +
                         '</div>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrInstagram + '</label>' +
                         '<div class="ad-field-input" style="background:rgba(255,255,255,0.03);cursor:default;opacity:0.85;">' +
-                            (item && item._instagram ? A.esc(withAt(item._instagram)) : '<span style="color:var(--text-muted);">\u2014</span>') +
+                            (item && item._instagram ? A.esc(withAt(item._instagram)) : '<span class="ad-tiho">\u2014</span>') +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -626,7 +626,7 @@
                         // бежать за ним в самый низ страницы незачем.
                         // Погашена, пока категорию не тронули
                         '<div style="display:flex;gap:12px;align-items:flex-end;">' +
-                            '<select class="ad-field-input" id="adPlrCat" style="flex:1;">' + catOptionsHtml + '</select>' +
+                            '<select class="ad-field-input ad-rastyanut" id="adPlrCat">' + catOptionsHtml + '</select>' +
                             (plrEditingId
                                 ? '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adPlrSaveCat" disabled>' +
                                   L.save + '</button>'
@@ -637,7 +637,7 @@
                         '<label class="ad-field-label">' + L.plrCountry + '</label>' +
                         '<input type="hidden" id="adPlrCountry" value="' + A.esc(item ? CU.normalizeCountry(item.country) || '' : '') + '">' +
                         '<input type="text" class="ad-field-input" id="adPlrCountryInput" placeholder="' + L.plrCountrySearch + '" autocomplete="off" value="' + A.esc(item && item.country ? CU.renderCountry(item.country, isEn ? 'en' : 'ru', true) : '') + '">' +
-                        '<div class="ad-dropdown-list" id="adPlrCountryDropdown" style="display:none;"></div>' +
+                        '<div class="ad-dropdown-list ad-skryt" id="adPlrCountryDropdown"></div>' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrGender + ' *</label>' +
@@ -1825,7 +1825,7 @@
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrRankChange + '</label>' +
-                        '<input type="text" class="ad-field-input" value="\u2014" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<input type="text" class="ad-field-input ad-pogashen" value="\u2014" readonly>' +
                     '</div>' +
                 '</div>' +
                 catBarHtml(r) +
@@ -1948,8 +1948,8 @@
         var html = '<div class="ad-table-wrap" style="overflow-x:auto;"><table class="ad-table"><thead><tr>' +
             '<th>' + L.rhDate + '</th>' +
             '<th>' + L.rhTournament + '</th>' +
-            '<th style="text-align:center;">' + L.rhPoints + '</th>' +
-            '<th style="text-align:center;">' + L.rhNtrp + '</th>' +
+            '<th class="ad-centr">' + L.rhPoints + '</th>' +
+            '<th class="ad-centr">' + L.rhNtrp + '</th>' +
             '<th style="width:40px;"></th>' +
             '</tr></thead><tbody>';
 
@@ -1970,7 +1970,7 @@
         var visible = reversed.slice(0, shown);
 
         visible.forEach(function(row) {
-            var ntrpCell = '<span style="color:var(--text-muted);">—</span>';
+            var ntrpCell = '<span class="ad-tiho">—</span>';
             if (row.ntrp_after != null) {
                 var move = ntrpMoves[row.id] || 0;
                 var arrow = move > 0 ? '<span style="color:var(--success);">\u2191</span> '
@@ -1982,8 +1982,8 @@
                 '<td>' + A.esc(rhDate(row.recorded_at)) + '</td>' +
                 '<td>' + A.esc(row.tournament_name) + '</td>' +
                 '<td style="text-align:center;color:var(--accent);font-weight:600;">' +
-                    (row.points_earned ? row.points_earned : '<span style="color:var(--text-muted);">—</span>') + '</td>' +
-                '<td style="text-align:center;">' + ntrpCell + '</td>' +
+                    (row.points_earned ? row.points_earned : '<span class="ad-tiho">—</span>') + '</td>' +
+                '<td class="ad-centr">' + ntrpCell + '</td>' +
                 '<td style="white-space:nowrap;">' +
                     // Править можно только начисления, заведённые руками.
                     // Очки за турнир считаются по сетке, а записи об оценке
@@ -2507,7 +2507,7 @@
                     '<td><strong>' + (запись.очки || 0) + '</strong></td>' +
                     '<td>' + wl.w + '/' + wl.l + '</td>' +
                     '<td class="ad-rat-form-cell">' + formHtml + '</td>' +
-                    '<td style="text-align:center;"><span class="' + changeClass + '">' + changeStr + '</span></td>' +
+                    '<td class="ad-centr"><span class="' + changeClass + '">' + changeStr + '</span></td>' +
                 '</tr>';
             });
 
@@ -2555,11 +2555,11 @@
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div style="display:flex;flex-direction:column;gap:12px;">' +
-                        '<div style="display:flex;justify-content:space-between;"><span style="color:var(--text-secondary)">' + L.ratResult + '</span><span style="color:' + resultColor + ';font-weight:700;">' + resultText + '</span></div>' +
-                        '<div style="display:flex;justify-content:space-between;"><span style="color:var(--text-secondary)">' + L.ratOpponent + '</span><span>' + A.esc(oppName) + '</span></div>' +
-                        '<div style="display:flex;justify-content:space-between;"><span style="color:var(--text-secondary)">' + L.ratScore + '</span><span style="font-weight:600;">' + A.esc(m.score || '—') + '</span></div>' +
-                        '<div style="display:flex;justify-content:space-between;"><span style="color:var(--text-secondary)">' + L.ratTournament + '</span><span>' + A.esc(trnName || '—') + '</span></div>' +
-                        '<div style="display:flex;justify-content:space-between;"><span style="color:var(--text-secondary)">' + L.ratDate + '</span><span>' + dateStr + '</span></div>' +
+                        '<div style="display:flex;justify-content:space-between;"><span class="ad-vtoroy">' + L.ratResult + '</span><span style="color:' + resultColor + ';font-weight:700;">' + resultText + '</span></div>' +
+                        '<div style="display:flex;justify-content:space-between;"><span class="ad-vtoroy">' + L.ratOpponent + '</span><span>' + A.esc(oppName) + '</span></div>' +
+                        '<div style="display:flex;justify-content:space-between;"><span class="ad-vtoroy">' + L.ratScore + '</span><span style="font-weight:600;">' + A.esc(m.score || '—') + '</span></div>' +
+                        '<div style="display:flex;justify-content:space-between;"><span class="ad-vtoroy">' + L.ratTournament + '</span><span>' + A.esc(trnName || '—') + '</span></div>' +
+                        '<div style="display:flex;justify-content:space-between;"><span class="ad-vtoroy">' + L.ratDate + '</span><span>' + dateStr + '</span></div>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -3060,17 +3060,17 @@
                             '<div class="ad-import-dropzone-hint">' + (isEn ? 'or drag & drop file here' : 'или перетащите файл сюда') + '</div>' +
                             '<input type="file" id="adImportFileInput" accept=".xlsx,.xls,.csv" class="ad-import-dropzone-file">' +
                         '</div>' +
-                        '<div id="adImportFileInfo" style="display:none;"></div>' +
+                        '<div class="ad-skryt" id="adImportFileInfo"></div>' +
                         '<div id="adImportSheetWrap" style="display:none;margin-top:12px;">' +
                             '<label class="ad-field-label">' + L.plrImportSheet + '</label>' +
                             '<select id="adImportSheetSelect" class="ad-field-input"></select>' +
                         '</div>' +
                     '</div>' +
-                    '<div id="adImportStep2" style="display:none;">' +
+                    '<div class="ad-skryt" id="adImportStep2">' +
                         '<h4 style="margin:0 0 16px;color:var(--text-primary);font-size:var(--fs-base);">' + L.plrImportMapCol + '</h4>' +
                         '<div id="adImportMapFields"></div>' +
                     '</div>' +
-                    '<div id="adImportStep3" style="display:none;">' +
+                    '<div class="ad-skryt" id="adImportStep3">' +
                         '<h4 style="margin:0 0 12px;color:var(--text-primary);font-size:var(--fs-base);">' + L.plrImportPreview + '</h4>' +
                         '<div class="ad-import-preview-wrap">' +
                             '<table class="ad-table ad-import-preview" id="adImportPreviewTable"></table>' +
@@ -3086,7 +3086,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-modal-footer" id="adImportFooter" style="display:none;">' +
+                '<div class="ad-modal-footer ad-skryt" id="adImportFooter">' +
                     '<button class="ad-btn ad-btn-outline" id="adImportCancelBtn">' + (isEn ? 'Cancel' : 'Отмена') + '</button>' +
                     '<button class="ad-btn" id="adImportDoBtn" style="margin-left:8px;">' + L.plrImportBtn + '</button>' +
                 '</div>' +
@@ -3146,7 +3146,7 @@
             info.innerHTML = '<div class="ad-import-file-selected">' +
                 '<span>\ud83d\udcc4</span>' +
                 '<span class="file-name">' + A.esc(file.name) + '</span>' +
-                '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
+                '<span class="ad-podpis">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
                 '<button class="file-remove" id="adImportFileRemove">&times;</button>' +
             '</div>';
             info.style.display = '';

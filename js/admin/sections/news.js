@@ -140,10 +140,10 @@
                             colHeader('reactions', '&#128077;', false, L.thReactions) +
                             colHeader('votes', '&#128499;&#65039;', false, L.thVotes) +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td class="ad-tablica-pusto" colspan="10">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
-                '<div class="ad-col-dropdown" id="adNewsColDropdown" style="display:none;"></div>' +
+                '<div class="ad-col-dropdown ad-skryt" id="adNewsColDropdown"></div>' +
             '</div>';
 
         document.getElementById('adNewsAdd').addEventListener('click', function() {
@@ -527,7 +527,7 @@
                     '<td>' + thumbHtml + '</td>' +
                     '<td class="ad-nazvanie" style="font-weight:500;color:var(--text-primary);" title="' + A.esc(a.title || L.noData) + '">' + (a.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
-                    '<td style="color:var(--text-secondary);">' + A.esc(a.executor || '\u2014') + '</td>' +
+                    '<td class="ad-vtoroy">' + A.esc(a.executor || '\u2014') + '</td>' +
                     '<td>' + statusHtml + '</td>' +
                     '<td>' + dateStr + '</td>' +
                     '<td class="ad-chislo" title="' + A.esc(L.thViews) + '">' + viewsCell + '</td>' +
@@ -625,7 +625,7 @@
                 '<div class="ad-image-upload ad-afisha-zone' + hasImageClass + '" id="adNewsImgZone">' +
                     imagePreviewHtml +
                 '</div>' +
-                '<input type="file" accept="image/jpeg,image/png" id="adNewsImgInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adNewsImgInput">' +
                 '<div class="ad-image-url-row">' +
                     '<input type="text" class="ad-field-input" id="adNewsImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (newsImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsImgUrlBtn">' + L.applyUrl + '</button>' +
@@ -770,13 +770,13 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.contentPreview + '</div>' +
                 '<div id="adNewsPreview"></div>' +
-                '<input type="file" accept="image/jpeg,image/png" id="adNewsContentImgInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adNewsContentImgInput">' +
             '</div>' +
 
             // Poll
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.pollSection + '</div>' +
-                '<div id="adNewsPollBody" style="display:none">' +
+                '<div class="ad-skryt" id="adNewsPollBody">' +
                     '<div class="ad-field">' +
                         '<input type="text" class="ad-field-input" id="adNewsPollQ" placeholder="' + L.pollQuestion + '">' +
                     '</div>' +
@@ -807,7 +807,7 @@
             '</div>' +
 
             // Engagement (shown only for published articles)
-            '<div class="ad-form-card" id="adNewsEngagement" style="display:none">' +
+            '<div class="ad-form-card ad-skryt" id="adNewsEngagement">' +
                 '<div class="ad-form-card-title">' + L.engagement + '</div>' +
                 '<div class="ad-engagement-stats">' +
                     '<div class="ad-engagement-item">&#128065; <span id="adEngViews">0</span></div>' +
@@ -1028,7 +1028,7 @@
                     for (var vi = 0; vi < article.poll.options.length; vi++) {
                         var pct = totalV > 0 ? Math.round((votes[vi] / totalV) * 100) : 0;
                         pollHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-                            '<span style="color:var(--text-secondary);">' + A.esc(article.poll.options[vi]) + '</span>' +
+                            '<span class="ad-vtoroy">' + A.esc(article.poll.options[vi]) + '</span>' +
                             '<span style="color:var(--accent);font-weight:500;">' + pct + '% (' + votes[vi] + ')</span>' +
                         '</div>';
                     }

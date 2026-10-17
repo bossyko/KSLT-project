@@ -33,7 +33,7 @@
         data.forEach(function(s) {
             var logoHtml = s.logo
                 ? '<img src="' + A.esc(s.logo) + '" style="width:40px;height:24px;object-fit:contain;border-radius:4px;background:var(--bg-elevated);">'
-                : '<span style="color:var(--text-muted)">—</span>';
+                : '<span class="ad-tiho">—</span>';
             var urlHtml = s.url
                 ? '<a href="' + A.esc(s.url) + '" target="_blank" style="color:var(--accent)">' + A.esc(s.url.replace(/^https?:\/\//, '').slice(0, 30)) + '</a>'
                 : '—';
@@ -55,9 +55,9 @@
                 '<td>' + logoHtml + '</td>' +
                 '<td>' + A.esc(s.name) + '</td>' +
                 '<td>' + urlHtml + '</td>' +
-                '<td style="text-align:center">' + contactsHtml + '</td>' +
-                '<td style="text-align:center">' + heroHtml + '</td>' +
-                '<td style="text-align:center">' + (s.sort_order || 0) + '</td>' +
+                '<td class="ad-centr">' + contactsHtml + '</td>' +
+                '<td class="ad-centr">' + heroHtml + '</td>' +
+                '<td class="ad-centr">' + (s.sort_order || 0) + '</td>' +
                 '<td style="text-align:center;color:var(--text-muted)">' + (s.view_count || 0) + '</td>' +
                 '<td><button class="ad-btn ad-btn-sm" data-edit="' + s.id + '">' + L.edit + '</button></td>' +
             '</tr>';
@@ -75,7 +75,7 @@
                 '</div>' +
             '</div>' +
             (data.length ? (
-                '<div class="ad-bulk-bar" id="spnBulkBar" style="display:none">' +
+                '<div class="ad-bulk-bar ad-skryt" id="spnBulkBar">' +
                     '<span id="spnBulkCount">0</span> ' + L.deleteSelected.toLowerCase() +
                     ' <button class="ad-btn ad-btn-danger ad-btn-sm" id="spnBulkDeleteBtn">' + L.deleteSelected + '</button>' +
                 '</div>' +
@@ -85,8 +85,8 @@
                         '<th style="width:50px">' + L.sponLogo + '</th>' +
                         '<th>' + L.sponName + '</th>' +
                         '<th>' + L.sponUrl + '</th>' +
-                        '<th style="text-align:center">' + L.sponContacts + '</th>' +
-                        '<th style="text-align:center">' + L.sponIsHero + '</th>' +
+                        '<th class="ad-centr">' + L.sponContacts + '</th>' +
+                        '<th class="ad-centr">' + L.sponIsHero + '</th>' +
                         '<th style="text-align:center;width:80px">' + L.sponSort + '</th>' +
                         '<th style="text-align:center;width:50px">&#128065;</th>' +
                         '<th style="width:130px"></th>' +
@@ -238,7 +238,7 @@
                     '<div class="ad-image-upload' + (hasImage ? ' has-image' : '') + '" id="spnUploadZone">' +
                         buildImagePreview(spnImageUrl) +
                     '</div>' +
-                    '<input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" id="spnLogoFile" style="display:none">' +
+                    '<input class="ad-skryt" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" id="spnLogoFile">' +
                     '<div class="ad-image-url-row">' +
                         '<input type="text" class="ad-field-input" id="spnLogoUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(spnImageUrl) + '">' +
                         '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="spnApplyUrl">' + L.applyUrl + '</button>' +

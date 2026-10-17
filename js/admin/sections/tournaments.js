@@ -91,19 +91,19 @@
                 // Считаем только сыгранное: предстоящий турнир может не
                 // состояться, и включать его в «всего» — обманывать себя
                 L.trnStatTotal + ': <span id="adTrnStatTotal">...</span>' +
-                '<span style="color:var(--text-muted);">|</span>' +
+                '<span class="ad-tiho">|</span>' +
                 L.trnStatRating + ': <span id="adTrnStatRating">...</span>' +
-                '<span style="color:var(--text-muted);">|</span>' +
+                '<span class="ad-tiho">|</span>' +
                 L.trnStatFriendly + ': <span id="adTrnStatFriendly">...</span>' +
-                '<span style="color:var(--text-muted);">|</span>' +
+                '<span class="ad-tiho">|</span>' +
                 L.trnStatUpcoming + ': <span id="adTrnStatUpcoming">...</span>' +
-                '<span style="color:var(--text-muted);">|</span>' +
+                '<span class="ad-tiho">|</span>' +
                 L.trnStatCancelled + ': <span id="adTrnStatCancelled">...</span>' +
                 // Черновики в общий счёт не идут: турнира ещё нет, его никто
                 // не видел. Но и прятать совсем нельзя — про недоделанное
                 // забывают, поэтому показываем отдельно и только когда есть
-                '<span id="adTrnStatDraftsWrap" style="display:none;">' +
-                    '<span style="color:var(--text-muted);">|</span>' +
+                '<span class="ad-skryt" id="adTrnStatDraftsWrap">' +
+                    '<span class="ad-tiho">|</span>' +
                     L.trnStatDrafts + ': <span id="adTrnStatDrafts">0</span>' +
                 '</span>' +
             '</div>' +
@@ -157,7 +157,7 @@
                 '<button class="ad-btn ad-btn-primary" id="adTrnAdd" style="white-space:nowrap;margin-left:auto;">+ ' + L.addTournament + '</button>' +
             '</div>' +
             '<div class="ad-table-card" style="position:relative;">' +
-                '<div class="ad-col-dropdown" id="adTrnColDropdown" style="display:none;"></div>' +
+                '<div class="ad-col-dropdown ad-skryt" id="adTrnColDropdown"></div>' +
                 '<div class="ad-table-wrap">' +
                     '<table class="ad-table ad-table-clickable" id="adTrnTable">' +
                         '<thead><tr>' +
@@ -169,7 +169,7 @@
                             trnColHeader('participants', L.trnMaxParticipantsShort) +
                             '<th></th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td class="ad-tablica-pusto" colspan="8">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -450,7 +450,7 @@
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🏆</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noTournaments + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noTournamentsText + '</div>' +
+                    '<div class="ad-podpis">' + L.noTournamentsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -485,10 +485,10 @@
                     A.bulkCheckboxTd(t.id) +
                     '<td style="font-weight:500;color:var(--text-primary);">' + (t.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
-                    '<td style="text-align:center;"><span class="ad-status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
-                    '<td style="text-align:center;">' + dateStartStr + '</td>' +
-                    '<td style="text-align:center;">' + dateEndStr + '</td>' +
-                    '<td style="text-align:center;">' + (t.max_participants || L.noData) + '</td>' +
+                    '<td class="ad-centr"><span class="ad-status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td class="ad-centr">' + dateStartStr + '</td>' +
+                    '<td class="ad-centr">' + dateEndStr + '</td>' +
+                    '<td class="ad-centr">' + (t.max_participants || L.noData) + '</td>' +
                     '<td>' + (t.bracket_type ? '<button class="ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn" data-brk-id="' + t.id + '">' + L.bracketTab + '</button>' : '') +
                         // Открыть турнир людям или убрать с глаз — решение
                         // менеджера, а не побочный итог сохранения формы
@@ -920,7 +920,7 @@
                 '<div class="ad-image-upload ad-afisha-zone' + hasImageClass + '" id="adTrnImgZone">' +
                     imagePreviewHtml +
                 '</div>' +
-                '<input type="file" accept="image/jpeg,image/png" id="adTrnImgInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adTrnImgInput">' +
                 /* ПОЛЕ ССЫЛКИ УБРАНО 28.09 — решение Кости: «афиши только
                    свои». Чужая картинка живёт на чужом сайте: её могут
                    удалить, мы её не сжимаем и не кадрируем (холст не имеет
@@ -988,7 +988,7 @@
                 '<div class="ad-form-card-title">' + L.trnVenue + '</div>' +
                 '<div class="ad-pay-entity-wrap">' +
                     '<input type="text" class="ad-field-input" id="adTrnVenueSearch" placeholder="' + L.trnVenueSearch + '" autocomplete="off">' +
-                    '<div class="ad-pay-entity-results" id="adTrnVenueResults" style="display:none;"></div>' +
+                    '<div class="ad-pay-entity-results ad-skryt" id="adTrnVenueResults"></div>' +
                 '</div>' +
                 '<input type="hidden" id="adTrnCourtId" value="' + (item && item.court_id ? item.court_id : '') + '">' +
                 '<div id="adTrnVenueInfo" style="display:none;margin-top:10px;"></div>' +
@@ -2301,7 +2301,7 @@ function обновитьРасклад() {
         if (reg.registered_at) {
             var d = new Date(reg.registered_at);
             regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
-                ' <span style="color:var(--text-muted);">' +
+                ' <span class="ad-tiho">' +
                 d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
             // Заявка держит место в сетке с момента подачи. Если её долго не
             // разбирать, турнир выглядит полным, а живых участников мало —
@@ -2681,7 +2681,7 @@ function обновитьРасклад() {
             '<div class="ad-field ad-pay-entity-wrap">' +
                 '<label class="ad-field-label" for="adTrnNewCrtCity">' + L.trnVenueNewCity + '</label>' +
                 '<input type="text" class="ad-field-input" id="adTrnNewCrtCity" autocomplete="off" value="' + A.esc(правим ? (правим.city || '') : (города[0] || '')) + '">' +
-                '<div class="ad-pay-entity-results" id="adTrnNewCrtCityList" style="display:none;"></div>' +
+                '<div class="ad-pay-entity-results ad-skryt" id="adTrnNewCrtCityList"></div>' +
             '</div>' +
             /* Страна тем же полем: клуб играет в Кыргызстане, но возит
                турниры в Алматы и Ташкент, и «Алматы» без страны в списке
@@ -2689,7 +2689,7 @@ function обновитьРасклад() {
             '<div class="ad-field ad-pay-entity-wrap">' +
                 '<label class="ad-field-label" for="adTrnNewCrtCountry">' + L.trnVenueNewCountry + '</label>' +
                 '<input type="text" class="ad-field-input" id="adTrnNewCrtCountry" autocomplete="off" value="' + A.esc(правим ? (правим.country || '') : (страны[0] || '')) + '">' +
-                '<div class="ad-pay-entity-results" id="adTrnNewCrtCountryList" style="display:none;"></div>' +
+                '<div class="ad-pay-entity-results ad-skryt" id="adTrnNewCrtCountryList"></div>' +
             '</div>' +
             '<div class="ad-field">' +
                 '<label class="ad-field-label" for="adTrnNewCrt2gis">' + L.trnVenueNew2gis + '</label>' +

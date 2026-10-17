@@ -130,7 +130,7 @@
                             '<th style="cursor:pointer;user-select:none;" id="adUsrSortMem">' + L.usrThMembership + ' <span style="opacity:0.4;">⇅</span></th>' +
                             '<th>' + L.thDate + '</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td class="ad-tablica-pusto" colspan="6">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -312,7 +312,7 @@
                 '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">👥</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.usrNoUsers + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrNoUsersText + '</div>' +
+                    '<div class="ad-podpis">' + L.usrNoUsersText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -346,7 +346,7 @@
             if (u.role === 'admin' || u.role === 'manager') {
                 // У сотрудников клуба членства нет и быть не может: под этой
                 // почтой они ведут клуб, а не играют. Срок писать нечему
-                memBadge = '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrStaffNoMembership + '</span>';
+                memBadge = '<span class="ad-podpis">' + L.usrStaffNoMembership + '</span>';
             } else if (mem && mem.status === 'active') {
                 var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
@@ -356,7 +356,7 @@
                 var expFormatted2 = expDate2 ? expDate2[2] + '.' + expDate2[1] + '.' + expDate2[0] : '';
                 memBadge = '<span class="ad-mem-badge ad-mem-expired">' + L.usrExpired + (expFormatted2 ? ' ' + expFormatted2 : '') + '</span>';
             } else {
-                memBadge = '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrNone + '</span>';
+                memBadge = '<span class="ad-podpis">' + L.usrNone + '</span>';
             }
 
             // Ban status badge
@@ -631,7 +631,7 @@
                         '<div style="color:var(--text-muted);font-size:var(--fs-sm);">' + A.esc(user.email || '') + '</div>' +
                         '<div style="display:flex;gap:8px;margin-top:4px;">' +
                             '<span style="color:' + tgColor + ';font-size:var(--fs-xs);">TG: ' + tgStatus + '</span>' +
-                            '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrLastSeen + ': ' + lastSeen + '</span>' +
+                            '<span class="ad-podpis">' + L.usrLastSeen + ': ' + lastSeen + '</span>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -1907,10 +1907,10 @@
             var к = карточки[z.player_id] || {};
             var ntrp = к.ntrp_singles ? ' · NTRP ' + к.ntrp_singles : '';
             return '<tr>' +
-                '<td>' + A.esc(ч.full_name || '—') + '<div style="font-size:var(--fs-xs);color:var(--text-muted);">' +
+                '<td>' + A.esc(ч.full_name || '—') + '<div class="ad-podpis">' +
                     A.esc(ч.email || '') + (ч.phone ? ' · ' + A.esc(ч.phone) : '') + '</div></td>' +
                 '<td>' + A.esc(к.name || z.player_id) +
-                    '<div style="font-size:var(--fs-xs);color:var(--text-muted);">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
+                    '<div class="ad-podpis">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
                 '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
                     new Date(z.created_at).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' +
@@ -1997,7 +1997,7 @@
                 var когда = z.decided_at || z.created_at;
                 return '<tr>' +
                     '<td>' + A.esc(ч.full_name || '—') +
-                        '<div style="font-size:var(--fs-xs);color:var(--text-muted);">' + A.esc(ч.email || '') + '</div></td>' +
+                        '<div class="ad-podpis">' + A.esc(ч.email || '') + '</div></td>' +
                     '<td>' + A.esc(к.name || z.player_id) + '</td>' +
                     '<td style="color:' + п.цвет + ';font-weight:600;">' + п.текст +
                         (z.note ? '<div style="font-size:var(--fs-xs);color:var(--text-muted);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +

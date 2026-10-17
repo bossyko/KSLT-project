@@ -343,7 +343,7 @@
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🎫</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.vchNoVouchers + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.vchNoVouchersText + '</div>' +
+                    '<div class="ad-podpis">' + L.vchNoVouchersText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -370,7 +370,7 @@
 
             html +=
                 '<tr>' +
-                    '<td style="color:var(--text-muted);font-size:var(--fs-xs);">' + num + '</td>' +
+                    '<td class="ad-podpis">' + num + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(v.player_name || '—') + '</td>' +
                     '<td>' + typeIcon + ' ' + A.esc(v.entity_name || '—') + '</td>' +
                     '<td style="font-size:var(--fs-sm);">' + A.esc(v.service_name || '—') + '</td>' +

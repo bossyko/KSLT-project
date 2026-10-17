@@ -411,17 +411,17 @@
                     '</div>' +
                     '<div id="adPartnerCard" style="display:none;margin-top:8px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:8px;font-size:var(--fs-sm);color:var(--text-secondary);"></div>' +
                 '</div>' +
-                '<div id="adPartnerGuestBlock" style="display:none;">' +
+                '<div class="ad-skryt" id="adPartnerGuestBlock">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.doublesExtPartnerName + '</label>' +
                         '<input type="text" class="ad-field-input" id="adPartnerExtName" placeholder="' + L.doublesExtPartnerName + '">' +
                     '</div>' +
                     '<div style="display:flex;gap:12px;margin-top:10px;">' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adPartnerExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                         '</div>' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
                             '<select class="ad-field-input" id="adPartnerExtGender">' +
                                 '<option value="">—</option>' +
@@ -676,7 +676,7 @@
                                 ? ' <span style="color:var(--warning);font-size:var(--fs-xs);">' + L.regInQueue + '</span>'
                                 : '') +
                         '</span>' +
-                        (мета ? '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + A.esc(мета) + '</span>' : '') +
+                        (мета ? '<span class="ad-podpis">' + A.esc(мета) + '</span>' : '') +
                     '</div>';
                 });
                 список.innerHTML = html;
@@ -1056,12 +1056,12 @@
                 '</ul>' +
                 (гость
                     ? '<div style="display:flex;gap:12px;">' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adReviewNtrp" min="1.0" max="7.0" step="0.5" value="' +
                                 (reg.partner_external_ntrp || '') + '">' +
                         '</div>' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerGender + '</label>' +
                             выборПола('adReviewGender', reg.partner_gender) +
                         '</div>' +
@@ -1240,7 +1240,7 @@
                         '<input type="hidden" id="adReplaceSelectedId" value="">' +
                     '</div>' +
                 '</div>' +
-                '<div id="adReplaceGuestBlock" style="display:none;">' +
+                '<div class="ad-skryt" id="adReplaceGuestBlock">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.regExternalName + '</label>' +
                         '<input type="text" class="ad-field-input" id="adReplaceExtName" placeholder="' + L.regExternalName + '">' +
@@ -1249,15 +1249,15 @@
                     // Страна стояла отдельной широкой полосой с крошечным
                     // флагом посередине и была выше соседнего поля
                     '<div style="display:flex;gap:12px;margin-top:10px;">' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
                             полеСтраны('adReplaceExtCountry') +
                         '</div>' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.regExternalNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adReplaceExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                         '</div>' +
-                        '<div class="ad-field" style="flex:1;">' +
+                        '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.regExternalGender + ' *</label>' +
                             '<select class="ad-field-input" id="adReplaceExtGender">' +
                                 '<option value="">—</option>' +
@@ -3457,15 +3457,15 @@
                         '</div>' +
                         // Страна, NTRP и пол — одним рядом и одного размера
                         '<div style="display:flex;gap:12px;">' +
-                            '<div class="ad-field" style="flex:1;">' +
+                            '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
                                 полеСтраны('adExtCountry') +
                             '</div>' +
-                            '<div class="ad-field" style="flex:1;">' +
+                            '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.regExternalNtrp + ' *</label>' +
                                 '<input type="number" class="ad-field-input" id="adExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                             '</div>' +
-                            '<div class="ad-field" style="flex:1;">' +
+                            '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.regExternalGender + ' *</label>' +
                                 '<select class="ad-field-input" id="adExtGender">' +
                                     '<option value="">—</option>' +
@@ -3481,15 +3481,15 @@
                             '<input type="text" class="ad-field-input" id="adExtPartnerName" placeholder="' + (isEn ? 'Partner Name' : 'Имя партнёра') + '">' +
                         '</div>' +
                         '<div style="display:flex;gap:12px;">' +
-                            '<div class="ad-field" style="flex:1;">' +
+                            '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
                                 полеСтраны('adExtPartnerCountry') +
                             '</div>' +
-                            '<div class="ad-field" style="flex:1;">' +
+                            '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                                 '<input type="number" class="ad-field-input" id="adExtPartnerNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
                             '</div>' +
-                            '<div class="ad-field" style="flex:1;">' +
+                            '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.doublesExtPartnerGender + ' *</label>' +
                                 '<select class="ad-field-input" id="adExtPartnerGender">' +
                                     '<option value="">—</option>' +
@@ -3717,7 +3717,7 @@
                             var nameDisplay = isEn ? (p.name_en || p.name) : p.name;
                             html += '<div data-player-id="' + p.id + '" data-gender="' + (p.gender || '') + '" data-player-name="' + A.esc(nameDisplay) + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:' + (alreadyIn ? 'default' : 'pointer') + ';opacity:' + (alreadyIn ? '0.5' : '1') + ';" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
                                 photoHtml +
-                                '<div style="flex:1;">' +
+                                '<div class="ad-rastyanut">' +
                                     '<div style="font-weight:500;color:var(--text-primary);">' + A.esc(nameDisplay) + '</div>' +
                                     '<div style="font-size:var(--fs-xs);color:' + (чужой ? 'var(--warning)' : 'var(--text-secondary)') + ';">' +
                                         (полLabel ? полLabel + ' · ' : '') + catLabel + (ntrpLabel ? ' · ' + ntrpLabel : '') + '</div>' +
@@ -4848,7 +4848,7 @@
                 if (!свой && занятыеНомера && занятыеНомера[с]) continue;
                 опции += '<option value="' + с + '"' + (свой ? ' selected' : '') + '>' + с + '</option>';
             }
-            посевTd = '<td style="text-align:center;">' +
+            посевTd = '<td class="ad-centr">' +
                 '<select class="ad-reg-seed" data-reg-id="' + reg.id + '"' +
                 (заморожено ? ' disabled' : '') + '>' + опции + '</select></td>';
         }
@@ -10853,11 +10853,11 @@
 
         var html =
             '<div style="display:flex;gap:16px;margin-bottom:14px;">' +
-                '<div class="ad-field" style="flex:1;">' +
+                '<div class="ad-field ad-rastyanut">' +
                     '<label class="ad-field-label">' + L.sessFirst + '</label>' +
                     '<input type="text" class="ad-field-input" id="adSess1" value="' + старт1 + '" maxlength="5" placeholder="09:00">' +
                 '</div>' +
-                '<div class="ad-field" style="flex:1;">' +
+                '<div class="ad-field ad-rastyanut">' +
                     '<label class="ad-field-label">' + L.sessSecond + '</label>' +
                     '<input type="text" class="ad-field-input" id="adSess2" maxlength="5" placeholder="12:30">' +
                 '</div>' +

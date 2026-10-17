@@ -93,11 +93,11 @@
                             '<th>' + L.cchPosition + '</th>' +
                             '<th>' + L.cchCourt + '</th>' +
                             '<th>' + L.cchTags + '</th>' +
-                            '<th style="text-align:center;">' + (isEn ? 'Price' : 'Цена') + '</th>' +
-                            '<th style="text-align:center;">' + L.cchPromoted + '</th>' +
+                            '<th class="ad-centr">' + (isEn ? 'Price' : 'Цена') + '</th>' +
+                            '<th class="ad-centr">' + L.cchPromoted + '</th>' +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td class="ad-tablica-pusto" colspan="9">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -163,7 +163,7 @@
                 '<tr><td colspan="9" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🎓</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCoaches + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noCoachesText + '</div>' +
+                    '<div class="ad-podpis">' + L.noCoachesText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -179,18 +179,18 @@
             (row.tags || []).forEach(function(t) {
                 tagsHtml += '<span class="ad-cch-tag-badge">' + (COACH_TAGS[t] || t) + '</span>';
             });
-            if (!tagsHtml) tagsHtml = '<span style="color:var(--text-muted);">—</span>';
+            if (!tagsHtml) tagsHtml = '<span class="ad-tiho">—</span>';
             var promotedHtml = row.promoted ? '<span style="color:var(--accent);">⭐</span>' : '—';
 
             html += '<tr data-id="' + row.id + '">' +
                 A.bulkCheckboxTd(row.id) +
-                '<td style="text-align:center;">' + editBtnHtml + '</td>' +
+                '<td class="ad-centr">' + editBtnHtml + '</td>' +
                 '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(fullName.trim()) + '</td>' +
                 '<td>' + A.esc(pos) + '</td>' +
                 '<td>' + courtText + '</td>' +
                 '<td>' + tagsHtml + '</td>' +
                 '<td style="font-weight:600;color:var(--accent);text-align:center;">' + (row.price || '—') + '</td>' +
-                '<td style="text-align:center;">' + promotedHtml + '</td>' +
+                '<td class="ad-centr">' + promotedHtml + '</td>' +
                 '<td style="text-align:center;color:var(--text-muted);">' + ((row.view_count || 0) > 0 ? row.view_count : '\u2014') + '</td>' +
             '</tr>';
         });
@@ -315,11 +315,11 @@
         (item.tags || []).forEach(function(t) {
             tagsHtml += '<span class="ad-cch-tag-badge" style="margin-right:4px;">' + (COACH_TAGS[t] || t) + '</span>';
         });
-        if (!tagsHtml) tagsHtml = '<span style="color:var(--text-muted);">—</span>';
+        if (!tagsHtml) tagsHtml = '<span class="ad-tiho">—</span>';
 
         var promotedHtml = item.promoted
             ? '<span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span>'
-            : '<span style="color:var(--text-muted);">—</span>';
+            : '<span class="ad-tiho">—</span>';
 
         // Payments table
         var paymentsHtml = '';
@@ -373,19 +373,19 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchViewInfo + '</div>' +
                 '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:var(--fs-sm);">' +
-                    '<span style="color:var(--text-muted);">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
+                    '<span class="ad-tiho">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(fullName.trim()) + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.cchPosition + '</span>' +
-                    '<span style="color:var(--text-secondary);">' + A.esc(pos || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.cchCourt + '</span>' +
-                    '<span style="color:var(--text-secondary);">' + A.esc(item.court || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.cchExperience + '</span>' +
-                    '<span style="color:var(--text-secondary);">' + (item.experience || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.cchPrice + '</span>' +
+                    '<span class="ad-tiho">' + L.cchPosition + '</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(pos || '—') + '</span>' +
+                    '<span class="ad-tiho">' + L.cchCourt + '</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(item.court || '—') + '</span>' +
+                    '<span class="ad-tiho">' + L.cchExperience + '</span>' +
+                    '<span class="ad-vtoroy">' + (item.experience || '—') + '</span>' +
+                    '<span class="ad-tiho">' + L.cchPrice + '</span>' +
                     '<span style="color:var(--text-secondary);font-weight:600;">' + (item.price || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.cchTags + '</span>' +
+                    '<span class="ad-tiho">' + L.cchTags + '</span>' +
                     '<span>' + tagsHtml + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.cchPromoted + '</span>' +
+                    '<span class="ad-tiho">' + L.cchPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
                 '</div>' +
             '</div>' +
@@ -549,7 +549,7 @@
 
             // Promoted badge (read-only)
             (item && item.promoted
-                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.cchPromotedHint + '</span></div>'
+                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span class="ad-podpis">' + L.cchPromotedHint + '</span></div>'
                 : '') +
 
             // Photo
@@ -558,7 +558,7 @@
                 '<div class="ad-image-upload' + hasImageClass + '" id="adCchImgZone">' +
                     imagePreviewHtml +
                 '</div>' +
-                '<input type="file" accept="image/jpeg,image/png" id="adCchImgInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adCchImgInput">' +
                 '<div style="display:flex;gap:8px;margin-top:8px;">' +
                     '<input type="text" class="ad-field-input" id="adCchImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (cchImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchImgUrlBtn">' + L.applyUrl + '</button>' +

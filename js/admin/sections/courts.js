@@ -247,7 +247,7 @@
                 '<tr><td colspan="12" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🏟️</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noCourtsText + '</div>' +
+                    '<div class="ad-podpis">' + L.noCourtsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -271,15 +271,15 @@
                 html +=
                     '<tr data-crt-id="' + c.id + '">' +
                         A.bulkCheckboxTd(c.id) +
-                        '<td style="text-align:center;">' + editBtnHtml + '</td>' +
+                        '<td class="ad-centr">' + editBtnHtml + '</td>' +
                         '<td style="font-weight:500;color:var(--text-primary);">' + имяЯчейка + '</td>' +
                         '<td>' + L.noData + '</td>' +
                         '<td>' + L.noData + '</td>' +
-                        '<td style="text-align:center;">' + L.noData + '</td>' +
+                        '<td class="ad-centr">' + L.noData + '</td>' +
                         '<td>' + L.noData + '</td>' +
                         '<td>' + cityText + '</td>' +
-                        '<td style="text-align:center;">' + partnerHtml + '</td>' +
-                        '<td style="text-align:center;">' + promotedHtml + '</td>' +
+                        '<td class="ad-centr">' + partnerHtml + '</td>' +
+                        '<td class="ad-centr">' + promotedHtml + '</td>' +
                         '<td style="text-align:center;color:var(--text-muted);">' + viewsCell + '</td>' +
                     '</tr>';
             } else {
@@ -293,8 +293,8 @@
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + editBtnHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + имяЯчейка + '</td>' +
                         '<td><span class="ad-type-badge ad-type-' + (t0.type || 'indoor') + '">' + (A.COURT_TYPES[t0.type] || t0.type || '') + '</span></td>' +
-                        '<td style="text-align:center;">' + (A.COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
-                        '<td style="text-align:center;">' + (t0.count || 1) + '</td>' +
+                        '<td class="ad-centr">' + (A.COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
+                        '<td class="ad-centr">' + (t0.count || 1) + '</td>' +
                         '<td style="font-weight:600;color:var(--accent);">' + (t0.price || 0) + '</td>' +
                         '<td rowspan="' + rowCount + '" style="vertical-align:middle;">' + cityText + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + partnerHtml + '</td>' +
@@ -308,8 +308,8 @@
                     html +=
                         '<tr class="ad-crt-subrow" data-crt-id="' + c.id + '">' +
                             '<td><span class="ad-type-badge ad-type-' + (ti.type || 'indoor') + '">' + (A.COURT_TYPES[ti.type] || ti.type || '') + '</span></td>' +
-                            '<td style="text-align:center;">' + (A.COURT_SURFACES[ti.surface] || ti.surface || '') + '</td>' +
-                            '<td style="text-align:center;">' + (ti.count || 1) + '</td>' +
+                            '<td class="ad-centr">' + (A.COURT_SURFACES[ti.surface] || ti.surface || '') + '</td>' +
+                            '<td class="ad-centr">' + (ti.count || 1) + '</td>' +
                             '<td style="font-weight:600;color:var(--accent);">' + (ti.price || 0) + '</td>' +
                         '</tr>';
                 }
@@ -440,10 +440,10 @@
                             crtColHeader('promoted', L.crtPromoted) +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
-                        '<tbody><tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:40px;">...</td></tr></tbody>' +
+                        '<tbody><tr><td class="ad-tablica-pusto" colspan="11">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
-                '<div class="ad-col-dropdown" id="adCrtColDropdown" style="display:none;"></div>' +
+                '<div class="ad-col-dropdown ad-skryt" id="adCrtColDropdown"></div>' +
             '</div>';
 
         document.getElementById('adCrtAdd').addEventListener('click', function() {
@@ -593,17 +593,17 @@
                     ' — ' + (t.price || 0) + ' ' + (isEn ? 'som' : 'сом') +
                 '</span>';
         });
-        if (!typesHtml) typesHtml = '<span style="color:var(--text-muted);">' + L.noData + '</span>';
+        if (!typesHtml) typesHtml = '<span class="ad-tiho">' + L.noData + '</span>';
 
         // Promoted status
         var promotedHtml = item.promoted
             ? '<span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span>'
-            : '<span style="color:var(--text-muted);">—</span>';
+            : '<span class="ad-tiho">—</span>';
 
         // Partner
         var partnerHtml = item.partner
             ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + (isEn ? 'Yes' : 'Да')
-            : '<span style="color:var(--text-muted);">' + (isEn ? 'No' : 'Нет') + '</span>';
+            : '<span class="ad-tiho">' + (isEn ? 'No' : 'Нет') + '</span>';
 
         // Payments table
         var paymentsHtml = '';
@@ -657,22 +657,22 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtViewInfo + '</div>' +
                 '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:var(--fs-sm);">' +
-                    '<span style="color:var(--text-muted);">' + L.crtName + '</span>' +
+                    '<span class="ad-tiho">' + L.crtName + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(item.name || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.crtCity + '</span>' +
-                    '<span style="color:var(--text-secondary);">' + A.esc(item.city || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.crtType + ' / ' + L.crtSurface + '</span>' +
+                    '<span class="ad-tiho">' + L.crtCity + '</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(item.city || '—') + '</span>' +
+                    '<span class="ad-tiho">' + L.crtType + ' / ' + L.crtSurface + '</span>' +
                     '<span>' + typesHtml + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.crtPartner + '</span>' +
+                    '<span class="ad-tiho">' + L.crtPartner + '</span>' +
                     '<span>' + partnerHtml + '</span>' +
-                    '<span style="color:var(--text-muted);">' + L.crtPromoted + '</span>' +
+                    '<span class="ad-tiho">' + L.crtPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
-                    '<span style="color:var(--text-muted);">' + (isEn ? 'Phone' : 'Телефон') + '</span>' +
-                    '<span style="color:var(--text-secondary);">' + A.esc(item.phone || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">WhatsApp</span>' +
-                    '<span style="color:var(--text-secondary);">' + A.esc(item.whatsapp || '—') + '</span>' +
-                    '<span style="color:var(--text-muted);">Instagram</span>' +
-                    '<span style="color:var(--text-secondary);">' + A.esc(item.instagram || '—') + '</span>' +
+                    '<span class="ad-tiho">' + (isEn ? 'Phone' : 'Телефон') + '</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(item.phone || '—') + '</span>' +
+                    '<span class="ad-tiho">WhatsApp</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(item.whatsapp || '—') + '</span>' +
+                    '<span class="ad-tiho">Instagram</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(item.instagram || '—') + '</span>' +
                 '</div>' +
             '</div>' +
 
@@ -975,7 +975,7 @@
                 '<div class="ad-image-upload' + hasImageClass + '" id="adCrtImgZone">' +
                     imagePreviewHtml +
                 '</div>' +
-                '<input type="file" accept="image/jpeg,image/png" id="adCrtImgInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adCrtImgInput">' +
                 '<div class="ad-image-url-row">' +
                     '<input type="text" class="ad-field-input" id="adCrtImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (crtImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtImgUrlBtn">' + L.applyUrl + '</button>' +
@@ -984,7 +984,7 @@
 
             // Promoted badge (read-only, managed via Payments)
             (item && item.promoted ?
-                '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span> <span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.crtPromotedHint + '</span></div>'
+                '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.crtPromotedBadge + '</span> <span class="ad-podpis">' + L.crtPromotedHint + '</span></div>'
             : '') +
 
             // Name (RU/EN/KG)
@@ -1230,13 +1230,13 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.crtGallery + '</div>' +
                 '<div class="ad-gallery-grid" id="adCrtGalleryGrid"></div>' +
-                '<input type="file" accept="image/jpeg,image/png" multiple id="adCrtGalleryInput" style="display:none">' +
+                '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" multiple id="adCrtGalleryInput">' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
                     '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtGalleryAdd">+ ' + L.uploadImage + '</button>' +
                     '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtGalleryAddUrl">' + L.crtAddByUrl + '</button>' +
                 '</div>' +
-                '<div id="adCrtGalleryUrlRow" style="display:none;" class="ad-crt-gallery-url-row">' +
-                    '<input type="url" class="ad-field-input" id="adCrtGalleryUrlInput" placeholder="https://example.com/photo.jpg" style="flex:1;">' +
+                '<div id="adCrtGalleryUrlRow" class="ad-crt-gallery-url-row ad-skryt">' +
+                    '<input type="url" class="ad-field-input ad-rastyanut" id="adCrtGalleryUrlInput" placeholder="https://example.com/photo.jpg">' +
                     '<button type="button" class="ad-btn ad-btn-sm" id="adCrtGalleryUrlConfirm">&#10003;</button>' +
                 '</div>' +
             '</div>' +
@@ -1637,7 +1637,7 @@
                 var hint = window.KSLT_PHONE ? KSLT_PHONE.placeholder(parts.iso) : '000 000 000';
 
                 html += '<div class="ad-phone-row">' +
-                    '<div class="ad-field" style="flex:1;">' +
+                    '<div class="ad-field ad-rastyanut">' +
                         '<label class="ad-field-label">' + label + '</label>' +
                         '<div style="display:flex;gap:6px;">' +
                             (window.KSLT_PHONE

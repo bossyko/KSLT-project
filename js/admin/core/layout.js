@@ -559,7 +559,7 @@
                 '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(t.title || L.noData) + '</td>' +
                 '<td>' + A.fmtDate(t.date_start) + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
-                '<td style="text-align:center;">' + (t.view_count || 0) + '</td>' +
+                '<td class="ad-centr">' + (t.view_count || 0) + '</td>' +
             '</tr>';
         }, L.noRecentTournaments);
 
@@ -576,7 +576,7 @@
                 '<td>' + A.esc(n.executor || '—') + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td>' + (n.published_at ? A.fmtDate(n.published_at) : '—') + '</td>' +
-                '<td style="text-align:center;">' + (n.view_count || 0) + '</td>' +
+                '<td class="ad-centr">' + (n.view_count || 0) + '</td>' +
             '</tr>';
         }, L.noRecentNews);
 

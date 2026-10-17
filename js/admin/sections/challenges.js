@@ -375,7 +375,7 @@
                 '<td>' + A.esc(p2Name) + '</td>' +
                 '<td id="chalVotes_' + c.id + '">...</td>' +
                 '<td>' + statusBadge + '</td>' +
-                '<td style="text-align:center;">' + broadcastCell + '</td>' +
+                '<td class="ad-centr">' + broadcastCell + '</td>' +
                 '<td>' + actions + '</td>' +
                 '</tr>';
         });
@@ -616,17 +616,17 @@
                         '<label class="ad-field-label">' + L.chalPlayer1 + '</label>' +
                         '<div style="position:relative;">' +
                             '<input type="text" class="ad-field-input" id="cbP1Input" placeholder="' + L.chalSearchPlayer + '" autocomplete="off">' +
-                            '<div class="ad-dropdown-list" id="cbP1Dropdown" style="display:none;"></div>' +
+                            '<div class="ad-dropdown-list ad-skryt" id="cbP1Dropdown"></div>' +
                         '</div>' +
                         '<div id="cbP1Selected" class="ad-chal-selected-hint"></div>' +
                         extrasRow('cbP1', { withGender: true }) +
                     '</div>' +
                     // Напарник стороны 1: показывается только в парном и миксте
-                    '<div class="ad-field-group cb-partner" id="cbM1Group" style="display:none;">' +
+                    '<div class="ad-field-group cb-partner ad-skryt" id="cbM1Group">' +
                         '<label class="ad-field-label">' + L.chalPartner + ' <span class="cb-hint" id="cbM1Hint"></span></label>' +
                         '<div style="position:relative;">' +
                             '<input type="text" class="ad-field-input" id="cbM1Input" placeholder="' + L.chalSearchPlayer + '" autocomplete="off">' +
-                            '<div class="ad-dropdown-list" id="cbM1Dropdown" style="display:none;"></div>' +
+                            '<div class="ad-dropdown-list ad-skryt" id="cbM1Dropdown"></div>' +
                         '</div>' +
                         '<div id="cbM1Selected" class="ad-chal-selected-hint"></div>' +
                         extrasRow('cbM1', { withGender: true }) +
@@ -636,17 +636,17 @@
                         '<label class="ad-field-label">' + L.chalPlayer2 + '</label>' +
                         '<div style="position:relative;">' +
                             '<input type="text" class="ad-field-input" id="cbP2Input" placeholder="' + L.chalSearchPlayer + '" autocomplete="off">' +
-                            '<div class="ad-dropdown-list" id="cbP2Dropdown" style="display:none;"></div>' +
+                            '<div class="ad-dropdown-list ad-skryt" id="cbP2Dropdown"></div>' +
                         '</div>' +
                         '<div id="cbP2Selected" class="ad-chal-selected-hint"></div>' +
                         extrasRow('cbP2', { withGender: true }) +
                     '</div>' +
                     // Напарник стороны 2: показывается только в парном и миксте
-                    '<div class="ad-field-group cb-partner" id="cbM2Group" style="display:none;">' +
+                    '<div class="ad-field-group cb-partner ad-skryt" id="cbM2Group">' +
                         '<label class="ad-field-label">' + L.chalPartner + ' <span class="cb-hint" id="cbM2Hint"></span></label>' +
                         '<div style="position:relative;">' +
                             '<input type="text" class="ad-field-input" id="cbM2Input" placeholder="' + L.chalSearchPlayer + '" autocomplete="off">' +
-                            '<div class="ad-dropdown-list" id="cbM2Dropdown" style="display:none;"></div>' +
+                            '<div class="ad-dropdown-list ad-skryt" id="cbM2Dropdown"></div>' +
                         '</div>' +
                         '<div id="cbM2Selected" class="ad-chal-selected-hint"></div>' +
                         extrasRow('cbM2', { withGender: true }) +
@@ -658,16 +658,16 @@
                     '</div>' +
                     // Date + Time
                     '<div style="display:flex;gap:12px;">' +
-                        '<div class="ad-field-group" style="flex:1;">' +
+                        '<div class="ad-field-group ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.chalDate + '</label>' +
                             '<input type="date" class="ad-field-input" id="cbDate">' +
                         '</div>' +
-                        '<div class="ad-field-group" style="flex:1;">' +
+                        '<div class="ad-field-group ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.chalTime + '</label>' +
                             '<div style="display:flex;gap:6px;align-items:center;">' +
-                                '<select class="ad-field-input" id="cbTimeH" style="flex:1;">' + buildHourOptions() + '</select>' +
+                                '<select class="ad-field-input ad-rastyanut" id="cbTimeH">' + buildHourOptions() + '</select>' +
                                 '<span style="color:var(--text-muted);font-weight:700;">:</span>' +
-                                '<select class="ad-field-input" id="cbTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
+                                '<select class="ad-field-input ad-rastyanut" id="cbTimeM">' + buildMinuteOptions() + '</select>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -684,7 +684,7 @@
                         '<label class="ad-field-label">' + L.chalCourtOrClub + '</label>' +
                         '<div style="position:relative;">' +
                             '<input type="text" class="ad-field-input" id="cbCourtInput" placeholder="' + L.chalSearchCourt + '" autocomplete="off">' +
-                            '<div class="ad-dropdown-list" id="cbCourtDropdown" style="display:none;"></div>' +
+                            '<div class="ad-dropdown-list ad-skryt" id="cbCourtDropdown"></div>' +
                         '</div>' +
                         '<div id="cbCourtSelected" class="ad-chal-selected-hint"></div>' +
                     '</div>' +
@@ -697,20 +697,20 @@
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalBanner + '</label>' +
                         '<div class="ad-chal-banner-row">' +
-                            '<input type="file" id="cbBannerFile" accept="image/*" style="display:none;">' +
+                            '<input class="ad-skryt" type="file" id="cbBannerFile" accept="image/*">' +
                             '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="cbBannerBtn">' +
                                 '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ' +
                                 L.chalUploadBanner +
                             '</button>' +
                             '<span id="cbBannerName" class="ad-chal-banner-name"></span>' +
-                            '<div id="cbBannerPreview" class="ad-chal-banner-preview" style="display:none;">' +
+                            '<div id="cbBannerPreview" class="ad-chal-banner-preview ad-skryt">' +
                                 '<img id="cbBannerImg">' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
                     // Показательная игра вне правил. Только для парного:
                     // микст — это мужчина и женщина по самому смыслу слова
-                    '<div class="ad-field-group cb-anypair" id="cbAnyPairGroup" style="display:none;">' +
+                    '<div class="ad-field-group cb-anypair ad-skryt" id="cbAnyPairGroup">' +
                         '<label class="ad-chk">' +
                             '<input type="checkbox" id="cbAnyPair"> ' + L.chalAnyPair +
                         '</label>' +
@@ -1720,16 +1720,16 @@
                     '</div>' +
                     // Date + Time
                     '<div style="display:flex;gap:12px;">' +
-                        '<div class="ad-field-group" style="flex:1;">' +
+                        '<div class="ad-field-group ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.chalDate + '</label>' +
                             '<input type="date" class="ad-field-input" id="ebDate" value="' + existingDate + '">' +
                         '</div>' +
-                        '<div class="ad-field-group" style="flex:1;">' +
+                        '<div class="ad-field-group ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.chalTime + '</label>' +
                             '<div style="display:flex;gap:6px;align-items:center;">' +
-                                '<select class="ad-field-input" id="ebTimeH" style="flex:1;">' + buildHourOptions() + '</select>' +
+                                '<select class="ad-field-input ad-rastyanut" id="ebTimeH">' + buildHourOptions() + '</select>' +
                                 '<span style="color:var(--text-muted);font-weight:700;">:</span>' +
-                                '<select class="ad-field-input" id="ebTimeM" style="flex:1;">' + buildMinuteOptions() + '</select>' +
+                                '<select class="ad-field-input ad-rastyanut" id="ebTimeM">' + buildMinuteOptions() + '</select>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -1746,7 +1746,7 @@
                         '<label class="ad-field-label">' + L.chalCourtOrClub + '</label>' +
                         '<div style="position:relative;">' +
                             '<input type="text" class="ad-field-input" id="cbCourtInput" value="' + A.esc(existingCourtName) + '" placeholder="' + L.chalSearchCourt + '" autocomplete="off">' +
-                            '<div class="ad-dropdown-list" id="cbCourtDropdown" style="display:none;"></div>' +
+                            '<div class="ad-dropdown-list ad-skryt" id="cbCourtDropdown"></div>' +
                         '</div>' +
                         '<div id="cbCourtSelected" class="ad-chal-selected-hint"></div>' +
                     '</div>' +
@@ -1759,7 +1759,7 @@
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalBanner + '</label>' +
                         '<div class="ad-chal-banner-row">' +
-                            '<input type="file" id="ebBannerFile" accept="image/*" style="display:none;">' +
+                            '<input class="ad-skryt" type="file" id="ebBannerFile" accept="image/*">' +
                             '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="ebBannerBtn">' +
                                 '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ' +
                                 L.chalUploadBanner +

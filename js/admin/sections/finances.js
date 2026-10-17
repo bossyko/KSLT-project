@@ -323,7 +323,7 @@
                 '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
                     '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">💰</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.payNoPayments + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.payNoPaymentsText + '</div>' +
+                    '<div class="ad-podpis">' + L.payNoPaymentsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -348,7 +348,7 @@
                     '<td style="font-size:var(--fs-xs);white-space:nowrap;">' + periodEnd + '</td>' +
                     '<td>' + methodLabel + '</td>' +
                     '<td>' + statusBadge + '</td>' +
-                    '<td style="font-size:var(--fs-xs);color:var(--text-muted);">' + createdDate + '</td>' +
+                    '<td class="ad-podpis">' + createdDate + '</td>' +
                 '</tr>';
         });
 
@@ -452,7 +452,7 @@
                 '<div class="ad-form-card-title">' + L.payEntity + '</div>' +
                 '<div class="ad-pay-entity-wrap">' +
                     '<input type="text" class="ad-field-input" id="adFinEntitySearch" placeholder="' + L.paySearchEntity + '" value="' + A.esc(item && !isClub ? item.entity_name : '') + '" autocomplete="off">' +
-                    '<div class="ad-pay-entity-results" id="adFinEntityResults" style="display:none;"></div>' +
+                    '<div class="ad-pay-entity-results ad-skryt" id="adFinEntityResults"></div>' +
                 '</div>' +
                 '<input type="hidden" id="adFinEntityId" value="' + (item ? item.entity_id : '') + '">' +
                 '<input type="hidden" id="adFinEntityName" value="' + A.esc(item ? item.entity_name : '') + '">' +
@@ -469,7 +469,7 @@
                 '<div class="ad-form-card-title">' + (isEn ? 'User' : 'Пользователь') + '</div>' +
                 '<div class="ad-pay-entity-wrap">' +
                     '<input type="text" class="ad-field-input" id="adFinProfileSearch" placeholder="' + L.paySearchProfile + '" value="' + A.esc(isMembership && item ? item.entity_name || '' : '') + '" autocomplete="off">' +
-                    '<div class="ad-pay-entity-results" id="adFinProfileResults" style="display:none;"></div>' +
+                    '<div class="ad-pay-entity-results ad-skryt" id="adFinProfileResults"></div>' +
                 '</div>' +
                 '<input type="hidden" id="adFinProfileId" value="' + (isMembership && item ? item._raw.profile_id || '' : '') + '">' +
                 '<input type="hidden" id="adFinProfileName" value="' + A.esc(isMembership && item ? item.entity_name || '' : '') + '">' +
@@ -493,7 +493,7 @@
                 '<div class="ad-form-card-title">' + (isEn ? 'Period' : 'Период') + '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinPeriodStart" value="' + (item && !isMembership ? item.period_start : '') + '" style="flex:1;">' +
-                    '<span style="color:var(--text-muted);">—</span>' +
+                    '<span class="ad-tiho">—</span>' +
                     '<input type="date" class="ad-field-input" id="adFinPeriodEnd" value="' + (item && !isMembership ? item.period_end : '') + '" style="flex:1;">' +
                 '</div>' +
             '</div>' +
@@ -509,7 +509,7 @@
                 '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinMemberStart" value="' + (isMembership && item && item._raw ? (item._raw.memberships ? item._raw.memberships.starts_at || '' : '').slice(0, 10) : todayStr) + '" style="flex:1;">' +
-                    '<span style="color:var(--text-muted);">—</span>' +
+                    '<span class="ad-tiho">—</span>' +
                     '<input type="date" class="ad-field-input" id="adFinMemberEnd" value="' + (isMembership && item && item._raw && item._raw.memberships ? (item._raw.memberships.expires_at || '').slice(0, 10) : '') + '" style="flex:1;">' +
                 '</div>' +
             '</div>' +

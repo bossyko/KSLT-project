@@ -102,7 +102,7 @@
         if (!content) return;
 
         if (!activeList.length) {
-            content.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">' + L.liveNoActive + '</p>';
+            content.innerHTML = '<p class="ad-tablica-pusto">' + L.liveNoActive + '</p>';
             return;
         }
 
@@ -128,7 +128,7 @@
 
             html += '<tr>' +
                 '<td><strong>' + A.esc(p1) + '</strong> vs <strong>' + A.esc(p2) + '</strong>' +
-                    (m.tournament_label ? '<br><span style="font-size:var(--fs-xs);color:var(--text-muted);">' + A.esc(m.tournament_label) + '</span>' : '') +
+                    (m.tournament_label ? '<br><span class="ad-podpis">' + A.esc(m.tournament_label) + '</span>' : '') +
                 '</td>' +
                 '<td style="font-family:monospace;font-weight:600;">' + score + '</td>' +
                 '<td style="' + statusStyle + '">' + statusLabel + '</td>' +
@@ -175,7 +175,7 @@
         if (!content) return;
 
         if (!completedList.length) {
-            content.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">' + L.liveNoCompleted + '</p>';
+            content.innerHTML = '<p class="ad-tablica-pusto">' + L.liveNoCompleted + '</p>';
             return;
         }
 
@@ -267,7 +267,7 @@
                         '</select>' +
                     '</div>' +
                     // Tournament selectors (hidden by default)
-                    '<div id="liveTournamentBlock" style="display:none;">' +
+                    '<div class="ad-skryt" id="liveTournamentBlock">' +
                         '<div class="ad-field-group">' +
                             '<label class="ad-field-label">' + L.liveSelectTournament + '</label>' +
                             '<select id="liveTournSelect" class="ad-field-input">' +
@@ -282,7 +282,7 @@
                         '</div>' +
                     '</div>' +
                     // Battle selector (hidden by default)
-                    '<div id="liveBattleBlock" style="display:none;">' +
+                    '<div class="ad-skryt" id="liveBattleBlock">' +
                         '<div class="ad-field-group">' +
                             '<label class="ad-field-label">' + L.liveSelectBattle + '</label>' +
                             '<select id="liveBattleSelect" class="ad-field-input">' +
@@ -296,7 +296,7 @@
                             '<label class="ad-field-label">' + L.livePlayer1 + '</label>' +
                             '<div style="position:relative;">' +
                                 '<input type="text" class="ad-field-input" id="liveP1Search" placeholder="' + L.liveSearchPlayer + '" autocomplete="off">' +
-                                '<div class="ad-dropdown-list" id="liveP1Dropdown" style="display:none;"></div>' +
+                                '<div class="ad-dropdown-list ad-skryt" id="liveP1Dropdown"></div>' +
                             '</div>' +
                             '<input type="hidden" id="liveP1Id">' +
                             '<div id="liveP1Selected" class="ad-chal-selected-hint"></div>' +
@@ -305,7 +305,7 @@
                             '<label class="ad-field-label">' + L.livePlayer2 + '</label>' +
                             '<div style="position:relative;">' +
                                 '<input type="text" class="ad-field-input" id="liveP2Search" placeholder="' + L.liveSearchPlayer + '" autocomplete="off">' +
-                                '<div class="ad-dropdown-list" id="liveP2Dropdown" style="display:none;"></div>' +
+                                '<div class="ad-dropdown-list ad-skryt" id="liveP2Dropdown"></div>' +
                             '</div>' +
                             '<input type="hidden" id="liveP2Id">' +
                             '<div id="liveP2Selected" class="ad-chal-selected-hint"></div>' +
@@ -318,8 +318,8 @@
                         '<label class="ad-field-label">' + L.liveSponsor + '</label>' +
                         '<div style="display:flex;gap:8px;align-items:center;">' +
                             '<button class="ad-btn ad-btn-outline ad-btn-sm" id="liveSponsorUpload" type="button">' + L.liveSponsorUpload + '</button>' +
-                            '<input type="file" id="liveSponsorFile" accept="image/*" style="display:none;">' +
-                            '<span id="liveSponsorName" style="font-size:var(--fs-xs);color:var(--text-muted);"></span>' +
+                            '<input class="ad-skryt" type="file" id="liveSponsorFile" accept="image/*">' +
+                            '<span class="ad-podpis" id="liveSponsorName"></span>' +
                         '</div>' +
                         '<input type="hidden" id="liveSponsorUrl">' +
                         // ИМЯ СПОНСОРА. До 24.09 поля не было: грузили только
@@ -346,7 +346,7 @@
                                 '<option value="short">' + L.formatShort + '</option>' +
                             '</select>' +
                         '</div>' +
-                        '<div class="ad-field-group" style="flex:1;">' +
+                        '<div class="ad-field-group ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.liveTournLabel + '</label>' +
                             '<input type="text" class="ad-field-input" id="liveTournLabel" placeholder="KSLT Masters #1 • SF">' +
                         '</div>' +
