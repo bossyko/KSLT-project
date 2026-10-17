@@ -335,9 +335,9 @@
                     (isAdm ? A.bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
-                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + L.plrBanned + '</span>' : '') +
+                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
-                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
+                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
@@ -1606,8 +1606,8 @@
             var oppName = isEn ? (opp.name_en || opp.name) : opp.name;
             var isWin = m.winner_id === playerId;
             var resultBadge = isWin
-                ? '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:var(--success-subtle);color:var(--success);">W</span>'
-                : '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:var(--danger-subtle);color:var(--danger);">L</span>';
+                ? '<span style="display:inline-block;padding:2px 8px;border-radius:var(--radius-xs);font-weight:600;font-size:var(--fs-xs);background:var(--success-subtle);color:var(--success);">W</span>'
+                : '<span style="display:inline-block;padding:2px 8px;border-radius:var(--radius-xs);font-weight:600;font-size:var(--fs-xs);background:var(--danger-subtle);color:var(--danger);">L</span>';
 
             // Format score (flip if player is p2 so their sets come first)
             var score = m.score || '';

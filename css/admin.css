@@ -357,7 +357,7 @@ body.ad-page {
     font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: var(--radius-full);
     margin-left: 8px;
     vertical-align: middle;
 }
@@ -531,7 +531,7 @@ body.ad-page {
     width: 100%;
     padding: 7px 10px !important;
     text-align: left;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
 }
 
 .ad-reg-menu-list .ad-reg-act:hover:not(:disabled) {
@@ -669,7 +669,7 @@ body.ad-page {
     height: 12px;
     min-width: 12px;
     border: var(--bw-thick) solid rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
+    border-radius: var(--radius-2xs);
     background: transparent;
     cursor: pointer;
     position: relative;
@@ -715,7 +715,7 @@ body.ad-page {
     height: 13px;
     min-width: 13px;
     border: var(--bw-thick) solid rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
+    border-radius: var(--radius-2xs);
     background: transparent;
     cursor: pointer;
     position: relative;
@@ -2370,7 +2370,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 16px;
     height: 16px;
     border: var(--bw-thick) solid var(--alpha-white-50);
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
@@ -2399,7 +2399,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-seg {
     display: flex;
     border: var(--bw-hair) solid var(--ad-border, var(--alpha-white-12));
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
 }
 .ad-seg-btn {
@@ -2752,7 +2752,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 16px;
     height: 16px;
     border: var(--bw-thick) solid var(--alpha-white-50);
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
@@ -3185,7 +3185,7 @@ select.ad-field-input {
     align-items: center;
     gap: 4px;
     padding: 10px 18px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     border: var(--bw-thick) solid var(--border-color);
     background: var(--alpha-white-04);
     color: var(--text-secondary);
@@ -3623,7 +3623,7 @@ select.ad-field-input {
     font-size: var(--fs-sm);
     font-weight: 500;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     transition: all 0.2s;
     white-space: nowrap;
 }
@@ -3785,7 +3785,7 @@ select.ad-field-input {
 .rat-rule-input {
     background: var(--alpha-white-08) !important;
     border: var(--bw-hair) solid rgba(255,255,255,0.15) !important;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     color: var(--neutral-white);
     padding: 6px 8px;
     font-size: var(--fs-sm);
@@ -3884,7 +3884,7 @@ select.ad-field-input {
     display: flex;
     gap: 4px;
     background: var(--alpha-white-04);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     padding: 4px;
 }
 
@@ -3978,7 +3978,7 @@ select.ad-field-input {
 .ad-badge {
     font-size: var(--fs-xs);
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: var(--radius-full);
     background: var(--alpha-white-12);
 }
 
@@ -4907,7 +4907,7 @@ select.ad-field-input {
     height: 30px;
     padding: 0;
     margin-left: 4px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     border: var(--bw-hair) solid var(--border-subtle);
     background: transparent;
     color: var(--text-secondary);
@@ -4992,7 +4992,7 @@ select.ad-field-input {
     margin-bottom: 20px;
     padding: 12px 16px;
     background: var(--alpha-white-04);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     border: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 .ad-mem-profile-row {
@@ -5236,7 +5236,7 @@ select.ad-field-input {
     flex: 1;
     height: 4px;
     background: var(--alpha-white-08);
-    border-radius: 2px;
+    border-radius: var(--radius-full);
     margin: 0 10px;
     overflow: hidden;
 }
@@ -5244,7 +5244,7 @@ select.ad-field-input {
 .ad-crt-stat-bar {
     height: 100%;
     background: var(--accent);
-    border-radius: 2px;
+    border-radius: var(--radius-full);
     transition: width 0.4s ease;
 }
 
@@ -5345,7 +5345,7 @@ select.ad-field-input {
 .ad-cch-tag-badge {
     display: inline-block;
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: var(--radius-full);
     font-size: var(--fs-2xs);
     font-weight: 600;
     background: var(--alpha-lime-12);
@@ -5431,7 +5431,7 @@ select.ad-field-input {
 .ad-pay-stat-card {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     padding: 16px;
     text-align: center;
 }
@@ -5738,7 +5738,7 @@ select.ad-field-input {
     padding: 4px 8px;
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-size: var(--fs-xs);
     cursor: pointer;
@@ -5783,7 +5783,7 @@ select.ad-field-input {
     -webkit-appearance: none;
     appearance: none;
     border: var(--bw-hair) solid var(--accent);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     color: var(--accent);
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -5951,7 +5951,7 @@ select.ad-field-input {
     padding: 5px 8px;
     background: none !important;
     border: none !important;
-    border-radius: 5px;
+    border-radius: var(--radius-xs);
     color: var(--text-primary) !important;
     font-size: var(--fs-xs);
     font-weight: 500;
@@ -6098,7 +6098,7 @@ select.ad-field-input {
     flex-shrink: 0;
     width: 44px;
     height: 44px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6204,7 +6204,7 @@ select.ad-field-input {
 .ad-vch-stat {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     padding: 14px 16px;
     font-size: var(--fs-sm);
     color: var(--text-secondary);
@@ -6265,7 +6265,7 @@ select.ad-field-input {
     cursor: pointer;
     font-size: var(--fs-base);
     padding: 4px 6px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     transition: background 0.2s;
 }
 
@@ -6432,7 +6432,7 @@ select.ad-field-input {
     width: 84px;
     height: 112px;
     flex: 0 0 84px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     padding: 0;
     overflow: hidden;
     display: flex;
@@ -6581,7 +6581,7 @@ select.ad-field-input {
     font-size: var(--fs-2xs);
     font-weight: 700;
     padding: 1px 0;
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
     min-width: 22px;
     width: 22px;
     flex-shrink: 0;
@@ -6779,10 +6779,10 @@ select.ad-field-input {
 .ad-news-preview-body figure img {
     max-width: 260px;
     max-height: 180px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     display: block;
 }
-.ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; }
+.ad-news-preview-body figure iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--radius-sm); }
 
 /* ДВА ОПРЕДЕЛЕНИЯ ОДНОГО ПОНЯТИЯ СВЕДЕНЫ 08.10. Здесь жило второе правило
    про вставленный снимок в редакторе — «треть ширины, поля 5 и 10», числа
@@ -6907,7 +6907,7 @@ select.ad-field-input {
     display: flex;
     height: 6px;
     margin: 10px 0 6px;
-    border-radius: 3px;
+    border-radius: var(--radius-full);
     overflow: hidden;
     background: var(--alpha-white-08);
 }
@@ -6935,7 +6935,7 @@ select.ad-field-input {
     display: inline-block;
     width: 8px;
     height: 8px;
-    border-radius: 2px;
+    border-radius: var(--radius-2xs);
     margin-right: 4px;
     vertical-align: middle;
 }
@@ -6959,7 +6959,7 @@ select.ad-field-input {
    рейтинга в ней остаются — поэтому она не убирается, а притухает */
 .ad-cat-card {
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     padding: 12px 14px;
     margin-bottom: 10px;
 }
@@ -7009,7 +7009,7 @@ select.ad-field-input {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: var(--radius-full);
     background: var(--accent);
     color: var(--neutral-950);
     font-size: var(--fs-xs);
@@ -7024,7 +7024,7 @@ select.ad-field-input {
     height: 18px;
     margin-left: 6px;
     padding: 0 5px;
-    border-radius: 9px;
+    border-radius: var(--radius-full);
     background: var(--accent);
     color: var(--neutral-950);
     font-size: var(--fs-2xs);
@@ -7106,7 +7106,7 @@ select.ad-field-input {
 .ad-modal-danger {
     margin: 0;
     padding: 12px 14px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: var(--danger-faint);
     border: var(--bw-hair) solid var(--danger-border);
     color: var(--danger);
@@ -7580,7 +7580,7 @@ select.ad-field-input {
 .ad-sched-status {
     padding: 4px 8px;
     font-size: var(--fs-xs);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--border-subtle);
     color: var(--text-primary);
@@ -7705,7 +7705,7 @@ select.ad-field-input {
     padding: 5px 8px;
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     color: var(--accent);
     font-size: var(--fs-sm);
     font-weight: 700;
@@ -7744,7 +7744,7 @@ select.ad-field-input {
 .ad-reg-act {
     padding: 4px 5px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     background: transparent;
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -7848,7 +7848,7 @@ select.ad-field-input {
 .ad-mode-switch {
     display: flex;
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
     margin-bottom: 4px;
 }

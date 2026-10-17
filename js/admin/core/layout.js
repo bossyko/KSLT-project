@@ -482,8 +482,8 @@
                 '<td><a href="#" class="ad-dash-trn-link" data-trn-id="' + A.esc(trnId) + '" style="color:var(--accent);text-decoration:none;cursor:pointer;">' + trnName + '</a></td>' +
                 '<td>' + A.fmtDate(r.registered_at) + '</td>' +
                 '<td style="white-space:nowrap;text-align:right;">' +
-                    '<button class="ad-dash-reg-approve" data-reg-id="' + r.id + '" title="' + L.regApproved + '" style="background:var(--success-subtle);border:1px solid var(--success-border);color:var(--success);border-radius:6px;padding:5px 10px;cursor:pointer;margin-right:8px;font-size:var(--fs-base);">✓</button>' +
-                    '<button class="ad-dash-reg-reject" data-reg-id="' + r.id + '" title="' + L.regRejected + '" style="background:var(--danger-subtle);border:1px solid var(--danger-border);color:var(--danger);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:var(--fs-base);">✗</button>' +
+                    '<button class="ad-dash-reg-approve" data-reg-id="' + r.id + '" title="' + L.regApproved + '" style="background:var(--success-subtle);border:1px solid var(--success-border);color:var(--success);border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;margin-right:8px;font-size:var(--fs-base);">✓</button>' +
+                    '<button class="ad-dash-reg-reject" data-reg-id="' + r.id + '" title="' + L.regRejected + '" style="background:var(--danger-subtle);border:1px solid var(--danger-border);color:var(--danger);border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:var(--fs-base);">✗</button>' +
                 '</td>' +
             '</tr>';
         }, L.noPendingRegs);

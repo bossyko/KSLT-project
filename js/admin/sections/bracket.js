@@ -9762,7 +9762,7 @@
                     '<td style="padding:8px 10px;text-align:center;color:var(--accent);font-weight:600;">' + groupLetter + '</td>' +
                     '<td style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);">' + c.wins + '-' + (c.losses || 0) + '</td>' +
                     '<td style="padding:8px 10px;">' +
-                        '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:var(--fs-sm);background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:6px;cursor:pointer;outline:none;">' +
+                        '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:var(--fs-sm);background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:var(--radius-sm);cursor:pointer;outline:none;">' +
                             '<option value="auto"' + (defaultActions[ci] === 'auto' ? ' selected' : '') + '>' + L.candidateActionAuto + '</option>' +
                             '<option value="ig"' + (defaultActions[ci] === 'ig' ? ' selected' : '') + '>' + L.candidateActionIG + '</option>' +
                             '<option value="out">' + L.candidateActionOut + '</option>' +
@@ -9788,7 +9788,7 @@
                     '</tr></thead>' +
                     '<tbody>' + rowsHtml + '</tbody>' +
                 '</table>' +
-                '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-sm);margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:6px;"></div>' +
+                '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-sm);margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:var(--radius-sm);"></div>' +
                 '<div id="adCandidateError" style="text-align:center;color:var(--danger, var(--danger));font-size:var(--fs-sm);margin-bottom:8px;display:none;"></div>' +
                 '<div class="ad-confirm-actions" style="margin-top:16px;">' +
                     '<button class="ad-btn ad-btn-primary" id="adCandidateConfirm">' + L.candidateConfirm + '</button>' +
@@ -11776,11 +11776,11 @@
         if (!document.getElementById('adOutcomeStyles')) {
             var styleEl = document.createElement('style');
             styleEl.id = 'adOutcomeStyles';
-            styleEl.textContent = '.ad-outcome-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-size:var(--fs-xs);transition:all .15s;}' +
+            styleEl.textContent = '.ad-outcome-chip{padding:5px 12px;border-radius:var(--radius-full);border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-size:var(--fs-xs);transition:all .15s;}' +
                 '.ad-outcome-chip:hover{border-color:var(--accent);color:var(--text-primary);}' +
                 '.ad-outcome-chip.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}' +
                 '.ad-retired-btn.active{background:var(--accent) !important;color:#000 !important;border-color:var(--accent) !important;font-weight:600;}' +
-                '.ad-brk-outcome{display:inline-block;font-size:var(--fs-2xs);font-weight:700;padding:1px 5px;border-radius:3px;background:var(--accent-subtle);color:var(--accent);margin-left:4px;vertical-align:middle;}';
+                '.ad-brk-outcome{display:inline-block;font-size:var(--fs-2xs);font-weight:700;padding:1px 5px;border-radius:var(--radius-xs);background:var(--accent-subtle);color:var(--accent);margin-left:4px;vertical-align:middle;}';
             document.head.appendChild(styleEl);
         }
 

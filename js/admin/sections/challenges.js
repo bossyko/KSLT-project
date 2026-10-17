@@ -2083,13 +2083,13 @@
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     // Battle info card
-                    '<div style="text-align:center;margin-bottom:20px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border);">' +
+                    '<div style="text-align:center;margin-bottom:20px;padding:14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border:1px solid var(--border);">' +
                         '<div style="font-weight:700;font-size:var(--fs-sm);color:var(--text-primary);">⚔️ ' + A.esc(challenge.battle_title || '') + '</div>' +
                         '<div style="color:var(--text-secondary);font-size:var(--fs-sm);margin-top:6px;">' + A.esc(p1Name) + ' <span style="color:var(--accent);font-weight:600;">VS</span> ' + A.esc(p2Name) + '</div>' +
                     '</div>' +
                     '<p style="color:var(--text-secondary);margin-bottom:16px;font-size:var(--fs-sm);">' + L.chalDeleteOrCancelDesc + '</p>' +
                     // Cancel battle — card-style button
-                    '<div id="dcCancel" style="cursor:pointer;padding:16px;margin-bottom:10px;border-radius:10px;border:1px solid var(--warning-border);background:var(--warning-faint);transition:all 0.2s;">' +
+                    '<div id="dcCancel" style="cursor:pointer;padding:16px;margin-bottom:10px;border-radius:var(--radius-sm);border:1px solid var(--warning-border);background:var(--warning-faint);transition:all 0.2s;">' +
                         '<div style="display:flex;align-items:center;gap:12px;">' +
                             '<span style="font-size:24px;">🚫</span>' +
                             '<div>' +
@@ -2099,7 +2099,7 @@
                         '</div>' +
                     '</div>' +
                     // Delete forever — card-style button
-                    '<div id="dcDelete" style="cursor:pointer;padding:16px;border-radius:10px;border:1px solid var(--danger-border);background:var(--danger-faint);transition:all 0.2s;">' +
+                    '<div id="dcDelete" style="cursor:pointer;padding:16px;border-radius:var(--radius-sm);border:1px solid var(--danger-border);background:var(--danger-faint);transition:all 0.2s;">' +
                         '<div style="display:flex;align-items:center;gap:12px;">' +
                             '<span style="font-size:24px;">🗑</span>' +
                             '<div>' +
