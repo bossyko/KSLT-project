@@ -107,6 +107,7 @@ const КУСКИ = [
     ['инлайн-стили в js', 'check-inlayn-stili.js', 'check-inlayn-stili-otkat.js'],
     ['адрес сайта', 'check-adres-sayta.js', 'check-adres-sayta-otkat.js'],
     ['слой админки', 'check-admin-sloy.js', 'check-admin-sloy-otkat.js'],
+    ['лестница роли', 'check-lestnica-roli.js', 'check-lestnica-roli-otkat.js'],
     ['движение и межстрочные', 'check-dvizhenie-i-mezhstrochnye.js', 'check-dvizhenie-i-mezhstrochnye-otkat.js']
 ];
 

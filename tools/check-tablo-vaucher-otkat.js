@@ -225,19 +225,22 @@ const ОТКАТЫ = [
  '../css/verify.css?v=', '../css/verify.css?нет=',
  'стиль и скрипт ваучера подключены с версией на всех трёх языках'],
 
+/* ЯКОРЬ ОБНОВЛЁН 17.10: адрес сайта уехал из строк в `window.KSLT_SAYT`
+   (круг «адрес сайта»), и откат держался за написание, которого больше
+   нет. Держимся за хвост, который живёт в этом месте постоянно. */
 ['вернуть кортам русский адрес ваучера', КОРТЫ,
- "'https://kslt.netlify.app/pages/verify' + verifySuffix + '.html?token='",
+ "window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token='",
  "'https://kslt.netlify.app/pages/verify.html?token='",
  'русского адреса ваучера в генераторах QR не осталось'],
 
 ['вернуть кабинету русский адрес ваучера', КАБ,
- "'https://kslt.netlify.app/pages/verify' + verifySuffix + '.html?token='",
+ "window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token='",
  "'https://kslt.netlify.app/pages/verify.html?token='",
  'русского адреса ваучера в генераторах QR не осталось'],
 
 ['завести четвёртое место, где строится адрес ваучера', ТРЕН,
- "        var verifyUrl = 'https://kslt.netlify.app/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;",
- "        var verifyUrl = 'https://kslt.netlify.app/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;\n        var verifyUrl2 = 'https://kslt.netlify.app/pages/verify.html?token=' + voucher.qr_token;",
+ "        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;",
+ "        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;\n        var verifyUrl2 = 'https://kslt.netlify.app/pages/verify.html?token=' + voucher.qr_token;",
  'мест, где строится адрес ваучера, ровно три — во всей папке js']
 
 ];

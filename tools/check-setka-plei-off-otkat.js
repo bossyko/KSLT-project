@@ -132,8 +132,8 @@ const ОТКАТЫ = [
    'отступы пометки — со шкалы'],
 
   [CSS,
-   '    color: var(--danger-on);',
-   '    color: #ffffff;',
+   '.ad-brk-notice-dup {\n    background: var(--danger);\n    color: var(--danger-on);',
+   '.ad-brk-notice-dup {\n    background: var(--danger);\n    color: #ffffff;',
    'дубль — сплошная заливка с почти-чёрным текстом, без границы'],
 
   [CSS,

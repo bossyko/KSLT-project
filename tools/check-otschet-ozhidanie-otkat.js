@@ -56,7 +56,7 @@ const ОТКАТЫ = [
  'предупреждение о регистрации берёт роль, а не своё число'],
 
 ['спрятать чужой красный в КАДР анимации срочного', TO,
- '@keyframes toCdUrgentPulse {\n    0%, 100% { box-shadow: 0 2px 12px rgba(255,71,87,0.3); }',
+ '@keyframes toCdUrgentPulse {\n    0%, 100% { box-shadow: 0 2px 12px var(--alpha-red-30); }',
  '@keyframes toCdUrgentPulse {\n    0%, 100% { box-shadow: 0 2px 12px rgba(239,68,68,0.3); }',
  'кадры анимаций отсчёта тоже без чужого красного'],
 
