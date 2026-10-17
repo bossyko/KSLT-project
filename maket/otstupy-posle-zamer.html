@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>КСЛТ — замер после: высоты элементов админки</title>
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/admin.css?v=276">
+<style>
+body { background: var(--bg-base); padding: var(--space-4); }
+.ряд { margin-bottom: var(--space-4); }
+.метка { font-size: var(--fs-2xs); color: var(--text-muted); margin-bottom: var(--space-2); }
+</style>
+</head>
+<body class="ad-page">
+<!-- ЗАМЕР ПОСЛЕ ПРАВКИ ОТСТУПОВ: настоящие классы админки, настоящий admin.css. -->
+<div class="ряд"><div class="метка">.ad-status-badge</div>
+  <span class="ad-status-badge ad-status-published">опубликован</span></div>
+<div class="ряд"><div class="метка">.ad-role-badge</div>
+  <span class="ad-role-badge ad-role-badge-manager">менеджер</span></div>
+<div class="ряд"><div class="метка">.ad-type-badge</div>
+  <span class="ad-type-badge">крытый</span></div>
+<div class="ряд"><div class="метка">.ad-btn (по умолчанию) и .ad-btn-sm</div>
+  <button class="ad-btn">Сохранить</button>
+  <button class="ad-btn ad-btn-sm">Мелкая</button></div>
+<div class="ряд"><div class="метка">.ad-rat-tab</div>
+  <div class="ad-rat-tabs"><button class="ad-rat-tab">Турниры</button>
+  <button class="ad-rat-tab">Игроки</button></div></div>
+<div class="ряд"><div class="метка">.ad-field-input</div>
+  <input class="ad-field-input" value="Иванов"></div>
+<div class="ряд"><div class="метка">таблица .ad-table</div>
+  <table class="ad-table"><thead><tr><th>игрок</th><th>рейтинг</th></tr></thead>
+  <tbody><tr><td>Иванов И.</td><td>4.5</td></tr><tr><td>Петров П.</td><td>4.0</td></tr></tbody></table></div>
+<div class="ряд"><div class="метка">.ad-mem-badge и .ad-pay-badge</div>
+  <span class="ad-mem-badge ad-mem-active">активно</span>
+  <span class="ad-pay-badge ad-pay-active">оплачено</span></div>
+<div class="ряд"><div class="метка">.ad-sidebar-badge и .ad-tab-count</div>
+  <span class="ad-sidebar-badge">3</span>
+  <span class="ad-tab-count">12</span></div>
+</body>
+</html>

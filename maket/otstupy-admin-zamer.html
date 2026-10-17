@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: отступы админки</title>
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<style>
+body { background: var(--bg-base); padding-bottom: var(--space-8); }
+.st-shapka { position: sticky; top: 0; z-index: 9; padding: var(--space-3) var(--space-4);
+  background: var(--bg-base); border-bottom: var(--bw-hair) solid var(--border-subtle);
+  font-size: var(--fs-sm); color: var(--text-secondary); }
+.st-rol { padding: var(--space-4); max-width: 1240px; }
+.st-imya { font-size: var(--fs-xs); color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: var(--space-2); }
+.st-tri { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+.st-dva { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+.st-karta { background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: var(--space-3); }
+.st-zag { font-size: var(--fs-2xs); color: var(--text-muted); margin-bottom: var(--space-3); }
+
+/* ── 1. БЕЙДЖ: вертикальный отступ 2 ── */
+.bd { display: inline-block; border-radius: var(--radius-full); font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold); background: var(--success-subtle); color: var(--success); }
+.bd-sejchas { padding: 2px 8px; }
+.bd-na4     { padding: 4px 8px; }
+.bd-na0     { padding: 0 8px; }
+
+/* ── 2. СТРОКА ТАБЛИЦЫ ── */
+table { border-collapse: collapse; width: 100%; font-size: var(--fs-xs);
+  color: var(--text-primary); }
+th { font-size: var(--fs-2xs); color: var(--text-muted); text-align: left;
+  border-bottom: var(--bw-hair) solid var(--border-subtle); }
+td { border-bottom: var(--bw-hair) solid var(--border-subtle); }
+.tb-sejchas th { padding: 8px 5px; } .tb-sejchas td { padding: 9px 8px; }
+.tb-shkala  th { padding: 8px 4px; } .tb-shkala  td { padding: 8px 8px; }
+
+/* ── 3. МОДАЛКА ── */
+.md { background: var(--bg-elevated); border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-lg); overflow: hidden; }
+.md-h { font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--text-primary);
+  border-bottom: var(--bw-hair) solid var(--border-subtle); }
+.md-b { font-size: var(--fs-xs); color: var(--text-secondary); }
+.md-f { border-top: var(--bw-hair) solid var(--border-subtle); text-align: right; }
+.md-20 .md-h, .md-20 .md-f { padding: 16px 20px; } .md-20 .md-b { padding: 20px; }
+.md-16 .md-h, .md-16 .md-f { padding: 16px; }      .md-16 .md-b { padding: 16px; }
+.md-24 .md-h, .md-24 .md-f { padding: 16px 24px; } .md-24 .md-b { padding: 24px; }
+
+/* ── 4. ПОЛЕ ФОРМЫ ── */
+.pl-lb { display: block; font-size: var(--fs-2xs); color: var(--text-muted); }
+.pl-in { width: 100%; height: var(--btn-h-md); background: var(--surface-glass);
+  border: var(--bw-hair) solid var(--border-subtle); border-radius: var(--radius-sm);
+  color: var(--text-primary); padding: 0 var(--space-3); font-size: var(--fs-sm); }
+.pl-sejchas .pl-lb { margin-bottom: 6px; } .pl-sejchas .pl-gr { margin-bottom: 20px; }
+.pl-shkala  .pl-lb { margin-bottom: 4px; } .pl-shkala  .pl-gr { margin-bottom: 16px; }
+.pl-c       .pl-lb { margin-bottom: 4px; } .pl-c       .pl-gr { margin-bottom: 20px; }
+
+/* ── 5. КНОПКА И ВКЛАДКА ── */
+.kn { border: var(--bw-hair) solid var(--border-subtle); background: var(--surface-glass);
+  color: var(--text-primary); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
+.kn-sejchas { padding: 10px 16px; } .kn-shkala { padding: 8px 16px; }
+.vk { display: inline-block; font-size: var(--fs-xs); color: var(--text-secondary); }
+.vk-sejchas { padding: 3px 10px; } .vk-shkala { padding: 4px 8px; }
+</style>
+</head>
+<body>
+<!-- СТЕНД ОТСТУПОВ, круг 7 ветки D. 223 места мимо шкалы:
+     10px×51, 6px×48, 20px×26, 2px×24, 14px×20, 3px×15, 5px×11. -->
+<div class="st-shapka">КСЛТ · ОТСТУПЫ АДМИНКИ · что будет, если двигать к ступеням</div>
+
+<div class="st-rol">
+  <div class="st-imya">1. бейдж: вертикальный отступ 2 · 24 места — ступени 2 в шкале НЕТ</div>
+  <div class="st-tri">
+    <div class="st-karta"><div class="st-zag">как сейчас: 2px 8px</div>
+      <span class="bd bd-sejchas">оплачено</span></div>
+    <div class="st-karta"><div class="st-zag">вверх к 4: выше на 4</div>
+      <span class="bd bd-na4">оплачено</span></div>
+    <div class="st-karta"><div class="st-zag">вниз к 0: схлопнется</div>
+      <span class="bd bd-na0">оплачено</span></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">2. строка таблицы · ячейки 9px 8px и 6px 5px</div>
+  <div class="st-dva">
+    <div class="st-karta"><div class="st-zag">как сейчас</div>
+      <table class="tb-sejchas"><tr><th>игрок</th><th>рейтинг</th><th>статус</th></tr>
+      <tr><td>Иванов И.</td><td>4.5</td><td><span class="bd bd-sejchas">допущен</span></td></tr>
+      <tr><td>Петров П.</td><td>4.0</td><td><span class="bd bd-sejchas">ожидает</span></td></tr>
+      <tr><td>Сидоров С.</td><td>3.5</td><td><span class="bd bd-sejchas">допущен</span></td></tr></table></div>
+    <div class="st-karta"><div class="st-zag">на ступенях: 8px 8px и 8px 4px</div>
+      <table class="tb-shkala"><tr><th>игрок</th><th>рейтинг</th><th>статус</th></tr>
+      <tr><td>Иванов И.</td><td>4.5</td><td><span class="bd bd-sejchas">допущен</span></td></tr>
+      <tr><td>Петров П.</td><td>4.0</td><td><span class="bd bd-sejchas">ожидает</span></td></tr>
+      <tr><td>Сидоров С.</td><td>3.5</td><td><span class="bd bd-sejchas">допущен</span></td></tr></table></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">3. модалка · 26 мест держат 20</div>
+  <div class="st-tri">
+    <div class="st-karta"><div class="st-zag">как сейчас: 20</div>
+      <div class="md md-20"><div class="md-h">Удалить заявку</div>
+        <div class="md-b">Заявка Иванова будет снята с турнира. Отменить нельзя.</div>
+        <div class="md-f"><button class="kn kn-shkala">Удалить</button></div></div></div>
+    <div class="st-karta"><div class="st-zag">вниз к 16</div>
+      <div class="md md-16"><div class="md-h">Удалить заявку</div>
+        <div class="md-b">Заявка Иванова будет снята с турнира. Отменить нельзя.</div>
+        <div class="md-f"><button class="kn kn-shkala">Удалить</button></div></div></div>
+    <div class="st-karta"><div class="st-zag">вверх к 24</div>
+      <div class="md md-24"><div class="md-h">Удалить заявку</div>
+        <div class="md-b">Заявка Иванова будет снята с турнира. Отменить нельзя.</div>
+        <div class="md-f"><button class="kn kn-shkala">Удалить</button></div></div></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">4. поле формы · подпись 6 снизу, группа 20 снизу</div>
+  <div class="st-tri">
+    <div class="st-karta pl-sejchas"><div class="st-zag">как сейчас: 6 и 20</div>
+      <div class="pl-gr"><label class="pl-lb">Имя</label><input class="pl-in" value="Иванов"></div>
+      <div class="pl-gr"><label class="pl-lb">Рейтинг</label><input class="pl-in" value="4.5"></div></div>
+    <div class="st-karta pl-shkala"><div class="st-zag">на ступенях: 4 и 16</div>
+      <div class="pl-gr"><label class="pl-lb">Имя</label><input class="pl-in" value="Иванов"></div>
+      <div class="pl-gr"><label class="pl-lb">Рейтинг</label><input class="pl-in" value="4.5"></div></div>
+    <div class="st-karta pl-c"><div class="st-zag">со ступенью 20: 4 и 20</div>
+      <div class="pl-gr"><label class="pl-lb">Имя</label><input class="pl-in" value="Иванов"></div>
+      <div class="pl-gr"><label class="pl-lb">Рейтинг</label><input class="pl-in" value="4.5"></div></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">5. кнопка 10px 16px и вкладка 3px 10px</div>
+  <div class="st-dva">
+    <div class="st-karta"><div class="st-zag">как сейчас</div>
+      <button class="kn kn-sejchas">Сохранить</button>
+      <span class="vk vk-sejchas">турниры</span></div>
+    <div class="st-karta"><div class="st-zag">на ступенях: 8px 16px и 4px 8px</div>
+      <button class="kn kn-shkala">Сохранить</button>
+      <span class="vk vk-shkala">турниры</span></div>
+  </div>
+</div>
+</body>
+</html>
