@@ -471,7 +471,7 @@
         if (articles.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="10" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📝</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">📝</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noArticles + '</div>' +
                     '<div class="ad-news-stat-top-pusto">' + L.noArticlesText + '</div>' +
                 '</td></tr>';
@@ -1455,7 +1455,7 @@
         var text = textEl ? textEl.value.trim() : '';
 
         if (!text) {
-            container.innerHTML = '<div style="color:var(--text-secondary);font-size:0.92em;padding:20px 0;text-align:center">' +
+            container.innerHTML = '<div style="color:var(--text-secondary);font-size:var(--fs-sm);padding:20px 0;text-align:center">' +
                 (isEn ? 'Start typing content to see preview' : 'Начните вводить текст для предпросмотра') + '</div>';
             return;
         }
@@ -1604,9 +1604,9 @@
         var html = '';
         newsPollData.options.forEach(function(opt, idx) {
             html += '<div style="display:flex;align-items:center;gap:8px;margin:4px 0">' +
-                '<span style="color:var(--text-secondary);font-size:0.85em;min-width:20px">' + (idx + 1) + '.</span>' +
+                '<span style="color:var(--text-secondary);font-size:var(--fs-sm);min-width:20px">' + (idx + 1) + '.</span>' +
                 '<input type="text" class="ad-field-input ad-poll-opt-input" data-idx="' + idx + '" value="' + A.esc(opt) + '" placeholder="' + L.pollOption + ' ' + (idx + 1) + '" style="flex:1">' +
-                (newsPollData.options.length > 2 ? '<button type="button" class="ad-gallery-remove ad-poll-opt-remove" data-idx="' + idx + '" style="position:static;width:24px;height:24px;font-size:14px">&times;</button>' : '') +
+                (newsPollData.options.length > 2 ? '<button type="button" class="ad-gallery-remove ad-poll-opt-remove" data-idx="' + idx + '" style="position:static;width:24px;height:24px;font-size:var(--fs-sm)">&times;</button>' : '') +
             '</div>';
         });
         container.innerHTML = html;

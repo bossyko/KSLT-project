@@ -47,7 +47,7 @@
             if (s.telegram) contacts.push('TG');
             if (s.email) contacts.push('✉');
             var contactsHtml = contacts.length
-                ? '<span style="color:var(--text-secondary);font-size:0.75rem">' + contacts.join(' ') + '</span>'
+                ? '<span style="color:var(--text-secondary);font-size:var(--fs-xs)">' + contacts.join(' ') + '</span>'
                 : '—';
 
             rows += '<tr>' +

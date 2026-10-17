@@ -28,7 +28,7 @@
         var el = document.getElementById(inputId);
         if (!el) return;
         var hint = document.createElement('div');
-        hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
+        hint.style.cssText = 'color:#ff4444;font-size:var(--fs-xs);margin-top:2px;display:none;';
         hint.textContent = hintText;
         el.parentNode.appendChild(hint);
         el.addEventListener('input', function() {
@@ -310,9 +310,9 @@
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📊</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">📊</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noPlayers + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noPlayersText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noPlayersText + '</div>' +
                 '</td></tr>';
             // Иначе под пустой таблицей остаются кнопки страниц от прошлого отбора
             var stale = document.getElementById('adPlrPagination');
@@ -325,7 +325,7 @@
             var plrFlag = CU.flagEmoji(CU.normalizeCountry(p.country)) || '?';
             var thumbHtml = p.photo
                 ? '<img src="' + A.esc(p.photo) + '" class="ad-table-thumb ad-table-thumb-round" alt="">'
-                : '<div class="ad-table-thumb ad-table-thumb-round" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">' + plrFlag + '</div>';
+                : '<div class="ad-table-thumb ad-table-thumb-round" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);">' + plrFlag + '</div>';
 
             var catObj = A.categoriesMap[p.category_id];
             var catLabel = catObj ? (isEn ? catObj.name_en : catObj.name) : (p.category_id || L.noData);
@@ -335,9 +335,9 @@
                     (isAdm ? A.bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
-                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
+                        (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
-                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
+                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
@@ -447,7 +447,7 @@
         var imagePreviewHtml = plrImageUrl
             ? '<img src="' + A.esc(plrImageUrl) + '" class="ad-image-upload-preview" id="adPlrImgPreview" style="border-radius:12px;width:100%;height:100%;aspect-ratio:auto;max-height:none;object-fit:cover;">' +
               '<button type="button" class="ad-image-upload-remove" id="adPlrImgRemove">&times;</button>'
-            : '<div class="ad-image-upload-placeholder" style="padding:16px 8px;font-size:0.7rem;text-align:center;">' +
+            : '<div class="ad-image-upload-placeholder" style="padding:16px 8px;font-size:var(--fs-2xs);text-align:center;">' +
                   '<div style="font-size:1.5rem;">📷</div>' +
                   '<div>' + L.uploadImage + '</div>' +
                   '<div class="ad-field-hint">' + L.uploadHint + '</div>' +
@@ -770,14 +770,14 @@
             (plrEditingId ? (
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrLastMatches + '</div>' +
-                '<div id="adPlrMatchesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
+                '<div id="adPlrMatchesContainer" style="color:var(--text-muted);font-size:var(--fs-sm);">...</div>' +
             '</div>'
             ) : '') +
 
             // Badges (loaded from Supabase)
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.plrBadges + '</div>' +
-                '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:0.85rem;">...</div>' +
+                '<div id="adPlrBadgesContainer" style="color:var(--text-muted);font-size:var(--fs-sm);">...</div>' +
             '</div>' +
 
 
@@ -791,13 +791,13 @@
             (plrEditingId ? (function() {
                 var isPlayerBanned = item && item.banned_until && new Date(item.banned_until) > new Date();
                 var banHtml = '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
-                    '<h3 style="font-size:0.9rem;color:var(--accent);margin-bottom:12px;font-weight:600;">' + (isEn ? 'Moderation' : 'Модерация') + '</h3>';
+                    '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + (isEn ? 'Moderation' : 'Модерация') + '</h3>';
                 if (isPlayerBanned) {
                     var isPerm = new Date(item.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU'));
-                    var banReasonStr = item.ban_reason ? '<div style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
+                    var banReasonStr = item.ban_reason ? '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
                     banHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
-                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banDateStr + '</span>' +
+                        '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banDateStr + '</span>' +
                     '</div>' +
                     banReasonStr +
                     '<button class="ad-btn ad-btn-sm" id="adPlrUnban" style="margin-top:8px;background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3);">' + L.plrUnbanPlayer + '</button>';
@@ -1590,8 +1590,8 @@
         }
 
         // Render matches table
-        var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">' +
-            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-muted);font-size:0.75rem;">' +
+        var html = '<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);">' +
+            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-muted);font-size:var(--fs-xs);">' +
                 '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Date' : 'Дата') + '</th>' +
                 '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Opponent' : 'Соперник') + '</th>' +
                 '<th style="text-align:center;padding:6px 8px;">' + (isEn ? 'Score' : 'Счёт') + '</th>' +
@@ -1606,8 +1606,8 @@
             var oppName = isEn ? (opp.name_en || opp.name) : opp.name;
             var isWin = m.winner_id === playerId;
             var resultBadge = isWin
-                ? '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:0.75rem;background:rgba(52,199,89,0.15);color:#34c759;">W</span>'
-                : '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:0.75rem;background:rgba(255,59,48,0.15);color:#ff3b30;">L</span>';
+                ? '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:rgba(52,199,89,0.15);color:#34c759;">W</span>'
+                : '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:var(--fs-xs);background:rgba(255,59,48,0.15);color:#ff3b30;">L</span>';
 
             // Format score (flip if player is p2 so their sets come first)
             var score = m.score || '';
@@ -1645,8 +1645,8 @@
                 '</td>' +
                 '<td style="padding:6px 8px;text-align:center;font-family:monospace;">' + A.esc(score) + '</td>' +
                 '<td style="padding:6px 8px;text-align:center;">' + resultBadge + '</td>' +
-                '<td style="padding:6px 8px;font-size:0.75rem;color:var(--text-muted);">' +
-                    (isDblTrn ? '<span style="font-size:1.1rem;vertical-align:middle;" title="' + (isEn ? 'Doubles' : 'Парный') + '">\uD83D\uDC65</span> ' : '') +
+                '<td style="padding:6px 8px;font-size:var(--fs-xs);color:var(--text-muted);">' +
+                    (isDblTrn ? '<span style="font-size:var(--fs-md);vertical-align:middle;" title="' + (isEn ? 'Doubles' : 'Парный') + '">\uD83D\uDC65</span> ' : '') +
                     A.esc(trnName) + (roundLabel ? ' <span style="opacity:0.6;">(' + A.esc(roundLabel) + ')</span>' : '') +
                 '</td>' +
             '</tr>';
@@ -1799,7 +1799,7 @@
                 '<div class="ad-cat-title">' +
                     '<span class="ad-cat-dot" style="background:' + A.esc(dot) + '"></span>' +
                     '<span style="font-weight:600;">' + A.esc(name) + '</span>' +
-                    (isHome ? '<span style="font-size:0.7rem;color:var(--accent);font-weight:500;">' + homeLabel + '</span>' : '') +
+                    (isHome ? '<span style="font-size:var(--fs-2xs);color:var(--accent);font-weight:500;">' + homeLabel + '</span>' : '') +
                     (closed ? '<span class="ad-cat-closed-tag">' + closedLabel + ' \u00b7 ' +
                         rhDate(r.closed_at) +
                         (r.closed_reason ? ' \u00b7 ' + A.esc(r.closed_reason) : '') + '</span>' : '') +
@@ -1941,7 +1941,7 @@
         if (!tableEl) return;
 
         if (data.length === 0) {
-            tableEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">' + L.rhNoData + '</div>';
+            tableEl.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-sm);">' + L.rhNoData + '</div>';
             return;
         }
 
@@ -2162,16 +2162,16 @@
                 var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString() : '';
 
                 html += '<tr>';
-                html += '<td style="font-size:1.3rem;text-align:center;width:40px;">' + def.icon + '</td>';
+                html += '<td style="font-size:var(--fs-lg);text-align:center;width:40px;">' + def.icon + '</td>';
                 html += '<td style="font-weight:500;">' + A.esc(name) + '</td>';
-                html += '<td style="color:var(--text-muted);font-size:0.82rem;">' + dateStr + '</td>';
+                html += '<td style="color:var(--text-muted);font-size:var(--fs-sm);">' + dateStr + '</td>';
                 // Вычисляемые значки ведёт расчёт: снимать их вручную
                 // бессмысленно, они вернутся при первом же пересчёте
                 var byRule = def.condition_type && def.condition_type !== 'manual';
                 if (A.currentRole === 'admin') {
                     html += '<td>' + (byRule
                         ? '<span title="' + (isEn ? 'Awarded automatically' : 'Начисляется автоматически') +
-                          '" style="color:var(--text-muted);font-size:0.9rem;">\u2699</span>'
+                          '" style="color:var(--text-muted);font-size:var(--fs-sm);">\u2699</span>'
                         : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button>') +
                     '</td>';
                 }
@@ -2180,7 +2180,7 @@
 
             html += '</tbody></table>';
         } else {
-            html += '<div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">' + L.badgeNoEarned + '</div>';
+            html += '<div style="color:var(--text-muted);font-size:var(--fs-sm);margin-bottom:12px;">' + L.badgeNoEarned + '</div>';
         }
 
         // Manual award (admin only)
@@ -3067,11 +3067,11 @@
                         '</div>' +
                     '</div>' +
                     '<div id="adImportStep2" style="display:none;">' +
-                        '<h4 style="margin:0 0 16px;color:var(--text-primary);font-size:0.95rem;">' + L.plrImportMapCol + '</h4>' +
+                        '<h4 style="margin:0 0 16px;color:var(--text-primary);font-size:var(--fs-base);">' + L.plrImportMapCol + '</h4>' +
                         '<div id="adImportMapFields"></div>' +
                     '</div>' +
                     '<div id="adImportStep3" style="display:none;">' +
-                        '<h4 style="margin:0 0 12px;color:var(--text-primary);font-size:0.95rem;">' + L.plrImportPreview + '</h4>' +
+                        '<h4 style="margin:0 0 12px;color:var(--text-primary);font-size:var(--fs-base);">' + L.plrImportPreview + '</h4>' +
                         '<div class="ad-import-preview-wrap">' +
                             '<table class="ad-table ad-import-preview" id="adImportPreviewTable"></table>' +
                         '</div>' +
@@ -3146,7 +3146,7 @@
             info.innerHTML = '<div class="ad-import-file-selected">' +
                 '<span>\ud83d\udcc4</span>' +
                 '<span class="file-name">' + A.esc(file.name) + '</span>' +
-                '<span style="color:var(--text-muted);font-size:0.75rem;">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
+                '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
                 '<button class="file-remove" id="adImportFileRemove">&times;</button>' +
             '</div>';
             info.style.display = '';

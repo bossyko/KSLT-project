@@ -43,9 +43,9 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.pushAudience + '</label>' +
                         '<div id="adPushAudienceWrap" style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center;">' +
-                            '<div class="ad-push-audience-opt active" data-value="all" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--accent);background:var(--alpha-lime-06);cursor:pointer;font-size:0.85rem;color:var(--accent);transition:all 0.2s;user-select:none;">' + L.pushAll + '</div>' +
-                            '<div class="ad-push-audience-opt" data-value="members" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushMembers + '</div>' +
-                            '<div class="ad-push-audience-opt" data-value="user" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:0.85rem;color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushUser + '</div>' +
+                            '<div class="ad-push-audience-opt active" data-value="all" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--accent);background:var(--alpha-lime-06);cursor:pointer;font-size:var(--fs-sm);color:var(--accent);transition:all 0.2s;user-select:none;">' + L.pushAll + '</div>' +
+                            '<div class="ad-push-audience-opt" data-value="members" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:var(--fs-sm);color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushMembers + '</div>' +
+                            '<div class="ad-push-audience-opt" data-value="user" style="display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;border:1px solid var(--border-subtle,rgba(255,255,255,0.12));cursor:pointer;font-size:var(--fs-sm);color:var(--text-secondary);transition:all 0.2s;user-select:none;">' + L.pushUser + '</div>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -140,14 +140,14 @@
 
         var profiles = res.data || [];
         if (profiles.length === 0) {
-            container.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:0.8rem;">—</div>';
+            container.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:var(--fs-xs);">—</div>';
             return;
         }
 
         container.innerHTML = profiles.map(function(p) {
-            return '<div class="ad-push-user-option" data-id="' + A.esc(p.id) + '" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-subtle);font-size:0.85rem;">' +
+            return '<div class="ad-push-user-option" data-id="' + A.esc(p.id) + '" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-subtle);font-size:var(--fs-sm);">' +
                 '<div style="font-weight:500;">' + A.esc(p.full_name || '') + '</div>' +
-                '<div style="color:var(--text-muted);font-size:0.75rem;">' + A.esc(p.email || '') + '</div>' +
+                '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + A.esc(p.email || '') + '</div>' +
             '</div>';
         }).join('');
 
@@ -293,9 +293,9 @@
             }
 
             return '<tr' + (recalled ? ' style="opacity:0.55;"' : '') + '>' +
-                '<td style="white-space:nowrap;font-size:0.8rem;">' + date + '</td>' +
+                '<td style="white-space:nowrap;font-size:var(--fs-xs);">' + date + '</td>' +
                 '<td style="font-weight:500;">' + A.esc(r.title || '') +
-                    (recalled ? ' <span style="font-size:0.7rem;color:var(--text-muted);">\u00b7 ' + recalledLabel + '</span>' : '') +
+                    (recalled ? ' <span style="font-size:var(--fs-2xs);color:var(--text-muted);">\u00b7 ' + recalledLabel + '</span>' : '') +
                 '</td>' +
                 '<td>' + (audienceLabels[r.audience] || r.audience || '—') + '</td>' +
                 '<td>' + (typeLabels[r.type] || r.type || '—') + '</td>' +

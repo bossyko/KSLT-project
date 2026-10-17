@@ -282,7 +282,7 @@
                             ? (isEn ? 'The date has passed — access is by membership' : 'Дата прошла — доступ по членству')
                             : (isEn ? 'Access is by membership' : 'Доступ по членству'))) +
                 '</p>' +
-                (когда ? '<p style="color:var(--text-muted);font-size:0.8rem;">' +
+                (когда ? '<p style="color:var(--text-muted);font-size:var(--fs-xs);">' +
                     (isEn ? 'Changed: ' : 'Менялось: ') + когда + '</p>' : '') +
             '</div>';
 

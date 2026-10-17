@@ -128,7 +128,7 @@
 
             html += '<tr>' +
                 '<td><strong>' + A.esc(p1) + '</strong> vs <strong>' + A.esc(p2) + '</strong>' +
-                    (m.tournament_label ? '<br><span style="font-size:0.8rem;color:var(--text-muted);">' + A.esc(m.tournament_label) + '</span>' : '') +
+                    (m.tournament_label ? '<br><span style="font-size:var(--fs-xs);color:var(--text-muted);">' + A.esc(m.tournament_label) + '</span>' : '') +
                 '</td>' +
                 '<td style="font-family:monospace;font-weight:600;">' + score + '</td>' +
                 '<td style="' + statusStyle + '">' + statusLabel + '</td>' +
@@ -319,7 +319,7 @@
                         '<div style="display:flex;gap:8px;align-items:center;">' +
                             '<button class="ad-btn ad-btn-outline ad-btn-sm" id="liveSponsorUpload" type="button">' + L.liveSponsorUpload + '</button>' +
                             '<input type="file" id="liveSponsorFile" accept="image/*" style="display:none;">' +
-                            '<span id="liveSponsorName" style="font-size:0.8rem;color:var(--text-muted);"></span>' +
+                            '<span id="liveSponsorName" style="font-size:var(--fs-xs);color:var(--text-muted);"></span>' +
                         '</div>' +
                         '<input type="hidden" id="liveSponsorUrl">' +
                         // ИМЯ СПОНСОРА. До 24.09 поля не было: грузили только
@@ -502,7 +502,7 @@
     function showPlayersPreview(p1, p2) {
         var preview = document.getElementById('livePlayersPreview');
         if (!preview) return;
-        preview.innerHTML = '<div style="text-align:center;font-size:1rem;">' +
+        preview.innerHTML = '<div style="text-align:center;font-size:var(--fs-base);">' +
             '<strong>' + A.esc(p1) + '</strong>' +
             '<span style="color:var(--text-muted);margin:0 8px;">vs</span>' +
             '<strong>' + A.esc(p2) + '</strong>' +

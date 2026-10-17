@@ -341,9 +341,9 @@
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🎫</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🎫</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.vchNoVouchers + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.vchNoVouchersText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.vchNoVouchersText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -370,12 +370,12 @@
 
             html +=
                 '<tr>' +
-                    '<td style="color:var(--text-muted);font-size:0.8rem;">' + num + '</td>' +
+                    '<td style="color:var(--text-muted);font-size:var(--fs-xs);">' + num + '</td>' +
                     '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(v.player_name || '—') + '</td>' +
                     '<td>' + typeIcon + ' ' + A.esc(v.entity_name || '—') + '</td>' +
-                    '<td style="font-size:0.85rem;">' + A.esc(v.service_name || '—') + '</td>' +
+                    '<td style="font-size:var(--fs-sm);">' + A.esc(v.service_name || '—') + '</td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + v.discount_percent + '%</td>' +
-                    '<td style="font-size:0.8rem;white-space:nowrap;">' + dateStr + '</td>' +
+                    '<td style="font-size:var(--fs-xs);white-space:nowrap;">' + dateStr + '</td>' +
                     '<td><span class="ad-vch-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                     '<td style="white-space:nowrap;">' + actionHtml + '</td>' +
                 '</tr>';
@@ -598,19 +598,19 @@
             '<title>' + L.vchReportTitle + '</title>' +
             '<style>' +
                 '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size: 12px; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
                 '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
                 '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
                 '.report-header .period { font-size: 13px; color: #666; }' +
                 '.stats-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }' +
                 '.stat-box { flex: 1; min-width: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
                 '.stat-box .val { font-size: 20px; font-weight: 700; }' +
-                '.stat-box .lbl { font-size: 11px; color: #666; margin-top: 2px; }' +
+                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
                 'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
-                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size: 11px; }' +
-                'td { padding: 6px; border-bottom: 1px solid #eee; font-size: 11px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
                 'tr:nth-child(even) { background: #fafafa; }' +
-                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 11px; color: #888; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
                 '@media print { body { padding: 15px; } .no-print { display: none; } }' +
             '</style>' +
             '</head><body>' +

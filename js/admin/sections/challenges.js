@@ -1050,7 +1050,7 @@
                 matches.forEach(function(p) {
                     var pName = isEn ? (p.name_en || p.name) : p.name;
                     html += '<div class="ad-dropdown-item" data-pid="' + p.id + '">' +
-                        (p.photo ? '<img src="' + A.esc(p.photo) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:8px;">' : '<span style="width:24px;height:24px;border-radius:50%;background:var(--bg-tertiary);display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:11px;">?</span>') +
+                        (p.photo ? '<img src="' + A.esc(p.photo) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:8px;">' : '<span style="width:24px;height:24px;border-radius:50%;background:var(--bg-tertiary);display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:var(--fs-2xs);">?</span>') +
                         A.esc(pName) +
                     '</div>';
                 });
@@ -1082,7 +1082,7 @@
                             }
                         } else if (manual) {
                             input.value = manual;
-                            selectedEl.innerHTML = manual + ' <span style="color:var(--text-secondary);font-size:11px;">(' + L.chalAddManual + ')</span>';
+                            selectedEl.innerHTML = manual + ' <span style="color:var(--text-secondary);font-size:var(--fs-2xs);">(' + L.chalAddManual + ')</span>';
                             onSelect({ id: null, name: manual });
                         }
                         dropdown.style.display = 'none';
@@ -1126,7 +1126,7 @@
                     html += '<div class="ad-dropdown-item" data-cid="' + c.id + '">' +
                         '<div>' +
                             '<div style="font-weight:500;">' + A.esc(cName) + '</div>' +
-                            (addr ? '<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">' + A.esc(addr) + '</div>' : '') +
+                            (addr ? '<div style="font-size:var(--fs-2xs);color:var(--text-secondary);margin-top:2px;">' + A.esc(addr) + '</div>' : '') +
                         '</div>' +
                     '</div>';
                 });
@@ -1156,7 +1156,7 @@
                             }
                         } else if (manual) {
                             input.value = manual;
-                            selectedEl.innerHTML = manual + ' <span style="color:var(--text-secondary);font-size:11px;">(' + L.chalAddManual + ')</span>';
+                            selectedEl.innerHTML = manual + ' <span style="color:var(--text-secondary);font-size:var(--fs-2xs);">(' + L.chalAddManual + ')</span>';
                             onSelect({ id: null, name: manual, address: '' });
                         }
                         dropdown.style.display = 'none';
@@ -1324,9 +1324,9 @@
                 '<span style="font-weight:600;">:</span>' +
                 '<input type="text" inputmode="numeric" maxlength="1" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
                 '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap"' + (showTB ? '' : ' style="display:none;"') + '>' +
-                    '<span style="font-size:11px;color:var(--text-secondary);margin-left:8px;">' + L.chalTiebreak + '</span>' +
+                    '<span style="font-size:var(--fs-2xs);color:var(--text-secondary);margin-left:8px;">' + L.chalTiebreak + '</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB1 + '" value="' + vals[2] + '">' +
-                    '<span style="font-weight:600;font-size:11px;">:</span>' +
+                    '<span style="font-weight:600;font-size:var(--fs-2xs);">:</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB2 + '" value="' + vals[3] + '">' +
                 '</span>' +
             '</div>';
@@ -1343,9 +1343,9 @@
                 '<div class="ad-modal-body">' +
                     '<div style="text-align:center;margin-bottom:16px;">' +
                         '<div style="font-weight:600;">' + A.esc(p1Name) + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:12px;margin:4px 0;">VS</div>' +
+                        '<div style="color:var(--text-secondary);font-size:var(--fs-xs);margin:4px 0;">VS</div>' +
                         '<div style="font-weight:600;">' + A.esc(p2Name) + '</div>' +
-                        '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">' + (_setFormat === 'short' ? L.formatShort : L.formatStandard) + '</div>' +
+                        '<div style="font-size:var(--fs-2xs);color:var(--text-muted);margin-top:6px;">' + (_setFormat === 'short' ? L.formatShort : L.formatStandard) + '</div>' +
                     '</div>' +
                     setRowHtml(1, sv[0]) +
                     setRowHtml(2, sv[1]) +
@@ -1703,13 +1703,13 @@
                     '</div>' +
                     // Player 1 extras
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p1Name) + '</label>' +
+                        '<label class="ad-field-label" style="font-size:var(--fs-2xs);color:var(--text-secondary);">' + A.esc(p1Name) + '</label>' +
                         extrasRow('ebP1', { ntrp: p1Ntrp, country: p1Country,
                                       photo: p1Photo, showPhoto: p1Ручной }) +
                     '</div>' +
                     // Player 2 extras
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label" style="font-size:11px;color:var(--text-secondary);">' + A.esc(p2Name) + '</label>' +
+                        '<label class="ad-field-label" style="font-size:var(--fs-2xs);color:var(--text-secondary);">' + A.esc(p2Name) + '</label>' +
                         extrasRow('ebP2', { ntrp: p2Ntrp, country: p2Country,
                                       photo: p2Photo, showPhoto: p2Ручной }) +
                     '</div>' +
@@ -2084,17 +2084,17 @@
                 '<div class="ad-modal-body">' +
                     // Battle info card
                     '<div style="text-align:center;margin-bottom:20px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border);">' +
-                        '<div style="font-weight:700;font-size:15px;color:var(--text-primary);">⚔️ ' + A.esc(challenge.battle_title || '') + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:13px;margin-top:6px;">' + A.esc(p1Name) + ' <span style="color:var(--accent);font-weight:600;">VS</span> ' + A.esc(p2Name) + '</div>' +
+                        '<div style="font-weight:700;font-size:var(--fs-sm);color:var(--text-primary);">⚔️ ' + A.esc(challenge.battle_title || '') + '</div>' +
+                        '<div style="color:var(--text-secondary);font-size:var(--fs-sm);margin-top:6px;">' + A.esc(p1Name) + ' <span style="color:var(--accent);font-weight:600;">VS</span> ' + A.esc(p2Name) + '</div>' +
                     '</div>' +
-                    '<p style="color:var(--text-secondary);margin-bottom:16px;font-size:13px;">' + L.chalDeleteOrCancelDesc + '</p>' +
+                    '<p style="color:var(--text-secondary);margin-bottom:16px;font-size:var(--fs-sm);">' + L.chalDeleteOrCancelDesc + '</p>' +
                     // Cancel battle — card-style button
                     '<div id="dcCancel" style="cursor:pointer;padding:16px;margin-bottom:10px;border-radius:10px;border:1px solid rgba(255,193,7,0.35);background:rgba(255,193,7,0.06);transition:all 0.2s;">' +
                         '<div style="display:flex;align-items:center;gap:12px;">' +
                             '<span style="font-size:24px;">🚫</span>' +
                             '<div>' +
-                                '<div style="font-weight:600;font-size:14px;color:#ffc107;">' + L.chalCancelBattle + '</div>' +
-                                '<div style="font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle will be unpublished but kept in history' : 'Баттл будет снят с публикации, но сохранён в истории') + '</div>' +
+                                '<div style="font-weight:600;font-size:var(--fs-sm);color:#ffc107;">' + L.chalCancelBattle + '</div>' +
+                                '<div style="font-size:var(--fs-xs);color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle will be unpublished but kept in history' : 'Баттл будет снят с публикации, но сохранён в истории') + '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -2103,8 +2103,8 @@
                         '<div style="display:flex;align-items:center;gap:12px;">' +
                             '<span style="font-size:24px;">🗑</span>' +
                             '<div>' +
-                                '<div style="font-weight:600;font-size:14px;color:#f44336;">' + L.chalDeleteForever + '</div>' +
-                                '<div style="font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle and all votes will be permanently deleted' : 'Баттл и все голоса будут удалены навсегда') + '</div>' +
+                                '<div style="font-weight:600;font-size:var(--fs-sm);color:#f44336;">' + L.chalDeleteForever + '</div>' +
+                                '<div style="font-size:var(--fs-xs);color:var(--text-secondary);margin-top:3px;line-height:1.4;">' + (isEn ? 'Battle and all votes will be permanently deleted' : 'Баттл и все голоса будут удалены навсегда') + '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +

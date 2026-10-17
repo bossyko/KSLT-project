@@ -60,7 +60,7 @@
 
             // Period row
             '<div class="ad-vch-period-row">' +
-                '<span style="color:var(--text-secondary);font-size:0.85rem;font-weight:500;">' + (isEn ? 'Date:' : 'Дата:') + '</span>' +
+                '<span style="color:var(--text-secondary);font-size:var(--fs-sm);font-weight:500;">' + (isEn ? 'Date:' : 'Дата:') + '</span>' +
                 '<select class="ad-field-input" id="adFinPeriod" style="max-width:160px;">' +
                     '<option value=""' + (finPeriodMode === '' ? ' selected' : '') + '>' + L.payPrdAll + '</option>' +
                     '<option value="this_month"' + (finPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.payPrdThis + '</option>' +
@@ -321,9 +321,9 @@
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="7" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">💰</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">💰</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.payNoPayments + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.payNoPaymentsText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.payNoPaymentsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -345,10 +345,10 @@
                     '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(p.name) + '</td>' +
                     '<td>' + typeBadge + '</td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
-                    '<td style="font-size:0.8rem;white-space:nowrap;">' + periodEnd + '</td>' +
+                    '<td style="font-size:var(--fs-xs);white-space:nowrap;">' + periodEnd + '</td>' +
                     '<td>' + methodLabel + '</td>' +
                     '<td>' + statusBadge + '</td>' +
-                    '<td style="font-size:0.8rem;color:var(--text-muted);">' + createdDate + '</td>' +
+                    '<td style="font-size:var(--fs-xs);color:var(--text-muted);">' + createdDate + '</td>' +
                 '</tr>';
         });
 
@@ -740,7 +740,7 @@
         }
 
         if (items.length === 0) {
-            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:0.85rem;">' + (isEn ? 'Not found' : 'Не найдено') + '</div>';
+            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:var(--fs-sm);">' + (isEn ? 'Not found' : 'Не найдено') + '</div>';
             resultsDiv.style.display = 'block';
             return;
         }
@@ -1023,19 +1023,19 @@
             '<title>' + L.payPdfTitle + '</title>' +
             '<style>' +
                 '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size: 12px; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
                 '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
                 '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
                 '.report-header .period { font-size: 13px; color: #666; }' +
                 '.stats-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }' +
                 '.stat-box { flex: 1; min-width: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
                 '.stat-box .val { font-size: 20px; font-weight: 700; }' +
-                '.stat-box .lbl { font-size: 11px; color: #666; margin-top: 2px; }' +
+                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
                 'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
-                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size: 11px; }' +
-                'td { padding: 6px; border-bottom: 1px solid #eee; font-size: 11px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
                 'tr:nth-child(even) { background: #fafafa; }' +
-                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 11px; color: #888; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
                 '@media print { body { padding: 15px; } }' +
             '</style>' +
             '</head><body>' +

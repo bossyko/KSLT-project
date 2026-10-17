@@ -82,7 +82,8 @@ function обойти(д, из) {
     fs.readdirSync(path.join(КОРЕНЬ, д), { withFileTypes: true }).forEach(э => {
         const п = д === '.' ? э.name : д + '/' + э.name;
         if (э.isDirectory()) {
-            if (/^(node_modules|\.git|tests|tools|dist|build|_sync|mobile|backups|archive|slepki|exports|import|builds)$/.test(э.name)) return;
+            /* `test-results` — выход прогона, не продукт (17.10) */
+            if (/^(node_modules|\.git|tests|test-results|tools|dist|build|_sync|mobile|backups|archive|slepki|exports|import|builds)$/.test(э.name)) return;
             обойти(п, из);
         } else if (/\.(html|js)$/.test(э.name)) из.push(п);
     });

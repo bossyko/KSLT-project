@@ -448,9 +448,9 @@
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🏆</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🏆</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noTournaments + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noTournamentsText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noTournamentsText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -2213,7 +2213,7 @@ function обновитьРасклад() {
         // Left column: Main Draw
         html += '<div>';
         html += '<h4 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + mainDraw.length + '/' + maxPart + '</span>' +
-            (staleCount > 0 ? ' <span style="color:#FFB020;font-size:0.8rem;font-weight:500;">\u23F3 ' + L.regStaleCount.replace('{n}', staleCount) + '</span>' : '') +
+            (staleCount > 0 ? ' <span style="color:#FFB020;font-size:var(--fs-xs);font-weight:500;">\u23F3 ' + L.regStaleCount.replace('{n}', staleCount) + '</span>' : '') +
         '</h4>';
         if (mainDraw.length > 0) {
             html += '<div class="ad-table-card"><table class="ad-table"><thead><tr>' +
@@ -2290,7 +2290,7 @@ function обновитьРасклад() {
         var photo = player.photo || '';
         var photoHtml = photo
             ? '<img src="' + A.esc(photo) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">'
-            : '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-muted);">—</div>';
+            : '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:var(--fs-2xs);color:var(--text-muted);">—</div>';
         var catId = player.category_id || '';
         var catParts = catId.split('-');
         var catLabel = catParts.length > 1
@@ -2317,8 +2317,8 @@ function обновитьРасклад() {
             '<td>' + num + '</td>' +
             '<td>' + photoHtml + '</td>' +
             '<td>' + A.esc(pName) + staleMark + '</td>' +
-            '<td style="font-size:0.8rem;">' + A.esc(catLabel) + '</td>' +
-            '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
+            '<td style="font-size:var(--fs-xs);">' + A.esc(catLabel) + '</td>' +
+            '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' + regDT + '</td>' +
         '</tr>';
     }
 
@@ -2946,10 +2946,10 @@ function обновитьРасклад() {
                 '</div>' +
             '</div>';
         if (addr) {
-            html += '<div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + L.trnVenueAddress + ': ' + A.esc(addr) + '</div>';
+            html += '<div style="color:var(--text-secondary);font-size:var(--fs-sm);margin-bottom:4px;">' + L.trnVenueAddress + ': ' + A.esc(addr) + '</div>';
         }
         if (court.phone) {
-            html += '<div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + L.trnVenuePhone + ': ' + A.esc(court.phone) + '</div>';
+            html += '<div style="color:var(--text-secondary);font-size:var(--fs-sm);margin-bottom:4px;">' + L.trnVenuePhone + ': ' + A.esc(court.phone) + '</div>';
         }
         var mapLinks = '';
         if (court.google_maps_url) {
@@ -2960,7 +2960,7 @@ function обновитьРасклад() {
             mapLinks += '<a href="' + A.esc(court.twogis_url) + '" target="_blank" style="color:var(--accent);">2GIS ↗</a>';
         }
         if (mapLinks) {
-            html += '<div style="font-size:0.85rem;">' + mapLinks + '</div>';
+            html += '<div style="font-size:var(--fs-sm);">' + mapLinks + '</div>';
         }
         html += '</div>';
 

@@ -209,7 +209,12 @@ function обойти(д, из) {
     fs.readdirSync(path.join(КОРЕНЬ, д), { withFileTypes: true }).forEach(э => {
         const п = д === '.' ? э.name : д + '/' + э.name;
         if (э.isDirectory()) {
-            if (/^(node_modules|\.git|tests|tools|dist|build|_sync|mobile|backups|archive|slepki|exports|import|builds|maket)$/.test(э.name)) return;
+            /* `test-results` — ВЫХОД ПРОГОНА, а не продукт: Playwright
+               кладёт туда следы со страницами, которые сам же и снял, и
+               правило ловило чужие блоки `<style>` внутри них. Прибор,
+               читающий выход прогона, говорит о прогоне, а не о коде —
+               и падает ровно тогда, когда идут тесты (17.10). */
+            if (/^(node_modules|\.git|tests|test-results|tools|dist|build|_sync|mobile|backups|archive|slepki|exports|import|builds|maket)$/.test(э.name)) return;
             if (э.name.startsWith('_do-')) return;        // копии «до» для сверки
             обойти(п, из);
         } else if (э.name.endsWith('.html')) из.push(п);

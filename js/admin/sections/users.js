@@ -310,9 +310,9 @@
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">👥</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">👥</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.usrNoUsers + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.usrNoUsersText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrNoUsersText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -327,13 +327,13 @@
 
             var avatarHtml = u.avatar_url
                 ? '<img src="' + A.esc(u.avatar_url) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
-                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;">' + initials + '</div>';
+                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:var(--fs-xs);font-weight:600;">' + initials + '</div>';
 
             // Role badge
             var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
             var roleBg = u.role === 'admin' ? 'rgba(255,59,48,0.15)' : u.role === 'manager' ? 'var(--accent-subtle)' : 'rgba(255,255,255,0.08)';
             var roleColor = u.role === 'admin' ? '#ff3b30' : u.role === 'manager' ? 'var(--accent)' : 'var(--text-secondary)';
-            var roleBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:' + roleBg + ';color:' + roleColor + ';">' + roleLabel + '</span>';
+            var roleBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:' + roleBg + ';color:' + roleColor + ';">' + roleLabel + '</span>';
 
             // Membership badge with expiry date
             var mem = memMap[u.id];
@@ -341,7 +341,7 @@
             if (u.role === 'admin' || u.role === 'manager') {
                 // У сотрудников клуба членства нет и быть не может: под этой
                 // почтой они ведут клуб, а не играют. Срок писать нечему
-                memBadge = '<span style="color:var(--text-muted);font-size:0.8rem;">' + L.usrStaffNoMembership + '</span>';
+                memBadge = '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrStaffNoMembership + '</span>';
             } else if (mem && mem.status === 'active') {
                 var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
@@ -351,7 +351,7 @@
                 var expFormatted2 = expDate2 ? expDate2[2] + '.' + expDate2[1] + '.' + expDate2[0] : '';
                 memBadge = '<span class="ad-mem-badge ad-mem-expired">' + L.usrExpired + (expFormatted2 ? ' ' + expFormatted2 : '') + '</span>';
             } else {
-                memBadge = '<span style="color:var(--text-muted);font-size:0.8rem;">' + L.usrNone + '</span>';
+                memBadge = '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrNone + '</span>';
             }
 
             // Ban status badge
@@ -362,9 +362,9 @@
                 var banLabel = isPermanent
                     ? L.usrBannedForever
                     : L.usrBannedUntil + ' ' + u.banned_until.split('T')[0];
-                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banLabel + '</span>';
+                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + banLabel + '</span>';
             } else {
-                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(52,199,89,0.15);color:#34c759;">' + L.usrStatusActive + '</span>';
+                banBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(52,199,89,0.15);color:#34c759;">' + L.usrStatusActive + '</span>';
             }
 
             // Online indicator
@@ -385,12 +385,12 @@
             var tr = document.createElement('tr');
             if (canClick) tr.style.cursor = 'pointer';
             tr.innerHTML =
-                '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;background:var(--alpha-lime-12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
-                '<td style="color:var(--text-muted);font-size:0.85rem;">' + email + '</td>' +
+                '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:var(--fs-2xs);font-weight:600;background:var(--alpha-lime-12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
+                '<td style="color:var(--text-muted);font-size:var(--fs-sm);">' + email + '</td>' +
                 '<td>' + roleBadge + безТелеграма + '</td>' +
                 '<td>' + banBadge + '</td>' +
                 '<td>' + memBadge + '</td>' +
-                '<td style="color:var(--text-muted);font-size:0.85rem;">' + regDate + '</td>';
+                '<td style="color:var(--text-muted);font-size:var(--fs-sm);">' + regDate + '</td>';
 
             if (canClick) {
                 tr.addEventListener('click', function(e) {
@@ -485,7 +485,7 @@
         var initials = (user.full_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
         var avatarHtml = user.avatar_url
             ? '<img src="' + A.esc(user.avatar_url) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
-            : '<div style="width:64px;height:64px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">' + initials + '</div>';
+            : '<div style="width:64px;height:64px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);font-weight:700;">' + initials + '</div>';
 
         // --- Membership section with inline payment ---
         var memHtml = '';
@@ -505,7 +505,7 @@
                 memHtml =
                     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
                         '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + '</span>' +
-                        '<span style="color:var(--text-secondary);font-size:0.85rem;">' + (isEn ? 'until ' : 'до ') + expDate + daysLeft + '</span>' +
+                        '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' + (isEn ? 'until ' : 'до ') + expDate + daysLeft + '</span>' +
                     '</div>';
             } else {
                 memHtml =
@@ -524,11 +524,11 @@
             memHtml +=
                 '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
                     periodBtns +
-                    '<span style="color:var(--text-secondary);font-size:0.85rem;margin-left:4px;">' + L.usrPayAmount + ':</span>' +
-                    '<input type="number" class="ad-field-input" id="adUsrPayAmount" style="width:100px;padding:4px 8px;font-size:0.85rem;" placeholder="0" min="0">' +
+                    '<span style="color:var(--text-secondary);font-size:var(--fs-sm);margin-left:4px;">' + L.usrPayAmount + ':</span>' +
+                    '<input type="number" class="ad-field-input" id="adUsrPayAmount" style="width:100px;padding:4px 8px;font-size:var(--fs-sm);" placeholder="0" min="0">' +
                     '<button class="ad-btn ad-btn-primary ad-btn-sm" id="adUsrPayBtn" disabled style="opacity:0.5;">' + L.usrProcessPayment + '</button>' +
                 '</div>' +
-                '<div id="adUsrPayInfo" style="margin-top:8px;font-size:0.8rem;">' +
+                '<div id="adUsrPayInfo" style="margin-top:8px;font-size:var(--fs-xs);">' +
                     (_lastPaymentInfo ? '<span style="color:#34c759;">' + _lastPaymentInfo + '</span>' : '') +
                 '</div>';
             _lastPaymentInfo = ''; // clear after showing
@@ -543,11 +543,11 @@
             var ntrpOpts = A.ntrpOptions(playerData ? playerData.ntrp_singles : null);
 
             playerCatHtml =
-                '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrPlayerCategory + '</h3>' +
+                '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrPlayerCategory + '</h3>' +
                 '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
-                    '🎾 <select class="ad-field-input" id="adUsrPlayerCat" style="width:auto;padding:4px 8px;font-size:0.85rem;">' + catOpts + '</select>' +
-                    '<span style="color:var(--text-secondary);font-size:0.85rem;">NTRP:</span>' +
-                    '<select class="ad-field-input" id="adUsrNtrp" style="width:auto;padding:4px 8px;font-size:0.85rem;">' + ntrpOpts + '</select>' +
+                    '🎾 <select class="ad-field-input" id="adUsrPlayerCat" style="width:auto;padding:4px 8px;font-size:var(--fs-sm);">' + catOpts + '</select>' +
+                    '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">NTRP:</span>' +
+                    '<select class="ad-field-input" id="adUsrNtrp" style="width:auto;padding:4px 8px;font-size:var(--fs-sm);">' + ntrpOpts + '</select>' +
                 '</div>';
         }
 
@@ -589,7 +589,7 @@
         }
 
         if (isSelf && isAdm) {
-            actionsHtml = '<div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
+            actionsHtml = '<div style="color:var(--text-muted);font-size:var(--fs-sm);font-style:italic;">' + L.usrCannotDeleteSelf + '</div>';
         } else if (actionBtns.length > 0) {
             actionsHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actionBtns.join('') + '</div>';
         }
@@ -602,7 +602,7 @@
             var banReasonStr = user.ban_reason ? ' — ' + A.esc(user.ban_reason) : '';
             banInfoHtml =
                 '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
-                    '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.8rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + L.usrBanned + ': ' + banDateStr + banReasonStr + '</span>' +
+                    '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;">' + L.usrBanned + ': ' + banDateStr + banReasonStr + '</span>' +
                 '</div>';
         }
 
@@ -622,16 +622,16 @@
                 '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.06);">' +
                     avatarHtml +
                     '<div>' +
-                        '<div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">' + A.esc(user.full_name || user.email) + '</div>' +
-                        '<div style="color:var(--text-muted);font-size:0.85rem;">' + A.esc(user.email || '') + '</div>' +
+                        '<div style="font-size:var(--fs-md);font-weight:600;color:var(--text-primary);">' + A.esc(user.full_name || user.email) + '</div>' +
+                        '<div style="color:var(--text-muted);font-size:var(--fs-sm);">' + A.esc(user.email || '') + '</div>' +
                         '<div style="display:flex;gap:8px;margin-top:4px;">' +
-                            '<span style="color:' + tgColor + ';font-size:0.8rem;">TG: ' + tgStatus + '</span>' +
-                            '<span style="color:var(--text-muted);font-size:0.8rem;">' + L.usrLastSeen + ': ' + lastSeen + '</span>' +
+                            '<span style="color:' + tgColor + ';font-size:var(--fs-xs);">TG: ' + tgStatus + '</span>' +
+                            '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.usrLastSeen + ': ' + lastSeen + '</span>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
                 // Profile form
-                '<h3 style="font-size:0.9rem;color:var(--accent);margin-bottom:12px;font-weight:600;">' + L.usrProfile + '</h3>' +
+                '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + L.usrProfile + '</h3>' +
                 '<div class="ad-field-row">' +
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.usrFullName + '</label>' +
@@ -673,7 +673,7 @@
                     '</div>' +
                 '</div>' +
                 // Membership with inline payment
-                (canManageMembership ? '<h3 style="font-size:0.9rem;color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrMembership + '</h3>' + memHtml : '') +
+                (canManageMembership ? '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin:24px 0 12px;font-weight:600;">' + L.usrMembership + '</h3>' + memHtml : '') +
                 // Player category + NTRP
                 playerCatHtml +
                 // Ban info + Actions (single row)
@@ -706,9 +706,9 @@
 
                         el.innerHTML =
                             '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">' +
-                                '<span style="font-size:0.85rem;color:' + statusColor + ';">' + statusText + '</span>' +
+                                '<span style="font-size:var(--fs-sm);color:' + statusColor + ';">' + statusText + '</span>' +
                                 (isBlocked
-                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:0.8rem;padding:4px 12px;">' + (isEn ? 'Unblock OTP' : 'Разблокировать OTP') + '</button>'
+                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:var(--fs-xs);padding:4px 12px;">' + (isEn ? 'Unblock OTP' : 'Разблокировать OTP') + '</button>'
                                     : '') +
                             '</div>';
 
@@ -719,7 +719,7 @@
                                 try {
                                     await A.adminAction('unblock_otp', { user_id: user.id });
                                     A.showToast(isEn ? 'OTP unblocked' : 'OTP разблокирован');
-                                    el.innerHTML = '<div style="margin-top:12px;font-size:0.85rem;color:#34c759;">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
+                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:#34c759;">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
                                 } catch (e) {
                                     A.showToast(isEn ? 'Error' : 'Ошибка', 'error');
                                     this.disabled = false;
@@ -1047,7 +1047,7 @@
                     '<div style="margin-bottom:16px;">' +
                         '<label class="ad-field-label">' + L.usrSelectCategory + '</label>' +
                         '<select class="ad-field-input" id="adMemCategory">' + catOpts + '</select>' +
-                        '<div style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">' + L.usrCategoryHint + '</div>' +
+                        '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-top:4px;">' + L.usrCategoryHint + '</div>' +
                     '</div>'
                 ) +
                 '<div style="margin-bottom:16px;">' +
@@ -1415,7 +1415,7 @@
                         '<input type="text" class="ad-field-input" id="adMgrLastName">' +
                     '</div>' +
                 '</div>' +
-                '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:16px;">' + L.usrAddManagerHint + '</div>' +
+                '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-bottom:16px;">' + L.usrAddManagerHint + '</div>' +
                 '<div class="ad-confirm-actions">' +
                     '<button class="ad-btn ad-btn-secondary" id="adMgrCancel">' + L.cancel + '</button>' +
                     '<button class="ad-btn ad-btn-primary" id="adMgrSubmit">' + L.usrAddManager + '</button>' +
@@ -1782,21 +1782,21 @@
             '<title>' + L.usrPdfTitle + '</title>' +
             '<style>' +
                 '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size: 12px; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
                 '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
                 '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
                 '.report-header .period { font-size: 13px; color: #666; }' +
                 '.stats-grid { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }' +
                 '.stat-box { flex: 1; min-width: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
                 '.stat-box .val { font-size: 20px; font-weight: 700; }' +
-                '.stat-box .lbl { font-size: 11px; color: #666; margin-top: 2px; }' +
-                '.breakdown { display: flex; gap: 20px; margin-bottom: 24px; font-size: 12px; color: #555; flex-wrap: wrap; }' +
+                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
+                '.breakdown { display: flex; gap: 20px; margin-bottom: 24px; font-size:var(--fs-xs); color: #555; flex-wrap: wrap; }' +
                 '.breakdown span { font-weight: 600; color: #1a1a1a; }' +
                 'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
-                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size: 11px; }' +
-                'td { padding: 6px; border-bottom: 1px solid #eee; font-size: 11px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
                 'tr:nth-child(even) { background: #fafafa; }' +
-                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 11px; color: #888; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
                 '@media print { body { padding: 15px; } }' +
             '</style>' +
             '</head><body>' +
@@ -1902,11 +1902,11 @@
             var к = карточки[z.player_id] || {};
             var ntrp = к.ntrp_singles ? ' · NTRP ' + к.ntrp_singles : '';
             return '<tr>' +
-                '<td>' + A.esc(ч.full_name || '—') + '<div style="font-size:0.75rem;color:var(--text-muted);">' +
+                '<td>' + A.esc(ч.full_name || '—') + '<div style="font-size:var(--fs-xs);color:var(--text-muted);">' +
                     A.esc(ч.email || '') + (ч.phone ? ' · ' + A.esc(ч.phone) : '') + '</div></td>' +
                 '<td>' + A.esc(к.name || z.player_id) +
-                    '<div style="font-size:0.75rem;color:var(--text-muted);">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
-                '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                    '<div style="font-size:var(--fs-xs);color:var(--text-muted);">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
+                '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
                     new Date(z.created_at).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' +
                     '<button class="ad-btn ad-btn-primary ad-btn-sm ad-link-yes" data-id="' + z.id + '">' + L.linkApprove + '</button> ' +
@@ -1992,11 +1992,11 @@
                 var когда = z.decided_at || z.created_at;
                 return '<tr>' +
                     '<td>' + A.esc(ч.full_name || '—') +
-                        '<div style="font-size:0.75rem;color:var(--text-muted);">' + A.esc(ч.email || '') + '</div></td>' +
+                        '<div style="font-size:var(--fs-xs);color:var(--text-muted);">' + A.esc(ч.email || '') + '</div></td>' +
                     '<td>' + A.esc(к.name || z.player_id) + '</td>' +
                     '<td style="color:' + п.цвет + ';font-weight:600;">' + п.текст +
-                        (z.note ? '<div style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
-                    '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                        (z.note ? '<div style="font-size:var(--fs-xs);color:var(--text-muted);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
+                    '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
                         (когда ? new Date(когда).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') : '—') + '</td>' +
                 '</tr>';
             }).join('') + '</tbody></table></div></div>';

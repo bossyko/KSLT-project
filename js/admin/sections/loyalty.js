@@ -580,7 +580,7 @@
                     var rHtml = '';
                     results.forEach(function(p) {
                         rHtml += '<div data-pid="' + p.id + '" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-subtle);color:var(--text-primary);transition:background 0.15s;" onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\'none\'">' +
-                            A.esc(p.full_name || '') + ' <span style="color:var(--text-muted);font-size:0.8rem;">' + A.esc(p.email || '') + '</span>' +
+                            A.esc(p.full_name || '') + ' <span style="color:var(--text-muted);font-size:var(--fs-xs);">' + A.esc(p.email || '') + '</span>' +
                         '</div>';
                     });
                     var rWrap = document.getElementById('adLoyAdjResults');

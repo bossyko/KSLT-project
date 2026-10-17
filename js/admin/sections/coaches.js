@@ -156,14 +156,14 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
-        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.cchViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
+        var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.cchViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:var(--fs-base);padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
 
         if (items.length === 0) {
             tbody.innerHTML =
                 '<tr><td colspan="9" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">🎓</div>' +
+                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🎓</div>' +
                     '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCoaches + '</div>' +
-                    '<div style="color:var(--text-muted);font-size:0.8rem;">' + L.noCoachesText + '</div>' +
+                    '<div style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.noCoachesText + '</div>' +
                 '</td></tr>';
             return;
         }
@@ -348,7 +348,7 @@
                     '<tr>' +
                         '<td>' + purposeBadge + '</td>' +
                         '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
-                        '<td style="font-size:0.85rem;">' + A.formatPayDate(p.period_end) + '</td>' +
+                        '<td style="font-size:var(--fs-sm);">' + A.formatPayDate(p.period_end) + '</td>' +
                         '<td>' + (A.PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
                         '<td>' + statusBadge + '</td>' +
                     '</tr>';
@@ -369,7 +369,7 @@
             // Info card
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchViewInfo + '</div>' +
-                '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:0.9rem;">' +
+                '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:var(--fs-sm);">' +
                     '<span style="color:var(--text-muted);">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(fullName.trim()) + '</span>' +
                     '<span style="color:var(--text-muted);">' + L.cchPosition + '</span>' +
@@ -546,7 +546,7 @@
 
             // Promoted badge (read-only)
             (item && item.promoted
-                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span style="color:var(--text-muted);font-size:0.8rem;">' + L.cchPromotedHint + '</span></div>'
+                ? '<div class="ad-form-card"><span class="ad-pay-badge ad-pay-active">⭐ ' + L.cchPromotedBadge + '</span> <span style="color:var(--text-muted);font-size:var(--fs-xs);">' + L.cchPromotedHint + '</span></div>'
                 : '') +
 
             // Photo
@@ -735,14 +735,14 @@
                         '<div class="ad-field" style="flex:0 0 200px;">' +
                             '<label class="ad-field-label">' + L.cchPartnerPin + '</label>' +
                             '<div style="display:flex;gap:6px;">' +
-                                '<input type="text" class="ad-field-input" id="adCchPartnerPin" value="' + A.esc(cchPartnerPin) + '" readonly style="font-size:1.2rem;letter-spacing:4px;text-align:center;font-weight:700;">' +
+                                '<input type="text" class="ad-field-input" id="adCchPartnerPin" value="' + A.esc(cchPartnerPin) + '" readonly style="font-size:var(--fs-md);letter-spacing:4px;text-align:center;font-weight:700;">' +
                                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchResetPin">' + L.cchResetPin + '</button>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
                     '<div style="margin-top:16px;">' +
                         '<label class="ad-field-label">' + (isEn ? 'Partner Services' : 'Услуги партнёра') + '</label>' +
-                        '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:0.75rem;color:var(--text-muted);">' +
+                        '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:var(--fs-xs);color:var(--text-muted);">' +
                             '<span>' + L.cchServiceName + '</span>' +
                             '<span>' + L.cchDiscount + '</span>' +
                             '<span></span>' +

@@ -37,13 +37,13 @@
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">' +
                         '<div>' +
                             '<span class="ad-field-label" style="margin-bottom:8px;display:block;">' + L.broadcastAudience + '</span>' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;margin-bottom:6px;"><input type="radio" name="bcAudience" value="all" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.broadcastAudienceAll + '</label>' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="radio" name="bcAudience" value="members" style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.broadcastAudienceMembers + '</label>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--text-muted);cursor:pointer;margin-bottom:6px;"><input type="radio" name="bcAudience" value="all" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.broadcastAudienceAll + '</label>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--text-muted);cursor:pointer;"><input type="radio" name="bcAudience" value="members" style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> ' + L.broadcastAudienceMembers + '</label>' +
                         '</div>' +
                         '<div>' +
                             '<span class="ad-field-label" style="margin-bottom:8px;display:block;">' + L.broadcastChannels + '</span>' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;margin-bottom:6px;"><input type="checkbox" id="adBcChTg" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> Telegram</label>' +
-                            '<label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;"><input type="checkbox" id="adBcChEmail" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> Email</label>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--text-muted);cursor:pointer;margin-bottom:6px;"><input type="checkbox" id="adBcChTg" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> Telegram</label>' +
+                            '<label style="display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--text-muted);cursor:pointer;"><input type="checkbox" id="adBcChEmail" checked style="margin:0;width:15px;height:15px;accent-color:var(--accent);"> Email</label>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +

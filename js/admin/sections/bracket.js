@@ -409,7 +409,7 @@
                         '<div id="adPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
                         '<input type="hidden" id="adPartnerSelectedId" value="">' +
                     '</div>' +
-                    '<div id="adPartnerCard" style="display:none;margin-top:8px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:8px;font-size:0.85rem;color:var(--text-secondary);"></div>' +
+                    '<div id="adPartnerCard" style="display:none;margin-top:8px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:8px;font-size:var(--fs-sm);color:var(--text-secondary);"></div>' +
                 '</div>' +
                 '<div id="adPartnerGuestBlock" style="display:none;">' +
                     '<div class="ad-field">' +
@@ -657,7 +657,7 @@
                     .limit(10);
                 var найдены = (res.data || []).filter(function(p) { return !(занятые && занятые[p.id]); });
                 if (!найдены.length) {
-                    список.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:0.85rem;">' +
+                    список.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:var(--fs-sm);">' +
                         (isEn ? 'No players found' : 'Игроков не найдено') + '</div>';
                     return;
                 }
@@ -669,14 +669,14 @@
                         : (ntrpПары(p) ? 'NTRP ' + ntrpПары(p) : '');
                     html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
                         'data-player-name="' + A.esc(имя) + '" ' +
-                        'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.9rem;' +
+                        'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:var(--fs-sm);' +
                         'display:flex;justify-content:space-between;align-items:center;">' +
                         '<span>' + A.esc(имя) +
                             (вОчереди && вОчереди[p.id]
-                                ? ' <span style="color:#FFA726;font-size:0.72rem;">' + L.regInQueue + '</span>'
+                                ? ' <span style="color:#FFA726;font-size:var(--fs-xs);">' + L.regInQueue + '</span>'
                                 : '') +
                         '</span>' +
-                        (мета ? '<span style="color:var(--text-muted);font-size:0.75rem;">' + A.esc(мета) + '</span>' : '') +
+                        (мета ? '<span style="color:var(--text-muted);font-size:var(--fs-xs);">' + A.esc(мета) + '</span>' : '') +
                     '</div>';
                 });
                 список.innerHTML = html;
@@ -891,7 +891,7 @@
 
         var html =
             '<div style="display:flex;flex-direction:column;gap:14px;min-width:340px;">' +
-                '<div style="color:var(--text-secondary);font-size:0.85rem;">' +
+                '<div style="color:var(--text-secondary);font-size:var(--fs-sm);">' +
                     L.regReplacePairHint + '</div>' +
                 поле(L.regReplaceMain, 'adPairFirst') +
                 поле(L.regReplacePartner, 'adPairSecond') +
@@ -1047,11 +1047,11 @@
                    Заголовок читался «Чынгыз Исматов — —»: второй прочерк
                    стоял на месте напарника, которого в одиночном турнире
                    не бывает. Замер 30.09 */
-                '<div style="font-size:0.9rem;color:var(--text-primary);">' +
+                '<div style="font-size:var(--fs-sm);color:var(--text-primary);">' +
                     A.esc(кто) + (напарник && напарник !== '\u2014'
                         ? ' \u2014 ' + A.esc(напарник) : '') +
                 '</div>' +
-                '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:0.82rem;line-height:1.5;">' +
+                '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.5;">' +
                     причиныHtml +
                 '</ul>' +
                 (гость
@@ -3713,16 +3713,16 @@
                             var чужой = полТурнира && p.gender && p.gender !== полТурнира;
                             var photoHtml = p.photo
                                 ? '<img src="' + A.esc(p.photo) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
-                                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;">—</div>';
+                                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:var(--fs-sm);">—</div>';
                             var nameDisplay = isEn ? (p.name_en || p.name) : p.name;
                             html += '<div data-player-id="' + p.id + '" data-gender="' + (p.gender || '') + '" data-player-name="' + A.esc(nameDisplay) + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:' + (alreadyIn ? 'default' : 'pointer') + ';opacity:' + (alreadyIn ? '0.5' : '1') + ';" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
                                 photoHtml +
                                 '<div style="flex:1;">' +
                                     '<div style="font-weight:500;color:var(--text-primary);">' + A.esc(nameDisplay) + '</div>' +
-                                    '<div style="font-size:0.8rem;color:' + (чужой ? '#ffb300' : 'var(--text-secondary)') + ';">' +
+                                    '<div style="font-size:var(--fs-xs);color:' + (чужой ? '#ffb300' : 'var(--text-secondary)') + ';">' +
                                         (полLabel ? полLabel + ' · ' : '') + catLabel + (ntrpLabel ? ' · ' + ntrpLabel : '') + '</div>' +
                                 '</div>' +
-                                (alreadyIn ? '<span style="font-size:0.75rem;color:var(--accent);">' + L.regAlreadyRegistered + '</span>' : '') +
+                                (alreadyIn ? '<span style="font-size:var(--fs-xs);color:var(--accent);">' + L.regAlreadyRegistered + '</span>' : '') +
                             '</div>';
                         });
                         resultsDiv.innerHTML = html;
@@ -3803,7 +3803,7 @@
                                 renderBracketManagement(tournamentId, 'registrations');
                                 row.removeAttribute('data-can-add');
                                 row.querySelector('[style*="flex:1"]').insertAdjacentHTML('afterend',
-                                    '<span style="font-size:0.75rem;color:var(--accent);">' + L.regAlreadyRegistered + '</span>');
+                                    '<span style="font-size:var(--fs-xs);color:var(--accent);">' + L.regAlreadyRegistered + '</span>');
                             }
                         });
                     }, 300);
@@ -3860,7 +3860,7 @@
             });
 
             var namesList = names.map(function(n) { return '• ' + n; }).join('<br>');
-            var confirmText = '<div style="text-align:left;margin-top:8px;max-height:200px;overflow-y:auto;font-size:0.9rem;line-height:1.6;">' + namesList + '</div>';
+            var confirmText = '<div style="text-align:left;margin-top:8px;max-height:200px;overflow-y:auto;font-size:var(--fs-sm);line-height:1.6;">' + namesList + '</div>';
 
             A.showConfirm(L.regRemoveConfirm, confirmText, async function() {
                 await removeRegistrations(ids, tournamentId);
@@ -4281,7 +4281,7 @@
                     A.showNotice(L.finalizeMismatchTitle,
                         '<p style="margin:0 0 10px;">' + L.finalizeMismatchText + '</p>' +
                         '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);' +
-                            'font-size:0.85rem;line-height:1.6;">' +
+                            'font-size:var(--fs-sm);line-height:1.6;">' +
                             разошлись.map(function(с) { return '<li>' + A.esc(с) + '</li>'; }).join('') +
                         '</ul>', null, 'warn');
                     return;
@@ -4385,12 +4385,12 @@
             var было = кто[r.old_player_id] || r.old_name || '\u2014';
             var стало = кто[r.new_player_id] || r.new_name || '\u2014';
             html += '<tr>' +
-                '<td style="font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">' +
+                '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
                     датаВремя(r.created_at) + '</td>' +
-                '<td style="font-size:0.8rem;">' + (подписьСтороны[r.side] || r.side) + '</td>' +
+                '<td style="font-size:var(--fs-xs);">' + (подписьСтороны[r.side] || r.side) + '</td>' +
                 '<td>' + A.esc(было) + ' <span class="ad-reg-cell-muted">\u2192</span> ' +
                     '<span style="color:var(--accent);">' + A.esc(стало) + '</span></td>' +
-                '<td style="font-size:0.8rem;color:var(--text-secondary);">' +
+                '<td style="font-size:var(--fs-xs);color:var(--text-secondary);">' +
                     A.esc(авторы[r.changed_by] || '\u2014') + '</td>' +
             '</tr>';
         });
@@ -8492,7 +8492,7 @@
 
         A.showConfirm(L.igCancelTitle,
             '<p style="margin:0 0 10px;">' + L.igCancelText + '</p>' +
-            '<p style="margin:0;color:var(--text-secondary);font-size:0.85rem;">' +
+            '<p style="margin:0;color:var(--text-secondary);font-size:var(--fs-sm);">' +
                 L.igCancelWho + ' ' + A.esc(кто) + '</p>',
             async function() {
                 // 1. Клетка, ждавшая победителя, больше никого не ждёт: метку
@@ -9762,7 +9762,7 @@
                     '<td style="padding:8px 10px;text-align:center;color:var(--accent);font-weight:600;">' + groupLetter + '</td>' +
                     '<td style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);">' + c.wins + '-' + (c.losses || 0) + '</td>' +
                     '<td style="padding:8px 10px;">' +
-                        '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:13px;background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:6px;cursor:pointer;outline:none;">' +
+                        '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:var(--fs-sm);background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:6px;cursor:pointer;outline:none;">' +
                             '<option value="auto"' + (defaultActions[ci] === 'auto' ? ' selected' : '') + '>' + L.candidateActionAuto + '</option>' +
                             '<option value="ig"' + (defaultActions[ci] === 'ig' ? ' selected' : '') + '>' + L.candidateActionIG + '</option>' +
                             '<option value="out">' + L.candidateActionOut + '</option>' +
@@ -9775,21 +9775,21 @@
            ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
         var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal" style="max-width:540px;text-align:left;">' +
-                '<div class="ad-confirm-title" style="text-align:center;font-size:1.15rem;margin-bottom:12px;">' + L.candidateSelectionTitle + '</div>' +
-                '<p style="text-align:center;color:var(--text-secondary, #aaa);margin-bottom:16px;font-size:14px;">' +
+                '<div class="ad-confirm-title" style="text-align:center;font-size:var(--fs-md);margin-bottom:12px;">' + L.candidateSelectionTitle + '</div>' +
+                '<p style="text-align:center;color:var(--text-secondary, #aaa);margin-bottom:16px;font-size:var(--fs-sm);">' +
                     L.candidateFreeSlots + ': <b style="color:var(--accent);">' + freeSlots + '</b>' +
                 '</p>' +
                 '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">' +
                     '<thead><tr style="border-bottom:2px solid var(--border-subtle, #333);">' +
-                        '<th style="padding:8px 10px;text-align:left;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + (isEn ? 'Player' : 'Игрок') + '</th>' +
-                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateGroup + '</th>' +
-                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateWL + '</th>' +
-                        '<th style="padding:8px 10px;color:var(--text-secondary, #aaa);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">' + (isEn ? 'Action' : 'Действие') + '</th>' +
+                        '<th style="padding:8px 10px;text-align:left;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + (isEn ? 'Player' : 'Игрок') + '</th>' +
+                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateGroup + '</th>' +
+                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateWL + '</th>' +
+                        '<th style="padding:8px 10px;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + (isEn ? 'Action' : 'Действие') + '</th>' +
                     '</tr></thead>' +
                     '<tbody>' + rowsHtml + '</tbody>' +
                 '</table>' +
-                '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:13px;margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:6px;"></div>' +
-                '<div id="adCandidateError" style="text-align:center;color:var(--danger, #ff4444);font-size:13px;margin-bottom:8px;display:none;"></div>' +
+                '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-sm);margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:6px;"></div>' +
+                '<div id="adCandidateError" style="text-align:center;color:var(--danger, #ff4444);font-size:var(--fs-sm);margin-bottom:8px;display:none;"></div>' +
                 '<div class="ad-confirm-actions" style="margin-top:16px;">' +
                     '<button class="ad-btn ad-btn-primary" id="adCandidateConfirm">' + L.candidateConfirm + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adCandidateCancel">' + L.cancel + '</button>' +
@@ -11457,9 +11457,9 @@
                 '<span style="font-weight:600;">:</span>' +
                 '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
                 '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap" style="display:none;">' +
-                    '<span style="font-size:11px;color:var(--text-secondary);margin-left:8px;">TB</span>' +
+                    '<span style="font-size:var(--fs-2xs);color:var(--text-secondary);margin-left:8px;">TB</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB1 + '" value="' + vals[2] + '">' +
-                    '<span style="font-weight:600;font-size:11px;">:</span>' +
+                    '<span style="font-weight:600;font-size:var(--fs-2xs);">:</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB2 + '" value="' + vals[3] + '">' +
                 '</span>' +
             '</div>';
@@ -11477,10 +11477,10 @@
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div style="text-align:center;margin-bottom:16px;">' +
-                        '<div style="font-weight:600;">' + A.esc(p1Name) + (displaySeed1 ? ' <span style="color:var(--accent);font-size:11px;">[' + displaySeed1 + ']</span>' : '') + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:12px;margin:4px 0;">' + L.vsLabel + '</div>' +
-                        '<div style="font-weight:600;">' + A.esc(p2Name) + (displaySeed2 ? ' <span style="color:var(--accent);font-size:11px;">[' + displaySeed2 + ']</span>' : '') + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:11px;margin-top:8px;">' +
+                        '<div style="font-weight:600;">' + A.esc(p1Name) + (displaySeed1 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + displaySeed1 + ']</span>' : '') + '</div>' +
+                        '<div style="color:var(--text-secondary);font-size:var(--fs-xs);margin:4px 0;">' + L.vsLabel + '</div>' +
+                        '<div style="font-weight:600;">' + A.esc(p2Name) + (displaySeed2 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + displaySeed2 + ']</span>' : '') + '</div>' +
+                        '<div style="color:var(--text-secondary);font-size:var(--fs-2xs);margin-top:8px;">' +
                             (isEn ? 'Enter the score from the winner\'s side'
                                   : 'Счёт пиши со стороны победителя') + '</div>' +
                     '</div>' +
@@ -11490,9 +11490,9 @@
                         setRowHtml(3, sv[2]) +
                     '</div>' +
                     '<div id="adSetButtons" style="display:flex;gap:8px;justify-content:center;margin-top:8px;">' +
-                        '<button class="ad-btn ad-btn-secondary" id="adAddSet" style="font-size:0.8rem;padding:4px 12px;">' + L.addSet + '</button>' +
-                        '<button class="ad-btn ad-btn-secondary" id="adRemoveSet" style="font-size:0.8rem;padding:4px 12px;">' + L.removeSet + '</button>' +
-                        '<button class="ad-btn ad-btn-secondary" id="adSuperTb" style="font-size:0.8rem;padding:4px 12px;">' +
+                        '<button class="ad-btn ad-btn-secondary" id="adAddSet" style="font-size:var(--fs-xs);padding:4px 12px;">' + L.addSet + '</button>' +
+                        '<button class="ad-btn ad-btn-secondary" id="adRemoveSet" style="font-size:var(--fs-xs);padding:4px 12px;">' + L.removeSet + '</button>' +
+                        '<button class="ad-btn ad-btn-secondary" id="adSuperTb" style="font-size:var(--fs-xs);padding:4px 12px;">' +
                             (isEn ? '+ Super TB' : '+ Супер ТБ') + '</button>' +
                     '</div>' +
                     '<div style="margin-top:16px;">' +
@@ -11508,8 +11508,8 @@
                     '<div id="adRetiredBlock" style="margin-top:12px;text-align:center;display:' + (existingOutcome ? 'block' : 'none') + ';">' +
                         '<label class="ad-field-label">' + L.whoRetired + '</label>' +
                         '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">' +
-                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP1Id ? ' active' : '') + '" data-retired="' + displayP1Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
-                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP2Id ? ' active' : '') + '" data-retired="' + displayP2Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP1Id ? ' active' : '') + '" data-retired="' + displayP1Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP2Id ? ' active' : '') + '" data-retired="' + displayP2Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
                         '</div>' +
                         '<input type="hidden" id="adRetiredPlayer" value="' + (existingRetiredId || '') + '">' +
                     '</div>' +
@@ -11518,10 +11518,10 @@
                         // В столбик и во всю ширину: имена пары в строку не
                         // помещались и вылезали за края окна
                         '<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">' +
-                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
-                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '" style="font-size:0.85rem;padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
                         '</div>' +
-                        '<div id="adWinnerDisplay" style="padding:6px 0 0;font-size:0.95rem;"></div>' +
+                        '<div id="adWinnerDisplay" style="padding:6px 0 0;font-size:var(--fs-base);"></div>' +
                         '<input type="hidden" id="adScoreWinner" value="' + (match.winner_id || '') + '">' +
                         '<input type="hidden" id="adSelectedOutcome" value="' + (existingOutcome || '') + '">' +
                     '</div>' +
@@ -11568,8 +11568,8 @@
         function нарисоватьИмена() {
             var верх = document.getElementById('adNameTop');
             var низ = document.getElementById('adNameBottom');
-            верх.innerHTML = A.esc(_имя1) + (_посев1 ? ' <span style="color:var(--accent);font-size:11px;">[' + _посев1 + ']</span>' : '');
-            низ.innerHTML = A.esc(_имя2) + (_посев2 ? ' <span style="color:var(--accent);font-size:11px;">[' + _посев2 + ']</span>' : '');
+            верх.innerHTML = A.esc(_имя1) + (_посев1 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + _посев1 + ']</span>' : '');
+            низ.innerHTML = A.esc(_имя2) + (_посев2 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + _посев2 + ']</span>' : '');
         }
 
         function поменятьМестами() {
@@ -11727,7 +11727,7 @@
             if (кто) {
                 winnerDisplay.innerHTML = '';
             } else {
-                winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem;">' +
+                winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' +
                     (isEn ? 'Tap the winner' : 'Нажми на имя победителя') + '</span>';
             }
         }
@@ -11776,11 +11776,11 @@
         if (!document.getElementById('adOutcomeStyles')) {
             var styleEl = document.createElement('style');
             styleEl.id = 'adOutcomeStyles';
-            styleEl.textContent = '.ad-outcome-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-size:0.8rem;transition:all .15s;}' +
+            styleEl.textContent = '.ad-outcome-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-size:var(--fs-xs);transition:all .15s;}' +
                 '.ad-outcome-chip:hover{border-color:var(--accent);color:var(--text-primary);}' +
                 '.ad-outcome-chip.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}' +
                 '.ad-retired-btn.active{background:var(--accent) !important;color:#000 !important;border-color:var(--accent) !important;font-weight:600;}' +
-                '.ad-brk-outcome{display:inline-block;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--accent-subtle);color:var(--accent);margin-left:4px;vertical-align:middle;}';
+                '.ad-brk-outcome{display:inline-block;font-size:var(--fs-2xs);font-weight:700;padding:1px 5px;border-radius:3px;background:var(--accent-subtle);color:var(--accent);margin-left:4px;vertical-align:middle;}';
             document.head.appendChild(styleEl);
         }
 
@@ -12228,7 +12228,7 @@
         // Build UI
         var html = '<div class="ad-xslot-section" style="margin-top:24px;padding:16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);">';
         html += '<div class="ad-grp-section-title" style="margin-bottom:8px;">' + L.xSlotAssign + '</div>';
-        html += '<p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px;">' + L.xSlotExplanation + '</p>';
+        html += '<p style="color:var(--text-secondary);font-size:var(--fs-sm);margin-bottom:16px;">' + L.xSlotExplanation + '</p>';
 
         xSlots.forEach(function(xs, idx) {
             var opponentGroup = xs.opponentId ? (playerGroup[xs.opponentId] || 0) : 0;
@@ -12245,7 +12245,7 @@
             }
 
             html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
-            html += '<span style="min-width:80px;color:var(--text-muted);font-size:0.85rem;">' +
+            html += '<span style="min-width:80px;color:var(--text-muted);font-size:var(--fs-sm);">' +
                 (isEn ? 'Match ' : 'Матч ') + xs.matchOrder +
                 (opponentName ? ' vs ' + A.esc(opponentName) : '') +
                 '</span>';
