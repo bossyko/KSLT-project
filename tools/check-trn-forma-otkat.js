@@ -148,9 +148,13 @@ const ОТКАТЫ = [
    'sections/tournaments.js?v=45&bylo=',
    'версии подняты — иначе браузер отдаст старое из кеша'],
   /* ─── афиша: два представления и ни одной чужой ссылки (03.10) ─── */
+  /* ЯКОРЬ ПЕРЕВЯЗАН 17.10: круг инлайнов снял `style="display:none"` в
+     пользу утилиты `ad-skryt` — якорь держался за НАПИСАНИЕ и упал на
+     верной правке. Держимся за id поля файла: он живёт в блоке
+     постоянно и от способа скрытия не зависит. */
   ['js/admin/sections/tournaments.js',
-   "'<input type=\"file\" accept=\"image/jpeg,image/png\" id=\"adTrnImgInput\" style=\"display:none\">' +",
-   "'<input type=\"url\" class=\"ad-field-input\" id=\"adTrnImgUrl\" placeholder=\"https://...\">' +\n                '<input type=\"file\" accept=\"image/jpeg,image/png\" id=\"adTrnImgInput\" style=\"display:none\">' +",
+   "id=\"adTrnImgInput\">' +",
+   "'<input type=\"url\" class=\"ad-field-input\" id=\"adTrnImgUrl\" placeholder=\"https://...\">' +\n                '<input class=\"ad-skryt\" type=\"file\" accept=\"image/jpeg,image/png\" id=\"adTrnImgInput\">' +",
    'карточка афиши берёт только свой файл'],
 
   ['js/admin/sections/tournaments.js',
