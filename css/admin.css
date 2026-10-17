@@ -23,11 +23,21 @@ body.ad-page {
 }
 
 /* ---- Sidebar ---- */
+:root {
+    /* Ширина боковой панели админки. Живёт здесь, а не в `tokens.css`:
+       это мера ОДНОГО экрана, а не ступень продукта. */
+    --ad-sidebar-w: 260px;
+}
+
+/* ШИРИНА ПАНЕЛИ — ОДНО ОПРЕДЕЛЕНИЕ. Число 260 жило дважды: здесь и в
+   отступе контента слева, и это не ступень шкалы, а ПРОИЗВОДНОЕ от
+   ширины панели. Разъедутся — контент наедет на панель или оставит
+   щель. */
 .ad-sidebar {
     position: fixed;
     top: var(--header-h);
     left: 0;
-    width: 260px;
+    width: var(--ad-sidebar-w);
     height: calc(100vh - var(--header-h));
     background: var(--bg-secondary);
     border-right: var(--bw-hair) solid var(--border-subtle);
@@ -53,7 +63,7 @@ body.ad-page {
     border-radius: 50%;
     object-fit: cover;
     border: var(--bw-heavy) solid var(--accent);
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     background: var(--bg-elevated);
 }
 
@@ -62,7 +72,7 @@ body.ad-page {
     height: 80px;
     border-radius: 50%;
     border: var(--bw-heavy) solid var(--accent);
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     background: var(--bg-elevated);
     display: flex;
     align-items: center;
@@ -75,7 +85,7 @@ body.ad-page {
     font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .ad-sidebar-email {
@@ -86,11 +96,11 @@ body.ad-page {
 
 .ad-sidebar-role {
     display: inline-block;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 3px 10px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     background: var(--alpha-lime-12);
     color: var(--accent);
@@ -106,14 +116,14 @@ body.ad-page {
 }
 
 .ad-sidebar-item {
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .ad-sidebar-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     text-decoration: none;
@@ -151,7 +161,7 @@ body.ad-page {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     background: var(--alpha-white-08);
     color: var(--text-muted);
@@ -161,7 +171,7 @@ body.ad-page {
 .ad-sidebar-divider {
     height: 1px;
     background: var(--border-subtle);
-    margin: 8px 0;
+    margin: var(--space-2) 0;
 }
 
 /* ---- Mobile Tabs ---- */
@@ -171,7 +181,7 @@ body.ad-page {
 
 /* ---- Content ---- */
 .ad-content {
-    margin-left: 260px;
+    margin-left: var(--ad-sidebar-w);
     /* Верхнее поле 16 -> 8: воздух над заголовком складывался трижды —
        здесь, в секции и в липкой шапке */
     padding: var(--space-2) var(--space-md) var(--space-sm);
@@ -192,22 +202,22 @@ body.ad-page {
    правило живёт только в админке */
 @media (max-width: 1600px) {
     .ad-content {
-        padding-left: 12px;
-        padding-right: 12px;
+        padding-left: var(--space-3);
+        padding-right: var(--space-3);
     }
 }
 
 @media (max-width: 1280px) {
     .ad-content {
-        padding-left: 8px;
-        padding-right: 8px;
+        padding-left: var(--space-2);
+        padding-right: var(--space-2);
     }
 
     /* Панель турнира тоже подбирает поля: внутри неё та же таблица */
     .ad-brk-panel,
     .ad-table-card {
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: var(--space-2);
+        padding-right: var(--space-2);
     }
 }
 
@@ -257,7 +267,7 @@ body.ad-page {
 .ad-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: var(--space-2);
     margin-bottom: var(--space-md);
 }
 
@@ -265,13 +275,13 @@ body.ad-page {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    padding: 8px 6px;
+    padding: var(--space-2) var(--space-1);
     text-align: center;
 }
 
 .ad-stat-icon {
     font-size: var(--fs-sm);
-    margin-bottom: 2px;
+    margin-bottom: var(--space-05);
     opacity: 0.7;
 }
 
@@ -279,7 +289,7 @@ body.ad-page {
     font-size: var(--fs-md);
     font-weight: 700;
     color: var(--accent);
-    margin-bottom: 1px;
+    margin-bottom: var(--space-05);
     line-height: 1.1;
 }
 
@@ -324,14 +334,14 @@ body.ad-page {
 .ad-dash-activity-grid {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
 .ad-table-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 12px;
+    padding-bottom: var(--space-3);
     margin-bottom: var(--space-sm);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
@@ -356,9 +366,9 @@ body.ad-page {
     display: inline-block;
     font-size: var(--fs-2xs);
     font-weight: 700;
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
-    margin-left: 8px;
+    margin-left: var(--space-2);
     vertical-align: middle;
 }
 .ad-dash-count-badge--danger { background: var(--danger-subtle); color: var(--danger); }
@@ -371,13 +381,13 @@ body.ad-page {
 
 .ad-dash-empty {
     text-align: center;
-    padding: 40px 20px;
+    padding: var(--space-10) var(--space-5);
     color: var(--text-muted);
     font-size: var(--fs-sm);
 }
 .ad-dash-empty-icon {
     font-size: var(--fs-xl);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     opacity: 0.4;
 }
 
@@ -479,7 +489,7 @@ body.ad-page {
     right: 0;
     z-index: 30;
     min-width: 150px;
-    padding: 4px;
+    padding: var(--space-1);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
@@ -529,7 +539,7 @@ body.ad-page {
 .ad-reg-menu-list .ad-reg-act {
     display: block;
     width: 100%;
-    padding: 7px 10px !important;
+    padding: var(--space-2) var(--space-2) !important;
     text-align: left;
     border-radius: var(--radius-sm);
 }
@@ -554,7 +564,7 @@ body.ad-page {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
-    padding-bottom: 12px;
+    padding-bottom: var(--space-3);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
@@ -591,7 +601,7 @@ body.ad-page {
 .ad-col-header {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--space-1);
     cursor: pointer;
     user-select: none;
     position: relative;
@@ -615,7 +625,7 @@ body.ad-page {
     font-size: var(--fs-2xs);
     opacity: 0.3;
     transition: opacity 0.15s;
-    padding: 2px;
+    padding: var(--space-05);
 }
 .ad-col-header:hover .ad-col-filter-btn { opacity: 0.7; }
 .ad-col-filter-btn.ad-col-filtered { opacity: 1; color: var(--accent); }
@@ -625,7 +635,7 @@ body.ad-page {
     border-radius: 50%;
     background: var(--accent);
     display: inline-block;
-    margin-left: 2px;
+    margin-left: var(--space-05);
 }
 
 /* Column filter dropdown */
@@ -637,15 +647,15 @@ body.ad-page {
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     box-shadow: 0 8px 24px var(--alpha-black-50);
-    padding: 4px 0;
+    padding: var(--space-1) 0;
 }
 .ad-col-dd-title-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 10px;
+    padding: var(--space-1) var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
-    margin-bottom: 2px;
+    margin-bottom: var(--space-05);
 }
 .ad-col-dd-title {
     font-size: var(--fs-2xs);
@@ -657,7 +667,7 @@ body.ad-page {
 .ad-col-dd-check-all {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--space-1);
     font-size: var(--fs-2xs);
     color: var(--text-muted);
     cursor: pointer;
@@ -689,7 +699,7 @@ body.ad-page {
     color: var(--neutral-black);
 }
 .ad-col-dd-item {
-    padding: 4px 10px;
+    padding: var(--space-1) var(--space-2);
     font-size: var(--fs-xs);
     color: var(--text-secondary);
     cursor: pointer;
@@ -697,12 +707,12 @@ body.ad-page {
 .ad-col-dd-item:hover { background: var(--alpha-white-04); color: var(--text-primary); }
 .ad-col-dd-sort { color: var(--text-muted); }
 .ad-col-dd-reset { color: var(--accent); }
-.ad-col-dd-divider { height: 1px; background: var(--border-subtle); margin: 3px 0; }
+.ad-col-dd-divider { height: 1px; background: var(--border-subtle); margin: var(--space-05) 0; }
 .ad-col-dd-check {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 10px;
+    gap: var(--space-1);
+    padding: var(--space-05) var(--space-2);
     font-size: var(--fs-xs);
     color: var(--text-secondary);
     cursor: pointer;
@@ -813,7 +823,7 @@ body.ad-page {
 .ad-table-user-cell {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-2);
 }
 
 .ad-table-user-name {
@@ -1451,7 +1461,7 @@ body.ad-page {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
 }
 
@@ -1486,13 +1496,13 @@ body.ad-page {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 80px 24px;
+    padding: var(--space-20) var(--space-6);
     min-height: 300px;
 }
 
 .ad-coming-soon-icon {
     font-size: var(--fs-3xl);
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     opacity: 0.4;
 }
 
@@ -1500,7 +1510,7 @@ body.ad-page {
     font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .ad-coming-soon-text {
@@ -1531,7 +1541,7 @@ body.ad-page {
        xs 28 · sm 36 · md 44 · lg 52. Умолчание md, остальные ступени —
        классами ниже. Одно определение на одно понятие */
     height: var(--ad-btn-h, var(--btn-h-md));
-    padding: 0 24px;
+    padding: 0 var(--space-6);
     border-radius: var(--radius-full);
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -1543,7 +1553,7 @@ body.ad-page {
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
     /* Кнопка без цветной пометки раньше оставалась белой: фона ей никто
        не задавал, и браузер рисовал свою системную. Тёмный вид по умолчанию —
        тот же, что у .ad-btn-secondary */
@@ -1767,8 +1777,8 @@ body.ad-page {
 .ad-bulk-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 0;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
 }
 
 .ad-bulk-cell {
@@ -1842,9 +1852,9 @@ body.ad-page {
 .ad-btn-translate {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-top: 8px;
-    padding: 6px 14px;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+    padding: var(--space-1) var(--space-3);
     font-size: var(--fs-xs);
     color: var(--accent);
     background: var(--alpha-lime-06);
@@ -1905,26 +1915,26 @@ body.ad-page {
     height: 200px;
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
-    margin-top: 10px;
+    margin-top: var(--space-2);
 }
 
 /* Custom amenity input row */
 .ad-crt-custom-amenity-row {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
 }
 
 /* Gallery URL input row */
 .ad-crt-gallery-url-row {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
 }
 
 .ad-btn-row {
     display: flex;
-    gap: 12px;
+    gap: var(--space-3);
     margin-top: var(--space-md);
 }
 
@@ -1943,7 +1953,7 @@ body.ad-page {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
 }
 
@@ -1999,7 +2009,7 @@ body.ad-page {
 .ad-cat-badge {
     display: inline-block;
     font-size: var(--fs-2xs);
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     background: var(--alpha-white-08);
     color: var(--text-muted);
@@ -2044,7 +2054,7 @@ body.ad-page {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
-    padding-bottom: 12px;
+    padding-bottom: var(--space-3);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
@@ -2058,14 +2068,14 @@ body.ad-page {
 /* Формы баттлов и трансляций собраны на этом классе, а в стилях его не
    было вовсе: подписи липли к полям, поля — друг к другу */
 .ad-field-group {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
 }
 
 .ad-field-group > .ad-field-label {
     display: block;
     font-size: var(--fs-xs);
     color: var(--text-muted);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-1);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -2078,14 +2088,14 @@ body.ad-page {
     display: block;
     font-size: var(--fs-xs);
     color: var(--text-muted);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-1);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .ad-field-input {
     width: 100%;
-    padding: 12px var(--input-px);
+    padding: var(--space-3) var(--input-px);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--input-radius);
@@ -2170,7 +2180,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
 .ad-field-row-3 {
@@ -2204,7 +2214,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-field-flow {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
 .ad-field-flow > .ad-field {
@@ -2242,8 +2252,8 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-filter-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
 .ad-filter-search {
@@ -2285,7 +2295,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    margin: 0 auto 16px;
+    margin: 0 auto var(--space-4);
     overflow: hidden;
 }
 
@@ -2294,7 +2304,7 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 .ad-image-upload-round .ad-image-upload-placeholder {
-    padding: 16px 8px;
+    padding: var(--space-4) var(--space-2);
     font-size: var(--fs-2xs);
     text-align: center;
 }
@@ -2317,7 +2327,7 @@ input[type="date"]::-webkit-datetime-edit {
 /* Players — W/L Form Toggles */
 .ad-form-toggles {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
 .ad-form-toggle {
@@ -2353,13 +2363,13 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-badges-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: var(--space-3);
 }
 
 .ad-checkbox-label {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-1);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     cursor: pointer;
@@ -2404,7 +2414,7 @@ input[type="date"]::-webkit-datetime-edit {
 }
 .ad-seg-btn {
     flex: 1;
-    padding: 9px 6px;
+    padding: var(--space-2) var(--space-1);
     background: none;
     border: none;
     cursor: pointer;
@@ -2430,7 +2440,7 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-chk {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: var(--space-2);
     cursor: pointer;
     font-size: var(--fs-sm);
 }
@@ -2610,7 +2620,7 @@ input[type="date"]::-webkit-datetime-edit {
 
 /* ---- Court-specific ---- */
 .ad-type-badge {
-    padding: 3px 10px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -2648,8 +2658,8 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-court-type-header {
     display: grid;
     grid-template-columns: 1fr 1fr 70px 100px 60px 70px 32px;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
     font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
@@ -2660,9 +2670,9 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-court-type-row {
     display: grid;
     grid-template-columns: 1fr 1fr 70px 100px 60px 70px 32px;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .ad-court-svc-header {
@@ -2717,9 +2727,9 @@ input[type="date"]::-webkit-datetime-edit {
 /* Phone rows */
 .ad-phone-row {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: flex-end;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 /* Крестик стоит вровень с полем, а не свисает под ним */
@@ -2732,8 +2742,8 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-phone-prefix {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 0 12px;
+    gap: var(--space-1);
+    padding: 0 var(--space-3);
     height: 44px;
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
@@ -2782,14 +2792,14 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-schedule-rows {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
 }
 
 .ad-schedule-row {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
 }
 
@@ -2817,8 +2827,8 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-gallery-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
 }
 
 .ad-gallery-thumb {
@@ -2867,7 +2877,7 @@ select.ad-field-input {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%23888'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 16px center;
-    padding-right: 40px;
+    padding-right: var(--space-10);
     cursor: pointer;
 }
 
@@ -2935,7 +2945,7 @@ select.ad-field-input {
     position: relative;
     border: var(--bw-thick) dashed var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 24px;
+    padding: var(--space-6);
     text-align: center;
     transition: var(--transition-fast);
     cursor: pointer;
@@ -2958,7 +2968,7 @@ select.ad-field-input {
 
 .ad-image-upload-icon {
     font-size: var(--fs-2xl);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     opacity: 0.4;
 }
 
@@ -3153,7 +3163,7 @@ select.ad-field-input {
 
 .ad-news-meta-row {
     display: flex;
-    gap: 20px;
+    gap: var(--space-5);
     font-size: var(--fs-xs);
     color: var(--text-muted);
 }
@@ -3161,14 +3171,14 @@ select.ad-field-input {
 /* ---- Engagement stats ---- */
 .ad-engagement-stats {
     display: flex;
-    gap: 24px;
+    gap: var(--space-6);
     font-size: var(--fs-md);
 }
 
 .ad-engagement-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-1);
     color: var(--text-secondary);
 }
 
@@ -3183,8 +3193,8 @@ select.ad-field-input {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 10px 18px;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-sm);
     border: var(--bw-thick) solid var(--border-color);
     background: var(--alpha-white-04);
@@ -3211,8 +3221,8 @@ select.ad-field-input {
 
 .ad-image-url-row {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
 }
 
 .ad-image-url-row .ad-field-input {
@@ -3225,7 +3235,7 @@ select.ad-field-input {
     top: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(-100px);
-    padding: 14px 28px;
+    padding: var(--space-3) var(--space-6);
     border-radius: var(--radius-sm);
     font-size: var(--fs-base);
     font-weight: 600;
@@ -3306,7 +3316,7 @@ select.ad-field-input {
        который читают один раз и быстро. */
     line-height: var(--lh-snug);
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .ad-confirm-text {
@@ -3462,8 +3472,8 @@ select.ad-field-input {
         z-index: 999;
         background: var(--bg-secondary);
         border-bottom: var(--bw-hair) solid var(--border-subtle);
-        padding: 12px 16px;
-        gap: 8px;
+        padding: var(--space-3) var(--space-4);
+        gap: var(--space-2);
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -3474,7 +3484,7 @@ select.ad-field-input {
 
     .ad-mobile-tab {
         flex-shrink: 0;
-        padding: 8px 16px;
+        padding: var(--space-2) var(--space-4);
         border-radius: var(--radius-full);
         border: var(--bw-hair) solid var(--border-subtle);
         background: transparent;
@@ -3492,8 +3502,8 @@ select.ad-field-input {
     }
 
     .ad-content {
-        padding: 16px;
-        padding-top: 80px;
+        padding: var(--space-4);
+        padding-top: var(--space-20);
     }
 
     .ad-filter-sticky {
@@ -3515,7 +3525,7 @@ select.ad-field-input {
 @media (max-width: 768px) {
     .ad-table-wrap {
         margin: 0 -16px;
-        padding: 0 16px;
+        padding: 0 var(--space-4);
     }
 
     .ad-field-row {
@@ -3572,13 +3582,13 @@ select.ad-field-input {
 
 @media (max-width: 480px) {
     .ad-content {
-        padding: 12px;
+        padding: var(--space-3);
         /* ОСТОРОЖНО: это НЕ про шапку, хотя похоже. Шапку уже отбивает
            .ad-layout через var(--header-h). Эти 72 отбивают полосу вкладок
            (замер 58) плюс воздух. Число осталось числом, потому что у полосы
            вкладок пока нет своего токена, — заводить его будем на шаге
            «админка». Не заменять на var(--header-h): оно тут ни при чём. */
-        padding-top: 72px;
+        padding-top: var(--space-16);
     }
 
     .ad-section-title {
@@ -3587,11 +3597,11 @@ select.ad-field-input {
 
     .ad-stats-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 6px;
+        gap: var(--space-1);
     }
 
     .ad-stat-card {
-        padding: 6px 4px;
+        padding: var(--space-1) var(--space-1);
     }
 
     .ad-stat-value {
@@ -3606,17 +3616,26 @@ select.ad-field-input {
 /* Sub-tabs */
 .ad-rat-tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 20px;
+    gap: var(--space-1);
+    margin-bottom: var(--space-5);
     background: var(--alpha-white-04);
     border-radius: 8px;
-    padding: 4px;
+    padding: var(--space-1);
     overflow-x: auto;
 }
 
+/* ВЫСОТА — СТУПЕНЬ, ВЕРТИКАЛЬНЫЙ ОТСТУП — ПРОИЗВОДНОЕ. Замер 17.10:
+   вкладка держала `padding: 10px 16px` и давала 41 — мимо шкалы кнопок
+   (28 · 36 · 44 · 52); после правки отступов стала 33, то есть мимо на
+   3. Высоту задаёт ступень, отступ по вертикали снят: иначе кегль или
+   межстрочный двинется — и высота уедет вместе с ним. */
 .ad-rat-tab {
     flex: 1;
-    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-4);
     background: transparent;
     border: none;
     color: var(--alpha-white-50);
@@ -3651,9 +3670,9 @@ select.ad-field-input {
 /* Filters */
 .ad-rat-filters {
     display: flex;
-    gap: 12px;
+    gap: var(--space-3);
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     flex-wrap: wrap;
 }
 
@@ -3668,8 +3687,8 @@ select.ad-field-input {
     color: var(--accent);
     font-size: var(--fs-base);
     font-weight: 600;
-    margin: 20px 0 8px;
-    padding-bottom: 4px;
+    margin: var(--space-5) 0 var(--space-2);
+    padding-bottom: var(--space-1);
     border-bottom: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
@@ -3680,7 +3699,7 @@ select.ad-field-input {
 /* Form badges (W/L) */
 .ad-rat-form-cell {
     display: flex;
-    gap: 3px;
+    gap: var(--space-05);
 }
 
 .ad-rat-form-cell span {
@@ -3738,10 +3757,10 @@ select.ad-field-input {
 
 /* Level badge */
 .ad-rat-level-badge {
-    padding: 10px 16px;
+    padding: var(--space-2) var(--space-4);
     background: var(--alpha-white-04);
     border-radius: 8px;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     font-size: var(--fs-sm);
     color: var(--alpha-white-72);
 }
@@ -3749,20 +3768,20 @@ select.ad-field-input {
 /* Actions bar */
 .ad-rat-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 16px;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
     justify-content: flex-end;
 }
 
 /* Info banner */
 .ad-rat-info-banner {
-    padding: 12px 16px;
+    padding: var(--space-3) var(--space-4);
     background: var(--alpha-lime-12);
     border: var(--bw-hair) solid var(--alpha-lime-20);
     border-radius: 8px;
     color: var(--alpha-white-72);
     font-size: var(--fs-sm);
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
 }
 
 /* Delete row button */
@@ -3772,7 +3791,7 @@ select.ad-field-input {
     color: var(--danger);
     font-size: var(--fs-lg);
     cursor: pointer;
-    padding: 2px 6px;
+    padding: var(--space-05) var(--space-1);
     border-radius: 4px;
     line-height: 1;
 }
@@ -3787,7 +3806,7 @@ select.ad-field-input {
     border: var(--bw-hair) solid rgba(255,255,255,0.15) !important;
     border-radius: var(--radius-sm);
     color: var(--neutral-white);
-    padding: 6px 8px;
+    padding: var(--space-1) var(--space-2);
     font-size: var(--fs-sm);
 }
 
@@ -3842,7 +3861,7 @@ select.ad-field-input {
 .ad-promo-actions {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--space-1);
 }
 
 .ad-promo-actions .ad-btn {
@@ -3853,12 +3872,12 @@ select.ad-field-input {
 /* Responsive */
 @media (max-width: 768px) {
     .ad-rat-tabs {
-        gap: 2px;
-        padding: 3px;
+        gap: var(--space-05);
+        padding: var(--space-05);
     }
 
     .ad-rat-tab {
-        padding: 8px 10px;
+        padding: var(--space-2) var(--space-2);
         font-size: var(--fs-xs);
     }
 
@@ -3882,10 +3901,10 @@ select.ad-field-input {
 /* Tabs */
 .ad-tabs {
     display: flex;
-    gap: 4px;
+    gap: var(--space-1);
     background: var(--alpha-white-04);
     border-radius: var(--radius-sm);
-    padding: 4px;
+    padding: var(--space-1);
 }
 
 .ad-tab {
@@ -3913,7 +3932,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: var(--space-1);
 }
 
 .ad-tab:hover {
@@ -3953,10 +3972,10 @@ select.ad-field-input {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--accent);
     border-radius: 12px;
-    padding: 12px 24px;
+    padding: var(--space-3) var(--space-6);
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-4);
     z-index: 1000;
     box-shadow: 0 8px 32px var(--alpha-black-50);
     animation: adFloatUp 0.25s ease-out;
@@ -3977,7 +3996,7 @@ select.ad-field-input {
 
 .ad-badge {
     font-size: var(--fs-xs);
-    padding: 2px 6px;
+    padding: var(--space-05) var(--space-1);
     border-radius: var(--radius-full);
     background: var(--alpha-white-12);
 }
@@ -3989,10 +4008,10 @@ select.ad-field-input {
    Кегль с шкалы — 11, отступы 2 · 8: бейдж стоит в строке имени и не
    должен её раздвигать. */
 .ad-league-go {
-    margin-left: 8px;
+    margin-left: var(--space-2);
     font-size: var(--fs-2xs);
     font-weight: 600;
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     letter-spacing: 0.3px;
     white-space: nowrap;
 }
@@ -4063,7 +4082,7 @@ select.ad-field-input {
 .ad-reg-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
 .ad-reg-columns .ad-table {
@@ -4071,12 +4090,12 @@ select.ad-field-input {
 }
 
 .ad-reg-columns .ad-table th {
-    padding: 8px 5px;
+    padding: var(--space-2) var(--space-1);
     font-size: var(--fs-2xs);
 }
 
 .ad-reg-columns .ad-table td {
-    padding: 6px 5px;
+    padding: var(--space-1) var(--space-1);
 }
 
 @media (max-width: 768px) {
@@ -4089,10 +4108,10 @@ select.ad-field-input {
     font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
 .ad-reg-section-title .ad-badge {
@@ -4185,7 +4204,7 @@ select.ad-field-input {
 .ad-brk-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 12px 0 20px;
+    padding: var(--space-3) 0 var(--space-5);
 }
 
 /* Main bracket flex row */
@@ -4210,8 +4229,8 @@ select.ad-field-input {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--accent);
-    padding-bottom: 8px;
-    margin-bottom: 8px;
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-12));
 }
 
@@ -4228,7 +4247,7 @@ select.ad-field-input {
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
-    margin: 4px 0;
+    margin: var(--space-1) 0;
     width: 210px;
     overflow: hidden;
     transition: border-color 0.2s;
@@ -4251,7 +4270,7 @@ select.ad-field-input {
 .ad-brk-schedule {
     font-size: var(--fs-2xs);
     color: var(--text-muted);
-    padding: 3px 8px 0;
+    padding: var(--space-05) var(--space-2) 0;
     white-space: nowrap;
 }
 
@@ -4259,8 +4278,8 @@ select.ad-field-input {
 .ad-brk-player {
     display: flex;
     align-items: center;
-    padding: 5px 8px;
-    gap: 4px;
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
     font-size: var(--fs-xs);
     border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
     color: var(--text-secondary, #aaa);
@@ -4289,7 +4308,7 @@ select.ad-field-input {
    у клетки `overflow: hidden`, поэтому и своего радиуса полосе не нужно.
    Кегль и вес — как у `Badge 27:53`: мелкая прописная подпись. */
 .ad-brk-notice {
-    padding: 8px 12px;
+    padding: var(--space-2) var(--space-3);
     font-size: var(--fs-2xs);
     font-weight: 500;
     line-height: 1.3;
@@ -4326,7 +4345,7 @@ select.ad-field-input {
 /* Что делать — строкой под бедой. Регистр обычный: это инструкция, а не
    ярлык, и прописными она читалась бы как второй крик */
 .ad-brk-notice-fix {
-    margin-top: 8px;
+    margin-top: var(--space-2);
     font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
@@ -4373,7 +4392,7 @@ select.ad-field-input {
 /* Set scores for each player */
 .ad-brk-sets {
     display: flex;
-    gap: 2px;
+    gap: var(--space-05);
     margin-left: auto;
     flex-shrink: 0;
 }
@@ -4407,7 +4426,7 @@ select.ad-field-input {
 .ad-brk-edit {
     display: block;
     width: 100%;
-    padding: 4px 8px;
+    padding: var(--space-1) var(--space-2);
     border: none;
     border-top: var(--bw-hair) solid var(--border, var(--alpha-white-08));
     background: var(--alpha-lime-06);
@@ -4539,8 +4558,8 @@ select.ad-field-input {
 
 /* FIC bracket sections */
 .ad-fic-section {
-    margin-bottom: 28px;
-    padding-bottom: 20px;
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-5);
     border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 .ad-fic-section:last-child {
@@ -4553,8 +4572,8 @@ select.ad-field-input {
     color: var(--accent);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 12px;
-    padding-left: 4px;
+    margin-bottom: var(--space-3);
+    padding-left: var(--space-1);
 }
 
 /* Modal overlay */
@@ -4570,7 +4589,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: var(--space-5);
 }
 
 /* Вторая семья окон — та же обводка: два окна подряд не должны
@@ -4588,7 +4607,7 @@ select.ad-field-input {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 
@@ -4613,11 +4632,11 @@ select.ad-field-input {
 }
 
 .ad-modal-body {
-    padding: 20px;
+    padding: var(--space-5);
 }
 
 .ad-modal-footer {
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
     border-top: var(--bw-hair) solid var(--border-subtle);
     text-align: right;
 }
@@ -4637,7 +4656,7 @@ select.ad-field-input {
 .ad-import-dropzone {
     border: var(--bw-thick) dashed var(--border-subtle);
     border-radius: 12px;
-    padding: 32px 20px;
+    padding: var(--space-8) var(--space-5);
     text-align: center;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -4652,14 +4671,14 @@ select.ad-field-input {
 
 .ad-import-dropzone-icon {
     font-size: var(--fs-2xl);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     opacity: 0.6;
 }
 
 .ad-import-dropzone-text {
     color: var(--text-secondary);
     font-size: var(--fs-sm);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .ad-import-dropzone-hint {
@@ -4674,12 +4693,12 @@ select.ad-field-input {
 .ad-import-file-selected {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
-    margin-top: 10px;
+    margin-top: var(--space-2);
 }
 
 .ad-import-file-selected .file-name {
@@ -4705,8 +4724,8 @@ select.ad-field-input {
 .ad-import-map-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
 }
 
 .ad-import-map-row label {
@@ -4754,9 +4773,9 @@ select.ad-field-input {
 
 .ad-import-stats {
     display: flex;
-    gap: 16px;
+    gap: var(--space-4);
     flex-wrap: wrap;
-    padding: 10px 14px;
+    padding: var(--space-2) var(--space-3);
     background: var(--bg-elevated);
     border-radius: 8px;
     font-size: var(--fs-sm);
@@ -4769,14 +4788,14 @@ select.ad-field-input {
 
 .ad-section-header-actions {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
 }
 
 /* Bracket button in tournament list */
 .ad-brk-btn {
     font-size: var(--fs-xs) !important;
-    padding: 4px 10px !important;
+    padding: var(--space-1) var(--space-2) !important;
 }
 
 /* Score input row */
@@ -4786,8 +4805,8 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
 }
 
 /* Подсветка поля счёта тоньше: широкое кольцо на маленьком поле выглядело
@@ -4801,21 +4820,21 @@ select.ad-field-input {
     text-align: center !important;
     font-size: var(--fs-md) !important;
     font-weight: 600 !important;
-    padding: 8px 4px !important;
+    padding: var(--space-2) var(--space-1) !important;
 }
 
 .ad-tb-wrap {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-left: 4px;
+    gap: var(--space-1);
+    margin-left: var(--space-1);
 }
 
 .ad-tb-input {
     width: 44px !important;
     text-align: center !important;
     font-size: var(--fs-sm) !important;
-    padding: 6px 4px !important;
+    padding: var(--space-1) var(--space-1) !important;
 }
 
 @media (max-width: 768px) {
@@ -4835,7 +4854,7 @@ select.ad-field-input {
 /* ---- Membership Badges ---- */
 .ad-mem-badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: var(--space-05) var(--space-2);
     border-radius: 12px;
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -4877,15 +4896,15 @@ select.ad-field-input {
     background: rgba(0, 136, 204, 0.15);
     color: #0088cc;
     font-size: var(--fs-2xs);
-    padding: 1px 5px;
+    padding: var(--space-05) var(--space-1);
     vertical-align: middle;
-    margin-right: 4px;
+    margin-right: var(--space-1);
 }
 
 /* ---- Membership Table Compact ---- */
 #adMemTable th,
 #adMemTable td {
-    padding: 8px 6px;
+    padding: var(--space-2) var(--space-1);
     font-size: var(--fs-xs);
 }
 
@@ -4906,7 +4925,7 @@ select.ad-field-input {
     width: 30px;
     height: 30px;
     padding: 0;
-    margin-left: 4px;
+    margin-left: var(--space-1);
     border-radius: var(--radius-sm);
     border: var(--bw-hair) solid var(--border-subtle);
     background: transparent;
@@ -4953,8 +4972,8 @@ select.ad-field-input {
 .ad-mem-profile-top {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
 }
 
 .ad-mem-profile-avatar {
@@ -4982,15 +5001,15 @@ select.ad-field-input {
 .ad-mem-profile-email {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    margin-top: 2px;
+    margin-top: var(--space-05);
 }
 
 .ad-mem-profile-details {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-    padding: 12px 16px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+    padding: var(--space-3) var(--space-4);
     background: var(--alpha-white-04);
     border-radius: var(--radius-sm);
     border: var(--bw-hair) solid var(--border, var(--alpha-white-08));
@@ -5007,7 +5026,7 @@ select.ad-field-input {
 
 .ad-mem-profile-payments-section {
     border-top: var(--bw-hair) solid var(--border, var(--alpha-white-08));
-    padding-top: 16px;
+    padding-top: var(--space-4);
 }
 
 .ad-mem-profile-payments {
@@ -5019,11 +5038,11 @@ select.ad-field-input {
     text-align: left;
     color: var(--text-secondary);
     font-weight: 500;
-    padding: 6px 8px;
+    padding: var(--space-1) var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
 }
 .ad-mem-profile-payments td {
-    padding: 6px 8px;
+    padding: var(--space-1) var(--space-2);
     color: var(--text-primary);
     border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
@@ -5032,7 +5051,7 @@ select.ad-field-input {
 .ad-draft-status {
     font-size: var(--fs-xs);
     color: var(--text-muted);
-    margin-left: 12px;
+    margin-left: var(--space-3);
     transition: opacity 0.3s;
 }
 
@@ -5085,7 +5104,7 @@ select.ad-field-input {
     font-size: var(--fs-xl);
     font-weight: 700;
     color: var(--accent);
-    margin-bottom: 2px;
+    margin-bottom: var(--space-05);
 }
 
 .ad-news-stat-label {
@@ -5171,22 +5190,22 @@ select.ad-field-input {
 .ad-crt-stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 18px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
 .ad-crt-stat-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
 }
 
 .ad-crt-stat-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
 }
 
 .ad-crt-stat-title {
@@ -5204,13 +5223,13 @@ select.ad-field-input {
     color: var(--accent);
     line-height: 1;
     margin-left: auto;
-    padding-left: 8px;
+    padding-left: var(--space-2);
 }
 
 .ad-crt-stat-body {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-1);
 }
 
 .ad-crt-stat-row {
@@ -5237,7 +5256,7 @@ select.ad-field-input {
     height: 4px;
     background: var(--alpha-white-08);
     border-radius: var(--radius-full);
-    margin: 0 10px;
+    margin: 0 var(--space-2);
     overflow: hidden;
 }
 
@@ -5254,8 +5273,8 @@ select.ad-field-input {
     top: var(--header-h);
     z-index: 20;
     background: var(--bg-primary);
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
     margin-bottom: 0;
 }
@@ -5263,16 +5282,16 @@ select.ad-field-input {
 /* Rowspan sub-rows — no top border */
 .ad-crt-subrow td {
     border-top: none !important;
-    padding-top: 2px;
+    padding-top: var(--space-05);
 }
 
 /* Pagination */
 .ad-crt-pagination {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--space-1);
     justify-content: center;
-    padding: 12px 0 4px;
+    padding: var(--space-3) 0 var(--space-1);
 }
 .ad-crt-page-btn {
     min-width: 32px;
@@ -5300,7 +5319,7 @@ select.ad-field-input {
     font-weight: 600;
 }
 .ad-crt-page-info {
-    margin-left: 10px;
+    margin-left: var(--space-2);
     font-size: var(--fs-xs);
     color: var(--text-muted);
 }
@@ -5308,7 +5327,7 @@ select.ad-field-input {
 @media (max-width: 768px) {
     .ad-crt-stats-grid {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: var(--space-2);
     }
 }
 
@@ -5316,18 +5335,18 @@ select.ad-field-input {
 .ad-cch-stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 18px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
 .ad-cch-stat-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-1);
 }
 
 .ad-cch-stat-label {
@@ -5344,28 +5363,28 @@ select.ad-field-input {
 
 .ad-cch-tag-badge {
     display: inline-block;
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     font-size: var(--fs-2xs);
     font-weight: 600;
     background: var(--alpha-lime-12);
     color: var(--accent);
     border: var(--bw-hair) solid var(--alpha-lime-20);
-    margin: 1px 2px;
+    margin: var(--space-05) var(--space-05);
     white-space: nowrap;
 }
 
 @media (max-width: 768px) {
     .ad-cch-stats-grid {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: var(--space-2);
     }
 }
 
 /* ---- Payments Section ---- */
 .ad-pay-badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: var(--space-05) var(--space-2);
     border-radius: 12px;
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -5424,15 +5443,15 @@ select.ad-field-input {
 .ad-pay-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
 .ad-pay-stat-card {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: var(--radius-sm);
-    padding: 16px;
+    padding: var(--space-4);
     text-align: center;
 }
 
@@ -5441,7 +5460,7 @@ select.ad-field-input {
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .ad-pay-stat-card .stat-label {
@@ -5466,11 +5485,11 @@ select.ad-field-input {
     max-height: 200px;
     overflow-y: auto;
     z-index: 100;
-    margin-top: 4px;
+    margin-top: var(--space-1);
 }
 
 .ad-pay-entity-item {
-    padding: 10px 14px;
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
     color: var(--text-secondary);
     font-size: var(--fs-sm);
@@ -5498,7 +5517,7 @@ select.ad-field-input {
 @media (max-width: 768px) {
     .ad-pay-stats-grid {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: var(--space-2);
     }
 }
 
@@ -5506,8 +5525,8 @@ select.ad-field-input {
 .ad-trn-stats-header {
     display: flex;
     align-items: center;
-    gap: 18px;
-    margin-bottom: 14px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
     font-size: var(--fs-sm);
     color: var(--text-muted);
 }
@@ -5520,7 +5539,7 @@ select.ad-field-input {
 /* Число вплотную к подписи читается как одно слово: «Дружеские9».
    Между ними нужен воздух */
 .ad-crt-stat-title {
-    margin-right: 4px;
+    margin-right: var(--space-1);
 }
 
 /* Карточек пять, а колонок было четыре — пятая уезжала во второй ряд и
@@ -5532,8 +5551,8 @@ select.ad-field-input {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: start;
-    gap: 12px;
-    margin-bottom: 18px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
 @media (max-width: 900px) {
@@ -5568,13 +5587,13 @@ select.ad-field-input {
 @media (max-width: 768px) {
     .ad-trn-stats-grid {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: var(--space-2);
     }
 }
 
 /* ---- Group Stage: Playoff / Section Titles ---- */
 .ad-grp-playoff-section {
-    margin-bottom: 24px;
+    margin-bottom: var(--space-6);
 }
 
 .ad-grp-section-title {
@@ -5583,22 +5602,22 @@ select.ad-field-input {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--accent);
-    padding-bottom: 8px;
-    margin-bottom: 16px;
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-4);
     border-bottom: var(--bw-thick) solid var(--alpha-lime-20);
 }
 
 .ad-grp-stage-separator {
-    margin: 28px 0 16px;
+    margin: var(--space-6) 0 var(--space-4);
 }
 
 /* ---- Group Stage (Round-Robin) ---- */
 .ad-grp-block {
-    margin-bottom: 24px;
+    margin-bottom: var(--space-6);
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 12px;
-    padding: 16px;
+    padding: var(--space-4);
 }
 
 .ad-grp-title {
@@ -5607,7 +5626,7 @@ select.ad-field-input {
     text-transform: uppercase;
     color: var(--accent);
     letter-spacing: 0.05em;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
 }
 
 .ad-grp-matrix {
@@ -5617,7 +5636,7 @@ select.ad-field-input {
 
 .ad-grp-matrix th,
 .ad-grp-matrix td {
-    padding: 6px 8px;
+    padding: var(--space-1) var(--space-2);
     border: var(--bw-hair) solid var(--border);
     font-size: var(--fs-xs);
 }
@@ -5683,7 +5702,7 @@ select.ad-field-input {
 }
 
 .ad-brk-ig-cancelled {
-    padding: 6px 8px;
+    padding: var(--space-1) var(--space-2);
     border-top: var(--bw-hair) solid var(--border-subtle);
     color: var(--danger, var(--danger));
     font-size: var(--fs-xs);
@@ -5696,8 +5715,8 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
 }
 
 .ad-sched-actions-right {
@@ -5712,7 +5731,7 @@ select.ad-field-input {
 .ad-sess-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-1);
     max-height: 320px;
     overflow-y: auto;
 }
@@ -5721,8 +5740,8 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 6px 10px;
+    gap: var(--space-3);
+    padding: var(--space-1) var(--space-2);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
@@ -5735,7 +5754,7 @@ select.ad-field-input {
 }
 
 .ad-sess-pick {
-    padding: 4px 8px;
+    padding: var(--space-1) var(--space-2);
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -5767,13 +5786,13 @@ select.ad-field-input {
 /* В шапке колонки «Раунд» стоит только список: он и есть заголовок */
 .ad-sched-table th.sched-round {
     white-space: nowrap;
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
 }
 
 .ad-sched-round-filter {
     margin-left: 0;
-    padding: 3px 22px 3px 8px;
+    padding: var(--space-05) var(--space-5) var(--space-05) var(--space-2);
     background: var(--bg-elevated);
     /* Своя стрелка: системную в тёмной теме почти не видно, и поле
        читалось как пустой ввод, а не как список */
@@ -5801,7 +5820,7 @@ select.ad-field-input {
 /* Пояснение к таблице отбора: справочная строка, а не объявление —
    крупная плашка во всю ширину перетягивала внимание с самой таблицы */
 .ad-qual-note {
-    margin-bottom: 10px;
+    margin-bottom: var(--space-2);
     font-size: var(--fs-xs);
     line-height: 1.3;
     color: var(--text-muted);
@@ -5819,7 +5838,7 @@ select.ad-field-input {
     position: fixed;
     z-index: 9999;
     max-width: 220px;
-    padding: 7px 10px;
+    padding: var(--space-2) var(--space-2);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--accent);
     border-radius: var(--radius-sm);
@@ -5839,7 +5858,7 @@ select.ad-field-input {
 }
 
 .ad-grp-lot {
-    margin-top: 3px;
+    margin-top: var(--space-05);
     font-size: var(--fs-2xs);
     font-weight: 500;
     line-height: 1;
@@ -5858,17 +5877,17 @@ select.ad-field-input {
 
 @media (max-width: 768px) {
     .ad-grp-block {
-        padding: 10px;
+        padding: var(--space-2);
     }
     .ad-grp-matrix th,
     .ad-grp-matrix td {
-        padding: 4px 5px;
+        padding: var(--space-1) var(--space-1);
         font-size: var(--fs-xs);
     }
 }
 
 /* ---- Schedule by courts ---- */
-.ad-sched-section { margin-bottom: 24px; }
+.ad-sched-section { margin-bottom: var(--space-6); }
 
 .ad-sched-court-title {
     font-size: var(--fs-base);
@@ -5876,8 +5895,8 @@ select.ad-field-input {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--accent);
-    padding-bottom: 8px;
-    margin-bottom: 8px;
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-2);
     border-bottom: var(--bw-thick) solid var(--alpha-lime-20);
 }
 
@@ -5894,7 +5913,7 @@ select.ad-field-input {
     white-space: nowrap;
     /* Отступы общей таблицы здесь слишком щедрые: строка широкая, и при
        стопроцентном масштабе она уезжала вбок */
-    padding: 8px 6px;
+    padding: var(--space-2) var(--space-1);
 }
 
 /* Девятый столбец — кнопки зова. Прежние доли складывались ровно в сто
@@ -5923,14 +5942,14 @@ select.ad-field-input {
    своим оформлением — здесь оно снимается */
 .ad-sched-menu .ad-reg-menu-list {
     min-width: 156px;
-    padding: 4px;
+    padding: var(--space-1);
 }
 
 /* Статус — одной строкой, зов — другой: два разных действия */
 .ad-sched-menu .ad-sched-switch,
 .ad-sched-menu .ad-sched-call {
     display: flex;
-    gap: 4px;
+    gap: var(--space-1);
     margin: 0;
     padding: 0;
     background: none;
@@ -5948,7 +5967,7 @@ select.ad-field-input {
     width: 100%;
     margin: 0;
     /* Мелкий кегль и тесные поля: это список в меню, а не кнопки страницы */
-    padding: 5px 8px;
+    padding: var(--space-1) var(--space-2);
     background: none !important;
     border: none !important;
     border-radius: var(--radius-xs);
@@ -5978,8 +5997,8 @@ select.ad-field-input {
 /* Черта между строками — заметная: сверху состояние игры, снизу вызов
    пары на корт, путать их нельзя */
 .ad-sched-menu .ad-sched-call {
-    margin-top: 4px;
-    padding-top: 5px;
+    margin-top: var(--space-1);
+    padding-top: var(--space-1);
     border-top: var(--bw-thick) solid var(--border-subtle);
 }
 
@@ -6029,7 +6048,7 @@ select.ad-field-input {
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
     color: var(--text-primary);
-    padding: 6px 12px;
+    padding: var(--space-1) var(--space-3);
     font-size: var(--fs-xs);
     box-sizing: border-box;
 }
@@ -6060,20 +6079,20 @@ select.ad-field-input {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 12px;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-6);
     overflow: hidden;
 }
 
 .ad-dash-chart-card .ad-table-card-header {
-    padding: 16px 20px 0;
+    padding: var(--space-4) var(--space-5) 0;
 }
 
 /* ---- Users Stats Cards ---- */
 .ad-usr-cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
 }
 
 .ad-usr-cards--3 {
@@ -6083,15 +6102,15 @@ select.ad-field-input {
 .ad-usr-card {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: var(--space-3);
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: var(--space-4) var(--space-5);
 }
 
 .ad-usr-card--sm {
-    padding: 14px 16px;
+    padding: var(--space-3) var(--space-4);
 }
 
 .ad-usr-card-icon {
@@ -6132,7 +6151,7 @@ select.ad-field-input {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-top: 2px;
+    margin-top: var(--space-05);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -6151,10 +6170,10 @@ select.ad-field-input {
     .ad-usr-cards,
     .ad-usr-cards--3 {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: var(--space-2);
     }
     .ad-usr-card {
-        padding: 14px 16px;
+        padding: var(--space-3) var(--space-4);
     }
 }
 
@@ -6162,21 +6181,21 @@ select.ad-field-input {
 .ad-vch-stats-big {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 12px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
 }
 
 .ad-vch-stat-big {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: 12px;
-    padding: 24px;
+    padding: var(--space-6);
     text-align: center;
 }
 
 .ad-vch-stat-big .stat-icon {
     font-size: var(--fs-xl);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .ad-vch-stat-big .stat-value {
@@ -6184,7 +6203,7 @@ select.ad-field-input {
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
-    margin-bottom: 6px;
+    margin-bottom: var(--space-1);
 }
 
 .ad-vch-stat-big .stat-label {
@@ -6197,15 +6216,15 @@ select.ad-field-input {
 .ad-vch-stats-small {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
 .ad-vch-stat {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
     border-radius: var(--radius-sm);
-    padding: 14px 16px;
+    padding: var(--space-3) var(--space-4);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
@@ -6224,14 +6243,14 @@ select.ad-field-input {
 .ad-vch-period-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
     flex-wrap: wrap;
 }
 
 .ad-vch-badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: var(--space-05) var(--space-2);
     border-radius: 12px;
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -6264,7 +6283,7 @@ select.ad-field-input {
     border: none;
     cursor: pointer;
     font-size: var(--fs-base);
-    padding: 4px 6px;
+    padding: var(--space-1) var(--space-1);
     border-radius: var(--radius-sm);
     transition: background 0.2s;
 }
@@ -6297,7 +6316,7 @@ select.ad-field-input {
 }
 
 .ad-btn-xs {
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     font-size: var(--fs-xs);
     border-radius: 4px;
 }
@@ -6306,14 +6325,14 @@ select.ad-field-input {
 .ad-vch-detail-grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--space-3);
 }
 
 .ad-vch-detail-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: var(--space-2) 0;
     border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }
 
@@ -6358,7 +6377,7 @@ select.ad-field-input {
 .ad-dropdown-item {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
     font-size: var(--fs-sm);
     color: var(--text-primary);
@@ -6375,7 +6394,7 @@ select.ad-field-input {
 
 /* ---- Challenge modal helpers ---- */
 .ad-chal-selected-hint {
-    margin-top: 4px;
+    margin-top: var(--space-1);
     font-size: var(--fs-xs);
     color: var(--accent);
     min-height: 18px;
@@ -6385,8 +6404,8 @@ select.ad-field-input {
    в один: у игрока клуба снимка не просят, места хватает. */
 .cb-extras {
     display: flex;
-    gap: 12px;
-    margin-top: 8px;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
     align-items: flex-start;
 }
 .cb-extras-fields {
@@ -6394,11 +6413,11 @@ select.ad-field-input {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-2);
 }
 .cb-extras-pair {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
 }
 .cb-extras-pair > select {
     flex: 1 1 0;
@@ -6470,7 +6489,7 @@ select.ad-field-input {
 .ad-chal-banner-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-2);
     flex-wrap: wrap;
 }
 .ad-chal-banner-name {
@@ -6484,7 +6503,7 @@ select.ad-field-input {
 .ad-chal-banner-preview {
     width: 100%;
     max-width: 300px;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     border-radius: 8px;
     overflow: hidden;
     border: var(--bw-hair) solid var(--border);
@@ -6497,15 +6516,15 @@ select.ad-field-input {
 
 /* ---- Inter-group (IG) matches ---- */
 .ad-ig-section {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-matches-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-top: 12px;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
 }
 @media (max-width: 600px) {
     .ad-ig-matches-grid { grid-template-columns: 1fr; }
@@ -6513,8 +6532,8 @@ select.ad-field-input {
 .ad-ig-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
 }
 .ad-ig-card {
     background: var(--bg-card);
@@ -6533,7 +6552,7 @@ select.ad-field-input {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted);
-    padding: 6px 12px;
+    padding: var(--space-1) var(--space-3);
     background: var(--alpha-white-04);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
@@ -6541,7 +6560,7 @@ select.ad-field-input {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--space-2) var(--space-3);
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-card-row:last-child {
@@ -6567,7 +6586,7 @@ select.ad-field-input {
     color: var(--text-secondary);
     font-weight: 600;
     white-space: nowrap;
-    margin-left: 8px;
+    margin-left: var(--space-2);
 }
 .ad-ig-card-winner .ad-ig-card-score {
     color: var(--accent);
@@ -6580,7 +6599,7 @@ select.ad-field-input {
     color: var(--accent);
     font-size: var(--fs-2xs);
     font-weight: 700;
-    padding: 1px 0;
+    padding: var(--space-05) 0;
     border-radius: var(--radius-xs);
     min-width: 22px;
     width: 22px;
@@ -6613,7 +6632,7 @@ select.ad-field-input {
     background: var(--alpha-lime-06);
 }
 .ad-alert-warning {
-    padding: 10px 14px;
+    padding: var(--space-2) var(--space-3);
     border-radius: 8px;
     background: var(--warning-subtle);
     border: var(--bw-hair) solid var(--warning-border);
@@ -6625,19 +6644,19 @@ select.ad-field-input {
 .anl-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 .anl-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    padding: 20px;
+    padding: var(--space-5);
     text-align: center;
 }
 .anl-card-icon {
     font-size: var(--fs-xl);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-1);
 }
 .anl-card-value {
     font-size: var(--fs-xl);
@@ -6647,20 +6666,20 @@ select.ad-field-input {
 .anl-card-label {
     font-size: var(--fs-xs);
     color: var(--text-muted);
-    margin-top: 4px;
+    margin-top: var(--space-1);
 }
 .anl-chart-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    padding: 20px;
-    margin-bottom: 24px;
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
 }
 .anl-chart-title {
     font-size: var(--fs-base);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
 }
 .anl-chart-wrap {
     height: 260px;
@@ -6668,14 +6687,14 @@ select.ad-field-input {
 .anl-top-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 .anl-top-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    padding: 20px;
+    padding: var(--space-5);
 }
 .anl-top-chart-wrap {
     height: 180px;
@@ -6683,7 +6702,7 @@ select.ad-field-input {
 .anl-empty {
     color: var(--text-muted);
     text-align: center;
-    padding: 30px 0;
+    padding: var(--space-8) 0;
     font-size: var(--fs-sm);
 }
 
@@ -6698,8 +6717,8 @@ select.ad-field-input {
 .ad-editor-toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px;
+    gap: var(--space-1);
+    padding: var(--space-2);
     border-bottom: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-12));
     background: var(--alpha-white-04);
 }
@@ -6762,20 +6781,20 @@ select.ad-field-input {
     color: var(--text-muted, #777);
 }
 
-.ad-editor-area p { margin: 0 0 12px; }
-.ad-editor-area h3 { margin: 20px 0 10px; font-size: var(--fs-base); color: var(--accent); }
+.ad-editor-area p { margin: 0 0 var(--space-3); }
+.ad-editor-area h3 { margin: var(--space-5) 0 var(--space-2); font-size: var(--fs-base); color: var(--accent); }
 .ad-editor-area ul,
-.ad-editor-area ol { margin: 0 0 12px; padding-left: 22px; }
-.ad-editor-area li { margin-bottom: 4px; }
+.ad-editor-area ol { margin: 0 0 var(--space-3); padding-left: 22px; }
+.ad-editor-area li { margin-bottom: var(--space-1); }
 .ad-editor-area a { color: var(--accent); }
 
 /* Предпросмотр новости — примерно то же, что увидит читатель */
 .ad-news-preview-body { font-size: var(--fs-base); line-height: 1.65; color: var(--text-secondary, #ccc); }
-.ad-news-preview-body p { margin: 0 0 12px; }
-.ad-news-preview-body h3 { margin: 18px 0 8px; font-size: var(--fs-base); color: var(--accent); }
+.ad-news-preview-body p { margin: 0 0 var(--space-3); }
+.ad-news-preview-body h3 { margin: var(--space-4) 0 var(--space-2); font-size: var(--fs-base); color: var(--accent); }
 .ad-news-preview-body ul,
-.ad-news-preview-body ol { margin: 0 0 12px; padding-left: 22px; }
-.ad-news-preview-body figure { margin: 14px 0; }
+.ad-news-preview-body ol { margin: 0 0 var(--space-3); padding-left: 22px; }
+.ad-news-preview-body figure { margin: var(--space-3) 0; }
 .ad-news-preview-body figure img {
     max-width: 260px;
     max-height: 180px;
@@ -6807,7 +6826,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: var(--space-6);
     background: var(--alpha-black-85);
     backdrop-filter: blur(4px);
 }
@@ -6830,7 +6849,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
     border-bottom: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-08));
 }
 
@@ -6846,7 +6865,7 @@ select.ad-field-input {
 }
 
 .ad-crop-hint {
-    padding: 12px 20px 0;
+    padding: var(--space-3) var(--space-5) 0;
     font-size: var(--fs-sm);
     line-height: 1.5;
     color: var(--text-muted, #888);
@@ -6855,7 +6874,7 @@ select.ad-field-input {
 .ad-crop-body {
     flex: 1;
     min-height: 0;
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
     overflow: hidden;
 }
 
@@ -6872,8 +6891,8 @@ select.ad-field-input {
     flex-shrink: 0;                     /* кнопки всегда на виду */
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 20px 20px;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5) var(--space-5);
     border-top: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-08));
     background: var(--bg-card, #141417);
 }
@@ -6884,7 +6903,7 @@ select.ad-field-input {
 /* Телефон: страна списком, номер рядом — как в кабинете игрока */
 .ad-phone-row {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
 .ad-phone-country {
@@ -6906,7 +6925,7 @@ select.ad-field-input {
 .ad-cat-bar {
     display: flex;
     height: 6px;
-    margin: 10px 0 6px;
+    margin: var(--space-2) 0 var(--space-1);
     border-radius: var(--radius-full);
     overflow: hidden;
     background: var(--alpha-white-08);
@@ -6925,7 +6944,7 @@ select.ad-field-input {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: var(--space-3);
     flex-wrap: wrap;
     font-size: var(--fs-xs);
     color: var(--text-muted);
@@ -6936,11 +6955,11 @@ select.ad-field-input {
     width: 8px;
     height: 8px;
     border-radius: var(--radius-2xs);
-    margin-right: 4px;
+    margin-right: var(--space-1);
     vertical-align: middle;
 }
 
-.ad-cat-mark-l { margin-left: 10px; }
+.ad-cat-mark-l { margin-left: var(--space-2); }
 .ad-cat-mark-w { background: var(--success); }
 .ad-cat-mark-l { background: var(--danger); }
 
@@ -6960,8 +6979,8 @@ select.ad-field-input {
 .ad-cat-card {
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    padding: var(--space-3) var(--space-3);
+    margin-bottom: var(--space-2);
 }
 
 .ad-cat-card-closed {
@@ -6972,8 +6991,8 @@ select.ad-field-input {
 .ad-cat-title {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
 }
 
 /* Цвет категории — тот же, что у точки в кабинете и у линии на графике */
@@ -6989,7 +7008,7 @@ select.ad-field-input {
 }
 
 .ad-cat-closed-tag {
-    padding: 2px 8px;
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     background: var(--alpha-white-08);
     color: var(--text-muted);
@@ -7005,7 +7024,7 @@ select.ad-field-input {
     margin-left: auto;
     min-width: 20px;
     height: 20px;
-    padding: 0 6px;
+    padding: 0 var(--space-1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -7022,8 +7041,8 @@ select.ad-field-input {
     justify-content: center;
     min-width: 18px;
     height: 18px;
-    margin-left: 6px;
-    padding: 0 5px;
+    margin-left: var(--space-1);
+    padding: 0 var(--space-1);
     border-radius: var(--radius-full);
     background: var(--accent);
     color: var(--neutral-950);
@@ -7037,7 +7056,7 @@ select.ad-field-input {
 .ad-chal-contacts {
     display: grid;
     grid-template-columns: max-content 1fr;
-    gap: 2px 14px;
+    gap: var(--space-05) var(--space-3);
     align-items: baseline;
     font-size: var(--fs-xs);
     line-height: 1.65;
@@ -7067,7 +7086,7 @@ select.ad-field-input {
 
 .ad-chal-links .ad-chal-sep {
     opacity: 0.35;
-    margin: 0 6px;
+    margin: 0 var(--space-1);
 }
 
 .ad-chal-none {
@@ -7077,14 +7096,14 @@ select.ad-field-input {
 
 /* Причина отмены под названием баттла */
 .ad-chal-reason {
-    margin-top: 3px;
+    margin-top: var(--space-05);
     font-size: var(--fs-xs);
     color: var(--text-muted);
     font-style: italic;
 }
 
 .ad-modal-note {
-    margin: 0 0 14px;
+    margin: 0 0 var(--space-3);
     font-size: var(--fs-sm);
     line-height: 1.5;
     color: var(--text-muted);
@@ -7093,7 +7112,7 @@ select.ad-field-input {
 /* Кнопки в строке баттла — одной высоты, без переносов */
 .ad-chal-actions {
     display: flex;
-    gap: 6px;
+    gap: var(--space-1);
     align-items: center;
     flex-wrap: nowrap;
 }
@@ -7105,7 +7124,7 @@ select.ad-field-input {
 /* Предупреждение о необратимом действии */
 .ad-modal-danger {
     margin: 0;
-    padding: 12px 14px;
+    padding: var(--space-3) var(--space-3);
     border-radius: var(--radius-sm);
     background: var(--danger-faint);
     border: var(--bw-hair) solid var(--danger-border);
@@ -7174,9 +7193,9 @@ select.ad-field-input {
 .kslt-cc-toggle {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-1);
     height: 44px;
-    padding: 0 12px;
+    padding: 0 var(--space-3);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -7208,7 +7227,7 @@ select.ad-field-input {
     min-width: 230px;
     max-height: 300px;
     overflow-y: auto;
-    padding: 6px;
+    padding: var(--space-1);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -7223,9 +7242,9 @@ select.ad-field-input {
 .kslt-cc-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-2);
     width: 100%;
-    padding: 8px 10px;
+    padding: var(--space-2) var(--space-2);
     background: none;
     border: none;
     border-radius: var(--radius-sm);
@@ -7265,7 +7284,7 @@ select.ad-field-input {
 }
 
 .ad-input-hint {
-    margin-top: 5px;
+    margin-top: var(--space-1);
     color: var(--danger);
     font-size: var(--fs-xs);
     line-height: 1.3;
@@ -7275,8 +7294,8 @@ select.ad-field-input {
    .ad-checkbox-label, здесь только раскладка */
 .ad-checkbox-inline {
     display: inline-flex;
-    margin-right: 16px;
-    margin-bottom: 8px;
+    margin-right: var(--space-4);
+    margin-bottom: var(--space-2);
 }
 
 /* Кнопка перевода после того, как всё переведено: гаснет, но остаётся
@@ -7296,8 +7315,8 @@ select.ad-field-input {
 .ad-score-queue {
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 14px;
+    padding: var(--space-3) var(--space-3);
+    margin-bottom: var(--space-3);
     background: var(--bg-card);
 }
 
@@ -7307,7 +7326,7 @@ select.ad-field-input {
     letter-spacing: 0.6px;
     color: var(--text-muted);
     font-weight: 700;
-    margin: 6px 0 8px;
+    margin: var(--space-1) 0 var(--space-2);
 }
 
 .ad-sq-title-hot { color: var(--danger); }
@@ -7315,8 +7334,8 @@ select.ad-field-input {
 .ad-sq-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
     flex-wrap: wrap;
     border-top: var(--bw-hair) solid var(--border-subtle);
 }
@@ -7349,7 +7368,7 @@ select.ad-field-input {
     color: var(--text-muted);
     font-size: var(--fs-xs);
     line-height: 1.5;
-    margin-bottom: 6px;
+    margin-bottom: var(--space-1);
 }
 
 /* Полоса прокрутки под сеткой в админке — тот же вид, что на сайте. */
@@ -7415,7 +7434,7 @@ select.ad-field-input {
     top: 0;
     z-index: 2;
     background: var(--bg-card, var(--neutral-900));
-    padding: 6px 0;
+    padding: var(--space-1) 0;
 }
 .ad-brk-grid--big .ad-brk-match {
     width: 176px;
@@ -7427,7 +7446,7 @@ select.ad-field-input {
 /* Имена в окне счёта: нажатие поднимает человека наверх, его цифры первые */
 .ad-score-name {
     font-weight: 600;
-    padding: 6px 10px;
+    padding: var(--space-1) var(--space-2);
     border-radius: 8px;
     cursor: pointer;
     transition: background 0.2s;
@@ -7460,7 +7479,7 @@ select.ad-field-input {
 /* Расклад турнира: каждая мысль своей строкой. Одной лентой читалось плохо,
    особенно когда групп много и деление неровное */
 #adTrnDrawHint div + div {
-    margin-top: 4px;
+    margin-top: var(--space-1);
 }
 
 /* Доп. матч: своя метка и куда уходит победитель. После ввода счёта метка
@@ -7468,13 +7487,13 @@ select.ad-field-input {
 .ad-brk-ig-head {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
     font-size: var(--fs-xs);
 }
 
 .ad-brk-ig-tag {
-    padding: 1px 6px;
+    padding: var(--space-05) var(--space-1);
     border-radius: 4px;
     background: var(--alpha-lime-12);
     color: var(--accent);
@@ -7508,8 +7527,8 @@ select.ad-field-input {
     border-radius: var(--radius-sm);
     /* Было 10 14 и margin-bottom 14 — ни одного числа со шкалы
        8 · 12 · 16 · 24 · 32 · 40 */
-    padding: 12px 16px;
-    margin-bottom: 16px;
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     line-height: 1.5;
@@ -7517,7 +7536,7 @@ select.ad-field-input {
 
 .ad-sched-call {
     display: flex;
-    gap: 4px;
+    gap: var(--space-1);
     justify-content: flex-end;
     white-space: nowrap;
 }
@@ -7527,8 +7546,8 @@ select.ad-field-input {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 12px;
-    margin-top: 16px;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
     flex-wrap: wrap;
 }
 
@@ -7536,7 +7555,7 @@ select.ad-field-input {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 2px;
+    gap: var(--space-05);
     margin-right: auto;
 }
 
@@ -7549,13 +7568,13 @@ select.ad-field-input {
 /* В расписании кнопок много, а строка одна — держим их компактными, иначе
    таблица уезжает вбок */
 .ad-sched-call .ad-btn-sm {
-    padding: 6px 9px;
+    padding: var(--space-1) var(--space-2);
     font-size: var(--fs-xs);
 }
 
 /* Уже отправляли: кнопка тише, уже и подписана временем */
 .ad-sched-call .ad-call-done {
-    padding: 6px 10px;
+    padding: var(--space-1) var(--space-2);
     font-size: var(--fs-xs);
     opacity: 0.75;
 }
@@ -7578,7 +7597,7 @@ select.ad-field-input {
 }
 
 .ad-sched-status {
-    padding: 4px 8px;
+    padding: var(--space-1) var(--space-2);
     font-size: var(--fs-xs);
     border-radius: var(--radius-sm);
     background: var(--alpha-white-04);
@@ -7599,7 +7618,7 @@ select.ad-field-input {
 #adTrnTable td:last-child .ad-btn {
     display: block;
     width: 100%;
-    margin: 0 0 4px;
+    margin: 0 0 var(--space-1);
 }
 
 #adTrnTable td:last-child .ad-btn:last-child {
@@ -7610,18 +7629,18 @@ select.ad-field-input {
    то, что занимает место зря: отступы, разряд и даты */
 #adTrnTable th,
 #adTrnTable td {
-    padding: 9px 8px;
+    padding: var(--space-2) var(--space-2);
 }
 
 #adTrnTable .ad-cat-badge,
 #adTrnTable .ad-status-badge {
     white-space: nowrap;
     font-size: var(--fs-2xs);
-    padding: 3px 8px;
+    padding: var(--space-05) var(--space-2);
 }
 
 #adTrnTable .ad-btn-sm {
-    padding: 5px 10px;
+    padding: var(--space-1) var(--space-2);
     font-size: var(--fs-xs);
 }
 
@@ -7667,13 +7686,13 @@ select.ad-field-input {
 .ad-replace-who {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    margin-top: 10px;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .ad-replace-who-row {
     display: flex;
-    gap: 14px;
+    gap: var(--space-3);
 }
 
 /* Имена длинные, и без воздуха текст упирался в края кнопки */
@@ -7682,7 +7701,7 @@ select.ad-field-input {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 12px 22px;
+    padding: var(--space-3) var(--space-5);
     line-height: 1.3;
 }
 
@@ -7702,7 +7721,7 @@ select.ad-field-input {
    из тёмной таблицы — оформляем как остальные поля админки */
 .ad-reg-seed {
     width: 60px;
-    padding: 5px 8px;
+    padding: var(--space-1) var(--space-2);
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -7742,7 +7761,7 @@ select.ad-field-input {
 /* Действия в строке заявки — словами, а не значками. Отдельный класс:
    у .ad-btn-icon ширина жёстко 32px, и надписи наезжали друг на друга */
 .ad-reg-act {
-    padding: 4px 5px;
+    padding: var(--space-1) var(--space-1);
     border: none;
     border-radius: var(--radius-sm);
     background: transparent;
@@ -7850,7 +7869,7 @@ select.ad-field-input {
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .ad-mode-switch button {
@@ -7858,7 +7877,7 @@ select.ad-field-input {
 }
 
 .ad-mode-switch button {
-    padding: 10px 26px;
+    padding: var(--space-2) var(--space-6);
     font-size: var(--fs-sm);
     font-weight: 600;
     border: none;
@@ -7891,7 +7910,7 @@ select.ad-field-input {
 }
 
 .ad-sched-switch button {
-    padding: 6px 9px;
+    padding: var(--space-1) var(--space-2);
     white-space: nowrap;
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -8365,7 +8384,7 @@ select.ad-field-input {
 }
 
 .ad-grp-draft {
-    margin-left: 10px;
+    margin-left: var(--space-2);
     font-size: var(--fs-2xs);
     font-weight: 500;
     letter-spacing: 0;
@@ -8404,7 +8423,7 @@ select.ad-field-input {
     margin-left: var(--space-2);
     font-size: var(--fs-xs);
     font-weight: 600;
-    padding: 2px var(--space-2);
+    padding: var(--space-05) var(--space-2);
     border-radius: var(--radius-full);
     white-space: nowrap;
 }
