@@ -117,17 +117,17 @@ const ОТКАТЫ = [
 
   /* ─── вид пометки ─── */
   [CSS,
-   '.ad-brk-notice {\n    padding: 8px 12px;',
-   '.ad-brk-notice {\n    width: 210px;\n    padding: 8px 12px;',
+   '.ad-brk-notice {\n    padding: var(--space-2) var(--space-3);',
+   '.ad-brk-notice {\n    width: 210px;\n    padding: var(--space-2) var(--space-3);',
    'полоса пометки не задаёт себе ширину'],
 
   [CSS,
-   '    padding: 8px 12px;\n    font-size: var(--fs-2xs);',
-   '    padding: 8px 12px;\n    font-size: 11px;',
+   '    padding: var(--space-2) var(--space-3);\n    font-size: var(--fs-2xs);',
+   '    padding: var(--space-2) var(--space-3);\n    font-size: 11px;',
    'кегль пометки и подсказки — со шкалы'],
 
   [CSS,
-   '.ad-brk-notice {\n    padding: 8px 12px;\n    font-size: var(--fs-2xs);',
+   '.ad-brk-notice {\n    padding: var(--space-2) var(--space-3);\n    font-size: var(--fs-2xs);',
    '.ad-brk-notice {\n    padding: 7px 10px;\n    font-size: var(--fs-2xs);',
    'отступы пометки — со шкалы'],
 

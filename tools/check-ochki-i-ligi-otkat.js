@@ -297,8 +297,8 @@ const ОТКАТЫ = [
    'пометка появляется, когда доиграна СВОЯ группа'],
 
   [CSS,
-   '    font-size: var(--fs-2xs);\n    font-weight: 600;\n    padding: 2px 8px;',
-   '    font-size: 0.65rem;\n    font-weight: 600;\n    padding: 2px 8px;',
+   '    font-size: var(--fs-2xs);\n    font-weight: 600;\n    padding: var(--space-05) var(--space-2);',
+   '    font-size: 0.65rem;\n    font-weight: 600;\n    padding: var(--space-05) var(--space-2);',
    'бейдж лиги стоит на шкале и не раздвигает строку'],
 
   /* ЯКОРЬ ПЕРЕЕХАЛ НА РОЛЬ (17.10): было `color: #0A0A0A` числом, стало

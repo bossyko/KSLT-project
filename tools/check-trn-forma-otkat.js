@@ -57,7 +57,7 @@ const ОТКАТЫ = [
 
   /* ─── кнопки ─── */
   ['css/admin.css',
-   '    height: var(--ad-btn-h, var(--btn-h-md));\n    padding: 0 24px;',
+   '    height: var(--ad-btn-h, var(--btn-h-md));\n    padding: 0 var(--space-6);',
    '    padding: 10px 24px;',
    'высота кнопки — свойством, а не полями'],
 
@@ -135,7 +135,7 @@ const ОТКАТЫ = [
    'подсказка расчёта без инлайн-стиля'],
 
   ['css/admin.css',
-   '    padding: 12px 16px;\n    margin-bottom: 16px;',
+   '    padding: var(--space-3) var(--space-4);\n    margin-bottom: var(--space-4);',
    '    padding: 10px 14px;\n    margin-bottom: 14px;',
    'отступы подсказки расчёта со шкалы'],
 
@@ -198,8 +198,11 @@ const ОТКАТЫ = [
    'межстрочный текста афиши — ступенью лестницы'],
 
   ['css/admin.css',
-   '    min-height: var(--btn-h-sm);',
-   '    height: var(--btn-h-sm);',
+   /* ЯКОРЬ СУЖЕН 17.10: `min-height: var(--btn-h-sm)` появился вторым
+      местом — круг 7 посадил на ступень и вкладку рейтинга. Держимся за
+      пояснение, которое живёт в этом блоке постоянно. */
+   'он верен на обеих осях. */\n    min-height: var(--btn-h-sm);',
+   'он верен на обеих осях. */\n    height: var(--btn-h-sm);',
    'вкладка раздела держит высоту порогом'],
 
   ['css/admin.css',

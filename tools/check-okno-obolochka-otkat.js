@@ -83,8 +83,8 @@ const ОТКАТЫ = [
    'окно не рвёт экран: предел высоты и прокрутка тела'],
 
   ['css/admin.css',
-   '    line-height: var(--lh-snug);\n    color: var(--text-primary);\n    margin-bottom: 8px;',
-   '    color: var(--text-primary);\n    margin-bottom: 8px;',
+   '    line-height: var(--lh-snug);\n    color: var(--text-primary);\n    margin-bottom: var(--space-2);',
+   '    color: var(--text-primary);\n    margin-bottom: var(--space-2);',
    'заголовок окна стоит на ступени заголовка'],
 
   ['css/admin.css',
