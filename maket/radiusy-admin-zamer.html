@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: радиусы админки</title>
+<link rel="stylesheet" href="../css/tokens.css?v=70">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<style>
+body { background: var(--bg-base); padding-bottom: var(--space-8); }
+.st-shapka { position: sticky; top: 0; z-index: 9; padding: var(--space-3) var(--space-4);
+  background: var(--bg-base); border-bottom: var(--bw-hair) solid var(--border-subtle);
+  font-size: var(--fs-sm); color: var(--text-secondary); }
+.st-rol { padding: var(--space-4); max-width: 1100px; }
+.st-imya { font-size: var(--fs-xs); color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: var(--space-2); }
+.st-para { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.st-karta { background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: var(--space-3); }
+.st-zag { font-size: var(--fs-2xs); color: var(--text-muted); margin-bottom: var(--space-3); }
+.st-ryad { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+
+/* карточка раздела */
+.kart { background: var(--bg-elevated); border: var(--bw-hair) solid var(--border-subtle);
+  padding: var(--space-3) 14px; min-width: 150px; font-size: var(--fs-sm);
+  color: var(--text-primary); }
+.kart-a { border-radius: 10px; }  .kart-b { border-radius: var(--radius-sm); }
+
+/* кнопка-иконка 30×30 */
+.ikn { width: 30px; height: 30px; display: inline-flex; align-items: center;
+  justify-content: center; border: var(--bw-hair) solid var(--border-subtle);
+  background: transparent; color: var(--text-secondary); font-size: var(--fs-xs); }
+.ikn-a { border-radius: 6px; }   .ikn-b { border-radius: var(--radius-sm); }
+
+/* вкладка */
+.vkl { padding: var(--space-1) var(--space-3); font-size: var(--fs-sm);
+  background: var(--surface-glass); color: var(--text-primary); }
+.vkl-a { border-radius: 6px; }   .vkl-b { border-radius: var(--radius-sm); }
+
+/* коробка галочки 16×16 */
+.gal { width: 16px; height: 16px; border: var(--bw-hair) solid var(--border-light);
+  background: var(--surface-glass); display: inline-block; }
+.gal-a { border-radius: 3px; }   .gal-b { border-radius: var(--radius-xs); }
+
+/* метка 8×8 */
+.mtk { width: 8px; height: 8px; background: var(--success); display: inline-block; }
+.mtk-a { border-radius: 2px; }   .mtk-b { border-radius: var(--radius-2xs); }
+
+/* полоса высотой 4 и 6 */
+.pls { width: 120px; background: var(--info); display: inline-block; }
+.pls4 { height: 4px; } .pls6 { height: 6px; }
+.pls-a4 { border-radius: 2px; } .pls-a6 { border-radius: 3px; }
+.pls-b  { border-radius: var(--radius-full); }
+
+/* бейджи, у которых высота не объявлена: 2px 8px при кегле 2xs и xs */
+.bdg  { display: inline-block; padding: 2px 8px; font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold); background: var(--danger-subtle); color: var(--danger); }
+.bdg2 { display: inline-block; padding: 2px 6px; font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold); background: var(--info-subtle); color: var(--info); }
+.bdg3 { display: inline-block; padding: 2px 8px; font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold); background: var(--success-subtle); color: var(--success); }
+.bdg-a { border-radius: 10px; }  .bdg-b { border-radius: var(--radius-full); }
+
+/* счётчик-капсула высотой 20 и 18 */
+.sch { display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 var(--space-2); background: var(--accent-subtle); color: var(--accent);
+  font-size: var(--fs-2xs); font-weight: var(--fw-semibold); }
+.sch20 { height: 20px; } .sch18 { height: 18px; }
+.sch-a20 { border-radius: 10px; } .sch-a18 { border-radius: 9px; }
+.sch-b { border-radius: var(--radius-full); }
+</style>
+</head>
+<body>
+<!-- СТЕНД РАДИУСОВ, круг 6 ветки D. Слева как сейчас (число),
+     справа — ступень шкалы радиусов 2 · 4 · 8 · 12 · 16 · 24 · 32 · полное. -->
+<div class="st-shapka">КСЛТ · РАДИУСЫ АДМИНКИ · слева число, справа ступень шкалы</div>
+
+<div class="st-rol">
+  <div class="st-imya">блок раздела · 17 мест держат 10</div>
+  <div class="st-para">
+    <div class="st-karta"><div class="st-zag">как сейчас: 10</div>
+      <div class="st-ryad"><div class="kart kart-a">карточка раздела</div></div></div>
+    <div class="st-karta"><div class="st-zag">ступень: --radius-sm (8)</div>
+      <div class="st-ryad"><div class="kart kart-b">карточка раздела</div></div></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">кнопка-иконка и вкладка · 10 мест держат 6</div>
+  <div class="st-para">
+    <div class="st-karta"><div class="st-zag">как сейчас: 6</div>
+      <div class="st-ryad"><button class="ikn ikn-a">✎</button>
+        <button class="ikn ikn-a">✕</button><span class="vkl vkl-a">турниры</span></div></div>
+    <div class="st-karta"><div class="st-zag">ступень: --radius-sm (8)</div>
+      <div class="st-ryad"><button class="ikn ikn-b">✎</button>
+        <button class="ikn ikn-b">✕</button><span class="vkl vkl-b">турниры</span></div></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">микро: коробка галочки 16 и метка 8 · сдвига нет, кроме 3 → 4</div>
+  <div class="st-para">
+    <div class="st-karta"><div class="st-zag">как сейчас: 3 и 2</div>
+      <div class="st-ryad"><span class="gal gal-a"></span><span class="mtk mtk-a"></span></div></div>
+    <div class="st-karta"><div class="st-zag">ступени: --radius-xs (4) и --radius-2xs (2)</div>
+      <div class="st-ryad"><span class="gal gal-b"></span><span class="mtk mtk-b"></span></div></div>
+  </div>
+</div>
+
+<div class="st-rol">
+  <div class="st-imya">полоса и счётчик · радиус был ровно половиной высоты — это капсула, а не число</div>
+  <div class="st-para">
+    <div class="st-karta"><div class="st-zag">как сейчас: 2, 3, 9, 10 числом</div>
+      <div class="st-ryad"><span class="pls pls4 pls-a4"></span><span class="pls pls6 pls-a6"></span>
+        <span class="sch sch20 sch-a20">12</span><span class="sch sch18 sch-a18">7</span></div></div>
+    <div class="st-karta"><div class="st-zag">--radius-full: вид тот же, число ушло</div>
+      <div class="st-ryad"><span class="pls pls4 pls-b"></span><span class="pls pls6 pls-b"></span>
+        <span class="sch sch20 sch-b">12</span><span class="sch sch18 sch-b">7</span></div></div>
+  </div>
+</div>
+<div class="st-rol">
+  <div class="st-imya">бейджи с радиусом 10 · ЗАМЕРЕНО: высота 20.5 и 22, половина — 10.3 и 11, то есть радиус и есть капсула</div>
+  <div class="st-para">
+    <div class="st-karta"><div class="st-zag">как сейчас: 10 числом</div>
+      <div class="st-ryad"><span class="bdg bdg-a">7</span><span class="bdg2 bdg-a">новый</span>
+        <span class="bdg3 bdg-a">хард</span></div></div>
+    <div class="st-karta"><div class="st-zag">--radius-full: форма та же</div>
+      <div class="st-ryad"><span class="bdg bdg-b">7</span><span class="bdg2 bdg-b">новый</span>
+        <span class="bdg3 bdg-b">хард</span></div></div>
+  </div>
+</div>
+</body>
+</html>
