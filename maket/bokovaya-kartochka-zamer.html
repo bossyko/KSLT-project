@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: боковая карточка переросла ступень</title>
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/tournaments-overview.css?v=164">
+<style>
+body { background: var(--bg-base); padding: var(--space-4) 0 var(--space-10); }
+.st-shapka { position: sticky; top: 0; z-index: 9; padding: var(--space-3) var(--space-4);
+  background: var(--bg-base); border-bottom: var(--bw-hair) solid var(--border-subtle);
+  font-size: var(--fs-sm); color: var(--text-secondary); margin-bottom: var(--space-4); }
+.st-rol { padding: 0 var(--space-4) var(--space-4); }
+.st-imya { font-size: var(--fs-xs); color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: var(--space-2); }
+.st-tri { display: grid; grid-template-columns: 1fr; gap: var(--space-4);
+  max-width: 640px; }
+.st-karta { background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: var(--space-3); }
+.st-zag { font-size: var(--fs-xs); color: var(--text-primary); margin-bottom: var(--space-3);
+  font-weight: var(--fw-semibold); }
+.st-chislo { font-size: var(--fs-2xs); color: var(--text-muted); margin-top: var(--space-2); }
+
+/* ── столб, как в продукте ──
+   ШИРИНА ВЗЯТА С ЖИВОЙ СТРАНИЦЫ: на 1280 колонка столба 591.8, и от неё
+   зависит, в сколько строк ложится название и сведения. Без этого стенд
+   мерил бы другую карточку. */
+.st-stolb { display: grid; gap: var(--space-md); width: 592px; max-width: 100%;
+  --to-slot: 160px; }
+.st-stolb .to-slot { position: relative; }
+
+/* КАК СЕЙЧАС: ступень — минимум, ряд растёт за содержимым */
+.st-sejchas .st-stolb { grid-template-rows: repeat(3, minmax(160px, auto)); }
+
+/* ВАРИАНТ А: ступень поднята до той, при которой САМЫЙ ПОЛНЫЙ слот
+   не режется. ЗАМЕР: 192 ещё обрезает на 38, нужна 240. */
+.st-a .st-stolb { grid-template-rows: repeat(3, 240px); }
+
+/* ВАРИАНТ Б: ступень 160 остаётся, а КАРТОЧКА УЖИМАЕТСЯ ПО-НАСТОЯЩЕМУ:
+   сведения идут одной строкой с многоточием вместо трёх строк столбиком,
+   кнопка встаёт рядом с ними, отступы плотнее. */
+.st-b .st-stolb { grid-template-rows: repeat(3, 160px); }
+.st-b .to-compact { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.st-b .to-compact-sub { display: flex; flex-wrap: nowrap; gap: var(--space-2);
+  overflow: hidden; white-space: nowrap; }
+.st-b .to-compact-sub > span { overflow: hidden; text-overflow: ellipsis; }
+.st-b .to-compact-info h4 { -webkit-line-clamp: 2; }
+.st-b .to-compact-right { grid-column: auto; align-self: center; }
+.st-b .to-compact-regbtn { min-height: var(--btn-h-sm); }
+</style>
+</head>
+<body class="to-categories">
+<!-- СТЕНД: боковая карточка переросла свою ступень.
+     Три состояния содержимого × три решения. -->
+<div class="st-shapka">КСЛТ · БОКОВАЯ КАРТОЧКА · слева как сейчас, в середине «поднять ступень», справа «ужать карточку»</div>
+
+<div class="st-rol">
+  <div class="st-imya">три слота: без кнопки · с кнопкой · с кнопкой и «осталось мест»</div>
+  <div class="st-tri">
+
+    <div class="st-karta st-sejchas"><div class="st-zag">как сейчас: ступень 160 — это МИНИМУМ, ряд растёт за содержимым</div>
+      <div class="st-stolb" id="stolb1"></div>
+      <div class="st-chislo" id="chislo1"></div></div>
+
+    <div class="st-karta st-a"><div class="st-zag">A · ступень поднята до 240 — столько просит самый полный слот</div>
+      <div class="st-stolb" id="stolb2"></div>
+      <div class="st-chislo" id="chislo2"></div></div>
+
+    <div class="st-karta st-b"><div class="st-zag">Б · ступень 160, карточка ужата: кнопка в строку, отступы плотнее</div>
+      <div class="st-stolb" id="stolb3"></div>
+      <div class="st-chislo" id="chislo3"></div></div>
+
+  </div>
+</div>
+
+<script>
+/* Разметка снята с живой страницы, а не придумана. */
+function карточка(состояние) {
+    var кнопка = состояние === 'простая' ? '' :
+        '<div class="to-compact-right"><button class="btn-register to-register to-compact-regbtn">Регистрация</button></div>';
+    var места = состояние === 'мест' ?
+        '<span class="to-compact-slots">осталось 3 места</span>' :
+        '<span class="to-compact-slots">16 мест</span>';
+    return '<div class="to-slot"><div class="to-compact to-compact-thumb">' +
+        '<a class="to-compact-cover" href="#" aria-label="Кубок КСЛТ"></a>' +
+        '<div class="to-compact-left">' +
+            '<span class="to-compact-status open">Рег. открыта</span>' +
+            '<div class="to-compact-date"><span class="to-day">29</span><span class="to-month">Окт</span></div>' +
+        '</div>' +
+        '<div class="to-compact-info"><h4>Кубок КСЛТ · октябрь</h4>' +
+            '<div class="to-compact-sub">' +
+                '<span>📍 «Ала-Тоо», Бишкек</span>' +
+                '<span class="to-compact-reg">Рег: 10 Окт — 20 Окт</span>' + места +
+            '</div>' +
+        '</div>' + кнопка + '</div></div>';
+}
+var набор = карточка('простая') + карточка('кнопка') + карточка('мест');
+['stolb1', 'stolb2', 'stolb3'].forEach(function (и) {
+    document.getElementById(и).innerHTML = набор;
+});
+/* ЧИСЛА БЕРУТСЯ У ПРИБОРА, А НЕ ПИШУТСЯ РУКОЙ */
+requestAnimationFrame(function () {
+    [['stolb1', 'chislo1'], ['stolb2', 'chislo2'], ['stolb3', 'chislo3']].forEach(function (п) {
+        var с = document.getElementById(п[0]);
+        var слоты = [].slice.call(с.querySelectorAll('.to-slot'));
+        var в = слоты.map(function (э) { return Math.round(э.getBoundingClientRect().height * 10) / 10; });
+        var срез = слоты.map(function (э) {
+            var к = э.querySelector('.to-compact');
+            return к ? Math.round((к.scrollHeight - э.clientHeight) * 10) / 10 : 0;
+        });
+        var максСрез = Math.max.apply(null, срез);
+        document.getElementById(п[1]).textContent =
+            'слоты: ' + в.join(' · ') + '   столб: ' + Math.round(с.getBoundingClientRect().height) +
+            '   ' + (максСрез > 0 ? 'ОБРЕЗАНО на ' + максСрез : 'обрезки нет');
+    });
+});
+</script>
+</body>
+</html>
