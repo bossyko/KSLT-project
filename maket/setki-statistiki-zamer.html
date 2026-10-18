@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Сетки статистики админки — замер пяти видов</title>
+<style>
+:root { --fon:#0a0a0a; --koroб:#141414; --ramka:#262626; --tekst:#f5f5f5;
+        --tiho:#a3a3a3; --lajm:#c3f73a; --red:#ff6b6b; --zel:#4ade80; }
+body { margin:0; padding:24px; background:var(--fon); color:var(--tekst);
+       font:14px/1.5 system-ui,-apple-system,sans-serif; }
+h1 { font-size:21px; margin:0 0 4px; }
+h2 { font-size:16px; margin:32px 0 8px; }
+.tiho { color:var(--tiho); font-size:12px; margin:0 0 16px; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin-bottom:8px; }
+th,td { border:1px solid var(--ramka); padding:5px 8px; text-align:left; }
+th { background:var(--koroб); font-weight:600; font-size:11px; }
+td.c { text-align:center; font-variant-numeric:tabular-nums; }
+.bylo { color:var(--tiho); }
+.stalo { color:var(--lajm); font-weight:600; }
+.sovpalo { color:var(--zel); }
+.razoshlos { color:var(--red); font-weight:600; }
+.vidy { display:flex; gap:16px; flex-wrap:wrap; margin:16px 0 0; }
+.vid { border:1px solid var(--ramka); border-radius:8px; overflow:hidden; background:var(--koroб); }
+.vid > div { padding:4px 8px; font-size:11px; color:var(--tiho); border-bottom:1px solid var(--ramka); }
+iframe { border:0; display:block; background:var(--fon); transform-origin:0 0; }
+.svod { background:var(--koroб); border:1px solid var(--ramka); border-radius:8px;
+        padding:12px 16px; margin:16px 0; }
+.svod b { color:var(--lajm); }
+code { background:var(--ramka); padding:1px 4px; border-radius:3px; font-size:11px; }
+</style></head>
+<body>
+<h1>Сетки плиток статистики — один компонент против девяти</h1>
+<p class="tiho">ПОСЧИТАНО: девять сеток, 24 объявления, четыре написания одного
+понятия («N колонок»), пять границ — 992, 900, 768, 600, 480. ЗАМЕРЕНО каждым
+видом ЗАГРУЗКОЙ на нужной ширине, а не сжатием окна.</p>
+
+<div class="svod">
+  <b>Что меряет стенд.</b> Ниже пять видов, в каждом девять сеток нарисованы
+  дважды: как живут сейчас и как легли бы одним компонентом
+  <code>repeat(auto-fit, minmax(max(--min, (100% − (n−1)·gap)/n), 1fr))</code>.
+  Стенд сам снимает число колонок и ширину первой колонки. Зелёное — совпало,
+  красное — разошлось: там надо смотреть глазами, а не числами.
+</div>
+
+<div class="vidy" id="vidy"></div>
+<h2>Что насчитал стенд</h2>
+<div id="tablica"><p class="tiho">меряю…</p></div>
+
+<script>
+var ВИДЫ = [
+  ['телефон вертикально', 390, 844],
+  ['телефон горизонтально', 844, 390],
+  ['планшет вертикально', 768, 1024],
+  ['планшет горизонтально', 1024, 768],
+  ['десктоп', 1280, 800]
+];
+var МАСШТАБ = { 390:0.46, 844:0.30, 768:0.33, 1024:0.25, 1280:0.20 };
+var собрано = {};
+
+var hv = '';
+ВИДЫ.forEach(function (в, i) {
+  var м = МАСШТАБ[в[1]];
+  hv += '<div class="vid"><div>' + в[0] + ' · ' + в[1] + '×' + в[2] + '</div>' +
+        '<div style="width:' + Math.round(в[1]*м) + 'px;height:' + Math.round(в[2]*м) +
+        'px;padding:0;overflow:hidden;border:0">' +
+        '<iframe src="setki-proba.html" data-i="' + i + '" ' +
+        'style="width:' + в[1] + 'px;height:' + в[2] + 'px;transform:scale(' + м + ')"></iframe>' +
+        '</div></div>';
+});
+document.getElementById('vidy').innerHTML = hv;
+
+window.addEventListener('message', function (е) {
+  if (!е.data || е.data.proba !== 'setki') return;
+  собрано[е.data.dannye.shirina] = е.data.dannye;
+  if (Object.keys(собрано).length === ВИДЫ.length) нарисовать();
+});
+
+function нарисовать() {
+  var классы = [];
+  var любой = собрано[ВИДЫ[0][1]];
+  любой.stroki.forEach(function (с) { if (классы.indexOf(с.kl) === -1) классы.push(с.kl); });
+
+  var h = '<table><tr><th>сетка</th>';
+  ВИДЫ.forEach(function (в) { h += '<th colspan="2">' + в[0].replace(' вертикально',' верт').replace(' горизонтально',' гориз') + '</th>'; });
+  h += '</tr><tr><th></th>';
+  ВИДЫ.forEach(function () { h += '<th>сейчас</th><th>после</th>'; });
+  h += '</tr>';
+
+  var расхождений = 0, всего = 0;
+  классы.forEach(function (кл) {
+    h += '<tr><td>' + кл + '</td>';
+    ВИДЫ.forEach(function (в) {
+      var д = собрано[в[1]];
+      var а = д.stroki.filter(function (с) { return с.kl === кл && с.kak === 'sejchas'; })[0];
+      var б = д.stroki.filter(function (с) { return с.kl === кл && с.kak === 'posle'; })[0];
+      всего++;
+      var одно = а && б && а.kolonok === б.kolonok;
+      if (!одно) расхождений++;
+      h += '<td class="c bylo">' + (а ? а.kolonok : '—') + '</td>' +
+           '<td class="c ' + (одно ? 'sovpalo' : 'razoshlos') + '">' + (б ? б.kolonok : '—') + '</td>';
+    });
+    h += '</tr>';
+  });
+  h += '</table>';
+  h += '<p class="tiho">Числа — КОЛОНОК в сетке. Сверок ' + всего +
+       ', совпало ' + (всего - расхождений) + ', разошлось <b>' + расхождений + '</b>.</p>';
+
+  if (расхождений) {
+    h += '<h2>Где разошлось — смотреть глазами</h2><table><tr><th>сетка</th><th>вид</th>' +
+         '<th>колонок сейчас</th><th>колонок после</th><th>колонка сейчас, px</th><th>колонка после, px</th></tr>';
+    классы.forEach(function (кл) {
+      ВИДЫ.forEach(function (в) {
+        var д = собрано[в[1]];
+        var а = д.stroki.filter(function (с) { return с.kl === кл && с.kak === 'sejchas'; })[0];
+        var б = д.stroki.filter(function (с) { return с.kl === кл && с.kak === 'posle'; })[0];
+        if (а && б && а.kolonok !== б.kolonok) {
+          h += '<tr><td>' + кл + '</td><td>' + в[0] + '</td><td class="c">' + а.kolonok +
+               '</td><td class="c">' + б.kolonok + '</td><td class="c">' + а.shirinaKolonki +
+               '</td><td class="c">' + б.shirinaKolonki + '</td></tr>';
+        }
+      });
+    });
+    h += '</table>';
+  }
+  document.getElementById('tablica').innerHTML = h;
+}
+</script>
+</body></html>

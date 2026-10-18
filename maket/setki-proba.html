@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/admin.css?v=279">
+<style>
+/* ПРОБА — НЕ ПРОДУКТ. Рисует девять сеток плиток статистики дважды:
+   как они живут сейчас и как лежали бы одним компонентом. Числа снимает
+   getComputedStyle и отдаёт стенду. Классы продукта НЕ переопределяются:
+   «после» нарисовано своими классами `pr-*`, чтобы специфичность
+   продукта не мешала замеру. */
+body { background: var(--bg-base); color: var(--text-primary); margin: 0; padding: 8px;
+       font-family: var(--font-body, system-ui); }
+.pr-podpis { font-size: 11px; color: var(--text-muted); margin: 6px 0 2px; }
+.pr-plitka { background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+             border-radius: var(--radius-md); padding: 8px; font-size: 11px; min-height: 34px; }
+
+/* ОДИН КОМПОНЕНТ. Число колонок — свойство ширины, а не границы:
+   сетка сама считает, сколько плиток встанет в ряд. --ad-n задаёт ПОТОЛОК
+   колонок (иначе 12 плиток встанут на широком в 12 колонок), --ad-min —
+   порог переноса. Ни одной точки останова.
+   ПОРОГ 160 — объявленная ступень ширины админки (.ad-pole-uzkoe), кратна
+   восьми; это не выдуманное число. */
+.pr-setka {
+    --ad-n: 3;
+    --ad-min: 160px;
+    --ad-gap: var(--space-3);
+    display: grid;
+    gap: var(--ad-gap);
+    grid-template-columns: repeat(auto-fit,
+        minmax(max(var(--ad-min), (100% - (var(--ad-n) - 1) * var(--ad-gap)) / var(--ad-n)), 1fr));
+}
+/* РАЗДЕЛ ЗАДАЁТ ТОЛЬКО ПАРАМЕТРЫ, А НЕ СЕТКУ ЗАНОВО. Отступы взяты у
+   прибора из сегодняшних объявлений — вид на широком не сдвигается. */
+.pr-stats      { --ad-n: 3; --ad-gap: var(--space-2); }
+.pr-trn        { --ad-n: 3; --ad-gap: var(--space-3); }
+.pr-crt        { --ad-n: 2; --ad-gap: var(--space-3); }
+.pr-cch        { --ad-n: 3; --ad-gap: var(--space-3); }
+.pr-pay        { --ad-n: 4; --ad-gap: var(--space-3); }
+.pr-vch-big    { --ad-n: 2; --ad-gap: var(--space-4); }
+.pr-vch-small  { --ad-n: 3; --ad-gap: var(--space-3); }
+.pr-usr        { --ad-n: 4; --ad-gap: var(--space-3); }
+.pr-ig         { --ad-n: 2; --ad-gap: var(--space-3); }
+.pr-anl        { --ad-n: 5; --ad-gap: var(--space-4); --ad-min: 160px; }
+.pr-anl-top    { --ad-n: 3; --ad-gap: var(--space-4); --ad-min: 320px; }
+</style></head>
+<body>
+<div id="pole"></div>
+<script>
+/* Девять сеток продукта: класс, сколько плиток, какой потолок колонок
+   им задан сегодня на широком виде. */
+var СЕТКИ = [
+  ['ad-stats-grid',       12, 'pr-stats'],
+  ['ad-trn-stats-grid',    5, 'pr-trn'],
+  ['ad-crt-stats-grid',    2, 'pr-crt'],
+  ['ad-cch-stats-grid',    3, 'pr-cch'],
+  ['ad-pay-stats-grid',    4, 'pr-pay'],
+  ['ad-vch-stats-big',     2, 'pr-vch-big'],
+  ['ad-vch-stats-small',   3, 'pr-vch-small'],
+  ['ad-usr-cards',         4, 'pr-usr'],
+  ['ad-ig-matches-grid',   2, 'pr-ig'],
+  ['anl-cards',            5, 'pr-anl'],
+  ['anl-top-grid',         6, 'pr-anl-top']
+];
+
+var h = '';
+СЕТКИ.forEach(function (с) {
+    var кл = с[0], плиток = с[1], пар = с[2], пл = '';
+    for (var i = 0; i < плиток; i++) пл += '<div class="pr-plitka">' + (i + 1) + '</div>';
+    h += '<div class="pr-podpis">' + кл + ' — сейчас</div>';
+    h += '<div class="' + кл + '" data-kak="sejchas" data-kl="' + кл + '">' + пл + '</div>';
+    h += '<div class="pr-podpis">' + кл + ' — одним компонентом</div>';
+    h += '<div class="pr-setka ' + пар + '" data-kak="posle" data-kl="' + кл + '">' + пл + '</div>';
+});
+document.getElementById('pole').innerHTML = h;
+
+function снять() {
+    var итог = { shirina: window.innerWidth, stroki: [] };
+    document.querySelectorAll('[data-kak]').forEach(function (эл) {
+        var цс = getComputedStyle(эл);
+        var колонок = цс.gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length;
+        var первая = parseFloat(цс.gridTemplateColumns.trim().split(/\s+/)[0]) || 0;
+        итог.stroki.push({
+            kl: эл.getAttribute('data-kl'),
+            kak: эл.getAttribute('data-kak'),
+            kolonok: колонок,
+            shirinaKolonki: Math.round(первая * 10) / 10,
+            vysota: Math.round(эл.getBoundingClientRect().height)
+        });
+    });
+    parent.postMessage({ proba: 'setki', dannye: итог }, '*');
+}
+window.addEventListener('load', function () { requestAnimationFrame(снять); });
+</script>
+</body></html>
