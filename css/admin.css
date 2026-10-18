@@ -264,10 +264,52 @@ body.ad-page {
 }
 
 /* ---- Stats Grid ---- */
-.ad-stats-grid {
+/* ════ СЕТКА ПЛИТОК СТАТИСТИКИ — ОДНО ОПРЕДЕЛЕНИЕ НА ДЕВЯТЬ СЕТОК ════
+   Круг 10 ветки D, 17.10. Было: девять сеток, 24 объявления, ЧЕТЫРЕ
+   написания одного понятия («N колонок»: repeat(3,1fr), 1fr 1fr 1fr,
+   repeat(2,1fr), 1fr 1fr) и ПЯТЬ границ — 992, 900, 768, 600, 480, из
+   них на шкале одна. Беда родилась ровно на швах: на планшете
+   вертикально СЕМЬ сеток из девяти стояли в одну колонку шириной 752px,
+   и плитка «Активных: 14» растягивалась на весь экран. Замерено
+   загрузкой на каждой ширине: высота девяти сеток там была 1628px,
+   стала 712 — экран короче на 916.
+
+   ЧИСЛО КОЛОНОК — СВОЙСТВО ШИРИНЫ, А НЕ ГРАНИЦЫ. Сетка считает сама,
+   сколько плиток встанет в ряд; `--ad-plitok` задаёт ПОТОЛОК (без него
+   auto-fit разводил 12 плиток на 12 колонок — у .ad-pay-stats-grid так
+   и было: ВОСЕМЬ колонок при четырёх плитках на десктопе, шесть на
+   планшете), `--ad-plitka-min` — порог переноса.
+
+   ПОРОГ 160 — объявленная ступень ширины админки (.ad-pole-uzkoe),
+   кратная восьми. Не выдуманное число.
+
+   РАЗДЕЛ ЗАДАЁТ ТОЛЬКО ПАРАМЕТРЫ, А НЕ СЕТКУ ЗАНОВО. Отступы взяты у
+   прибора из прежних объявлений — на десктопе и планшете горизонтально
+   восемь сеток из девяти совпали ДО ПИКСЕЛЯ, девятая — та самая `pay`,
+   где беду чинят, а не вид меняют. */
+.ad-stats-grid,
+.ad-trn-stats-grid,
+.ad-crt-stats-grid,
+.ad-cch-stats-grid,
+.ad-pay-stats-grid,
+.ad-vch-stats-big,
+.ad-vch-stats-small,
+.ad-usr-cards,
+.ad-ig-matches-grid,
+.anl-cards,
+.anl-top-grid {
+    --ad-plitok: 3;
+    --ad-plitka-min: 160px;
+    --ad-plitka-gap: var(--space-3);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
+    gap: var(--ad-plitka-gap);
+    grid-template-columns: repeat(auto-fit, minmax(max(var(--ad-plitka-min),
+        (100% - (var(--ad-plitok) - 1) * var(--ad-plitka-gap)) / var(--ad-plitok)), 1fr));
+}
+
+.ad-stats-grid {
+    --ad-plitok: 3;
+    --ad-plitka-gap: var(--space-2);
     margin-bottom: var(--space-md);
 }
 
@@ -3518,9 +3560,6 @@ select.ad-field-input {
         top: calc(var(--header-h) + 58px);
     }
 
-    .ad-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (max-width: 768px) {
@@ -3596,10 +3635,11 @@ select.ad-field-input {
         font-size: var(--fs-md);
     }
 
-    .ad-stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-1);
-    }
+    /* СНЕСЕНО 17.10, КРУГ 10: колонки и зазор ушли в компонент. Здесь
+       блок сжимал зазор с 8 до 4 — цена сноса ЗАМЕРЕНА: главная доска
+       на телефоне стала на 20px длиннее (332 -> 352), при том что
+       девять сеток там стали короче на 636. Двадцать пикселей не стоят
+       отдельной границы 480 мимо шкалы. */
 
     .ad-stat-card {
         padding: var(--space-1) var(--space-1);
@@ -5189,9 +5229,7 @@ select.ad-field-input {
 
 /* ---- Court Stats Cards ---- */
 .ad-crt-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
+    --ad-plitok: 2;
     margin-bottom: var(--space-4);
 }
 
@@ -5325,18 +5363,10 @@ select.ad-field-input {
     color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
-    .ad-crt-stats-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-2);
-    }
-}
 
 /* ---- Coaches Stats & Tags ---- */
 .ad-cch-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: var(--space-3);
+    --ad-plitok: 3;
     margin-bottom: var(--space-4);
 }
 
@@ -5375,12 +5405,6 @@ select.ad-field-input {
     white-space: nowrap;
 }
 
-@media (max-width: 768px) {
-    .ad-cch-stats-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-2);
-    }
-}
 
 /* ---- Payments Section ---- */
 .ad-pay-badge {
@@ -5441,10 +5465,10 @@ select.ad-field-input {
     color: var(--text-muted);
 }
 
+/* ПОТОЛОК ЗАВЕДЁН: auto-fit без него разводил четыре плитки на восемь
+   колонок — половина сетки была пустыми местами справа. */
 .ad-pay-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: var(--space-3);
+    --ad-plitok: 4;
     margin-bottom: var(--space-4);
 }
 
@@ -5515,12 +5539,6 @@ select.ad-field-input {
     filter: brightness(1.3) drop-shadow(0 0 6px var(--accent));
 }
 
-@media (max-width: 768px) {
-    .ad-pay-stats-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-2);
-    }
-}
 
 /* ---- Tournaments Stats Cards ---- */
 .ad-trn-stats-header {
@@ -5549,18 +5567,11 @@ select.ad-field-input {
 /* Три колонки: сверху мужские — одиночные, парные и смешанные, снизу женские.
    Так разряды сравниваются по вертикали, а смешанные стоят особняком */
 .ad-trn-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    --ad-plitok: 3;
     align-items: start;
-    gap: var(--space-3);
     margin-bottom: var(--space-4);
 }
 
-@media (max-width: 900px) {
-    .ad-trn-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 
 .ad-stat-collapsible {
     cursor: pointer;
@@ -5585,12 +5596,6 @@ select.ad-field-input {
    тогда там стояли «смешанные» и «дружеские». Теперь порядок другой, и
    женские карточки должны просто вставать под мужскими */
 
-@media (max-width: 768px) {
-    .ad-trn-stats-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-2);
-    }
-}
 
 /* ---- Group Stage: Playoff / Section Titles ---- */
 .ad-grp-playoff-section {
@@ -6090,14 +6095,14 @@ select.ad-field-input {
 
 /* ---- Users Stats Cards ---- */
 .ad-usr-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-3);
+    --ad-plitok: 4;
     margin-bottom: var(--space-3);
 }
 
+/* БЫЛО ТРИ ОБЪЯВЛЕНИЯ НА ОДНО: база, противовес в 992 (повторял базу
+   слово в слово) и 1fr в 600. Остался один параметр. */
 .ad-usr-cards--3 {
-    grid-template-columns: repeat(3, 1fr);
+    --ad-plitok: 3;
 }
 
 .ad-usr-card {
@@ -6158,21 +6163,8 @@ select.ad-field-input {
     text-overflow: ellipsis;
 }
 
-@media (max-width: 992px) {
-    .ad-usr-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .ad-usr-cards--3 {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
 
 @media (max-width: 600px) {
-    .ad-usr-cards,
-    .ad-usr-cards--3 {
-        grid-template-columns: 1fr;
-        gap: var(--space-2);
-    }
     .ad-usr-card {
         padding: var(--space-3) var(--space-4);
     }
@@ -6180,9 +6172,8 @@ select.ad-field-input {
 
 /* ---- Vouchers Section ---- */
 .ad-vch-stats-big {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+    --ad-plitok: 2;
+    --ad-plitka-gap: var(--space-4);
     margin-bottom: var(--space-3);
 }
 
@@ -6215,9 +6206,7 @@ select.ad-field-input {
 }
 
 .ad-vch-stats-small {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-3);
+    --ad-plitok: 3;
     margin-bottom: var(--space-4);
 }
 
@@ -6349,12 +6338,6 @@ select.ad-field-input {
 }
 
 @media (max-width: 768px) {
-    .ad-vch-stats-big {
-        grid-template-columns: 1fr;
-    }
-    .ad-vch-stats-small {
-        grid-template-columns: 1fr;
-    }
     .ad-vch-period-row {
         flex-direction: column;
         align-items: stretch;
@@ -6522,13 +6505,8 @@ select.ad-field-input {
     border-bottom: var(--bw-hair) solid var(--border-subtle);
 }
 .ad-ig-matches-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
+    --ad-plitok: 2;
     margin-top: var(--space-3);
-}
-@media (max-width: 600px) {
-    .ad-ig-matches-grid { grid-template-columns: 1fr; }
 }
 .ad-ig-grid {
     display: grid;
@@ -6642,10 +6620,11 @@ select.ad-field-input {
 }
 
 /* ---- Analytics Dashboard ---- */
+/* ПЯТЬ ПЛИТОК СВОДКИ, А КОЛОНОК БЫЛО ШЕСТЬ: auto-fit без потолка
+   разводил их на всю ширину, шестая стояла пустой. */
 .anl-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--space-4);
+    --ad-plitok: 5;
+    --ad-plitka-gap: var(--space-4);
     margin-bottom: var(--space-6);
 }
 .anl-card {
@@ -6685,10 +6664,14 @@ select.ad-field-input {
 .anl-chart-wrap {
     height: 260px;
 }
+/* ПОТОЛОК 3 ВЗЯТ У ПРИБОРА, А НЕ У КОММЕНТАРИЯ. Комментарий в js
+   обещает «Top-5 grids (2 columns)», а живут три — и три не хуже:
+   карточка 411px, два ряда вместо трёх. Потолок 2 сделал бы блок выше
+   на 68px. ЗАМЕР РЕШАЕТ, А НЕ ЗАДУМКА. */
 .anl-top-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--space-4);
+    --ad-plitok: 3;
+    --ad-plitka-min: 320px;
+    --ad-plitka-gap: var(--space-4);
     margin-bottom: var(--space-6);
 }
 .anl-top-card {
