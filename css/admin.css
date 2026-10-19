@@ -180,11 +180,20 @@ body.ad-page {
 }
 
 /* ---- Content ---- */
+/* БОКОВОЕ ПОЛЕ СОДЕРЖИМОГО — ОДНО ОПРЕДЕЛЕНИЕ НА ДВА МЕСТА (18.10).
+   От него зависит не только сам отступ: обёртка таблицы уходит в
+   МИНУСОВОЕ поле ровно на эту величину, чтобы таблица доходила до края
+   экрана. Пока поле жило числом в одном месте, а минус — числом в другом,
+   они разошлись: на телефоне поле 12, минус 16 — и страница переливалась
+   на 4 пикселя (замерено стендом `maket/pereliv-admin-zamer.html`,
+   загрузкой на 390). ЗАМОРАЖИВАЕТСЯ ОТНОШЕНИЕ: минус равен полю, какими
+   бы числами поле ни задавали. */
 .ad-content {
+    --ad-content-pad: var(--space-md);
     margin-left: var(--ad-sidebar-w);
     /* Верхнее поле 16 -> 8: воздух над заголовком складывался трижды —
        здесь, в секции и в липкой шапке */
-    padding: var(--space-2) var(--space-md) var(--space-sm);
+    padding: var(--space-2) var(--ad-content-pad) var(--space-sm);
 }
 
 /* Предел ширины: на большом мониторе строка таблицы растягивалась во всю
@@ -202,15 +211,17 @@ body.ad-page {
    правило живёт только в админке */
 @media (max-width: 1600px) {
     .ad-content {
-        padding-left: var(--space-3);
-        padding-right: var(--space-3);
+        --ad-content-pad: var(--space-3);
+        padding-left: var(--ad-content-pad);
+        padding-right: var(--ad-content-pad);
     }
 }
 
 @media (max-width: 1280px) {
     .ad-content {
-        padding-left: var(--space-2);
-        padding-right: var(--space-2);
+        --ad-content-pad: var(--space-2);
+        padding-left: var(--ad-content-pad);
+        padding-right: var(--ad-content-pad);
     }
 
     /* Панель турнира тоже подбирает поля: внутри неё та же таблица */
@@ -3545,7 +3556,8 @@ select.ad-field-input {
     }
 
     .ad-content {
-        padding: var(--space-4);
+        --ad-content-pad: var(--space-4);
+        padding: var(--ad-content-pad);
         padding-top: var(--space-20);
     }
 
@@ -3563,9 +3575,13 @@ select.ad-field-input {
 }
 
 @media (max-width: 768px) {
+    /* МИНУС РАВЕН ПОЛЮ СОДЕРЖИМОГО, А НЕ ЧИСЛУ 16. Было `margin: 0 -16px`
+       при поле 16 на этом виде — сходилось; но на телефоне поле 12, и
+       страница переливалась на 4 пикселя в каждую сторону. Теперь обе
+       величины берутся у одного определения и разойтись не могут. */
     .ad-table-wrap {
-        margin: 0 -16px;
-        padding: 0 var(--space-4);
+        margin-inline: calc(-1 * var(--ad-content-pad));
+        padding-inline: var(--ad-content-pad);
     }
 
     .ad-field-row {
@@ -3622,7 +3638,8 @@ select.ad-field-input {
 
 @media (max-width: 480px) {
     .ad-content {
-        padding: var(--space-3);
+        --ad-content-pad: var(--space-3);
+        padding: var(--ad-content-pad);
         /* ОСТОРОЖНО: это НЕ про шапку, хотя похоже. Шапку уже отбивает
            .ad-layout через var(--header-h). Эти 72 отбивают полосу вкладок
            (замер 58) плюс воздух. Число осталось числом, потому что у полосы
