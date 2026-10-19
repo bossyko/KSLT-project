@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>«Идёт сейчас» — пять красок на два понятия</title>
+<link rel="stylesheet" href="../css/tokens.css?v=73">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/admin.css?v=284">
+<link rel="stylesheet" href="../css/tournament-detail.css?v=155">
+<link rel="stylesheet" href="../css/tournaments-overview.css?v=170">
+<style>
+body { margin:0; padding:24px; background:var(--bg-base); color:var(--text-primary);
+       font:14px/1.5 system-ui,-apple-system,sans-serif; }
+h1 { font-size:21px; margin:0 0 4px; }
+h2 { font-size:16px; margin:26px 0 8px; }
+.tiho { color:var(--text-muted); font-size:12px; margin:0 0 14px; max-width:86ch; }
+.ryad { display:grid; gap:14px; margin:12px 0 18px;
+        grid-template-columns:repeat(auto-fit, minmax(max(280px,(100% - 14px)/2), 1fr)); }
+.korob { border:1px solid var(--border-subtle); border-radius:12px; background:var(--bg-elevated); padding:14px; }
+.korob > .shapka { font-size:11px; color:var(--text-muted); margin:0 0 10px; }
+.korob > .shapka b { color:var(--accent); }
+.spisok { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin:8px 0 18px; }
+th,td { border:1px solid var(--border-subtle); padding:5px 8px; text-align:left; }
+th { background:var(--bg-elevated); font-size:11px; }
+td.c { text-align:center; font-variant-numeric:tabular-nums; }
+.raznye { color:#ff6b6b; font-weight:600; }
+.odna { color:#4ade80; font-weight:600; }
+.obr { display:inline-block; width:13px; height:13px; border-radius:3px; vertical-align:-2px; margin-right:5px; }
+/* ПРЕДЛОЖЕНИЕ: статус турнира «идёт» — роль, уже объявленная в токенах
+   как «менеджер / идёт сейчас» (решение 17.10). Матч «идёт» — эфир,
+   решённый кругом 2б как --danger. */
+.pr .st-ongoing { background: var(--role-manager-subtle); color: var(--role-manager); }
+.pr .m-live { border-color: var(--danger); box-shadow: 0 0 8px var(--danger-border); }
+.pr .m-row-live { background: var(--danger-faint); }
+.ramka { border:2px solid var(--border-subtle); border-radius:8px; padding:8px 10px; font-size:12px; }
+.stroka { padding:6px 10px; font-size:12px; border-radius:6px; }
+</style></head>
+<body>
+<h1>«Идёт сейчас»: пять красок на два понятия</h1>
+<p class="tiho">ПОСЧИТАНО: состояние «идёт» красится в продукте ПЯТЬЮ красками, и это ДВА
+разных понятия. Статус ТУРНИРА — фиолетовый в списке админки, лаймовый в её же форме,
+голубой числом <code>#00A3FF</code> на сайте (в трёх файлах). Статус МАТЧА — оранжевый
+в админке, красный на сайте. Решения по обоим уже есть: роль «менеджер / идёт сейчас»
+объявлена в токенах 17.10, эфир сведён к <code>--danger</code> кругом 2б. Их просто не
+во все места донесли.</p>
+
+<h2>Статус турнира «идёт»</h2>
+<div class="ryad">
+  <div class="korob"><div class="shapka"><b>СЕЙЧАС</b> — три краски</div>
+    <div class="spisok">
+      <span class="ad-status ad-status-ongoing" id="a1">Идёт</span>
+      <span class="ad-trn-status-field ad-status-ongoing" id="a2">Идёт (форма)</span>
+      <span class="td-status-badge ongoing" id="a3">Идёт (сайт)</span>
+    </div>
+  </div>
+  <div class="korob pr"><div class="shapka"><b>ПОСЛЕ</b> — одна роль</div>
+    <div class="spisok">
+      <span class="ad-status st-ongoing" id="b1">Идёт</span>
+      <span class="ad-status st-ongoing" id="b2">Идёт (форма)</span>
+      <span class="td-status-badge st-ongoing" id="b3">Идёт (сайт)</span>
+    </div>
+  </div>
+</div>
+
+<h2>Матч «идёт» — это эфир</h2>
+<div class="ryad">
+  <div class="korob"><div class="shapka"><b>СЕЙЧАС</b> — админка оранжевая, сайт красный</div>
+    <div class="spisok" style="flex-direction:column;align-items:stretch">
+      <div class="ramka ad-brk-match live" id="c1">Матч в сетке админки</div>
+      <!-- ПРАВИЛО ЗАДАНО НА `td`, И МЕРИТЬ НАДО `td`. Первая редакция
+           стенда ставила класс на `div` — фон выходил прозрачным, и прибор
+           показывал чёрный, будто краска чужая. ПРИБОР ДОЛЖЕН МЕРИТЬ ТОТ
+           ЭЛЕМЕНТ, НА КОТОРОМ ЖИВЁТ ПРАВИЛО. -->
+      <table style="width:100%;border-collapse:collapse"><tr class="ad-sched-row-live">
+        <td id="c2" class="stroka">Строка расписания админки</td></tr></table>
+      <span class="td-status-pill live" id="c3">В эфире (сайт)</span>
+    </div>
+  </div>
+  <div class="korob pr"><div class="shapka"><b>ПОСЛЕ</b> — эфир говорит одной краской</div>
+    <div class="spisok" style="flex-direction:column;align-items:stretch">
+      <div class="ramka m-live" id="d1">Матч в сетке админки</div>
+      <table style="width:100%;border-collapse:collapse"><tr class="ad-sched-row-live">
+        <td id="d2" class="stroka">Строка расписания админки</td></tr></table>
+      <span class="td-status-pill live" id="d3">В эфире (сайт)</span>
+    </div>
+  </div>
+</div>
+
+<h2>Что насчитал прибор</h2>
+<div id="tablica"><p class="tiho">меряю…</p></div>
+
+<script>
+function rgb(s) {
+  var m = s.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+  return m ? { r:+m[1], g:+m[2], b:+m[3], a: m[4]===undefined?1:+m[4] } : null;
+}
+function имяЦвета(c) { return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')'; }
+function lab(c) {
+  function f(v){ v/=255; return v<=0.04045? v/12.92 : Math.pow((v+0.055)/1.055,2.4); }
+  var r=f(c.r),g=f(c.g),b=f(c.b);
+  var X=(r*0.4124+g*0.3576+b*0.1805)/0.95047, Y=r*0.2126+g*0.7152+b*0.0722, Z=(r*0.0193+g*0.1192+b*0.9505)/1.08883;
+  function g2(t){ return t>0.008856? Math.pow(t,1/3) : 7.787*t+16/116; }
+  var fx=g2(X),fy=g2(Y),fz=g2(Z);
+  return [116*fy-16,500*(fx-fy),200*(fy-fz)];
+}
+function dE(a,b){ var la=lab(a),lb=lab(b);
+  return Math.round(Math.sqrt(la.reduce(function(s,v,i){return s+(v-lb[i])*(v-lb[i])},0))*10)/10; }
+
+window.addEventListener('load', function () {
+  function краска(id, свойство) {
+    var э = document.getElementById(id);
+    if (!э) return null;
+    var cs = getComputedStyle(э);
+    var зн = свойство === 'border' ? cs.borderTopColor
+           : свойство === 'bg' ? cs.backgroundColor : cs.color;
+    return rgb(зн);
+  }
+  var h = '<table><tr><th>понятие</th><th>место</th><th>сейчас</th><th>после</th>' +
+          '<th>ΔE между сейчас и после</th></tr>';
+  function группа(имя, строки) {
+    var цвета = [];
+    h += '<tr><td colspan="5" style="background:var(--bg-elevated)"><b>' + имя + '</b></td></tr>';
+    строки.forEach(function (с) {
+      var было = краска(с[1], с[3]), стало = краска(с[2], с[3]);
+      if (было) цвета.push(было);
+      h += '<tr><td>' + имя + '</td><td>' + с[0] + '</td>' +
+           '<td class="c"><span class="obr" style="background:' + (было?имяЦвета(было):'transparent') + '"></span>' +
+             (было?имяЦвета(было):'—') + '</td>' +
+           '<td class="c"><span class="obr" style="background:' + (стало?имяЦвета(стало):'transparent') + '"></span>' +
+             (стало?имяЦвета(стало):'—') + '</td>' +
+           '<td class="c">' + (было && стало ? dE(было, стало) : '—') + '</td></tr>';
+    });
+    // сколько разных красок было
+    var уник = [];
+    цвета.forEach(function (ц) {
+      if (!уник.some(function (у) { return dE(у, ц) < 3; })) уник.push(ц);
+    });
+    h += '<tr><td colspan="4"><b>разных красок у одного понятия БЫЛО</b></td>' +
+         '<td class="c ' + (уник.length > 1 ? 'raznye' : 'odna') + '">' + уник.length + '</td></tr>';
+    return уник.length;
+  }
+  группа('статус турнира «идёт»', [
+    ['список админки', 'a1', 'b1', 'color'],
+    ['форма админки', 'a2', 'b2', 'color'],
+    ['страница турнира', 'a3', 'b3', 'color']
+  ]);
+  группа('матч «идёт» (эфир)', [
+    ['сетка админки (рамка)', 'c1', 'd1', 'border'],
+    ['расписание админки (фон)', 'c2', 'd2', 'bg'],
+    ['страница турнира', 'c3', 'd3', 'color']
+  ]);
+  h += '</table>';
+  document.getElementById('tablica').innerHTML = h;
+  window.__zamer = document.getElementById('tablica').innerText;
+});
+</script>
+</body></html>
