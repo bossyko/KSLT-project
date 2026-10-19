@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Палитра различителей — замер</title>
+<link rel="stylesheet" href="../css/tokens.css?v=72">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/admin.css?v=283">
+<style>
+body { margin:0; padding:24px; background:var(--bg-base); color:var(--text-primary);
+       font:14px/1.5 system-ui,-apple-system,sans-serif; }
+h1 { font-size:21px; margin:0 0 4px; }
+h2 { font-size:16px; margin:28px 0 8px; }
+.tiho { color:var(--text-muted); font-size:12px; margin:0 0 16px; max-width:86ch; }
+.ryad { display:grid; gap:16px; margin:12px 0 20px;
+        grid-template-columns:repeat(auto-fit, minmax(max(300px,(100% - 16px)/2), 1fr)); }
+.korob { border:1px solid var(--border-subtle); border-radius:12px; background:var(--bg-elevated); padding:14px; }
+.korob > .shapka { font-size:11px; color:var(--text-muted); margin:0 0 10px; }
+.korob > .shapka b { color:var(--accent); }
+.spisok { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin:8px 0 20px; }
+th,td { border:1px solid var(--border-subtle); padding:5px 8px; text-align:left; }
+th { background:var(--bg-elevated); font-size:11px; }
+td.c { text-align:center; font-variant-numeric:tabular-nums; }
+.plohо { color:#ff6b6b; font-weight:600; }
+.horosho { color:#4ade80; font-weight:600; }
+.obrazec { display:inline-block; width:14px; height:14px; border-radius:3px;
+           vertical-align:-2px; margin-right:6px; }
+
+/* ПРЕДЛАГАЕМАЯ ПАЛИТРА РАЗЛИЧИТЕЛЕЙ. Три краски — столько, сколько
+   различителей встречается на ОДНОМ экране. Подобраны по числам: AA на
+   своей подложке и ΔE не меньше 30 до каждой роли состояния и между
+   собой. Четвёртой далёкой в системе нет: шесть ролей уже заняли
+   основные тона. */
+.pr-cat {
+  --cat-1: #00BCD4;  /* бирюза */
+  --cat-2: #BCAAA4;  /* бежевый */
+  --cat-3: #F472B6;  /* розовый */
+  --cat-1-subtle: rgba(0, 188, 212, 0.15);
+  --cat-2-subtle: rgba(188, 170, 164, 0.15);
+  --cat-3-subtle: rgba(244, 114, 182, 0.15);
+}
+.pr-cat .c1 { background: var(--cat-1-subtle); color: var(--cat-1); }
+.pr-cat .c2 { background: var(--cat-2-subtle); color: var(--cat-2); }
+.pr-cat .c3 { background: var(--cat-3-subtle); color: var(--cat-3); }
+.pr-cat .cn { background: var(--surface-glass); color: var(--text-muted); }
+.pr-rol-info { background: var(--alpha-blue-15); color: var(--info); }
+.pr-rol-manager { background: var(--alpha-violet-15); color: var(--role-manager); }
+</style></head>
+<body>
+<h1>Палитра различителей: «такой тип» против «такое состояние»</h1>
+<p class="tiho">ПОСЧИТАНО: различителей семь, все краской числом. ЧЕТЫРЕ из семи почти
+равны ролям состояния — закрытый корт выглядит как «сведения» (ΔE 8.8), открытый как
+«успех» (13.1), игрок как «внимание» (16.7). Порог заметности 2.3. Один различитель
+НИЖЕ AA: тип платежа «корт» даёт 4.34 на своей подложке. Числа снимает сама страница.</p>
+
+<h2>Как сейчас — и рядом роли состояния</h2>
+<div class="ryad">
+  <div class="korob"><div class="shapka"><b>СЕЙЧАС</b> — различители</div>
+    <div class="spisok">
+      <span class="ad-type-badge ad-type-indoor">Закрытый</span>
+      <span class="ad-type-badge ad-type-outdoor">Открытый</span>
+      <span class="ad-pay-badge ad-pay-type-court">Корт</span>
+      <span class="ad-pay-badge ad-pay-type-coach">Тренер</span>
+      <span class="ad-pay-badge ad-pay-type-player">Игрок</span>
+      <span class="ad-pay-badge ad-pay-purpose-sponsorship">Спонсорство</span>
+      <span class="ad-pay-badge ad-pay-purpose-rental">Аренда</span>
+    </div>
+  </div>
+  <div class="korob"><div class="shapka">РОЛИ СОСТОЯНИЯ — с ними не спутать</div>
+    <div class="spisok">
+      <span class="ad-pay-badge ad-pay-active">Активен</span>
+      <span class="ad-pay-badge ad-pay-expired">Истёк</span>
+      <span class="ad-status ad-status-pending">В очереди</span>
+      <span class="ad-pay-badge ad-pay-purpose-promoted">Продвижение</span>
+      <!-- РОЛИ info И manager ТОЖЕ ОБЯЗАНЫ БЫТЬ ЗДЕСЬ: первая редакция
+           стенда их не вывела, и прибор сравнивал различители лишь с
+           четырьмя ролями из шести — «закрытый корт» выходил безопасным
+           (ΔE 101 до успеха), хотя до «сведений» у него 8.8. ПРИБОР,
+           КОТОРЫЙ ВИДИТ ЧАСТЬ, НЕ МЕРИТ НИЧЕГО. -->
+      <span class="ad-pay-badge pr-rol-info">Сведения</span>
+      <span class="ad-pay-badge pr-rol-manager">Менеджер</span>
+    </div>
+  </div>
+</div>
+
+<h2>Предложение: три краски, и помечаем не всё</h2>
+<p class="tiho">Четвёртой далёкой краски в системе НЕТ — шесть ролей (успех, опасность,
+внимание, сведения, акцент, менеджер) заняли основные тона, а бейдж 12px/600 — мелкий
+текст, порог AA 4.5, не 3.0. Поэтому краской помечается то, что ВЫДЕЛЯЕТ: аренда и
+«прочее» остаются нейтральными, как обычное назначение. На экране корта тогда нет ни
+одного совпадения красок.</p>
+<div class="ryad pr-cat">
+  <div class="korob"><div class="shapka"><b>ПОСЛЕ</b> — тип корта и тип платежа</div>
+    <div class="spisok">
+      <span class="ad-type-badge c1">Закрытый</span>
+      <span class="ad-type-badge c2">Открытый</span>
+      <span class="ad-pay-badge c1">Корт</span>
+      <span class="ad-pay-badge c2">Тренер</span>
+      <span class="ad-pay-badge c3">Игрок</span>
+    </div>
+  </div>
+  <div class="korob"><div class="shapka"><b>ПОСЛЕ</b> — назначение платежа</div>
+    <div class="spisok">
+      <span class="ad-pay-badge ad-pay-purpose-promoted">Продвижение</span>
+      <span class="ad-pay-badge c3">Спонсорство</span>
+      <span class="ad-pay-badge cn">Аренда</span>
+      <span class="ad-pay-badge cn">Прочее</span>
+    </div>
+  </div>
+</div>
+
+<h2>Экран корта: что видно одновременно</h2>
+<div class="ryad pr-cat">
+  <div class="korob"><div class="shapka">СЕЙЧАС</div>
+    <div class="spisok">
+      <span class="ad-type-badge ad-type-outdoor">Открытый</span>
+      <span class="ad-pay-badge ad-pay-purpose-sponsorship">Спонсорство</span>
+      <span class="ad-pay-badge ad-pay-purpose-rental">Аренда</span>
+      <span class="ad-pay-badge ad-pay-active">Активен</span>
+    </div>
+  </div>
+  <div class="korob"><div class="shapka">ПОСЛЕ</div>
+    <div class="spisok">
+      <span class="ad-type-badge c2">Открытый</span>
+      <span class="ad-pay-badge c3">Спонсорство</span>
+      <span class="ad-pay-badge cn">Аренда</span>
+      <span class="ad-pay-badge ad-pay-active">Активен</span>
+    </div>
+  </div>
+</div>
+
+<h2>Что насчитал прибор</h2>
+<div id="tablica"><p class="tiho">меряю…</p></div>
+
+<script>
+function rgb(s) {
+  var m = s.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+  if (m) return { r:+m[1], g:+m[2], b:+m[3], a: m[4] === undefined ? 1 : +m[4] };
+  return null;
+}
+function слой(в, н) {
+  return { r: Math.round(в.r*в.a + н.r*(1-в.a)), g: Math.round(в.g*в.a + н.g*(1-в.a)),
+           b: Math.round(в.b*в.a + н.b*(1-в.a)), a: 1 };
+}
+function L(c) {
+  function f(v) { v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }
+  return 0.2126*f(c.r) + 0.7152*f(c.g) + 0.0722*f(c.b);
+}
+function контраст(a, b) {
+  var la = L(a), lb = L(b), hi = Math.max(la,lb), lo = Math.min(la,lb);
+  return Math.round(((hi+0.05)/(lo+0.05))*100)/100;
+}
+function lab(c) {
+  function f(v) { v/=255; return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }
+  var r=f(c.r), g=f(c.g), b=f(c.b);
+  var X=(r*0.4124+g*0.3576+b*0.1805)/0.95047, Y=r*0.2126+g*0.7152+b*0.0722,
+      Z=(r*0.0193+g*0.1192+b*0.9505)/1.08883;
+  function g2(t) { return t>0.008856 ? Math.pow(t,1/3) : 7.787*t+16/116; }
+  var fx=g2(X), fy=g2(Y), fz=g2(Z);
+  return [116*fy-16, 500*(fx-fy), 200*(fy-fz)];
+}
+function dE(a, b) {
+  var la=lab(a), lb=lab(b);
+  return Math.round(Math.sqrt(la.reduce(function(s,v,i){ return s+(v-lb[i])*(v-lb[i]); },0))*10)/10;
+}
+
+window.addEventListener('load', function () {
+  var фонКороба = rgb(getComputedStyle(document.querySelector('.korob')).backgroundColor);
+  var РОЛИ = [];
+  [['успех','ad-pay-active'],['опасность','ad-pay-expired'],['внимание','ad-status-pending'],
+   ['акцент','ad-pay-purpose-promoted'],['сведения','pr-rol-info'],
+   ['менеджер','pr-rol-manager']].forEach(function (р) {
+    var э = document.querySelector('.' + р[1]);
+    if (э) РОЛИ.push({ имя: р[0], цв: rgb(getComputedStyle(э).color) });
+  });
+
+  function замер(подпись, эл) {
+    var cs = getComputedStyle(эл);
+    var текст = rgb(cs.color);
+    var подл = rgb(cs.backgroundColor);
+    var фон = подл && подл.a < 1 ? слой(подл, фонКороба) : (подл || фонКороба);
+    var к = контраст(текст, фон);
+    var бл = РОЛИ.map(function (р) { return { имя: р.имя, d: dE(текст, р.цв) }; })
+                 .sort(function (a,b) { return a.d - b.d; })[0];
+    return { подпись: подпись, цвет: 'rgb(' + текст.r + ',' + текст.g + ',' + текст.b + ')',
+             контраст: к, роль: бл ? бл.имя : '—', dE: бл ? бл.d : null };
+  }
+
+  var h = '<table><tr><th>различитель</th><th>контраст на своей подложке</th>' +
+          '<th>AA (4.5)</th><th>ближайшая роль</th><th>ΔE до неё</th><th>спутать?</th></tr>';
+  function строки(заголовок, узлы) {
+    h += '<tr><td colspan="6" style="background:var(--bg-elevated)"><b>' + заголовок + '</b></td></tr>';
+    узлы.forEach(function (у) {
+      var з = замер(у[0], document.querySelector(у[1]));
+      var ааОк = з.контраст >= 4.5;
+      var далеко = з.dE === null || з.dE >= 30;
+      h += '<tr><td><span class="obrazec" style="background:' + з.цвет + '"></span>' + з.подпись + '</td>' +
+           '<td class="c">' + з.контраст + '</td>' +
+           '<td class="c ' + (ааОк ? 'horosho' : 'plohо') + '">' + (ааОк ? 'ок' : 'НИЖЕ') + '</td>' +
+           '<td class="c">' + з.роль + '</td>' +
+           '<td class="c ' + (далеко ? 'horosho' : 'plohо') + '">' + (з.dE === null ? '—' : з.dE) + '</td>' +
+           '<td class="c ' + (далеко ? 'horosho' : 'plohо') + '">' + (далеко ? 'нет' : 'ДА') + '</td></tr>';
+    });
+  }
+  строки('КАК СЕЙЧАС', [
+    ['закрытый корт', '.ad-type-indoor'], ['открытый корт', '.ad-type-outdoor'],
+    ['платёж: корт', '.ad-pay-type-court'], ['платёж: тренер', '.ad-pay-type-coach'],
+    ['платёж: игрок', '.ad-pay-type-player'],
+    ['спонсорство', '.ad-pay-purpose-sponsorship'], ['аренда', '.ad-pay-purpose-rental']
+  ]);
+  строки('ПРЕДЛОЖЕНИЕ', [
+    ['различитель 1 (бирюза)', '.pr-cat .c1'], ['различитель 2 (бежевый)', '.pr-cat .c2'],
+    ['различитель 3 (розовый)', '.pr-cat .c3'], ['нейтральный', '.pr-cat .cn']
+  ]);
+  h += '</table>';
+  document.getElementById('tablica').innerHTML = h;
+  window.__zamer = document.getElementById('tablica').innerText;
+});
+</script>
+</body></html>
