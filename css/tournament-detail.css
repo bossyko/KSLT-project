@@ -190,9 +190,15 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
+/* «ИДЁТ» — ОДНА РОЛЬ НА ВЕСЬ ПРОДУКТ (круг 16, 18.10). Роль объявлена в
+   `tokens.css` как «менеджер / идёт сейчас» ещё 17.10 — ПРИНЯТОЕ НЕ
+   ПЕРЕОТКРЫВАЕТСЯ, его просто не донесли сюда. Было три краски на одно
+   состояние: фиолетовая в списке админки (верная), лаймовая в её форме
+   (ΔE 164 от верной) и голубой `#00A3FF` числом здесь (ΔE 37). Человек
+   видел турнир лаймовым в форме и голубым на сайте. */
 .td-status-badge.ongoing {
-    background: rgba(0, 163, 255, 0.2);
-    color: #00A3FF;
+    background: var(--role-manager-subtle);
+    color: var(--role-manager);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }

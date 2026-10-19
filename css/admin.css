@@ -4210,7 +4210,10 @@ select.ad-field-input {
 .ad-trn-status-field.ad-status-upcoming { color: var(--blue-400); }
 .ad-trn-status-field.ad-status-registration-open { color: var(--success); }
 .ad-trn-status-field.ad-status-registration-closed { color: var(--warning); }
-.ad-trn-status-field.ad-status-ongoing { color: var(--accent); }
+/* «ИДЁТ» — РОЛЬ, А НЕ АКЦЕНТ (круг 16, 18.10). Лайм здесь значил то же
+   состояние, что фиолетовый в списке статусов выше: одно понятие, две
+   краски в одном файле. */
+.ad-trn-status-field.ad-status-ongoing { color: var(--role-manager); }
 .ad-trn-status-field.ad-status-completed { color: var(--text-secondary); }
 .ad-trn-status-field.ad-status-cancelled { color: var(--danger); }
 
@@ -4341,9 +4344,15 @@ select.ad-field-input {
     border-color: var(--accent-glow);
 }
 
+/* МАТЧ «ИДЁТ» — ЭТО ЭФИР, И ЭФИР ГОВОРИТ ОДНОЙ КРАСКОЙ (круг 2б ветки B,
+   решение 15.10). Класс ставится из `status === 'live'` — ровно то же
+   состояние, что на странице турнира рисуется `--danger`. Здесь стоял
+   оранжевый: один живой матч человек видел оранжевым в сетке админки и
+   красным на сайте. Сторож эфира этого не поймал — его список держал 16
+   селекторов ПУБЛИЧНОЙ части, а админка в него не входила. */
 .ad-brk-match.live {
-    border-color: var(--warning);
-    box-shadow: 0 0 8px var(--warning-border);
+    border-color: var(--danger);
+    box-shadow: 0 0 8px var(--danger-border);
 }
 
 /* Schedule info above players */
@@ -7649,8 +7658,10 @@ select.ad-field-input {
     opacity: 0.75;
 }
 
+/* ТА ЖЕ РОЛЬ ЭФИРА, ТА ЖЕ КРАСКА: строка расписания подсвечивается из
+   того же `status === 'live'`. */
 .ad-sched-row-live td {
-    background: var(--warning-faint);
+    background: var(--danger-faint);
 }
 
 .ad-sched-status {
