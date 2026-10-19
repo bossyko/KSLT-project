@@ -161,7 +161,7 @@ const ОТКАТЫ = [
      'версия group-standings.js одна на все страницы'],
     [HTML, 'tournament-detail.js?v=', 'tournament-detail.js?v=1',
      'версия tournament-detail.js одна на все страницы'],
-    [HTML, 'tournament-detail.css?v=', 'tournament-detail.css?v=1',
+    [HTML, 'tournament-detail.css?v=', 'tournament-detail.css?v=2',
      'версия tournament-detail.css одна на все страницы']
 ];
 

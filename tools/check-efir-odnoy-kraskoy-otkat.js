@@ -14,14 +14,32 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/style.css', 'css/tournament-detail.css', 'css/tournaments-overview.css',
-               'css/tournaments.css', 'css/battles-overview.css', 'css/tokens.css'];
+               'css/tournaments.css', 'css/battles-overview.css', 'css/tokens.css',
+               /* АДМИНКА, 18.10: роль эфира живёт и в ней. Без файла в этом
+                  списке откат падал с ошибкой «исходник не определён» —
+                  прувер не мог даже дотянуться до нового места. */
+               'css/admin.css'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
 const S = 'css/style.css', TD = 'css/tournament-detail.css', TO = 'css/tournaments-overview.css',
-      T2 = 'css/tournaments.css', BO = 'css/battles-overview.css', T = 'css/tokens.css';
+      T2 = 'css/tournaments.css', BO = 'css/battles-overview.css', T = 'css/tokens.css',
+      AD = 'css/admin.css';
 
 const ОТКАТЫ = [
+
+/* АДМИНКА, 18.10: роль эфира в ней красилась ОРАНЖЕВЫМ, и шестнадцать
+   селекторов публичной части этого не видели. Откат возвращает оранжевый
+   в сетку и в расписание — правило обязано упасть на обоих. */
+['вернуть оранжевый живому матчу в сетке админки', AD,
+ '.ad-brk-match.live {\n    border-color: var(--danger);\n    box-shadow: 0 0 8px var(--danger-border);',
+ '.ad-brk-match.live {\n    border-color: var(--warning);\n    box-shadow: 0 0 8px var(--warning-border);',
+ 'эфир говорит одной краской'],
+
+['вернуть оранжевый строке расписания админки', AD,
+ '.ad-sched-row-live td {\n    background: var(--danger-faint);',
+ '.ad-sched-row-live td {\n    background: var(--warning-faint);',
+ 'эфир говорит одной краской'],
 
 ['вернуть #FF3B30 точке в шапке', S,
  '.live-dot {\n    width: 8px;\n    height: 8px;\n    background: var(--danger);',
