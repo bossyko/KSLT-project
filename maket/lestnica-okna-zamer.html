@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Лестница окна админки — два варианта</title>
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/admin.css?v=282">
+<style>
+body { margin:0; padding:24px; background:var(--bg-base); color:var(--text-primary);
+       font:14px/1.5 system-ui,-apple-system,sans-serif; }
+h1 { font-size:21px; margin:0 0 4px; }
+.tiho { color:var(--text-muted); font-size:12px; margin:0 0 16px; max-width:84ch; }
+.ryad { display:grid; gap:16px; margin:16px 0 24px;
+        grid-template-columns:repeat(auto-fit, minmax(max(300px,(100% - 2*16px)/3), 1fr)); }
+.korob { border:1px solid var(--border-subtle); border-radius:12px; overflow:hidden; background:var(--bg-elevated); }
+.korob > .shapka { padding:6px 12px; font-size:11px; color:var(--text-muted);
+                   border-bottom:1px solid var(--border-subtle); }
+.korob > .shapka b { color:var(--accent); }
+.okno { padding:16px; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin:8px 0 24px; }
+th,td { border:1px solid var(--border-subtle); padding:5px 8px; text-align:left; }
+th { background:var(--bg-elevated); font-size:11px; }
+td.c { text-align:center; font-variant-numeric:tabular-nums; }
+.dve { color:#ff6b6b; font-weight:600; }
+.odna { color:#4ade80; font-weight:600; }
+
+/* ВАРИАНТ А — пара на ступень ВНИЗ: заголовок 16, тело 14.
+   Так уже живёт обычное окно; окно подтверждения становится мельче. */
+.vA .ad-confirm-title, .vA .ad-modal-header h3 {
+  font-size: var(--fs-base); font-weight: var(--fw-semibold); line-height: var(--lh-snug);
+}
+.vA .ad-confirm-text, .vA .ad-modal-note { font-size: var(--fs-sm); }
+
+/* ВАРИАНТ Б — пара на ступень ВВЕРХ: заголовок 18, тело 16.
+   Так уже живёт заголовок подтверждения; тело поднимается до основного
+   текста — его ведь читают, прежде чем нажать «Удалить». */
+.vB .ad-confirm-title, .vB .ad-modal-header h3 {
+  font-size: var(--fs-md); font-weight: var(--fw-semibold); line-height: var(--lh-snug);
+}
+.vB .ad-confirm-text, .vB .ad-modal-note { font-size: var(--fs-base); }
+</style></head>
+<body>
+<h1>Заголовок окна: одно понятие, два определения</h1>
+<p class="tiho">ПОСЧИТАНО: заголовок окна определён в админке ДВАЖДЫ и разными
+ступенями — окно подтверждения 18 (вес 600), обычное окно 16 (вес по умолчанию 700).
+Пара «заголовок + тело» стоит у одного на ДВЕ ступени (18 → 14), у другого на ОДНУ
+(16 → 14). Правило продукта: пара отстоит на ступень. Ниже три столбца: как сейчас
+и два варианта. Числа снимает сама страница, на трёх видах стенд меряется загрузкой.</p>
+
+<div class="ryad">
+  <div class="korob"><div class="shapka"><b>КАК СЕЙЧАС</b> — два определения</div>
+    <div class="okno" id="now"></div></div>
+  <div class="korob vA"><div class="shapka"><b>А</b> — заголовок 16, тело 14 (ступень вниз)</div>
+    <div class="okno vA" id="a"></div></div>
+  <div class="korob vB"><div class="shapka"><b>Б</b> — заголовок 18, тело 16 (ступень вверх)</div>
+    <div class="okno vB" id="b"></div></div>
+</div>
+
+<div id="tablica"></div>
+
+<script>
+var ОКНА =
+  '<div class="ad-confirm-title">Удалить турнир «Кубок осени»?</div>' +
+  '<div class="ad-confirm-text">Турнир, его сетка и 48 заявок будут удалены ' +
+  'без возможности восстановить. Игроки получат уведомление об отмене.</div>' +
+  '<div class="ad-modal-header"><h3>Редактирование корта</h3></div>' +
+  '<p class="ad-modal-note">Изменения видны игрокам сразу после сохранения.</p>';
+['now','a','b'].forEach(function (и) { document.getElementById(и).innerHTML = ОКНА; });
+
+var ШКАЛА = [11, 12, 14, 16, 18, 21, 26, 32, 40];
+function ступеней(а, б) {
+  var иа = ШКАЛА.indexOf(Math.round(а)), иб = ШКАЛА.indexOf(Math.round(б));
+  return (иа < 0 || иб < 0) ? '?' : Math.abs(иа - иб);
+}
+
+window.addEventListener('load', function () {
+  var h = '<table><tr><th>окно</th><th>уровень</th><th>сейчас</th><th>вариант А</th>' +
+          '<th>вариант Б</th></tr>';
+  var пары = [
+    ['подтверждение', '.ad-confirm-title', '.ad-confirm-text'],
+    ['обычное',       '.ad-modal-header h3', '.ad-modal-note']
+  ];
+  var сводка = [];
+  пары.forEach(function (п) {
+    ['заголовок', 'тело'].forEach(function (ур, i) {
+      var сел = п[1 + i];
+      var зн = ['now', 'a', 'b'].map(function (и) {
+        var э = document.getElementById(и).querySelector(сел) ||
+                document.getElementById(и).parentElement.querySelector(сел);
+        if (!э) return '—';
+        var cs = getComputedStyle(э);
+        return Math.round(parseFloat(cs.fontSize)) + 'px / вес ' + cs.fontWeight;
+      });
+      h += '<tr><td>' + п[0] + '</td><td>' + ур + '</td><td class="c">' + зн[0] +
+           '</td><td class="c">' + зн[1] + '</td><td class="c">' + зн[2] + '</td></tr>';
+    });
+    // ступени в паре
+    var ст = ['now', 'a', 'b'].map(function (и) {
+      var к = document.getElementById(и);
+      var з = к.querySelector(п[1]), т = к.querySelector(п[2]);
+      if (!з || !т) return '?';
+      return ступеней(parseFloat(getComputedStyle(з).fontSize), parseFloat(getComputedStyle(т).fontSize));
+    });
+    h += '<tr><td>' + п[0] + '</td><td><b>ступеней в паре</b></td>' +
+         ст.map(function (s) {
+           return '<td class="c ' + (s === 1 ? 'odna' : 'dve') + '">' + s + '</td>';
+         }).join('') + '</tr>';
+    сводка.push(п[0] + ': сейчас ' + ст[0] + ', А ' + ст[1] + ', Б ' + ст[2]);
+  });
+  h += '</table><p class="tiho">Ступеней в паре — по шкале кеглей 11 · 12 · 14 · 16 · 18 · 21 · 26 · 32 · 40. ' +
+       'Правило продукта: пара «заголовок + его текст» отстоит на ОДНУ ступень.<br>' + сводка.join(' · ') + '</p>';
+  document.getElementById('tablica').innerHTML = h;
+  window.__zamer = сводка;
+});
+</script>
+</body></html>
