@@ -113,7 +113,8 @@ const КУСКИ = [
     ['движение и межстрочные', 'check-dvizhenie-i-mezhstrochnye.js', 'check-dvizhenie-i-mezhstrochnye-otkat.js'],
     ['сетки плиток', 'check-setki-plitok.js', 'check-setki-plitok-otkat.js'],
     ['тело новости', 'check-telo-novosti.js', 'check-telo-novosti-otkat.js'],
-    ['поле содержимого', 'check-pole-soderzhimogo.js', 'check-pole-soderzhimogo-otkat.js']
+    ['поле содержимого', 'check-pole-soderzhimogo.js', 'check-pole-soderzhimogo-otkat.js'],
+    ['лестница окна', 'check-lestnica-okna.js', 'check-lestnica-okna-otkat.js']
 ];
 
 function прогнать(файл) {

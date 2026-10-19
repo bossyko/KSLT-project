@@ -82,9 +82,14 @@ const ОТКАТЫ = [
    '    display: flex;\n    flex-direction: column;\n    max-height: none;',
    'окно не рвёт экран: предел высоты и прокрутка тела'],
 
+  /* ЯКОРЬ ПЕРЕВЯЗАН 18.10: держался за тройку строк, из которой круг 13
+     увёл `margin-bottom` в отдельное правило (заголовок окна сведён в одно
+     определение на оба окна). Держимся за пару «межстрочный + цвет» перед
+     закрывающей скобкой — она живёт только в блоке заголовка окна,
+     проверено счётом. */
   ['css/admin.css',
-   '    line-height: var(--lh-snug);\n    color: var(--text-primary);\n    margin-bottom: var(--space-2);',
-   '    color: var(--text-primary);\n    margin-bottom: var(--space-2);',
+   '    line-height: var(--lh-snug);\n    color: var(--text-primary);\n}',
+   '    color: var(--text-primary);\n}',
    'заголовок окна стоит на ступени заголовка'],
 
   ['css/admin.css',
