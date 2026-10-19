@@ -622,6 +622,34 @@
      * @param {string} [kgId] - Kyrgyz field input ID
      * @param {HTMLButtonElement} btn - Trigger button (for loading state)
      */
+    /* ════ ЯЗЫК ОТКРЫТОЙ ВКЛАДКИ — ОДНО ОПРЕДЕЛЕНИЕ НА ВЕСЬ ЭКРАН ════
+       Круг 14 ветки D, 18.10. Три редактора (RU/EN/KG) живут в DOM
+       одновременно, и «текст, который автор сейчас пишет» — это поле
+       ОТКРЫТОЙ вкладки. Понятие было определено трижды: перевод читал
+       активную вкладку ВЕРНО, а предпросмотр, время чтения и слушатель
+       правок — жёстко русское поле. Автор писал английскую новость и
+       видел в предпросмотре русскую.
+
+       ДАННЫЕ БЫЛИ ЦЕЛЫ: сохранение читает все три поля (строки 1259-1268
+       и 1707-1718 в `sections/news.js`). Врал только экран.
+
+       `карта` — короб `.ad-form-card`, в котором живут вкладки. Если
+       вкладок нет или ни одна не активна, отдаём `ru`: это не догадка, а
+       то же умолчание, что было у прежнего кода. */
+    function языкВкладки(карта) {
+        if (!карта) return 'ru';
+        var вкладка = карта.querySelector('.ad-lang-tab.active');
+        return (вкладка && вкладка.dataset.lang) || 'ru';
+    }
+
+    /* Поле открытой вкладки по тройке id. Возвращает элемент или null —
+       звать можно до отрисовки формы. */
+    function полеВкладки(карта, ids) {
+        var язык = языкВкладки(карта);
+        var id = (язык === 'en' && ids.en) || (язык === 'kg' && ids.kg) || ids.ru;
+        return document.getElementById(id);
+    }
+
     async function translateToEmpty(ruId, enId, kgId, btn) {
         var ruEl = document.getElementById(ruId);
         var enEl = document.getElementById(enId);
@@ -631,13 +659,11 @@
         var enVal = enEl ? enEl.value.trim() : '';
         var kgVal = kgEl ? kgEl.value.trim() : '';
 
-        // Detect active language tab — translate FROM the currently visible tab
-        var activeLang = '';
+        /* ЯЗЫК ОТКРЫТОЙ ВКЛАДКИ БЕРЁТСЯ У ОБЩЕГО ОПРЕДЕЛЕНИЯ (выше), а не
+           считается здесь заново: ровно этот код был эталоном, который
+           предпросмотр не звал, — теперь он один на всех. */
         var card = btn.closest('.ad-form-card');
-        if (card) {
-            var activeTab = card.querySelector('.ad-lang-tab.active');
-            if (activeTab) activeLang = activeTab.dataset.lang;
-        }
+        var activeLang = card ? языкВкладки(card) : '';
 
         // Find source: active tab first, then first non-empty
         var srcLang = '';
@@ -1306,6 +1332,8 @@
     A.formatDateLocal = formatDateLocal;
     A.translateFromRu = translateFromRu;
     A.translateToEmpty = translateToEmpty;
+    A.языкВкладки = языкВкладки;
+    A.полеВкладки = полеВкладки;
     A.settleTranslateButtons = settleTranslateButtons;
     A.uniqueCourtId = uniqueCourtId;
     A.settleTranslateButton = settleTranslateButton;

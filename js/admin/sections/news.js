@@ -963,7 +963,12 @@
             var readEl = document.getElementById('adMetaReadTime');
             var pubInput = document.getElementById('adNewsPubDate');
             var authorInput = document.getElementById('adNewsAuthor');
-            var contentInput = document.getElementById('adNewsContent');
+            /* ВРЕМЯ ЧТЕНИЯ СЧИТАЕТСЯ ПО ОТКРЫТОЙ ВКЛАДКЕ: английская
+               новость показывала время русской. */
+            var якорьМеты = document.getElementById('adNewsContent');
+            var contentInput = (A.полеВкладки && A.полеВкладки(
+                якорьМеты && якорьМеты.closest('.ad-form-card'),
+                { ru: 'adNewsContent', en: 'adNewsContentEn', kg: 'adNewsContentKg' })) || якорьМеты;
             if (dateEl && pubInput && pubInput.value) {
                 var d = new Date(pubInput.value + 'T12:00:00');
                 var months = isEn ? MONTHS_EN : MONTHS_RU;
@@ -1101,13 +1106,41 @@
         // Content Preview: render + live update
         renderNewsPreview();
         var previewTimer = null;
-        var contentTextarea = document.getElementById('adNewsContent');
-        if (contentTextarea) {
-            contentTextarea.addEventListener('input', function() {
+        /* СЛУШАЕМ ВСЕ ТРИ ПОЛЯ, А НЕ ОДНО РУССКОЕ: иначе правка в
+           английской вкладке предпросмотр не трогала вовсе. */
+        ['adNewsContent', 'adNewsContentEn', 'adNewsContentKg'].forEach(function(id) {
+            var поле = document.getElementById(id);
+            if (!поле) return;
+            поле.addEventListener('input', function() {
                 clearTimeout(previewTimer);
                 previewTimer = setTimeout(renderNewsPreview, 300);
             });
-        }
+        });
+
+        /* И ПЕРЕРИСОВЫВАЕМ ПРИ СМЕНЕ ВКЛАДКИ: текст уже другой, а экран
+           показывал прежний, пока в него не напечатают.
+
+           СЛУШАЕМ КОРОБ ТЕКСТА, А НЕ РАЗДЕЛ. Первая редакция искала
+           `.ad-section` вокруг предпросмотра — а его там НЕТ: предпросмотр
+           лежит прямо в своём `.ad-form-card`. Проверка `if (!карта)
+           return` выходила молча, и правка не делала ничего. Поймано
+           прибором на стенде: язык вкладки читался верно (`en`, поле
+           `adNewsContentEn` с английским текстом), а перерисовки не было.
+           Якорь тот же, что у двух других мест — короб русского поля:
+           вкладки текста живут внутри него, а вкладки заголовка и выдержки
+           снаружи и текста не касаются. */
+        (function () {
+            var якорь = document.getElementById('adNewsContent');
+            var коробТекста = якорь && якорь.closest('.ad-form-card');
+            if (!коробТекста) return;
+            коробТекста.addEventListener('click', function (e) {
+                if (!e.target.closest('.ad-lang-tab')) return;
+                setTimeout(function () {
+                    renderNewsPreview();
+                    updateMetaPreview();
+                }, 0);
+            });
+        })();
 
         // Content Preview: file input handler
         var contentImgInput = document.getElementById('adNewsContentImgInput');
@@ -1451,7 +1484,18 @@
         var container = document.getElementById('adNewsPreview');
         if (!container) return;
 
-        var textEl = document.getElementById('adNewsContent');
+        /* ТЕКСТ ОТКРЫТОЙ ВКЛАДКИ, А НЕ ВСЕГДА РУССКИЙ. Автор писал
+           английскую новость и видел в предпросмотре русскую: три
+           редактора живут в DOM разом, и жёсткий `adNewsContent` всегда
+           брал первый. Язык даёт одно определение — `A.полеВкладки`. */
+        /* КОРОБ ИЩЕТСЯ ЧЕРЕЗ САМО РУССКОЕ ПОЛЕ: вкладок на форме новости
+           ТРИ группы (заголовок, выдержка, текст), и короб текста — тот,
+           внутри которого лежит `adNewsContent`. Если поля нет вовсе,
+           падать некуда — отдаём то же, что отдавал прежний код. */
+        var якорьТекста = document.getElementById('adNewsContent');
+        var textEl = (A.полеВкладки && A.полеВкладки(
+            якорьТекста && якорьТекста.closest('.ad-form-card'),
+            { ru: 'adNewsContent', en: 'adNewsContentEn', kg: 'adNewsContentKg' })) || якорьТекста;
         var text = textEl ? textEl.value.trim() : '';
 
         if (!text) {
