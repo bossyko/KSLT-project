@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Перелив админки — пять видов</title>
+<!-- ТОТ ЖЕ НАБОР, ЧТО У pages/admin.html, И В ТОМ ЖЕ ПОРЯДКЕ. Первая
+     редакция стенда взяла только tokens и admin — и соврала на 8px: без
+     style.css у body остаётся браузерное поле 8, и оно съедало ровно то
+     расхождение, которое мерим. ВИД МЕРЯЕТСЯ ТЕМ ЖЕ НАБОРОМ, ЧТО В
+     ПРОДУКТЕ, а не частью его. -->
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<link rel="stylesheet" href="../css/admin.css?v=281">
+<style>
+/* СКЕЛЕТ АДМИНКИ НАСТОЯЩИМИ КЛАССАМИ. Админка за входом, пароля нет —
+   узкие виды меряются стендом. Содержимое крайнее: длинные имена,
+   много колонок. */
+.zamer-itog { position: fixed; right: 0; bottom: 0; z-index: 9999;
+  background: #111; color: #c3f73a; font: 11px/1.4 ui-monospace, monospace;
+  padding: 8px 10px; border-top-left-radius: 8px; max-width: 60ch;
+  white-space: pre-wrap; }
+</style></head>
+<body class="ad-body">
+<div class="ad-layout">
+  <aside class="ad-sidebar"><div class="ad-sidebar-logo">КСЛТ</div></aside>
+  <main class="ad-content">
+    <div class="ad-section active">
+      <h2 class="ad-section-title">Заявки на турнир</h2>
+      <div class="ad-filter-row">
+        <input class="ad-field-input ad-filter-search" placeholder="Поиск игрока">
+        <select class="ad-field-input ad-filter-select"><option>Все разряды</option></select>
+      </div>
+      <div class="ad-table-wrap">
+        <table class="ad-table">
+          <thead><tr><th>Игрок</th><th>Разряд</th><th>Рейтинг</th><th>Телефон</th>
+            <th>Оплата</th><th>Заявка подана</th><th>Статус</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Орозбеков Азаматбек Жумабекович</td><td>Мужской одиночный</td>
+              <td>1248</td><td>+996 555 123 456</td><td>Оплачено</td>
+              <td>18.10.2026 14:32</td><td><span class="ad-status ad-status-active">Принята</span></td>
+              <td><button class="ad-btn ad-btn-sm">Открыть</button></td></tr>
+            <tr><td>Абдырахманова Айпери Кубанычбековна</td><td>Женский одиночный</td>
+              <td>986</td><td>+996 700 987 654</td><td>Ждёт</td>
+              <td>18.10.2026 09:05</td><td><span class="ad-status ad-status-pending">В очереди</span></td>
+              <td><button class="ad-btn ad-btn-sm">Открыть</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ad-stats-grid">
+        <div class="ad-stat-card"><div class="ad-stat-value">48</div><div class="ad-stat-label">Заявок</div></div>
+        <div class="ad-stat-card"><div class="ad-stat-value">12</div><div class="ad-stat-label">Ждут оплаты</div></div>
+        <div class="ad-stat-card"><div class="ad-stat-value">4</div><div class="ad-stat-label">Отказы</div></div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="zamer-itog" id="itog">меряю…</div>
+<script>
+function снять() {
+  var окно = window.innerWidth;
+  var док = document.documentElement;
+  var перелив = Math.round((док.scrollWidth - окно) * 10) / 10;
+  // кто именно шире окна
+  var виноватые = [];
+  document.querySelectorAll('.ad-layout *, .ad-layout').forEach(function (эл) {
+    var r = эл.getBoundingClientRect();
+    var правый = Math.round((r.right) * 10) / 10;
+    if (правый > окно + 0.5) {
+      var имя = эл.className ? ('.' + String(эл.className).split(' ').filter(Boolean).join('.')) : эл.tagName;
+      виноватые.push(имя.slice(0, 40) + ' правый край ' + правый + ' (шире на ' + Math.round((правый - окно) * 10) / 10 + ')');
+    }
+  });
+  var конт = document.querySelector('.ad-content');
+  var обёр = document.querySelector('.ad-table-wrap');
+  var кс = getComputedStyle(конт), ос = getComputedStyle(обёр);
+  var строки = [
+    'окно ' + окно + '  перелив страницы: ' + перелив,
+    'ad-content padding: ' + кс.paddingLeft + ' / ' + кс.paddingRight + '  margin-left: ' + кс.marginLeft,
+    'ad-table-wrap margin: ' + ос.marginLeft + ' / ' + ос.marginRight + '  padding: ' + ос.paddingLeft + ' / ' + ос.paddingRight,
+    'сайдбар: ' + getComputedStyle(document.querySelector('.ad-sidebar')).display,
+    виноватые.length ? ('ШИРЕ ОКНА (' + виноватые.length + '):\n  ' + виноватые.slice(0, 6).join('\n  ')) : 'ничего не выходит за окно'
+  ];
+  document.getElementById('itog').textContent = строки.join('\n');
+  window.__zamer = { окно: окно, перелив: перелив, виноватые: виноватые,
+    contentPad: кс.paddingLeft, wrapMargin: ос.marginLeft, wrapPad: ос.paddingLeft };
+}
+window.addEventListener('load', function () { requestAnimationFrame(снять); });
+</script>
+</body></html>
