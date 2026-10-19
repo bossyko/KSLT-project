@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тело новости — три определения одного понятия</title>
+<link rel="stylesheet" href="../css/tokens.css?v=71">
+<link rel="stylesheet" href="../css/news.css?v=113">
+<link rel="stylesheet" href="../css/admin.css?v=280">
+<style>
+body { margin:0; padding:24px; background:var(--bg-base); color:var(--text-primary);
+       font:14px/1.5 system-ui,-apple-system,sans-serif; }
+h1 { font-size:21px; margin:0 0 4px; }
+.tiho { color:var(--text-muted); font-size:12px; margin:0 0 16px; max-width:80ch; }
+.tri { display:grid; grid-template-columns:repeat(auto-fit, minmax(max(320px, (100% - 2*16px)/3), 1fr));
+       gap:16px; margin:16px 0; }
+.stolb { border:1px solid var(--border-subtle); border-radius:8px; overflow:hidden;
+         background:var(--bg-elevated); }
+.stolb > .shapka { padding:6px 12px; font-size:11px; border-bottom:1px solid var(--border-subtle);
+                   color:var(--text-muted); }
+.stolb > .shapka b { color:var(--accent); }
+.telo { padding:12px; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin:8px 0 24px; }
+th,td { border:1px solid var(--border-subtle); padding:5px 8px; text-align:left; }
+th { background:var(--bg-elevated); font-size:11px; }
+td.c { text-align:center; font-variant-numeric:tabular-nums; }
+.vret { color:#ff6b6b; font-weight:600; }
+.sovp { color:#4ade80; }
+</style></head>
+<body>
+<h1>Тело новости определено ТРИЖДЫ, и все три разные</h1>
+<p class="tiho">Автор пишет новость в редакторе, проверяет в предпросмотре, читатель видит
+страницу. Это ОДНО понятие — «тело статьи», — и у него три определения:
+<code>.news-html</code> (читатель), <code>.ad-news-preview-body</code> (предпросмотр),
+<code>.ad-editor-area</code> (редактор). Ниже один и тот же текст, нарисованный каждым
+из трёх; числа снимает сама страница. Эталон уже приходит в предпросмотр — элемент
+носит ОБА класса, — и админка перебивает его своей специфичностью.</p>
+
+<div class="tri">
+  <div class="stolb"><div class="shapka"><b>ЧИТАТЕЛЬ</b> — .news-html</div>
+    <div class="telo news-html" id="a"></div></div>
+  <div class="stolb"><div class="shapka"><b>ПРЕДПРОСМОТР</b> — news-html + ad-news-preview-body</div>
+    <div class="telo news-html ad-news-preview-body" id="b"></div></div>
+  <div class="stolb"><div class="shapka"><b>РЕДАКТОР</b> — .ad-editor-area</div>
+    <div class="telo ad-editor-area" id="c"></div></div>
+</div>
+
+<div id="tablica"></div>
+
+<script>
+var ТЕКСТ =
+  '<p>Турнир «Кубок осени» собрал 48 игроков в четырёх разрядах. ' +
+  'Матчи шли три дня на шести кортах.</p>' +
+  '<h3>Победители</h3>' +
+  '<ul><li>Мужской одиночный — Алмаз Садыков</li>' +
+  '<li>Женский одиночный — Айпери Орозова</li>' +
+  '<li>Мужской парный — Садыков / Исаев</li></ul>' +
+  '<p>Следующий турнир — в ноябре. Заявки открыты на сайте.</p>';
+['a','b','c'].forEach(function (и) { document.getElementById(и).innerHTML = ТЕКСТ; });
+
+var УРОВНИ = [
+  ['тело статьи',      '',      ['font-size','line-height','color']],
+  ['абзац',            'p',     ['font-size','line-height','margin-bottom','color']],
+  ['заголовок в тексте','h3',   ['font-size','font-weight','margin-top','margin-bottom','color']],
+  ['список',           'ul',    ['padding-left','margin-bottom']],
+  ['строка списка',    'li',    ['font-size','line-height','margin-bottom','color']]
+];
+
+window.addEventListener('load', function () {
+  var h = '<table><tr><th>уровень</th><th>свойство</th><th>читатель</th>' +
+          '<th>предпросмотр</th><th>редактор</th><th>предпросмотр врёт?</th></tr>';
+  var вретВсего = 0, строк = 0;
+  УРОВНИ.forEach(function (у) {
+    у[2].forEach(function (св) {
+      var зн = ['a','b','c'].map(function (и) {
+        var кор = document.getElementById(и);
+        var эл = у[1] ? кор.querySelector(у[1]) : кор;
+        if (!эл) return '—';
+        var v = getComputedStyle(эл)[св];
+        return (св === 'color') ? v.replace(/rgb\(|\)/g, '') : v;
+      });
+      строк++;
+      var врёт = зн[1] !== зн[0];
+      if (врёт) вретВсего++;
+      h += '<tr><td>' + у[0] + '</td><td>' + св + '</td>' +
+           '<td class="c">' + зн[0] + '</td>' +
+           '<td class="c ' + (врёт ? 'vret' : 'sovp') + '">' + зн[1] + '</td>' +
+           '<td class="c">' + зн[2] + '</td>' +
+           '<td class="c">' + (врёт ? 'ДА' : '—') + '</td></tr>';
+    });
+  });
+  h += '</table><p class="tiho">Сверено ' + строк + ' свойств. Предпросмотр расходится с ' +
+       'читателем в <b>' + вретВсего + '</b> из них. Каждое такое место — ложь автору ' +
+       'о том, как новость выйдет.</p>';
+  document.getElementById('tablica').innerHTML = h;
+});
+</script>
+</body></html>
