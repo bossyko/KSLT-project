@@ -119,7 +119,8 @@ const КУСКИ = [
     ['палитра различителей', 'check-palitra-kategoriy.js', 'check-palitra-kategoriy-otkat.js'],
     ['статус «идёт»', 'check-status-idet.js', 'check-status-idet-otkat.js'],
     ['краски холста', 'check-kraski-holsta.js', 'check-kraski-holsta-otkat.js'],
-    ['печатная карточка', 'check-kartochka-holsta.js', 'check-kartochka-holsta-otkat.js']
+    ['печатная карточка', 'check-kartochka-holsta.js', 'check-kartochka-holsta-otkat.js'],
+    ['экранирование html', 'check-ekranirovanie.js', 'check-ekranirovanie-otkat.js']
 ];
 
 function прогнать(файл) {
