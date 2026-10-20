@@ -779,11 +779,14 @@
         if (btnPause) btnPause.addEventListener('click', handlePause);
     }
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
+       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
+       пишется в двойных кавычках», которого никто не сторожит. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
     function esc(s) {
-        if (!s) return '';
-        var d = document.createElement('div');
-        d.textContent = s;
-        return d.innerHTML;
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     // Export engine for scoreboard/live-match reuse

@@ -55,7 +55,15 @@
     var userId = null;
     var userVotes = {};
 
-    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
+       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
+       пишется в двойных кавычках», которого никто не сторожит. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
+    function esc(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
     function formatDate(dateStr) {
         if (!dateStr) return '';

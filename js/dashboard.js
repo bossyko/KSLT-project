@@ -930,9 +930,14 @@
     // Use shared Supabase client from supabase-config.js
     var client = window.supabaseClient;
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
+       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
+       пишется в двойных кавычках», которого никто не сторожит. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
     function dbEsc(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     // ---- Проверка имени ----
@@ -6825,10 +6830,13 @@
         }, duration);
     }
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА: результат идёт в `src=` и `alt=`, а
+       способ через `textContent` кавычек не экранирует вовсе. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
     function escHtml(str) {
-        var div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
 })();

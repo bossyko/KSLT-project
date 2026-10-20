@@ -29,9 +29,14 @@
 
     var страницаНовостей = isEn ? 'pages/news-en.html' : (isKg ? 'pages/news-kg.html' : 'pages/news.html');
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
+       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
+       пишется в двойных кавычках», которого никто не сторожит. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
     function esc(s) {
         return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     /** Дата словами: «10 сентября 2026». */

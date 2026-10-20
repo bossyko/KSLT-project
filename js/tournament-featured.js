@@ -42,9 +42,14 @@
         'stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>' +
         '<circle cx="12" cy="10" r="3"/></svg>';
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
+       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
+       пишется в двойных кавычках», которого никто не сторожит. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
     function esc(s) {
         return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     /**

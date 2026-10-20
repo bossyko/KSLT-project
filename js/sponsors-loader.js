@@ -478,11 +478,15 @@
         trackSiteVisit();
     }
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА. Прежде здесь
+       стоял способ через `createTextNode` — третье написание того же
+       слабого приёма: кавычки он не экранирует вовсе, а результат идёт в
+       `src=`, `alt=` и `title=` логотипов спонсоров (10 мест в этом
+       файле). Эталон взят дословно у `js/kslt-lenta.js`. */
     function esc(str) {
-        if (!str) return '';
-        var d = document.createElement('div');
-        d.appendChild(document.createTextNode(str));
-        return d.innerHTML;
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
 })();

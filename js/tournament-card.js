@@ -46,10 +46,14 @@
     var PAGE = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
     var BASE = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
 
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
+       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
+       пишется в двойных кавычках», которого никто не сторожит. Эталон
+       взят дословно у `js/kslt-lenta.js`. */
     function esc(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function today() { return new Date().toISOString().substring(0, 10); }

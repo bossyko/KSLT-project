@@ -1076,11 +1076,16 @@
     }
 
     /* ========== UTILS ========== */
-    function esc(str) {
-        if (!str) return '';
-        var d = document.createElement('div');
-        d.textContent = str;
-        return d.innerHTML;
+    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА. Прежде здесь
+       стоял способ через `textContent`: он безопасен в текстовом узле, но
+       НЕ ЭКРАНИРУЕТ КАВЫЧКИ ВОВСЕ, а результат подставляется внутрь
+       атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
+       или в адресе логотипа закрывает атрибут. Эталон взят дословно у
+       `js/kslt-lenta.js`. */
+    function esc(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function formatDate(dateStr) {
