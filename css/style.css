@@ -1162,7 +1162,7 @@ input, button, select, textarea {
     width: 300px;
     max-height: 400px;
     overflow-y: auto;
-    background: var(--bg-card, #1a1a2e);
+    background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle, var(--alpha-white-12));
     border-radius: 12px;
     box-shadow: 0 8px 32px var(--alpha-black-50);
@@ -1223,7 +1223,7 @@ input, button, select, textarea {
 .site-notif-dropdown .site-notif-foot {
     position: sticky;
     bottom: 0;
-    background: var(--bg-card, #1a1a2e);
+    background: var(--bg-card);
     padding: 10px 16px;
 }
 
