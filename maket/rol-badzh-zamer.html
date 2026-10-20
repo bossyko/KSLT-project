@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: бейдж роли — четыре формы, 96в</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=460">
+<link rel="stylesheet" href="../css/admin.css?v=285">
+<link rel="stylesheet" href="../css/dashboard.css?v=170">
+<style>
+/* СТЕНД, НЕ ПРОДУКТ. Подложки взяты из продукта дословно:
+   админка — admin.css:16 body.ad-page { background: #0f1219 }
+   кабинет — tokens.css --bg-base
+   Это НАМЕРЕНО: контраст бейджа считается по той подложке, на которой он живёт. */
+    body { margin: 0; font-family: var(--font-sans); background: var(--bg-base); color: var(--text-primary); }
+    .зона { padding: 24px; }
+    .зона-admin { background: #0f1219; }
+    .зона-db { background: var(--bg-base); }
+    .шапка { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+    .ряд { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 16px; }
+    .метка { font-size: 11px; color: var(--text-muted); min-width: 170px; }
+/* Инлайн users.js:341 — ДОСЛОВНО, чтобы мерить то, что в продукте */
+    .инлайн-кегль { font-size: var(--fs-xs); }
+/* Своего определения бейджа тут НЕТ НАМЕРЕННО: стенд мерит
+       .kslt-role из style.css, то есть продукт, а не копию. */
+</style>
+</head>
+<body>
+
+<div class="зона зона-admin">
+    <div class="шапка">A · админка, подложка #0f1219 (admin.css:16)</div>
+
+    <div class="ряд"><div class="метка">1 · класс, layout.js:549</div>
+        <span class="ad-role-badge ad-role-badge-admin" data-проба="кл-admin">Администратор</span>
+        <span class="ad-role-badge ad-role-badge-manager" data-проба="кл-manager">Менеджер</span>
+        <span class="ad-role-badge ad-role-badge-player" data-проба="кл-player">Игрок</span>
+        <span class="ad-role-badge ad-role-badge-user" data-проба="кл-user">Пользователь</span>
+    </div>
+
+    <div class="ряд"><div class="метка">2 · инлайн, users.js:341</div>
+        <span data-проба="ин-admin" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">Администратор</span>
+        <span data-проба="ин-manager" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--role-manager-subtle);color:var(--role-manager);">Менеджер</span>
+        <span data-проба="ин-player" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--surface-glass-hover);color:var(--text-secondary);">Игрок</span>
+        <span data-проба="ин-user" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--surface-glass-hover);color:var(--text-secondary);">Пользователь</span>
+    </div>
+
+    <div class="ряд"><div class="метка">3 · боковая, layout.js:71</div>
+        <div class="ad-sidebar-role" data-проба="сб-ad-admin">Администратор</div>
+        <div class="ad-sidebar-role" data-проба="сб-ad-manager">Менеджер</div>
+    </div>
+</div>
+
+<div class="зона зона-db">
+    <div class="шапка">B · кабинет, подложка --bg-base</div>
+    <div class="ряд"><div class="метка">4 · боковая, dashboard.js:1337</div>
+        <div class="db-sidebar-role" data-проба="сб-db-admin">Администратор</div>
+        <div class="db-sidebar-role" data-проба="сб-db-manager">Менеджер</div>
+    </div>
+</div>
+
+<div class="зона зона-admin">
+    <div class="шапка">C · английский и кыргызский — длина слова, та же форма</div>
+    <div class="ряд"><div class="метка">en · класс и инлайн</div>
+        <span class="ad-role-badge ad-role-badge-admin" data-проба="en-кл">Admin</span>
+        <span data-проба="en-ин" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">Admin</span>
+        <span class="ad-role-badge ad-role-badge-manager" data-проба="en-кл-m">Manager</span>
+    </div>
+    <div class="ряд"><div class="метка">kg · класс и инлайн</div>
+        <span class="ad-role-badge ad-role-badge-admin" data-проба="kg-кл">Администратор</span>
+        <span data-проба="kg-ин" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--surface-glass-hover);color:var(--text-secondary);">Колдонуучу</span>
+        <span class="ad-role-badge ad-role-badge-player" data-проба="kg-кл-p">Оюнчу</span>
+    </div>
+</div>
+
+
+<div class="зона зона-admin">
+    <div class="шапка">D · ПРЕДЛОЖЕНО — одна форма по эталону Badge 27:53 (chip-h 24, fw-medium 500, 0.5px, radius-full, space-2)</div>
+    <div class="ряд"><div class="метка">новое · четыре роли</div>
+        <span class="kslt-role kslt-role-admin" data-проба="нов-admin">Администратор</span>
+        <span class="kslt-role kslt-role-manager" data-проба="нов-manager">Менеджер</span>
+        <span class="kslt-role kslt-role-player" data-проба="нов-player">Игрок</span>
+        <span class="kslt-role kslt-role-user" data-проба="нов-user">Пользователь</span>
+    </div>
+    <div class="ряд"><div class="метка">было · класс (19 выс)</div>
+        <span class="ad-role-badge ad-role-badge-admin">Администратор</span>
+        <span class="ad-role-badge ad-role-badge-manager">Менеджер</span>
+        <span class="ad-role-badge ad-role-badge-player">Игрок</span>
+        <span class="ad-role-badge ad-role-badge-user">Пользователь</span>
+    </div>
+    <div class="ряд"><div class="метка">было · инлайн (18 выс)</div>
+        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">Администратор</span>
+        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--role-manager-subtle);color:var(--role-manager);">Менеджер</span>
+        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--surface-glass-hover);color:var(--text-secondary);">Игрок</span>
+        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--surface-glass-hover);color:var(--text-secondary);">Пользователь</span>
+    </div>
+    <div class="ряд"><div class="метка">en · новое</div>
+        <span class="kslt-role kslt-role-admin">Admin</span>
+        <span class="kslt-role kslt-role-manager">Manager</span>
+        <span class="kslt-role kslt-role-player">Player</span>
+        <span class="kslt-role kslt-role-user">User</span>
+    </div>
+    <div class="ряд"><div class="метка">kg · новое</div>
+        <span class="kslt-role kslt-role-admin">Администратор</span>
+        <span class="kslt-role kslt-role-manager">Менеджер</span>
+        <span class="kslt-role kslt-role-player">Оюнчу</span>
+        <span class="kslt-role kslt-role-user">Колдонуучу</span>
+    </div>
+</div>
+
+<div class="зона зона-admin">
+    <div class="шапка">G · ЦЕНА ЗА СТРОКУ ТАБЛИЦЫ — две таблицы, в одной только старые бейджи, в другой только новые</div>
+    <table class="ad-table" id="тБыло" style="width:100%;max-width:520px;margin-bottom:16px">
+        <thead><tr><th>Имя</th><th>Роль</th></tr></thead>
+        <tbody>
+        <tr><td>Константин Хан</td><td><span class="ad-role-badge ad-role-badge-admin">Администратор</span></td></tr>
+        <tr><td>Иван Петров</td><td><span class="ad-role-badge ad-role-badge-user">Пользователь</span></td></tr>
+        </tbody>
+    </table>
+    <table class="ad-table" id="тСтанет" style="width:100%;max-width:520px">
+        <thead><tr><th>Имя</th><th>Роль</th></tr></thead>
+        <tbody>
+        <tr><td>Константин Хан</td><td><span class="kslt-role kslt-role-admin">Администратор</span></td></tr>
+        <tr><td>Иван Петров</td><td><span class="kslt-role kslt-role-user">Пользователь</span></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="зона зона-admin">
+    <div class="шапка">E · КРАЙНИЙ СЛУЧАЙ — бейдж в строке таблицы: было 19, станет 24</div>
+    <table class="ad-table" style="width:100%;max-width:760px">
+        <thead><tr><th>Имя</th><th>Роль было</th><th>Роль станет</th></tr></thead>
+        <tbody>
+        <tr><td>Константин Хан</td>
+            <td><span class="ad-role-badge ad-role-badge-admin">Администратор</span></td>
+            <td><span class="kslt-role kslt-role-admin">Администратор</span></td></tr>
+        <tr><td>Имя, которое занимает всю клетку и переносится на вторую строку</td>
+            <td><span class="ad-role-badge ad-role-badge-manager">Менеджер</span></td>
+            <td><span class="kslt-role kslt-role-manager">Менеджер</span></td></tr>
+        <tr><td>—</td>
+            <td><span class="ad-role-badge ad-role-badge-user">Пользователь</span></td>
+            <td><span class="kslt-role kslt-role-user">Пользователь</span></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="зона зона-db">
+    <div class="шапка">F · боковые панели — решено: та же краска, что в таблице</div>
+    <div class="ряд"><div class="метка">было · всегда лайм</div>
+        <div class="ad-sidebar-role">Администратор</div>
+        <div class="ad-sidebar-role">Менеджер</div>
+        <div class="db-sidebar-role">Менеджер</div>
+    </div>
+    <div class="ряд"><div class="метка">станет · роль различается</div>
+        <span class="kslt-role kslt-role-admin" data-проба="сб-нов-admin">Администратор</span>
+        <span class="kslt-role kslt-role-manager" data-проба="сб-нов-manager">Менеджер</span>
+    </div>
+</div>
+
+<script>
+/* ЗАМЕР ЧИТАЕТ НАРИСОВАННОЕ, а не объявленное: --alpha-lime-12 это 12 %
+   поверх подложки, и контраст считается к тому, что видно. Подложки взяты
+   из продукта: админка #0f1219 (admin.css), кабинет --bg-base. */
+(function () {
+    function разбор(s) { var m = String(s).match(/[\d.]+/g); if (!m) return [0,0,0,1]; m = m.map(Number); return [m[0], m[1], m[2], m.length > 3 ? m[3] : 1]; }
+    function поверх(c, ф) { var a = c[3]; return [c[0]*a + ф[0]*(1-a), c[1]*a + ф[1]*(1-a), c[2]*a + ф[2]*(1-a), 1]; }
+    function яркость(c) { var f = c.slice(0,3).map(function (v) { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }); return 0.2126*f[0] + 0.7152*f[1] + 0.0722*f[2]; }
+    function контраст(a, b) { var l1 = яркость(a), l2 = яркость(b); return Math.round(((Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05))*100)/100; }
+
+    function собрать() {
+        var фонА = разбор(getComputedStyle(document.querySelector('.зона-admin')).backgroundColor);
+        var фонК = разбор(getComputedStyle(document.querySelector('.зона-db')).backgroundColor);
+        var роли = {}, формы = {}, переносов = 0;
+        document.querySelectorAll('.kslt-role').forEach(function (el) {
+            var с = getComputedStyle(el), r = el.getBoundingClientRect();
+            var подл = el.closest('.зона-db') ? фонК : фонА;
+            var фб = поверх(разбор(с.backgroundColor), подл);
+            var м = el.className.match(/kslt-role-(\w+)/);
+            var роль = м ? м[1] : '?';
+            var зона = el.closest('.зона-db') ? 'кабинет' : 'админка';
+            var ключ = роль + '/' + зона;
+            if (r.height > 26) переносов++;
+            if (!роли[ключ]) роли[ключ] = {
+                высота: Math.round(r.height * 10) / 10,
+                кегль: parseFloat(с.fontSize), вес: с.fontWeight,
+                межбуквенный: с.letterSpacing, капс: с.textTransform,
+                радиус: с.borderRadius, отступы: с.padding,
+                тень: с.boxShadow.indexOf('inset') !== -1,
+                рамка: parseFloat(с.borderTopWidth) || 0,
+                контраст: контраст(поверх(разбор(с.color), фб), фб),
+                штук: 0
+            };
+            роли[ключ].штук++;
+            var ф = [с.fontSize, с.fontWeight, с.letterSpacing, с.borderRadius, с.padding, с.textTransform].join('|');
+            формы[ф] = (формы[ф] || 0) + 1;
+        });
+        function высоты(сел) {
+            return Array.prototype.map.call(document.querySelectorAll(сел),
+                function (tr) { return Math.round(tr.getBoundingClientRect().height * 10) / 10; });
+        }
+        return {
+            роли: роли,
+            формОдна: Object.keys(формы).length,
+            переносов: переносов,
+            старых: document.querySelectorAll('.ad-role-badge, [style*="border-radius:4px"]').length,
+            строкиБыло: высоты('#тБыло tbody tr'),
+            строкиСтанет: высоты('#тСтанет tbody tr'),
+            фоны: { админка: фонА.join(','), кабинет: фонК.join(',') }
+        };
+    }
+
+    window.снять = собрать;
+    function готово() {
+        var пуск = function () { window.ЗАМЕР = собрать(); };
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(пуск); else пуск();
+    }
+    if (document.readyState === 'complete') готово();
+    else window.addEventListener('load', готово);
+})();
+</script>
+</body>
+</html>
