@@ -68,7 +68,7 @@
                 avatarHtml +
                 '<div class="ad-sidebar-name">' + (profile.full_name || 'Admin') + '</div>' +
                 '<div class="ad-sidebar-email">' + (profile.email || '') + '</div>' +
-                '<div class="ad-sidebar-role">' + roleLabel + '</div>' +
+                '<div class="kslt-role kslt-role-' + (profile.role || 'user') + ' ad-sidebar-role">' + roleLabel + '</div>' +
             '</div>' +
             '<ul class="ad-sidebar-nav">' + navHtml + '</ul>';
     }
@@ -539,14 +539,14 @@
             var avatarHtml = u.avatar_url
                 ? '<img src="' + A.esc(u.avatar_url) + '" class="ad-table-avatar" alt="">'
                 : '<div class="ad-table-avatar-placeholder">' + initials + '</div>';
-            var roleClass = 'ad-role-badge-' + (u.role || 'user');
+            var roleClass = 'kslt-role-' + (u.role || 'user');
             var roleLabel = L['role' + (u.role || 'user').charAt(0).toUpperCase() + (u.role || 'user').slice(1)] || u.role;
             return '<tr>' +
                 '<td><div class="ad-table-user-cell">' + avatarHtml +
                     '<div><div class="ad-table-user-name">' + A.esc(u.full_name || L.noData) + '</div></div>' +
                 '</div></td>' +
                 '<td>' + A.esc(u.email || L.noData) + '</td>' +
-                '<td><span class="ad-role-badge ' + roleClass + '">' + roleLabel + '</span></td>' +
+                '<td><span class="kslt-role ' + roleClass + '">' + roleLabel + '</span></td>' +
                 '<td>' + A.fmtDate(u.created_at) + '</td>' +
             '</tr>';
         }, L.noRecentUsers);

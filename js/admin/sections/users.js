@@ -331,14 +331,13 @@
 
             // Role badge
             var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
-            // КРАСКИ ТЕ ЖЕ, ЧТО У `.ad-role-badge-*` в admin.css: роль
-            // пользователя рисуется в двух местах (здесь и в layout.js
-            // классами), и до 17.10 менеджер был тут лаймовым, а там —
-            // фиолетовым. ФОРМА пока расходится (кегль и скругление) —
-            // находка в трекере, ждёт стенда.
-            var roleBg = u.role === 'admin' ? 'var(--danger-subtle)' : u.role === 'manager' ? 'var(--role-manager-subtle)' : 'var(--surface-glass-hover)';
-            var roleColor = u.role === 'admin' ? 'var(--danger)' : u.role === 'manager' ? 'var(--role-manager)' : 'var(--text-secondary)';
-            var roleBadge = '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:' + roleBg + ';color:' + roleColor + ';">' + roleLabel + '</span>';
+            // ОДНО ОПРЕДЕЛЕНИЕ: класс `.kslt-role` в style.css (96в, 19.10).
+            // Здесь стоял свой инлайн — 12/600, радиус 4px, без капса и без
+            // обводки, высота 18 против эталонных 24. И он не знал роли
+            // «игрок» вовсе: красил её как «прочие», хотя в layout.js она
+            // синяя. Админ тут был КРАСНЫМ, а там лаймовым — слово Кости
+            // 19.10: лайм. Красный остаётся роли ошибки и отказа.
+            var roleBadge = '<span class="kslt-role kslt-role-' + (u.role || 'user') + '">' + roleLabel + '</span>';
 
             // Membership badge with expiry date
             var mem = memMap[u.id];

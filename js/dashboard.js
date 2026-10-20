@@ -1334,7 +1334,7 @@
         // Role badge for admin/manager only
         var roleHtml = '';
         if (profile.role === 'admin' || profile.role === 'manager') {
-            roleHtml = '<div class="db-sidebar-role">' + (L['role_' + profile.role] || profile.role) + '</div>';
+            roleHtml = '<div class="kslt-role kslt-role-' + profile.role + ' db-sidebar-role">' + (L['role_' + profile.role] || profile.role) + '</div>';
         }
 
         var qrBtnHtml = profile.player_id

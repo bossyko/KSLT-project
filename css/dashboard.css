@@ -82,17 +82,11 @@ body.db-page.auth-ready {
     word-break: break-all;
 }
 
+/* ТОЛЬКО ПОЛОЖЕНИЕ. Форму и краску даёт .kslt-role в style.css.
+   Держала пятую копию бейджа: отступы 3·10 мимо шкалы, отступ сверху
+   8 числом вместо --space-2, высота 21 против эталонных 24. */
 .db-sidebar-role {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: var(--fs-2xs);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 3px 10px;
-    border-radius: var(--radius-full);
-    background: var(--alpha-lime-12);
-    color: var(--accent);
-    border: var(--bw-hair) solid var(--alpha-lime-20);
+    margin-top: var(--space-2);
 }
 
 .db-sidebar-ratings {

@@ -11748,3 +11748,59 @@ main > section:first-child:not(.hero) {
         margin-top: var(--space-8);
     }
 }
+
+/* ============================================================================
+   БЕЙДЖ РОЛИ ПОЛЬЗОВАТЕЛЯ — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ (96в, 19.10)
+   Стоял четырьмя формами: класс в admin.css (выс 19), инлайн в users.js
+   (12/600/радиус 4, выс 18), .ad-sidebar-role (межбуквенный 1px) и
+   .db-sidebar-role (отступы 3·10, выс 21). Ни одна не совпадала с эталоном —
+   компонентом Badge 27:53 в Фигме, который 18.09 уже заменил 22 комбинации.
+   Живёт ЗДЕСЬ, а не в admin.css, потому что роль рисуется и в админке, и в
+   кабинете, а эти два файла друг друга не видят: style.css грузят оба.
+   Числа все именами: высота --chip-h 24, кегль --fs-2xs 11, вес --fw-medium.
+   ОБВОДКА ВНУТРЕННЕЙ ТЕНЬЮ, А НЕ border: эталон прямо предупреждает — border
+   добавляет 2px к фиксированным 24, и замер это подтвердил (вышло 26).
+   Межбуквенный 0.5px — НАМЕРЕНО число: лестницы межбуквенных в системе нет,
+   а эталон называет именно 0.5 (боковые панели держали 1px сами по себе).
+   Контраст, мерено на стенде maket/rol-badzh-zamer.html 19.10 на подложках
+   продукта (админка #0f1219, кабинет --bg-base): админ 11.99, менеджер 5.52
+   (в кабинете 6.00), игрок 5.84, пользователь 5.18 — порог AA 4.5 для 11px.
+   Краска админа ЛАЙМОМ — слово Кости 19.10. Красный не взят намеренно:
+   --danger занят ролью ошибки и отказа (круг 21), одно значение на краску.
+   ============================================================================ */
+.kslt-role {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--chip-h);
+    padding: 0 var(--space-2);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.kslt-role-admin {
+    background: var(--alpha-lime-12);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 var(--bw-hair) var(--alpha-lime-20);
+}
+
+.kslt-role-manager {
+    background: var(--role-manager-subtle);
+    color: var(--role-manager);
+    box-shadow: inset 0 0 0 var(--bw-hair) var(--role-manager-border);
+}
+
+.kslt-role-player {
+    background: var(--info-subtle);
+    color: var(--info);
+    box-shadow: inset 0 0 0 var(--bw-hair) var(--info-border);
+}
+
+.kslt-role-user {
+    background: var(--alpha-white-04);
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 var(--bw-hair) var(--border-subtle);
+}

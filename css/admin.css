@@ -94,17 +94,11 @@ body.ad-page {
     word-break: break-all;
 }
 
+/* ТОЛЬКО ПОЛОЖЕНИЕ. Форму и краску даёт .kslt-role в style.css.
+   Держала свою копию бейджа и красила ЛЮБУЮ роль лаймом: менеджер здесь
+   был лаймовым, а в таблице фиолетовым — одно из двух было неправдой. */
 .ad-sidebar-role {
-    display: inline-block;
     margin-top: var(--space-2);
-    font-size: var(--fs-2xs);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: var(--space-05) var(--space-2);
-    border-radius: var(--radius-full);
-    background: var(--alpha-lime-12);
-    color: var(--accent);
-    border: var(--bw-hair) solid var(--alpha-lime-20);
 }
 
 /* Sidebar Nav */
@@ -1509,38 +1503,10 @@ body.ad-page {
     .ad-reg-sub-inline { display: block; }
 }
 
-.ad-role-badge {
-    display: inline-block;
-    font-size: var(--fs-2xs);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: var(--space-05) var(--space-2);
-    border-radius: var(--radius-full);
-}
-
-.ad-role-badge-admin {
-    background: var(--alpha-lime-12);
-    color: var(--accent);
-    border: var(--bw-hair) solid var(--alpha-lime-20);
-}
-
-.ad-role-badge-player {
-    background: var(--info-subtle);
-    color: var(--info);
-    border: var(--bw-hair) solid var(--info-border);
-}
-
-.ad-role-badge-manager {
-    background: var(--role-manager-subtle);
-    color: var(--role-manager);
-    border: var(--bw-hair) solid var(--role-manager-border);
-}
-
-.ad-role-badge-user {
-    background: var(--alpha-white-04);
-    color: var(--text-muted);
-    border: var(--bw-hair) solid var(--border-subtle);
-}
+/* БЕЙДЖ РОЛИ ЖИВЁТ В style.css КЛАССОМ .kslt-role (96в, 19.10).
+   Здесь он стоял своим определением высотой 19 и расходился с эталоном
+   весом (400 против --fw-medium) и высотой (19 против --chip-h 24).
+   Второго определения тут нет НАМЕРЕННО: кабинет admin.css не грузит. */
 
 /* ---- Coming Soon Placeholder ---- */
 .ad-coming-soon {
