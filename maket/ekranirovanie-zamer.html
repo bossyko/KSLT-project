@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер: экранирование для атрибута</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<style>
+  body { background: var(--bg-base); color: var(--text-primary); font: 14px/1.5 Inter, sans-serif; padding: 20px; margin: 0; }
+  table { border-collapse: collapse; margin-bottom: 20px; width: 100%; max-width: 980px; }
+  td, th { border: 1px solid var(--border-light); padding: 6px 10px; text-align: left; font-size: 12px; vertical-align: top; }
+  .ок { color: var(--success); font-weight: 600; }
+  .беда { color: var(--danger); font-weight: 600; }
+  pre { font-size: 11px; white-space: pre-wrap; color: var(--text-secondary); }
+  #песочница { position: absolute; left: -9999px; }
+</style>
+</head><body>
+<h2>Экранирование: что доходит до атрибута</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:760px">
+  Прибор не читает исходник. Он берёт КАЖДЫЙ способ экранирования, какой
+  встречался в продукте, подставляет через него имя внутрь атрибута, вставляет
+  это в живой DOM и спрашивает у браузера, что он разобрал: уцелел ли атрибут
+  целиком и не появилось ли лишних узлов.
+</p>
+<table id="т"><thead><tr>
+  <th>способ</th><th>атрибут в двойных</th><th>атрибут в одинарных</th><th>как текст</th>
+</tr></thead><tbody></tbody></table>
+<pre id="out"></pre>
+<div id="песочница"></div>
+<script>
+/* ТРИ СПОСОБА, КАКИЕ ЖИЛИ В ПРОДУКТЕ, плюс эталон. */
+var СПОСОБЫ = {
+  'textContent (слабый)': function (s) {
+    if (!s) return '';
+    var d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+  },
+  'createTextNode (слабый)': function (s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s)); return d.innerHTML;
+  },
+  'без одинарной (частичный)': function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  },
+  'эталон kslt-lenta': function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+};
+
+/* ИМЯ С КАВЫЧКАМИ — то, что человек может ввести в админке.
+   Крайний случай, а не удобный. */
+var ИМЯ = 'Ким "Скала" О\'Брайен <и> Ко & сыновья';
+
+var песочница = document.getElementById('песочница');
+
+/* Что спрашиваем у браузера: уцелел ли атрибут целиком и один ли узел. */
+function проверить(собрать) {
+  песочница.innerHTML = собрать();
+  var узлов = песочница.querySelectorAll('*').length;
+  var эл = песочница.querySelector('[data-proba]');
+  var дошло = эл ? эл.getAttribute('title') : null;
+  return { узлов: узлов, дошло: дошло, целоеИмя: дошло === ИМЯ, лишниеУзлы: узлов !== 1 };
+}
+
+var tb = document.querySelector('#т tbody');
+var ЗАМЕР = { имя: ИМЯ, способы: {} };
+
+Object.keys(СПОСОБЫ).forEach(function (имяСпособа) {
+  var экр = СПОСОБЫ[имяСпособа];
+  var двойные = проверить(function () {
+    return '<span data-proba title="' + экр(ИМЯ) + '">x</span>';
+  });
+  var одинарные = проверить(function () {
+    return "<span data-proba title='" + экр(ИМЯ) + "'>x</span>";
+  });
+  var текстом = (function () {
+    песочница.innerHTML = '<span data-proba>' + экр(ИМЯ) + '</span>';
+    var эл = песочница.querySelector('[data-proba]');
+    var узлов = песочница.querySelectorAll('*').length;
+    return { целоеИмя: эл && эл.textContent === ИМЯ, лишниеУзлы: узлов !== 1 };
+  })();
+
+  ЗАМЕР.способы[имяСпособа] = { двойные: двойные, одинарные: одинарные, текстом: текстом };
+
+  function клетка(р) {
+    var цел = р.целоеИмя && !р.лишниеУзлы;
+    return '<td class="' + (цел ? 'ок' : 'беда') + '">' +
+      (цел ? 'цело' : 'ПОРВАЛО') +
+      (р.лишниеУзлы ? ' · узлов ' + р.узлов : '') + '</td>';
+  }
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + имяСпособа + '</td>' + клетка(двойные) + клетка(одинарные) + клетка(текстом);
+  tb.appendChild(tr);
+});
+
+/* Итог: какие способы годны для атрибута в ЛЮБЫХ кавычках. */
+ЗАМЕР.годныеДляАтрибута = Object.keys(ЗАМЕР.способы).filter(function (к) {
+  var с = ЗАМЕР.способы[к];
+  return с.двойные.целоеИмя && !с.двойные.лишниеУзлы
+      && с.одинарные.целоеИмя && !с.одинарные.лишниеУзлы;
+});
+ЗАМЕР.рвутАтрибут = Object.keys(ЗАМЕР.способы).filter(function (к) {
+  return ЗАМЕР.годныеДляАтрибута.indexOf(к) === -1;
+});
+песочница.innerHTML = '';
+window.ЗАМЕР = ЗАМЕР;
+document.getElementById('out').textContent = JSON.stringify(ЗАМЕР, null, 1);
+</script>
+</body></html>
