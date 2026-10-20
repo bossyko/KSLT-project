@@ -10,13 +10,15 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/style.css', 'css/pricing.css', 'js/kslt-kraska.js',
-               'js/courts.js', 'js/admin/core/export.js', 'pages/courts.html',
+               'js/courts.js', 'js/kslt-vaucher-kartochka.js',
+               'js/admin/core/export.js', 'pages/courts.html',
                'css/tokens.css'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
 const С = 'css/style.css', Ц = 'css/pricing.css', Ч = 'js/kslt-kraska.js',
-      К = 'js/courts.js', В = 'js/admin/core/export.js', П = 'pages/courts.html';
+      К = 'js/courts.js', В = 'js/admin/core/export.js', П = 'pages/courts.html',
+      ВК = 'js/kslt-vaucher-kartochka.js';
 
 const ОТКАТЫ = [
 
@@ -27,9 +29,12 @@ const ОТКАТЫ = [
  '    outline: var(--bw-thick) solid #CCFF00;',
  'числа акцента в коде нет'],
 
-['вернуть число акцента на холст', К,
- "ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');",
- "ctx.fillStyle = '#CCFF00';",
+/* ЯКОРЬ ПЕРЕЕХАЛ 19.10 (круг 18): рисование карточки сведено из трёх
+   копий в дом `js/kslt-vaucher-kartochka.js`, и в `courts.js` холста
+   больше нет вовсе. Откат идёт туда, где холст живёт теперь. */
+['вернуть число акцента на холст', ВК,
+ "        ctx.fillStyle = краска('--accent');\n        ctx.fillRect(0, 0, ш, 4);",
+ "        ctx.fillStyle = '#CCFF00';\n        ctx.fillRect(0, 0, ш, 4);",
  'числа акцента в коде нет'],
 
 ['завести второе число в выгрузке', В,

@@ -14,7 +14,8 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-adres-'));
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 
 const ФАЙЛЫ = ['js/supabase-config.js', 'js/dashboard.js', 'js/courts.js',
-                'js/coaches.js', 'supabase/functions/send-email/index.ts'];
+                'js/coaches.js', 'js/kslt-vaucher-kartochka.js',
+                'supabase/functions/send-email/index.ts'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -31,6 +32,7 @@ function прогон(замена) {
 
 const C = 'js/supabase-config.js', D = 'js/dashboard.js',
       K = 'js/courts.js', T = 'js/coaches.js',
+      ВК = 'js/kslt-vaucher-kartochka.js',
       E = 'supabase/functions/send-email/index.ts';
 
 const ОТКАТЫ = [
@@ -42,12 +44,15 @@ const ОТКАТЫ = [
     ['вернуть зашитый адрес в QR корта', K,
      "var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify'",
      "var verifyUrl = 'https://kslt.netlify.app/pages/verify'",
-     'ваучер в `courts.js` берёт адрес из дома'],
+     'ссылка QR в `courts.js` берёт адрес из дома'],
 
-    ['вернуть зашитую подпись на картинке у тренера', T,
+    /* ПОДПИСЬ ПЕРЕЕХАЛА В ДОМ КАРТОЧКИ (круг 18, 19.10): рисование сведено
+       в одно место, и в трёх прежних её больше нет. Откат идёт туда, где
+       подпись живёт теперь. */
+    ['вернуть зашитую подпись на картинке', ВК,
      'ctx.fillText(window.KSLT_SAYT.подпись',
      "ctx.fillText('kslt.netlify.app'",
-     'ваучер в `coaches.js` берёт адрес из дома'],
+     'подпись на картинке берёт адрес из дома'],
 
     ['снести дом адреса', C,
      'window.KSLT_SAYT = {',
