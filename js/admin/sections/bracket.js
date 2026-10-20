@@ -6017,7 +6017,7 @@
                     var igEx = extractOutcome(m.score);
                     igOutcome = igEx.outcome;
                     (igEx.sets ? igEx.sets.split(' ') : []).forEach(function(s) {
-                        var pr = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
+                        var pr = s.match(/^(\d+)\/(\d+)(?:\((\d+)\s*[-–—]\s*(\d+)\))?$/);
                         if (pr) {
                             p1Scores.push(pr[1] + (pr[3] ? '<sup>' + pr[3] + '</sup>' : ''));
                             p2Scores.push(pr[2] + (pr[4] ? '<sup>' + pr[4] + '</sup>' : ''));
@@ -6132,21 +6132,6 @@
         playerGroupLabel = playerGroupLabel || {};
         var totalRounds = Math.log2(drawSize);
         var html = '';
-
-        function parseSets(score) {
-            if (!score || score === 'BYE') return { p1: [], p2: [], outcome: '' };
-            var ex = extractOutcome(score);
-            var sets = ex.sets ? ex.sets.split(' ') : [];
-            var p1Sets = [], p2Sets = [];
-            sets.forEach(function(s) {
-                var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
-                if (m) {
-                    p1Sets.push(m[1] + (m[3] ? '<sup>' + m[3] + '</sup>' : ''));
-                    p2Sets.push(m[2] + (m[4] ? '<sup>' + m[4] + '</sup>' : ''));
-                }
-            });
-            return { p1: p1Sets, p2: p2Sets, outcome: ex.outcome };
-        }
 
         html += '<div class="ad-brk-scroll"><div class="ad-brk-grid">';
 
@@ -6387,7 +6372,7 @@
 
         return sets.map(function(s) {
             // Parse "6/3" or "7/6(7-5)"
-            var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
+            var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)\s*[-–—]\s*(\d+)\))?$/);
             if (!m) return s;
             var a = m[1], b = m[2], tb1 = m[3], tb2 = m[4];
             if (needFlip) {
@@ -6494,21 +6479,6 @@
         var html = '';
 
         // Parse score into per-set arrays for each player
-        function parseSets(score) {
-            if (!score || score === 'BYE') return { p1: [], p2: [], outcome: '' };
-            var ex = extractOutcome(score);
-            var sets = ex.sets ? ex.sets.split(' ') : [];
-            var p1Sets = [], p2Sets = [];
-            sets.forEach(function(s) {
-                var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
-                if (m) {
-                    p1Sets.push(m[1] + (m[3] ? '<sup>' + m[3] + '</sup>' : ''));
-                    p2Sets.push(m[2] + (m[4] ? '<sup>' + m[4] + '</sup>' : ''));
-                }
-            });
-            return { p1: p1Sets, p2: p2Sets, outcome: ex.outcome };
-        }
-
         // Visual bracket with connectors
         html += '<div class="ad-brk-scroll">' +
                 '<div class="ad-brk-grid">';
@@ -6934,21 +6904,6 @@
         }
         var sections = getFicSections(drawSize, isEn ? 'en' : 'ru');
         var html = '';
-
-        function parseSets(score) {
-            if (!score || score === 'BYE') return { p1: [], p2: [], outcome: '' };
-            var ex = extractOutcome(score);
-            var sets = ex.sets ? ex.sets.split(' ') : [];
-            var p1Sets = [], p2Sets = [];
-            sets.forEach(function(s) {
-                var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
-                if (m) {
-                    p1Sets.push(m[1] + (m[3] ? '<sup>' + m[3] + '</sup>' : ''));
-                    p2Sets.push(m[2] + (m[4] ? '<sup>' + m[4] + '</sup>' : ''));
-                }
-            });
-            return { p1: p1Sets, p2: p2Sets, outcome: ex.outcome };
-        }
 
         // Сколько человек на самом деле в сетке
         var вСетке = {};
@@ -11295,6 +11250,36 @@
 
     var MATCH_OUTCOMES = ['RET', 'W/O', 'DEF', 'NA'];
 
+    /**
+     * СЧЁТ СЕТАМИ ДЛЯ ОТРИСОВКИ — ОДНО ОПРЕДЕЛЕНИЕ. До 19.10 эта функция
+     * лежала в ЧЕТЫРЁХ копиях внутри `renderPlayoffBracketHtml`,
+     * `renderBracketPanel`, `renderFicBracketPanel` и
+     * `renderLeagueBracketHtml` — побайтово одинаковых, то есть расходиться
+     * они ещё не успели. Беда на шве была не в них, а рядом (см. ниже).
+     *
+     * ТИРЕ В ТАЙ-БРЕЙКЕ — ЛЮБОЕ. Образец принимал только дефис, а
+     * `js/group-standings.js` — дефис, длинное и среднее тире. Значит счёт
+     * `7/6(5–7)`, пришедший из экселя или напечатанный вручную, таблица
+     * группы разбирала с тай-брейком, а сетка — без него. Замер 19.10:
+     * расширение образца не меняет НИ ОДНОГО счёта, который разбирался
+     * прежде (0 расхождений на 14 видах счёта), и чинит два, которые не
+     * разбирались вовсе.
+     */
+    function parseSets(score) {
+        if (!score || score === 'BYE') return { p1: [], p2: [], outcome: '' };
+        var ex = extractOutcome(score);
+        var sets = ex.sets ? ex.sets.split(' ') : [];
+        var p1Sets = [], p2Sets = [];
+        sets.forEach(function(s) {
+            var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)\s*[-–—]\s*(\d+)\))?$/);
+            if (m) {
+                p1Sets.push(m[1] + (m[3] ? '<sup>' + m[3] + '</sup>' : ''));
+                p2Sets.push(m[2] + (m[4] ? '<sup>' + m[4] + '</sup>' : ''));
+            }
+        });
+        return { p1: p1Sets, p2: p2Sets, outcome: ex.outcome };
+    }
+
     function extractOutcome(score) {
         if (!score || score === 'BYE') return { sets: score || '', outcome: '' };
         var parts = score.split(' ');
@@ -11419,7 +11404,7 @@
         var sv = [['','','',''],['','','',''],['','','','']];
         for (var i = 0; i < 3; i++) {
             if (existingSets[i]) {
-                var tbMatch = existingSets[i].match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
+                var tbMatch = existingSets[i].match(/^(\d+)\/(\d+)(?:\((\d+)\s*[-–—]\s*(\d+)\))?$/);
                 if (tbMatch) {
                     sv[i] = swapped
                         ? [tbMatch[2], tbMatch[1], tbMatch[4] || '', tbMatch[3] || '']
@@ -11621,15 +11606,10 @@
 
         // ---- Супер тай-брейк ----
         //
-        // Иногда третий сет не играют, а разыгрывают решающий тай-брейк до
-        // десяти с разницей в два. В таблице ТБШ он записан обычным сетом:
-        // «3/6 6/4 10/5». Так и храним.
-        var _суперТБ = (function() {
-            var третий = existingSets[2];
-            if (!третий) return false;
-            var м = третий.match(/^(\d+)\/(\d+)$/);
-            return !!(м && (+м[1] >= 10 || +м[2] >= 10));
-        })();
+        // Признак СПРАШИВАЕМ У ДОМА ПРАВИЛ: до 19.10 он считался и здесь,
+        // и в групповой таблице `group-standings.js` — одно понятие, два
+        // определения. Теперь одно: `KSLT_RULES.этоСуперТБ`.
+        var _суперТБ = window.KSLT_RULES.этоСуперТБ(existingSets);
 
         function нарисоватьСупер() {
             var подпись = document.getElementById('adSetLabel3');
@@ -13656,21 +13636,6 @@
             if (roundsFromEnd === 2) return L.roundQF;
             if (roundsFromEnd === 3) return L.roundR16;
             return isEn ? 'Round ' + roundNum : 'Раунд ' + roundNum;
-        }
-
-        function parseSets(score) {
-            if (!score || score === 'BYE') return { p1: [], p2: [], outcome: '' };
-            var ex = extractOutcome(score);
-            var sets = ex.sets ? ex.sets.split(' ') : [];
-            var p1Sets = [], p2Sets = [];
-            sets.forEach(function(s) {
-                var m = s.match(/^(\d+)\/(\d+)(?:\((\d+)-(\d+)\))?$/);
-                if (m) {
-                    p1Sets.push(m[1] + (m[3] ? '<sup>' + m[3] + '</sup>' : ''));
-                    p2Sets.push(m[2] + (m[4] ? '<sup>' + m[4] + '</sup>' : ''));
-                }
-            });
-            return { p1: p1Sets, p2: p2Sets, outcome: ex.outcome };
         }
 
         var html = '<div class="ad-brk-scroll"><div class="ad-brk-grid">';
