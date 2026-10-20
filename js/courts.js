@@ -6,20 +6,6 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    function roundRect(ctx, x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
-    }
-
     /**
      * Номер хранится слитно: +996701111732. На странице показываем его
      * группами по правилам страны. Телефонов может быть несколько — они
@@ -1776,98 +1762,23 @@
             if (e.target === modal) modal.remove();
         });
 
-        // Download branded PNG
+        /* Скачать картинку. Рисует ОДИН дом — `js/kslt-vaucher-kartochka.js`:
+           до 19.10 эти 60 строк жили здесь, у тренеров и в кабинете
+           порознь, и проверку пустой скидки знала только копия кабинета. */
         document.getElementById('ctVoucherDownload').addEventListener('click', function() {
             setTimeout(function() {
                 var qrCanvas = qrContainer.querySelector('canvas');
                 if (!qrCanvas) return;
-
-                var w = 380;
-                var h = 520;
-                var c = document.createElement('canvas');
-                c.width = w;
-                c.height = h;
-                var ctx = c.getContext('2d');
-
-                // Gradient background
-                var grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#0f0f0f');
-                grad.addColorStop(1, '#1a1a2e');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Accent top stripe
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.fillRect(0, 0, w, 4);
-
-                // Logo
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.font = 'bold 26px Inter, Arial, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('KSLT', w / 2, 42);
-
-                // Subtitle
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.font = '11px Inter, Arial, sans-serif';
-                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
-
-                // Divider line
-                ctx.strokeStyle = 'var(--alpha-lime-20)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(40, 75);
-                ctx.lineTo(w - 40, 75);
-                ctx.stroke();
-
-                // Discount badge
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.font = 'bold 32px Inter, Arial, sans-serif';
-                ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
-
-                // Service name
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 15px Inter, Arial, sans-serif';
-                ctx.fillText(voucher.service_name || '', w / 2, 138);
-
-                // Entity name
-                ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.font = '13px Inter, Arial, sans-serif';
-                ctx.fillText(voucher.entity_name || '', w / 2, 160);
-
-                // QR code with rounded white background
-                var qrSize = 200;
-                var qrX = (w - qrSize) / 2;
-                var qrY = 180;
-                var pad = 12;
-                ctx.fillStyle = '#ffffff';
-                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
-                ctx.fill();
-                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
-
-                // Scan text
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                ctx.font = '11px Inter, Arial, sans-serif';
-                var scanLabel = isEn ? 'Scan QR to verify discount' : (isKg ? 'Арзандатууну текшерүү үчүн QR сканерлеңиз' : 'Отсканируйте QR для проверки скидки');
-                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
-
-                // Expires
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.font = '12px Inter, Arial, sans-serif';
-                ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
-
-                // Bottom accent stripe
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.fillRect(0, h - 4, w, 4);
-
-                // URL footer
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                ctx.font = '10px Inter, Arial, sans-serif';
-                ctx.fillText(window.KSLT_SAYT.подпись, w / 2, h - 14);
-
-                var link = document.createElement('a');
-                link.download = 'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png';
-                link.href = c.toDataURL('image/png');
-                link.click();
+                var карточка = window.KSLT_VAUCHER.нарисовать({
+                    qrCanvas: qrCanvas,
+                    скидка: voucher.discount_percent,
+                    услуга: voucher.service_name,
+                    заведение: voucher.entity_name,
+                    срок: expiresStr,
+                    язык: isEn ? 'en' : (isKg ? 'kg' : 'ru')
+                });
+                window.KSLT_VAUCHER.скачать(карточка,
+                    'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png');
             }, 300);
         });
     }

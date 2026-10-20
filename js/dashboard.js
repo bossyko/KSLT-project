@@ -935,20 +935,6 @@
         return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    function roundRect(ctx, x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
-    }
-
     // ---- Проверка имени ----
     //
     // Раньше письменность требовалась по языку страницы: на русской версии
@@ -1636,90 +1622,27 @@
         });
 
         // Download branded PNG
+        /* Скачать картинку. Рамку рисует ОДИН дом —
+           `js/kslt-vaucher-kartochka.js`, — тот же, что у ваучера:
+           фон, полосы, логотип, разделитель, QR на белом и подвал были
+           здесь и в трёх ваучерных копиях одинаковыми. Середина своя:
+           имя игрока и разряд вместо скидки и услуги. */
         document.getElementById('dbQrDownload').addEventListener('click', function() {
             setTimeout(function() {
                 var qrCanvas = qrEl.querySelector('canvas');
                 if (!qrCanvas) return;
-
-                var w = 380;
-                var h = 480;
-                var c = document.createElement('canvas');
-                c.width = w;
-                c.height = h;
-                var ctx = c.getContext('2d');
-
-                // Gradient background
-                var grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#0f0f0f');
-                grad.addColorStop(1, '#1a1a2e');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Accent top stripe
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.fillRect(0, 0, w, 4);
-
-                // Logo
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.font = 'bold 26px Inter, Arial, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('KSLT', w / 2, 42);
-
-                // Subtitle
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.font = '11px Inter, Arial, sans-serif';
-                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
-
-                // Divider
-                ctx.strokeStyle = 'var(--alpha-lime-20)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(40, 75);
-                ctx.lineTo(w - 40, 75);
-                ctx.stroke();
-
-                // Player name
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 18px Inter, Arial, sans-serif';
-                ctx.fillText(profile.full_name || '', w / 2, 105);
-
-                // Category
                 var catEl = document.getElementById('dbQrCategory');
-                if (catEl && catEl.textContent) {
-                    ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                    ctx.font = '14px Inter, Arial, sans-serif';
-                    ctx.fillText(catEl.textContent, w / 2, 128);
-                }
-
-                // QR code with rounded white bg
-                var qrSize = 200;
-                var qrX = (w - qrSize) / 2;
-                var qrY = 150;
-                var pad = 12;
-                ctx.fillStyle = '#ffffff';
-                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
-                ctx.fill();
-                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
-
-                // Scan text
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                ctx.font = '11px Inter, Arial, sans-serif';
-                var scanLabel = isEn ? 'Scan to view player profile' : (isKg ? 'Оюнчунун профилин көрүү үчүн сканерлеңиз' : 'Отсканируйте для просмотра профиля');
-                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
-
-                // Bottom accent stripe
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.fillRect(0, h - 4, w, 4);
-
-                // URL footer
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                ctx.font = '10px Inter, Arial, sans-serif';
-                ctx.fillText(window.KSLT_SAYT.подпись, w / 2, h - 14);
-
-                var link = document.createElement('a');
-                link.download = 'KSLT-' + (profile.player_id || 'profile') + '.png';
-                link.href = c.toDataURL('image/png');
-                link.click();
+                var карточка = window.KSLT_VAUCHER.профиль({
+                    qrCanvas: qrCanvas,
+                    имя: profile.full_name,
+                    разряд: catEl && catEl.textContent,
+                    подпись: isEn ? 'Scan to view player profile'
+                        : (isKg ? 'Оюнчунун профилин көрүү үчүн сканерлеңиз'
+                                : 'Отсканируйте для просмотра профиля'),
+                    язык: isEn ? 'en' : (isKg ? 'kg' : 'ru')
+                });
+                window.KSLT_VAUCHER.скачать(карточка,
+                    'KSLT-' + (profile.player_id || 'profile') + '.png');
             }, 300);
         });
     }
@@ -5857,88 +5780,23 @@
         document.getElementById('dbVQRClose').addEventListener('click', function() { modal.remove(); });
         modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
 
+        /* Скачать картинку. Рисует ОДИН дом — `js/kslt-vaucher-kartochka.js`.
+           Эта копия единственная из трёх проверяла пустую скидку и срок —
+           проверки перенесены в дом, и теперь их знают все три места. */
         document.getElementById('dbVQRDownload').addEventListener('click', function() {
             setTimeout(function() {
                 var qrCanvas = qrContainer.querySelector('canvas');
                 if (!qrCanvas) return;
-
-                var w = 380;
-                var h = 520;
-                var c = document.createElement('canvas');
-                c.width = w;
-                c.height = h;
-                var ctx = c.getContext('2d');
-
-                var grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#0f0f0f');
-                grad.addColorStop(1, '#1a1a2e');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.fillRect(0, 0, w, 4);
-
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.font = 'bold 26px Inter, Arial, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('KSLT', w / 2, 42);
-
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.font = '11px Inter, Arial, sans-serif';
-                ctx.fillText('KYRGYZSTAN SOCIAL LAWN TENNIS', w / 2, 60);
-
-                ctx.strokeStyle = 'var(--alpha-lime-20)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(40, 75);
-                ctx.lineTo(w - 40, 75);
-                ctx.stroke();
-
-                if (voucher.discount_percent) {
-                    ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                    ctx.font = 'bold 32px Inter, Arial, sans-serif';
-                    ctx.fillText('-' + voucher.discount_percent + '%', w / 2, 112);
-                }
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 15px Inter, Arial, sans-serif';
-                ctx.fillText(voucher.service_name || '', w / 2, 138);
-
-                ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.font = '13px Inter, Arial, sans-serif';
-                ctx.fillText(voucher.entity_name || '', w / 2, 160);
-
-                var qrSize = 200;
-                var qrX = (w - qrSize) / 2;
-                var qrY = 180;
-                var pad = 12;
-                ctx.fillStyle = '#ffffff';
-                roundRect(ctx, qrX - pad, qrY - pad, qrSize + pad * 2, qrSize + pad * 2, 12);
-                ctx.fill();
-                ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
-
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                ctx.font = '11px Inter, Arial, sans-serif';
-                var scanLabel = isEn ? 'Scan QR to verify discount' : (isKg ? 'Арзандатууну текшерүү үчүн QR сканерлеңиз' : 'Отсканируйте QR для проверки скидки');
-                ctx.fillText(scanLabel, w / 2, qrY + qrSize + pad + 22);
-
-                if (expiresStr) {
-                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                    ctx.font = '12px Inter, Arial, sans-serif';
-                    ctx.fillText(expiresStr, w / 2, qrY + qrSize + pad + 44);
-                }
-
-                ctx.fillStyle = window.KSLT_KRASKA.цвет('--accent');
-                ctx.fillRect(0, h - 4, w, 4);
-
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                ctx.font = '10px Inter, Arial, sans-serif';
-                ctx.fillText(window.KSLT_SAYT.подпись, w / 2, h - 14);
-
-                var link = document.createElement('a');
-                link.download = 'KSLT-voucher-' + token.substring(0, 8) + '.png';
-                link.href = c.toDataURL('image/png');
-                link.click();
+                var карточка = window.KSLT_VAUCHER.нарисовать({
+                    qrCanvas: qrCanvas,
+                    скидка: voucher.discount_percent,
+                    услуга: voucher.service_name,
+                    заведение: voucher.entity_name,
+                    срок: expiresStr,
+                    язык: isEn ? 'en' : (isKg ? 'kg' : 'ru')
+                });
+                window.KSLT_VAUCHER.скачать(карточка,
+                    'KSLT-voucher-' + token.substring(0, 8) + '.png');
             }, 300);
         });
     }
