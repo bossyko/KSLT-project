@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер: карточка ваучера и QR профиля</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../js/supabase-config.js?v=3"></script>
+<script src="../js/kslt-kraska.js?v=5"></script>
+<script src="../js/kslt-vaucher-kartochka.js?v=1"></script>
+<style>
+  body { background: var(--bg-base); color: var(--text-primary); font: 14px/1.5 Inter, sans-serif; padding: 20px; margin: 0; }
+  h3 { font-size: 14px; color: var(--text-muted); margin: 20px 0 8px; font-weight: 600; }
+  .ряд { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .случай { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; }
+  .случай > div:first-child { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  canvas.вид { display: block; }
+  #qrСклад { position: absolute; left: -9999px; top: 0; }
+  pre { font-size: 11px; white-space: pre-wrap; color: var(--text-secondary); }
+</style>
+</head><body>
+<div id="qrСклад"></div>
+<h3>Ваучер — крайние случаи, а не удобные</h3>
+<div class="ряд" id="ваучеры"></div>
+<h3>QR профиля — та же рамка, своя середина</h3>
+<div class="ряд" id="профили"></div>
+<pre id="out"></pre>
+<script>
+/* ПРИБОР ЧИТАЕТ НАРИСОВАННОЕ: карточка строится настоящим домом продукта,
+   затем её пиксели снимаются обратно и считается контраст каждого текста
+   к фону ПОД ним — к тому самому месту градиента, а не к среднему. */
+function qrХолст(текст) {
+    var к = document.createElement('div');
+    document.getElementById('qrСклад').appendChild(к);
+    new QRCode(к, { text: текст, width: 200, height: 200,
+        colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    return к.querySelector('canvas');
+}
+function срт(c) { c = c / 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function ярк(p) { return 0.2126 * срт(p[0]) + 0.7152 * срт(p[1]) + 0.0722 * срт(p[2]); }
+function контраст(a, b) { var la = ярк(a), lb = ярк(b); if (la < lb) { var t = la; la = lb; lb = t; }
+    return (la + 0.05) / (lb + 0.05); }
+function пиксель(ctx, x, y) { var d = ctx.getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2]]; }
+
+/* Самый светлый пиксель в полосе — это и есть текст; фон берём у края,
+   где текста нет. Так контраст меряется у НАРИСОВАННОГО, а не у задуманного. */
+function замерПолосы(ctx, ш, y, высота) {
+    var текст = null, фон = пиксель(ctx, 4, y);
+    for (var yy = y - высота; yy <= y + 4; yy++) {
+        for (var xx = 20; xx < ш - 20; xx++) {
+            var p = пиксель(ctx, xx, yy);
+            if (!текст || ярк(p) > ярк(текст)) текст = p;
+        }
+    }
+    return { текст: текст, фон: фон, контраст: Math.round(контраст(текст, фон) * 100) / 100 };
+}
+
+var ЗАМЕР = { ваучер: [], профиль: [] };
+
+var СЛУЧАИ = [
+    ['полный', { скидка: 25, услуга: 'Аренда корта, 1 час', заведение: 'Центральный теннисный клуб', срок: 'до 31.12.2026', язык: 'ru' }],
+    ['без скидки', { услуга: 'Пробная тренировка', заведение: 'Клуб «Ак-Жол»', срок: 'до 01.11.2026', язык: 'ru' }],
+    ['без срока и заведения', { скидка: 100, услуга: 'Подарочный сертификат', язык: 'ru' }],
+    ['длинные строки, kg', { скидка: 5, услуга: 'Жабык корттогу жекече машыгуу сабагы', заведение: 'Бишкек шаарындагы борбордук теннис клубу', срок: '15.03.2027ге чейин', язык: 'kg' }],
+    ['английский', { скидка: 15, услуга: 'Court rental, 1 hour', заведение: 'Central Tennis Club', срок: 'until 31.12.2026', язык: 'en' }]
+];
+var ряд = document.getElementById('ваучеры');
+СЛУЧАИ.forEach(function (с, i) {
+    var o = Object.assign({ qrCanvas: qrХолст('https://kslt.kg/verify?token=proba' + i) }, с[1]);
+    var к = window.KSLT_VAUCHER.нарисовать(o);
+    var ящик = document.createElement('div');
+    ящик.className = 'случай';
+    ящик.innerHTML = '<div>' + с[0] + '</div>';
+    к.className = 'вид';
+    ящик.appendChild(к);
+    ряд.appendChild(ящик);
+    var ctx = к.getContext('2d');
+    ЗАМЕР.ваучер.push({
+        случай: с[0], ш: к.width, в: к.height,
+        подзаголовок: замерПолосы(ctx, к.width, 60, 11),
+        /* РАСШИФРОВКА НЕ ДОЛЖНА КАСАТЬСЯ КОНЦОВ РАЗДЕЛИТЕЛЯ: он идёт от 40
+           до ш-40, и текст, дотянувшийся до 40, уже слился с линией. */
+        расшифровкаВПолосе: (function () {
+            var левее = false, правее = false;
+            for (var yy = 50; yy <= 64; yy++) {
+                for (var xx = 0; xx < 40; xx++) if (ярк(пиксель(ctx, xx, yy)) > ярк(пиксель(ctx, 2, yy)) * 1.6) левее = true;
+                for (var x2 = к.width - 40; x2 < к.width; x2++) if (ярк(пиксель(ctx, x2, yy)) > ярк(пиксель(ctx, к.width - 2, yy)) * 1.6) правее = true;
+            }
+            return !левее && !правее;
+        })(),
+        подписьСкана: замерПолосы(ctx, к.width, 414, 11),
+        подписьСайта: замерПолосы(ctx, к.width, 506, 11),
+        разделительЕсть: (function () {
+            /* Линия стояла var() и не рисовалась вовсе. Ищем её пиксели. */
+            var нашли = false;
+            for (var x = 45; x < к.width - 45; x++) {
+                var p = пиксель(ctx, x, 75);
+                if (ярк(p) > ярк(пиксель(ctx, 4, 75)) * 1.5) { нашли = true; break; }
+            }
+            return нашли;
+        })()
+    });
+});
+
+var ПРОФИЛИ = [
+    ['полный', { имя: 'Фуркат Садыков', разряд: 'Мастерс', подпись: 'Отсканируйте для просмотра профиля' }],
+    ['без разряда', { имя: 'Денис Ли', подпись: 'Отсканируйте для просмотра профиля' }],
+    ['английский', { имя: 'Denis Lee', разряд: 'Tour', подпись: 'Scan to view player profile', язык: 'en' }]
+];
+var ряд2 = document.getElementById('профили');
+ПРОФИЛИ.forEach(function (с, i) {
+    var o = Object.assign({ qrCanvas: qrХолст('https://kslt.kg/player?id=proba' + i) }, с[1]);
+    var к = window.KSLT_VAUCHER.профиль(o);
+    var ящик = document.createElement('div');
+    ящик.className = 'случай';
+    ящик.innerHTML = '<div>' + с[0] + '</div>';
+    к.className = 'вид';
+    ящик.appendChild(к);
+    ряд2.appendChild(ящик);
+    var ctx = к.getContext('2d');
+    ЗАМЕР.профиль.push({
+        случай: с[0], ш: к.width, в: к.height,
+        подзаголовок: замерПолосы(ctx, к.width, 60, 11),
+        подписьСкана: замерПолосы(ctx, к.width, 384, 11),
+        подписьСайта: замерПолосы(ctx, к.width, 466, 11)
+    });
+});
+
+/* Ниже порога AA 4.5 — список, а не «кажется, читается». */
+ЗАМЕР.нижеПорога = [];
+['ваучер', 'профиль'].forEach(function (вид) {
+    ЗАМЕР[вид].forEach(function (з) {
+        ['подзаголовок', 'подписьСкана', 'подписьСайта'].forEach(function (к) {
+            if (з[к] && з[к].контраст < 4.5) ЗАМЕР.нижеПорога.push(вид + '/' + з.случай + '/' + к + ' = ' + з[к].контраст);
+        });
+    });
+});
+ЗАМЕР.расшифровкаВылезла = ЗАМЕР.ваучер.filter(function (з) { return !з.расшифровкаВПолосе; }).map(function (з) { return з.случай; });
+ЗАМЕР.разделительНеНарисован = ЗАМЕР.ваучер.filter(function (з) { return !з.разделительЕсть; }).map(function (з) { return з.случай; });
+window.ЗАМЕР = ЗАМЕР;
+document.getElementById('out').textContent = JSON.stringify(ЗАМЕР, null, 1);
+</script>
+</body></html>
