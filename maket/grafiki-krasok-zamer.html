@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер: графики рейтинга и NTRP</title>
+<link rel="stylesheet" href="../css/tokens.css?v=74">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="../js/kslt-vremya.js?v=2"></script>
+<script src="../js/kslt-kraska.js?v=5"></script>
+<script src="../js/kslt-rules.js?v=29"></script>
+<script src="../js/rating-chart.js?v=16"></script>
+<style>
+  body { background: var(--bg-base); color: var(--text-primary); font: 14px/1.5 Inter, sans-serif; padding: 20px; margin: 0; }
+  .обёртка { max-width: 760px; }
+  .поле { position: relative; height: 260px; margin-bottom: 28px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; }
+  pre { font-size: 11px; white-space: pre-wrap; }
+</style>
+</head><body>
+<div class="обёртка">
+  <h3>Очки по категориям</h3>
+  <div class="поле"><canvas id="гОчки"></canvas></div>
+  <h3>Оценка NTRP</h3>
+  <div id="оНtrp"><div class="поле"><canvas id="гNtrp"></canvas></div></div>
+</div>
+<pre id="out"></pre>
+<script>
+/* ПОДЛОЖНЫЙ КЛИЕНТ. База не трогается вовсе: прибор подаёт придуманные
+   строки того же вида, что отдаёт запрос. Так рисует ТОТ ЖЕ код продукта. */
+var КАТЕГОРИИ = [
+  { id: 'masters',    name: 'Мастерс',    name_en: 'Masters',    name_kg: 'Мастерс',    sort_order: 1, color: null },
+  { id: 'tour',       name: 'Тур',        name_en: 'Tour',       name_kg: 'Тур',        sort_order: 2, color: '#B76BFF' },
+  { id: 'challenger', name: 'Челленджер', name_en: 'Challenger', name_kg: 'Челленджер', sort_order: 3, color: null }
+];
+var ИСТОРИЯ = [
+  { recorded_at: '2025-09-14', points_earned: 120, tournament_name: 'Осенний', category_id: 'masters',    is_doubles: false, ntrp_after: 3.5 },
+  { recorded_at: '2025-10-05', points_earned: 80,  tournament_name: 'Кубок',   category_id: 'tour',       is_doubles: false, ntrp_after: 3.5 },
+  { recorded_at: '2025-11-20', points_earned: 200, tournament_name: 'Зимний',  category_id: 'masters',    is_doubles: false, ntrp_after: 4.0 },
+  { recorded_at: '2026-02-11', points_earned: 60,  tournament_name: 'Весна',   category_id: 'challenger', is_doubles: false, ntrp_after: 4.0 },
+  { recorded_at: '2026-05-30', points_earned: 150, tournament_name: 'Лето',    category_id: 'tour',       is_doubles: false, ntrp_after: 4.5 },
+  { recorded_at: '2026-09-02', points_earned: 90,  tournament_name: 'Осень-2', category_id: 'masters',    is_doubles: false, ntrp_after: 4.5 }
+];
+function запрос(данные) {
+  var ц = { data: данные, error: null };
+  var о = {
+    select: function () { return о; }, eq: function () { return о; },
+    gte: function () { return о; }, not: function () { return о; },
+    order: function () { return о; },
+    then: function (f, g) { return Promise.resolve(ц).then(f, g); }
+  };
+  return о;
+}
+var КЛИЕНТ = { from: function (т) {
+  if (т === 'categories') return запрос(КАТЕГОРИИ);
+  if (т === 'rating_history') return запрос(ИСТОРИЯ);
+  return запрос([]);
+} };
+
+/* ЯЗЫК БЕРЁТСЯ ИЗ АДРЕСА: краски от языка зависеть не должны, и
+   проверяется это прогоном на всех трёх, а не рассуждением. */
+var ЯЗЫК = (new URLSearchParams(location.search).get('lang') || 'ru');
+
+/* ЖАЛОБЫ ДОМА — ЧАСТЬ ЗАМЕРА. Дом говорит в консоль о ненайденном
+   токене; молча пропустить такую жалобу значит мерить вслепую. */
+var ЖАЛОБЫ = [];
+(function () {
+  var прежний = console.warn;
+  console.warn = function () {
+    try { ЖАЛОБЫ.push(Array.prototype.join.call(arguments, ' ')); } catch (e) {}
+    return прежний.apply(console, arguments);
+  };
+})();
+
+(async function () {
+  var з = { язык: ЯЗЫК };
+  try {
+    з.нарисовалось = await window.KSLT_RATING_CHART.render({
+      client: КЛИЕНТ, playerId: 'проба', canvasId: 'гОчки',
+      ntrpCanvasId: 'гNtrp', ntrpWrapId: 'оНtrp',
+      isEn: ЯЗЫК === 'en', isKg: ЯЗЫК === 'kg'
+    });
+
+    /* ЧИТАЕМ ОБРАТНО ТО, ЧТО НАРИСОВАНО, а не то, что задумано. */
+    function подс(t) {
+      return t ? { фон: t.backgroundColor, обводка: t.borderColor,
+                   заголовок: t.titleColor, тело: t.bodyColor } : null;
+    }
+    function ось(s) {
+      if (!s) return null;
+      return { подписи: s.ticks && s.ticks.color, сетка: s.grid && s.grid.color };
+    }
+    function снять(id) {
+      var c = document.getElementById(id);
+      var ч = c && window.Chart.getChart(c);
+      if (!ч) return { нет: id };
+      var о = ч.options || {};
+      var п = о.plugins || {};
+      return {
+        ряды: ч.data.datasets.map(function (d) {
+          return { ярлык: d.label, линия: d.borderColor, заливка: d.backgroundColor,
+                   точка: d.pointBackgroundColor,
+                   обводкаТочки: Array.isArray(d.pointBorderColor) ? d.pointBorderColor : d.pointBorderColor };
+        }),
+        подсказка: подс(п.tooltip),
+        легенда: п.legend && п.legend.labels && п.legend.labels.color,
+        оси: { x: ось(о.scales && о.scales.x), y: ось(о.scales && о.scales.y) }
+      };
+    }
+    з.очки = снять('гОчки');
+    з.ntrp = снять('гNtrp');
+    var плоско = JSON.stringify(з);
+    /* ПУСТАЯ СТРОКА — провал: холст нарисует прозрачным. */
+    з.пустыхКрасок = (плоско.match(/:\s*""/g) || []).length;
+    /* var() в холсте — тот же провал, только громче. */
+    з.varВХолсте = (плоско.match(/var\(--/g) || []).length;
+    з.жалобыДома = ЖАЛОБЫ.slice();
+  } catch (e) {
+    з.ошибка = String(e && e.message);
+    з.стек = String(e && e.stack).slice(0, 500);
+  }
+  window.ЗАМЕР = з;
+  document.getElementById('out').textContent = JSON.stringify(з, null, 1);
+})();
+</script>
+</body></html>

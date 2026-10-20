@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер: краски холста через дом</title>
+<link rel="stylesheet" href="../css/tokens.css?v=74">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<script src="../js/kslt-kraska.js?v=5"></script>
+<style>
+  body { background: var(--bg-base); color: var(--text-primary); font: 14px/1.5 Inter, sans-serif; padding: 24px; margin: 0; }
+  table { border-collapse: collapse; margin-bottom: 24px; }
+  td, th { border: 1px solid var(--border-light); padding: 6px 10px; text-align: left; font-size: 12px; }
+  .кв { width: 40px; height: 20px; display: inline-block; border: 1px solid var(--border-light); }
+  canvas { border: 1px solid var(--border-light); background: var(--bg-base); }
+</style>
+</head><body>
+<h2>Что отдаёт дом красок</h2>
+<table id="t"><thead><tr><th>имя</th><th>альфа</th><th>строка</th><th>образец</th></tr></thead><tbody></tbody></table>
+<h2>Холст: краски доходят?</h2>
+<canvas id="c" width="320" height="120"></canvas>
+<pre id="out" style="font-size:12px"></pre>
+<script>
+var имена = [
+  ['--chart-tip-bg', null], ['--chart-tip-border', null],
+  ['--chart-tip-title', null], ['--chart-tip-body', null],
+  ['--cat-1', null], ['--cat-1', 0.08], ['--cat-1', 0.25],
+  ['--accent', null], ['--accent', 0.12], ['--accent', 0.20],
+  ['--text-muted', null], ['--text-secondary', null], ['--bg-base', null],
+  ['--success', null], ['--warning', null], ['--danger', null],
+  ['--neutral-white', 0.04], ['--neutral-white', 0.5], ['--neutral-white', 0.72]
+];
+var tb = document.querySelector('#t tbody');
+var итог = [];
+имена.forEach(function (п) {
+  var s = window.KSLT_KRASKA.цвет(п[0], п[1] === null ? undefined : п[1]);
+  итог.push({ имя: п[0], альфа: п[1], строка: s, пусто: !s });
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + п[0] + '</td><td>' + (п[1] === null ? '—' : п[1]) +
+    '</td><td>' + (s || '<b>ПУСТО</b>') + '</td><td><span class="кв" style="background:' + s + '"></span></td>';
+  tb.appendChild(tr);
+});
+// рисуем на холсте теми же красками и читаем пиксели обратно
+var c = document.getElementById('c'), x = c.getContext('2d');
+var пробы = [['--chart-tip-bg', null], ['--cat-1', null], ['--cat-1', 0.25], ['--accent', null]];
+пробы.forEach(function (п, i) {
+  x.fillStyle = window.KSLT_KRASKA.цвет(п[0], п[1] === null ? undefined : п[1]);
+  x.fillRect(i * 80, 0, 80, 120);
+});
+var пиксели = пробы.map(function (п, i) {
+  var d = x.getImageData(i * 80 + 40, 60, 1, 1).data;
+  return { проба: п[0] + (п[1] ? '@' + п[1] : ''), пиксель: 'rgb(' + d[0] + ',' + d[1] + ',' + d[2] + ')', альфаПикселя: d[3] };
+});
+window.ЗАМЕР = { дом: итог, холст: пиксели,
+  пустых: итог.filter(function (o) { return o.пусто; }).length };
+document.getElementById('out').textContent = JSON.stringify(window.ЗАМЕР, null, 1);
+</script>
+</body></html>
