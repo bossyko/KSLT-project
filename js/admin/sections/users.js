@@ -521,7 +521,7 @@
             var periodBtns = [1, 3, 6, 12].map(function(m) {
                 var isActive = _selectedPeriod === m;
                 var style = isActive
-                    ? 'background:var(--accent);color:#000;border-color:var(--accent);'
+                    ? 'background:var(--accent);color:var(--accent-on);border-color:var(--accent);'
                     : '';
                 return '<button class="ad-btn ad-btn-secondary ad-btn-sm adUsrPeriodBtn" data-months="' + m + '" style="' + style + '">' + L['usrMonths' + m] + '</button>';
             }).join('');
@@ -707,7 +707,7 @@
                         var statusText = isBlocked
                             ? (isEn ? 'OTP blocked' : 'OTP заблокирован') + ' (' + escalLabels[b.escalation || 0] + ')'
                             : (isEn ? 'OTP: no block' : 'OTP: нет блокировки');
-                        var statusColor = isBlocked ? '#ff3b30' : '#34c759';
+                        var statusColor = isBlocked ? 'var(--danger)' : 'var(--success)';
 
                         el.innerHTML =
                             '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">' +
@@ -1989,8 +1989,8 @@
             (pl.data || []).forEach(function(p) { карточки[p.id] = p; });
 
             var подпись = {
-                approved: { текст: L.linkStApproved, цвет: '#34c759' },
-                rejected: { текст: L.linkStRejected, цвет: '#ff3b30' },
+                approved: { текст: L.linkStApproved, цвет: 'var(--success)' },
+                rejected: { текст: L.linkStRejected, цвет: 'var(--danger)' },
                 withdrawn: { текст: L.linkStWithdrawn, цвет: 'var(--text-muted)' }
             };
 

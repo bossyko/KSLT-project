@@ -741,7 +741,7 @@
         var el = document.getElementById(id);
         if (!el) return;
         var hint = document.createElement('div');
-        hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
+        hint.style.cssText = 'color:var(--danger);font-size:0.75rem;margin-top:2px;display:none;';
         hint.textContent = _sHint;
         el.parentNode.appendChild(hint);
         var _nameTimer = null;
@@ -750,7 +750,7 @@
             _nameTimer = setTimeout(function() {
                 var v = el.value.trim();
                 var bad = v.length > 2 && !_sRe.test(v);
-                el.style.borderColor = bad ? '#ff4444' : '';
+                el.style.borderColor = bad ? 'var(--danger)' : '';
                 hint.style.display = bad ? '' : 'none';
             }, 500);
         });

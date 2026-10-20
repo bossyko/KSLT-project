@@ -961,13 +961,13 @@
         var el = document.getElementById(inputId);
         if (!el) return;
         var hint = document.createElement('div');
-        hint.style.cssText = 'color:#ff4444;font-size:0.75rem;margin-top:2px;display:none;';
+        hint.style.cssText = 'color:var(--danger);font-size:0.75rem;margin-top:2px;display:none;';
         hint.textContent = scriptHint;
         el.parentNode.appendChild(hint);
         el.addEventListener('input', function() {
             var v = el.value.trim();
             var bad = v.length > 0 && !scriptRegex.test(v);
-            el.style.borderColor = bad ? '#ff4444' : '';
+            el.style.borderColor = bad ? 'var(--danger)' : '';
             hint.style.display = bad ? '' : 'none';
         });
     }
@@ -5765,7 +5765,7 @@
                 (voucher.entity_name ? '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:12px;">' + dbEsc(voucher.entity_name) + '</div>' : '') +
                 '<div id="dbVQRCode" style="display:flex;justify-content:center;background:#fff;border-radius:12px;padding:16px;width:fit-content;margin:0 auto 16px;"></div>' +
                 (expiresStr ? '<div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:12px;">' + expiresStr + '</div>' : '') +
-                '<button id="dbVQRDownload" style="background:var(--accent);color:#000;border:none;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">' + (isEn ? 'Download QR' : (isKg ? 'QR жүктөө' : 'Скачать QR')) + '</button>' +
+                '<button id="dbVQRDownload" style="background:var(--accent);color:var(--accent-on);border:none;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">' + (isEn ? 'Download QR' : (isKg ? 'QR жүктөө' : 'Скачать QR')) + '</button>' +
             '</div>';
 
         document.body.appendChild(modal);

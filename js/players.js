@@ -694,7 +694,7 @@
                             (isBg ? '<span class="pl-guest-mark" title="' +
                                 (isEnPage() ? 'In the club database, membership not paid' : (isKgPage() ? 'Клубдун базасында бар, мүчөлүк төлөнгөн эмес' : 'Есть в базе клуба, членство не оплачено')) + '">' +
                                 (isEnPage() ? 'not a member' : (isKgPage() ? 'мүчө эмес' : 'не член клуба')) + '</span>' : '') +
-                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
+                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
                         '</div>' +
                         catLabel +
                     '</div>' +
@@ -1064,7 +1064,7 @@
                         '<div class="pl-player-name-row">' +
                             nameHtml +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
-                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:rgba(255,59,48,0.15);color:#ff3b30;margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
+                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
                         '</div>' +
                     '</div>' +
                 '</div>' +

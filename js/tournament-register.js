@@ -25,9 +25,9 @@
             '.trn-register-modal-title{font-size:1.3rem;font-weight:600;color:var(--text-primary,#fff);margin:0 0 12px}' +
             '.trn-register-modal-text{font-size:0.95rem;color:var(--text-muted,#888);max-width:340px;margin:0 auto;line-height:1.5}' +
             '.trn-register-modal-note{margin:18px auto 0;max-width:340px;padding:10px 14px;border-radius:8px;background:var(--alpha-lime-06);border:1px solid var(--alpha-lime-20);color:var(--text-secondary,#aaa);font-size:0.85rem;line-height:1.45}' +
-            '.trn-register-modal-btn{display:inline-block;margin-top:24px;padding:12px 32px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--accent);color:#000;transition:opacity .2s}' +
+            '.trn-register-modal-btn{display:inline-block;margin-top:24px;padding:12px 32px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--accent);color:var(--accent-on);transition:opacity .2s}' +
             '.trn-register-modal-btn:hover{opacity:0.9}' +
-            '.trn-register-modal-btn.is-error{background:#ff3b30;color:#fff}' +
+            '.trn-register-modal-btn.is-error{background:var(--danger);color:var(--danger-on)}' +
             '.trn-register-modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}' +
             '.trn-register-modal-actions .trn-register-modal-btn{margin-top:24px}' +
             '.trn-register-modal-btn.is-ghost{background:transparent;border:1px solid var(--border,#2a2a2a);color:var(--text-muted,#888)}' +

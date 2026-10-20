@@ -3324,7 +3324,7 @@ function гостюКнопкуЗаписи(isEn, isKg) {
     heroContent.insertAdjacentHTML('beforeend',
         '<div class="td-register-wrap" style="margin-top:20px;">' +
             '<button class="td-register-btn" id="tdRegisterBtn" style="padding:10px 24px;border:none;' +
-            'border-radius:8px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;' +
+            'border-radius:8px;background:var(--accent);color:var(--accent-on);font-weight:600;cursor:pointer;' +
             'font-size:var(--fs-base);">' + подпись + '</button>' +
         '</div>');
 
