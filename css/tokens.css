@@ -229,6 +229,17 @@
   --cat-3-faint:  var(--alpha-pink-06);
   --cat-3-border: var(--alpha-pink-30);
 
+  /* ПОДСКАЗКА ГРАФИКА. Холст не понимает var(), краски ему подаёт дом
+     красок (js/kslt-kraska.js) — поэтому имена тут, а не в правилах css.
+     До 19.10 фон подсказки был записан ТРЕМЯ разными числами —
+     rgba(20,20,24,.95) в графике рейтинга, rgba(20,20,30,.95) в аналитике,
+     rgba(20,24,36,.95) в пользователях: одно понятие в трёх видах.
+     Теперь одно имя. Фон = --neutral-850 при 95 %, ΔE к прежнему 2.8. */
+  --chart-tip-bg:     rgba(20, 20, 20, 0.95);
+  --chart-tip-border: var(--border-light);
+  --chart-tip-title:  var(--text-primary);
+  --chart-tip-body:   var(--text-secondary);
+
   /* Тускло и граница — по лестнице роли (см. раздел альф). */
   --success-faint:  var(--alpha-green-06);
   --success-border: var(--alpha-green-30);
