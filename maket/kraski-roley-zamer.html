@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер: краски ролей — было и стало</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=459">
+<style>
+  body { background: var(--bg-base); color: var(--text-primary); font: 14px/1.5 Inter, sans-serif; padding: 20px; margin: 0; }
+  h3 { font-size: 14px; color: var(--text-muted); margin: 24px 0 10px; font-weight: 600; }
+  .пара { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 920px; margin-bottom: 8px; }
+  .бок { border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; background: var(--bg-card); }
+  .бок > .кто { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em; }
+  .ряд { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .бейдж { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.65rem; font-weight: 600; }
+  .кнопка { padding: 12px 32px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+  .поле { width: 190px; padding: 8px 10px; border-radius: 8px; background: var(--surface-glass); color: var(--text-primary); }
+  table { border-collapse: collapse; margin-top: 18px; max-width: 920px; width: 100%; }
+  td, th { border: 1px solid var(--border-light); padding: 6px 10px; font-size: 12px; text-align: left; }
+  .ок { color: var(--success); font-weight: 600; }
+  .беда { color: var(--danger); font-weight: 600; }
+  pre { font-size: 11px; white-space: pre-wrap; color: var(--text-secondary); }
+</style>
+</head><body>
+<h2>Краски ролей: было и стало</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:720px">
+  Слева — как было до 19.10, пятью разными красными и зелёным iOS. Справа —
+  системные роли. Контраст снизу считан у НАРИСОВАННОГО: цвет берётся
+  <code>getComputedStyle</code>, слои складываются, порог AA 4.5.
+</p>
+
+<h3>Кнопка ошибки регистрации · <code>.is-error</code></h3>
+<div class="пара">
+  <div class="бок"><div class="кто">было: #ff3b30 + белый</div>
+    <button class="кнопка" id="бКн" style="background:#ff3b30;color:#fff">Повторить</button></div>
+  <div class="бок"><div class="кто">стало: --danger + --danger-on</div>
+    <button class="кнопка" id="сКн" style="background:var(--danger);color:var(--danger-on)">Повторить</button></div>
+</div>
+
+<h3>Бейдж «Заблок.» в рейтинге · <code>players.js</code></h3>
+<div class="пара">
+  <div class="бок"><div class="кто">было: #ff3b30 на 15 %</div>
+    <span class="бейдж" id="бБдж" style="background:rgba(255,59,48,0.15);color:#ff3b30">Заблок.</span></div>
+  <div class="бок"><div class="кто">стало: --danger + --danger-subtle</div>
+    <span class="бейдж" id="сБдж" style="background:var(--danger-subtle);color:var(--danger)">Заблок.</span></div>
+</div>
+
+<h3>Статусы заявки и блокировки · <code>users.js</code></h3>
+<div class="пара">
+  <div class="бок"><div class="кто">было: #34c759 / #ff3b30</div>
+    <div class="ряд"><span id="бУсп" style="color:#34c759">Одобрена</span>
+      <span id="бОтк" style="color:#ff3b30">Отклонена</span></div></div>
+  <div class="бок"><div class="кто">стало: --success / --danger</div>
+    <div class="ряд"><span id="сУсп" style="color:var(--success)">Одобрена</span>
+      <span id="сОтк" style="color:var(--danger)">Отклонена</span></div></div>
+</div>
+
+<h3>Граница поля при неверном вводе · <code>auth.js</code>, <code>dashboard.js</code></h3>
+<div class="пара">
+  <div class="бок"><div class="кто">было: #ff4444</div>
+    <input class="поле" id="бПоле" value="Иван123" style="border:1px solid #ff4444"></div>
+  <div class="бок"><div class="кто">стало: --danger</div>
+    <input class="поле" id="сПоле" value="Иван123" style="border:1px solid var(--danger)"></div>
+</div>
+
+<h3>Неверный ввод в окне парной заявки · <code>.de-bad</code></h3>
+<div class="пара">
+  <div class="бок"><div class="кто">было: #f44336 Material</div>
+    <input class="поле" value="NTRP 9.9" style="border:1px solid #f44336;box-shadow:0 0 0 2px rgba(244,67,54,.15)">
+    <div id="бНота" style="margin:6px 0 0;font-size:.78rem;color:#f44336">Предел пары превышен</div></div>
+  <div class="бок"><div class="кто">стало: --danger</div>
+    <input class="поле" value="NTRP 9.9" style="border:1px solid var(--danger);box-shadow:0 0 0 2px var(--danger-subtle)">
+    <div id="сНота" style="margin:6px 0 0;font-size:.78rem;color:var(--danger)">Предел пары превышен</div></div>
+</div>
+
+<table id="т"><thead><tr><th>место</th><th>было</th><th>стало</th><th>порог AA 4.5</th></tr></thead><tbody></tbody></table>
+<pre id="out"></pre>
+<script>
+function срт(c) { c = c / 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function ярк(p) { return 0.2126 * срт(p[0]) + 0.7152 * срт(p[1]) + 0.0722 * срт(p[2]); }
+function контраст(a, b) { var la = ярк(a), lb = ярк(b); if (la < lb) { var t = la; la = lb; lb = t; }
+  return Math.round(((la + 0.05) / (lb + 0.05)) * 100) / 100; }
+function разбор(s) {
+  var m = /rgba?\(([^)]+)\)/.exec(s);
+  if (!m) return null;
+  var ч = m[1].split(',').map(parseFloat);
+  return { цв: [ч[0], ч[1], ч[2]], a: ч.length > 3 ? ч[3] : 1 };
+}
+/* СЛОЖЕНИЕ СЛОЁВ: подложка роли полупрозрачна, и контраст считается
+   к тому, что видно, а не к объявленному цвету. */
+function поверх(низ, верх) {
+  if (!верх) return низ;
+  return [0,1,2].map(function (и) { return верх.a * верх.цв[и] + (1 - верх.a) * низ[и]; });
+}
+function замер(ид, фонРодителя) {
+  var э = document.getElementById(ид);
+  if (!э) return null;
+  var с = getComputedStyle(э);
+  var текст = разбор(с.color);
+  var фон = разбор(с.backgroundColor);
+  var граница = разбор(с.borderTopColor);
+  var низ = фонРодителя;
+  var видимыйФон = поверх(низ, фон && фон.a > 0 ? фон : null);
+  return {
+    текст: текст ? контраст(поверх(видимыйФон, текст), видимыйФон) : null,
+    граница: граница && граница.a > 0 ? контраст(поверх(видимыйФон, граница), видимыйФон) : null
+  };
+}
+var ФОН_КАРТОЧКИ = разбор(getComputedStyle(document.querySelector('.бок')).backgroundColor).цв;
+
+var МЕСТА = [
+  ['кнопка ошибки — текст на заливке', 'бКн', 'сКн', 'текст'],
+  ['бейдж «Заблок.» — текст на подложке', 'бБдж', 'сБдж', 'текст'],
+  ['статус «одобрена»', 'бУсп', 'сУсп', 'текст'],
+  ['статус «отклонена»', 'бОтк', 'сОтк', 'текст'],
+  ['граница поля при ошибке', 'бПоле', 'сПоле', 'граница'],
+  ['подпись «предел превышен»', 'бНота', 'сНота', 'текст']
+];
+var tb = document.querySelector('#т tbody');
+var ЗАМЕР = { места: {}, нижеПорогаБыло: [], нижеПорогаСтало: [] };
+МЕСТА.forEach(function (м) {
+  var было = замер(м[1], ФОН_КАРТОЧКИ), стало = замер(м[2], ФОН_КАРТОЧКИ);
+  var б = было && было[м[3]], с = стало && стало[м[3]];
+  ЗАМЕР.места[м[0]] = { было: б, стало: с };
+  if (б !== null && б < 4.5) ЗАМЕР.нижеПорогаБыло.push(м[0] + ' = ' + б);
+  if (с !== null && с < 4.5) ЗАМЕР.нижеПорогаСтало.push(м[0] + ' = ' + с);
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + м[0] + '</td>' +
+    '<td class="' + (б >= 4.5 ? 'ок' : 'беда') + '">' + б + '</td>' +
+    '<td class="' + (с >= 4.5 ? 'ок' : 'беда') + '">' + с + '</td>' +
+    '<td>' + (с >= 4.5 ? 'держит' : 'НЕ ДЕРЖИТ') + '</td>';
+  tb.appendChild(tr);
+});
+window.ЗАМЕР = ЗАМЕР;
+document.getElementById('out').textContent = JSON.stringify(ЗАМЕР, null, 1);
+</script>
+</body></html>
