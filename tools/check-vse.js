@@ -117,7 +117,8 @@ const КУСКИ = [
     ['лестница окна', 'check-lestnica-okna.js', 'check-lestnica-okna-otkat.js'],
     ['язык вкладки', 'check-yazyk-vkladki.js', 'check-yazyk-vkladki-otkat.js'],
     ['палитра различителей', 'check-palitra-kategoriy.js', 'check-palitra-kategoriy-otkat.js'],
-    ['статус «идёт»', 'check-status-idet.js', 'check-status-idet-otkat.js']
+    ['статус «идёт»', 'check-status-idet.js', 'check-status-idet-otkat.js'],
+    ['краски холста', 'check-kraski-holsta.js', 'check-kraski-holsta-otkat.js']
 ];
 
 function прогнать(файл) {

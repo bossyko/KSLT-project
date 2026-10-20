@@ -181,7 +181,7 @@ const ОТКАТЫ = [
         'fillStyle: ds.pointBackgroundColor,',
    'запись легенды собирается сама и красится цветом линии'],
 
-  [ГРФ, 'color: ЦВЕТ_ПОДПИСИ, usePointStyle: true',
+  [ГРФ, 'color: ЦВЕТ_ПОДПИСИ(), usePointStyle: true',
         "color: '#ccc', usePointStyle: true",
    'подпись легенды названа одним именем, а не двумя числами'],
 
