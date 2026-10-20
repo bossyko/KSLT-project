@@ -1172,17 +1172,17 @@
                     legend: {
                         position: 'top',
                         labels: {
-                            color: 'rgba(255,255,255,0.7)',
+                            color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72),
                             font: { size: 11 },
                             boxWidth: 12,
                             padding: 16
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(20,24,36,0.95)',
-                        titleColor: '#fff',
-                        bodyColor: 'rgba(255,255,255,0.8)',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
+                        titleColor: window.KSLT_KRASKA.цвет('--chart-tip-title'),
+                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
+                        borderColor: window.KSLT_KRASKA.цвет('--neutral-white', 0.12),
                         borderWidth: 1,
                         padding: 10,
                         cornerRadius: 8,
@@ -1195,21 +1195,21 @@
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(255,255,255,0.04)' },
-                        ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } }
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.04) },
+                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5), font: { size: 10 } }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.06) },
                         ticks: {
-                            color: 'rgba(255,255,255,0.5)',
+                            color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5),
                             font: { size: 10 },
                             callback: function(val) { return val.toLocaleString(); }
                         },
                         title: {
                             display: true,
                             text: 'KGS',
-                            color: 'rgba(255,255,255,0.4)',
+                            color: window.KSLT_KRASKA.цвет('--neutral-white', 0.4),
                             font: { size: 10 }
                         }
                     }

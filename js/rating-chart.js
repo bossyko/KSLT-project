@@ -14,12 +14,23 @@
 
     var API = window.KSLT_RATING_CHART = {};
 
-    var FALLBACK_COLOR = '#8A8A8F';
+    /* Краски берутся ДОМОМ КРАСОК и ЛЕНИВО — в момент рисования, а не при
+       загрузке файла. Так порядок подключения скриптов перестаёт быть
+       вопросом: когда график рисуется, дом уже на странице. Холст не
+       понимает var(), поэтому через дом — единственный законный путь. */
+
+    /** Линия категории, у которой свой цвет не задан: приглушённый текст. */
+    function FALLBACK_COLOR() {
+        return window.KSLT_KRASKA.цвет('--text-muted');
+    }
 
     /* Цвет подписи в легенде. Одним именем, потому что его называют дважды:
        в настройках легенды и в каждой её записи — запись, собранная своими
-       руками, настроек не наследует. */
-    var ЦВЕТ_ПОДПИСИ = '#ccc';
+       руками, настроек не наследует. Отношение: подпись легенды — тот же
+       второстепенный текст, что и во всей системе. */
+    function ЦВЕТ_ПОДПИСИ() {
+        return window.KSLT_KRASKA.цвет('--text-secondary');
+    }
 
     /** Нарисованные графики по идентификатору холста — чтобы гасить прежний. */
     var _charts = {};
@@ -46,7 +57,7 @@
         (res.data || []).forEach(function(c) {
             map[c.id] = {
                 name: isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name),
-                color: c.color || FALLBACK_COLOR,
+                color: c.color || FALLBACK_COLOR(),
                 sort: c.sort_order || 0
             };
         });
@@ -191,13 +202,13 @@
         if (wrap) wrap.style.display = '';
 
         var datasets = series.sets.map(function(s) {
-            var c = cats[s.cat] || { name: s.cat, color: FALLBACK_COLOR };
+            var c = cats[s.cat] || { name: s.cat, color: FALLBACK_COLOR() };
             return {
                 label: c.name,
                 data: s.values,
                 _meta: s.meta,
                 _total: s.total,
-                borderColor: closed[s.cat] ? c.color + '66' : c.color,
+                borderColor: closed[s.cat] ? window.KSLT_KRASKA.сАльфой(c.color, 0.40) : c.color,
                 borderWidth: closed[s.cat] ? 2 : (s.cat === opts.homeCategory ? 3 : 2),
                 borderDash: closed[s.cat] ? [5, 4] : undefined,
                 // Ступенька у даты начисления, а не у предыдущей: с 'after'
@@ -210,12 +221,12 @@
                     var area = ctx.chart.chartArea;
                     if (!area) return 'transparent';
                     var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-                    g.addColorStop(0, c.color + '38');
-                    g.addColorStop(1, c.color + '00');
+                    g.addColorStop(0, window.KSLT_KRASKA.сАльфой(c.color, 0.22));
+                    g.addColorStop(1, window.KSLT_KRASKA.сАльфой(c.color, 0));
                     return g;
                 },
                 pointBackgroundColor: s.meta.map(function(m) { return m ? c.color : 'transparent'; }),
-                pointBorderColor: s.meta.map(function(m, i) { return i === s.debut ? '#0d0d10' : 'transparent'; }),
+                pointBorderColor: s.meta.map(function(m, i) { return i === s.debut ? window.KSLT_KRASKA.цвет('--bg-base') : 'transparent'; }),
                 pointBorderWidth: s.meta.map(function(m, i) { return i === s.debut ? 3 : 0; }),
                 pointRadius: s.meta.map(function(m, i) { return i === s.debut ? 8 : (m ? 4 : 0); }),
                 pointHoverRadius: s.meta.map(function(m) { return m ? 7 : 0; })
@@ -268,7 +279,7 @@
                            Берём `borderColor` — он у линии один и уже несёт
                            приглушение закрытой категории. */
                         labels: {
-                            color: ЦВЕТ_ПОДПИСИ, usePointStyle: true, pointStyle: 'circle',
+                            color: ЦВЕТ_ПОДПИСИ(), usePointStyle: true, pointStyle: 'circle',
                             boxWidth: 8, padding: 16, font: { size: 12 },
                             generateLabels: function(chart) {
                                 return chart.data.datasets.map(function(ds, и) {
@@ -278,7 +289,7 @@
                                         strokeStyle: ds.borderColor,
                                         lineWidth: 0,
                                         pointStyle: 'circle',
-                                        fontColor: ЦВЕТ_ПОДПИСИ,
+                                        fontColor: ЦВЕТ_ПОДПИСИ(),
                                         hidden: !chart.isDatasetVisible(и),
                                         datasetIndex: и
                                     };
@@ -287,12 +298,12 @@
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(20,20,24,0.95)',
-                        borderColor: 'rgba(255,255,255,0.12)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
+                        borderColor: window.KSLT_KRASKA.цвет('--chart-tip-border'),
                         borderWidth: 1,
                         padding: 12,
-                        titleColor: '#fff',
-                        bodyColor: '#ccc',
+                        titleColor: window.KSLT_KRASKA.цвет('--chart-tip-title'),
+                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
                         displayColors: false,
                         filter: function(item) { return !!item.dataset._meta[item.dataIndex]; },
                         callbacks: {
@@ -314,19 +325,19 @@
                 scales: {
                     x: {
                         ticks: {
-                            color: '#888', maxRotation: 45, font: { size: 11 },
+                            color: window.KSLT_KRASKA.цвет('--text-muted'), maxRotation: 45, font: { size: 11 },
                             // В базе дата лежит как 2026-03-16, а в кабинете
                             // везде принят вид 16.03.26
                             callback: function(v, i) { return tickDate(this.getLabelForValue(i)); }
                         },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.04) }
                     },
                     y: {
                         beginAtZero: true,
-                        ticks: { color: '#888', font: { size: 11 } },
+                        ticks: { color: window.KSLT_KRASKA.цвет('--text-muted'), font: { size: 11 } },
                         // Подпись оси убрана: она повторяла заголовок над
                         // графиком и съедала ширину повёрнутым текстом
-                        grid: { color: 'rgba(255,255,255,0.05)' }
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.04) }
                     }
                 }
             }
@@ -436,11 +447,11 @@
                 datasets: [{
                     label: 'NTRP',
                     data: values,
-                    borderColor: '#00BFFF',
-                    backgroundColor: 'rgba(0,191,255,0.08)',
+                    borderColor: window.KSLT_KRASKA.цвет('--cat-1'),
+                    backgroundColor: window.KSLT_KRASKA.цвет('--cat-1', 0.08),
                     fill: true,
                     tension: 0.3,
-                    pointBackgroundColor: '#00BFFF',
+                    pointBackgroundColor: window.KSLT_KRASKA.цвет('--cat-1'),
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     borderWidth: 2
@@ -452,9 +463,11 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(20,20,24,0.95)',
-                        borderColor: 'rgba(255,255,255,0.12)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
+                        borderColor: window.KSLT_KRASKA.цвет('--chart-tip-border'),
                         borderWidth: 1,
+                        titleColor: window.KSLT_KRASKA.цвет('--chart-tip-title'),
+                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
                         displayColors: false,
                         callbacks: {
                             label: function(item) { return 'NTRP: ' + ntrpText(item.parsed.y); }
@@ -464,15 +477,15 @@
                 scales: {
                     x: {
                         ticks: {
-                            color: '#888', maxRotation: 45, font: { size: 11 },
+                            color: window.KSLT_KRASKA.цвет('--text-muted'), maxRotation: 45, font: { size: 11 },
                             callback: function(v, i) { return tickDate(this.getLabelForValue(i)); }
                         },
                         grid: { display: false }
                     },
                     y: {
                         min: 1.0, max: 7.0,
-                        ticks: { color: '#00BFFF', stepSize: 1, font: { size: 11 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
+                        ticks: { color: window.KSLT_KRASKA.цвет('--cat-1'), stepSize: 1, font: { size: 11 } },
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.04) }
                     }
                 }
             }

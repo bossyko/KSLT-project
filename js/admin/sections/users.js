@@ -1562,44 +1562,44 @@
                     {
                         label: L.usrChartRegistered,
                         data: regData,
-                        borderColor: 'rgba(76, 175, 80, 1)',
-                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderColor: window.KSLT_KRASKA.цвет('--success'),
+                        backgroundColor: window.KSLT_KRASKA.цвет('--success', 0.1),
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointBackgroundColor: 'rgba(76, 175, 80, 1)',
+                        pointBackgroundColor: window.KSLT_KRASKA.цвет('--success'),
                         tension: 0.3,
                         fill: false
                     },
                     {
                         label: L.usrChartPlayers,
                         data: plrData,
-                        borderColor: 'rgba(255, 214, 0, 1)',
-                        backgroundColor: 'rgba(255, 214, 0, 0.1)',
+                        borderColor: window.KSLT_KRASKA.цвет('--warning'),
+                        backgroundColor: window.KSLT_KRASKA.цвет('--warning', 0.1),
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointBackgroundColor: 'rgba(255, 214, 0, 1)',
+                        pointBackgroundColor: window.KSLT_KRASKA.цвет('--warning'),
                         tension: 0.3,
                         fill: false
                     },
                     {
                         label: L.usrChartDeleted,
                         data: delData,
-                        borderColor: 'rgba(244, 67, 54, 1)',
-                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        borderColor: window.KSLT_KRASKA.цвет('--danger'),
+                        backgroundColor: window.KSLT_KRASKA.цвет('--danger', 0.1),
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointBackgroundColor: 'rgba(244, 67, 54, 1)',
+                        pointBackgroundColor: window.KSLT_KRASKA.цвет('--danger'),
                         tension: 0.3,
                         fill: false
                     },
                     {
                         label: L.usrChartNet,
                         data: netData,
-                        borderColor: 'var(--accent)',
-                        backgroundColor: 'var(--alpha-lime-12)',
+                        borderColor: window.KSLT_KRASKA.цвет('--accent'),
+                        backgroundColor: window.KSLT_KRASKA.цвет('--accent', 0.12),
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointBackgroundColor: 'var(--accent)',
+                        pointBackgroundColor: window.KSLT_KRASKA.цвет('--accent'),
                         tension: 0.3,
                         fill: false
                     }
@@ -1616,17 +1616,17 @@
                     legend: {
                         position: 'top',
                         labels: {
-                            color: 'rgba(255,255,255,0.7)',
+                            color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72),
                             font: { size: 11 },
                             boxWidth: 12,
                             padding: 16
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(20,24,36,0.95)',
-                        titleColor: '#fff',
-                        bodyColor: 'rgba(255,255,255,0.8)',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
+                        titleColor: window.KSLT_KRASKA.цвет('--chart-tip-title'),
+                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
+                        borderColor: window.KSLT_KRASKA.цвет('--neutral-white', 0.12),
                         borderWidth: 1,
                         padding: 10,
                         cornerRadius: 8,
@@ -1641,20 +1641,20 @@
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(255,255,255,0.04)' },
-                        ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } },
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.04) },
+                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5), font: { size: 10 } },
                         title: {
                             display: true,
                             text: isEn ? 'Day' : 'День',
-                            color: 'rgba(255,255,255,0.4)',
+                            color: window.KSLT_KRASKA.цвет('--neutral-white', 0.4),
                             font: { size: 10 }
                         }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.06) },
                         ticks: {
-                            color: 'rgba(255,255,255,0.5)',
+                            color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5),
                             font: { size: 10 },
                             stepSize: 1,
                             callback: function(val) { return Number.isInteger(val) ? val : ''; }

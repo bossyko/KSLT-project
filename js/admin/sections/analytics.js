@@ -183,7 +183,7 @@
                     {
                         label: 'App',
                         data: appValues,
-                        backgroundColor: '#00E5FF',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--cat-1'),
                         borderRadius: 6,
                         barThickness: 40
                     }
@@ -196,26 +196,26 @@
                 plugins: {
                     legend: {
                         display: true,
-                        labels: { color: 'rgba(255,255,255,0.7)', font: { size: 12 } }
+                        labels: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 12 } }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(20,20,30,0.95)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
                         titleColor: window.KSLT_KRASKA.цвет('--accent'),
-                        bodyColor: '#fff',
-                        borderColor: 'var(--accent-glow)',
+                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
+                        borderColor: window.KSLT_KRASKA.цвет('--chart-tip-border'),
                         borderWidth: 1
                     }
                 },
                 scales: {
                     x: {
                         stacked: true,
-                        grid: { color: 'rgba(255,255,255,0.06)' },
-                        ticks: { color: 'rgba(255,255,255,0.5)' }
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.06) },
+                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5) }
                     },
                     y: {
                         stacked: true,
                         grid: { display: false },
-                        ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 13 } }
+                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 13 } }
                     }
                 }
             }
@@ -242,7 +242,7 @@
                     {
                         label: 'Site',
                         data: siteValues,
-                        backgroundColor: 'var(--alpha-lime-20)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--accent', 0.20),
                         borderColor: window.KSLT_KRASKA.цвет('--accent'),
                         borderWidth: 1,
                         borderRadius: 4,
@@ -251,8 +251,8 @@
                     {
                         label: 'App',
                         data: appValues,
-                        backgroundColor: 'rgba(0,229,255,0.25)',
-                        borderColor: '#00E5FF',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--cat-1', 0.25),
+                        borderColor: window.KSLT_KRASKA.цвет('--cat-1'),
                         borderWidth: 1,
                         borderRadius: 4,
                         barThickness: 20
@@ -266,12 +266,12 @@
                 plugins: {
                     legend: {
                         display: true,
-                        labels: { color: 'rgba(255,255,255,0.7)', font: { size: 11 } }
+                        labels: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 11 } }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(20,20,30,0.95)',
+                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
                         titleColor: window.KSLT_KRASKA.цвет('--accent'),
-                        bodyColor: '#fff',
+                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
                         callbacks: {
                             title: function(items) {
                                 if (!items.length) return '';
@@ -293,13 +293,13 @@
                 scales: {
                     x: {
                         stacked: true,
-                        grid: { color: 'rgba(255,255,255,0.06)' },
-                        ticks: { color: 'rgba(255,255,255,0.5)' }
+                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.06) },
+                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5) }
                     },
                     y: {
                         stacked: true,
                         grid: { display: false },
-                        ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 12 } }
+                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 12 } }
                     }
                 }
             }
