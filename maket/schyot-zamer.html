@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: счёт — один дом на страницу игрока, кабинет и админку</title>
+<!--
+    СТЕНД, А НЕ СТРАНИЦА. Кабинет и админка закрыты входом: страж
+    `auth-guard.js` уводит кадр на `auth.html`, и замер начинает говорить о
+    СТРАНИЦЕ ВХОДА, а не о кабинете. Поймано 19.10 на себе же, через час
+    после того, как это правило было выведено: ЗАГРУЗКА, ПОСЛЕ КОТОРОЙ
+    СТРАНИЦА СМЕНИЛАСЬ, ГОВОРИТ О ДРУГОЙ СТРАНИЦЕ.
+
+    Поэтому счёт меряется здесь: стенд подключает ТОТ ЖЕ дом правил, что
+    страница игрока, кабинет и админка, и считает те же случаи.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=460">
+<style>
+    body { margin: 0; padding: 24px; background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); font-size: var(--fs-sm); }
+    h2 { font-size: var(--fs-md); margin: 24px 0 8px; color: var(--accent); }
+    table { border-collapse: collapse; width: 100%; max-width: 900px; margin-bottom: 16px; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: var(--bw-hair) solid var(--border-subtle); }
+    th { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    code { color: var(--accent); }
+    .нет { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<h2>A · счёт: показ, переворот, разбор</h2>
+<table id="тСчёт">
+    <thead><tr><th>случай</th><th>в базе</th><th>показ</th><th>переворот</th><th>сеты</th><th>геймы</th></tr></thead>
+    <tbody></tbody>
+</table>
+
+<h2>B · годность сета: стандарт и короткий формат</h2>
+<table id="тГодность">
+    <thead><tr><th>счёт</th><th>формат</th><th>годен</th></tr></thead>
+    <tbody></tbody>
+</table>
+
+<script src="../js/kslt-rules.js?v=31"></script>
+<script>
+/* ЗАМЕР ЧИТАЕТ ДОМ, А НЕ СВОЮ КОПИЮ: если дом не подключён, стенд обязан
+   сказать это числом, а не нарисовать пустую таблицу. */
+(function () {
+    var СЧЁТ = [
+        ['обычная победа в двух сетах', '6/4 6/3'],
+        ['тай-брейк, проигранный сет и супер-ТБ', '7/6(5-7) 4/6 10/8'],
+        ['пропуск круга', 'BYE'],
+        ['счёта нет', ''],
+        ['один сет', '6/0'],
+        ['три сета вровень по геймам', '6/4 4/6 7/6']
+    ];
+    var ГОДНОСТЬ = [
+        [6, 4, undefined], [7, 5, undefined], [7, 6, undefined], [6, 6, undefined],
+        [8, 1, undefined], [6, 4, 'short'], [6, 5, 'short'], [7, 5, 'short'],
+        ['a', 'b', undefined]
+    ];
+
+    function строка(ячейки) {
+        return '<tr>' + ячейки.map(function (з) { return '<td>' + з + '</td>'; }).join('') + '</tr>';
+    }
+
+    var R = window.KSLT_RULES;
+    var итог = { домЕсть: !!(R && R.показатьСчёт && R.перевернутьСчёт && R.разборСчёта && R.сетГоден),
+                 счёт: {}, годность: {} };
+
+    if (итог.домЕсть) {
+        document.querySelector('#тСчёт tbody').innerHTML = СЧЁТ.map(function (с) {
+            var р = R.разборСчёта(с[1]);
+            итог.счёт[с[1] || 'пусто'] = {
+                показ: R.показатьСчёт(с[1]),
+                переворот: R.перевернутьСчёт(с[1]),
+                разбор: р
+            };
+            return строка([
+                с[0],
+                '<code>' + (с[1] || '—') + '</code>',
+                '<code>' + R.показатьСчёт(с[1]) + '</code>',
+                '<code>' + (R.перевернутьСчёт(с[1]) || '<span class="нет">пусто</span>') + '</code>',
+                р ? р.p1Sets + ':' + р.p2Sets : '<span class="нет">нет</span>',
+                р ? р.p1Games + ':' + р.p2Games : '<span class="нет">нет</span>'
+            ]);
+        }).join('');
+
+        document.querySelector('#тГодность tbody').innerHTML = ГОДНОСТЬ.map(function (г) {
+            var годен = R.сетГоден(г[0], г[1], г[2]);
+            итог.годность[г[0] + ':' + г[1] + '/' + (г[2] || 'стандарт')] = годен;
+            return строка([
+                '<code>' + г[0] + ':' + г[1] + '</code>',
+                г[2] || 'стандарт',
+                годен ? 'да' : '<span class="нет">нет</span>'
+            ]);
+        }).join('');
+    } else {
+        document.querySelector('#тСчёт tbody').innerHTML =
+            '<tr><td colspan="6">ДОМА ПРАВИЛ НЕТ — стенд подключил его неверно</td></tr>';
+    }
+
+    window.ЗАМЕР = итог;
+})();
+</script>
+</body>
+</html>
