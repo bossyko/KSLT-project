@@ -124,7 +124,8 @@ const КУСКИ = [
     ['разбор счёта', 'check-razbor-schyota.js', 'check-razbor-schyota-otkat.js'],
     ['роль в инлайнах js', 'check-rol-v-inlaynah.js', 'check-rol-v-inlaynah-otkat.js'],
     ['бейдж роли', 'check-rol-badzh.js', 'check-rol-badzh-otkat.js'],
-    ['важность', 'check-vazhnost.js', 'check-vazhnost-otkat.js']
+    ['важность', 'check-vazhnost.js', 'check-vazhnost-otkat.js'],
+    ['копии функций', 'check-kopii-funkciy.js', 'check-kopii-funkciy-otkat.js']
 ];
 
 function прогнать(файл) {
