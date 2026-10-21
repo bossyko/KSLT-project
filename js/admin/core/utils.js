@@ -443,17 +443,16 @@
            Ловушка нужна не для красоты: под окном лежит вся страница с
            кнопками, которые меняют данные, и слепой обход по ней из
            открытого окна — это нажатие вслепую. */
+        /* ЛОВУШКА БЕРЁТСЯ ДОМОМ (21.10), И ДОМ СПИСАН ИМЕННО С ЭТОЙ
+           КОПИИ: она была ЛУЧШЕЙ из шести — полный список фокусируемого,
+           возврат фокуса из-под окна, гашение Tab в пустом окне. Пять
+           копий сайта не умели ни второго, ни третьего.
+           Esc остаётся здесь: он завязан на `закрыть()` этого окна, а это
+           другое понятие. */
+        var ловушкаТаб = window.KSLT_FOKUS.ловушка(окно);
         function поКлавише(e) {
             if (e.key === 'Escape') { закрыть(); return; }
-            if (e.key !== 'Tab') return;
-            var куда = окно.querySelectorAll(
-                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]),' +
-                ' textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
-            if (!куда.length) { e.preventDefault(); окно.focus(); return; }
-            var первый = куда[0], последний = куда[куда.length - 1];
-            if (!окно.contains(document.activeElement)) { e.preventDefault(); первый.focus(); return; }
-            if (e.shiftKey && document.activeElement === первый) { e.preventDefault(); последний.focus(); }
-            else if (!e.shiftKey && document.activeElement === последний) { e.preventDefault(); первый.focus(); }
+            ловушкаТаб(e);
         }
         document.addEventListener('keydown', поКлавише);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) закрыть(); });

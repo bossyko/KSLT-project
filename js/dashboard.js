@@ -1598,18 +1598,9 @@
             if (фокусДоQR && фокусДоQR.focus) фокусДоQR.focus();
         }
         function поКлавишеQR(e) { if (e.key === 'Escape') закрытьQR(); }
-        function ловушкаQR(e) {
-            if (e.key !== 'Tab') return;
-            var сп = overlay.querySelectorAll(
-                'button:not([disabled]), a[href], input:not([disabled]), ' +
-                'select:not([disabled]), textarea:not([disabled]), ' +
-                '[tabindex]:not([tabindex="-1"])'
-            );
-            if (!сп.length) return;
-            var пер = сп[0], посл = сп[сп.length - 1];
-            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
-            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
-        }
+        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
+           фокусируемого, возврат фокуса из-под окна, пустое окно. */
+        var ловушкаQR = window.KSLT_FOKUS.ловушка(overlay);
 
         кнопкаЗакрытьQR.addEventListener('click', закрытьQR);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) закрытьQR(); });
@@ -3701,14 +3692,9 @@
             setTimeout(function() { overlay.remove(); }, 300);
             if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         };
-        function ловушка(e) {
-            if (e.key !== 'Tab') return;
-            var сп = overlay.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
-            if (!сп.length) return;
-            var пер = сп[0], посл = сп[сп.length - 1];
-            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
-            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
-        }
+        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
+           фокусируемого, возврат фокуса из-под окна, пустое окно. */
+        var ловушка = window.KSLT_FOKUS.ловушка(overlay);
         var кнопкаЗакрыть = overlay.querySelector('.h2h-close');
         кнопкаЗакрыть.addEventListener('click', closeOverlay);
         кнопкаЗакрыть.focus();
@@ -4483,18 +4469,9 @@
             if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         }
         function onKey(e) { if (e.key === 'Escape') close(); }
-        function ловушка(e) {
-            if (e.key !== 'Tab') return;
-            var сп = back.querySelectorAll(
-                'button:not([disabled]), a[href], input:not([disabled]), ' +
-                'select:not([disabled]), textarea:not([disabled]), ' +
-                '[tabindex]:not([tabindex="-1"])'
-            );
-            if (!сп.length) return;
-            var пер = сп[0], посл = сп[сп.length - 1];
-            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
-            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
-        }
+        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
+           фокусируемого, возврат фокуса из-под окна, пустое окно. */
+        var ловушка = window.KSLT_FOKUS.ловушка(back);
 
         кнопкаЗакрыть.addEventListener('click', close);
         back.addEventListener('click', function(e) { if (e.target === back) close(); });
@@ -6117,18 +6094,9 @@
             if (фокусДоОбмена && фокусДоОбмена.focus) фокусДоОбмена.focus();
         }
         function поКлавишеОбмена(e) { if (e.key === 'Escape') закрытьОбмен(); }
-        function ловушкаОбмена(e) {
-            if (e.key !== 'Tab') return;
-            var сп = overlay.querySelectorAll(
-                'button:not([disabled]), a[href], input:not([disabled]), ' +
-                'select:not([disabled]), textarea:not([disabled]), ' +
-                '[tabindex]:not([tabindex="-1"])'
-            );
-            if (!сп.length) return;
-            var пер = сп[0], посл = сп[сп.length - 1];
-            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
-            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
-        }
+        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
+           фокусируемого, возврат фокуса из-под окна, пустое окно. */
+        var ловушкаОбмена = window.KSLT_FOKUS.ловушка(overlay);
 
         кнопкаЗакрытьОбмен.addEventListener('click', закрытьОбмен);
         overlay.addEventListener('click', function(e) {

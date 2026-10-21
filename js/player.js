@@ -1621,14 +1621,11 @@
         // при закрытии фокус возвращается туда, откуда окно позвали
         var фокусДоОкна = document.activeElement;
         closeBtn.focus();
-        var ловушка = function(e) {
-            if (e.key !== 'Tab') return;
-            var сп = overlay.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
-            if (!сп.length) return;
-            var пер = сп[0], посл = сп[сп.length - 1];
-            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }
-            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }
-        };
+        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10). Здесь стоял БЕДНЫЙ
+           список — только кнопки, ссылки и `tabindex`, без полей. Полей в
+           этом окне сегодня нет, но держалось это на СОДЕРЖИМОМ окна, а не
+           на правиле. */
+        var ловушка = window.KSLT_FOKUS.ловушка(overlay);
         overlay.addEventListener('keydown', ловушка);
         overlay.addEventListener('h2h-closed', function() {
             if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
