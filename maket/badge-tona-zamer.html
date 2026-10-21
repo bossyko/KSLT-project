@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: тона бейджа админки</title>
+<!--
+    СТЕНД, А НЕ АДМИНКА. Админка закрыта входом: страж `auth-guard.js`
+    уводит кадр на `auth.html`, и замер начинает говорить о СТРАНИЦЕ ВХОДА.
+    Поэтому бейджи меряются здесь — на ТЕХ ЖЕ `tokens.css`, `style.css` и
+    `admin.css`, что грузит `pages/admin.html`, и на том же `--bg-card`,
+    на котором бейдж стоит в таблицах админки.
+
+    ЧТО ЗДЕСЬ ЗАМОРОЖЕНО ЧИСЛАМИ: у каждого тона фон НЕ ПРОЗРАЧНЫЙ (беда
+    «зов в пустоту» рисовала бейдж базовым серым), тона РАЗЛИЧАЮТСЯ между
+    собой, и текст читается по WCAG AA на фактическом, сложенном со слоями
+    фоне — а не на том, который записан в токене.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=460">
+<link rel="stylesheet" href="../css/admin.css?v=287">
+<style>
+    body { margin: 0; padding: 24px; background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); font-size: var(--fs-sm); }
+    h2 { font-size: var(--fs-md); margin: 24px 0 8px; color: var(--accent); }
+    .st-karta { background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
+                border-radius: var(--radius-sm); padding: 16px; max-width: 900px; }
+    .st-ryad { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    table { border-collapse: collapse; width: 100%; max-width: 900px; margin-top: 16px; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: var(--bw-hair) solid var(--border-subtle);
+             font-size: var(--fs-2xs); }
+    th { text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<h2>A · тона бейджа на карте админки</h2>
+<div class="st-karta">
+    <div class="st-ryad" id="ряд">
+        <span class="ad-badge ad-badge-accent">акцент</span>
+        <span class="ad-badge ad-badge-danger">12</span>
+        <span class="ad-badge ad-badge-warning">7</span>
+        <span class="ad-badge ad-badge-success">сыгран</span>
+        <span class="ad-badge ad-badge-info">голосование</span>
+        <span class="ad-badge">без тона</span>
+    </div>
+</div>
+
+<h2>B · ловушка удельного веса: `.ad-reg-section-title .ad-badge`</h2>
+<!--
+    ВЛОЖЕННОЕ ПРАВИЛО С ТЕМ ЖЕ ЗНАЧЕНИЕМ — НЕ МЁРТВОЕ, А ЛОВУШКА.
+    `.ad-reg-section-title .ad-badge { font-size: var(--fs-xs) }` повторяет
+    то, что базовый класс уже задаёт, — на сегодняшних бейджах не меняет
+    ничего. Но удельный вес у него ВЫШЕ, чем у `.ad-badge-sm`, и первый же
+    мелкий бейдж в заголовке раздела молча вернётся к обычному кеглю.
+    МЁРТВЫМ КОД НАЗЫВАЕТСЯ ПОСЛЕ ПРОВЕРКИ — здесь проверка и стоит.
+-->
+<div class="st-karta">
+    <h3 class="ad-reg-section-title" id="заголовок">
+        Основная сетка
+        <span class="ad-badge" id="вЗаг">12/16</span>
+        <span class="ad-badge ad-badge-sm" id="вЗагМелкий">мелкий</span>
+    </h3>
+    <div class="st-ryad">
+        <span class="ad-badge ad-badge-sm" id="внеЗагМелкий">мелкий</span>
+    </div>
+</div>
+
+<table id="тТона">
+    <thead><tr><th>класс</th><th>фон сложенный</th><th>текст</th><th>контраст</th><th>высота</th><th>кегль</th></tr></thead>
+    <tbody></tbody>
+</table>
+
+<script>
+/* ЗАМЕР СКЛАДЫВАЕТ СЛОИ САМ. Все тона заданы через `rgba(...)` поверх
+   `--bg-card`, который сам лежит поверх `--bg-base`. Контраст, посчитанный
+   по записанному в токене цвету, — ложь: он не знает, что под ним. */
+(function () {
+    function разбор(с) {
+        var m = /rgba?\(([^)]+)\)/.exec(с || '');
+        if (!m) return null;
+        var ч = m[1].split(',').map(function (x) { return parseFloat(x.trim()); });
+        return { r: ч[0], g: ч[1], b: ч[2], a: ч.length > 3 ? ч[3] : 1 };
+    }
+    function поверх(верх, низ) {
+        if (!верх) return низ;
+        var a = верх.a;
+        return { r: верх.r * a + низ.r * (1 - a),
+                 g: верх.g * a + низ.g * (1 - a),
+                 b: верх.b * a + низ.b * (1 - a), a: 1 };
+    }
+    /* фактический фон элемента: идём вверх, пока не ляжет непрозрачный слой */
+    function фон(эл) {
+        var слои = [];
+        for (var у = эл; у; у = у.parentElement) {
+            var ц = разбор(getComputedStyle(у).backgroundColor);
+            if (ц && ц.a > 0) { слои.push(ц); if (ц.a === 1) break; }
+        }
+        var итог = слои.length ? слои[слои.length - 1] : { r: 0, g: 0, b: 0, a: 1 };
+        for (var i = слои.length - 2; i >= 0; i--) итог = поверх(слои[i], итог);
+        return итог;
+    }
+    function яркость(ц) {
+        var к = [ц.r, ц.g, ц.b].map(function (v) {
+            v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * к[0] + 0.7152 * к[1] + 0.0722 * к[2];
+    }
+    function контраст(a, b) {
+        var l1 = яркость(a), l2 = яркость(b);
+        return Math.round(((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)) * 100) / 100;
+    }
+    function строка(ц) { return 'rgb(' + [ц.r, ц.g, ц.b].map(Math.round).join(',') + ')'; }
+
+    var итог = {}, тело = document.querySelector('#тТона tbody');
+    [].forEach.call(document.querySelectorAll('#ряд .ad-badge'), function (эл) {
+        var с = getComputedStyle(эл);
+        var свой = разбор(с.backgroundColor);
+        var подним = фон(эл.parentElement);
+        var сложен = поверх(свой, подним);
+        var текст = поверх(разбор(с.color), сложен);
+        var имя = (эл.className.match(/ad-badge-[a-z]+/) || ['ad-badge'])[0];
+        var д = {
+            своёАльфа: свой ? свой.a : 0,
+            фон: строка(сложен),
+            текст: строка(текст),
+            контраст: контраст(текст, сложен),
+            высота: Math.round(эл.getBoundingClientRect().height * 100) / 100,
+            кегль: parseFloat(с.fontSize),
+            вес: с.fontWeight,
+            радиус: с.borderTopLeftRadius
+        };
+        итог[имя] = д;
+        var tr = document.createElement('tr');
+        ['', д.фон, д.текст, д.контраст, д.высота, д.кегль].forEach(function (з, i) {
+            var td = document.createElement('td');
+            td.textContent = i === 0 ? имя : String(з);
+            tr.appendChild(td);
+        });
+        тело.appendChild(tr);
+    });
+
+    function кегль(ид) {
+        var э = document.getElementById(ид);
+        return э ? parseFloat(getComputedStyle(э).fontSize) : null;
+    }
+    var ловушка = {
+        вЗаголовке: кегль('вЗаг'),
+        мелкийВЗаголовке: кегль('вЗагМелкий'),
+        мелкийВнеЗаголовка: кегль('внеЗагМелкий')
+    };
+    /* ПРИЗНАК ЛОВУШКИ: мелкий бейдж ВНЕ заголовка мельче, чем В заголовке.
+       Если числа равны — вложенное правило `-sm` не перебивает. */
+    ловушка.перебивает = ловушка.мелкийВЗаголовке !== ловушка.мелкийВнеЗаголовка;
+
+    window.ЗАМЕР = {
+        ловушка: ловушка,
+        домЕсть: !!итог['ad-badge'],
+        тона: итог,
+        /* ПОРЯДОК ПРАВИЛ В ФАЙЛЕ РЕШАЕТ: тон обязан перебить базовый серый.
+           Если он объявлен ВЫШЕ `.ad-badge`, фон останется базовым — и это
+           сравнение единственное, что это ловит в браузере. */
+        базовыйФон: итог['ad-badge'] ? итог['ad-badge'].фон : null
+    };
+})();
+</script>
+</body>
+</html>
