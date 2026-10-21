@@ -11213,27 +11213,8 @@
 
     // ---- Score Entry Modal ----
     // Tennis score validation
-    function isValidSet(a, b, format) {
-        a = parseInt(a); b = parseInt(b);
-        if (isNaN(a) || isNaN(b)) return false;
-        if (format === 'short') {
-            // Short: 6-0..6-4 normal, 6-5 tiebreak. No 7-5 or 7-6.
-            if (a < 0 || b < 0 || a > 6 || b > 6) return false;
-            if ((a === 6 && b <= 4) || (b === 6 && a <= 4)) return true;
-            if ((a === 6 && b === 5) || (b === 6 && a === 5)) return true;
-            return false;
-        }
-        // Standard
-        if (a < 0 || b < 0 || a > 7 || b > 7) return false;
-        // Normal win: 6-0..6-4
-        if ((a === 6 && b <= 4) || (b === 6 && a <= 4)) return true;
-        // 7-5
-        if ((a === 7 && b === 5) || (b === 7 && a === 5)) return true;
-        // Tiebreak: 7-6
-        if ((a === 7 && b === 6) || (b === 7 && a === 6)) return true;
-        return false;
-    }
-
+    /* ГОДНОСТЬ СЕТА — У ДОМА `js/kslt-rules.js` (19.10). Вторая копия. */
+    var isValidSet = function (a, b, формат) { return window.KSLT_RULES.сетГоден(a, b, формат); };
     var MATCH_OUTCOMES = ['RET', 'W/O', 'DEF', 'NA'];
 
     /**

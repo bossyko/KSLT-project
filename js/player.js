@@ -460,30 +460,13 @@
         return d.getDate() + ' ' + months[d.getMonth()];
     }
 
-    function formatScore(score) {
-        if (!score) return '\u2014';
-        return score.replace(/(\d+)\/(\d+)/g, '$1:$2');
-    }
-
-    function flipScore(score) {
-        if (!score) return score;
-        return score.replace(/(\d+)\/(\d+)/g, '$2/$1');
-    }
-
-    function parseScoreStats(score) {
-        if (!score || score === 'BYE') return null;
-        var sets = score.trim().split(/\s+/);
-        var p1S = 0, p2S = 0, p1G = 0, p2G = 0;
-        sets.forEach(function(s) {
-            var m = s.match(/^(\d+)\/(\d+)/);
-            if (m) {
-                var g1 = parseInt(m[1], 10), g2 = parseInt(m[2], 10);
-                p1G += g1; p2G += g2;
-                if (g1 > g2) p1S++; else if (g2 > g1) p2S++;
-            }
-        });
-        return { p1Sets: p1S, p2Sets: p2S, p1Games: p1G, p2Games: p2G };
-    }
+    /* СЧЁТ БЕРЁТСЯ У ДОМА `js/kslt-rules.js` (19.10). Здесь стояли три
+       копии — показ, переворот и разбор счёта, — а в кабинете те же три под
+       префиксом `db`. Страница игрока и кабинет говорят об ОДНОМ человеке:
+       счёт у них обязан быть один. */
+    var показатьСчёт = function (с) { return window.KSLT_RULES.показатьСчёт(с); };
+    var перевернутьСчёт = function (с) { return window.KSLT_RULES.перевернутьСчёт(с); };
+    var разборСчёта = function (с) { return window.KSLT_RULES.разборСчёта(с); };
 
     function playerPage() {
         return isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
@@ -1232,7 +1215,7 @@
             var result = m.winner_id === мойКапитан ? 'W' : 'L';
             var oppPhoto = opp.photo || '';
             var score = m.score || '';
-            var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
+            var displayScore = isP1 ? показатьСчёт(score) : показатьСчёт(перевернутьСчёт(score));
 
             var tName = m.tournament ? (isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title)) : '';
             var tId = m.tournament ? m.tournament.id : '';
@@ -1711,7 +1694,7 @@
             if (m.winner_id === _playerId) myWins++; else oppWins++;
 
             if (m.score) {
-                var stats = parseScoreStats(m.score);
+                var stats = разборСчёта(m.score);
                 if (stats) {
                     if (isP1) {
                         mySets += stats.p1Sets; oppSets += stats.p2Sets;
@@ -1768,7 +1751,7 @@
             var isP1 = m.player1_id === _playerId;
             var result = m.winner_id === _playerId ? 'W' : 'L';
             var score = m.score || '';
-            var displayScore = isP1 ? formatScore(score) : formatScore(flipScore(score));
+            var displayScore = isP1 ? показатьСчёт(score) : показатьСчёт(перевернутьСчёт(score));
             var tName = '';
             if (m.tournament) {
                 tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);

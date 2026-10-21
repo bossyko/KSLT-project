@@ -3090,30 +3090,12 @@
         } catch(e) { return '\u2014'; }
     }
 
-    function dbFlipScore(score) {
-        if (!score) return score;
-        return score.replace(/(\d+)\/(\d+)/g, '$2/$1');
-    }
-
-    function dbFormatScore(score) {
-        if (!score) return '\u2014';
-        return score.replace(/(\d+)\/(\d+)/g, '$1:$2');
-    }
-
-    function dbParseScoreStats(score) {
-        if (!score || score === 'BYE') return null;
-        var sets = score.trim().split(/\s+/);
-        var p1S = 0, p2S = 0, p1G = 0, p2G = 0;
-        sets.forEach(function(s) {
-            var m = s.match(/^(\d+)\/(\d+)/);
-            if (m) {
-                var g1 = parseInt(m[1], 10), g2 = parseInt(m[2], 10);
-                p1G += g1; p2G += g2;
-                if (g1 > g2) p1S++; else if (g2 > g1) p2S++;
-            }
-        });
-        return { p1Sets: p1S, p2Sets: p2S, p1Games: p1G, p2Games: p2G };
-    }
+    /* СЧЁТ БЕРЁТСЯ У ДОМА `js/kslt-rules.js` (19.10). Здесь стояли те же
+       три копии, что на странице игрока, только под префиксом `db` — и по
+       имени их родство не видно вовсе. */
+    var dbПоказатьСчёт = function (с) { return window.KSLT_RULES.показатьСчёт(с); };
+    var dbПеревернутьСчёт = function (с) { return window.KSLT_RULES.перевернутьСчёт(с); };
+    var dbРазборСчёта = function (с) { return window.KSLT_RULES.разборСчёта(с); };
 
     // ---- H2H labels ----
     var LH = isKg ? {
@@ -3478,7 +3460,7 @@
                 var opp = _matchesOpponents[oppId] || { name: oppId, photo: '' };
                 var isWin = m.winner_id === (mineIsP1 ? m.player1_id : m.player2_id);
                 var score = m.score || '';
-                var displayScore = mineIsP1 ? dbFormatScore(score) : dbFormatScore(dbFlipScore(score));
+                var displayScore = mineIsP1 ? dbПоказатьСчёт(score) : dbПоказатьСчёт(dbПеревернутьСчёт(score));
 
                 // Пара бывает и в турнире, и в баттле. В турнире состав знает
                 // заявка, в баттле — сам вызов
@@ -3772,7 +3754,7 @@
             var isP1 = m.player1_id === pid;
             if (m.winner_id === pid) myWins++; else oppWins++;
             if (m.score) {
-                var stats = dbParseScoreStats(m.score);
+                var stats = dbРазборСчёта(m.score);
                 if (stats) {
                     if (isP1) {
                         mySets += stats.p1Sets; oppSets += stats.p2Sets;
@@ -3822,7 +3804,7 @@
         last5.forEach(function(m) {
             var isP1 = m.player1_id === pid;
             var result = m.winner_id === pid ? 'W' : 'L';
-            var displayScore = isP1 ? dbFormatScore(m.score) : dbFormatScore(dbFlipScore(m.score));
+            var displayScore = isP1 ? dbПоказатьСчёт(m.score) : dbПоказатьСчёт(dbПеревернутьСчёт(m.score));
             var tName = '';
             if (m.tournament) {
                 tName = isEn ? (m.tournament.title_en || m.tournament.title) : (isKg ? (m.tournament.title_kg || m.tournament.title) : m.tournament.title);
