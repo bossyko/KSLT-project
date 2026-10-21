@@ -3337,10 +3337,12 @@
        а сайт — «Скоро» и «Скоро открытие» */
     var TOURNAMENT_STATUSES = window.KSLT_STATUS.подписи(isEn ? 'en' : 'ru');
 
-    /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
-    function computeTournamentStatus(a, b, c, d) {
-        return window.KSLT_STATUS.вычислить(a, b, c, d);
-    }
+    /* Вычисление одно на всю КСЛТ — js/tournament-status.js.
+       СВОЕГО ТЕЛА ЗДЕСЬ БОЛЬШЕ НЕТ (19.10): стояла четвёртая побайтовая
+       обёртка. Имя в API модуля остаётся — его зовут шесть мест в
+       `sections/tournaments.js` как `A.computeTournamentStatus`, и
+       переименование было бы правкой ради правки. Теперь это ССЫЛКА на
+       дом, а не копия: расходиться нечему. */
 
     // ---- SVG Icons ----
     var ICONS = {
@@ -3420,7 +3422,7 @@
         COURT_SURFACES: COURT_SURFACES,
         COURT_AMENITIES: COURT_AMENITIES,
         ROLE_SECTIONS: ROLE_SECTIONS,
-        computeTournamentStatus: computeTournamentStatus,
+        computeTournamentStatus: function (a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); },
         cachedCategories: cachedCategories,
         categoriesMap: categoriesMap,
         client: null,

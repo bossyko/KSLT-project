@@ -155,7 +155,9 @@
 
     // Auto-compute tournament status from dates
     /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
-    function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }
+    /* СТАТУС БЕРЁТСЯ У ДОМА НАПРЯМУЮ (19.10). Здесь стояла одна из
+       ЧЕТЫРЁХ побайтовых обёрток над `js/tournament-status.js` —
+       посредник, который ничего не добавлял, но плодил понятие. */
 
     // SVG icons
     var pinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
@@ -451,7 +453,7 @@
             if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
                 effectiveStatus = t.status;
             } else {
-                effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+                effectiveStatus = window.KSLT_STATUS.вычислить(t.registration_start, t.registration_end, t.date_start, t.date_end);
             }
             effectiveStatus = settleStatus(t, effectiveStatus);
             var cardStatus = mapStatus(effectiveStatus);

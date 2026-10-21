@@ -16,7 +16,7 @@
 
     // Auto-compute tournament status from dates
     /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
-    function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }
+    /* СТАТУС БЕРЁТСЯ У ДОМА НАПРЯМУЮ (19.10): третья из четырёх обёрток. */
 
     /** Сумма в шапке — коротко: 2626000 → «2.6M», 40000 → «40K» */
     function shortPrize(num) {
@@ -333,7 +333,7 @@
                 if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
                     effectiveStatus = t.status;
                 } else {
-                    effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+                    effectiveStatus = window.KSLT_STATUS.вычислить(t.registration_start, t.registration_end, t.date_start, t.date_end);
                 }
                 // Турнир, который отыграли, — завершён, что бы ни стояло в базе.
                 // Иначе апрельский турнир со стухшим «регистрация закрыта»

@@ -1347,7 +1347,7 @@ function loadFromSupabase(client, id) {
 }
 
 /* Вычисление одно на всю КСЛТ — js/tournament-status.js */
-function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }
+/* СТАТУС БЕРЁТСЯ У ДОМА НАПРЯМУЮ (19.10): обёртка была второй из четырёх. */
 
 /**
  * Места в шапке турнира. Пока свободных много — показываем вместимость,
@@ -1411,7 +1411,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     if (t.status === 'cancelled' || t.status === 'registration_closed' || t.status === 'completed') {
         effectiveStatus = t.status;
     } else {
-        effectiveStatus = computeStatus(t.registration_start, t.registration_end, t.date_start, t.date_end);
+        effectiveStatus = window.KSLT_STATUS.вычислить(t.registration_start, t.registration_end, t.date_start, t.date_end);
     }
 
     // Status labels & CSS class mapping
