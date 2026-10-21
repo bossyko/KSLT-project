@@ -331,16 +331,16 @@
             var p2Name = chalSideName(c, 2);
 
             var statusBadge = c.status === 'completed'
-                ? '<span class="ad-badge ad-badge-green">' + L.chalCompleted + '</span>'
+                ? '<span class="ad-badge ad-badge-success">' + L.chalCompleted + '</span>'
                 : (c.voting_closed
-                    ? '<span class="ad-badge ad-badge-yellow">' + L.chalVotingClosed + '</span>'
-                    : '<span class="ad-badge ad-badge-blue">' + L.chalAccepted + '</span>');
+                    ? '<span class="ad-badge ad-badge-warning">' + L.chalVotingClosed + '</span>'
+                    : '<span class="ad-badge ad-badge-info">' + L.chalAccepted + '</span>');
 
             // Публичные страницы считают баттл сыгранным по дате, а вкладки
             // админки — по полю status, которое меняется только со счётом.
             // Без пометки такой баттл висит среди опубликованных и теряется
             if (isBattleOverdue(c)) {
-                statusBadge += '<br><span class="ad-badge ad-badge-red" style="margin-top:4px;display:inline-block;">' +
+                statusBadge += '<br><span class="ad-badge ad-badge-danger" style="margin-top:4px;display:inline-block;">' +
                     L.chalOverdue + '</span>';
             }
 
@@ -349,11 +349,11 @@
             var broadcastCell = '';
             if (c.status === 'completed') {
                 broadcastCell = notified
-                    ? '<span class="ad-badge ad-badge-green" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span>'
+                    ? '<span class="ad-badge ad-badge-success" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span>'
                     : '<span class="ad-badge" style="opacity:0.5;">—</span>';
             } else {
                 broadcastCell = notified
-                    ? '<span class="ad-badge ad-badge-green" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + (isEn ? 'Resend' : 'Повторить') + '</button>'
+                    ? '<span class="ad-badge ad-badge-success" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + (isEn ? 'Resend' : 'Повторить') + '</button>'
                     : '<button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" title="' + L.chalNotify + '">' + L.chalNotify + '</button>';
             }
 
@@ -464,7 +464,7 @@
             var p1Name = chalSideName(c, 1);
             var p2Name = chalSideName(c, 2);
             var date = c.accepted_at ? formatDate(c.accepted_at) : '-';
-            var titleExtra = c.status === 'cancelled' ? ' <span class="ad-badge ad-badge-yellow">' + L.chalCancelledBadge + '</span>' : '';
+            var titleExtra = c.status === 'cancelled' ? ' <span class="ad-badge ad-badge-warning">' + L.chalCancelledBadge + '</span>' : '';
             // Причина отмены — рядом с пометкой: без неё «Отменён» ничего
             // не объясняет ни менеджеру, ни тому, кто разбирается позже
             var reasonLine = (c.status === 'cancelled' && c.cancel_reason)

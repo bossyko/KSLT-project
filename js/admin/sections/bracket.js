@@ -4693,7 +4693,11 @@
 
             if (внеТурнира.length > 0) {
                 html += '<h3 class="ad-reg-section-title ad-reg-blok-title ad-reg-title-out">' + L.regOut +
-                    ' <span class="ad-badge ad-badge-out">' +
+                    /* СЧЁТЧИК ТОНОМ, А НЕ ИМЕНЕМ СОСТОЯНИЯ: класс `-out` ниже в
+                       admin.css занят подписью «в зачёт не берётся» и перебивал
+                       этот — счётчик рисовался пунктиром рядом с красным
+                       заголовком. */
+                    ' <span class="ad-badge ad-badge-danger">' +
                     внеТурнира.length + '</span></h3>';
                 html += '<p class="ad-reg-podskazka">' + L.regOutHint + '</p>';
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
@@ -4751,7 +4755,7 @@
                     ? 'Did not pass the entry rules. Kept for statistics — shows how many wanted to join.'
                     : 'Не прошли правила допуска. Сохраняются для статистики — видно, сколько человек хотело участвовать.';
                 html += '<h3 class="ad-reg-section-title ad-reg-blok-title ad-reg-title-blk">' + blkTitle +
-                    ' <span class="ad-badge ad-badge-blk">' + blocked.length + '</span></h3>';
+                    ' <span class="ad-badge ad-badge-warning">' + blocked.length + '</span></h3>';
                 html += '<p class="ad-reg-podskazka">' + blkHint + '</p>';
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     '<th class="ad-reg-num-sm">#</th>' +
