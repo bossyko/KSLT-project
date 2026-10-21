@@ -1,0 +1,593 @@
+[
+ {
+  "файл": "admin.css",
+  "строка": 589,
+  "сел": ".ad-reg-menu-list .ad-reg-act",
+  "св": "padding",
+  "медиа": "",
+  "набор": [
+   "ad-reg-act",
+   "ad-reg-act-vynos",
+   "ad-reg-act-reshit",
+   "ad-btn-review"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 595,
+  "сел": ".ad-reg-menu-list .ad-reg-act:hover:not(:disabled)",
+  "св": "background",
+  "медиа": "",
+  "набор": [
+   "ad-reg-act",
+   "ad-reg-act-vynos",
+   "ad-reg-act-reshit",
+   "ad-btn-review"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 1814,
+  "сел": ".ad-bulk-all",
+  "св": "width",
+  "медиа": "",
+  "набор": [
+   "ad-bulk-all"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 1815,
+  "сел": ".ad-bulk-all",
+  "св": "height",
+  "медиа": "",
+  "набор": [
+   "ad-bulk-all"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 3852,
+  "сел": ".rat-rule-input",
+  "св": "background",
+  "медиа": "",
+  "набор": [
+   "rat-rule-input"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4874,
+  "сел": ".ad-brk-btn",
+  "св": "font-size",
+  "медиа": "",
+  "набор": [
+   "ad-btn",
+   "ad-btn-sm",
+   "ad-btn-secondary",
+   "ad-brk-btn"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4875,
+  "сел": ".ad-brk-btn",
+  "св": "padding",
+  "медиа": "",
+  "набор": [
+   "ad-btn",
+   "ad-btn-sm",
+   "ad-btn-secondary",
+   "ad-brk-btn"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4892,
+  "сел": ".ad-score-input:focus",
+  "св": "box-shadow",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-set-game"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4896,
+  "сел": ".ad-score-input",
+  "св": "width",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-set-game"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4897,
+  "сел": ".ad-score-input",
+  "св": "text-align",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-set-game"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4898,
+  "сел": ".ad-score-input",
+  "св": "font-size",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-set-game"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4899,
+  "сел": ".ad-score-input",
+  "св": "font-weight",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-set-game"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4900,
+  "сел": ".ad-score-input",
+  "св": "padding",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-set-game"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4911,
+  "сел": ".ad-tb-input",
+  "св": "width",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-tb-input"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4912,
+  "сел": ".ad-tb-input",
+  "св": "text-align",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-tb-input"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4913,
+  "сел": ".ad-tb-input",
+  "св": "font-size",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-tb-input"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4914,
+  "сел": ".ad-tb-input",
+  "св": "padding",
+  "медиа": "",
+  "набор": [
+   "ad-field-input",
+   "ad-score-input",
+   "ad-tb-input"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 4927,
+  "сел": ".ad-modal",
+  "св": "max-width",
+  "медиа": "@media (max-width: 768px)",
+  "набор": [
+   "ad-modal",
+   "ad-import-modal"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 5391,
+  "сел": ".ad-crt-page-active",
+  "св": "background",
+  "медиа": "",
+  "набор": [
+   "ad-crt-page-active"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 5392,
+  "сел": ".ad-crt-page-active",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "ad-crt-page-active"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 5701,
+  "сел": ".ad-grp-diag",
+  "св": "background",
+  "медиа": "",
+  "набор": [
+   "ad-grp-diag"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 6012,
+  "сел": ".ad-sched-menu .ad-sched-call .ad-btn",
+  "св": "text-align",
+  "медиа": "",
+  "набор": [
+   "ad-btn",
+   "ad-btn-secondary",
+   "ad-btn-sm",
+   "ad-export-csv"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "admin.css",
+  "строка": 6021,
+  "сел": ".ad-sched-menu .ad-reg-menu-list button",
+  "св": "background",
+  "медиа": "",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 6022,
+  "сел": ".ad-sched-menu .ad-reg-menu-list button",
+  "св": "border",
+  "медиа": "",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 6024,
+  "сел": ".ad-sched-menu .ad-reg-menu-list button",
+  "св": "color",
+  "медиа": "",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 6033,
+  "сел": ".ad-sched-menu .ad-reg-menu-list button:hover:not(:disabled)",
+  "св": "background",
+  "медиа": "",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 6038,
+  "сел": ".ad-sched-menu .ad-reg-menu-list .ad-sched-status.on",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "ad-sched-status",
+   "on"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "admin.css",
+  "строка": 8438,
+  "сел": ".ad-grp-place-draft",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "ad-grp-place-draft"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "courts.css",
+  "строка": 843,
+  "сел": ".ct-detail-map .leaflet-control-zoom a",
+  "св": "background",
+  "медиа": "",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "courts.css",
+  "строка": 844,
+  "сел": ".ct-detail-map .leaflet-control-zoom a",
+  "св": "color",
+  "медиа": "",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "news.css",
+  "строка": 1085,
+  "сел": ".news-statya-hero .news-hero-bg img",
+  "св": "transform",
+  "медиа": "@media (max-width: 640px)",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "style.css",
+  "строка": 475,
+  "сел": ".nav-item-live",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "nav-item",
+   "nav-item-live"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 481,
+  "сел": ".nav-item-live:hover",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "nav-item",
+   "nav-item-live"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 485,
+  "сел": ".nav-item-live.is-live",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "nav-item-live",
+   "is-live"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "style.css",
+  "строка": 490,
+  "сел": ".nav-item-live.is-live:hover",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "nav-item-live",
+   "is-live"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "style.css",
+  "строка": 1300,
+  "сел": ".admin-nav-menu",
+  "св": "left",
+  "медиа": "",
+  "набор": [
+   "nav-dropdown-menu",
+   "admin-nav-menu"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 1301,
+  "сел": ".admin-nav-menu",
+  "св": "right",
+  "медиа": "",
+  "набор": [
+   "nav-dropdown-menu",
+   "admin-nav-menu"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 1302,
+  "сел": ".admin-nav-menu",
+  "св": "transform",
+  "медиа": "",
+  "набор": [
+   "nav-dropdown-menu",
+   "admin-nav-menu"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 1309,
+  "сел": ".admin-nav-dropdown:hover .admin-nav-menu",
+  "св": "transform",
+  "медиа": "",
+  "набор": [
+   "nav-dropdown-menu",
+   "admin-nav-menu"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 3434,
+  "сел": ".vn-four .vn-discount",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "vn-discount"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 3612,
+  "сел": ".court-surface",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "court-surface"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "style.css",
+  "строка": 7460,
+  "сел": ".mobile-nav-links a.is-live",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "is-live"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 737,
+  "сел": "tr.td-rr-row-highlight",
+  "св": "background",
+  "медиа": "",
+  "набор": [
+   "td-rr-row-highlight"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 1025,
+  "сел": ".td-rr-diagonal",
+  "св": "background",
+  "медиа": "",
+  "набор": [
+   "td-rr-cell",
+   "td-rr-diagonal"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 1076,
+  "сел": ".td-rr-place",
+  "св": "font-weight",
+  "медиа": "",
+  "набор": [
+   "td-rr-stat",
+   "td-rr-place"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 1077,
+  "сел": ".td-rr-place",
+  "св": "color",
+  "медиа": "",
+  "набор": [
+   "td-rr-stat",
+   "td-rr-place"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 2493,
+  "сел": ".td-grp-mine",
+  "св": "padding",
+  "медиа": "",
+  "набор": [
+   "td-grp-mine"
+  ],
+  "изРазметки": false
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 2894,
+  "сел": ".td-ig-grid",
+  "св": "grid-template-columns",
+  "медиа": "@media (max-width: 992px)",
+  "набор": [
+   "td-ig-grid"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 2895,
+  "сел": ".td-ig-grid",
+  "св": "gap",
+  "медиа": "@media (max-width: 992px)",
+  "набор": [
+   "td-ig-grid"
+  ],
+  "изРазметки": true
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 2903,
+  "сел": ".td-ig-match > div:first-child",
+  "св": "padding",
+  "медиа": "@media (max-width: 992px)",
+  "набор": [],
+  "изРазметки": false
+ },
+ {
+  "файл": "tournament-detail.css",
+  "строка": 2909,
+  "сел": ".td-ig-match > div:not(:first-child)",
+  "св": "padding",
+  "медиа": "@media (max-width: 992px)",
+  "набор": [],
+  "изРазметки": false
+ }
+]

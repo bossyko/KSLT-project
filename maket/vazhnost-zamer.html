@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: 66 важностей «свой css» — двойник с погашенным движением</title>
+<!--
+    ЗАЧЕМ СТЕНД. 38 из 66 важностей живут там, где на пустых данных нет ни
+    одного элемента по селектору: «изменилось 0» значило бы «мерить было
+    нечем», а не «важность лишняя» (правило куска 107). Стенд заводит
+    элемент под КАЖДЫЙ селектор — и мерит.
+
+    ВАРИАНТЫ МЕРЯЮТСЯ ОДНИМ ПРОГОНОМ, ДО ПРАВКИ ФАЙЛА. Три кадра с одной и
+    той же разметкой:
+      A — исходный css;
+      B — тот же css, где у перечисленных строк СНЯТА важность;
+      C — исходный css ВТОРОЙ РАЗ, контрольный проход.
+    A против C обязано дать НОЛЬ расхождений. Не дало — числа замера пустые,
+    и это поймано 19.10: двойник без единой правки дал 9 расхождений, потому
+    что на странице шли анимации.
+
+    ДВИЖЕНИЕ ГАСИТСЯ В КАДРАХ: своим блоком отказа и `animation: none` на
+    всё. Прежде чем верить разнице — погаси движение.
+
+    ЧЕГО СТЕНД НЕ МЕРИТ, И ЭТО НАЗВАНО ПРЯМО:
+      — правила с `:hover` и `:focus` computed-значением не снимаются:
+        событие мыши не зажигает состояние (урок доски 109);
+      — ИНЛАЙНА ИЗ JS ЗДЕСЬ НЕТ ВОВСЕ, а именно им держатся 11 важностей
+        из 51. Инлайн сильнее любого класса, и стенд без него всегда
+        скажет «важность лишняя».
+    ПОЭТОМУ СТЕНД НЕ ВЫНОСИТ ВЕРДИКТА. Он отдаёт ЧИСЛА — значение с
+    важностью и без неё — и контрольный проход. Вердикт «нужна или лишняя»
+    выносит `tools/check-vazhnost.js`, который ищет конкурента
+    исчерпывающе: по css, по наборам классов из разметки и по инлайну в js.
+    СТЕНД, КОТОРЫЙ НЕ ВОСПРОИЗВОДИТ КОНКУРЕНТА, ВСЕГДА СКАЖЕТ «ЛИШНЯЯ».
+-->
+<style>
+    body { margin: 0; padding: 24px; background: #111; color: #eee;
+           font-family: system-ui, sans-serif; font-size: 14px; }
+    h2 { font-size: 18px; margin: 20px 0 8px; color: #cfff4f; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #333;
+             vertical-align: top; }
+    th { text-transform: uppercase; letter-spacing: .5px; color: #8a8a8a; }
+    .нужна { color: #ff4757; }
+    .лишняя { color: #2ed573; }
+    .курсор { color: #ff9f43; }
+    iframe { width: 1280px; height: 300px; border: 1px solid #333; display: block;
+             margin-bottom: 8px; }
+    #кадры { position: absolute; left: -99999px; top: 0; }
+</style>
+</head>
+<body>
+
+<h2>Итог</h2>
+<div id="итог">мерю…</div>
+
+<table id="таблица">
+    <thead><tr><th>место</th><th>свойство</th><th>селектор</th><th>с важностью</th><th>без важности</th><th>вывод</th></tr></thead>
+    <tbody></tbody>
+</table>
+
+<div id="кадры"></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ─── разметка под селектор ───────────────────────────────────────────────
+   СЕЛЕКТОР РАЗБИРАЕТСЯ, А НЕ УГАДЫВАЕТСЯ. Потомки дают вложенные узлы,
+   классы — классы, имя тега — тег, `> div:first-child` — ребёнка нужного
+   места. Псевдосостояния снимаются и помечаются: их мерит проба курсором. */
+var ПСЕВДО = /:(hover|focus|focus-visible|active|visited)\b/;
+
+function разобратьСелектор(сел) {
+    var курсор = ПСЕВДО.test(сел);
+    var части = сел.replace(ПСЕВДО, '').split('>').join(' > ').split(/\s+/).filter(Boolean);
+    return { курсор: курсор, части: части };
+}
+
+function узелПоЧасти(ч) {
+    /* `tr.td-rr-row-highlight` → tr с классом; `.a.b` → div с двумя;
+       `div:first-child` → div; `:not(...)` отбрасывается. */
+    ч = ч.replace(/:not\([^)]*\)/g, '').replace(/::?[a-z-]+(\([^)]*\))?/g, '');
+    var тег = (ч.match(/^[a-zA-Z]+/) || ['div'])[0];
+    var классы = (ч.match(/\.[-\w]+/g) || []).map(function (к) { return к.slice(1); });
+    var ид = (ч.match(/#[-\w]+/) || [''])[0].slice(1);
+    return { тег: тег, классы: классы, ид: ид };
+}
+
+/* ЭЛЕМЕНТ СОБИРАЕТСЯ С ПОЛНЫМ НАБОРОМ КЛАССОВ, А НЕ С ОДНИМ ИЗ СЕЛЕКТОРА.
+   Голый элемент показывал «важность ничего не меняет» у ВСЕХ 58 мест —
+   потому что конкурент в продукте стоит на ДРУГОМ классе того же элемента,
+   и на голом его просто нет. Та же дыра, что поймалась на
+   `.ad-crt-page-active` в куске 112. */
+function собрать(сел, индекс, набор) {
+    var р = разобратьСелектор(сел);
+    var корень = null, текущий = null, последний = null;
+    var ждётРебёнка = false;
+    for (var i = 0; i < р.части.length; i++) {
+        if (р.части[i] === '>') { ждётРебёнка = true; continue; }
+        var о = узелПоЧасти(р.части[i]);
+        var тег = о.тег;
+        /* ТАБЛИЧНЫЕ ТЕГИ ТРЕБУЮТ СВОЕЙ ОБЁРТКИ, иначе браузер их выбросит и
+           замер скажет о выброшенном. */
+        var э;
+        if (тег === 'td' || тег === 'th') {
+            var t = document.createElement('table'), tb = document.createElement('tbody'),
+                tr = document.createElement('tr');
+            э = document.createElement(тег);
+            tr.appendChild(э); tb.appendChild(tr); t.appendChild(tb);
+            if (текущий) текущий.appendChild(t); else корень = t;
+        } else if (тег === 'tr') {
+            var t2 = document.createElement('table'), tb2 = document.createElement('tbody');
+            э = document.createElement('tr');
+            var td = document.createElement('td'); td.textContent = 'клетка';
+            э.appendChild(td); tb2.appendChild(э); t2.appendChild(tb2);
+            if (текущий) текущий.appendChild(t2); else корень = t2;
+        } else {
+            э = document.createElement(тег);
+            if (текущий) текущий.appendChild(э); else корень = э;
+        }
+        for (var k = 0; k < о.классы.length; k++) э.classList.add(о.классы[k]);
+        if (о.ид) э.id = о.ид;
+        /* `:first-child` / `:not(:first-child)` — порядок детей решает. */
+        if (ждётРебёнка && /:not\(:first-child\)/.test(р.части[i])) {
+            var пустой = document.createElement('div');
+            э.parentNode.insertBefore(пустой, э);
+        }
+        ждётРебёнка = false;
+        текущий = э; последний = э;
+    }
+    if (!последний) return null;
+    if (набор) набор.forEach(function (к) { последний.classList.add(к); });
+    последний.setAttribute('data-замер', String(индекс));
+    if (!последний.textContent) последний.textContent = 'текст';
+    if (последний.tagName === 'INPUT') последний.value = '6';
+    return корень;
+}
+
+/* ─── сбор ──────────────────────────────────────────────────────────────── */
+var ДАННЫЕ = null, МЕСТА = [], ФАЙЛЫ = [];
+
+function разметка() {
+    var куски = [];
+    МЕСТА.forEach(function (м, i) {
+        var у = собрать(м.сел, i, м.набор);
+        if (!у) return;
+        var обёртка = document.createElement('div');
+        меткаФайла(обёртка, м);
+        обёртка.appendChild(у);
+        куски.push(обёртка.outerHTML);
+    });
+    return куски.join('\n');
+}
+function меткаФайла(о, м) {
+    /* Обёртка несёт классы ПРЕДКОВ, названных в селекторе через пробел,
+       когда предок уже собран выше — здесь только метка файла. */
+    о.setAttribute('data-файл', м.файл);
+}
+
+function кадр(css, имя) {
+    var ifr = document.createElement('iframe');
+    ifr.setAttribute('data-кадр', имя);
+    document.getElementById('кадры').appendChild(ifr);
+    var док = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + css +
+        '</style><style>' +
+        /* ДВИЖЕНИЕ ГАСИТСЯ НАСИЛЬНО: иначе двойник без правок даёт
+           расхождения сам по себе — поймано 19.10. */
+        '*,*::before,*::after{animation:none !important;transition:none !important}' +
+        '</style></head><body>' + разметка() + '</body></html>';
+    ifr.srcdoc = док;
+    return new Promise(function (ок) { ifr.onload = function () { ок(ifr); }; });
+}
+
+function снять(ifr) {
+    var д = ifr.contentDocument;
+    return МЕСТА.map(function (м, i) {
+        var э = д.querySelector('[data-замер="' + i + '"]');
+        if (!э) return null;
+        return д.defaultView.getComputedStyle(э).getPropertyValue(м.св);
+    });
+}
+
+function снятьВажность(текст, строки) {
+    var стрки = текст.split('\n');
+    строки.forEach(function (н) {
+        стрки[н - 1] = стрки[н - 1].replace(/\s*!important/g, '');
+    });
+    return стрки.join('\n');
+}
+
+fetch('vazhnost-dannye.json').then(function (о) { return о.json(); }).then(function (д) {
+    ДАННЫЕ = д;
+    МЕСТА = д;
+    var файлы = [];
+    д.forEach(function (м) { if (файлы.indexOf(м.файл) === -1) файлы.push(м.файл); });
+    ФАЙЛЫ = файлы;
+    return Promise.all(файлы.map(function (ф) {
+        return fetch('../css/' + ф).then(function (о) { return о.text(); })
+            .then(function (т) { return { ф: ф, т: т }; });
+    }));
+}).then(function (файлы) {
+    var цел = файлы.map(function (x) { return x.т; }).join('\n');
+    var без = файлы.map(function (x) {
+        var строки = ДАННЫЕ.filter(function (м) { return м.файл === x.ф; })
+            .map(function (м) { return м.строка; });
+        return снятьВажность(x.т, строки);
+    }).join('\n');
+    return Promise.all([кадр(цел, 'A'), кадр(без, 'B'), кадр(цел, 'C')]);
+}).then(function (кадры) {
+    var A = снять(кадры[0]), B = снять(кадры[1]), C = снять(кадры[2]);
+    var контроль = [], нужна = [], лишняя = [], курсор = [], нет = [];
+    var тело = document.querySelector('#таблица tbody');
+    МЕСТА.forEach(function (м, i) {
+        var место = м.файл + ':' + м.строка;
+        if (A[i] === null) { нет.push(место); return; }
+        if (A[i] !== C[i]) { контроль.push(место + ' (' + A[i] + ' / ' + C[i] + ')'); }
+        var вывод, кл;
+        /* ВЕРДИКТА ЗДЕСЬ НЕТ — только что видно на стенде. */
+        if (ПСЕВДО.test(м.сел)) { вывод = 'ждёт курсора'; кл = 'курсор'; курсор.push(место); }
+        else if (A[i] === B[i]) { вывод = 'на стенде не меняется'; кл = 'лишняя'; лишняя.push(место); }
+        else { вывод = 'на стенде МЕНЯЕТСЯ'; кл = 'нужна'; нужна.push(место); }
+        var tr = document.createElement('tr');
+        [место, м.св, м.сел, A[i], B[i], вывод].forEach(function (з, к) {
+            var td = document.createElement('td');
+            td.textContent = String(з);
+            if (к === 5) td.className = кл;
+            tr.appendChild(td);
+        });
+        тело.appendChild(tr);
+    });
+    window.ЗАМЕР = {
+        мест: МЕСТА.length,
+        значения: МЕСТА.map(function (м, i) {
+            return { место: м.файл + ':' + м.строка, св: м.св, сВажностью: A[i], без: B[i] };
+        }),
+        контрольныхРасхождений: контроль.length,
+        контроль: контроль,
+        нужна: нужна, лишняя: лишняя, ждётКурсора: курсор, безЭлемента: нет
+    };
+    document.getElementById('итог').textContent =
+        'мест ' + МЕСТА.length + ' · контрольный проход: расхождений ' + контроль.length +
+        ' · на стенде меняется ' + нужна.length + ' · не меняется ' + лишняя.length +
+        ' · ждёт курсора ' + курсор.length + ' · без элемента ' + нет.length;
+}).catch(function (e) {
+    window.ЗАМЕР = { беда: String(e && e.message || e) };
+    document.getElementById('итог').textContent = 'беда: ' + (e && e.message || e);
+});
+})();
+</script>
+</body>
+</html>
