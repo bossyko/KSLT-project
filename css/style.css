@@ -3695,7 +3695,7 @@ h2 {
 .section-sponsors-compact {
     background: var(--bg-secondary);
     /* Было 5 — логотипы упирались в нижний край полосы */
-    padding-bottom: 32px !important;
+    padding-bottom: 32px;
 }
 
 .section-sponsors-compact .section-header {

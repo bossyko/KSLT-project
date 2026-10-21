@@ -665,7 +665,7 @@ body.ad-page {
     height: 44px;
 }
 .ad-col-header:hover { color: var(--accent); }
-.set-del-level:hover { background: var(--danger-border) !important; }
+.set-del-level:hover { background: var(--danger-border); }
 .ad-col-active { color: var(--accent); }
 .ad-sort-arrow { font-size: var(--fs-2xs); opacity: 0.7; }
 .ad-col-filter-btn {
@@ -3239,7 +3239,7 @@ select.ad-field-input {
 
 /* ---- Auto-copied hint ---- */
 .ad-auto-copied {
-    border-color: var(--accent-glow) !important;
+    border-color: var(--accent-glow);
 }
 
 .ad-image-url-row {
@@ -3850,7 +3850,7 @@ select.ad-field-input {
 /* Points rules inputs */
 .rat-rule-input {
     background: var(--alpha-white-08) !important;
-    border: var(--bw-hair) solid rgba(255,255,255,0.15) !important;
+    border: var(--bw-hair) solid rgba(255,255,255,0.15);
     border-radius: var(--radius-sm);
     color: var(--neutral-white);
     padding: var(--space-1) var(--space-2);
@@ -3858,7 +3858,7 @@ select.ad-field-input {
 }
 
 .rat-rule-input:focus {
-    border-color: var(--accent) !important;
+    border-color: var(--accent);
     outline: none;
 }
 
@@ -3937,7 +3937,7 @@ select.ad-field-input {
     }
 
     .rat-rule-input {
-        width: 55px !important;
+        width: 55px;
     }
 }
 
@@ -4896,7 +4896,7 @@ select.ad-field-input {
     width: 56px !important;
     text-align: center !important;
     font-size: var(--fs-md) !important;
-    font-weight: 600 !important;
+    font-weight: 600;
     padding: var(--space-2) var(--space-1) !important;
 }
 
@@ -4920,7 +4920,7 @@ select.ad-field-input {
     }
 
     .ad-bracket-grid {
-        min-width: auto !important;
+        min-width: auto;
     }
 
     .ad-modal {
@@ -5356,7 +5356,7 @@ select.ad-field-input {
 
 /* Rowspan sub-rows — no top border */
 .ad-crt-subrow td {
-    border-top: none !important;
+    border-top: none;
     padding-top: var(--space-05);
 }
 
@@ -5390,7 +5390,7 @@ select.ad-field-input {
 .ad-crt-page-active {
     background: var(--accent) !important;
     color: var(--neutral-black) !important;
-    border-color: var(--accent) !important;
+    border-color: var(--accent);
     font-weight: 600;
 }
 .ad-crt-page-info {

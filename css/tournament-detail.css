@@ -724,7 +724,7 @@
 
 .td-match-highlight,
 .td-ig-match.td-match-highlight {
-    border-color: var(--accent) !important;
+    border-color: var(--accent);
     box-shadow: 0 0 10px var(--alpha-lime-20);
 }
 
@@ -1012,11 +1012,11 @@ tr.td-rr-row-highlight {
 }
 
 .td-rr-player-header {
-    text-align: left !important;
+    text-align: left;
 }
 
 .td-rr-player {
-    text-align: left !important;
+    text-align: left;
     white-space: nowrap;
     color: var(--text-primary);
 }
@@ -1075,7 +1075,7 @@ tr.td-rr-row-highlight {
 .td-rr-place {
     font-weight: 700 !important;
     color: var(--accent) !important;
-    font-size: var(--fs-base) !important;
+    font-size: var(--fs-base);
 }
 
 .td-rr-table tbody tr {
@@ -2901,7 +2901,7 @@ tr.td-rr-row-highlight {
 
     .td-ig-match > div:first-child {
         padding: 4px 8px !important;
-        font-size: var(--fs-2xs) !important;
+        font-size: var(--fs-2xs);
     }
 
     .td-ig-match .td-match-player,
