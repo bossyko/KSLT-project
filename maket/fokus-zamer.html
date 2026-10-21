@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: ловушка фокуса — один дом на кабинет, страницу игрока и админку</title>
+<!--
+    СТЕНД, А НЕ СТРАНИЦА. Кабинет и админка закрыты входом: страж
+    `auth-guard.js` уводит кадр на `auth.html`, и замер начинает говорить о
+    СТРАНИЦЕ ВХОДА. Поэтому ловушка меряется здесь — на ТОМ ЖЕ доме
+    `js/kslt-fokus.js`, который зовут кабинет, страница игрока и оболочка
+    окна админки.
+
+    ЧТО ЗДЕСЬ МЕРИТСЯ НАЖАТИЕМ, А НЕ ЧТЕНИЕМ. Ловушка видна только Tab'ом:
+    по исходнику не отличить окно, из которого фокус уходит на страницу под
+    ним, от окна, которое держит его внутри. Три окна:
+      A — с полями, СЛУШАТЕЛЬ НА ПОДЛОЖКЕ: так навешивают все пять окон
+          сайта (`overlay.addEventListener('keydown', ...)`). Ровно то, на
+          чём расходились копии: две из шести не перечисляли `input`,
+          `select`, `textarea`;
+      B — пустое, СЛУШАТЕЛЬ НА `document`: так навешивает оболочка окна
+          админки. Пять копий сайта отпускали Tab наружу;
+      C — с полями, СЛУШАТЕЛЬ НА `document`: возврат фокуса, оказавшегося
+          ПОД окном.
+
+    ДВА СПОСОБА НАВЕСИТЬ — И ЭТО НЕ ОФОРМЛЕНИЕ. Замер 21.10: при слушателе
+    НА ПОДЛОЖКЕ ветка «фокус оказался под окном» НЕДОСТИЖИМА ВООБЩЕ —
+    нажатие происходит на элементе страницы под окном, до подложки не
+    всплывает, и обработчик не зовётся. У пяти окон сайта она поэтому
+    мёртвая, у админского живая. Стенд меряет ОБА способа так, как они
+    стоят в продукте, а не один удобный.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=460">
+<style>
+    body { margin: 0; padding: 24px; background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); font-size: var(--fs-sm); }
+    h2 { font-size: var(--fs-md); margin: 24px 0 8px; color: var(--accent); }
+    .st-okno { background: var(--bg-card); border: var(--bw-hair) solid var(--border-subtle);
+               border-radius: var(--radius-sm); padding: 16px; max-width: 600px; margin-bottom: 16px; }
+    .st-ryad { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    button, input, select, textarea, a { font-size: var(--fs-sm); }
+    #подНим { margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<h2>A · окно с полями</h2>
+<div class="st-okno" id="окноA">
+    <div class="st-ryad">
+        <button id="aПер">первая кнопка</button>
+        <input id="aПоле" type="text" value="поле">
+        <select id="aВыбор"><option>раз</option><option>два</option></select>
+        <textarea id="aТекст" rows="1">текст</textarea>
+        <a href="#" id="aПосл">последняя ссылка</a>
+    </div>
+</div>
+
+<h2>B · пустое окно, слушатель на document (как у админки)</h2>
+<div class="st-okno" id="окноB" tabindex="-1"><span>только текст, ни кнопки, ни поля</span></div>
+
+<h2>C · окно с полями, слушатель на document (как у админки)</h2>
+<div class="st-okno" id="окноC">
+    <div class="st-ryad">
+        <button id="cПер">первая кнопка</button>
+        <input id="cПоле" type="text" value="поле">
+        <a href="#" id="cПосл">последняя ссылка</a>
+    </div>
+</div>
+
+<h2>C · страница под окном</h2>
+<div id="подНим">
+    <button id="подКнопка">кнопка страницы под окном — Tab сюда уходить не должен</button>
+</div>
+
+<script src="../js/kslt-fokus.js?v=1"></script>
+<script>
+/* ЗАМЕР ЧИТАЕТ ДОМ, А НЕ СВОЮ КОПИЮ: если дом не подключён, стенд обязан
+   сказать это числом, а не нарисовать пустую страницу. */
+(function () {
+    var есть = !!(window.KSLT_FOKUS && window.KSLT_FOKUS.ловушка);
+    var окноA = document.getElementById('окноA');
+    var окноB = document.getElementById('окноB');
+    var окноC = document.getElementById('окноC');
+    /* ОДНО ОКНО ЗА РАЗ — КАК В ПРОДУКТЕ, А НЕ КАК УДОБНО СТЕНДУ.
+       Первый замер 21.10 повесил на `document` ДВЕ ловушки сразу, по одной
+       на окно B и C, и обе сработали на один Tab: победила последняя,
+       фокус уехал в окно C даже при нажатии в окне B. Стенд врал, но
+       соврал полезно — у оболочки окна слушатель живёт РОВНО ПОКА окно
+       открыто, и два открытых окна с ловушками на document — это шов.
+       Поэтому слушатель один, а какое окно открыто — говорит стенд. */
+    var открытое = null;
+    if (есть) {
+        /* КАК У САЙТА: слушатель на подложке, живёт всегда. */
+        окноA.addEventListener('keydown', window.KSLT_FOKUS.ловушка(окноA));
+        /* КАК У АДМИНКИ: один слушатель на document, на открытое окно. */
+        document.addEventListener('keydown', function (e) {
+            if (!открытое) return;
+            window.KSLT_FOKUS.ловушка(открытое)(e);
+        });
+    }
+    /* Проба говорит, какое окно считается открытым: `null` — ни одного. */
+    window.ОТКРЫТЬ = function (ид) {
+        открытое = ид ? document.getElementById(ид) : null;
+        return !!открытое || ид == null;
+    };
+    window.ЗАМЕР = {
+        домЕсть: есть,
+        /* СПИСОК ФОКУСИРУЕМОГО БЕРЁТСЯ У ДОМА, А НЕ ПОВТОРЯЕТСЯ ЗДЕСЬ:
+           стенд мерит продукт, а не реплику. */
+        списокДома: есть ? window.KSLT_FOKUS.ФОКУСИРУЕМОЕ : null,
+        нашлосьВА: есть ? окноA.querySelectorAll(window.KSLT_FOKUS.ФОКУСИРУЕМОЕ).length : 0,
+        нашлосьВB: есть ? окноB.querySelectorAll(window.KSLT_FOKUS.ФОКУСИРУЕМОЕ).length : 0,
+        нашлосьВC: есть ? окноC.querySelectorAll(window.KSLT_FOKUS.ФОКУСИРУЕМОЕ).length : 0
+    };
+})();
+</script>
+</body>
+</html>
