@@ -443,12 +443,6 @@
        ИМЯ ФУНКЦИИ ОСТАВЛЕНО НА МЕСТЕ: вызовы в этом файле не трогаются,
        правится одно тело вместо каждого вызова.
        Перевод тона живёт в модуле — одно определение, а не семь. */
-    function showToast(msg) {
-        if (window.KSLT_TOAST) {
-            window.KSLT_TOAST.показать(msg, { тон: window.KSLT_TOAST.тон('') });
-        }
-    }
-
     // ---- Map modal (venue click) ----
     function showMapModal(venue) {
         var existing = document.getElementById('bcMapModal');

@@ -158,26 +158,7 @@
         'women-masters': 'Masters', 'women-promasters': 'Pro-Masters'
     };
 
-    function getMapEmbed(url) {
-        if (!url) return null;
-        if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
-            if (url.indexOf('/embed') !== -1) return url;
-            var qMatch = url.match(/[?&]q=([^&]+)/);
-            if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
-            var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
-            if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
-            var placeMatch = url.match(/\/place\/([^/]+)/);
-            if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
-            return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
-        }
-        if (url.indexOf('2gis.') !== -1) {
-            var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
-            if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
-            if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
-        }
-        return null;
-    }
-
+    /* КАРТА ЖИВЁТ В ДОМЕ `js/kslt-karta.js` (19.10). */
     function buildMapLinks(b) {
         var gm = b.court_google_maps || '';
         var tg = b.court_twogis || '';
@@ -192,7 +173,7 @@
     function buildMapEmbed(b) {
         var gm = b.court_google_maps || '';
         var tg = b.court_twogis || '';
-        var embedUrl = getMapEmbed(gm) || getMapEmbed(tg);
+        var embedUrl = window.KSLT_KARTA.встроить(gm) || window.KSLT_KARTA.встроить(tg);
         if (!embedUrl) return '';
         return '<div class="ch-detail-map"><iframe src="' + esc(embedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
     }

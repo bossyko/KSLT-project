@@ -79,34 +79,8 @@ function tdCountryFlag(val) {
     return CU.flagEmoji(CU.normalizeCountry(val)) || val;
 }
 
-function getMapEmbed(url, fallbackAddress) {
-    if (!url) {
-        // No URL but have address — embed by address search
-        if (fallbackAddress) return 'https://maps.google.com/maps?q=' + encodeURIComponent(fallbackAddress) + '&output=embed';
-        return null;
-    }
-    if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
-        if (url.indexOf('/embed') !== -1) return url;
-        var qMatch = url.match(/[?&]q=([^&]+)/);
-        if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
-        var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
-        if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
-        var placeMatch = url.match(/\/place\/([^/]+)/);
-        if (placeMatch) return 'https://maps.google.com/maps?q=' + encodeURIComponent(placeMatch[1].replace(/\+/g, ' ')) + '&output=embed';
-        // Short link (goo.gl) — can't extract coords, use address as fallback
-        if (fallbackAddress) return 'https://maps.google.com/maps?q=' + encodeURIComponent(fallbackAddress) + '&output=embed';
-        return null;
-    }
-    if (url.indexOf('2gis.') !== -1) {
-        var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
-        if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
-        if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
-        // 2GIS without coords — use address
-        if (fallbackAddress) return 'https://maps.google.com/maps?q=' + encodeURIComponent(fallbackAddress) + '&output=embed';
-    }
-    return null;
-}
-
+/* КАРТА ЖИВЁТ В ДОМЕ `js/kslt-karta.js` (19.10). Это определение было
+   САМЫМ БОГАТЫМ из четырёх — на него и свели остальные три. */
 // ---- Doubles helpers ----
 function isDoublesTournamentPublic(t) {
     return t && (t.format === 'doubles' || t.format === 'mixed_doubles');
@@ -3241,7 +3215,7 @@ function renderVenueSection(court, isEn) {
     var courtUrl = черновик ? '' : (isEn ? 'court-en.html?id=' + court.id : (isKg ? 'court-kg.html?id=' + court.id : 'court.html?id=' + court.id));
     var mapUrl = court.google_maps_url || court.twogis_url || '';
     var fullAddress = [courtName, address, 'Bishkek'].filter(Boolean).join(', ');
-    var embedUrl = getMapEmbed(mapUrl, fullAddress);
+    var embedUrl = window.KSLT_KARTA.встроить(mapUrl, fullAddress);
 
     var html = '<div class="td-venue-card">';
 

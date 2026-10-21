@@ -13,6 +13,41 @@
 
     // ---- Doubles helpers ----
 
+    /* ВРЕМЯ РАСПИСАНИЯ — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ (19.10).
+       Стояло ЧЕТЫРЬМЯ копиями `timeToMin` и ТРЕМЯ `minToTime` — по одной
+       внутри каждой функции расписания: assignPlayoffSchedule,
+       assignGroupSchedule, assignSchedule, assignFicSchedule.
+       И копии УЖЕ РАЗОШЛИСЬ: та, что в assignGroupSchedule, писала
+       `String(t).split(':')` и потому не падала, когда время приходило
+       числом, а три остальные падали. То есть одна была починена, а три
+       нет — и узнать об этом было негде.
+       Взято устойчивое: `String(t)`. ОДИНАКОВЫЕ КОПИИ — ЭТО ВЕЗЕНИЕ, А НЕ
+       БЕЗОПАСНОСТЬ: они одинаковы лишь до первой правки одной из них. */
+    function timeToMin(t) {
+        var parts = String(t).split(':');
+        return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    }
+
+    function minToTime(m) {
+        var h = Math.floor(m / 60);
+        var mm = m % 60;
+        return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
+    }
+
+    /* ГРУППЫ В ПОЛОВИНЕ СЕТКИ — ОДНО ОПРЕДЕЛЕНИЕ (19.10).
+       Стояло двумя побайтовыми копиями: в generateIGMatches и в
+       generatePlayoffDraw. Обе замыкались на `draw` и `halfSize` своей
+       функции — поэтому СВОДИТСЯ РАМКА, А НЕ СЕРЕДИНА: сетка и размер
+       половины приходят параметрами, замыкание не переезжает. */
+    function getGroupsInHalf(halfIdx, draw, halfSize) {
+        var groups = [];
+        var start = halfIdx * halfSize;
+        for (var hi = start; hi < start + halfSize; hi++) {
+            if (draw[hi] && draw[hi].groupIdx >= 0) groups.push(draw[hi].groupIdx);
+        }
+        return groups;
+    }
+
     function isDoublesTournament(tournament) {
         return tournament && (tournament.format === 'doubles' || tournament.format === 'mixed_doubles');
     }
@@ -9968,15 +10003,6 @@
                 if (draw[i] === null && !byeReserved[i] && !местаДопам[i]) emptySlots.push(i);
             }
 
-            function getGroupsInHalf(halfIdx) {
-                var groups = [];
-                var start = halfIdx * halfSize;
-                for (var hi = start; hi < start + halfSize; hi++) {
-                    if (draw[hi] && draw[hi].groupIdx >= 0) groups.push(draw[hi].groupIdx);
-                }
-                return groups;
-            }
-
             for (var a = 0; a < secondPlaces.length; a++) {
                 var player = secondPlaces[a];
                 var bestSlotIdx = -1;
@@ -9990,7 +10016,7 @@
                         score = 0;
                     } else {
                         var halfIdx = Math.floor(slot / halfSize);
-                        var groupsInHalf = getGroupsInHalf(halfIdx);
+                        var groupsInHalf = getGroupsInHalf(halfIdx, draw, halfSize);
                         score = (groupsInHalf.indexOf(player.groupIdx) === -1) ? 2 : 1;
                     }
                     if (score > bestScore) {
@@ -10053,7 +10079,7 @@
                         apScore = 0;
                     } else {
                         var apHalf = Math.floor(apSlot / halfSize);
-                        var apGroupsInHalf = getGroupsInHalf(apHalf);
+                        var apGroupsInHalf = getGroupsInHalf(apHalf, draw, halfSize);
                         apScore = (apGroupsInHalf.indexOf(apPlayer.groupIdx) === -1) ? 2 : 1;
                     }
                     if (apScore > apBestScore) {
@@ -10382,15 +10408,6 @@
 
             var halfSize = Math.max(drawSize / 2, 2);
 
-            function getGroupsInHalf(halfIdx) {
-                var groups = [];
-                var start = halfIdx * halfSize;
-                for (var hi = start; hi < start + halfSize; hi++) {
-                    if (draw[hi] && draw[hi].groupIdx >= 0) groups.push(draw[hi].groupIdx);
-                }
-                return groups;
-            }
-
             var unplaced = otherPlaces.slice();
 
             for (var attempt = 0; attempt < unplaced.length; attempt++) {
@@ -10410,7 +10427,7 @@
                     } else {
                         // Check bracket half
                         var halfIdx = Math.floor(slot / halfSize);
-                        var groupsInHalf = getGroupsInHalf(halfIdx);
+                        var groupsInHalf = getGroupsInHalf(halfIdx, draw, halfSize);
                         if (groupsInHalf.indexOf(player.groupIdx) === -1) {
                             score = 2; // No same-group in half — best
                         } else {
@@ -10602,15 +10619,6 @@
             .limit(1);
         var lastGroupTime = (grpRes.data && grpRes.data[0] && grpRes.data[0].scheduled_time) || '09:00';
 
-        function timeToMin(t) {
-            var parts = t.split(':');
-            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        }
-        function minToTime(m) {
-            var h = Math.floor(m / 60);
-            var mm = m % 60;
-            return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
-        }
 
         var currentMin = timeToMin(lastGroupTime.slice(0, 5)) + matchDuration;
 
@@ -10989,10 +10997,6 @@
         var allMatches = res.data || [];
         if (!allMatches.length) return;
 
-        function timeToMin(t) {
-            var parts = String(t).split(':');
-            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        }
 
         // Порядок и развод по волнам — общим расчётом: им же пользуется
         // окно сессий, и расписание не расходится само с собой
@@ -11028,16 +11032,7 @@
         if (!allMatches.length) return;
 
         // Helper: parse "HH:MM" to total minutes
-        function timeToMin(t) {
-            var parts = t.split(':');
-            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        }
         // Helper: total minutes to "HH:MM"
-        function minToTime(m) {
-            var h = Math.floor(m / 60);
-            var mm = m % 60;
-            return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
-        }
 
         // Group by round_number
         var roundsMap = {};
@@ -11131,15 +11126,6 @@
         var allMatches = res.data || [];
         if (!allMatches.length) return;
 
-        function timeToMin(t) {
-            var parts = t.split(':');
-            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        }
-        function minToTime(m) {
-            var h = Math.floor(m / 60);
-            var mm = m % 60;
-            return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
-        }
 
         var updates = [];
         // Track end times keyed by 'R-M'

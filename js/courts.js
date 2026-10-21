@@ -26,29 +26,9 @@
         }).filter(Boolean).join(', ');
     }
 
-    function getMapEmbed(url) {
-        if (!url) return null;
-        // Google Maps
-        if (url.indexOf('google.com/maps') !== -1 || url.indexOf('goo.gl/maps') !== -1 || url.indexOf('maps.app.goo.gl') !== -1) {
-            if (url.indexOf('/embed') !== -1) return url;
-            var qMatch = url.match(/[?&]q=([^&]+)/);
-            if (qMatch) return 'https://maps.google.com/maps?q=' + qMatch[1] + '&output=embed';
-            var coordMatch = url.match(/@(-?[\d.]+),(-?[\d.]+)/);
-            if (coordMatch) return 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
-            // Place URL: extract place name from /place/Name/
-            var placeMatch = url.match(/\/place\/([^/]+)/);
-            if (placeMatch) return 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
-            return 'https://maps.google.com/maps?q=' + encodeURIComponent(url) + '&output=embed';
-        }
-        // 2GIS
-        if (url.indexOf('2gis.') !== -1) {
-            var gisMatch = url.match(/\/([\d.]+)%2C([\d.]+)\//);
-            if (!gisMatch) gisMatch = url.match(/\/([\d.]+),([\d.]+)\//);
-            if (gisMatch) return 'https://maps.google.com/maps?q=' + gisMatch[2] + ',' + gisMatch[1] + '&output=embed';
-        }
-        return null;
-    }
-
+    /* КАРТА ЖИВЁТ В ДОМЕ `js/kslt-karta.js` (19.10). Здесь стояла своя
+       копия, которая на короткой ссылке подставляла САМУ ССЫЛКУ
+       поисковым запросом и показывала карту неизвестно чего. */
     var isEn = window.location.pathname.indexOf('-en') !== -1;
     var isKg = window.location.pathname.indexOf('-kg') !== -1;
     /* АНГЛИЙСКАЯ ВЕТКА ЗАВЕДЕНА 12.10. Её не было вовсе: словарь строился
@@ -373,12 +353,6 @@
        ИМЯ ФУНКЦИИ ОСТАВЛЕНО НА МЕСТЕ: вызовы в этом файле не трогаются,
        правится одно тело вместо каждого вызова.
        Перевод тона живёт в модуле — одно определение, а не семь. */
-    function showToast(message, type) {
-        if (window.KSLT_TOAST) {
-            window.KSLT_TOAST.показать(message, { тон: window.KSLT_TOAST.тон(type) });
-        }
-    }
-
     var courtPage = window.location.pathname.indexOf('court.html') !== -1 || window.location.pathname.indexOf('court-en.html') !== -1 || window.location.pathname.indexOf('court-kg.html') !== -1;
     var isListPage = window.location.pathname.indexOf('courts.html') !== -1 || window.location.pathname.indexOf('courts-en.html') !== -1 || window.location.pathname.indexOf('courts-kg.html') !== -1;
     var isDetailPage = courtPage && !isListPage;
@@ -1443,7 +1417,8 @@
 
         // Map embed + links (for DB courts — at the bottom)
         if (court.google_maps_url || court.twogis_url) {
-            var mapEmbedUrl = getMapEmbed(court.google_maps_url) || getMapEmbed(court.twogis_url);
+            var mapEmbedUrl = window.KSLT_KARTA.встроить(court.google_maps_url, court.address) ||
+                              window.KSLT_KARTA.встроить(court.twogis_url, court.address);
             html += '<div class="ct-section ct-fade-in">';
             html += '<h2 class="ct-section-title">' + L_labels.locationTitle + '</h2>';
             if (mapEmbedUrl) {
