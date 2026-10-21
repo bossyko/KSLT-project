@@ -20,7 +20,8 @@ fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(песок, 'mobil
           { recursive: true });
 
 const ФАЙЛЫ = ['js/live-match.js', 'js/scoreboard.js', 'js/sponsors-loader.js',
-                'js/player.js', 'js/kslt-lenta.js', 'mobile/www/js/screens/home.js'];
+                'js/player.js', 'js/kslt-lenta.js', 'mobile/www/js/screens/home.js',
+                'js/kslt-sloy.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -37,12 +38,23 @@ function прогон(замена) {
 }
 
 const ЛМ = 'js/live-match.js', ТБ = 'js/scoreboard.js', СП = 'js/sponsors-loader.js',
-      ИГ = 'js/player.js', ЭТ = 'js/kslt-lenta.js', МБ = 'mobile/www/js/screens/home.js';
+      ИГ = 'js/player.js', ЭТ = 'js/kslt-lenta.js', МБ = 'mobile/www/js/screens/home.js',
+      СЛ = 'js/kslt-sloy.js';
 
 /* Полная замена тела — одним куском, чтобы якорь не держался за отступ. */
 const ПОЛНОЕ_ЛМ = "    function esc(s) {\n        return String(s == null ? '' : s)\n            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n            .replace(/\"/g, '&quot;').replace(/'/g, '&#39;');\n    }";
 
 const ОТКАТЫ = [
+    /* ИМЯ БЕЗ КОРНЯ — то, чего правило не видело вовсе до 21.10.
+       `экр` не содержит ни `esc`, ни `экран`, и прежний отбор по написанию
+       имени пропускал такую функцию молча: докладывал «на сайте слабых
+       НОЛЬ», когда их было три. Этот откат доказывает, что кандидата
+       теперь находит ТЕЛО, а не имя. */
+    ['вернуть слабое экранирование под именем без корня', СЛ,
+     ".replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n            .replace(/\"/g, '&quot;').replace(/'/g, '&#39;');",
+     ".replace(/&/g, '&amp;').replace(/\"/g, '&quot;')\n            .replace(/</g, '&lt;').replace(/>/g, '&gt;');",
+     'экранирование на сайте гасит обе кавычки'],
+
     /* написание 1: textContent */
     ['вернуть слабое экранирование через textContent', ЛМ,
      ПОЛНОЕ_ЛМ,
