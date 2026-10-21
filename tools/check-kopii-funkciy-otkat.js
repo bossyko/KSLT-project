@@ -22,8 +22,9 @@ for (const ф of fs.readdirSync(КОРЕНЬ)) {
 
 const BR = 'js/admin/sections/bracket.js', KT = 'js/kslt-toast.js',
       KK = 'js/kslt-karta.js', CO = 'js/courts.js', MS = 'js/match-score.js',
-      TD = 'js/tournament-detail.js', PG = 'pages/court.html';
-const ФАЙЛЫ = [BR, KT, KK, CO, MS, TD, PG];
+      TD = 'js/tournament-detail.js', PG = 'pages/court.html',
+      PL = 'js/player.js', PS = 'pages/player.html';
+const ФАЙЛЫ = [BR, KT, KK, CO, MS, TD, PG, PL, PS];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -86,7 +87,31 @@ const ОТКАТЫ = [
     ['прибавить новую побайтовую копию', TD,
      '/* КАРТА ЖИВЁТ В ДОМЕ',
      'function человечно(д) {\n    var м = String(д).split(\'-\');\n    return м[2] + \'.\' + м[1];\n}\nfunction человечноТоже(д) {\n    var м = String(д).split(\'-\');\n    return м[2] + \'.\' + м[1];\n}\n\n/* КАРТА ЖИВЁТ В ДОМЕ',
-     'побайтовых копий не больше замеренного']
+     'побайтовых копий не больше замеренного'],
+
+    /* ВЕРНУТЬ СВОЮ ЛОВУШКУ ФОКУСА — и именно БЕДНУЮ, ту, что стояла здесь
+       до 21.10: без полей в списке. Правило обязано упасть на ней так же,
+       как на полной: копия опасна не тем, что она копия, а тем, что
+       расходится. */
+    ['вернуть свою ловушку фокуса, и бедную', PL,
+     '        var ловушка = window.KSLT_FOKUS.ловушка(overlay);',
+     '        var ловушка = function(e) {\n' +
+     "            if (e.key !== 'Tab') return;\n" +
+     '            var сп = overlay.querySelectorAll(\'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])\');\n' +
+     '            if (!сп.length) return;\n' +
+     '            var пер = сп[0], посл = сп[сп.length - 1];\n' +
+     '            if (e.shiftKey && document.activeElement === пер) { e.preventDefault(); посл.focus(); }\n' +
+     '            else if (!e.shiftKey && document.activeElement === посл) { e.preventDefault(); пер.focus(); }\n' +
+     '        };',
+     'ловушка фокуса определена только в доме kslt-fokus.js'],
+
+    /* СНЯТЬ ПОДКЛЮЧЕНИЕ ДОМА СО СТРАНИЦЫ. Дом без подключения — тихая
+       поломка: окно откроется, а Tab уйдёт под него, и узнает об этом
+       только человек с клавиатуры. */
+    ['снять подключение дома ловушки со страницы игрока', PS,
+     '<script src="../js/kslt-fokus.js?v=1"></script>\n',
+     '',
+     'дом ловушки подключён на каждой странице, где его зовут']
 ];
 
 const база = прогон(null);
