@@ -2623,6 +2623,36 @@ input[type="date"]::-webkit-datetime-edit {
 
 
 
+/* ПУСТОЕ СОСТОЯНИЕ АДМИНКИ. Класс `.ad-empty-state` звали 22 места, а
+   правила под него не было НИ В ОДНОМ css — блок рисовался голым
+   текстом в потоке. Ещё 9 мест рисовали пустоту строкой таблицы с
+   инлайнами. Одно понятие, два способа, и ни один не оформлен.
+
+   Числа со шкалы: воздух 40 и 8 (--space-*), кегли 21 и 14 (--fs-xl,
+   --fs-sm). Знак приглушён до 0.3 — он метка, а не картина. */
+.ad-pusto {
+    text-align: center;
+    padding: var(--space-10) var(--space-5);
+    color: var(--text-secondary);
+}
+
+.ad-pusto-znak {
+    font-size: var(--fs-3xl);
+    opacity: 0.3;
+    margin-bottom: var(--space-2);
+}
+
+.ad-pusto-zagolovok {
+    font-size: var(--fs-md);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.ad-pusto-podskazka {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+}
+
 /* ЗНАЧКОВАЯ КНОПКА — ОДНО ОПРЕДЕЛЕНИЕ. Их было два: это и на :5907, и
    побеждали свойства ВПЕРЕМЕШКУ из обоих. Отсюда брались размер, flex и
    цвет, оттуда — отсутствие рамки, кегль, отступ и переход. Мёртвыми

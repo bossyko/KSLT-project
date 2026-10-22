@@ -336,14 +336,13 @@
         var table = document.getElementById('adVchTable');
         if (!table) return;
         var tbody = table.querySelector('tbody');
-
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🎫</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.vchNoVouchers + '</div>' +
-                    '<div class="ad-podpis">' + L.vchNoVouchersText + '</div>' +
-                '</td></tr>';
+        /* ДВА РАЗНЫХ ПУСТЫХ СОСТОЯНИЯ (кусок 129): дом сам решает по
+           числу записей В БАЗЕ, сказать «пока нет» или «не найдено». */
+        if ((items.length || 0) === 0) {
+            tbody.innerHTML = A.пустоеСостояние({
+                всего: vchAllData.length, колонок: 8,
+                значок: '🎫', пусто: L.vchNoVouchers, подсказка: L.vchNoVouchersText
+            });
             return;
         }
 

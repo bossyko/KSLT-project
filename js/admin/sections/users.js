@@ -304,14 +304,20 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="6" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">👥</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.usrNoUsers + '</div>' +
-                    '<div class="ad-podpis">' + L.usrNoUsersText + '</div>' +
-                '</td></tr>';
+        /* ДВА РАЗНЫХ ПУСТЫХ СОСТОЯНИЯ (кусок 129). */
+
+        if ((items.length || 0) === 0) {
+
+            tbody.innerHTML = A.пустоеСостояние({
+
+                всего: usrAllItems.length, колонок: 6,
+
+                значок: '👥', пусто: L.usrNoUsers, подсказка: L.usrNoUsersText
+
+            });
+
             return;
+
         }
 
         var now = Date.now();

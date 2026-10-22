@@ -157,14 +157,20 @@
 
         var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.cchViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:var(--fs-base);padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
 
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="9" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🎓</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCoaches + '</div>' +
-                    '<div class="ad-podpis">' + L.noCoachesText + '</div>' +
-                '</td></tr>';
+        /* ДВА РАЗНЫХ ПУСТЫХ СОСТОЯНИЯ (кусок 129). */
+
+        if ((items.length || 0) === 0) {
+
+            tbody.innerHTML = A.пустоеСостояние({
+
+                всего: cchAllData.length, колонок: 9,
+
+                значок: '🎓', пусто: L.noCoaches, подсказка: L.noCoachesText
+
+            });
+
             return;
+
         }
 
         var html = '';

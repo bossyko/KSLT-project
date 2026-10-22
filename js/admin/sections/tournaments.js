@@ -444,14 +444,20 @@
         if (!table) return;
         var tbody = table.querySelector('tbody');
 
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🏆</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noTournaments + '</div>' +
-                    '<div class="ad-podpis">' + L.noTournamentsText + '</div>' +
-                '</td></tr>';
+        /* ДВА РАЗНЫХ ПУСТЫХ СОСТОЯНИЯ (кусок 129). */
+
+        if ((items.length || 0) === 0) {
+
+            tbody.innerHTML = A.пустоеСостояние({
+
+                всего: trnAllData.length, колонок: 8,
+
+                значок: '🏆', пусто: L.noTournaments, подсказка: L.noTournamentsText
+
+            });
+
             return;
+
         }
 
         tbody.innerHTML = '';

@@ -306,17 +306,24 @@
         var tbody = table.querySelector('tbody');
         var items = result.data || [];
 
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="8" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">📊</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noPlayers + '</div>' +
-                    '<div class="ad-podpis">' + L.noPlayersText + '</div>' +
-                '</td></tr>';
-            // Иначе под пустой таблицей остаются кнопки страниц от прошлого отбора
-            var stale = document.getElementById('adPlrPagination');
-            if (stale) stale.remove();
+        /* ДВА РАЗНЫХ ПУСТЫХ СОСТОЯНИЯ (кусок 129). Здесь фильтр уходит В
+
+           БАЗУ, и числа «сколько всего» взять неоткуда без второго
+
+           запроса — дом спрашивает, стоит ли хоть один фильтр. */
+
+        if ((items.length || 0) === 0) {
+
+            tbody.innerHTML = A.пустоеСостояние({
+
+                фильтры: !!(plrSearchQuery || plrFilterCategory), колонок: 8,
+
+                значок: '📊', пусто: L.noPlayers, подсказка: L.noPlayersText
+
+            });
+
             return;
+
         }
 
         tbody.innerHTML = '';

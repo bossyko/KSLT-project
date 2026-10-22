@@ -240,14 +240,13 @@
         var tbody = table.querySelector('tbody');
 
         var editBtnHtml = '<button class="ad-crt-edit-btn" title="' + L.crtViewEdit + '" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:var(--fs-base);padding:4px;border-radius:4px;transition:color 0.15s;">✏️</button>';
-
-        if (items.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="12" style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:var(--fs-2xl);opacity:0.3;margin-bottom:8px;">🏟️</div>' +
-                    '<div style="color:var(--text-secondary);margin-bottom:4px;">' + L.noCourts + '</div>' +
-                    '<div class="ad-podpis">' + L.noCourtsText + '</div>' +
-                '</td></tr>';
+        /* ДВА РАЗНЫХ ПУСТЫХ СОСТОЯНИЯ (кусок 129): дом сам решает по
+           числу записей В БАЗЕ, сказать «пока нет» или «не найдено». */
+        if ((items.length || 0) === 0) {
+            tbody.innerHTML = A.пустоеСостояние({
+                всего: crtAllData.length, колонок: 12,
+                значок: '🏟️', пусто: L.noCourts, подсказка: L.noCourtsText
+            });
             return;
         }
 
