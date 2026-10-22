@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     // State
     var vchSearchQuery = '', vchFilterStatus = '', vchFilterType = '';
@@ -357,7 +356,7 @@
             var statusLabel = L['vchStatus' + v.status.charAt(0).toUpperCase() + v.status.slice(1)] || v.status;
             var dateStr = v.created_at ? formatVchDate(v.created_at) : '—';
 
-            var actionHtml = '<button class="ad-btn-icon" data-vch-view="' + v.id + '" title="' + (isEn ? 'View' : 'Просмотр') + '">👁</button>';
+            var actionHtml = '<button class="ad-btn-icon" data-vch-view="' + v.id + '" title="' + ('Просмотр') + '">👁</button>';
             if (isAdmin && v.status === 'active') {
                 actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-cancel="' + v.id + '" title="' + L.vchCancel + '">✕</button>';
             }
@@ -365,7 +364,7 @@
             // ваучер — обязательство перед человеком, его сначала отменяют
             if (isAdmin && (v.status === 'cancelled' || v.status === 'expired')) {
                 actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-delete="' + v.id + '" title="' +
-                    (isEn ? 'Delete' : 'Удалить') + '">🗑</button>';
+                    ('Удалить') + '">🗑</button>';
             }
 
             html +=
@@ -427,7 +426,7 @@
         if (vchPage < totalPages) {
             html += '<button class="ad-crt-page-btn" data-vch-page="' + (vchPage + 1) + '">&raquo;</button>';
         }
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
         var container = document.getElementById('ad-vouchers');
@@ -461,8 +460,7 @@
                 return;
             }
             if (!result.data || !result.data.length) {
-                A.showToast(isEn ? 'Nothing changed: no permission or the discount is not active'
-                                 : 'Ничего не изменилось: нет прав или скидка уже не активна', 'error');
+                A.showToast('Ничего не изменилось: нет прав или скидка уже не активна', 'error');
                 return;
             }
 
@@ -476,8 +474,8 @@
         if (A.currentRole !== 'admin') return;
 
         A.showConfirm(
-            isEn ? 'Delete this discount?' : 'Удалить эту скидку?',
-            isEn ? 'The record will be removed permanently.' : 'Запись исчезнет без возможности вернуть.',
+            'Удалить эту скидку?',
+            'Запись исчезнет без возможности вернуть.',
             async function() {
                 var result = await A.client.from('discount_vouchers')
                     .delete()
@@ -492,12 +490,11 @@
                 // Пустой ответ без ошибки — обычное дело при запрете правилами
                 // доступа. Молчать об этом нельзя: человек решит, что удалилось
                 if (!result.data || !result.data.length) {
-                    A.showToast(isEn ? 'Nothing deleted: no permission or the discount is still active'
-                                     : 'Ничего не удалено: нет прав или скидка ещё действует', 'error');
+                    A.showToast('Ничего не удалено: нет прав или скидка ещё действует', 'error');
                     return;
                 }
 
-                A.showToast(isEn ? 'Discount deleted' : 'Скидка удалена', 'success');
+                A.showToast('Скидка удалена', 'success');
                 loadVouchersData();
             }
         );
@@ -526,7 +523,7 @@
             '<div class="ad-modal-overlay" id="adVchModal">' +
                 '<div class="ad-modal" style="max-width:500px;">' +
                     '<div class="ad-modal-header">' +
-                        '<h3>🎫 ' + (isEn ? 'Discount Details' : 'Детали скидки') + '</h3>' +
+                        '<h3>🎫 ' + ('Детали скидки') + '</h3>' +
                         '<button class="ad-modal-close" id="adVchModalClose">✕</button>' +
                     '</div>' +
                     '<div class="ad-modal-body" style="padding:20px;">' +
@@ -537,7 +534,7 @@
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDiscount + '</span><span style="font-weight:600;color:var(--accent);">' + v.discount_percent + '% (' + discountAmount + ' ' + L.vchCurrency + ')</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchStatus + '</span><span class="ad-vch-badge ' + statusCls + '">' + statusLabel + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDate + '</span><span>' + formatVchDate(v.created_at) + '</span></div>' +
-                            '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + (isEn ? 'Expires' : 'Истекает') + '</span><span>' + formatVchDate(v.expires_at) + '</span></div>' +
+                            '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + ('Истекает') + '</span><span>' + formatVchDate(v.expires_at) + '</span></div>' +
                             (v.used_at ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchUsedAt + '</span><span>' + formatVchDate(v.used_at) + '</span></div>' : '') +
                         '</div>' +
                     '</div>' +

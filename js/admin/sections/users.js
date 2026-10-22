@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     var usrSearchQuery = '';
     var usrFilterRole = '';
@@ -33,9 +32,7 @@
 
         var isAdm = A.currentRole === 'admin';
 
-        var curMonthName = isEn
-            ? ['January','February','March','April','May','June','July','August','September','October','November','December'][new Date().getMonth()]
-            : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][new Date().getMonth()];
+        var curMonthName = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][new Date().getMonth()];
 
         container.innerHTML =
             '<div class="ad-section-header">' +
@@ -69,7 +66,7 @@
                 '</div>' +
                 '<div class="ad-usr-card" id="adUsrStatNewMonth">' +
                     '<div class="ad-usr-card-icon" style="background:rgba(0,136,204,0.12);color:#0088cc;">📈</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + (isEn ? 'New' : 'Новых') + ' (' + curMonthName + ')</div></div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + ('Новых') + ' (' + curMonthName + ')</div></div>' +
                 '</div>' +
             '</div>' +
 
@@ -349,7 +346,7 @@
             } else if (mem && mem.status === 'active') {
                 var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
-                memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + (expFormatted ? ' ' + (isEn ? 'until' : 'до') + ' ' + expFormatted : '') + '</span>';
+                memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + (expFormatted ? ' ' + ('до') + ' ' + expFormatted : '') + '</span>';
             } else if (mem && mem.status === 'expired') {
                 var expDate2 = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted2 = expDate2 ? expDate2[2] + '.' + expDate2[1] + '.' + expDate2[0] : '';
@@ -504,12 +501,12 @@
                     var today = new Date(); today.setHours(0,0,0,0);
                     var exp = new Date(membership.expires_at); exp.setHours(0,0,0,0);
                     var diff = Math.ceil((exp - today) / 86400000);
-                    daysLeft = diff > 0 ? ' (' + diff + ' ' + (isEn ? 'days left' : 'дн.') + ')' : '';
+                    daysLeft = diff > 0 ? ' (' + diff + ' ' + ('дн.') + ')' : '';
                 }
                 memHtml =
                     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
                         '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + '</span>' +
-                        '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' + (isEn ? 'until ' : 'до ') + expDate + daysLeft + '</span>' +
+                        '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' + ('до ') + expDate + daysLeft + '</span>' +
                     '</div>';
             } else {
                 memHtml =
@@ -658,11 +655,11 @@
                 '</div>' +
                 '<div class="ad-field-row">' +
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + (isEn ? 'Gender' : 'Пол') + '</label>' +
-                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'men' ? (isEn ? 'Male' : 'Мужской') : user.gender === 'women' ? (isEn ? 'Female' : 'Женский') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<label class="ad-field-label">' + ('Пол') + '</label>' +
+                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'men' ? ('Мужской') : user.gender === 'women' ? ('Женский') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + (isEn ? 'Date of Birth' : 'Дата рождения') + '</label>' +
+                        '<label class="ad-field-label">' + ('Дата рождения') + '</label>' +
                         '<input type="text" class="ad-field-input" value="' + (user.birth_day && user.birth_month && user.birth_year ? (user.birth_day < 10 ? '0' : '') + user.birth_day + '.' + (user.birth_month < 10 ? '0' : '') + user.birth_month + '.' + user.birth_year : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                 '</div>' +
@@ -704,15 +701,15 @@
                         var isBlocked = b.blocked_until && new Date(b.blocked_until) > new Date() && !b.admin_unblocked;
                         var escalLabels = ['15 мин', '1 час', '24 часа'];
                         var statusText = isBlocked
-                            ? (isEn ? 'OTP blocked' : 'OTP заблокирован') + ' (' + escalLabels[b.escalation || 0] + ')'
-                            : (isEn ? 'OTP: no block' : 'OTP: нет блокировки');
+                            ? ('OTP заблокирован') + ' (' + escalLabels[b.escalation || 0] + ')'
+                            : ('OTP: нет блокировки');
                         var statusColor = isBlocked ? 'var(--danger)' : 'var(--success)';
 
                         el.innerHTML =
                             '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">' +
                                 '<span style="font-size:var(--fs-sm);color:' + statusColor + ';">' + statusText + '</span>' +
                                 (isBlocked
-                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:var(--fs-xs);padding:4px 12px;">' + (isEn ? 'Unblock OTP' : 'Разблокировать OTP') + '</button>'
+                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:var(--fs-xs);padding:4px 12px;">' + ('Разблокировать OTP') + '</button>'
                                     : '') +
                             '</div>';
 
@@ -722,12 +719,12 @@
                                 this.textContent = '...';
                                 try {
                                     await A.adminAction('unblock_otp', { user_id: user.id });
-                                    A.showToast(isEn ? 'OTP unblocked' : 'OTP разблокирован');
-                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:var(--success);">' + (isEn ? 'OTP: unblocked' : 'OTP: разблокирован') + '</div>';
+                                    A.showToast('OTP разблокирован');
+                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:var(--success);">' + ('OTP: разблокирован') + '</div>';
                                 } catch (e) {
-                                    A.showToast(isEn ? 'Error' : 'Ошибка', 'error');
+                                    A.showToast('Ошибка', 'error');
                                     this.disabled = false;
-                                    this.textContent = isEn ? 'Unblock OTP' : 'Разблокировать OTP';
+                                    this.textContent = 'Разблокировать OTP';
                                 }
                             });
                         }
@@ -853,7 +850,7 @@
                 status: 'active',
                 starts_at: startStr + 'T00:00:00.000Z',
                 expires_at: endStr + 'T23:59:59.000Z',
-                note: isEn ? 'Admin: via user page' : 'Админ: через карточку пользователя'
+                note: 'Админ: через карточку пользователя'
             }).select('id').single();
 
             if (memResult.error) {
@@ -904,7 +901,7 @@
             var now = new Date();
             var timeStr = (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
             var dateStr = (now.getDate() < 10 ? '0' : '') + now.getDate() + '.' + (now.getMonth() + 1 < 10 ? '0' : '') + (now.getMonth() + 1) + '.' + now.getFullYear();
-            _lastPaymentInfo = '✓ ' + (isEn ? 'Payment completed' : 'Оплата проведена') + ' — ' + dateStr + ' ' + timeStr + ', ' + amount + ' KGS';
+            _lastPaymentInfo = '✓ ' + ('Оплата проведена') + ' — ' + dateStr + ' ' + timeStr + ', ' + amount + ' KGS';
 
             // Reload form (will show confirmation via _lastPaymentInfo)
             loadAndEditUser(user.id);
@@ -924,8 +921,8 @@
                 .limit(1);
             if (!memCheck.data || memCheck.data.length === 0) {
                 A.showConfirm(
-                    isEn ? 'Payment required' : 'Необходима оплата',
-                    isEn ? 'To create a player card, please process membership payment first. Enter the amount and click "Pay".' : 'Для создания карточки игрока сначала проведите оплату членства. Введите сумму и нажмите "Оплатить".',
+                    'Необходима оплата',
+                    'Для создания карточки игрока сначала проведите оплату членства. Введите сумму и нажмите "Оплатить".',
                     null,
                     'OK'
                 );
@@ -1004,7 +1001,7 @@
      * и Казахстана он общий, +7.
      */
     function adminPhoneFieldHtml(user, readonlyAttr) {
-        var lang = A.isEn ? 'en' : 'ru';
+        var lang = 'ru';
         var parts = window.KSLT_PHONE
             ? KSLT_PHONE.split(user.phone || '', user.phone_country)
             : { iso: 'KG', rest: user.phone || '' };
@@ -1030,7 +1027,7 @@
         A.cachedCategories.forEach(function(c) {
             if (filterGender && c.gender && c.gender !== filterGender) return;
             var sel = (selectedId && c.id === selectedId) ? ' selected' : '';
-            opts += '<option value="' + c.id + '"' + sel + '>' + (isEn ? c.name_en : c.name) + '</option>';
+            opts += '<option value="' + c.id + '"' + sel + '>' + (c.name) + '</option>';
         });
         return opts;
     }
@@ -1062,9 +1059,7 @@
         // карточку вовсе, чем создать с неверным полом.
         var playerGender = (user.gender === 'men' || user.gender === 'women') ? user.gender : null;
         if (!playerGender) {
-            A.showToast(isEn
-                ? 'Set the gender in the user profile first — the rating is kept separately for men and women'
-                : 'Сначала укажите пол в профиле пользователя — рейтинг ведётся раздельно для мужчин и женщин', 'error');
+            A.showToast('Сначала укажите пол в профиле пользователя — рейтинг ведётся раздельно для мужчин и женщин', 'error');
             return;
         }
 
@@ -1496,9 +1491,7 @@
                         cornerRadius: 8,
                         callbacks: {
                             title: function(items) {
-                                return items[0].label + ' ' + (isEn
-                                    ? ['January','February','March','April','May','June','July','August','September','October','November','December'][month]
-                                    : ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'][month]);
+                                return items[0].label + ' ' + (['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'][month]);
                             }
                         }
                     }
@@ -1509,7 +1502,7 @@
                         ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5), font: { size: 10 } },
                         title: {
                             display: true,
-                            text: isEn ? 'Day' : 'День',
+                            text: 'День',
                             color: window.KSLT_KRASKA.цвет('--neutral-white', 0.4),
                             font: { size: 10 }
                         }
@@ -1733,7 +1726,7 @@
         var memMap = usrMemMap;
         var today = KSLT_VREMYA.сегодня();
 
-        var headers = ['№', L.thUser, L.thEmail, L.thRole, isEn ? 'Membership' : 'Членство', isEn ? 'Player' : 'Игрок', 'Telegram', L.thDate];
+        var headers = ['№', L.thUser, L.thEmail, L.thRole, 'Членство', 'Игрок', 'Telegram', L.thDate];
         var rows = items.map(function(u, i) {
             var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
             var mem = memMap[u.id];
@@ -1782,7 +1775,7 @@
                 '<td>' + A.esc(к.name || z.player_id) +
                     '<div class="ad-podpis">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
                 '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
-                    new Date(z.created_at).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') + '</td>' +
+                    new Date(z.created_at).toLocaleDateString('ru-RU') + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' +
                     '<button class="ad-btn ad-btn-primary ad-btn-sm ad-link-yes" data-id="' + z.id + '">' + L.linkApprove + '</button> ' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm ad-link-no" data-id="' + z.id + '">' + L.linkReject + '</button>' +
@@ -1872,7 +1865,7 @@
                     '<td style="color:' + п.цвет + ';font-weight:600;">' + п.текст +
                         (z.note ? '<div style="font-size:var(--fs-xs);color:var(--text-muted);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
                     '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
-                        (когда ? new Date(когда).toLocaleDateString(isEn ? 'en-GB' : 'ru-RU') : '—') + '</td>' +
+                        (когда ? new Date(когда).toLocaleDateString('ru-RU') : '—') + '</td>' +
                 '</tr>';
             }).join('') + '</tbody></table></div></div>';
         });

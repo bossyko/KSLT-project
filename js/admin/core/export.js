@@ -21,12 +21,8 @@
 (function (A) {
     'use strict';
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
 
-    var L = isEn
-        ? { download: 'Download', print: 'Print', empty: 'Nothing to export yet',
-            signDirector: 'Tournament director', signReferee: 'Head referee', signName: 'name' }
-        : { download: 'Скачать', print: 'Печать', empty: 'Выгружать пока нечего',
+    var L = { download: 'Скачать', print: 'Печать', empty: 'Выгружать пока нечего',
             signDirector: 'Директор турнира', signReferee: 'Главный судья', signName: 'фамилия, имя' };
 
     /** Текст ячейки без служебного: кнопок, галочек и подсказок. */

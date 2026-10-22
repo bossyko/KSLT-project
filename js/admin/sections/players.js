@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
     var CU = window.KSLT_COUNTRY;
 
     var plrEditingId = null;
@@ -53,7 +52,7 @@
         if (!hidden || !input || !dropdown) return;
 
         var countries = window.KSLT_COUNTRIES || [];
-        var lang = isEn ? 'en' : 'ru';
+        var lang = 'ru';
 
         function renderDropdownItems(list) {
             dropdown.innerHTML = '';
@@ -218,7 +217,7 @@
 
         var catFilterHtml = '<option value="">' + L.plrAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
-            var catName = isEn ? c.name_en : c.name;
+            var catName = c.name;
             var selected = plrFilterCategory === c.id ? ' selected' : '';
             catFilterHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
         });
@@ -328,7 +327,7 @@
                 : '<div class="ad-table-thumb ad-table-thumb-round" style="background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);">' + plrFlag + '</div>';
 
             var catObj = A.categoriesMap[p.category_id];
-            var catLabel = catObj ? (isEn ? catObj.name_en : catObj.name) : (p.category_id || L.noData);
+            var catLabel = catObj ? (catObj.name) : (p.category_id || L.noData);
 
             tbody.innerHTML +=
                 '<tr data-plr-id="' + p.id + '"' + (isAdm ? ' style="cursor:pointer;"' : '') + '>' +
@@ -337,7 +336,7 @@
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
                         (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
-                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + (isEn ? 'Guest' : 'Гость') + '</span>' : '') +
+                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + ('Гость') + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
@@ -384,7 +383,7 @@
             html += '<button class="ad-crt-page-btn' + (p === plrPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         });
         html += '<button class="ad-crt-page-btn" data-page="' + (plrPage + 1) + '"' + (plrPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
 
@@ -459,7 +458,7 @@
         var catOptionsHtml = '<option value="">' + L.selectCategoryTrn + '</option>';
         A.cachedCategories.forEach(function(c) {
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
-            var catName = isEn ? c.name_en : c.name;
+            var catName = c.name;
             catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
         });
 
@@ -503,9 +502,7 @@
                     // приходит сюда. Правка здесь вернётся к прежнему, как
                     // только он сохранит профиль, — предупреждаем заранее.
                     (plrEditingId ? '<div class="ad-field-hint" style="margin-bottom:10px;">' +
-                        (isEn
-                            ? 'The player sets their own name in their account. Edits here are overwritten when they save their profile.'
-                            : 'Имя задаёт сам игрок в своём кабинете. Правка здесь пропадёт, когда он сохранит профиль.') +
+                        ('Имя задаёт сам игрок в своём кабинете. Правка здесь пропадёт, когда он сохранит профиль.') +
                     '</div>' : '') +
                     '<div class="ad-lang-tabs">' +
                         '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
@@ -562,7 +559,7 @@
             // игрока этих колонок либо нет, либо их никто не заполняет.
             (plrEditingId ? (
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + (isEn ? 'Contacts' : 'Контакты') + '</div>' +
+                '<div class="ad-form-card-title">' + ('Контакты') + '</div>' +
                 '<div class="ad-field-row ad-field-row-2">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrPhone + '</label>' +
@@ -587,7 +584,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-field-hint" style="margin-top:4px;">' + (isEn ? 'From the user profile (read-only)' : 'Из профиля пользователя (только чтение)') + '</div>' +
+                '<div class="ad-field-hint" style="margin-top:4px;">' + ('Из профиля пользователя (только чтение)') + '</div>' +
             '</div>'
             ) : '') +
 
@@ -600,7 +597,7 @@
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + (isEn ? 'e.g. Never give up!' : 'напр. Никогда не сдавайся!') + '" value="' + A.esc(item ? item.bio : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + ('напр. Никогда не сдавайся!') + '" value="' + A.esc(item ? item.bio : '') + '">' +
                         '<div class="ad-field-hint" style="text-align:right;margin-top:2px;"><span id="adPlrMottoCount">' + ((item && item.bio) ? item.bio.length : 0) + '</span>/100</div>' +
                     '</div>' +
                 '</div>' +
@@ -636,7 +633,7 @@
                     '<div class="ad-field" style="position:relative;">' +
                         '<label class="ad-field-label">' + L.plrCountry + '</label>' +
                         '<input type="hidden" id="adPlrCountry" value="' + A.esc(item ? CU.normalizeCountry(item.country) || '' : '') + '">' +
-                        '<input type="text" class="ad-field-input" id="adPlrCountryInput" placeholder="' + L.plrCountrySearch + '" autocomplete="off" value="' + A.esc(item && item.country ? CU.renderCountry(item.country, isEn ? 'en' : 'ru', true) : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adPlrCountryInput" placeholder="' + L.plrCountrySearch + '" autocomplete="off" value="' + A.esc(item && item.country ? CU.renderCountry(item.country, 'ru', true) : '') + '">' +
                         '<div class="ad-dropdown-list ad-skryt" id="adPlrCountryDropdown"></div>' +
                     '</div>' +
                     '<div class="ad-field">' +
@@ -791,10 +788,10 @@
             (plrEditingId ? (function() {
                 var isPlayerBanned = item && item.banned_until && new Date(item.banned_until) > new Date();
                 var banHtml = '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
-                    '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + (isEn ? 'Moderation' : 'Модерация') + '</h3>';
+                    '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + ('Модерация') + '</h3>';
                 if (isPlayerBanned) {
                     var isPerm = new Date(item.banned_until).getFullYear() >= 2099;
-                    var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU'));
+                    var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString('ru-RU'));
                     var banReasonStr = item.ban_reason ? '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
                     banHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
                         '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">' + banDateStr + '</span>' +
@@ -845,7 +842,7 @@
                 // и запись без неё в рейтинг не попадёт
                 var catVal = document.getElementById('adPlrRhCat').value;
                 if (!catVal) {
-                    A.showToast(isEn ? 'Select the category' : 'Выберите категорию', 'error');
+                    A.showToast('Выберите категорию', 'error');
                     return;
                 }
 
@@ -893,8 +890,8 @@
         attachScriptValidation('adPlrLastNameEn', SCRIPT_EN, 'Latin characters only');
         attachScriptValidation('adPlrFirstNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
         attachScriptValidation('adPlrLastNameKg', SCRIPT_KG, 'Кыргыз тамгалары гана');
-        var rhNameHint = isEn ? 'Latin characters only' : 'Только кириллица';
-        var rhNameRegex = isEn ? SCRIPT_EN : SCRIPT_KG;
+        var rhNameHint = 'Только кириллица';
+        var rhNameRegex = SCRIPT_KG;
         attachScriptValidation('adPlrRhName', rhNameRegex, rhNameHint);
 
         // --- Country picker ---
@@ -908,7 +905,7 @@
                     var el = document.getElementById(fid);
                     if (el) { el.removeAttribute('readonly'); el.style.opacity = ''; el.style.cursor = ''; }
                 });
-                A.showToast(isEn ? 'Fields unlocked' : 'Поля разблокированы', 'info');
+                A.showToast('Поля разблокированы', 'info');
             });
         }
         var recalcStatsBtn = document.getElementById('adPlrRecalcStats');
@@ -926,7 +923,7 @@
                     if (lf) lf.value = fresh.data.losses || 0;
                 }
                 recalcStatsBtn.disabled = false;
-                A.showToast(isEn ? 'Recalculated' : 'Пересчитано', 'success');
+                A.showToast('Пересчитано', 'success');
             });
         }
 
@@ -937,7 +934,7 @@
                 document.querySelectorAll('.ad-plr-doubles-field').forEach(function(el) {
                     el.removeAttribute('readonly'); el.style.opacity = ''; el.style.cursor = '';
                 });
-                A.showToast(isEn ? 'Fields unlocked' : 'Поля разблокированы', 'info');
+                A.showToast('Поля разблокированы', 'info');
             });
         }
 
@@ -967,7 +964,7 @@
 
                 var needEn = !document.getElementById('adPlrFirstNameEn').value.trim() && !document.getElementById('adPlrLastNameEn').value.trim();
                 var needKg = !document.getElementById('adPlrFirstNameKg').value.trim() && !document.getElementById('adPlrLastNameKg').value.trim();
-                if (!needEn && !needKg) { A.showToast(isEn ? 'All fields already filled' : 'Все поля уже заполнены', 'info'); return; }
+                if (!needEn && !needKg) { A.showToast('Все поля уже заполнены', 'info'); return; }
 
                 var origLabel = translateAllBtn.textContent;
                 translateAllBtn.textContent = L.translating;
@@ -1242,27 +1239,27 @@
 
             // Script validation
             if (fnRu && !checkScript(fnRu, SCRIPT_RU)) {
-                A.showToast(isEn ? 'RU name must use Cyrillic' : 'Имя (RU) должно быть на кириллице', 'error');
+                A.showToast('Имя (RU) должно быть на кириллице', 'error');
                 setSaving(false); return;
             }
             if (lnRu && !checkScript(lnRu, SCRIPT_RU)) {
-                A.showToast(isEn ? 'RU last name must use Cyrillic' : 'Фамилия (RU) должна быть на кириллице', 'error');
+                A.showToast('Фамилия (RU) должна быть на кириллице', 'error');
                 setSaving(false); return;
             }
             if (fnEn && !checkScript(fnEn, SCRIPT_EN)) {
-                A.showToast(isEn ? 'EN name must use Latin' : 'Имя (EN) должно быть на латинице', 'error');
+                A.showToast('Имя (EN) должно быть на латинице', 'error');
                 setSaving(false); return;
             }
             if (lnEn && !checkScript(lnEn, SCRIPT_EN)) {
-                A.showToast(isEn ? 'EN last name must use Latin' : 'Фамилия (EN) должна быть на латинице', 'error');
+                A.showToast('Фамилия (EN) должна быть на латинице', 'error');
                 setSaving(false); return;
             }
             if (fnKg && !checkScript(fnKg, SCRIPT_KG)) {
-                A.showToast(isEn ? 'KG name must use Kyrgyz script' : 'Имя (KG) должно быть на кыргызском', 'error');
+                A.showToast('Имя (KG) должно быть на кыргызском', 'error');
                 setSaving(false); return;
             }
             if (lnKg && !checkScript(lnKg, SCRIPT_KG)) {
-                A.showToast(isEn ? 'KG last name must use Kyrgyz script' : 'Фамилия (KG) должна быть на кыргызском', 'error');
+                A.showToast('Фамилия (KG) должна быть на кыргызском', 'error');
                 setSaving(false); return;
             }
 
@@ -1291,7 +1288,7 @@
             };
 
             if (!fnRu) {
-                A.showToast(isEn ? 'First name is required' : 'Имя обязательно', 'error');
+                A.showToast('Имя обязательно', 'error');
                 setSaving(false);
                 return;
             }
@@ -1299,7 +1296,7 @@
             // Без пола игрок не попадёт в рейтинг: мужской и женский считаются
             // раздельно, и карточка без пола просто нигде не покажется
             if (!data.gender) {
-                A.showToast(isEn ? 'Gender is required' : 'Укажите пол игрока', 'error');
+                A.showToast('Укажите пол игрока', 'error');
                 setSaving(false);
                 return;
             }
@@ -1328,7 +1325,7 @@
                     if (prevNtrp === null || Math.abs(prevNtrp - data.ntrp_singles) > 0.001) {
                         var ntrpRow = await A.client.from('rating_history').insert({
                             player_id: plrEditingId,
-                            tournament_name: isEn ? 'NTRP rating' : 'Оценка NTRP',
+                            tournament_name: 'Оценка NTRP',
                             points_earned: 0,
                             ntrp_before: prevNtrp,
                             ntrp_after: data.ntrp_singles,
@@ -1386,7 +1383,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
+        A.showToast('Удалено', 'success');
         renderPlayersSection();
     }
 
@@ -1410,7 +1407,7 @@
                     '</select>' +
                 '</div>' +
                 '<div style="margin-bottom:16px;display:none;" id="adPlrBanCustomWrap">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Date' : 'Дата') + '</label>' +
+                    '<label class="ad-field-label">' + ('Дата') + '</label>' +
                     '<input type="date" class="ad-field-input" id="adPlrBanCustomDate">' +
                 '</div>' +
                 '<div style="margin-bottom:16px;">' +
@@ -1442,7 +1439,7 @@
             } else if (duration === 'custom') {
                 var customDate = document.getElementById('adPlrBanCustomDate').value;
                 if (!customDate) {
-                    A.showToast(isEn ? 'Select a date' : 'Выберите дату', 'error');
+                    A.showToast('Выберите дату', 'error');
                     return;
                 }
                 bannedUntil = new Date(customDate + 'T23:59:59').toISOString();
@@ -1572,18 +1569,18 @@
         // Render matches table
         var html = '<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);">' +
             '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-muted);font-size:var(--fs-xs);">' +
-                '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Date' : 'Дата') + '</th>' +
-                '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Opponent' : 'Соперник') + '</th>' +
-                '<th style="text-align:center;padding:6px 8px;">' + (isEn ? 'Score' : 'Счёт') + '</th>' +
-                '<th style="text-align:center;padding:6px 8px;">' + (isEn ? 'Result' : 'Итог') + '</th>' +
-                '<th style="text-align:left;padding:6px 8px;">' + (isEn ? 'Tournament' : 'Турнир') + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + ('Дата') + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + ('Соперник') + '</th>' +
+                '<th style="text-align:center;padding:6px 8px;">' + ('Счёт') + '</th>' +
+                '<th style="text-align:center;padding:6px 8px;">' + ('Итог') + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + ('Турнир') + '</th>' +
             '</tr></thead><tbody>';
 
         res.data.forEach(function(m) {
             var isP1 = m.player1_id === playerId;
             var oppId = isP1 ? m.player2_id : m.player1_id;
             var opp = oppMap[oppId] || { name: '?', name_en: '?' };
-            var oppName = isEn ? (opp.name_en || opp.name) : opp.name;
+            var oppName = opp.name;
             var isWin = m.winner_id === playerId;
             var resultBadge = isWin
                 ? '<span style="display:inline-block;padding:2px 8px;border-radius:var(--radius-xs);font-weight:600;font-size:var(--fs-xs);background:var(--success-subtle);color:var(--success);">W</span>'
@@ -1599,12 +1596,12 @@
             }
 
             var dateStr = m.played_at
-                ? new Date(m.played_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })
-                : (m.created_at ? new Date(m.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '\u2014');
+                ? new Date(m.played_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                : (m.created_at ? new Date(m.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '\u2014');
 
             var trnName = '';
             if (m.tournament) {
-                trnName = isEn ? (m.tournament.title_en || m.tournament.title || '') : (m.tournament.title || '');
+                trnName = (m.tournament.title || '');
             }
 
             var roundLabel = m.round || '';
@@ -1626,7 +1623,7 @@
                 '<td style="padding:6px 8px;text-align:center;font-family:monospace;">' + A.esc(score) + '</td>' +
                 '<td style="padding:6px 8px;text-align:center;">' + resultBadge + '</td>' +
                 '<td style="padding:6px 8px;font-size:var(--fs-xs);color:var(--text-muted);">' +
-                    (isDblTrn ? '<span style="font-size:var(--fs-md);vertical-align:middle;" title="' + (isEn ? 'Doubles' : 'Парный') + '">\uD83D\uDC65</span> ' : '') +
+                    (isDblTrn ? '<span style="font-size:var(--fs-md);vertical-align:middle;" title="' + ('Парный') + '">\uD83D\uDC65</span> ' : '') +
                     A.esc(trnName) + (roundLabel ? ' <span style="opacity:0.6;">(' + A.esc(roundLabel) + ')</span>' : '') +
                 '</td>' +
             '</tr>';
@@ -1653,7 +1650,7 @@
      */
     function catBarHtml(r) {
         var w = r.wins || 0, l = r.losses || 0, played = w + l;
-        var noMatches = isEn ? 'no matches yet' : 'матчей пока нет';
+        var noMatches = 'матчей пока нет';
 
         if (!played) {
             return '<div class="ad-cat-bar"></div>' +
@@ -1661,8 +1658,8 @@
         }
 
         var pct = Math.round(w / played * 100);
-        var total = isEn ? 'Matches played' : 'Всего матчей';
-        var rateWord = isEn ? 'wins' : 'побед';
+        var total = 'Всего матчей';
+        var rateWord = 'побед';
 
         return '<div class="ad-cat-bar">' +
                 '<i class="ad-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
@@ -1678,11 +1675,7 @@
 
     /** Число со словом в нужном падеже: 1 победа, 2 победы, 5 побед. */
     function plural(n, kind) {
-        var forms = isEn
-            ? (kind === 'wins' ? ['win', 'wins'] : ['loss', 'losses'])
-            : (kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
-        if (isEn) return n + ' ' + (n === 1 ? forms[0] : forms[1]);
-
+        var forms = (kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
         var a = Math.abs(n) % 100, b = a % 10;
         var word = (a > 10 && a < 20) ? forms[2]
                  : (b > 1 && b < 5) ? forms[1]
@@ -1713,10 +1706,10 @@
         var html = '<option value="">' + L.selectCategoryTrn + '</option>';
         A.cachedCategories.forEach(function(c) {
             if (c.id === 'friendly') return;
-            var name = isEn ? (c.name_en || c.name) : c.name;
+            var name = c.name;
             var off = !allowed[c.id];
             html += '<option value="' + c.id + '"' + (off ? ' disabled' : '') + '>' +
-                A.esc(name) + (off ? ' \u00b7 ' + (isEn ? 'no card in this category' : 'нет карточки категории') : '') +
+                A.esc(name) + (off ? ' \u00b7 ' + ('нет карточки категории') : '') +
             '</option>';
         });
         sel.innerHTML = html;
@@ -1748,24 +1741,22 @@
 
         if (rows.length === 0) return;
 
-        var title = isEn ? 'Points by category' : 'Очки по категориям';
-        var homeLabel = isEn ? 'home' : 'домашняя';
-        var closedLabel = isEn ? 'closed' : 'закрыта';
-        var closeBtn = isEn ? 'Close' : 'Закрыть';
-        var openBtn = isEn ? 'Reopen' : 'Открыть';
+        var title = 'Очки по категориям';
+        var homeLabel = 'домашняя';
+        var closedLabel = 'закрыта';
+        var closeBtn = 'Закрыть';
+        var openBtn = 'Открыть';
 
         var openCount = rows.filter(function(r) { return !r.closed_at; }).length;
 
         var html = '<div class="ad-field-label" style="margin-bottom:8px;">' + title + '</div>';
         html += '<div class="ad-field-hint" style="margin-bottom:10px;">' +
-            (isEn
-                ? 'A player competes in up to two categories. Closing one stops new entries — points, matches and rating history stay.'
-                : 'Игрок выступает не более чем в двух категориях. Закрытая перестаёт принимать заявки — очки, матчи и история рейтинга остаются.') +
+            ('Игрок выступает не более чем в двух категориях. Закрытая перестаёт принимать заявки — очки, матчи и история рейтинга остаются.') +
         '</div>';
 
         rows.forEach(function(r) {
             var cat = A.categoriesMap ? A.categoriesMap[r.category_id] : null;
-            var name = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : r.category_id;
+            var name = cat ? (cat.name) : r.category_id;
             var isHome = item && r.category_id === item.category_id;
             var closed = !!r.closed_at;
             // Открыть можно, только если действующих меньше двух
@@ -1786,7 +1777,7 @@
                     (A.currentRole === 'admin' || A.currentRole === 'manager'
                         ? '<button class="ad-btn ad-btn-sm ' + (closed ? 'ad-btn-secondary' : 'ad-btn-danger') +
                           ' ad-cat-toggle" data-cat="' + A.esc(r.category_id) + '" data-closed="' + (closed ? '1' : '0') + '"' +
-                          (closed && !canOpen ? ' disabled title="' + (isEn ? 'Two categories are already open' : 'Уже открыты две категории') + '"' : '') + '>' +
+                          (closed && !canOpen ? ' disabled title="' + ('Уже открыты две категории') + '"' : '') + '>' +
                           (closed ? openBtn : closeBtn) + '</button>'
                         : '') +
                 '</div>' +
@@ -1822,12 +1813,10 @@
                 var reason = null;
                 if (closing) {
                     reason = await A.showPromptAsync({
-                        title: isEn ? 'Close the category' : 'Закрыть категорию',
-                        text: isEn
-                            ? 'New entries will be blocked. Points, matches and rating history stay.'
-                            : 'Новые заявки приниматься не будут. Очки, матчи и история рейтинга останутся.',
-                        placeholder: isEn ? 'Reason (optional)' : 'Причина (можно не указывать)',
-                        okLabel: isEn ? 'Close' : 'Закрыть'
+                        title: 'Закрыть категорию',
+                        text: 'Новые заявки приниматься не будут. Очки, матчи и история рейтинга останутся.',
+                        placeholder: 'Причина (можно не указывать)',
+                        okLabel: 'Закрыть'
                     });
                     // Отменили окно — ничего не делаем
                     if (reason === null) return;
@@ -1846,17 +1835,17 @@
                     (res.data && res.data.error);
                 if (err) {
                     A.showToast(err === 'too_many_open'
-                        ? (isEn ? 'Two categories are already open' : 'Уже открыты две категории')
+                        ? ('Уже открыты две категории')
                         : err === 'forbidden'
-                            ? (isEn ? 'Not enough rights' : 'Недостаточно прав')
+                            ? ('Недостаточно прав')
                             : err, 'error');
                     btn.disabled = false;
                     return;
                 }
 
                 A.showToast(closing
-                    ? (isEn ? 'Category closed' : 'Категория закрыта')
-                    : (isEn ? 'Category reopened' : 'Категория открыта'), 'success');
+                    ? ('Категория закрыта')
+                    : ('Категория открыта'), 'success');
                 renderPlayerForm(item);
             });
         });
@@ -1971,7 +1960,7 @@
                     // ни очков — форма их только испортила бы
                     (row.tournament_id || row.ntrp_after != null ? '' :
                         '<button class="ad-btn-icon ad-rh-edit" data-rh-id="' + row.id + '" title="' +
-                        (isEn ? 'Edit' : 'Изменить') + '">\u270E</button>') +
+                        ('Изменить') + '">\u270E</button>') +
                     '<button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '">&times;</button>' +
                 '</td>' +
                 '</tr>';
@@ -1986,12 +1975,12 @@
             var step = Math.min(RH_PAGE, left);
             html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">' +
                 '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrRhMore">' +
-                (isEn ? 'Show ' + step + ' more' : 'Показать ещё ' + step) +
-                ' \u00b7 ' + (isEn ? 'left' : 'осталось') + ' ' + left + '</button></div>';
+                ('Показать ещё ' + step) +
+                ' \u00b7 ' + ('осталось') + ' ' + left + '</button></div>';
         } else if (reversed.length > RH_PAGE) {
             html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">' +
                 '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrRhLess">' +
-                (isEn ? 'Collapse' : 'Свернуть') + '</button></div>';
+                ('Свернуть') + '</button></div>';
         }
 
         tableEl.innerHTML = html;
@@ -2027,7 +2016,7 @@
 
                 plrRhEditingId = row.id;
                 var addBtn = document.getElementById('adPlrRhAdd');
-                if (addBtn) addBtn.textContent = isEn ? 'Save' : 'Сохранить';
+                if (addBtn) addBtn.textContent = 'Сохранить';
 
                 document.getElementById('adPlrRhName').focus();
                 document.getElementById('adPlrRhName').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2099,7 +2088,10 @@
             client: A.client,
             playerId: plrEditingId,
             homeCategory: plrEditingItem && plrEditingItem.category_id,
-            isEn: isEn,
+            /* График ОБЩИЙ С САЙТОМ (`js/rating-chart.js`), и там язык правда
+               переключается. Админка живёт на русском — говорим это ЯВНО,
+               а не молчанием: УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ. */
+            isEn: false,
             canvasId: 'adPlrRhChart',
             wrapId: 'adPlrRhChartWrap',
             ntrpCanvasId: 'adPlrNtrpChart',
@@ -2138,7 +2130,7 @@
             earned.forEach(function(pb) {
                 var def = allDefs.find(function(d) { return d.id === pb.badge_id; });
                 if (!def) return;
-                var name = isEn ? (def.name_en || def.name) : def.name;
+                var name = def.name;
                 var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString() : '';
 
                 html += '<tr>';
@@ -2150,7 +2142,7 @@
                 var byRule = def.condition_type && def.condition_type !== 'manual';
                 if (A.currentRole === 'admin') {
                     html += '<td>' + (byRule
-                        ? '<span title="' + (isEn ? 'Awarded automatically' : 'Начисляется автоматически') +
+                        ? '<span title="' + ('Начисляется автоматически') +
                           '" style="color:var(--text-muted);font-size:var(--fs-sm);">\u2699</span>'
                         : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button>') +
                     '</td>';
@@ -2169,7 +2161,7 @@
             // бывают. Но выбрать можно только те, у которых нет условия:
             // вычисляемые начисляет расчёт, и выданный руками «Чемпион» он
             // тут же отбирал — условие-то не выполняется
-            function badgeName(d) { return isEn ? (d.name_en || d.name) : d.name; }
+            function badgeName(d) { return d.name; }
 
             var manualDefs = allDefs.filter(function(d) {
                 return !d.condition_type || d.condition_type === 'manual';
@@ -2178,9 +2170,9 @@
                 return d.condition_type && d.condition_type !== 'manual';
             });
 
-            var haveLabel = isEn ? 'already earned' : 'уже есть';
-            var manualGroup = isEn ? 'Awarded by hand' : 'Выдаются вручную';
-            var autoGroup = isEn ? 'Calculated automatically' : 'Начисляются автоматически';
+            var haveLabel = 'уже есть';
+            var manualGroup = 'Выдаются вручную';
+            var autoGroup = 'Начисляются автоматически';
 
             var optionsHtml = '<option value="">\u2014 ' + L.badgeManualAward + ' \u2014</option>';
 
@@ -2213,9 +2205,7 @@
             html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrBadgeCheck">' + L.badgeCheckBtn + '</button>';
             html += '</div>';
             html += '<div class="ad-field-hint" style="margin-top:8px;">' +
-                (isEn
-                    ? 'Only badges without a rule are awarded by hand. The rest are calculated from matches, tournaments and points.'
-                    : 'Руками выдаются только значки без условия. Остальные начисляет расчёт по матчам, турнирам и очкам.') +
+                ('Руками выдаются только значки без условия. Остальные начисляет расчёт по матчам, турнирам и очкам.') +
             '</div>';
         }
 
@@ -2230,7 +2220,7 @@
                     A.showToast(res.error.message, 'error');
                     return;
                 }
-                A.showToast(isEn ? 'Badge removed' : 'Бейдж убран', 'success');
+                A.showToast('Бейдж убран', 'success');
                 loadPlayerBadgesAdmin(playerId);
             });
         });
@@ -2252,7 +2242,7 @@
                     A.showToast(res.error.message, 'error');
                     return;
                 }
-                A.showToast(isEn ? 'Badge awarded' : 'Бейдж выдан', 'success');
+                A.showToast('Бейдж выдан', 'success');
                 loadPlayerBadgesAdmin(playerId);
             });
         }
@@ -2267,9 +2257,9 @@
                     var res = await A.client.rpc('check_and_award_badges', { p_player_id: playerId });
                     var newBadges = res.data || [];
                     if (newBadges.length > 0) {
-                        A.showToast((isEn ? 'New badges: ' : 'Новые бейджи: ') + newBadges.length, 'success');
+                        A.showToast(('Новые бейджи: ') + newBadges.length, 'success');
                     } else {
-                        A.showToast(isEn ? 'No new badges' : 'Новых бейджей нет', 'info');
+                        A.showToast('Новых бейджей нет', 'info');
                     }
                     loadPlayerBadgesAdmin(playerId);
                 } catch(e) {
@@ -2295,7 +2285,7 @@
 
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
-            var name = isEn ? (c.name_en || c.name) : c.name;
+            var name = c.name;
             catOpts += '<option value="' + c.id + '">' + name + '</option>';
         });
 
@@ -2304,8 +2294,8 @@
                 '<input type="text" class="ad-field-input ad-filter-search" id="ratSearch" placeholder="' + L.ratSearchPlayer + '">' +
                 '<select class="ad-field-input ad-filter-select" id="ratGenderFilter">' + genderOpts + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="ratCatFilter">' + catOpts + '</select>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratRecalcAllBtn" style="margin-left:auto">🔄 ' + (isEn ? 'Recalculate all' : 'Пересчитать все') + '</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + (isEn ? 'Season change' : 'Смена сезона') + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratRecalcAllBtn" style="margin-left:auto">🔄 ' + ('Пересчитать все') + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + ('Смена сезона') + '</button>' +
             '</div>' +
             '<div id="ratRankingsBody"></div>';
 
@@ -2390,7 +2380,7 @@
         } catch (e) { /* matches optional */ }
 
         var playerNameMap = {};
-        players.forEach(function(p) { playerNameMap[p.id] = isEn ? (p.name_en || p.name) : p.name; });
+        players.forEach(function(p) { playerNameMap[p.id] = p.name; });
         var playerEditBase = '#players/edit/';
 
         // Игрок стоит в своём разряде и в тех, где набирал очки. Так же
@@ -2440,7 +2430,7 @@
             var catPlayers = groups[catId];
             var catName = '';
             if (catId !== 'none' && A.categoriesMap[catId]) {
-                catName = isEn ? (A.categoriesMap[catId].name_en || A.categoriesMap[catId].name) : A.categoriesMap[catId].name;
+                catName = A.categoriesMap[catId].name;
             }
 
             if (!_ratCatFilter) {
@@ -2477,7 +2467,7 @@
                         formHtml += '<span class="ad-rat-form-' + f.toLowerCase() + '">' + f + '</span>';
                     });
                 }
-                var name = isEn ? (p.name_en || p.name) : p.name;
+                var name = p.name;
                 var changeStr = p.rank_change > 0 ? '+' + p.rank_change : (p.rank_change < 0 ? String(p.rank_change) : '0');
                 var changeClass = p.rank_change > 0 ? 'ad-change-up' : (p.rank_change < 0 ? 'ad-change-down' : '');
 
@@ -2521,9 +2511,9 @@
         var resultColor = isWin ? 'var(--success)' : 'var(--danger)';
         var trnName = '';
         if (m.tournaments) {
-            trnName = isEn ? (m.tournaments.title_en || m.tournaments.title) : m.tournaments.title;
+            trnName = m.tournaments.title;
         }
-        var dateStr = m.played_at ? new Date(m.played_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU') : '—';
+        var dateStr = m.played_at ? new Date(m.played_at).toLocaleDateString('ru-RU') : '—';
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';
@@ -2563,7 +2553,7 @@
 
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
-            var name = isEn ? (c.name_en || c.name) : c.name;
+            var name = c.name;
             catOpts += '<option value="' + c.id + '">' + name + '</option>';
         });
 
@@ -2609,7 +2599,7 @@
             if (_ratResCatFilter && t.category_id !== _ratResCatFilter) return false;
             if (_ratResGenderFilter && t.gender !== _ratResGenderFilter) return false;
             if (_ratResSearchQuery) {
-                var title = isEn ? (t.title_en || t.title) : t.title;
+                var title = t.title;
                 if (title.toLowerCase().indexOf(_ratResSearchQuery) === -1) return false;
             }
             return true;
@@ -2628,10 +2618,10 @@
         '</tr></thead><tbody>';
 
         filtered.forEach(function(t) {
-            var title = isEn ? (t.title_en || t.title) : t.title;
+            var title = t.title;
             var date = t.date_start ? t.date_start.substring(0, 10) : '';
             var cat = A.categoriesMap[t.category_id];
-            var catName = cat ? (isEn ? (cat.name_en || cat.name) : cat.name) : '';
+            var catName = cat ? (cat.name) : '';
             html += '<tr class="ad-rat-trn-row" data-trn-id="' + t.id + '" style="cursor:pointer;">' +
                 '<td>' + date + '</td>' +
                 '<td><span class="ad-rat-trn-link">' + A.esc(title) + '</span></td>' +
@@ -2678,17 +2668,17 @@
 
         var levelName = '';
         if (tournament && tournament.tournament_levels) {
-            levelName = isEn ? (tournament.tournament_levels.name_en || tournament.tournament_levels.name) : tournament.tournament_levels.name;
+            levelName = tournament.tournament_levels.name;
         }
 
         var levelHtml = levelName
             ? '<div class="ad-rat-level-badge">' + L.ratTournamentLevel + ': <strong>' + A.esc(levelName) + '</strong></div>'
-            : '<div class="ad-rat-level-badge" style="color:var(--danger);">' + L.ratTournamentLevel + ': ' + (isEn ? 'Not set! Edit tournament to assign level.' : 'Не задан! Отредактируйте турнир для назначения уровня.') + '</div>';
+            : '<div class="ad-rat-level-badge" style="color:var(--danger);">' + L.ratTournamentLevel + ': ' + ('Не задан! Отредактируйте турнир для назначения уровня.') + '</div>';
 
         var plrOpts = '<option value="">' + L.ratSelectPlayer + '</option>';
         allPlayers.forEach(function(p) {
-            var name = isEn ? (p.name_en || p.name) : p.name;
-            var cat = A.categoriesMap[p.category_id] ? (isEn ? A.categoriesMap[p.category_id].name_en : A.categoriesMap[p.category_id].name) : '';
+            var name = p.name;
+            var cat = A.categoriesMap[p.category_id] ? (A.categoriesMap[p.category_id].name) : '';
             plrOpts += '<option value="' + p.id + '">' + A.esc(name) + (cat ? ' [' + cat + ']' : '') + '</option>';
         });
 
@@ -2706,7 +2696,7 @@
             '</tr></thead><tbody id="ratResultsTbody">';
 
         results.forEach(function(r) {
-            var name = r.players ? (isEn ? (r.players.name_en || r.players.name) : r.players.name) : '?';
+            var name = r.players ? (r.players.name) : '?';
             html += renderResultRow(r.id, r.player_id, name, r.round_reached, r.points_earned, plrOpts, roundOpts, true);
         });
 
@@ -2815,7 +2805,7 @@
         });
 
         if (toUpsert.length === 0) {
-            A.showToast(isEn ? 'No results to save' : 'Нет результатов для сохранения', 'error');
+            A.showToast('Нет результатов для сохранения', 'error');
             return;
         }
 
@@ -2921,18 +2911,14 @@
      * Вся работа на сервере — Edge Function season-reset.
      */
     async function runSeasonReset() {
-        var warn = isEn
-            ? 'Points earned in the season that ended last August will expire. Every player whose points or rank change will get a Telegram message and a push. Proceed?'
-            : 'Очки за сезон, закончившийся в прошлом августе, сгорят. Каждому игроку, у кого изменятся очки или место, уйдёт сообщение в Telegram и push. Продолжить?';
+        var warn = 'Очки за сезон, закончившийся в прошлом августе, сгорят. Каждому игроку, у кого изменятся очки или место, уйдёт сообщение в Telegram и push. Продолжить?';
 
         var isSeptember = new Date().getMonth() === 8;
         if (!isSeptember) {
-            warn = (isEn
-                ? 'It is not September — the season change is not due yet. '
-                : 'Сейчас не сентябрь, смена сезона ещё не наступила. ') + warn;
+            warn = ('Сейчас не сентябрь, смена сезона ещё не наступила. ') + warn;
         }
 
-        A.showConfirm(isEn ? 'Season change' : 'Смена сезона', warn, async function() {
+        A.showConfirm('Смена сезона', warn, async function() {
             var btn = document.getElementById('ratSeasonResetBtn');
             if (btn) { btn.disabled = true; btn.textContent = '🗓 ...'; }
             try {
@@ -2951,17 +2937,17 @@
                 if (!res.ok) throw new Error(result.error || 'HTTP ' + res.status);
 
                 A.showToast(
-                    (isEn ? 'Season ' : 'Сезон ') + result.season + ': ' +
-                    (isEn ? 'changed ' : 'изменилось у ') + result.changed + ', ' +
-                    (isEn ? 'notified ' : 'уведомлено ') + result.notified,
+                    ('Сезон ') + result.season + ': ' +
+                    ('изменилось у ') + result.changed + ', ' +
+                    ('уведомлено ') + result.notified,
                     'success'
                 );
                 loadRatRankings();
             } catch (e) {
                 A.showToast(e.message || 'Error', 'error');
             }
-            if (btn) { btn.disabled = false; btn.textContent = '🗓 ' + (isEn ? 'Season change' : 'Смена сезона'); }
-        }, isEn ? 'Proceed' : 'Провести');
+            if (btn) { btn.disabled = false; btn.textContent = '🗓 ' + ('Смена сезона'); }
+        }, 'Провести');
     }
 
     async function recalcAllPoints() {
@@ -2974,19 +2960,19 @@
         try {
             var res = await A.client.from('players').select('id');
             var ids = (res.data || []).map(function(p) { return p.id; });
-            if (ids.length === 0) { A.showToast(isEn ? 'No players found' : 'Игроки не найдены', 'error'); return; }
+            if (ids.length === 0) { A.showToast('Игроки не найдены', 'error'); return; }
             var total = ids.length;
             for (var i = 0; i < total; i++) {
                 await recalcPlayerPoints([ids[i]]);
                 if (typeof A.recalcDoublesPoints === 'function') await A.recalcDoublesPoints([ids[i]]);
                 updateBtn(Math.round((i + 1) / total * 100));
             }
-            A.showToast(isEn ? 'All points recalculated (' + total + ' players)' : 'Все очки пересчитаны (' + total + ' игроков)', 'success');
+            A.showToast('Все очки пересчитаны (' + total + ' игроков)', 'success');
             loadRatRankings();
         } catch (err) {
             A.showToast(err.message, 'error');
         } finally {
-            if (btn) { btn.disabled = false; btn.innerHTML = '🔄 ' + (isEn ? 'Recalculate all' : 'Пересчитать все'); }
+            if (btn) { btn.disabled = false; btn.innerHTML = '🔄 ' + ('Пересчитать все'); }
         }
     }
 
@@ -3007,10 +2993,10 @@
         var items = res.data || [];
         if (!items.length) { A.showToast(L.plrImportNoData, 'warning'); return; }
 
-        var headers = ['#', L.plrName, isEn ? 'Name EN' : 'Имя EN', L.plrCategory, L.plrPoints, L.plrWins, L.plrLosses, 'NTRP', L.plrCountry];
+        var headers = ['#', L.plrName, 'Имя EN', L.plrCategory, L.plrPoints, L.plrWins, L.plrLosses, 'NTRP', L.plrCountry];
         var rows = items.map(function(p, i) {
             var cat = A.categoriesMap[p.category_id];
-            var catName = cat ? (isEn ? cat.name_en : cat.name) : (p.category_id || '');
+            var catName = cat ? (cat.name) : (p.category_id || '');
             return [i + 1, p.name || '', p.name_en || '', catName, p.points || 0, p.wins || 0, p.losses || 0, p.ntrp_singles || '', p.country || ''];
         });
         var today = KSLT_VREMYA.сегодня();
@@ -3037,7 +3023,7 @@
                         '<div class="ad-import-dropzone" id="adImportDropzone">' +
                             '<div class="ad-import-dropzone-icon">\ud83d\udcc2</div>' +
                             '<div class="ad-import-dropzone-text">' + L.plrImportFile + '</div>' +
-                            '<div class="ad-import-dropzone-hint">' + (isEn ? 'or drag & drop file here' : 'или перетащите файл сюда') + '</div>' +
+                            '<div class="ad-import-dropzone-hint">' + ('или перетащите файл сюда') + '</div>' +
                             '<input type="file" id="adImportFileInput" accept=".xlsx,.xls,.csv" class="ad-import-dropzone-file">' +
                         '</div>' +
                         '<div class="ad-skryt" id="adImportFileInfo"></div>' +
@@ -3067,7 +3053,7 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer ad-skryt" id="adImportFooter">' +
-                    '<button class="ad-btn ad-btn-outline" id="adImportCancelBtn">' + (isEn ? 'Cancel' : 'Отмена') + '</button>' +
+                    '<button class="ad-btn ad-btn-outline" id="adImportCancelBtn">' + ('Отмена') + '</button>' +
                     '<button class="ad-btn" id="adImportDoBtn" style="margin-left:8px;">' + L.plrImportBtn + '</button>' +
                 '</div>' +
             '</div>';
@@ -3221,7 +3207,7 @@
                     if (s.dataset.field === 'name' && v >= 0) nameSet = true;
                 });
                 if (!nameSet) {
-                    A.showToast(L.plrImportColName + ' — ' + (isEn ? 'required' : 'обязательно'), 'error');
+                    A.showToast(L.plrImportColName + ' — ' + ('обязательно'), 'error');
                     return;
                 }
                 showPreviewStep();
@@ -3325,10 +3311,10 @@
 
             var total = parsedRows.length;
             document.getElementById('adImportStats').innerHTML =
-                '<span>' + (isEn ? 'Found' : 'Найдено') + ': <strong>' + total + '</strong> ' + L.plrImportRows + '</span>' +
+                '<span>' + ('Найдено') + ': <strong>' + total + '</strong> ' + L.plrImportRows + '</span>' +
                 '<span>\ud83d\udd04 ' + L.plrImportUpdated + ': <strong>' + countUpdate + '</strong></span>' +
                 '<span>\u2795 ' + L.plrImportCreated + ': <strong>' + countCreate + '</strong></span>' +
-                '<span>\u26a0\ufe0f ' + (isEn ? 'Errors' : 'Ошибки') + ': <strong>' + countError + '</strong></span>';
+                '<span>\u26a0\ufe0f ' + ('Ошибки') + ': <strong>' + countError + '</strong></span>';
         }
 
         // Step 4: Do import

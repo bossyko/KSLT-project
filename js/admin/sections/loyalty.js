@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     // State
     var loySubTab = 'rules';
@@ -24,15 +23,15 @@
     };
 
     var ACTION_LABELS = {
-        tournament: isEn ? 'Tournament' : 'Турнир',
-        court: isEn ? 'Court' : 'Корт',
-        coach: isEn ? 'Coach' : 'Тренер',
-        membership: isEn ? 'Membership' : 'Членство',
-        expiry: isEn ? 'Expiry' : 'Сгорание',
-        admin: isEn ? 'Admin' : 'Админ',
-        first_membership: isEn ? 'Welcome bonus' : 'Приветственный бонус',
-        free_tournament: isEn ? 'Free tournament' : 'Бесп. турнир',
-        free_membership_1m: isEn ? 'Free membership' : 'Бесп. членство'
+        tournament: 'Турнир',
+        court: 'Корт',
+        coach: 'Тренер',
+        membership: 'Членство',
+        expiry: 'Сгорание',
+        admin: 'Админ',
+        first_membership: 'Приветственный бонус',
+        free_tournament: 'Бесп. турнир',
+        free_membership_1m: 'Бесп. членство'
     };
 
     // ---- Entry point ----
@@ -99,7 +98,7 @@
         var rules = res.data || [];
 
         var html = '<div style="margin-bottom:16px;">' +
-            '<button class="ad-btn ad-btn-primary" id="adLoyAddRule">+ ' + (isEn ? 'Add Rule' : 'Добавить правило') + '</button>' +
+            '<button class="ad-btn ad-btn-primary" id="adLoyAddRule">+ ' + ('Добавить правило') + '</button>' +
             '</div>';
 
         if (rules.length === 0) {
@@ -111,14 +110,14 @@
 
         html += '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
             '<th>' + L.loyAction + '</th>' +
-            '<th>' + (isEn ? 'Label' : 'Название') + '</th>' +
+            '<th>' + ('Название') + '</th>' +
             '<th>' + L.loyPoints + '</th>' +
             '<th>' + L.thStatus + '</th>' +
             '<th></th>' +
             '</tr></thead><tbody>';
 
         rules.forEach(function(r) {
-            var label = isEn ? (r.label_en || r.label) : r.label;
+            var label = r.label;
             var statusCls = r.active ? 'ad-status-active' : 'ad-status-expired';
             var statusLabel = r.active ? L.loyActive : L.loyInactive;
 
@@ -128,7 +127,7 @@
                 '<td style="font-weight:600;color:var(--accent);">' + r.points + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td class="ad-table-actions">' +
-                    '<button class="ad-btn ad-btn--sm" data-loyedit="' + r.id + '">' + (isEn ? 'Edit' : 'Ред.') + '</button>' +
+                    '<button class="ad-btn ad-btn--sm" data-loyedit="' + r.id + '">' + ('Ред.') + '</button>' +
                     ' <button class="ad-btn ad-btn--sm ad-btn--danger" data-loyruledel="' + r.id + '">✕</button>' +
                 '</td>' +
             '</tr>';
@@ -150,7 +149,7 @@
         wrap.querySelectorAll('[data-loyruledel]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var id = this.dataset.loyruledel;
-                A.showConfirm(isEn ? 'Delete rule?' : 'Удалить правило?', '', async function() {
+                A.showConfirm('Удалить правило?', '', async function() {
                     var res = await A.client.from('loyalty_rules').delete().eq('id', id);
                     if (res.error) { A.showToast(res.error.message, 'error'); return; }
                     A.showToast(L.loyDeleted, 'success');
@@ -165,15 +164,15 @@
         var formHtml =
             '<div style="text-align:left;">' +
                 '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Action code' : 'Код действия') + '</label>' +
+                    '<label class="ad-field-label">' + ('Код действия') + '</label>' +
                     '<input type="text" id="adLoyRuleAction" class="ad-field-input" placeholder="court_premium" value="' + (existing ? A.esc(existing.action) : '') + '"' + (isEdit ? ' readonly style="opacity:0.5;"' : '') + '>' +
                 '</div>' +
                 '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Label (RU)' : 'Название (RU)') + '</label>' +
+                    '<label class="ad-field-label">' + ('Название (RU)') + '</label>' +
                     '<input type="text" id="adLoyRuleLabel" class="ad-field-input" value="' + (existing ? A.esc(existing.label || '') : '') + '">' +
                 '</div>' +
                 '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Label (EN)' : 'Название (EN)') + '</label>' +
+                    '<label class="ad-field-label">' + ('Название (EN)') + '</label>' +
                     '<input type="text" id="adLoyRuleLabelEn" class="ad-field-input" value="' + (existing ? A.esc(existing.label_en || '') : '') + '">' +
                 '</div>' +
                 '<div class="ad-field">' +
@@ -183,7 +182,7 @@
                 (isEdit ? '<div style="margin-top:4px;"><label class="ad-checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-primary);"><input type="checkbox" id="adLoyRuleActive"' + (existing.active ? ' checked' : '') + '> ' + L.loyActive + '</label></div>' : '') +
             '</div>';
 
-        A.showConfirm(isEdit ? (isEn ? 'Edit Rule' : 'Редактирование правила') : (isEn ? 'Add Rule' : 'Добавить правило'), formHtml, async function() {
+        A.showConfirm(isEdit ? ('Редактирование правила') : ('Добавить правило'), formHtml, async function() {
             var action = document.getElementById('adLoyRuleAction').value.trim();
             var label = document.getElementById('adLoyRuleLabel').value.trim();
             var labelEn = document.getElementById('adLoyRuleLabelEn').value.trim();
@@ -192,7 +191,7 @@
             var active = activeEl ? activeEl.checked : true;
 
             if (!action) {
-                A.showToast(isEn ? 'Action code required' : 'Код действия обязателен', 'error');
+                A.showToast('Код действия обязателен', 'error');
                 return;
             }
 
@@ -251,7 +250,7 @@
             '</tr></thead><tbody>';
 
         rewards.forEach(function(r) {
-            var title = isEn ? (r.title_en || r.title) : r.title;
+            var title = r.title;
             var statusCls = r.active ? 'ad-status-active' : 'ad-status-expired';
             var statusLabel = r.active ? L.loyActive : L.loyInactive;
 
@@ -261,7 +260,7 @@
                 '<td style="font-weight:600;color:var(--accent);">' + r.cost + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td class="ad-table-actions">' +
-                    '<button class="ad-btn ad-btn--sm" data-loyrewardedit="' + r.id + '">' + (isEn ? 'Edit' : 'Ред.') + '</button> ' +
+                    '<button class="ad-btn ad-btn--sm" data-loyrewardedit="' + r.id + '">' + ('Ред.') + '</button> ' +
                     '<button class="ad-btn ad-btn--sm ad-btn--danger" data-loyrewarddel="' + r.id + '">✕</button>' +
                 '</td>' +
             '</tr>';
@@ -330,7 +329,7 @@
             var active = document.getElementById('adLoyRwActive').checked;
 
             if (!code || !title) {
-                A.showToast(isEn ? 'Code and title required' : 'Код и название обязательны', 'error');
+                A.showToast('Код и название обязательны', 'error');
                 return;
             }
 
@@ -545,8 +544,8 @@
             var pts = parseInt(document.getElementById('adLoyAdjPoints').value);
             var note = document.getElementById('adLoyAdjNote').value.trim();
 
-            if (!profileId) { A.showToast(isEn ? 'Select a user' : 'Выберите пользователя', 'error'); return; }
-            if (!pts || pts === 0) { A.showToast(isEn ? 'Enter points' : 'Введите баллы', 'error'); return; }
+            if (!profileId) { A.showToast('Выберите пользователя', 'error'); return; }
+            if (!pts || pts === 0) { A.showToast('Введите баллы', 'error'); return; }
 
             var res = await A.client.from('loyalty_transactions').insert({
                 profile_id: profileId,

@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     // ---- State ----
     var subTab = 'active';
@@ -77,7 +76,7 @@
     function playerName(id, fallback) {
         if (fallback) return fallback;
         for (var i = 0; i < allPlayers.length; i++) {
-            if (allPlayers[i].id === id) return isEn ? (allPlayers[i].name_en || allPlayers[i].name) : allPlayers[i].name;
+            if (allPlayers[i].id === id) return allPlayers[i].name;
         }
         return '—';
     }
@@ -182,7 +181,7 @@
         var html = '<table class="ad-table"><thead><tr>' +
             '<th>' + L.livePlayer1 + ' vs ' + L.livePlayer2 + '</th>' +
             '<th>' + L.chalScore + '</th>' +
-            '<th>' + (isEn ? 'Date' : 'Дата') + '</th>' +
+            '<th>' + ('Дата') + '</th>' +
             '<th></th>' +
             '</tr></thead><tbody>';
 
@@ -234,9 +233,7 @@
     }
 
     // ---- Round labels ----
-    var ROUND_MAP = isEn
-        ? { 1: 'R1', 2: 'R2', 3: 'QF', 4: 'SF', 5: 'F', 6: '3rd Place' }
-        : { 1: 'R1', 2: 'R2', 3: 'ЧФ', 4: 'ПФ', 5: 'Финал', 6: 'За 3-е' };
+    var ROUND_MAP = { 1: 'R1', 2: 'R2', 3: 'ЧФ', 4: 'ПФ', 5: 'Финал', 6: 'За 3-е' };
 
     // ---- Cached data for create modal ----
     var cachedTournaments = [];
@@ -534,7 +531,7 @@
                         if (!sel) return;
                         var html = '<option value="">' + L.liveSelectTournament + '</option>';
                         cachedTournaments.forEach(function(t) {
-                            var name = isEn ? (t.title_en || t.title) : t.title;
+                            var name = t.title;
                             html += '<option value="' + t.id + '">' + A.esc(name) + '</option>';
                         });
                         sel.innerHTML = html;
@@ -585,8 +582,8 @@
                     cachedMatches = matches.map(function(m) {
                         var p1 = pMap[m.player1_id];
                         var p2 = pMap[m.player2_id];
-                        m._p1Name = p1 ? (isEn ? (p1.name_en || p1.name) : p1.name) : 'TBD';
-                        m._p2Name = p2 ? (isEn ? (p2.name_en || p2.name) : p2.name) : 'TBD';
+                        m._p1Name = p1 ? (p1.name) : 'TBD';
+                        m._p2Name = p2 ? (p2.name) : 'TBD';
                         return m;
                     });
 
@@ -634,8 +631,8 @@
                     cachedBattles = battles.map(function(b) {
                         var p1 = pMap[b.challenger_player_id];
                         var p2 = pMap[b.opponent_player_id];
-                        b._p1Name = p1 ? (isEn ? (p1.name_en || p1.name) : p1.name) : 'TBD';
-                        b._p2Name = p2 ? (isEn ? (p2.name_en || p2.name) : p2.name) : 'TBD';
+                        b._p1Name = p1 ? (p1.name) : 'TBD';
+                        b._p2Name = p2 ? (p2.name) : 'TBD';
                         return b;
                     });
 
@@ -672,7 +669,7 @@
                 if (!filtered.length) { dropdown.style.display = 'none'; return; }
 
                 dropdown.innerHTML = filtered.map(function(p) {
-                    var name = isEn ? (p.name_en || p.name) : p.name;
+                    var name = p.name;
                     var photo = p.photo ? '<img src="' + A.esc(p.photo) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:8px;">' : '';
                     return '<div class="ad-dropdown-item" data-pid="' + p.id + '" data-pname="' + A.esc(name) + '">' +
                         photo + A.esc(name) +

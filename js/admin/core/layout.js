@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     // ---- Render Sidebar ----
     function renderSidebar(profile) {
@@ -265,7 +264,7 @@
             // Activity tables
             '<div class="ad-dash-activity-grid">' +
                 buildActivityTableHtml('adDashPendingRegs', L.actPendingRegs, 'warning',
-                    [L.thPlayer, L.thCategory || (isEn ? 'Category' : 'Категория'), L.thRating || (isEn ? 'Rating' : 'Рейтинг'), L.thTournament, L.thDate, ''], 'tournaments') +
+                    [L.thPlayer, L.thCategory || ('Категория'), L.thRating || ('Рейтинг'), L.thTournament, L.thDate, ''], 'tournaments') +
                 buildActivityTableHtml('adDashApproaching', L.actApproaching, 'warning',
                     [L.thName, L.thExpires, L.thDaysLeft], 'users') +
                 buildActivityTableHtml('adDashOverdue', L.actOverdue, 'danger',
@@ -335,7 +334,7 @@
 
     function fmtDate(dateStr) {
         if (!dateStr) return L.noData;
-        return new Date(dateStr).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
+        return new Date(dateStr).toLocaleDateString('ru-RU');
     }
 
     async function loadStats() {
@@ -448,7 +447,7 @@
             return '<tr>' +
                 '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:var(--fs-2xs);color:var(--text-muted);">' + email + '</div></td>' +
                 '<td>' + A.fmtDate(m.expires_at) + '</td>' +
-                '<td class="' + dCls + '">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
+                '<td class="' + dCls + '">' + diff + (' дн.') + '</td>' +
             '</tr>';
         }, L.noApproaching);
 
@@ -461,7 +460,7 @@
             return '<tr>' +
                 '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:var(--fs-2xs);color:var(--text-muted);">' + email + '</div></td>' +
                 '<td style="color:var(--danger);">' + A.fmtDate(m.expires_at) + '</td>' +
-                '<td class="ad-days-danger">' + diff + (isEn ? 'd' : ' дн.') + '</td>' +
+                '<td class="ad-days-danger">' + diff + (' дн.') + '</td>' +
             '</tr>';
         }, L.noOverdue);
 
@@ -471,7 +470,7 @@
             var playerId = r.players ? r.players.id : '';
             var catId = r.players ? r.players.category_id : '';
             var catObj = catId && A.categoriesMap ? A.categoriesMap[catId] : null;
-            var catName = catObj ? (isEn ? (catObj.name_en || catObj.name) : catObj.name) : '—';
+            var catName = catObj ? (catObj.name) : '—';
             var pts = r.players ? (r.players.points || 0) : 0;
             var trnName = r.tournaments ? A.esc(r.tournaments.title || '') : L.noData;
             var trnId = r.tournament_id || '';
@@ -567,7 +566,7 @@
         fillDashTable('adDashRecentNews', results[16], function(n) {
             var isPublished = !!n.published_at;
             var statusCls = isPublished ? 'ad-status-published' : 'ad-status-draft';
-            var statusLabel = isPublished ? (isEn ? 'Published' : 'Опубликована') : (isEn ? 'Draft' : 'Черновик');
+            var statusLabel = isPublished ? ('Опубликована') : ('Черновик');
             var title = n.title || L.noData;
             if (title.length > 50) title = title.substring(0, 47) + '...';
             return '<tr>' +

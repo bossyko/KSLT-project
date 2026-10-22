@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     var chartsInstances = [];
 
@@ -69,12 +68,12 @@
 
         // Find most popular type (site + app combined)
         var typeData = [
-            { label: isEn ? 'Courts' : 'Корты', site: overview.courts_views || 0, app: overview.courts_views_app || 0 },
-            { label: isEn ? 'Coaches' : 'Тренеры', site: overview.coaches_views || 0, app: overview.coaches_views_app || 0 },
-            { label: isEn ? 'Players' : 'Игроки', site: overview.players_views || 0, app: overview.players_views_app || 0 },
-            { label: isEn ? 'News' : 'Новости', site: overview.news_views || 0, app: overview.news_views_app || 0 },
-            { label: isEn ? 'Tournaments' : 'Турниры', site: overview.tournaments_views || 0, app: overview.tournaments_views_app || 0 },
-            { label: isEn ? 'Sponsors' : 'Спонсоры', site: overview.sponsors_views || 0, app: overview.sponsors_views_app || 0 }
+            { label: 'Корты', site: overview.courts_views || 0, app: overview.courts_views_app || 0 },
+            { label: 'Тренеры', site: overview.coaches_views || 0, app: overview.coaches_views_app || 0 },
+            { label: 'Игроки', site: overview.players_views || 0, app: overview.players_views_app || 0 },
+            { label: 'Новости', site: overview.news_views || 0, app: overview.news_views_app || 0 },
+            { label: 'Турниры', site: overview.tournaments_views || 0, app: overview.tournaments_views_app || 0 },
+            { label: 'Спонсоры', site: overview.sponsors_views || 0, app: overview.sponsors_views_app || 0 }
         ];
         typeData.forEach(function(d) { d.total = d.site + d.app; });
         typeData.sort(function(a, b) { return b.total - a.total; });
@@ -153,8 +152,8 @@
             '</tr>';
         });
         return '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
-            '<th>' + (isEn ? 'Page' : 'Страница') + '</th>' +
-            '<th style="text-align:right">' + (isEn ? 'Views' : 'Просмотры') + '</th>' +
+            '<th>' + ('Страница') + '</th>' +
+            '<th style="text-align:right">' + ('Просмотры') + '</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table></div>';
     }
 

@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     var trnEditingId = null;
     var trnEditingPublishedAt = null;
@@ -72,7 +71,7 @@
         // Category filter options
         var catFilterHtml = '<option value="">' + L.trnAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
-            var catName = isEn ? c.name_en : c.name;
+            var catName = c.name;
             catFilterHtml += '<option value="' + c.id + '">' + catName + '</option>';
         });
 
@@ -324,7 +323,7 @@
                 var cat = A.categoriesMap[t.category_id];
                 if (!cat) return;
                 var key = cat.id;
-                if (!breakdown[key]) breakdown[key] = { name: isEn ? cat.name_en : cat.name, sort: cat.sort_order || 0, count: 0 };
+                if (!breakdown[key]) breakdown[key] = { name: cat.name, sort: cat.sort_order || 0, count: 0 };
                 breakdown[key].count++;
             });
 
@@ -399,8 +398,8 @@
             items.sort(function(a, b) {
                 var ca = A.categoriesMap[a.category_id];
                 var cb = A.categoriesMap[b.category_id];
-                var va = ca ? (isEn ? ca.name_en : ca.name) : '';
-                var vb = cb ? (isEn ? cb.name_en : cb.name) : '';
+                var va = ca ? (ca.name) : '';
+                var vb = cb ? (cb.name) : '';
                 return trnSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             });
         } else if (trnSortCol === 'status') {
@@ -458,7 +457,7 @@
         tbody.innerHTML = '';
         items.forEach(function(t) {
             var catObj = A.categoriesMap[t.category_id];
-            var catLabel = catObj ? (isEn ? catObj.name_en : catObj.name) : (t.category_id || L.noData);
+            var catLabel = catObj ? (catObj.name) : (t.category_id || L.noData);
             var statusLabel, statusClass;
             var isDraft = !t.published_at && (!t.status || t.status === 'upcoming');
             if (isDraft) {
@@ -474,10 +473,10 @@
             }
 
             var dateStartStr = t.date_start
-                ? new Date(t.date_start + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
+                ? new Date(t.date_start + 'T00:00:00').toLocaleDateString('ru-RU')
                 : L.noData;
             var dateEndStr = t.date_end
-                ? new Date(t.date_end + 'T00:00:00').toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
+                ? new Date(t.date_end + 'T00:00:00').toLocaleDateString('ru-RU')
                 : '—';
 
             tbody.innerHTML +=
@@ -493,12 +492,12 @@
                         // Открыть турнир людям или убрать с глаз — решение
                         // менеджера, а не побочный итог сохранения формы
                         ' <button class="ad-btn ad-btn-sm ad-btn-secondary ad-pub-btn" data-pub-id="' + t.id + '" data-pub-on="' + (t.published_at ? '1' : '') + '" title="' +
-                        (t.published_at ? (isEn ? 'Unpublish' : 'Снять с публикации')
-                                        : (isEn ? 'Publish' : 'Опубликовать')) + '">' +
+                        (t.published_at ? ('Снять с публикации')
+                                        : ('Опубликовать')) + '">' +
                         // Коротко: «Снять с публикации» распирало колонку, и таблица
                         // уезжала вбок. Полная подпись осталась подсказкой
-                        (t.published_at ? (isEn ? 'Unpublish' : 'Снять')
-                                        : (isEn ? 'Publish' : 'Опубликовать')) + '</button>' +
+                        (t.published_at ? ('Снять')
+                                        : ('Опубликовать')) + '</button>' +
                     '</td>' +
                 '</tr>';
         });
@@ -536,8 +535,8 @@
                     A.showToast(r.error.message, 'error');
                     return;
                 }
-                A.showToast(открыт ? (isEn ? 'Hidden from the site' : 'Убран с сайта')
-                                   : (isEn ? 'Published' : 'Опубликован'), 'success');
+                A.showToast(открыт ? ('Убран с сайта')
+                                   : ('Опубликован'), 'success');
                 loadTournamentsList();
                 return;
             }
@@ -582,7 +581,7 @@
                 if (!игроки || !игроки.length) return;
                 var пересчёт = await A.client.rpc('recalc_player_categories', { p_ids: игроки });
                 if (пересчёт.error) {
-                    A.showToast((isEn ? 'Points not recalculated: ' : 'Очки не пересчитались: ') +
+                    A.showToast(('Очки не пересчитались: ') +
                                 пересчёт.error.message, 'error');
                 }
             }
@@ -606,7 +605,7 @@
             html += '<button class="ad-crt-page-btn' + (p === trnPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         }
         html += '<button class="ad-crt-page-btn" data-page="' + (trnPage + 1) + '"' + (trnPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
 
@@ -644,14 +643,14 @@
         var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
 
         if (isNumeric) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Most first' : '↓ Сначала больше') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Least first' : '↑ Сначала меньше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала больше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала меньше') + '</div>';
         } else if (isDate) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Newest first' : '↓ Сначала новые') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Oldest first' : '↑ Сначала старые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала новые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала старые') + '</div>';
         } else {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
         }
 
         dd.innerHTML = html;
@@ -779,26 +778,22 @@
         var число = function(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
         var есть = п.заявок || п.матчей || п.результатов || п.начислений;
         if (!есть) {
-            return '<p class="ad-udalenie-pusto">' + (isEn
-                ? 'Nothing but the tournament itself will be removed: it has no entries, matches, results or points.'
-                : 'Кроме самого турнира не уйдёт ничего: заявок, матчей, результатов и начислений у него нет.') + '</p>';
+            return '<p class="ad-udalenie-pusto">' + ('Кроме самого турнира не уйдёт ничего: заявок, матчей, результатов и начислений у него нет.') + '</p>';
         }
         var строки =
-            строка(isEn ? 'entries' : 'заявок', число(п.заявок)) +
-            строка(isEn ? 'matches' : 'матчей', число(п.матчей)) +
-            строка(isEn ? 'results' : 'результатов', число(п.результатов)) +
-            строка(isEn ? 'points records' : 'начислений',
+            строка('заявок', число(п.заявок)) +
+            строка('матчей', число(п.матчей)) +
+            строка('результатов', число(п.результатов)) +
+            строка('начислений',
                    число(п.начислений) + ' · ' +
-                   число(п.игроков) + (isEn ? ' players' : ' игроков') + ' · ' +
-                   число(п.очков) + (isEn ? ' pts' : ' очков'));
+                   число(п.игроков) + (' игроков') + ' · ' +
+                   число(п.очков) + (' очков'));
         if (турниров > 1) {
-            строки += строка(isEn ? 'of them with points' : 'из них с начислениями',
+            строки += строка('из них с начислениями',
                              число(п.сНачислениями) + ' / ' + число(турниров));
         }
         return '<div class="ad-udalenie">' +
-                   '<p class="ad-udalenie-zagolovok">' + (isEn
-                       ? 'Will be removed for good:'
-                       : 'Безвозвратно уйдёт:') + '</p>' +
+                   '<p class="ad-udalenie-zagolovok">' + ('Безвозвратно уйдёт:') + '</p>' +
                    '<ul class="ad-udalenie-spisok">' + строки + '</ul>' +
                '</div>';
     }
@@ -862,7 +857,7 @@
         var catOptionsHtml = '<option value="">' + L.selectCategoryTrn + '</option>';
         A.cachedCategories.forEach(function(c) {
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
-            var catName = isEn ? c.name_en : c.name;
+            var catName = c.name;
             catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
         });
 
@@ -891,7 +886,7 @@
         var trnLevelOptionsHtml = '<option value="">—</option>';
         A.cachedLevels.forEach(function(lv) {
             var selected = (item && item.level_id === lv.id) ? ' selected' : '';
-            var name = isEn ? (lv.name_en || lv.name) : lv.name;
+            var name = lv.name;
             trnLevelOptionsHtml += '<option value="' + lv.id + '"' + selected + '>' + name + '</option>';
         });
 
@@ -1480,9 +1475,8 @@ function обновитьРасклад() {
             if (беда) {
                 var размеры = KSLT_RULES.размерыГрупп(участников, групп).join('/');
                 строки.push(беда === 'мало_участников'
-                    ? (isEn ? 'Not enough players: ' + участников + ' for ' + групп + ' groups'
-                            : 'Участников мало: ' + участников + ' на ' + групп + ' групп')
-                    : (isEn ? 'Check the settings' : 'Проверьте настройку') +
+                    ? ('Участников мало: ' + участников + ' на ' + групп + ' групп')
+                    : ('Проверьте настройку') +
                       (размеры ? ': ' + размеры : ''));
                 показать(строки);
                 return;
@@ -1895,8 +1889,8 @@ function обновитьРасклад() {
         document.getElementById('adTrnSave').addEventListener('click', function() {
             if (trnEditingId) {
                 A.showConfirm(
-                    isEn ? 'Save changes?' : 'Сохранить изменения?',
-                    isEn ? 'Current changes will be saved.' : 'Текущие изменения будут сохранены.',
+                    'Сохранить изменения?',
+                    'Текущие изменения будут сохранены.',
                     function() { saveTournamentHandler(); },
                     L.save
                 );
@@ -1993,7 +1987,7 @@ function обновитьРасклад() {
                             if (!res.ok) {
                                 throw new Error(result.error || 'HTTP ' + res.status);
                             }
-                            A.showToast(isEn ? 'Notification sent!' : 'Рассылка отправлена!', 'success');
+                            A.showToast('Рассылка отправлена!', 'success');
                             var today = KSLT_VREMYA.сегодня();
                             notifyBtn.textContent = '📢 ' + L.trnNotifySent + ' ' + today;
                         } catch (err) {
@@ -2197,12 +2191,12 @@ function обновитьРасклад() {
                    new Date(r.registered_at).getTime() < staleEdge;
         }).length;
 
-        var thName = isEn ? 'Name' : 'ФИО';
-        var thCat = isEn ? 'Category' : 'Категория';
-        var thDate = isEn ? 'Date' : 'Дата';
-        var thTime = isEn ? 'Time' : 'Время';
+        var thName = 'ФИО';
+        var thCat = 'Категория';
+        var thDate = 'Дата';
+        var thTime = 'Время';
 
-        var thReg = isEn ? 'Registered' : 'Регистрация';
+        var thReg = 'Регистрация';
         var regTHead = '<th style="width:30px;"><input type="checkbox" class="ad-reg-check-all" data-group="GRP"></th>' +
             '<th style="width:28px;">#</th><th style="width:32px;"></th><th>' + thName + '</th><th>' + thCat + '</th><th>' + thReg + '</th>';
 
@@ -2286,7 +2280,7 @@ function обновитьРасклад() {
 
     function renderTrnRegRow(reg, num, group) {
         var player = reg.players || {};
-        var pName = isEn ? (player.name_en || player.name || '—') : (player.name || '—');
+        var pName = (player.name || '—');
         var photo = player.photo || '';
         var photoHtml = photo
             ? '<img src="' + A.esc(photo) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">'
@@ -2300,9 +2294,9 @@ function обновитьРасклад() {
         var stale = false;
         if (reg.registered_at) {
             var d = new Date(reg.registered_at);
-            regDT = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+            regDT = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
                 ' <span class="ad-tiho">' +
-                d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
+                d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>';
             // Заявка держит место в сетке с момента подачи. Если её долго не
             // разбирать, турнир выглядит полным, а живых участников мало —
             // поэтому нерешённые старше трёх суток помечаем
@@ -2381,7 +2375,7 @@ function обновитьРасклад() {
             }
 
             if (!data.title) {
-                A.showToast(isEn ? 'Title is required' : 'Название обязательно', 'error');
+                A.showToast('Название обязательно', 'error');
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
@@ -2391,7 +2385,7 @@ function обновитьРасклад() {
             // правил допуска: проверка в tournament-register стоит под условием
             // «категория задана», и записаться сможет кто угодно
             if (!data.category_id) {
-                A.showToast(isEn ? 'Category is required' : 'Категория обязательна', 'error');
+                A.showToast('Категория обязательна', 'error');
                 var catField = document.getElementById('adTrnCat');
                 if (catField) catField.focus();
                 saveBtn.disabled = false;
@@ -2403,9 +2397,7 @@ function обновитьРасклад() {
             // примет сколько угодно, а вытеснение в лист ожидания не сработает
             if (!data.max_participants) {
                 var isDbl = data.format === 'doubles' || data.format === 'mixed_doubles';
-                A.showToast(isEn
-                    ? (isDbl ? 'Max pairs is required' : 'Max participants is required')
-                    : (isDbl ? 'Укажите максимум пар' : 'Укажите максимум участников'), 'error');
+                A.showToast((isDbl ? 'Укажите максимум пар' : 'Укажите максимум участников'), 'error');
                 var maxField = document.getElementById('adTrnMaxPart');
                 if (maxField) maxField.focus();
                 saveBtn.disabled = false;
@@ -2421,7 +2413,7 @@ function обновитьРасклад() {
                Отказ, а не подстановка: число решает, влезет ли турнир в день,
                и выдумывать его за человека нельзя. */
             if (!data.match_duration) {
-                A.showToast(isEn ? 'Match duration is required' : 'Укажите длительность матча', 'error');
+                A.showToast('Укажите длительность матча', 'error');
                 var durField = document.getElementById('adTrnMatchDuration');
                 if (durField) durField.focus();
                 saveBtn.disabled = false;
@@ -2431,7 +2423,7 @@ function обновитьРасклад() {
 
             // Пол нужен рейтингу и допуску: таблицы мужские и женские раздельные
             if (!data.gender) {
-                A.showToast(isEn ? 'Gender is required' : 'Пол обязателен', 'error');
+                A.showToast('Пол обязателен', 'error');
                 var genderField = document.getElementById('adTrnGender');
                 if (genderField) genderField.focus();
                 saveBtn.disabled = false;
@@ -2443,9 +2435,7 @@ function обновитьРасклад() {
             if (data.bracket_type && data.bracket_type !== 'round_robin' && data.bracket_type !== 'group_league' && data.draw_size && data.max_participants) {
                 if (data.max_participants > data.draw_size) {
                     var _isDbl = data.format === 'doubles' || data.format === 'mixed_doubles';
-                    A.showToast(isEn
-                        ? 'Max ' + (_isDbl ? 'pairs' : 'participants') + ' (' + data.max_participants + ') cannot exceed draw size (' + data.draw_size + ')'
-                        : 'Макс. ' + (_isDbl ? 'пар' : 'участников') + ' (' + data.max_participants + ') не может превышать размер сетки (' + data.draw_size + ')', 'error');
+                    A.showToast('Макс. ' + (_isDbl ? 'пар' : 'участников') + ' (' + data.max_participants + ') не может превышать размер сетки (' + data.draw_size + ')', 'error');
                     saveBtn.disabled = false;
                     saveBtn.textContent = L.save;
                     return;
@@ -2534,7 +2524,7 @@ function обновитьРасклад() {
             }
         }
 
-        A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
+        A.showToast('Удалено', 'success');
         renderTournamentsList();
     }
 

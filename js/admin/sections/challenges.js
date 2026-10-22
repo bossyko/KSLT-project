@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     // ---- State ----
     var _chalSubTabs = ['pending', 'accepted', 'published', 'completed'];
@@ -179,7 +178,7 @@
             '<th>' + L.chalOpponent + '</th>' +
             '<th>' + L.chalDate + '</th>' +
             '<th>' + L.chalVenue + '</th>' +
-            '<th>' + (isEn ? 'Sent' : 'Отправлено') + '</th>' +
+            '<th>' + ('Отправлено') + '</th>' +
             '</tr></thead><tbody>';
 
         pendingList.forEach(function(c) {
@@ -353,7 +352,7 @@
                     : '<span class="ad-badge" style="opacity:0.5;">—</span>';
             } else {
                 broadcastCell = notified
-                    ? '<span class="ad-badge ad-badge-success" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + (isEn ? 'Resend' : 'Повторить') + '</button>'
+                    ? '<span class="ad-badge ad-badge-success" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + ('Повторить') + '</button>'
                     : '<button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" title="' + L.chalNotify + '">' + L.chalNotify + '</button>';
             }
 
@@ -496,7 +495,7 @@
                 if (scoreCell) scoreCell.textContent = (res.data.score || '-').replace(/\//g, ':');
                 if (winnerCell) {
                     var wp = pMap[res.data.winner_id] || {};
-                    winnerCell.innerHTML = '<strong style="color:var(--accent);">' + A.esc(isEn ? (wp.name_en || wp.name || '?') : (wp.name || '?')) + '</strong>';
+                    winnerCell.innerHTML = '<strong style="color:var(--accent);">' + A.esc((wp.name || '?')) + '</strong>';
                 }
             });
         });
@@ -548,7 +547,7 @@
         document.getElementById('dcCompConfirm').addEventListener('click', async function() {
             var btn = document.getElementById('dcCompConfirm');
             btn.disabled = true;
-            btn.textContent = isEn ? 'Deleting...' : 'Удаление...';
+            btn.textContent = 'Удаление...';
 
             try {
                 // 1. Убрать сам матч. Откатывать победы и поражения больше
@@ -654,7 +653,7 @@
                     // Title
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalBattleTitle + '</label>' +
-                        '<input type="text" class="ad-field-input" id="cbTitle" placeholder="' + (isEn ? 'e.g. Derby of Champions' : 'напр. Дерби Чемпионов') + '" maxlength="100">' +
+                        '<input type="text" class="ad-field-input" id="cbTitle" placeholder="' + ('напр. Дерби Чемпионов') + '" maxlength="100">' +
                     '</div>' +
                     // Date + Time
                     '<div style="display:flex;gap:12px;">' +
@@ -673,7 +672,7 @@
                     '</div>' +
                     // Set Format
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + (isEn ? 'Set Format' : 'Формат сетов') + '</label>' +
+                        '<label class="ad-field-label">' + ('Формат сетов') + '</label>' +
                         '<select class="ad-field-input" id="cbSetFormat">' +
                             '<option value="standard">' + L.formatStandard + '</option>' +
                             '<option value="short">' + L.formatShort + '</option>' +
@@ -691,7 +690,7 @@
                     // Address
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalAddress + '</label>' +
-                        '<input type="text" class="ad-field-input" id="cbAddress" placeholder="' + (isEn ? 'Auto-filled from court or enter manually' : 'Автозаполнение из корта или введите вручную') + '">' +
+                        '<input type="text" class="ad-field-input" id="cbAddress" placeholder="' + ('Автозаполнение из корта или введите вручную') + '">' +
                     '</div>' +
                     // Banner
                     '<div class="ad-field-group">' +
@@ -1010,13 +1009,13 @@
     function chalSideName(c, n) {
         var pMap = A._chalPlayersMap || {};
         var side = chalSide(c, n);
-        var name = isEn ? (side.name_en || side.name || '?') : (side.name || '?');
+        var name = (side.name || '?');
         if (!c.format || c.format === 'singles') return name;
 
         var mateId = n === 1 ? c.challenger_partner_id : c.opponent_partner_id;
         var mateExt = n === 1 ? c.challenger_partner_name : c.opponent_partner_name;
         var mate = (mateId && pMap[mateId]) || null;
-        var mateName = mate ? (isEn ? (mate.name_en || mate.name) : mate.name) : mateExt;
+        var mateName = mate ? (mate.name) : mateExt;
         return mateName ? name + ' / ' + mateName : name;
     }
 
@@ -1048,7 +1047,7 @@
 
                 var html = '';
                 matches.forEach(function(p) {
-                    var pName = isEn ? (p.name_en || p.name) : p.name;
+                    var pName = p.name;
                     html += '<div class="ad-dropdown-item" data-pid="' + p.id + '">' +
                         (p.photo ? '<img src="' + A.esc(p.photo) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:8px;">' : '<span style="width:24px;height:24px;border-radius:50%;background:var(--bg-tertiary);display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:var(--fs-2xs);">?</span>') +
                         A.esc(pName) +
@@ -1072,7 +1071,7 @@
                         if (pid) {
                             var p = allPlayers.find(function(pl) { return pl.id === pid; });
                             if (p) {
-                                var pName = isEn ? (p.name_en || p.name) : p.name;
+                                var pName = p.name;
                                 input.value = pName;
                                 // Разряд и NTRP — строкой, только посмотреть.
                                 // Видно, того ли человека взял, но в баттл они
@@ -1121,7 +1120,7 @@
 
                 var html = '';
                 matches.forEach(function(c) {
-                    var cName = isEn ? (c.name_en || c.name) : c.name;
+                    var cName = c.name;
                     var addr = buildCourtAddress(c);
                     html += '<div class="ad-dropdown-item" data-cid="' + c.id + '">' +
                         '<div>' +
@@ -1148,7 +1147,7 @@
                         if (cid) {
                             var c = allCourts.find(function(ct) { return ct.id === cid; });
                             if (c) {
-                                var cName = isEn ? (c.name_en || c.name) : c.name;
+                                var cName = c.name;
                                 var addr = buildCourtAddress(c);
                                 input.value = cName;
                                 selectedEl.textContent = cName;
@@ -1177,7 +1176,7 @@
        он получал русскую строку. Адрес собирается в одном месте. */
     function buildCourtAddress(court) {
         return window.KSLT_ADDRESS
-            ? window.KSLT_ADDRESS.адрес(court, isEn ? 'en' : 'ru')
+            ? window.KSLT_ADDRESS.адрес(court, 'ru')
             : '';
     }
 
@@ -1444,7 +1443,7 @@
         // ---- Save Draft ----
         document.getElementById('chSaveDraft').addEventListener('click', function() {
             var score = collectScore();
-            if (!score) { A.showToast(isEn ? 'Enter at least one set' : 'Введите хотя бы один сет', 'error'); return; }
+            if (!score) { A.showToast('Введите хотя бы один сет', 'error'); return; }
             var btn = document.getElementById('chSaveDraft');
             btn.disabled = true;
             A.client.from('challenges').update({ score_draft: score }).eq('id', challenge.id).then(function(res) {
@@ -1462,9 +1461,9 @@
             for (var s = 1; s <= visibleSets; s++) {
                 var g1 = (document.getElementById('chS' + s + 'P1') || {}).value || '';
                 var g2 = (document.getElementById('chS' + s + 'P2') || {}).value || '';
-                if (!g1 || !g2) { A.showToast(isEn ? 'Fill all sets' : 'Заполните все сеты', 'error'); return; }
+                if (!g1 || !g2) { A.showToast('Заполните все сеты', 'error'); return; }
                 if (!isValidSet(g1, g2, _setFormat)) {
-                    A.showToast((isEn ? 'Invalid score in Set ' : 'Некорректный счёт сета ') + s, 'error');
+                    A.showToast(('Некорректный счёт сета ') + s, 'error');
                     return;
                 }
                 var v1 = parseInt(g1), v2 = parseInt(g2);
@@ -1477,7 +1476,7 @@
                 else if (v2 > v1) p2Wins++;
             }
             if (p1Wins < 2 && p2Wins < 2) {
-                A.showToast(isEn ? 'Winner must win 2 sets (2-0 or 2-1)' : 'Победитель должен выиграть 2 сета (2-0 или 2-1)', 'error');
+                A.showToast('Победитель должен выиграть 2 сета (2-0 или 2-1)', 'error');
                 return;
             }
 
@@ -1566,7 +1565,7 @@
                 });
             }).catch(function(err) {
                 console.error('Finalize match error:', err);
-                A.showToast(isEn ? 'Error finalizing match' : 'Ошибка завершения матча', 'error');
+                A.showToast('Ошибка завершения матча', 'error');
                 return false;
             });
     }
@@ -1606,14 +1605,14 @@
             }
 
             if (result.tg_sent) {
-                A.showToast(isEn ? 'TG announcement sent with voting buttons!' : 'Анонс в TG отправлен с кнопками голосования!', 'success');
+                A.showToast('Анонс в TG отправлен с кнопками голосования!', 'success');
             } else {
                 var dbg = result.debug || {};
                 var reason = !dbg.has_token ? 'TELEGRAM_BOT_TOKEN not set'
                     : !dbg.has_group_id ? 'TELEGRAM_GROUP_CHAT_ID not set'
                     : 'TG API error (group: ' + (dbg.group_id || '?') + ')';
                 console.error('TG send failed:', result.debug);
-                A.showToast((isEn ? 'TG failed: ' : 'TG ошибка: ') + reason, 'error');
+                A.showToast(('TG ошибка: ') + reason, 'error');
             }
             loadData();
 
@@ -1722,7 +1721,7 @@
                     '</div>' +
                     // Set Format
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + (isEn ? 'Set Format' : 'Формат сетов') + '</label>' +
+                        '<label class="ad-field-label">' + ('Формат сетов') + '</label>' +
                         '<select class="ad-field-input" id="ebSetFormat">' +
                             '<option value="standard"' + ((challenge.set_format || 'standard') === 'standard' ? ' selected' : '') + '>' + L.formatStandard + '</option>' +
                             '<option value="short"' + (challenge.set_format === 'short' ? ' selected' : '') + '>' + L.formatShort + '</option>' +
@@ -1740,7 +1739,7 @@
                     // Address
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalAddress + '</label>' +
-                        '<input type="text" class="ad-field-input" id="ebAddress" value="' + A.esc(existingAddress) + '" placeholder="' + (isEn ? 'Auto-filled from court or enter manually' : 'Автозаполнение из корта или введите вручную') + '">' +
+                        '<input type="text" class="ad-field-input" id="ebAddress" value="' + A.esc(existingAddress) + '" placeholder="' + ('Автозаполнение из корта или введите вручную') + '">' +
                     '</div>' +
                     // Banner
                     '<div class="ad-field-group">' +
@@ -2118,7 +2117,7 @@
         var части = [];
         if (p.category_id) {
             var cat = (A.cachedCategories || []).find(function (c) { return c.id === p.category_id; });
-            if (cat) части.push(isEn ? (cat.name_en || cat.name) : cat.name);
+            if (cat) части.push(cat.name);
         }
         // В подсказке поиска показываем оба числа: одиночный / парный —
         // так видно и то, и другое, каким бы ни был формат баттла
@@ -2149,7 +2148,7 @@
     function buildCountryOptions(selectedVal) {
         var CU = window.KSLT_COUNTRY;
         var список = window.KSLT_COUNTRIES || [];
-        var lang = isEn ? 'en' : 'ru';
+        var lang = 'ru';
         var html = '<option value="">' + L.chalCountry + '</option>';
         список.forEach(function (c) {
             var флаг = CU ? CU.flagEmoji(c.code) : '';

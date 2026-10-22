@@ -8,7 +8,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     /**
      * Sets up bulk-delete UI (checkboxes + delete button) for an admin table.
@@ -104,7 +103,7 @@
                 if (result.error) {
                     showToast(result.error.message, 'error');
                 } else {
-                    showToast(isEn ? 'Deleted ' + ids.length + ' items' : 'Удалено: ' + ids.length, 'success');
+                    showToast('Удалено: ' + ids.length, 'success');
                     /* ВЫБОР ПЕРЕЖИВАЛ УДАЛЕНИЕ. Полоса «Удалить выбранные (1)»
                        живёт ВНЕ таблицы, и перерисовка списка её не трогала:
                        строки уже не было, а счётчик стоял — до перезагрузки
@@ -702,9 +701,7 @@
         if (targets.length === 0) {
             // Всё заполнено и исходник с тех пор не менялся — спрашиваем,
             // а не отказываем: у человека может быть своя причина
-            var again = confirm(isEn
-                ? 'Translations are already filled. Translate again and overwrite them?'
-                : 'Переводы уже заполнены. Перевести заново и заменить их?');
+            var again = confirm('Переводы уже заполнены. Перевести заново и заменить их?');
             if (!again) return;
             if (enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
             if (kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });
@@ -737,13 +734,11 @@
             }
             if (failed.length === targets.length) {
                 var why = A.lastTranslateError === 'quota'
-                    ? (isEn ? 'Daily free translation limit reached. It resets in a few hours — or fill the fields manually.'
-                            : 'Дневной лимит бесплатных переводов исчерпан. Он обновится через несколько часов — или заполните поля вручную.')
-                    : (isEn ? 'Translation service did not respond. Fields left empty.'
-                            : 'Сервис перевода не ответил. Поля оставлены пустыми — переведите вручную.');
+                    ? ('Дневной лимит бесплатных переводов исчерпан. Он обновится через несколько часов — или заполните поля вручную.')
+                    : ('Сервис перевода не ответил. Поля оставлены пустыми — переведите вручную.');
                 showToast(why, 'error');
             } else if (failed.length) {
-                showToast((isEn ? 'Not translated: ' : 'Не переведено: ') + failed.join(', '), 'warning');
+                showToast(('Не переведено: ') + failed.join(', '), 'warning');
             }
         } catch (e) {
             showToast(L.translateError, 'error');
@@ -775,7 +770,7 @@
 
         btn.disabled = true;
         btn.classList.add('is-done');
-        var doneLabel = isEn ? 'Translated' : 'Переведено';
+        var doneLabel = 'Переведено';
         var was = btn.textContent;
         btn.textContent = '\u2713 ' + doneLabel;
 

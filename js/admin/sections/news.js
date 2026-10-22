@@ -14,7 +14,6 @@
         return A.cleanNewsHtml ? A.cleanNewsHtml(value) : (value || '');
     }
     var L = A.L;
-    var isEn = A.isEn;
 
     /**
      * ПРЕДЕЛ «КРАТКОГО ОПИСАНИЯ» — 240 ЗНАКОВ.
@@ -198,7 +197,7 @@
                 if (pubCountEl) pubCountEl.textContent = s.published_count || 0;
                 if (draftCountEl) draftCountEl.textContent = s.draft_count || 0;
 
-                var dateFmt = isEn ? 'en-US' : 'ru-RU';
+                var dateFmt = 'ru-RU';
                 var dateOpts = { day: 'numeric', month: 'short' };
                 if (pubDateEl) {
                     pubDateEl.textContent = s.last_published
@@ -276,7 +275,7 @@
 
             // Select All + Title on same line
             html += '<div class="ad-col-dd-title-row">' +
-                '<label class="ad-col-dd-check-all"><input type="checkbox" id="adColSelectAll"' + (allChecked ? ' checked' : '') + '> ' + (isEn ? 'All' : 'Все') + '</label>' +
+                '<label class="ad-col-dd-check-all"><input type="checkbox" id="adColSelectAll"' + (allChecked ? ' checked' : '') + '> ' + ('Все') + '</label>' +
                 '<span class="ad-col-dd-title">' + (colLabels[col] || col) + '</span>' +
             '</div>';
 
@@ -293,14 +292,14 @@
 
         // Sort options after checkboxes
         if (isDateCol) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Newest first' : '↓ Сначала новые') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Oldest first' : '↑ Сначала старые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала новые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала старые') + '</div>';
         } else if (isNumericCol) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Most first' : '↓ Сначала больше') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Least first' : '↑ Сначала меньше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала больше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала меньше') + '</div>';
         } else {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
         }
 
         dd.innerHTML = html;
@@ -427,7 +426,7 @@
             html += '<button class="ad-crt-page-btn' + (p === newsPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         }
         html += '<button class="ad-crt-page-btn" data-page="' + (newsPage + 1) + '"' + (newsPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
 
@@ -513,7 +512,7 @@
                 : '<span class="ad-status-badge ad-status-draft">' + L.newsDraft + '</span>';
 
             var dateStr = a.published_at
-                ? new Date(a.published_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU')
+                ? new Date(a.published_at).toLocaleDateString('ru-RU')
                 : L.noData;
 
             var eng = engMap[a.id] || { reactions: 0, votes: 0 };
@@ -834,7 +833,7 @@
                     var mo = String(d.getMonth() + 1).padStart(2, '0');
                     var hh = String(d.getHours()).padStart(2, '0');
                     var mm = String(d.getMinutes()).padStart(2, '0');
-                    return '\u2713 ' + (isEn ? 'Last saved' : 'Сохранено') + ' ' + dd + '.' + mo + ' ' + hh + ':' + mm;
+                    return '\u2713 ' + ('Сохранено') + ' ' + dd + '.' + mo + ' ' + hh + ':' + mm;
                 })() + '</span>' +
             '</div>';
 
@@ -971,7 +970,7 @@
                 { ru: 'adNewsContent', en: 'adNewsContentEn', kg: 'adNewsContentKg' })) || якорьМеты;
             if (dateEl && pubInput && pubInput.value) {
                 var d = new Date(pubInput.value + 'T12:00:00');
-                var months = isEn ? MONTHS_EN : MONTHS_RU;
+                var months = MONTHS_RU;
                 dateEl.textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
             } else if (dateEl) {
                 dateEl.textContent = L.newsDraft;
@@ -1169,7 +1168,7 @@
             var urlBtn = e.target.closest('.ad-preview-insert-url-btn');
             if (urlBtn) {
                 var afterPar = parseInt(urlBtn.dataset.afterParagraph, 10) || 1;
-                var url = prompt(isEn ? 'Paste image URL:' : 'Вставьте URL изображения:');
+                var url = prompt('Вставьте URL изображения:');
                 if (url && url.trim()) {
                     newsContentImages.push({ url: url.trim(), after_paragraph: afterPar });
                     newsContentImageFiles.push(null);
@@ -1500,7 +1499,7 @@
 
         if (!text) {
             container.innerHTML = '<div style="color:var(--text-secondary);font-size:var(--fs-sm);padding:20px 0;text-align:center">' +
-                (isEn ? 'Start typing content to see preview' : 'Начните вводить текст для предпросмотра') + '</div>';
+                ('Начните вводить текст для предпросмотра') + '</div>';
             return;
         }
 
@@ -1784,7 +1783,7 @@
             }
 
             if (!data.title) {
-                A.showToast(isEn ? 'Title is required' : 'Заголовок обязателен', 'error');
+                A.showToast('Заголовок обязателен', 'error');
                 activeBtn.disabled = false;
                 activeBtn.textContent = doPublish ? (newsEditingPublishedAt ? L.update : L.publish) : L.save;
                 return;
@@ -1870,7 +1869,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
+        A.showToast('Удалено', 'success');
         if (newsFormOpts.послеУдаления) newsFormOpts.послеУдаления();
         else renderNewsList();
     }

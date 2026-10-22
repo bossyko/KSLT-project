@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     var finSearchQuery = '', finFilterType = '', finFilterStatus = '';
     var finPeriodMode = '', finDateFrom = '', finDateTo = '';
@@ -60,7 +59,7 @@
 
             // Period row
             '<div class="ad-vch-period-row">' +
-                '<span style="color:var(--text-secondary);font-size:var(--fs-sm);font-weight:500;">' + (isEn ? 'Date:' : 'Дата:') + '</span>' +
+                '<span style="color:var(--text-secondary);font-size:var(--fs-sm);font-weight:500;">' + ('Дата:') + '</span>' +
                 '<select class="ad-field-input" id="adFinPeriod" style="max-width:160px;">' +
                     '<option value=""' + (finPeriodMode === '' ? ' selected' : '') + '>' + L.payPrdAll + '</option>' +
                     '<option value="this_month"' + (finPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.payPrdThis + '</option>' +
@@ -84,9 +83,9 @@
                 '<table class="ad-table ad-table-clickable" id="adFinTable">' +
                     '<thead><tr>' +
                         '<th>' + L.payEntity + '</th>' +
-                        '<th>' + (isEn ? 'Type' : 'Тип') + '</th>' +
+                        '<th>' + ('Тип') + '</th>' +
                         '<th>' + L.payAmount + '</th>' +
-                        '<th>' + (isEn ? 'Active Until' : 'Активен до') + '</th>' +
+                        '<th>' + ('Активен до') + '</th>' +
                         '<th>' + L.payMethod + '</th>' +
                         '<th>' + L.payStatus + '</th>' +
                         '<th>' + L.payCreatedAt + '</th>' +
@@ -386,7 +385,7 @@
         if (finPage < totalPages) {
             html += '<button class="ad-crt-page-btn" data-fin-page="' + (finPage + 1) + '">&raquo;</button>';
         }
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
         var container = document.getElementById('ad-finances');
@@ -461,12 +460,12 @@
             // From (club only)
             '<div class="ad-form-card" id="adFinClubFromBlock"' + (isClub ? '' : ' style="display:none;"') + '>' +
                 '<div class="ad-form-card-title">' + L.payFrom + '</div>' +
-                '<input type="text" class="ad-field-input" id="adFinClubFrom" placeholder="' + (isEn ? 'Sponsor / Organization name' : 'Спонсор / Название организации') + '" value="' + A.esc(item && isClub ? item.entity_name : '') + '">' +
+                '<input type="text" class="ad-field-input" id="adFinClubFrom" placeholder="' + ('Спонсор / Название организации') + '" value="' + A.esc(item && isClub ? item.entity_name : '') + '">' +
             '</div>' +
 
             // Profile search (membership only)
             '<div class="ad-form-card" id="adFinProfileBlock"' + (isMembership ? '' : ' style="display:none;"') + '>' +
-                '<div class="ad-form-card-title">' + (isEn ? 'User' : 'Пользователь') + '</div>' +
+                '<div class="ad-form-card-title">' + ('Пользователь') + '</div>' +
                 '<div class="ad-pay-entity-wrap">' +
                     '<input type="text" class="ad-field-input" id="adFinProfileSearch" placeholder="' + L.paySearchProfile + '" value="' + A.esc(isMembership && item ? item.entity_name || '' : '') + '" autocomplete="off">' +
                     '<div class="ad-pay-entity-results ad-skryt" id="adFinProfileResults"></div>' +
@@ -490,7 +489,7 @@
 
             // Period (court/coach)
             '<div class="ad-form-card" id="adFinPeriodBlock"' + (isClub || isMembership ? ' style="display:none;"' : '') + '>' +
-                '<div class="ad-form-card-title">' + (isEn ? 'Period' : 'Период') + '</div>' +
+                '<div class="ad-form-card-title">' + ('Период') + '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinPeriodStart" value="' + (item && !isMembership ? item.period_start : '') + '" style="flex:1;">' +
                     '<span class="ad-tiho">—</span>' +
@@ -502,10 +501,10 @@
             '<div class="ad-form-card" id="adFinMemberPeriodBlock"' + (isMembership ? '' : ' style="display:none;"') + '>' +
                 '<div class="ad-form-card-title">' + L.payMemberPeriod + '</div>' +
                 '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="1">1 ' + (isEn ? 'mo' : 'мес') + '</button>' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="3">3 ' + (isEn ? 'mo' : 'мес') + '</button>' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="6">6 ' + (isEn ? 'mo' : 'мес') + '</button>' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="12">1 ' + (isEn ? 'yr' : 'год') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="1">1 ' + ('мес') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="3">3 ' + ('мес') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="6">6 ' + ('мес') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="12">1 ' + ('год') + '</button>' +
                 '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinMemberStart" value="' + (isMembership && item && item._raw ? (item._raw.memberships ? item._raw.memberships.starts_at || '' : '').slice(0, 10) : todayStr) + '" style="flex:1;">' +
@@ -740,7 +739,7 @@
         }
 
         if (items.length === 0) {
-            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:var(--fs-sm);">' + (isEn ? 'Not found' : 'Не найдено') + '</div>';
+            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:var(--fs-sm);">' + ('Не найдено') + '</div>';
             resultsDiv.style.display = 'block';
             return;
         }
@@ -804,7 +803,7 @@
                 status: 'active',
                 starts_at: memberStart + 'T00:00:00.000Z',
                 expires_at: memberEnd + 'T23:59:59.000Z',
-                note: note || (isEn ? 'Admin: via finances' : 'Админ: через финансы')
+                note: note || ('Админ: через финансы')
             }).select('id').single();
 
             if (memResult.error) {
@@ -868,7 +867,7 @@
                 return;
             }
             if (!opDate) {
-                A.showToast(isEn ? 'Enter transaction date' : 'Укажите дату операции', 'error');
+                A.showToast('Укажите дату операции', 'error');
                 return;
             }
         } else {
@@ -1053,9 +1052,9 @@
                 '<thead><tr>' +
                     '<th>№</th>' +
                     '<th>' + L.payEntity + '</th>' +
-                    '<th>' + (isEn ? 'Type' : 'Тип') + '</th>' +
+                    '<th>' + ('Тип') + '</th>' +
                     '<th>' + L.payAmount + '</th>' +
-                    '<th>' + (isEn ? 'Active Until' : 'Активен до') + '</th>' +
+                    '<th>' + ('Активен до') + '</th>' +
                     '<th>' + L.payStatus + '</th>' +
                     '<th>' + L.payCreatedAt + '</th>' +
                 '</tr></thead>' +
@@ -1093,7 +1092,7 @@
             filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) <= finDateTo; });
         }
 
-        var headers = ['№', L.payEntity, isEn ? 'Type' : 'Тип', L.payAmount, isEn ? 'Currency' : 'Валюта', isEn ? 'Active Until' : 'Активен до', L.payStatus, L.payCreatedAt];
+        var headers = ['№', L.payEntity, 'Тип', L.payAmount, 'Валюта', 'Активен до', L.payStatus, L.payCreatedAt];
         var rows = filtered.map(function(p, i) {
             var isAct = p.period_end >= today;
             var statusLabel = isAct ? L.payActive : L.payExpired;
@@ -1118,7 +1117,7 @@
             var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
             months.push({
                 key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
-                label: d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { month: 'short', year: '2-digit' })
+                label: d.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })
             });
         }
 

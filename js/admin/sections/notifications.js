@@ -264,13 +264,13 @@
         var isAdmin = A.currentRole === 'admin';
         var isStaff = isAdmin || A.currentRole === 'manager';
 
-        var recallLabel = A.isEn ? 'Recall' : 'Отозвать';
-        var recallAgainLabel = A.isEn ? 'Recall again' : 'Отозвать повторно';
-        var recalledLabel = A.isEn ? 'recalled' : 'отозвана';
-        var delLabel = A.isEn ? 'Delete broadcast' : 'Удалить рассылку';
+        var recallLabel = 'Отозвать';
+        var recallAgainLabel = 'Отозвать повторно';
+        var recalledLabel = 'отозвана';
+        var delLabel = 'Удалить рассылку';
 
         tbody.innerHTML = rows.map(function(r) {
-            var date = r.created_at ? new Date(r.created_at).toLocaleDateString(A.isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+            var date = r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
             var recalled = !!r.recalled_at;
 
             // Отозвать может менеджер: это про людей — убрать сообщение у
@@ -308,10 +308,8 @@
         tbody.querySelectorAll('.ad-push-recall').forEach(function(btn) {
             btn.addEventListener('click', async function() {
                 var ok = await A.showConfirmAsync(
-                    A.isEn ? 'Recall this broadcast?' : 'Отозвать рассылку?',
-                    A.isEn
-                        ? 'The message will disappear for everyone who received it. The journal entry stays, marked as recalled.'
-                        : 'Сообщение исчезнет у всех, кто его получил. Запись в журнале останется с пометкой об отзыве.',
+                    'Отозвать рассылку?',
+                    'Сообщение исчезнет у всех, кто его получил. Запись в журнале останется с пометкой об отзыве.',
                     recallLabel);
                 if (!ok) return;
 
@@ -320,7 +318,7 @@
                 var err = (res.error && res.error.message) || (res.data && res.data.error);
                 if (err) {
                     A.showToast(err === 'forbidden'
-                        ? (A.isEn ? 'Not enough rights' : 'Недостаточно прав') : err, 'error');
+                        ? ('Недостаточно прав') : err, 'error');
                     btn.disabled = false;
                     return;
                 }
@@ -329,15 +327,11 @@
                 // У повторного отзыва ноль — норма, там уже всё убрано
                 var removed = (res.data && res.data.removed) || 0;
                 if (removed === 0 && btn.dataset.recalled) {
-                    A.showToast(A.isEn
-                        ? 'Already recalled, nothing left to remove'
-                        : 'Уже отозвана, убирать нечего', 'success');
+                    A.showToast('Уже отозвана, убирать нечего', 'success');
                 } else if (removed === 0) {
-                    A.showToast(A.isEn
-                        ? 'Marked as recalled, but nothing was removed from recipients'
-                        : 'Помечено отозванной, но у получателей ничего не убралось', 'error');
+                    A.showToast('Помечено отозванной, но у получателей ничего не убралось', 'error');
                 } else {
-                    A.showToast((A.isEn ? 'Recalled, removed: ' : 'Отозвано, убрано: ') + removed, 'success');
+                    A.showToast(('Отозвано, убрано: ') + removed, 'success');
                 }
                 loadHistory();
             });
@@ -346,11 +340,9 @@
         tbody.querySelectorAll('.ad-push-del').forEach(function(btn) {
             btn.addEventListener('click', async function() {
                 var ok = await A.showConfirmAsync(
-                    A.isEn ? 'Delete the broadcast?' : 'Удалить рассылку?',
-                    A.isEn
-                        ? 'The message will disappear for everyone who received it, and the journal entry will be erased too. This cannot be undone.'
-                        : 'Сообщение исчезнет у всех, кто его получил, и запись в журнале тоже будет стёрта. Отменить это нельзя.',
-                    A.isEn ? 'Delete' : 'Удалить');
+                    'Удалить рассылку?',
+                    'Сообщение исчезнет у всех, кто его получил, и запись в журнале тоже будет стёрта. Отменить это нельзя.',
+                    'Удалить');
                 if (!ok) return;
 
                 btn.disabled = true;
@@ -362,7 +354,7 @@
                 var recErr = (rec.error && rec.error.message) || (rec.data && rec.data.error);
                 if (recErr) {
                     A.showToast(recErr === 'forbidden'
-                        ? (A.isEn ? 'Not enough rights' : 'Недостаточно прав') : recErr, 'error');
+                        ? ('Недостаточно прав') : recErr, 'error');
                     btn.disabled = false;
                     return;
                 }
@@ -376,7 +368,7 @@
 
                 var removed = (rec.data && rec.data.removed) || 0;
                 A.showToast(
-                    (A.isEn ? 'Deleted, removed from recipients: ' : 'Удалено, убрано у получателей: ') + removed,
+                    ('Удалено, убрано у получателей: ') + removed,
                     (removed === 0 && !btn.dataset.recalled) ? 'error' : 'success');
                 loadHistory();
             });

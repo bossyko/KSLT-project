@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     /* СОСТОЯНИЕ ЭКРАНА ОЧКОВ — СВОЁ, А НЕ ОБЩИЙ КЭШ.
        Общий `A._местаОчков` держит места ДЕЙСТВУЮЩЕЙ версии: по ним считает
@@ -37,7 +36,7 @@
            администратору: они меняют не очки, а правила платформы. */
         var правит = A.currentRole === 'admin';
         if (!правит && A.currentRole !== 'manager') {
-            container.innerHTML = '<div class="ad-empty-state"><p>' + (isEn ? 'Access denied' : 'Доступ запрещён') + '</p></div>';
+            container.innerHTML = '<div class="ad-empty-state"><p>' + ('Доступ запрещён') + '</p></div>';
             return;
         }
 
@@ -45,8 +44,8 @@
             ? [
                 { key: 'rules', label: L.setSubRules },
                 { key: 'promotions', label: L.setSubPromo },
-                { key: 'prices', label: isEn ? 'Prices' : 'Цены' },
-                { key: 'access', label: isEn ? 'Access' : 'Доступ' }
+                { key: 'prices', label: 'Цены' },
+                { key: 'access', label: 'Доступ' }
               ]
             : [ { key: 'rules', label: L.setSubRules } ];
 
@@ -121,7 +120,7 @@
         var р = await A.client.from('pricing_plans').select('*');
         if (р.error) {
             panel.innerHTML = '<div class="ad-empty-state"><p>' +
-                (isEn ? 'Prices table is not available: ' : 'Таблица цен недоступна: ') +
+                ('Таблица цен недоступна: ') +
                 р.error.message + '</p></div>';
             return;
         }
@@ -138,12 +137,12 @@
             var сумма = (p.amount === null || p.amount === undefined) ? '' : p.amount;
             return '<div class="ad-field-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;">' +
                 '<div style="flex:1;min-width:160px;">' +
-                    '<label class="ad-field-label">' + (isEn ? в.en : в.ru) + '</label>' +
+                    '<label class="ad-field-label">' + (в.ru) + '</label>' +
                     '<input type="number" min="0" step="1" class="ad-field-input" id="pp-' + в.kind + '" ' +
-                        'value="' + сумма + '" placeholder="' + (isEn ? 'to be announced' : 'уточняется') + '">' +
+                        'value="' + сумма + '" placeholder="' + ('уточняется') + '">' +
                 '</div>' +
                 '<div style="width:120px;">' +
-                    '<label class="ad-field-label">' + (isEn ? 'Currency' : 'Валюта') + '</label>' +
+                    '<label class="ad-field-label">' + ('Валюта') + '</label>' +
                     '<input type="text" class="ad-field-input" id="pc-' + в.kind + '" value="' + (p.currency || 'сом') + '">' +
                 '</div>' +
             '</div>';
@@ -167,25 +166,21 @@
 
         panel.innerHTML =
             '<div class="ad-card" style="max-width:720px;">' +
-                '<h3 style="margin-bottom:8px;">' + (isEn ? 'Membership fees' : 'Членские взносы') + '</h3>' +
+                '<h3 style="margin-bottom:8px;">' + ('Членские взносы') + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
-                    (isEn
-                        ? 'The amounts shown on the Pricing page. An empty amount is not an error: the page says «to be announced» and the payment button stays off.'
-                        : 'Суммы, которые видно на странице «Цены». Пустая сумма — не ошибка: страница пишет «уточняется», а кнопка оплаты выключена.') +
+                    ('Суммы, которые видно на странице «Цены». Пустая сумма — не ошибка: страница пишет «уточняется», а кнопка оплаты выключена.') +
                 '</p>' +
                 строки +
-                '<button class="ad-btn ad-btn-primary" id="ppSave">' + (isEn ? 'Save amounts' : 'Сохранить суммы') + '</button>' +
+                '<button class="ad-btn ad-btn-primary" id="ppSave">' + ('Сохранить суммы') + '</button>' +
             '</div>' +
             '<div class="ad-card" style="max-width:720px;margin-top:24px;">' +
-                '<h3 style="margin-bottom:8px;">' + (isEn ? 'Free period notice' : 'Плашка бесплатного периода') + '</h3>' +
+                '<h3 style="margin-bottom:8px;">' + ('Плашка бесплатного периода') + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
-                    (isEn
-                        ? 'Shown on the Pricing page while the free-access date has not passed. Empty text leaves only the line with the date; clearing the date in Access hides the whole block.'
-                        : 'Видна на странице «Цены», пока не прошла дата бесплатного доступа. Пустой текст оставит только строку с датой; стёртая дата во вкладке «Доступ» убирает блок целиком.') +
+                    ('Видна на странице «Цены», пока не прошла дата бесплатного доступа. Пустой текст оставит только строку с датой; стёртая дата во вкладке «Доступ» убирает блок целиком.') +
                 '</p>' +
-                поле('pricing_free_title', (isEn ? 'Heading' : 'Заголовок'), false) +
-                поле('pricing_free_text', (isEn ? 'Text' : 'Текст'), true) +
-                '<button class="ad-btn ad-btn-primary" id="scSave">' + (isEn ? 'Save text' : 'Сохранить текст') + '</button>' +
+                поле('pricing_free_title', ('Заголовок'), false) +
+                поле('pricing_free_text', ('Текст'), true) +
+                '<button class="ad-btn ad-btn-primary" id="scSave">' + ('Сохранить текст') + '</button>' +
             '</div>';
 
         var сохрСуммы = document.getElementById('ppSave');
@@ -197,7 +192,7 @@
                 var сырое = document.getElementById('pp-' + kind).value.trim();
                 var сумма = сырое === '' ? null : Number(сырое);
                 if (сумма !== null && !(сумма >= 0)) {
-                    беды.push((isEn ? 'Wrong amount: ' : 'Неверная сумма: ') + сырое);
+                    беды.push(('Неверная сумма: ') + сырое);
                     continue;
                 }
                 var res = await A.client.from('pricing_plans')
@@ -210,7 +205,7 @@
             }
             сохрСуммы.disabled = false;
             if (беды.length) { A.showToast(беды.join(' · '), 'error'); return; }
-            A.showToast(isEn ? 'Saved' : 'Сохранено', 'success');
+            A.showToast('Сохранено', 'success');
             renderSetPrices();
         });
 
@@ -232,7 +227,7 @@
             }
             сохрТекст.disabled = false;
             if (беды.length) { A.showToast(беды.join(' · '), 'error'); return; }
-            A.showToast(isEn ? 'Saved' : 'Сохранено', 'success');
+            A.showToast('Сохранено', 'success');
             renderSetPrices();
         });
     }
@@ -251,7 +246,7 @@
             .select('value, updated_at').eq('key', 'free_access_until').maybeSingle();
         var дата = (r.data && r.data.value) ? String(r.data.value).replace(/"/g, '') : '';
         var когда = (r.data && r.data.updated_at)
-            ? new Date(r.data.updated_at).toLocaleString(isEn ? 'en-US' : 'ru-RU') : '';
+            ? new Date(r.data.updated_at).toLocaleString('ru-RU') : '';
 
         var сегодня = KSLT_VREMYA.сегодня();
         var идёт = дата && сегодня <= дата;
@@ -259,31 +254,29 @@
         panel.innerHTML =
             '<div class="ad-card" style="max-width:520px;">' +
                 '<h3 style="margin-bottom:8px;">' +
-                    (isEn ? 'Free access for everyone' : 'Бесплатный доступ для всех') + '</h3>' +
+                    ('Бесплатный доступ для всех') + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">' +
-                    (isEn
-                        ? 'Until this date every signed-in user gets full access without a KSLT membership. Clear the date to return to memberships.'
-                        : 'До этой даты полный доступ есть у каждого, кто вошёл, — членство КСЛТ не спрашивается. Пустая дата возвращает обычный порядок.') +
+                    ('До этой даты полный доступ есть у каждого, кто вошёл, — членство КСЛТ не спрашивается. Пустая дата возвращает обычный порядок.') +
                 '</p>' +
                 '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
                     '<div>' +
-                        '<label class="ad-field-label">' + (isEn ? 'Free until' : 'Бесплатно до') + '</label>' +
+                        '<label class="ad-field-label">' + ('Бесплатно до') + '</label>' +
                         '<input type="date" class="ad-field-input" id="setFreeUntil" value="' + дата + '">' +
                     '</div>' +
                     '<button class="ad-btn ad-btn-primary" id="setFreeSave">' +
-                        (isEn ? 'Save' : 'Сохранить') + '</button>' +
+                        ('Сохранить') + '</button>' +
                     (дата ? '<button class="ad-btn ad-btn-secondary" id="setFreeClear">' +
-                        (isEn ? 'Turn off' : 'Выключить') + '</button>' : '') +
+                        ('Выключить') + '</button>' : '') +
                 '</div>' +
                 '<p style="margin-top:14px;color:' + (идёт ? 'var(--accent)' : 'var(--text-secondary)') + ';">' +
                     (идёт
-                        ? (isEn ? 'Free access is on until ' : 'Бесплатный доступ идёт до ') + дата
+                        ? ('Бесплатный доступ идёт до ') + дата
                         : (дата
-                            ? (isEn ? 'The date has passed — access is by membership' : 'Дата прошла — доступ по членству')
-                            : (isEn ? 'Access is by membership' : 'Доступ по членству'))) +
+                            ? ('Дата прошла — доступ по членству')
+                            : ('Доступ по членству'))) +
                 '</p>' +
                 (когда ? '<p class="ad-podpis">' +
-                    (isEn ? 'Changed: ' : 'Менялось: ') + когда + '</p>' : '') +
+                    ('Менялось: ') + когда + '</p>' : '') +
             '</div>';
 
         async function сохранить(значение) {
@@ -299,7 +292,7 @@
                 A.showToast(res.error.message, 'error');
                 return;
             }
-            A.showToast(isEn ? 'Saved' : 'Сохранено', 'success');
+            A.showToast('Сохранено', 'success');
             renderSetAccess();
         }
 
@@ -463,7 +456,7 @@
                 '<th class="ad-pts-place-h">' + L.ratPlace + '</th>';
 
             cachedLevels.forEach(function(lv) {
-                var name = isEn ? (lv.name_en || lv.name) : lv.name;
+                var name = lv.name;
                 var предел = A.пределМест(lv.id);
                 /* Название и предел — разными строками. 03.10 на боевой вышло
                    «ИТОГОВЫЙ ТУРНИРДО 8»: предел шёл встык за названием. */
@@ -1073,7 +1066,7 @@
         // Category dropdown
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
-            var name = isEn ? (c.name_en || c.name) : c.name;
+            var name = c.name;
             catOpts += '<option value="' + c.id + '">' + name + '</option>';
         });
 
@@ -1091,7 +1084,7 @@
             var newCatOpts = '<option value="">' + L.ratAllCategories + '</option>';
             A.cachedCategories.forEach(function(c) {
                 if (_promoGenderFilter && c.gender !== _promoGenderFilter) return;
-                var name = isEn ? (c.name_en || c.name) : c.name;
+                var name = c.name;
                 newCatOpts += '<option value="' + c.id + '">' + name + '</option>';
             });
             catSelect.innerHTML = newCatOpts;
@@ -1136,7 +1129,7 @@
         });
 
         // Build eligible list
-        var eligibleHtml = '<h3 class="ad-rat-cat-title">' + (isEn ? 'Eligible for Promotion' : 'Доступны для промоушена') + '</h3>';
+        var eligibleHtml = '<h3 class="ad-rat-cat-title">' + ('Доступны для промоушена') + '</h3>';
         var hasEligible = false;
 
         var genders = Object.keys(catsByGender);
@@ -1144,7 +1137,7 @@
             if (_promoGenderFilter && genders[gi] !== _promoGenderFilter) continue;
 
             var genderCats = catsByGender[genders[gi]];
-            var genderLabel = genders[gi] === 'men' ? (isEn ? 'Men' : 'Мужчины') : (isEn ? 'Women' : 'Женщины');
+            var genderLabel = genders[gi] === 'men' ? ('Мужчины') : ('Женщины');
 
             for (var ci = 0; ci < genderCats.length - 1; ci++) {
                 var cat = genderCats[ci];
@@ -1152,8 +1145,8 @@
 
                 if (_promoCatFilter && cat.id !== _promoCatFilter) continue;
 
-                var catName = isEn ? (cat.name_en || cat.name) : cat.name;
-                var nextCatName = isEn ? (nextCat.name_en || nextCat.name) : nextCat.name;
+                var catName = cat.name;
+                var nextCatName = nextCat.name;
 
                 var plrRes = await A.client.from('players').select('id, name, name_en, points').eq('category_id', cat.id).order('points', { ascending: false }).limit(5);
                 var top5 = plrRes.data || [];
@@ -1167,7 +1160,7 @@
                         '</tr></thead><tbody>';
 
                     top5.forEach(function(p, idx) {
-                        var name = isEn ? (p.name_en || p.name) : p.name;
+                        var name = p.name;
                         var actionCell;
                         if (activePromotionMap[p.id]) {
                             var st = activePromotionMap[p.id];
@@ -1188,7 +1181,7 @@
         }
 
         // Existing promotions history
-        var historyHtml = '<h3 class="ad-rat-cat-title">' + (isEn ? 'Promotion History' : 'История промоушенов') + '</h3>';
+        var historyHtml = '<h3 class="ad-rat-cat-title">' + ('История промоушенов') + '</h3>';
 
         var filteredPromotions = promotions;
         if (_promoGenderFilter || _promoCatFilter) {
@@ -1212,9 +1205,9 @@
             '</tr></thead><tbody>';
 
             filteredPromotions.forEach(function(pr) {
-                var name = pr.players ? (isEn ? (pr.players.name_en || pr.players.name) : pr.players.name) : '?';
-                var fromCat = pr.from_cat ? (isEn ? (pr.from_cat.name_en || pr.from_cat.name) : pr.from_cat.name) : '?';
-                var toCat = pr.to_cat ? (isEn ? (pr.to_cat.name_en || pr.to_cat.name) : pr.to_cat.name) : '?';
+                var name = pr.players ? (pr.players.name) : '?';
+                var fromCat = pr.from_cat ? (pr.from_cat.name) : '?';
+                var toCat = pr.to_cat ? (pr.to_cat.name) : '?';
                 var statusLabel = pr.status === 'eligible' ? L.ratEligible : pr.status === 'transition' ? L.ratTransition : L.ratCompleted;
                 var statusClass = 'ad-status-badge ad-status-' + pr.status;
 

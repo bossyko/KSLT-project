@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     var crtEditingId = null;
     var crtImageFile = null;
@@ -62,17 +61,17 @@
         dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
         dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
 
-        var colLabels = { name: L.crtName, price: L.crtPrice, count: isEn ? 'Count' : 'Кол-во', city: L.crtCity, type: L.crtType, surface: L.crtSurface, partner: L.crtPartner };
+        var colLabels = { name: L.crtName, price: L.crtPrice, count: 'Кол-во', city: L.crtCity, type: L.crtType, surface: L.crtSurface, partner: L.crtPartner };
         var isNumeric = col === 'price' || col === 'count' || col === 'partner';
 
         var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
 
         if (isNumeric) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Most first' : '↓ Сначала больше') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ Least first' : '↑ Сначала меньше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала больше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала меньше') + '</div>';
         } else {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + (isEn ? '↑ A → Z' : '↑ А → Я') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + (isEn ? '↓ Z → A' : '↓ Я → А') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
         }
 
         dd.innerHTML = html;
@@ -355,7 +354,7 @@
         // Next
         html += '<button class="ad-crt-page-btn" data-page="' + (crtPage + 1) + '"' + (crtPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
         // Info
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
 
@@ -433,7 +432,7 @@
                             crtColHeader('name', L.crtName) +
                             crtColHeader('type', L.crtType) +
                             crtColHeader('surface', L.crtSurface) +
-                            crtColHeader('count', isEn ? 'Count' : 'Кол-во') +
+                            crtColHeader('count', 'Кол-во') +
                             crtColHeader('price', L.crtPrice) +
                             crtColHeader('city', L.crtCity) +
                             crtColHeader('partner', L.crtPartner) +
@@ -590,7 +589,7 @@
                 '</span>' +
                 '<span style="color:var(--text-secondary);margin-right:12px;">' +
                     (A.COURT_SURFACES[t.surface] || t.surface || '') + ' × ' + (t.count || 1) +
-                    ' — ' + (t.price || 0) + ' ' + (isEn ? 'som' : 'сом') +
+                    ' — ' + (t.price || 0) + ' ' + ('сом') +
                 '</span>';
         });
         if (!typesHtml) typesHtml = '<span class="ad-tiho">' + L.noData + '</span>';
@@ -602,8 +601,8 @@
 
         // Partner
         var partnerHtml = item.partner
-            ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + (isEn ? 'Yes' : 'Да')
-            : '<span class="ad-tiho">' + (isEn ? 'No' : 'Нет') + '</span>';
+            ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + ('Да')
+            : '<span class="ad-tiho">' + ('Нет') + '</span>';
 
         // Payments table
         var paymentsHtml = '';
@@ -667,7 +666,7 @@
                     '<span>' + partnerHtml + '</span>' +
                     '<span class="ad-tiho">' + L.crtPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
-                    '<span class="ad-tiho">' + (isEn ? 'Phone' : 'Телефон') + '</span>' +
+                    '<span class="ad-tiho">' + ('Телефон') + '</span>' +
                     '<span class="ad-vtoroy">' + A.esc(item.phone || '—') + '</span>' +
                     '<span class="ad-tiho">WhatsApp</span>' +
                     '<span class="ad-vtoroy">' + A.esc(item.whatsapp || '—') + '</span>' +
@@ -749,11 +748,11 @@
         var tooLong = parsed.digits.length > country.len;
 
         if (hadJunk) {
-            phoneWarn(input, isEn ? 'Digits only' : 'Только цифры');
+            phoneWarn(input, 'Только цифры');
         } else if (tooLong) {
-            phoneWarn(input, (isEn ? 'Number is longer than ' : 'В номере больше ') + country.len + (isEn ? ' digits' : ' цифр'));
+            phoneWarn(input, ('В номере больше ') + country.len + (' цифр'));
         } else if (parsed.switched) {
-            phoneWarn(input, (isEn ? 'Country set from the number' : 'Страна определена по номеру'));
+            phoneWarn(input, ('Страна определена по номеру'));
         } else {
             phoneWarn(input, '');
         }
@@ -766,7 +765,7 @@
         var country = KSLT_PHONE.byIso(iso);
         var n = input.value.replace(/[^0-9]/g, '').length;
         if (n && n < country.len) {
-            phoneWarn(input, (isEn ? 'Number is short: ' : 'Номер короткий: нужно ') + country.len + (isEn ? ' digits needed' : ' цифр'));
+            phoneWarn(input, ('Номер короткий: нужно ') + country.len + (' цифр'));
         } else {
             phoneWarn(input, '');
         }
@@ -809,7 +808,7 @@
 
         return '<div style="display:flex;gap:6px;">' +
             (window.KSLT_PHONE
-                ? KSLT_PHONE.pickerHtml(parts.iso, isEn ? 'en' : 'ru', 'ad-crt-wa-country')
+                ? KSLT_PHONE.pickerHtml(parts.iso, 'ru', 'ad-crt-wa-country')
                 : '') +
             '<input type="text" inputmode="numeric" class="ad-field-input" id="adCrtWhatsapp" value="' +
                 A.esc(window.KSLT_PHONE ? KSLT_PHONE.format(parts.iso, parts.rest) : parts.rest) +
@@ -1045,7 +1044,7 @@
 
             // Address form (RU/EN/KG)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + (isEn ? 'Address' : 'Адрес') + '</div>' +
+                '<div class="ad-form-card-title">' + ('Адрес') + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
@@ -1147,7 +1146,7 @@
 
             // Phones + Email
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + (isEn ? 'Contacts' : 'Контакты') + '</div>' +
+                '<div class="ad-form-card-title">' + ('Контакты') + '</div>' +
                 '<div id="adCrtPhones"></div>' +
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtAddPhone">' + L.crtAddPhone + '</button>' +
                 '<div class="ad-form-row" style="margin-top:12px;">' +
@@ -1628,7 +1627,7 @@
             if (!phonesEl) return;
             var html = '';
             crtPhones.forEach(function(ph, idx) {
-                var label = idx === 0 ? (isEn ? 'Phone' : 'Телефон') : (isEn ? 'Additional phone' : 'Доп. телефон');
+                var label = idx === 0 ? ('Телефон') : ('Доп. телефон');
                 var parts = window.KSLT_PHONE
                     ? KSLT_PHONE.split(ph)
                     : { iso: 'KG', rest: String(ph || '').replace(/\D/g, '') };
@@ -1641,12 +1640,12 @@
                         '<label class="ad-field-label">' + label + '</label>' +
                         '<div style="display:flex;gap:6px;">' +
                             (window.KSLT_PHONE
-                                ? KSLT_PHONE.pickerHtml(parts.iso, isEn ? 'en' : 'ru', 'ad-crt-phone-country" data-idx="' + idx)
+                                ? KSLT_PHONE.pickerHtml(parts.iso, 'ru', 'ad-crt-phone-country" data-idx="' + idx)
                                 : '') +
                             '<input type="text" inputmode="numeric" class="ad-field-input ad-crt-phone" data-idx="' + idx + '" placeholder="' + hint + '" value="' + A.esc(shown) + '" style="flex:1;">' +
                         '</div>' +
                     '</div>' +
-                    (idx >= 1 ? '<button type="button" class="ad-btn-icon ad-phone-remove" data-idx="' + idx + '" title="' + (isEn ? 'Remove' : 'Убрать') + '">&times;</button>' : '') +
+                    (idx >= 1 ? '<button type="button" class="ad-btn-icon ad-phone-remove" data-idx="' + idx + '" title="' + ('Убрать') + '">&times;</button>' : '') +
                 '</div>';
             });
             phonesEl.innerHTML = html;
@@ -1917,7 +1916,7 @@
         var grid = document.getElementById('adCrtGalleryGrid');
         if (!grid) return;
         if (crtGalleryUrls.length === 0) {
-            grid.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-xs);padding:8px 0;">' + (isEn ? 'No photos yet' : 'Фото ещё нет') + '</div>';
+            grid.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-xs);padding:8px 0;">' + ('Фото ещё нет') + '</div>';
             return;
         }
         var html = '';
@@ -2058,7 +2057,7 @@
             var n = input.value.replace(/[^0-9]/g, '').length;
             var need = KSLT_PHONE.byIso(iso).len;
             if (n && n !== need) {
-                phoneWarn(input, (isEn ? 'Number is incomplete: ' : 'Неполный номер: нужно ') + need + (isEn ? ' digits needed' : ' цифр'), true);
+                phoneWarn(input, ('Неполный номер: нужно ') + need + (' цифр'), true);
                 if (!bad) bad = input;
             }
         });
@@ -2070,7 +2069,7 @@
             var waN = wa.value.replace(/[^0-9]/g, '').length;
             var waNeed = KSLT_PHONE.byIso(waIso).len;
             if (waN && waN !== waNeed) {
-                phoneWarn(wa, (isEn ? 'Number is incomplete: ' : 'Неполный номер: нужно ') + waNeed + (isEn ? ' digits needed' : ' цифр'), true);
+                phoneWarn(wa, ('Неполный номер: нужно ') + waNeed + (' цифр'), true);
                 if (!bad) bad = wa;
             }
         }
@@ -2085,7 +2084,7 @@
                 var full = KSLT_PHONE.join(picker ? picker.dataset.iso : 'KG', input.value);
                 if (!full) return;
                 if (seen[full]) {
-                    phoneWarn(input, isEn ? 'This number is already listed' : 'Этот номер уже есть выше', true);
+                    phoneWarn(input, 'Этот номер уже есть выше', true);
                     if (!bad) bad = input;
                 }
                 seen[full] = true;
@@ -2095,7 +2094,7 @@
         if (bad) {
             bad.scrollIntoView({ behavior: 'smooth', block: 'center' });
             bad.focus();
-            A.showToast(isEn ? 'Check the phone numbers' : 'Проверьте номера телефонов', 'error');
+            A.showToast('Проверьте номера телефонов', 'error');
             return false;
         }
         return true;
@@ -2121,10 +2120,10 @@
             h.className = 'ad-input-hint';
             box.appendChild(h);
         }
-        h.textContent = isEn ? 'Check the email address' : 'Проверьте адрес почты';
+        h.textContent = 'Проверьте адрес почты';
         input.scrollIntoView({ behavior: 'smooth', block: 'center' });
         input.focus();
-        A.showToast(isEn ? 'Check the email address' : 'Проверьте адрес почты', 'error');
+        A.showToast('Проверьте адрес почты', 'error');
         return false;
     }
 
@@ -2213,7 +2212,7 @@
             };
 
             if (!data.name) {
-                A.showToast(isEn ? 'Name is required' : 'Название обязательно', 'error');
+                A.showToast('Название обязательно', 'error');
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
@@ -2275,7 +2274,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
+        A.showToast('Удалено', 'success');
         renderCourtsList();
     }
 

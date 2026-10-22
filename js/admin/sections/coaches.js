@@ -7,7 +7,6 @@
 
     var A = window.KSLT_ADMIN;
     var L = A.L;
-    var isEn = A.isEn;
 
     var cchEditingId = null;
     var cchImageFile = null;
@@ -24,12 +23,12 @@
     var cchPartnerPin = '';
 
     var COACH_TAGS = {
-        adults: isEn ? 'Adults' : 'Взрослые',
-        kids: isEn ? 'Kids' : 'Дети',
-        individual: isEn ? 'Individual' : 'Индивидуальные',
-        group: isEn ? 'Group' : 'Групповые',
-        beginner: isEn ? 'Beginner' : 'Начинающие',
-        advanced: isEn ? 'Advanced' : 'Продвинутые'
+        adults: 'Взрослые',
+        kids: 'Дети',
+        individual: 'Индивидуальные',
+        group: 'Групповые',
+        beginner: 'Начинающие',
+        advanced: 'Продвинутые'
     };
 
     function renderCoachesSection() {
@@ -89,11 +88,11 @@
                         '</colgroup>' +
                         '<thead><tr>' +
                             '<th style="width:36px;"></th>' +
-                            '<th>' + (isEn ? 'Name' : 'ФИО') + '</th>' +
+                            '<th>' + ('ФИО') + '</th>' +
                             '<th>' + L.cchPosition + '</th>' +
                             '<th>' + L.cchCourt + '</th>' +
                             '<th>' + L.cchTags + '</th>' +
-                            '<th class="ad-centr">' + (isEn ? 'Price' : 'Цена') + '</th>' +
+                            '<th class="ad-centr">' + ('Цена') + '</th>' +
                             '<th class="ad-centr">' + L.cchPromoted + '</th>' +
                             '<th style="text-align:center;width:50px;">&#128065;</th>' +
                         '</tr></thead>' +
@@ -170,10 +169,8 @@
 
         var html = '';
         items.forEach(function(row) {
-            var fullName = isEn
-                ? ((row.last_name_en || row.last_name || '') + ' ' + (row.first_name_en || row.first_name || ''))
-                : ((row.last_name || '') + ' ' + (row.first_name || ''));
-            var pos = isEn ? (row.position_en || row.position || '') : (row.position || '');
+            var fullName = ((row.last_name || '') + ' ' + (row.first_name || ''));
+            var pos = (row.position || '');
             var courtText = A.esc(row.court || '—');
             var tagsHtml = '';
             (row.tags || []).forEach(function(t) {
@@ -229,7 +226,7 @@
             html += '<button class="ad-crt-page-btn' + (p === cchPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         }
         html += '<button class="ad-crt-page-btn" data-page="' + (cchPage + 1) + '"' + (cchPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + (isEn ? 'total' : 'всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
 
         wrap.innerHTML = html;
 
@@ -307,10 +304,8 @@
 
         var today = KSLT_VREMYA.сегодня();
 
-        var fullName = isEn
-            ? ((item.last_name_en || item.last_name || '') + ' ' + (item.first_name_en || item.first_name || ''))
-            : ((item.last_name || '') + ' ' + (item.first_name || ''));
-        var pos = isEn ? (item.position_en || item.position || '') : (item.position || '');
+        var fullName = ((item.last_name || '') + ' ' + (item.first_name || ''));
+        var pos = (item.position || '');
         var tagsHtml = '';
         (item.tags || []).forEach(function(t) {
             tagsHtml += '<span class="ad-cch-tag-badge" style="margin-right:4px;">' + (COACH_TAGS[t] || t) + '</span>';
@@ -373,7 +368,7 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchViewInfo + '</div>' +
                 '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:var(--fs-sm);">' +
-                    '<span class="ad-tiho">' + (isEn ? 'Name' : 'ФИО') + '</span>' +
+                    '<span class="ad-tiho">' + ('ФИО') + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(fullName.trim()) + '</span>' +
                     '<span class="ad-tiho">' + L.cchPosition + '</span>' +
                     '<span class="ad-vtoroy">' + A.esc(pos || '—') + '</span>' +
@@ -461,9 +456,9 @@
             var cRes = await A.client.from('courts').select('id,name,name_en,name_kg').order('name');
             if (cRes.data) courtsList = cRes.data;
         }
-        var courtOptionsHtml = '<option value="">' + (isEn ? '— Select —' : '— Выберите —') + '</option>';
+        var courtOptionsHtml = '<option value="">' + ('— Выберите —') + '</option>';
         courtsList.forEach(function(c) {
-            var courtName = isEn ? (c.name_en || c.name) : c.name;
+            var courtName = c.name;
             var sel = (item && item.court === c.name) ? ' selected' : '';
             courtOptionsHtml += '<option value="' + A.esc(c.id) + '" data-name="' + A.esc(c.name) + '" data-name-en="' + A.esc(c.name_en || '') + '" data-name-kg="' + A.esc(c.name_kg || '') + '"' + sel + '>' + A.esc(courtName) + '</option>';
         });
@@ -567,7 +562,7 @@
 
             // ФИО (Last Name / First Name / Patronymic)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + (isEn ? 'Full Name' : 'ФИО') + '</div>' +
+                '<div class="ad-form-card-title">' + ('ФИО') + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
@@ -604,7 +599,7 @@
                     '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                    '<input type="text" class="ad-field-input" id="adCchPosition" placeholder="' + (isEn ? 'Head coach' : 'Старший тренер') + '" value="' + A.esc(item ? item.position : '') + '">' +
+                    '<input type="text" class="ad-field-input" id="adCchPosition" placeholder="' + ('Старший тренер') + '" value="' + A.esc(item ? item.position : '') + '">' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<input type="text" class="ad-field-input" id="adCchPositionEn" value="' + A.esc(item ? item.position_en : '') + '">' +
@@ -641,7 +636,7 @@
 
             // Contacts
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + (isEn ? 'Contacts' : 'Контакты') + '</div>' +
+                '<div class="ad-form-card-title">' + ('Контакты') + '</div>' +
                 '<div class="ad-form-row" style="grid-template-columns:1fr 1fr 1fr;">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.cchPhone + '</label>' +
@@ -744,7 +739,7 @@
                         '</div>' +
                     '</div>' +
                     '<div style="margin-top:16px;">' +
-                        '<label class="ad-field-label">' + (isEn ? 'Partner Services' : 'Услуги партнёра') + '</label>' +
+                        '<label class="ad-field-label">' + ('Услуги партнёра') + '</label>' +
                         '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:var(--fs-xs);color:var(--text-muted);">' +
                             '<span>' + L.cchServiceName + '</span>' +
                             '<span>' + L.cchDiscount + '</span>' +
@@ -1319,7 +1314,7 @@
             };
 
             if (!lastName) {
-                A.showToast(isEn ? 'Last name is required' : 'Фамилия обязательна', 'error');
+                A.showToast('Фамилия обязательна', 'error');
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
@@ -1365,7 +1360,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast(isEn ? 'Deleted' : 'Удалено', 'success');
+        A.showToast('Удалено', 'success');
         renderCoachesList();
     }
 
