@@ -131,7 +131,8 @@ const КУСКИ = [
     ['счёт в доме', 'check-schyot-doma.js', 'check-schyot-doma-otkat.js'],
     ['тона бейджа админки', 'check-badge-tona.js', 'check-badge-tona-otkat.js'],
     ['мёртвые классы кабинета', 'check-mertvye-klassy.js', 'check-mertvye-klassy-otkat.js'],
-    ['лестница разрядов', 'check-lestnica-razryadov.js', 'check-lestnica-razryadov-otkat.js']
+    ['лестница разрядов', 'check-lestnica-razryadov.js', 'check-lestnica-razryadov-otkat.js'],
+    ['админка одним языком', 'check-admin-odin-yazyk.js', 'check-admin-odin-yazyk-otkat.js']
 ];
 
 function прогнать(файл) {
