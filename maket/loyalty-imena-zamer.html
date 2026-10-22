@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер имён кнопок «Лояльности»</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=296">
+<!--
+  ЗАЧЕМ. В «Лояльности» кнопки носили имена с ДВОЙНЫМ тире —
+  `ad-btn--sm`, `ad-btn--danger`, — а правил под них в css нет вовсе
+  (счёт по всем файлам: 0). Пагинация звала `ad-page-btn`, которого
+  тоже нет: живое имя `ad-crt-page-btn`, 26 зовов и 3 правила.
+
+  ЗАМЕРЕНО НА БОЕВОЙ 22.10: «Ред.» 81×44 и «✕» 61×44 — обе обычного
+  размера, обе одного фона #1E1E1E. То есть мелкая кнопка не мелкая, а
+  кнопка УДАЛЕНИЯ ПРАВИЛА неотличима по виду от «Ред.».
+-->
+<style>
+  body { background: var(--bg-base); color: var(--text-primary);
+         font-family: var(--font-sans); padding: 40px; }
+  .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin: 20px 0 8px; }
+  .ряд { display: flex; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="подпись">БЫЛО — имена с двойным тире, правил под них нет</div>
+<div class="ряд" id="было">
+  <button class="ad-btn ad-btn--sm">Ред.</button>
+  <button class="ad-btn ad-btn--sm ad-btn--danger">✕</button>
+  <button class="ad-page-btn">1</button>
+</div>
+
+<div class="подпись">СТАЛО — живые имена, те же, что во всей админке</div>
+<div class="ряд" id="стало">
+  <button class="ad-btn ad-btn-sm">Ред.</button>
+  <button class="ad-btn ad-btn-sm ad-btn-danger">✕</button>
+  <button class="ad-crt-page-btn">1</button>
+</div>
+</body>
+</html>
