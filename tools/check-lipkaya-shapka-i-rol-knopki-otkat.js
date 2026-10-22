@@ -12,7 +12,9 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-123-'));
 ['js', 'css', 'tools'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
-const AD = 'css/admin.css', НАСТР = 'js/admin/sections/settings.js',
+const AD = 'css/admin.css',
+      FIN = 'js/admin/sections/finances.js', VCH = 'js/admin/sections/vouchers.js',
+      USR = 'js/admin/sections/users.js', НАСТР = 'js/admin/sections/settings.js',
       ТУРН = 'js/admin/sections/tournaments.js';
 
 const ОТКАТЫ = [
@@ -55,6 +57,32 @@ const ОТКАТЫ = [
    'ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn',
    'ad-btn ad-btn-sm ad-btn-warning ad-brk-btn',
    '«Сетка» осталась нейтральной'],
+  /* ── полоса фильтров, кусок 125 ── */
+  ['вернуть мёртвое имя полосе фильтров «Финансов»', FIN,
+   '<div class="ad-filter-row ad-filter-sticky">',
+   '<div class="ad-filter-row sticky">',
+   'ни одна полоса фильтров не носит имени, под которым нет правила'],
+
+  ['вернуть мёртвое имя полосе фильтров «Скидок»', VCH,
+   '<div class="ad-filter-row ad-filter-sticky">',
+   '<div class="ad-filter-row sticky">',
+   'липнут ВСЕ двенадцать полос фильтров'],
+
+  ['снять липкость у полосы «Пользователей»', USR,
+   '<div class="ad-filter-row ad-filter-sticky">',
+   '<div class="ad-filter-row">',
+   'липнут ВСЕ двенадцать полос фильтров'],
+
+  ['завести правило `.sticky` — второе имя тому же понятию', AD,
+   '.ad-filter-sticky {\n    position: sticky;',
+   '.sticky {\n    position: sticky;\n}\n\n.ad-filter-sticky {\n    position: sticky;',
+   'правила `.sticky` в admin.css по-прежнему нет'],
+
+  ['унести полосу фильтров «Финансов» — правилу станет нечего считать', FIN,
+   'class="ad-filter-row ad-filter-sticky"',
+   'class="ad-NETU-filter-row ad-filter-sticky"',
+   'полосы фильтров найдены, и их 12'],
+
 ];
 
 function прогон() {
