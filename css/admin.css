@@ -676,14 +676,6 @@ body.ad-page {
 }
 .ad-col-header:hover .ad-col-filter-btn { opacity: 0.7; }
 .ad-col-filter-btn.ad-col-filtered { opacity: 1; color: var(--accent); }
-.ad-col-filter-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: inline-block;
-    margin-left: var(--space-05);
-}
 
 /* Column filter dropdown */
 .ad-col-dropdown {
@@ -753,7 +745,6 @@ body.ad-page {
 }
 .ad-col-dd-item:hover { background: var(--alpha-white-04); color: var(--text-primary); }
 .ad-col-dd-sort { color: var(--text-muted); }
-.ad-col-dd-reset { color: var(--accent); }
 .ad-col-dd-divider { height: 1px; background: var(--border-subtle); margin: var(--space-05) 0; }
 .ad-col-dd-check {
     display: flex;
@@ -1134,7 +1125,6 @@ body.ad-page {
     padding: var(--space-4) 0;
 }
 .ad-btn-wide { font-size: var(--fs-base); padding: var(--space-3) var(--space-8); }
-.ad-btn-off { opacity: 0.45; cursor: not-allowed; }
 .ad-qual-block-top { margin-top: var(--space-5); }
 .ad-qual-note-top { margin-top: var(--space-2); }
 .ad-ig-section-top { margin-top: var(--space-6); }
@@ -1192,71 +1182,9 @@ body.ad-page {
    четырьмя разными инлайнами с зашитым `#4caf50`; стало четыре класса
    на токенах. Крестик удаления снимка был 22×22 с кеглем 14 — ступень
    высоты 28 и кегль 16, и у него появилась цель нажатия. */
-.ad-trn-news-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-4);
-}
-.ad-trn-news-title { margin: 0; font-size: var(--fs-md); line-height: var(--lh-snug); }
-.ad-trn-news-status { font-weight: var(--fw-semibold); }
-.ad-trn-news-status--sent  { color: var(--success); }
-.ad-trn-news-status--pub   { color: var(--accent); }
-.ad-trn-news-status--draft { color: var(--text-secondary); font-weight: var(--fw-regular); }
-.ad-trn-news-status--gen   { color: var(--text-secondary); font-weight: var(--fw-regular); }
 
-.ad-trn-photos-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-3);
-}
-.ad-trn-photos-head .ad-form-card-title { margin: 0; }
-.ad-trn-photo-pick { cursor: pointer; font-size: var(--fs-sm); }
-.ad-trn-photo-file { display: none; }
-.ad-trn-photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: var(--space-2);
-}
-.ad-trn-photo-empty {
-    grid-column: 1 / -1;
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-}
-.ad-trn-photo-cell {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: var(--bw-hair) solid var(--border);
-}
-.ad-trn-photo-img { width: 100%; height: 100%; object-fit: cover; }
 /* Крестик снимка: ступень кнопки 28 вместо 22, кегль 16 вместо 14.
    Цель нажатия даёт общий слой — класс внесён в список низких кнопок. */
-.ad-trn-photo-remove {
-    position: absolute;
-    top: var(--space-1);
-    right: var(--space-1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--btn-h-xs);
-    height: var(--btn-h-xs);
-    border: none;
-    border-radius: var(--radius-full);
-    background: var(--alpha-black-60);
-    color: var(--neutral-white);
-    font-size: var(--fs-base);
-    line-height: var(--lh-none);
-    cursor: pointer;
-}
-.ad-trn-news-actions {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-    padding-top: var(--space-3);
-}
 .ad-btn[disabled] { opacity: 0.5; }
 
 /* Предупреждение «ждут парный рейтинг»: своя краска, потому что это не
@@ -1510,34 +1438,9 @@ body.ad-page {
    Второго определения тут нет НАМЕРЕННО: кабинет admin.css не грузит. */
 
 /* ---- Coming Soon Placeholder ---- */
-.ad-coming-soon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--space-20) var(--space-6);
-    min-height: 300px;
-}
 
-.ad-coming-soon-icon {
-    font-size: var(--fs-3xl);
-    margin-bottom: var(--space-4);
-    opacity: 0.4;
-}
 
-.ad-coming-soon-title {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-}
 
-.ad-coming-soon-text {
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
-    max-width: 360px;
-}
 
 /* ---- Section Header (title + action button) ---- */
 .ad-section-header {
@@ -1596,9 +1499,7 @@ body.ad-page {
    Замер 28.09 на странице турнира: 37 видимых кнопок, 10 вариантов,
    высоты 28 · 32 · 36 · 44 (32 мимо шкалы), радиусов четыре.
    ========================================================================== */
-.ad-btn-xs { --ad-btn-h: var(--btn-h-xs); padding: 0 var(--space-3); font-size: var(--fs-xs); }
 .ad-btn-sm { --ad-btn-h: var(--btn-h-sm); padding: 0 var(--space-sm); }
-.ad-btn-lg { --ad-btn-h: var(--btn-h-lg); padding: 0 var(--space-6); }
 
 /* ЖЕРЕБЬЁВКА: НОМЕР ЖРЕБИЯ И ПОДПИСЬ ПОД КНОПКОЙ
    ────────────────────────────────────────────────────────────────────────
@@ -1670,7 +1571,6 @@ body.ad-page {
    а не теснота. Слой растёт на 4 — внутри отступа полосы 12. */
 .ad-reg-floating-remove,
 .ad-btn-restore,
-.ad-trn-photo-remove,
 /* 03.10: галочка строки 16, «выбрать все» 16, «Отмена» в окне решения 20.
    Галочке слой нужен обёрткой — у `input` нет псевдоэлементов. «Отмена»
    намеренно текстовая ссылка (решение 30.09: четыре кнопки давали 474 при
@@ -1708,7 +1608,6 @@ body.ad-page {
 .ad-export-bar .ad-btn::after,
 .ad-reg-floating-remove::after,
 .ad-btn-restore::after,
-.ad-trn-photo-remove::after,
 .ad-reg-check-wrap::after,
 .ad-confirm-cancel::after {
     content: '';
@@ -2215,9 +2114,6 @@ input[type="date"]::-webkit-datetime-edit {
 /* Сетка формы одна на всю вкладку, а полю, которому нужно шире, даётся
    ячеек больше. Так колонка, которую глаз ведёт сверху вниз, не ломается
    на стыке карточек — прежде соседние карточки имели 3 и 4 колонки */
-.ad-field-2 {
-    grid-column: span 2;
-}
 
 /* ШИРИНА ПОЛЯ — СВОЙСТВО СОДЕРЖИМОГО, А НЕ КОЛОНКИ.
    Замер 28.09, карточка «Тип сетки»: полю «Корты» нужно 42, «В группе» —
@@ -2312,27 +2208,9 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 /* Players — Round Image Upload */
-.ad-image-upload-round {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin: 0 auto var(--space-4);
-    overflow: hidden;
-}
 
-.ad-image-upload-round .ad-image-upload-preview {
-    border-radius: 50%;
-}
 
-.ad-image-upload-round .ad-image-upload-placeholder {
-    padding: var(--space-4) var(--space-2);
-    font-size: var(--fs-2xs);
-    text-align: center;
-}
 
-.ad-image-upload-round .ad-image-upload-icon {
-    font-size: var(--fs-xl);
-}
 
 /* Players — Rank Change */
 .ad-change-up {
@@ -2346,39 +2224,10 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 /* Players — W/L Form Toggles */
-.ad-form-toggles {
-    display: flex;
-    gap: var(--space-2);
-}
 
-.ad-form-toggle {
-    display: flex;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: var(--bw-hair) solid var(--border-light);
-}
 
-.ad-form-toggle button {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: var(--bg-elevated);
-    color: var(--text-muted);
-    font-weight: 700;
-    font-size: var(--fs-sm);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
 
-.ad-form-btn-w.active {
-    background: var(--accent);
-    color: var(--neutral-black);
-}
 
-.ad-form-btn-l.active {
-    background: var(--danger);
-    color: var(--danger-on);
-}
 
 /* Players — Badges Grid */
 .ad-badges-grid {
@@ -2762,20 +2611,6 @@ input[type="date"]::-webkit-datetime-edit {
     flex-shrink: 0;
 }
 
-.ad-phone-prefix {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: 0 var(--space-3);
-    height: 44px;
-    background: var(--bg-elevated);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
 
 /* Удобства корта — тот же флажок, что везде в админке.
    Здесь стоял appearance:auto: он возвращал белый квадрат из браузера,
@@ -2807,24 +2642,8 @@ input[type="date"]::-webkit-datetime-edit {
     font-weight: 700;
 }
 
-.ad-court-type-line {
-    font-size: var(--fs-sm);
-    line-height: 1.65;
-}
 
-.ad-schedule-rows {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-2);
-}
 
-.ad-schedule-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: var(--space-2);
-    align-items: center;
-}
 
 .ad-btn-icon {
     width: 32px;
@@ -3277,16 +3096,7 @@ select.ad-field-input {
     color: var(--success);
 }
 
-.ad-toast-error {
-    background: var(--danger-subtle);
-    border: var(--bw-hair) solid var(--danger-border);
-    color: var(--danger);
-}
 
-.ad-toast-show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
 
 /* ---- Confirm Modal ---- */
 .ad-confirm-overlay {
@@ -3616,13 +3426,7 @@ select.ad-field-input {
         font-size: var(--fs-xs);
     }
 
-    .ad-schedule-row {
-        grid-template-columns: 1fr auto;
-    }
 
-    .ad-schedule-row .ad-sched-val {
-        grid-column: 1;
-    }
 }
 
 @media (max-width: 480px) {
@@ -3715,19 +3519,7 @@ select.ad-field-input {
 }
 
 /* Filters */
-.ad-rat-filters {
-    display: flex;
-    gap: var(--space-3);
-    align-items: center;
-    margin-bottom: var(--space-4);
-    flex-wrap: wrap;
-}
 
-.ad-rat-hint {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    font-style: italic;
-}
 
 /* Category titles */
 .ad-rat-cat-title {
@@ -3848,29 +3640,9 @@ select.ad-field-input {
 }
 
 /* Points rules inputs */
-.rat-rule-input {
-    background: var(--alpha-white-08) !important;
-    border: var(--bw-hair) solid rgba(255,255,255,0.15);
-    border-radius: var(--radius-sm);
-    color: var(--neutral-white);
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--fs-sm);
-}
 
-.rat-rule-input:focus {
-    border-color: var(--accent);
-    outline: none;
-}
 
-.rat-rule-input::-webkit-outer-spin-button,
-.rat-rule-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
 
-.rat-rule-input {
-    -moz-appearance: textfield;
-}
 
 /* Status badges for promotions */
 .ad-status-eligible {
@@ -3936,9 +3708,6 @@ select.ad-field-input {
         width: 100%;
     }
 
-    .rat-rule-input {
-        width: 55px;
-    }
 }
 
 /* ============================================
@@ -4078,10 +3847,6 @@ select.ad-field-input {
     color: var(--text-secondary);
 }
 
-.ad-badge-accent {
-    background: var(--alpha-lime-20);
-    color: var(--accent);
-}
 
 /* СЧЁТЧИКИ У ЗАГОЛОВКОВ «СНЯТЫЕ» И «НЕ ДОПУЩЕНЫ» — ПО ТОНУ, А НЕ ПО ИМЕНИ
    СОСТОЯНИЯ (19.10). Звались `-out` и `-blk`.
@@ -4919,9 +4684,6 @@ select.ad-field-input {
         flex-direction: column;
     }
 
-    .ad-bracket-grid {
-        min-width: auto;
-    }
 
     .ad-modal {
         max-width: 100% !important;
@@ -4949,34 +4711,10 @@ select.ad-field-input {
     color: var(--warning);
 }
 
-.ad-mem-cancelled {
-    background: var(--danger-subtle);
-    color: var(--danger);
-}
 
-.ad-mem-expiring {
-    background: var(--warning-subtle);
-    color: var(--warning);
-}
 
-.ad-mem-paid {
-    background: var(--success-subtle);
-    color: var(--success);
-}
 
-.ad-mem-unpaid {
-    background: var(--danger-subtle);
-    color: var(--danger);
-}
 
-.ad-mem-tg {
-    background: rgba(0, 136, 204, 0.15);
-    color: #0088cc;
-    font-size: var(--fs-2xs);
-    padding: var(--space-05) var(--space-1);
-    vertical-align: middle;
-    margin-right: var(--space-1);
-}
 
 /* ---- Membership Table Compact ---- */
 #adMemTable th,
@@ -4990,139 +4728,19 @@ select.ad-field-input {
 }
 
 /* ---- Membership Actions ---- */
-.ad-mem-actions {
-    white-space: nowrap;
-    text-align: right;
-}
 
-.ad-mem-actions .ad-btn-sm {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    margin-left: var(--space-1);
-    border-radius: var(--radius-sm);
-    border: var(--bw-hair) solid var(--border-subtle);
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: var(--fs-xs);
-    transition: all 0.15s ease;
-}
 
-.ad-btn-extend:hover {
-    background: var(--success-subtle);
-    color: var(--success);
-    border-color: var(--success);
-}
 
-.ad-btn-cancel-mem:hover {
-    background: var(--danger-subtle);
-    color: var(--danger);
-    border-color: var(--danger);
-}
 
-.ad-btn-edit-mem:hover {
-    background: var(--alpha-lime-12);
-    color: var(--accent);
-    border-color: var(--accent);
-}
 
 /* ---- Member Profile Modal ---- */
-.ad-mem-profile-modal {
-    max-width: 550px;
-}
 
-.ad-mem-profile-link {
-    color: var(--accent);
-    text-decoration: none;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-.ad-mem-profile-link:hover {
-    opacity: 0.8;
-    text-decoration: underline;
-}
 
-.ad-mem-profile-top {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    margin-bottom: var(--space-5);
-}
 
-.ad-mem-profile-avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-.ad-mem-profile-avatar-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--accent-subtle);
-    color: var(--accent);
-    font-size: var(--fs-xl);
-    font-weight: 700;
-}
 
-.ad-mem-profile-name {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-.ad-mem-profile-email {
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-    margin-top: var(--space-05);
-}
 
-.ad-mem-profile-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-5);
-    padding: var(--space-3) var(--space-4);
-    background: var(--alpha-white-04);
-    border-radius: var(--radius-sm);
-    border: var(--bw-hair) solid var(--border, var(--alpha-white-08));
-}
-.ad-mem-profile-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: var(--fs-sm);
-}
-.ad-mem-profile-label {
-    color: var(--text-secondary);
-}
 
-.ad-mem-profile-payments-section {
-    border-top: var(--bw-hair) solid var(--border, var(--alpha-white-08));
-    padding-top: var(--space-4);
-}
 
-.ad-mem-profile-payments {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--fs-xs);
-}
-.ad-mem-profile-payments th {
-    text-align: left;
-    color: var(--text-secondary);
-    font-weight: 500;
-    padding: var(--space-1) var(--space-2);
-    border-bottom: var(--bw-hair) solid var(--border, var(--alpha-white-08));
-}
-.ad-mem-profile-payments td {
-    padding: var(--space-1) var(--space-2);
-    color: var(--text-primary);
-    border-bottom: var(--bw-hair) solid var(--alpha-white-08);
-}
 
 /* ---- Draft autosave indicator ---- */
 .ad-draft-status {
@@ -5657,9 +5275,6 @@ select.ad-field-input {
     border-bottom: var(--bw-thick) solid var(--alpha-lime-20);
 }
 
-.ad-grp-stage-separator {
-    margin: var(--space-6) 0 var(--space-4);
-}
 
 /* ---- Group Stage (Round-Robin) ---- */
 .ad-grp-block {
@@ -5939,16 +5554,6 @@ select.ad-field-input {
 /* ---- Schedule by courts ---- */
 .ad-sched-section { margin-bottom: var(--space-6); }
 
-.ad-sched-court-title {
-    font-size: var(--fs-base);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--accent);
-    padding-bottom: var(--space-2);
-    margin-bottom: var(--space-2);
-    border-bottom: var(--bw-thick) solid var(--alpha-lime-20);
-}
 
 /* Раздача ширин долями резала содержимое: «Корт 1» превращался в «Корт», а
    «Готовьтесь» — в «отовьтесь». Теперь ширину диктует само содержимое, а
@@ -6092,7 +5697,6 @@ select.ad-field-input {
 /* Поля и переключатель — одного роста с кнопками «Готовьтесь» и «На корт»:
    строка читается как один ряд, а не как лесенка */
 .ad-sched-time,
-.ad-sched-player,
 .ad-sched-court {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
@@ -6106,11 +5710,9 @@ select.ad-field-input {
 /* Поля держат свой размер сами: при гибкой таблице «сто процентов» означало
    «сколько дадут», а давали мало */
 .ad-sched-time   { width: 66px; }
-.ad-sched-player { width: 100%; }
 .ad-sched-court  { width: 78px; }
 
 .ad-sched-time:focus,
-.ad-sched-player:focus,
 .ad-sched-court:focus {
     border-color: var(--accent);
     outline: none;
@@ -6118,7 +5720,6 @@ select.ad-field-input {
 }
 
 .ad-sched-time:disabled,
-.ad-sched-player:disabled,
 .ad-sched-court:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -6145,9 +5746,6 @@ select.ad-field-input {
 
 /* БЫЛО ТРИ ОБЪЯВЛЕНИЯ НА ОДНО: база, противовес в 992 (повторял базу
    слово в слово) и 1fr в 600. Остался один параметр. */
-.ad-usr-cards--3 {
-    --ad-plitok: 3;
-}
 
 .ad-usr-card {
     display: flex;
@@ -6349,11 +5947,6 @@ select.ad-field-input {
     color: var(--text-primary);
 }
 
-.ad-btn-xs {
-    padding: var(--space-05) var(--space-2);
-    font-size: var(--fs-xs);
-    border-radius: 4px;
-}
 
 /* Voucher detail modal */
 .ad-vch-detail-grid {
@@ -6551,68 +6144,6 @@ select.ad-field-input {
 .ad-ig-matches-grid {
     --ad-plitok: 2;
     margin-top: var(--space-3);
-}
-.ad-ig-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--space-3);
-    margin-top: var(--space-3);
-}
-.ad-ig-card {
-    background: var(--bg-card);
-    border: var(--bw-hair) solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-.ad-ig-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent-subtle);
-}
-.ad-ig-card-title {
-    font-size: var(--fs-2xs);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-muted);
-    padding: var(--space-1) var(--space-3);
-    background: var(--alpha-white-04);
-    border-bottom: var(--bw-hair) solid var(--border-subtle);
-}
-.ad-ig-card-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-2) var(--space-3);
-    border-bottom: var(--bw-hair) solid var(--border-subtle);
-}
-.ad-ig-card-row:last-child {
-    border-bottom: none;
-}
-.ad-ig-card-row.ad-ig-card-winner {
-    background: var(--alpha-lime-06);
-}
-.ad-ig-card-name {
-    font-size: var(--fs-sm);
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 170px;
-}
-.ad-ig-card-winner .ad-ig-card-name {
-    color: var(--accent);
-    font-weight: 700;
-}
-.ad-ig-card-score {
-    font-size: var(--fs-xs);
-    color: var(--text-secondary);
-    font-weight: 600;
-    white-space: nowrap;
-    margin-left: var(--space-2);
-}
-.ad-ig-card-winner .ad-ig-card-score {
-    color: var(--accent);
 }
 .ad-brk-grp-label {
     display: inline-flex;
@@ -7498,16 +7029,6 @@ select.ad-field-input {
 
 
 /* Имена в окне счёта: нажатие поднимает человека наверх, его цифры первые */
-.ad-score-name {
-    font-weight: 600;
-    padding: var(--space-1) var(--space-2);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.ad-score-name:hover {
-    background: var(--alpha-lime-12);
-}
 #adNameTop {
     background: var(--alpha-lime-06);
 }
@@ -8667,7 +8188,6 @@ select.ad-field-input {
 }
 .ad-pts-in[readonly]:hover { border-color: transparent; }
 /* Нулевое значение не кричит: у итогового их тридцать подряд. */
-.ad-pts-in.ad-pts-zero { color: var(--text-dim); font-weight: 400; }
 /* Уровень, которому столько мест не разыграть, вообще не предлагает поле. */
 .ad-pts-off { color: var(--text-dim); font-size: var(--fs-xs); }
 
