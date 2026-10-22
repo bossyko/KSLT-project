@@ -2336,12 +2336,31 @@
         // Связей между игроком и разрядами теперь две — домашняя и таблица
         // очков по разрядам, — и база не знает, какую подставить. Указываем
         // домашнюю явно, иначе запрос отвечает ошибкой и список пуст
+        /* КОЛОНКИ ПЕРЕЧИСЛЕНЫ, А НЕ ЗВЁЗДОЧКА (22.10). `select('*')` просил
+           и `phone` с `email`, которые роли `authenticated` НАМЕРЕННО не
+           выданы, — и запрос падал с «permission denied for table players»
+           КАЖДЫЙ раз, а не иногда. Доступы верны и трогать их не надо
+           (слово Кости 22.10): неверен был ЗАПРОС.
+           Замерено в боевой базе до правки: со звёздочкой — отказ, с этим
+           перечнем — строки и все поля. Это был ЕДИНСТВЕННЫЙ `select('*')`
+           к `players` во всём продукте; везде остальное уже перечисляет. */
+        var ПОЛЯ_РЕЙТИНГА =
+            'id, name, name_en, points, category_id, wins, losses, form, rank_change';
         var query = A.client.from('players')
-            .select('*, categories!players_category_id_fkey(name, name_en)')
+            .select(ПОЛЯ_РЕЙТИНГА + ', categories!players_category_id_fkey(name, name_en)')
             .order('points', { ascending: false });
         if (_ratCatFilter) query = query.eq('category_id', _ratCatFilter);
         if (_ratGenderFilter) query = query.eq('gender', _ratGenderFilter);
         var res = await query;
+        /* ОШИБКА ЧТЕНИЯ НЕ ПРЕВРАЩАЕТСЯ В НОЛЬ. Прежде `res.error` не
+           смотрели вовсе: при отказе базы `data` пуст, и экран писал «Нет
+           игроков» — менеджер читал это как «никого нет в разряде». */
+        if (res.error) {
+            body.innerHTML = '<div class="ad-empty-state"><p>' +
+                A.esc(L.ratLoadFailed) + '</p><p class="ad-modal-note">' +
+                A.esc(res.error.message) + '</p></div>';
+            return;
+        }
         var players = res.data || [];
 
         if (_ratSearchQuery) {
