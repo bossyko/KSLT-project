@@ -18,7 +18,9 @@
         { key: 'promasters', name: 'Pro-Masters' },
         { key: 'masters', name: 'Masters' },
         { key: 'tour', name: 'Tour' },
-        { key: 'challenger', name: 'Challengers' },
+        /* `Challenger` без «s»: имя сверено с базой 21.10 — копии уже
+           разошлись, в запасном наборе стояло «Challengers». */
+        { key: 'challenger', name: 'Challenger' },
         { key: 'futures', name: 'Futures' },
         { key: 'friendly', name: 'Friendly Weekend' }
     ];
