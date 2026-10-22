@@ -14,7 +14,7 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-126-'));
 
 const UT = 'js/admin/core/utils.js', AD = 'css/admin.css',
       CH = 'js/admin/sections/challenges.js', VC = 'js/admin/sections/vouchers.js',
-      LV = 'js/admin/sections/live.js';
+      LV = 'js/admin/sections/live.js', CN = 'js/admin/core/constants.js';
 
 const ОТКАТЫ = [
   /* ЯКОРЬ ВЗЯТ ИЗ ФАЙЛА, А НЕ ПО ПАМЯТИ. Первая версия цеплялась за
@@ -49,6 +49,19 @@ const ОТКАТЫ = [
    '            if (!overlay.isConnected) {',
    '            if (false) {',
    'слушатель клавиш снимает себя, если окно закрыли мимо оболочки'],
+
+  /* ЭТОТ ОТКАТ НАПИСАН ПО ЖИВОЙ БЕДЕ: ключ `modalClose` не завёлся с
+     первого раза, разметка его звала, и на боевой диктор читал
+     «undefined». Правило наличия атрибута этого не видело. */
+  ['снять ключ подписи из словаря — атрибут останется, слово пропадёт', CN,
+   "        modalClose: 'Закрыть',\n",
+   '',
+   'каждый ключ подписи закрывашки заведён в словаре'],
+
+  ['зашить подпись закрывашки литералом мимо словаря', LV,
+   'id="liveModalClose" aria-label="\' + L.modalClose + \'"',
+   'id="liveModalClose" aria-label="Закрыть"',
+   'подпись закрывашки берётся из словаря, а не зашита'],
 
   ['снять подпись у закрывашки окна «Эфира»', LV,
    'id="liveModalClose" aria-label="\' + L.modalClose + \'"',
