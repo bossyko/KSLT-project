@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер пустого состояния</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=297">
+<link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<!--
+  ЗАЧЕМ. Все пустые состояния админки считали пустоту от УЖЕ
+  отфильтрованного списка и говорили одно и то же. ЗАМЕРЕНО НА БОЕВОЙ
+  22.10: при ДВЕНАДЦАТИ кортах в базе поиск без совпадений выдавал
+  «🏟️ Кортов пока нет. Нажмите "Добавить корт" для создания».
+
+  Способов рисовать пустоту было два: блок `.ad-empty-state` (22 места,
+  правила под него нет НИ В ОДНОМ css) и строка таблицы с инлайнами
+  (9 мест). Стенд зовёт НАСТОЯЩИЙ `A.пустоеСостояние` в обоих случаях.
+-->
+<style>
+  body { background: var(--bg-base); color: var(--text-primary);
+         font-family: var(--font-sans); padding: 40px; }
+  .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin: 24px 0 8px; }
+  .карточка { background: var(--bg-card); border-radius: 12px; }
+</style>
+</head>
+<body>
+<div class="подпись">В БАЗЕ ПУСТО — приглашение завести первое</div>
+<div class="карточка"><table class="ad-table"><tbody id="пусто"></tbody></table></div>
+
+<div class="подпись">В БАЗЕ 12 ЗАПИСЕЙ, ФИЛЬТР НИЧЕГО НЕ НАШЁЛ — другое</div>
+<div class="карточка"><table class="ad-table"><tbody id="нетНаходок"></tbody></table></div>
+
+<div class="подпись">ФИЛЬТР УХОДИТ В БАЗУ — дом спрашивает признак, а не число</div>
+<div class="карточка"><table class="ad-table"><tbody id="поПризнаку"></tbody></table></div>
+
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/admin/core/constants.js?v=158"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<script src="../js/kslt-vremya.js?v=2"></script>
+<script src="../js/kslt-fokus.js?v=1"></script>
+<script src="../js/admin/core/utils.js?v=55"></script>
+<script>
+(function () {
+    var A = window.KSLT_ADMIN, L = A.L;
+    document.getElementById('пусто').innerHTML = A.пустоеСостояние({
+        всего: 0, колонок: 12, значок: '🏟️', пусто: L.noCourts, подсказка: L.noCourtsText });
+    document.getElementById('нетНаходок').innerHTML = A.пустоеСостояние({
+        всего: 12, колонок: 12, значок: '🏟️', пусто: L.noCourts, подсказка: L.noCourtsText });
+    document.getElementById('поПризнаку').innerHTML = A.пустоеСостояние({
+        фильтры: true, колонок: 8, значок: '📊', пусто: L.noPlayers, подсказка: L.noPlayersText });
+})();
+</script>
+</body>
+</html>
