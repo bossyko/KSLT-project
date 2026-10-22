@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер полосы фильтров</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=295">
+<!--
+  ЗАЧЕМ. Полос фильтров по админке ДВЕНАДЦАТЬ, и понятие одно, а имён
+  было три: шесть носили `ad-filter-sticky` и липли, ДВЕ носили голое
+  `sticky` — правила `.sticky` в admin.css нет вовсе, — и четыре стоят
+  без модификатора. Замерено 22.10 на боевой: у липких фон #0A0A0A,
+  граница снизу 1px и отступы 12/12; у носивших мёртвое имя —
+  position: static, фон прозрачный, границы нет, отступы 0.
+
+  Стенд показывает ОБА состояния рядом: что было у «Финансов» и
+  «Скидок» и что стало.
+-->
+<style>
+    body { background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); padding: 40px; margin: 0; }
+    .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin: 24px 0 8px; }
+    .коробка { background: var(--bg-card); padding: 0 16px 16px; border-radius: 12px; }
+    /* мёртвое имя воспроизведено ДОСЛОВНО: класс есть, правила нет */
+</style>
+</head>
+<body>
+<div class="подпись">БЫЛО — класс `sticky`, правила под него нет</div>
+<div class="коробка">
+    <div class="ad-filter-row sticky" id="было">
+        <input type="text" class="ad-field-input" placeholder="Поиск" style="max-width:220px;">
+        <select class="ad-field-input" style="max-width:150px;"><option>Все типы</option></select>
+        <select class="ad-field-input" style="max-width:150px;"><option>Все статусы</option></select>
+    </div>
+    <table class="ad-table"><tbody>
+        <tr><td>Строка списка</td><td>для видимости границы</td></tr>
+    </tbody></table>
+</div>
+
+<div class="подпись">СТАЛО — класс `ad-filter-sticky`, тот же, что у Кортов, Тренеров и Новостей</div>
+<div class="коробка">
+    <div class="ad-filter-row ad-filter-sticky" id="стало">
+        <input type="text" class="ad-field-input" placeholder="Поиск" style="max-width:220px;">
+        <select class="ad-field-input" style="max-width:150px;"><option>Все типы</option></select>
+        <select class="ad-field-input" style="max-width:150px;"><option>Все статусы</option></select>
+    </div>
+    <table class="ad-table"><tbody>
+        <tr><td>Строка списка</td><td>для видимости границы</td></tr>
+    </tbody></table>
+</div>
+</body>
+</html>
