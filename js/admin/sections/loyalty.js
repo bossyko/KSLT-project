@@ -127,8 +127,8 @@
                 '<td style="font-weight:600;color:var(--accent);">' + r.points + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td class="ad-table-actions">' +
-                    '<button class="ad-btn ad-btn--sm" data-loyedit="' + r.id + '">' + ('Ред.') + '</button>' +
-                    ' <button class="ad-btn ad-btn--sm ad-btn--danger" data-loyruledel="' + r.id + '">✕</button>' +
+                    '<button class="ad-btn ad-btn-sm" data-loyedit="' + r.id + '">' + ('Ред.') + '</button>' +
+                    ' <button class="ad-btn ad-btn-sm ad-btn-danger" data-loyruledel="' + r.id + '">✕</button>' +
                 '</td>' +
             '</tr>';
         });
@@ -260,8 +260,8 @@
                 '<td style="font-weight:600;color:var(--accent);">' + r.cost + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td class="ad-table-actions">' +
-                    '<button class="ad-btn ad-btn--sm" data-loyrewardedit="' + r.id + '">' + ('Ред.') + '</button> ' +
-                    '<button class="ad-btn ad-btn--sm ad-btn--danger" data-loyrewarddel="' + r.id + '">✕</button>' +
+                    '<button class="ad-btn ad-btn-sm" data-loyrewardedit="' + r.id + '">' + ('Ред.') + '</button> ' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-danger" data-loyrewarddel="' + r.id + '">✕</button>' +
                 '</td>' +
             '</tr>';
         });
@@ -504,7 +504,7 @@
         if (totalPages > 1) {
             html += '<div class="ad-pagination">';
             for (var p = 1; p <= totalPages; p++) {
-                html += '<button class="ad-page-btn' + (p === loyTxPage ? ' active' : '') + '" data-loypage="' + p + '">' + p + '</button>';
+                html += '<button class="ad-crt-page-btn' + (p === loyTxPage ? ' active' : '') + '" data-loypage="' + p + '">' + p + '</button>';
             }
             html += '</div>';
         }
