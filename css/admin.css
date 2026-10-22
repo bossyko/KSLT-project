@@ -4495,7 +4495,12 @@ select.ad-field-input {
     margin: 0;
 }
 
+/* ЗАКРЫВАШКА ОКНА. Размера у неё не было вовсе — её прямоугольник был
+   кеглем текста: замерено 22.10 на боевой, 20×26 при норме цели 44.
+   Слой прозрачный, по тому же эталону, что у чекбокса (решение 04.10) и
+   у значковой кнопки (кусок 124): вид не меняется, попасть — можно. */
 .ad-modal-close {
+    position: relative;
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -4503,6 +4508,16 @@ select.ad-field-input {
     cursor: pointer;
     padding: 0;
     line-height: 1;
+}
+
+.ad-modal-close::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--btn-h-md);
+    height: var(--btn-h-md);
 }
 
 .ad-modal-close:hover {
