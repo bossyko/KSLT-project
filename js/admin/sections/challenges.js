@@ -523,7 +523,7 @@
             '<div class="ad-modal" style="max-width:440px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.chalDeleteForever + '</h3>' +
-                    '<button class="ad-modal-close" id="dcCompClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="dcCompClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     // Тот же вид, что и у окна отмены: два соседних действия
@@ -538,7 +538,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         document.getElementById('dcCompClose').addEventListener('click', function() { overlay.remove(); });
         document.getElementById('dcCompCancel').addEventListener('click', function() { overlay.remove(); });
@@ -597,7 +600,7 @@
             '<div class="ad-modal" style="max-width:540px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.chalCreate + '</h3>' +
-                    '<button class="ad-modal-close" id="cbClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="cbClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body" style="max-height:70vh;overflow-y:auto;">' +
                     // Формат баттла. Пока стоит одиночный, форма выглядит как
@@ -721,7 +724,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         // Close
         document.getElementById('cbClose').addEventListener('click', function() { overlay.remove(); });
@@ -1324,7 +1330,7 @@
             '<div class="ad-modal" style="max-width:420px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.chalScoreTitle + '</h3>' +
-                    '<button class="ad-modal-close" id="chScoreClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="chScoreClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div style="text-align:center;margin-bottom:16px;">' +
@@ -1348,7 +1354,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         document.getElementById('chScoreClose').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
@@ -1678,7 +1687,7 @@
             '<div class="ad-modal" style="max-width:540px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.chalEditTitle + '</h3>' +
-                    '<button class="ad-modal-close" id="ebClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="ebClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body" style="max-height:70vh;overflow-y:auto;">' +
                     // Players info (read-only names)
@@ -1763,7 +1772,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         // Pre-select hour/minute
         var hSel = document.getElementById('ebTimeH');
@@ -1896,7 +1908,7 @@
             '<div class="ad-modal" style="max-width:460px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.chalCancelBattleTitle + '</h3>' +
-                    '<button class="ad-modal-close" id="cbxClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="cbxClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<p class="ad-modal-text">' +
@@ -1914,7 +1926,10 @@
                     '<button class="ad-btn ad-btn-danger" id="cbxYes">' + L.chalCancelBattle + '</button>' +
                 '</div>' +
             '</div>';
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         function close() { overlay.remove(); }
         document.getElementById('cbxClose').addEventListener('click', close);

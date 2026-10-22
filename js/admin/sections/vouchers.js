@@ -519,12 +519,16 @@
         var basePrice = entity && entity.price ? entity.price : 0;
         var discountAmount = Math.round(basePrice * v.discount_percent / 100);
 
+        /* ОКНО ЖИВЁТ В ОБЩЕЙ ОБОЛОЧКЕ (решение 04.10). Своя разметка
+           остаётся своей — её принимает вход `сырое`; от оболочки окно
+           получает `role`, подпись диктору, фокус внутрь, ловушку Tab,
+           возврат фокуса звавшему, Esc и клик мимо. Замерено до правки:
+           role не было, фокус оставался на `body`. */
         var html =
-            '<div class="ad-modal-overlay" id="adVchModal">' +
                 '<div class="ad-modal" style="max-width:500px;">' +
                     '<div class="ad-modal-header">' +
                         '<h3>🎫 ' + ('Детали скидки') + '</h3>' +
-                        '<button class="ad-modal-close" id="adVchModalClose">✕</button>' +
+                        '<button class="ad-modal-close" id="adVchModalClose" aria-label="' + L.modalClose + '">✕</button>' +
                     '</div>' +
                     '<div class="ad-modal-body" style="padding:20px;">' +
                         '<div class="ad-vch-detail-grid">' +
@@ -538,21 +542,12 @@
                             (v.used_at ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchUsedAt + '</span><span>' + formatVchDate(v.used_at) + '</span></div>' : '') +
                         '</div>' +
                     '</div>' +
-                '</div>' +
-            '</div>';
+                '</div>';
 
-        // Remove existing modal
-        var existingModal = document.getElementById('adVchModal');
-        if (existingModal) existingModal.remove();
+        var окноГот = A.оболочкаОкна({ сырое: html });
 
-        document.body.insertAdjacentHTML('beforeend', html);
-
-        document.getElementById('adVchModalClose').addEventListener('click', function() {
-            document.getElementById('adVchModal').remove();
-        });
-        document.getElementById('adVchModal').addEventListener('click', function(e) {
-            if (e.target === this) this.remove();
-        });
+        окноГот.окно.querySelector('.ad-modal-close')
+            .addEventListener('click', окноГот.закрыть);
     }
 
     // ---- PDF Report ----

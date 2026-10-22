@@ -248,7 +248,7 @@
             '<div class="ad-modal" style="max-width:540px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.liveCreate + '</h3>' +
-                    '<button class="ad-modal-close" id="liveModalClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="liveModalClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body" style="max-height:70vh;overflow-y:auto;">' +
                     // Source dropdown
@@ -354,7 +354,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         var closeModal = function() { overlay.remove(); };
         document.getElementById('liveModalClose').addEventListener('click', closeModal);

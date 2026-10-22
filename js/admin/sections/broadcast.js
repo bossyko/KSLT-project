@@ -23,7 +23,7 @@
             '<div class="ad-modal" style="max-width:520px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>📢 ' + L.broadcastTitle + '</h3>' +
-                    '<button class="ad-modal-close" id="adBroadcastClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="adBroadcastClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div class="ad-field">' +
@@ -53,7 +53,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         // Close handlers
         document.getElementById('adBroadcastClose').addEventListener('click', closeModal);

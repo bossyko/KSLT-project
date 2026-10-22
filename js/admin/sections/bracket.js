@@ -11225,7 +11225,10 @@
                         ('Применить') + '</button>' +
                     '</div>' +
                 '</div>';
-            document.body.appendChild(overlay);
+            /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+               остаётся своей, а `role`, подпись диктору, фокус внутрь,
+               ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+            A.оболочкаОкна({ узел: overlay });
             overlay.querySelector('[data-нет]').addEventListener('click', function() {
                 overlay.remove(); resolve(false);
             });
@@ -11325,7 +11328,7 @@
             '<div class="ad-modal" style="max-width:460px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.enterScore + '</h3>' +
-                    '<button class="ad-modal-close" id="adScoreClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="adScoreClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div style="text-align:center;margin-bottom:16px;">' +
@@ -11382,7 +11385,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         var currentSets = visibleSets;
         setTimeout(function() { нарисоватьСупер(); }, 0);

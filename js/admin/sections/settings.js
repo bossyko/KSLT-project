@@ -617,7 +617,7 @@
             '<div class="ad-modal" style="max-width:400px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.ratAddLevel + '</h3>' +
-                    '<button class="ad-modal-close" id="setLevelModalClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="setLevelModalClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div class="ad-field" style="margin-bottom:12px;">' +
@@ -634,7 +634,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         document.getElementById('setLevelModalClose').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
@@ -938,7 +941,10 @@
                     '<button class="ad-btn ad-btn-primary" id="setVerOk">' + L.ratNewVersionGo + '</button>' +
                 '</div>' +
             '</div>';
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         document.getElementById('setVerCancel').addEventListener('click', function() { overlay.remove(); });
         document.getElementById('setVerOk').addEventListener('click', async function() {

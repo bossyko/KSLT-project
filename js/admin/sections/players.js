@@ -2551,7 +2551,7 @@
             '<div class="ad-modal" style="max-width:400px;">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.ratMatchDetails + '</h3>' +
-                    '<button class="ad-modal-close" id="ratMatchModalClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="ratMatchModalClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div style="display:flex;flex-direction:column;gap:12px;">' +
@@ -2564,7 +2564,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
         document.getElementById('ratMatchModalClose').addEventListener('click', function() { overlay.remove(); });
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
     }
@@ -3046,7 +3049,7 @@
             '<div class="ad-modal ad-import-modal">' +
                 '<div class="ad-modal-header">' +
                     '<h3>\ud83d\udce5 ' + L.plrImportTitle + '</h3>' +
-                    '<button class="ad-modal-close" id="adImportClose">&times;</button>' +
+                    '<button class="ad-modal-close" id="adImportClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
                     '<div id="adImportStep1">' +
@@ -3088,7 +3091,10 @@
                 '</div>' +
             '</div>';
 
-        document.body.appendChild(overlay);
+        /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
+           остаётся своей, а `role`, подпись диктору, фокус внутрь,
+           ловушка Tab, возврат фокуса звавшему и Esc приходят от неё. */
+        A.оболочкаОкна({ узел: overlay });
 
         // State
         var workbook = null;

@@ -51,7 +51,9 @@
                             '<button type="button" class="ad-btn ad-btn-primary ad-crop-apply">Применить</button>' +
                         '</div>' +
                     '</div>';
-                document.body.appendChild(overlay);
+                /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): кадрирование
+                   было ТРЕТЬИМ семейством окон и тоже шло мимо неё. */
+                window.KSLT_ADMIN.оболочкаОкна({ узел: overlay });
 
                 var img = overlay.querySelector('.ad-crop-image');
                 img.src = ev.target.result;
