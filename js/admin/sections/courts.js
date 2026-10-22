@@ -1553,7 +1553,7 @@
             var html = '';
             crtAdditionalServices.forEach(function(svc, idx) {
                 html += '<div class="ad-court-type-row ad-court-svc-row" data-idx="' + idx + '">' +
-                    '<input type="text" class="ad-field-input ad-svc-name" placeholder="' + L.crtServiceName + '..." value="' + A.esc(svc.name || '') + '">' +
+                    '<input type="text" class="ad-field-input ad-svc-name" placeholder="' + L.crtServiceNameHint + '..." value="' + A.esc(svc.name || '') + '">' +
                     '<input type="text" class="ad-field-input ad-svc-price" inputmode="numeric" pattern="[0-9]*" value="' + (svc.price || '') + '">' +
                     '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-svc-partner"' + (svc.partner ? ' checked' : '') + '></label>' +
                     '<input type="text" class="ad-field-input ad-svc-discount" inputmode="numeric" pattern="[0-9]*" placeholder="%" value="' + (svc.discount || '') + '"' + (svc.partner ? '' : ' style="visibility:hidden"') + '>' +
@@ -1968,7 +1968,7 @@
         var html = '';
         crtPartnerServices.forEach(function(svc, idx) {
             html += '<div class="ad-partner-svc-row" data-idx="' + idx + '" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:6px;align-items:center;">' +
-                '<input type="text" class="ad-field-input ad-psvc-name" value="' + A.esc(svc.service_name || '') + '" placeholder="' + L.crtServiceName + '">' +
+                '<input type="text" class="ad-field-input ad-psvc-name" value="' + A.esc(svc.service_name || '') + '" placeholder="' + L.crtServiceNameHint + '">' +
                 '<input type="number" class="ad-field-input ad-psvc-discount" value="' + (svc.discount_percent || '') + '" min="1" max="100" placeholder="%">' +
                 (crtPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove">&times;</button>' : '<div></div>') +
             '</div>';

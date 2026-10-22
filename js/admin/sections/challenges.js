@@ -1895,7 +1895,7 @@
         overlay.innerHTML =
             '<div class="ad-modal" style="max-width:460px;">' +
                 '<div class="ad-modal-header">' +
-                    '<h3>' + L.chalCancelBattle + '</h3>' +
+                    '<h3>' + L.chalCancelBattleTitle + '</h3>' +
                     '<button class="ad-modal-close" id="cbxClose">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +

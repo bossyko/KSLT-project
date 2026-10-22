@@ -26,7 +26,15 @@
         // Add checkbox header
         var thCheck = document.createElement('th');
         thCheck.style.width = '36px';
-        thCheck.innerHTML = '<input type="checkbox" class="ad-bulk-all" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">';
+        /* ИНЛАЙН СНЯТ 22.10, КУСОК 119. Все три свойства были мертвы, и
+           замерено это, а не предположено: `width`/`height` перебивались
+           важностью в css (при инлайне 40px браузер показывал 18);
+           `cursor` css объявляет тем же значением; `accent-color` красит
+           НАТИВНЫЙ чекбокс, а его нет — `appearance: none`, и галочка
+           рисуется своим `::after` с `color: var(--neutral-black)`.
+           ЗАМКНУТЫЙ КРУГ: инлайн держался тем, что его перебивают
+           важностью, а важность — тем, что есть инлайн. */
+        thCheck.innerHTML = '<input type="checkbox" class="ad-bulk-all">';
         thead.insertBefore(thCheck, thead.firstChild);
 
         // Add bulk delete button (hidden initially)
@@ -145,7 +153,8 @@
      */
     function bulkCheckboxTd(id) {
         return '<td class="ad-bulk-cell" style="width:36px;text-align:center;">' +
-            '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">' +
+            /* ИНЛАЙН СНЯТ 22.10, КУСОК 119 — см. `.ad-bulk-all` выше. */
+            '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + id + '">' +
         '</td>';
     }
 

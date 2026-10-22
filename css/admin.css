@@ -1681,12 +1681,15 @@ body.ad-page {
     cursor: default;
 }
 
+/* ВАЖНОСТИ СНЯТЫ 22.10, КУСОК 119. Они перебивали инлайн из
+   `js/admin/core/utils.js`, и больше перебивать нечего: инлайн снят тем же
+   куском. ВАЖНОСТЬ БЕЗ КОНКУРЕНТА — ЭТО НЕ ВАЖНОСТЬ, А МУСОР. */
 .ad-bulk-item,
 .ad-bulk-all {
     appearance: none;
     -webkit-appearance: none;
-    width: 18px !important;
-    height: 18px !important;
+    width: 18px;
+    height: 18px;
     border: var(--bw-thick) solid var(--accent);
     border-radius: 4px;
     background: transparent;
