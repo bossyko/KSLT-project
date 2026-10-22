@@ -67,9 +67,14 @@ const ОТКАТЫ = [
    "            var statusLabels = { registration_open: 'Регистрация открыта' } || window.KSLT_STATUS.подписи(",
    'js/tournaments-overlay.js берёт подписи у источника, а не держит свою карту'],
 
+  /* ЯКОРЬ ПЕРЕВЯЗАН 22.10. Прежний держался за `function computeStatus`,
+     а кусок 117 снял её как МЁРТВУЮ — файл больше не держит ни копии, ни
+     обёртки. Откат заводит копию ЗАНОВО, на живом якоре: правило падает
+     от появления своего вычисления, а не от пропажи обёртки.
+     ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ — НО СОДЕРЖИМОЕ МОЖЕТ ОКАЗАТЬСЯ МЁРТВЫМ. */
   ['js/tournament-detail.js',
-   "function computeStatus(a, b, c, d) { return window.KSLT_STATUS.вычислить(a, b, c, d); }",
-   "function computeStatus(regStart) { var now = ''; if (regStart && now < regStart) return 'upcoming'; return 'upcoming'; }",
+   "function языкСтраницы() {",
+   "function computeStatus(regStart) { var now = ''; if (regStart && now < regStart) return 'upcoming'; return 'upcoming'; }\nfunction языкСтраницы() {",
    'js/tournament-detail.js не держит своей копии вычисления статуса'],
 
   ['js/admin/core/constants.js',
@@ -77,14 +82,17 @@ const ОТКАТЫ = [
    "    var TOURNAMENT_STATUSES = { registration_open: 'Регистрация открыта' } || Ф.подписи(",
    'js/admin/core/constants.js берёт подписи у источника, а не держит свою карту'],
 
+  /* ЯКОРЬ БЕЗ НОМЕРА ВЕРСИИ, перевязан 22.10: прежний держался за `?v=1`,
+     и кусок 117 поднял версию до 12 — откат перестал находить строку.
+     ЯКОРЬ НЕ ДЕРЖИТСЯ ЗА НОМЕР ВЕРСИИ: он меняется каждым куском. */
   ['pages/tournaments.html',
-   '<script src="../js/tournament-status.js?v=1"></script>\n',
-   '',
+   '<script src="../js/tournament-status.js',
+   '<script src="../js/NETU-takogo-fajla.js',
    'pages/tournaments.html подключает источник статусов'],
 
   ['pages/admin.html',
-   '    <script src="../js/tournament-status.js?v=1"></script>\n    <script src="../js/admin/core/constants.js',
-   '    <script src="../js/admin/core/constants.js',
+   '<script src="../js/tournament-status.js',
+   '<script src="../js/NETU-takogo-fajla.js',
    'pages/admin.html подключает источник статусов']
 ];
 

@@ -159,7 +159,7 @@ const ОТКАТЫ = [
   [TOAST, '    window.KSLT_TOAST = T;', '    window.KSLT_TOAST_SVOY = T;',
    'уведомление берётся из общего, а не заводится седьмым'],
 
-  [SETT, "                { key: 'prices', label: isEn ? 'Prices' : 'Цены' },", '',
+  [SETT, "                { key: 'prices', label: 'Цены' },", '',
    'карточка цен в админке есть и зовётся только администратору'],
 
   [SETT, "from('site_content').upsert", "from('site_content_staroe').upsert",
