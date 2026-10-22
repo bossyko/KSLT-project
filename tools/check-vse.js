@@ -133,7 +133,9 @@ const КУСКИ = [
     ['мёртвые классы кабинета', 'check-mertvye-klassy.js', 'check-mertvye-klassy-otkat.js'],
     ['лестница разрядов', 'check-lestnica-razryadov.js', 'check-lestnica-razryadov-otkat.js'],
     ['админка одним языком', 'check-admin-odin-yazyk.js', 'check-admin-odin-yazyk-otkat.js'],
-    ['чекбокс и имена', 'check-chekboks-i-imena.js', 'check-chekboks-i-imena-otkat.js']
+    ['чекбокс и имена', 'check-chekboks-i-imena.js', 'check-chekboks-i-imena-otkat.js'],
+    ['липкая шапка и роли кнопок', 'check-lipkaya-shapka-i-rol-knopki.js',
+     'check-lipkaya-shapka-i-rol-knopki-otkat.js']
 ];
 
 function прогнать(файл) {
