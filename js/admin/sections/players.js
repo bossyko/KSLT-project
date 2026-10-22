@@ -2460,7 +2460,18 @@
 
             html += '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
                 '<th style="width:50px">' + L.ratRank + '</th>' +
-                '<th>' + L.ratPlayer + '</th>' +
+                /* ШИРИНА ИМЕНИ ЗАДАНА, 22.10. Прежде её не было вовсе: колонка
+                   сжималась до 130px, а «Форма» распирала себя значками до 682
+                   из 1114 — при объявленных ей 100. Имена в 130 не влезали у
+                   495 игроков из 659, переносились на две-три строки, и ряды
+                   шли ДВУХ высот: 59 и 48.
+                   200 взято ЗАМЕРОМ по всем 659 именам: средняя 121, п95 157,
+                   максимум 250 («Александра-Елизавета Пономарева»). Целиком
+                   влезают 655; четырём остаётся многоточие, а полное имя живёт
+                   в подсказке.
+                   В таблице «Результаты» колонок четыре, имя берёт всю
+                   оставшуюся ширину и не переносится — там ширина не нужна. */
+                '<th class="ad-rat-name-cell">' + L.ratPlayer + '</th>' +
                 '<th style="width:80px">' + L.ratPoints + '</th>' +
                 '<th style="width:80px">' + L.ratWL + '</th>' +
                 '<th style="width:100px">' + L.ratForm + '</th>' +
@@ -2492,7 +2503,7 @@
 
                 html += '<tr>' +
                     '<td>' + (i + 1) + '</td>' +
-                    '<td><a href="' + playerEditBase + p.id + '" class="ad-rat-player-link">' + A.esc(name) + '</a></td>' +
+                    '<td class="ad-rat-name-cell"><a href="' + playerEditBase + p.id + '" class="ad-rat-player-link" title="' + A.esc(name) + '">' + A.esc(name) + '</a></td>' +
                     '<td><strong>' + (запись.очки || 0) + '</strong></td>' +
                     '<td>' + wl.w + '/' + wl.l + '</td>' +
                     '<td class="ad-rat-form-cell">' + formHtml + '</td>' +
