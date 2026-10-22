@@ -86,7 +86,7 @@
             '</div>' +
 
             // Filters
-            '<div class="ad-filter-row sticky">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input" id="adVchSearch" placeholder="' + L.vchSearch + '" value="' + A.esc(vchSearchQuery) + '" style="max-width:220px;">' +
                 '<select class="ad-field-input" id="adVchStatusFilter" style="max-width:160px;">' + statusOptions + '</select>' +
                 '<select class="ad-field-input" id="adVchTypeFilter" style="max-width:140px;">' + typeOptions + '</select>' +

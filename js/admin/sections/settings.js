@@ -1080,7 +1080,7 @@
 
         panel.innerHTML =
             '<div class="ad-rat-info-banner">' + L.ratTop5Info + '</div>' +
-            '<div class="ad-filter-row">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<select class="ad-field-input ad-filter-select" id="setPromoGenderFilter">' + genderOpts + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="setPromoCatFilter">' + catOpts + '</select>' +
             '</div>' +

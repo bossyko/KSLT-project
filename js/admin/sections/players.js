@@ -232,7 +232,7 @@
                     '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adPlrExportBtn">\ud83d\udcca ' + L.plrExport + '</button>' +
                 '</div>' : '') +
             '</div>' +
-            '<div class="ad-filter-row">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adPlrSearch" placeholder="' + L.plrSearch + '" value="' + A.esc(plrSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adPlrCatFilter">' + catFilterHtml + '</select>' +
             '</div>' +

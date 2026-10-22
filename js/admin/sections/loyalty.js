@@ -397,7 +397,7 @@
             '<option value="admin_adjust"' + (loyTxFilterType === 'admin_adjust' ? ' selected' : '') + '>' + L.loyAdjust + '</option>';
 
         var filtersHtml =
-            '<div class="ad-filter-row">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" id="adLoySearch" class="ad-field-input ad-filter-search" placeholder="' + L.loySearch + '" value="' + A.esc(loyTxSearch) + '">' +
                 '<select id="adLoyTypeFilter" class="ad-field-input ad-filter-select">' + typeOptions + '</select>' +
                 (isAdm ? '<button class="ad-btn ad-btn-primary" id="adLoyAdjustBtn" style="white-space:nowrap;">' + L.loyAdjustTitle + '</button>' : '') +

@@ -73,7 +73,7 @@
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinExcelBtn" title="' + L.payExcelExport + '">📊 Excel</button>' +
             '</div>' +
 
-            '<div class="ad-filter-row sticky">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input" id="adFinSearch" placeholder="' + L.paySearch + '" value="' + A.esc(finSearchQuery) + '" style="max-width:220px;">' +
                 '<select class="ad-field-input" id="adFinTypeFilter" style="max-width:150px;">' + typeOptions + '</select>' +
                 '<select class="ad-field-input" id="adFinStatusFilter" style="max-width:150px;">' + statusOptions + '</select>' +

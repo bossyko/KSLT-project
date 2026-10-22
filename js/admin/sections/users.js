@@ -112,7 +112,7 @@
             // не проверить, а с ней уходят рейтинг и вся история
             '<div id="adUsrLinkRequests"></div>' +
 
-            '<div class="ad-filter-row">' +
+            '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + A.esc(usrSearchQuery) + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adUsrRoleFilter">' + roleFilterHtml + '</select>' +
             '</div>' +
