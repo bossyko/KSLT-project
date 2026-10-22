@@ -363,7 +363,12 @@
     function оболочкаОкна(о) {
         // Одно окно за раз. Иначе повторные нажатия складывают их стопкой:
         // закрываешь верхнее, под ним такое же — и кажется, что оно замерло
-        document.querySelectorAll('.ad-confirm-overlay').forEach(function(el) { el.remove(); });
+        /* ОДНО ОКНО ЗА РАЗ — СЧИТАЯ И РУКОДЕЛЬНЫЕ. Семейств окон в админке
+           два: `.ad-confirm-*` у оболочки и `.ad-modal-*` у рукодельных.
+           Пока сносилось только своё, рукодельное окно оставалось стоять
+           под новым. */
+        document.querySelectorAll('.ad-confirm-overlay, .ad-modal-overlay')
+            .forEach(function(el) { el.remove(); });
 
         /* КОМУ ВЕРНУТЬ ФОКУС. Окно забирает фокус себе, и после закрытия
            он обязан вернуться туда, откуда пришёл, — иначе клавиатура
@@ -373,8 +378,15 @@
         var звал = document.activeElement;
 
         var номерОкна = 'adConfirmTitle' + (++счётчикОкон);
-        var overlay = document.createElement('div');
-        overlay.className = 'ad-confirm-overlay';
+        /* ТРЕТИЙ ВХОД: ГОТОВЫЙ УЗЕЛ. Девять рукодельных окон собирают
+           свою подложку сами — `createElement` плюс `innerHTML`, — и
+           переписывать девять разных сборок значит девять поводов
+           сломать работающее. Оболочка принимает собранный узел как
+           есть и доставляет ему то, чего в нём нет. Класс своего
+           семейства добавляется, а не заменяет чужой: на `.ad-modal-
+           overlay` держится вся вёрстка этих окон. */
+        var overlay = о.узел || document.createElement('div');
+        overlay.classList.add('ad-confirm-overlay');
         /* ДВА ВХОДА, ОДНА ОБОЛОЧКА.
            `о.сырое` принимает ГОТОВУЮ разметку окна — ту, что девять
            рукодельных окон уже написали у себя. Так они получают `role`,
@@ -383,7 +395,7 @@
            поводов сломать работающее. Их вёрстка остаётся долгом и стоит
            в трекере числом, а не прячется.
            Остальные зовут по частям: заголовок, тело, кнопки. */
-        overlay.innerHTML = о.сырое ||
+        if (!о.узел) overlay.innerHTML = о.сырое ||
             ('<div class="ad-confirm-modal' + (о.широкое ? ' ad-confirm-modal-wide' : '') +
                  '" role="dialog" aria-modal="true" ' +
                  'aria-labelledby="' + номерОкна + '" tabindex="-1"' +
@@ -393,14 +405,19 @@
                 '<div class="ad-confirm-actions">' + (о.кнопки || '') + '</div>' +
             '</div>');
         document.body.appendChild(overlay);
-        var окно = overlay.querySelector('.ad-confirm-modal');
+        /* ОКНО УЗНАЁТСЯ ПО ЛЮБОМУ ИЗ ДВУХ ИМЁН. Готовая разметка
+           рукодельных окон зовёт своё окно `.ad-modal`, и признак,
+           знавший одно имя, не находил его вовсе: `role`, подпись и
+           фокус до них не доезжали, хотя вход `о.сырое` для них и
+           сделан. ПРИЗНАК, ЗНАЮЩИЙ ОДНО ИМЯ, СТОРОЖИТ ОДНО СЕМЕЙСТВО. */
+        var окно = overlay.querySelector('.ad-confirm-modal, .ad-modal, .ad-crop-modal');
         /* ГОТОВОЙ РАЗМЕТКЕ ДОСТАВЛЯЕМ ТО, ЧЕГО В НЕЙ НЕТ. Подпись диктору
            вешаем на её же заголовок — у окна он есть всегда. */
-        if (окно && о.сырое) {
+        if (окно && (о.сырое || о.узел)) {
             окно.setAttribute('role', 'dialog');
             окно.setAttribute('aria-modal', 'true');
             окно.setAttribute('tabindex', '-1');
-            var свойЗаголовок = окно.querySelector('.ad-confirm-title');
+            var свойЗаголовок = окно.querySelector('.ad-confirm-title, .ad-modal-header h3, .ad-modal-header h2, .ad-crop-title');
             if (свойЗаголовок) {
                 if (!свойЗаголовок.id) свойЗаголовок.id = номерОкна;
                 окно.setAttribute('aria-labelledby', свойЗаголовок.id);
@@ -459,6 +476,15 @@
            другое понятие. */
         var ловушкаТаб = window.KSLT_FOKUS.ловушка(окно);
         function поКлавише(e) {
+            /* ОКНО МОГЛИ ЗАКРЫТЬ МИМО ОБОЛОЧКИ. Девять рукодельных окон
+               закрывают себя своим же `overlay.remove()` — оболочка об
+               этом не узнаёт, и её слушатель остался бы на `document`
+               навсегда, перехватывая Esc у того, что откроется следом.
+               Признак — узел ушёл из документа; тогда снимаем себя. */
+            if (!overlay.isConnected) {
+                document.removeEventListener('keydown', поКлавише);
+                return;
+            }
             if (e.key === 'Escape') { закрыть(); return; }
             ловушкаТаб(e);
         }
