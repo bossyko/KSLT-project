@@ -271,18 +271,6 @@ function getPlayer(tournament, playerId) {
 
 var TD_OUTCOMES = ['RET', 'W/O', 'DEF', 'NA'];
 
-function reverseScore(score) {
-    if (!score) return '';
-    var parts = score.split(' ');
-    var suffix = '';
-    if (parts.length > 0 && TD_OUTCOMES.indexOf(parts[parts.length - 1]) !== -1) {
-        suffix = ' ' + parts.pop();
-    }
-    return parts.map(function(set) {
-        var p = set.split('/');
-        return p[1] + '/' + p[0];
-    }).join(' ') + suffix;
-}
 
 function getStatusLabel(status) {
     var labels = typeof window.statusLabels !== 'undefined' ? window.statusLabels : {
@@ -740,263 +728,21 @@ function renderMatch(tournament, match, predOpts) {
 // ROUND ROBIN
 // ========================================
 
-function renderRoundRobin(tournament) {
-    var container = document.getElementById('bracketContainer');
-    if (!container) return;
-
-    var rr = tournament.roundRobin;
-    var colHeaders = typeof window.rrHeaders !== 'undefined' ? window.rrHeaders : { player: 'Игрок', wins: 'П', points: 'О', place: 'Место' };
-    var html = '<div class="td-rr-groups">';
-
-    rr.groups.forEach(function(group) {
-        var groupPlayers = group.playerIds.map(function(id) { return getPlayer(tournament, id); });
-        var rrGroupHasResults = group.matches && group.matches.some(function(m) { return m.status === 'completed'; });
-
-        html += '<div class="td-rr-group">' +
-            '<h3 class="td-rr-group-title">' + group.name + '</h3>' +
-            '<div class="td-rr-table-scroll">' +
-            '<table class="td-rr-table"><thead><tr>' +
-            '<th class="td-rr-num">№</th>' +
-            '<th class="td-rr-player-header">' + colHeaders.player + '</th>';
-
-        // Column per player (number)
-        groupPlayers.forEach(function(p, idx) {
-            html += '<th class="td-rr-vs-header">' + (idx + 1) + '</th>';
-        });
-
-        html += '<th class="td-rr-stat-header">' + colHeaders.wins + '</th>' +
-            '<th class="td-rr-stat-header">' + colHeaders.points + '</th>' +
-            '<th class="td-rr-stat-header">' + colHeaders.place + '</th>' +
-            '</tr></thead><tbody>';
-
-        // Rows by standings order
-        group.standings.forEach(function(standing, rowIdx) {
-            var rowPlayer = getPlayer(tournament, standing.playerId);
-            var rowPlayerIndex = group.playerIds.indexOf(standing.playerId);
-
-            html += '<tr data-player-id="' + (standing.playerId || '') + '">' +
-                '<td class="td-rr-rank">' + (rowIdx + 1) + '.</td>' +
-                '<td class="td-rr-player"><strong>' + rowPlayer.name + '</strong></td>';
-
-            // Cross-table cells
-            groupPlayers.forEach(function(colPlayer, colIdx) {
-                if (colPlayer.id === standing.playerId) {
-                    html += '<td class="td-rr-cell td-rr-diagonal"></td>';
-                } else {
-                    var match = group.matches.find(function(m) {
-                        return (m.player1Id === standing.playerId && m.player2Id === colPlayer.id) ||
-                               (m.player2Id === standing.playerId && m.player1Id === colPlayer.id);
-                    });
-
-                    if (match && match.status === 'completed') {
-                        var isWin = match.winnerId === standing.playerId;
-                        var displayScore = match.player1Id === standing.playerId ? match.score : reverseScore(match.score);
-                        html += '<td class="td-rr-cell ' + (isWin ? 'td-rr-win' : 'td-rr-loss') + '">' +
-                            '<span class="td-rr-score-text">' + displayScore + '</span>' +
-                            '<span class="td-rr-result">' + (isWin ? '1' : '0') + '</span>' +
-                        '</td>';
-                    } else {
-                        html += '<td class="td-rr-cell">—</td>';
-                    }
-                }
-            });
-
-            var rrPlaceDisplay = rrGroupHasResults ? standing.place : '—';
-            html += '<td class="td-rr-stat">' + standing.wins + '</td>' +
-                '<td class="td-rr-stat td-rr-points">' + standing.points + '</td>' +
-                '<td class="td-rr-stat td-rr-place">' + rrPlaceDisplay + '</td>' +
-                '</tr>';
-        });
-
-        html += '</tbody></table></div></div>';
-    });
-
-    html += '</div>';
-
-    // Knockout phase
-    if (rr.knockout && rr.knockout.rounds.length > 0) {
-        html += '<div class="td-rr-knockout">' +
-            '<h3 class="td-section-subtitle">' + (typeof window.rrHeaders !== 'undefined' && window.rrHeaders.playoff ? window.rrHeaders.playoff : 'Плей-офф') + '</h3>' +
-            '<div class="td-rr-knockout-matches">';
-
-        rr.knockout.rounds.forEach(function(round) {
-            round.matches.forEach(function(match) {
-                html += '<div class="td-rr-ko-match">' +
-                    '<div class="td-rr-ko-label">' + round.name + '</div>' +
-                    renderMatch(tournament, match) +
-                '</div>';
-            });
-        });
-
-        html += '</div></div>';
-    }
-
-    container.innerHTML = html;
-}
 
 // ========================================
 // SCHEDULE
 // ========================================
 
-function renderSchedule(tournament) {
-    var filtersEl = document.getElementById('scheduleFilters');
-    var listEl = document.getElementById('scheduleList');
-    if (!filtersEl || !listEl) return;
-
-    var days = tournament.schedule.days;
-    var allLabel = typeof window.scheduleLabels !== 'undefined' ? window.scheduleLabels.allDays : 'Все дни';
-    var courtLabel = typeof window.scheduleLabels !== 'undefined' ? window.scheduleLabels.court : 'Корт';
-
-    // Day filter buttons
-    var filtersHtml = '<button class="filter-btn active" data-day="all">' + allLabel + '</button>';
-    days.forEach(function(day) {
-        filtersHtml += '<button class="filter-btn" data-day="' + day.date + '">' + day.label + '</button>';
-    });
-    filtersEl.innerHTML = filtersHtml;
-
-    // Match rows
-    var listHtml = '';
-    days.forEach(function(day) {
-        listHtml += '<div class="td-schedule-day" data-day="' + day.date + '">' +
-            '<h3 class="td-schedule-day-title">' + day.label + '</h3>' +
-            '<div class="td-schedule-matches">';
-
-        day.matches.forEach(function(match) {
-            var p1 = getPlayer(tournament, match.player1Id);
-            var p2 = getPlayer(tournament, match.player2Id);
-            var statusText = getStatusLabel(match.status);
-
-            listHtml += '<div class="td-schedule-match ' + match.status + '">' +
-                '<div class="td-schedule-time">' + match.time + '</div>' +
-                '<div class="td-schedule-court">' + courtLabel + ' ' + match.court + '</div>' +
-                '<div class="td-schedule-players">' +
-                    '<span class="td-schedule-p1 ' + (match.winnerId === match.player1Id ? 'winner' : '') + '">' + p1.name + '</span>' +
-                    '<span class="td-schedule-vs">vs</span>' +
-                    '<span class="td-schedule-p2 ' + (match.winnerId === match.player2Id ? 'winner' : '') + '">' + p2.name + '</span>' +
-                '</div>' +
-                '<div class="td-schedule-round">' + match.roundName + '</div>' +
-                '<div class="td-schedule-score">' + (match.score || '—') + '</div>' +
-                '<div class="td-schedule-status">' +
-                    '<span class="td-status-pill ' + match.status + '">' +
-                        (match.status === 'live' ? '<span class="live-dot"></span> ' : '') +
-                        statusText +
-                    '</span>' +
-                '</div>' +
-            '</div>';
-        });
-
-        listHtml += '</div></div>';
-    });
-
-    listEl.innerHTML = listHtml;
-}
 
 // ========================================
 // PARTICIPANTS
 // ========================================
 
-function renderParticipants(tournament) {
-    var grid = document.getElementById('participantsGrid');
-    if (!grid) return;
-
-    var html = '';
-    tournament.players.forEach(function(player) {
-        html += '<div class="td-participant-card">' +
-            '<div class="td-participant-info">' +
-                (player.seed ? '<span class="td-participant-seed">[' + player.seed + ']</span>' : '') +
-                '<span class="td-participant-name">' + player.name + '</span>' +
-                '<span class="td-participant-country">' + player.country + '</span>' +
-            '</div>' +
-        '</div>';
-    });
-
-    grid.innerHTML = html;
-}
 
 // ========================================
 // RESULTS
 // ========================================
 
-function renderResults(tournament) {
-    var container = document.getElementById('resultsPodium');
-    if (!container) return;
-
-    if (!tournament.results) {
-        container.innerHTML = '<div class="td-no-results">' +
-            '<p>' + (typeof window.resultsLabels !== 'undefined' ? window.resultsLabels.noResults : 'Результаты будут доступны после завершения турнира') + '</p>' +
-        '</div>';
-        return;
-    }
-
-    var r = tournament.results;
-    var winner = getPlayer(tournament, r.winner.playerId);
-    var runnerUp = getPlayer(tournament, r.runnerUp.playerId);
-
-    var placeLabel = typeof window.resultsLabels !== 'undefined' ? window.resultsLabels.place : 'место';
-    var prizeLabel = typeof window.resultsLabels !== 'undefined' ? window.resultsLabels.prize : 'Приз';
-
-    var html = '<div class="td-podium">' +
-        // 1st place
-        '<div class="td-podium-card td-podium-1">' +
-            '<div class="td-podium-medal">🥇</div>' +
-            '<div class="td-podium-place">1-e ' + placeLabel + '</div>' +
-            '<div class="td-podium-name">' + winner.name + '</div>' +
-            '<div class="td-podium-country">' + winner.country + '</div>' +
-            '<div class="td-podium-prize">' + prizeLabel + ': ' + r.winner.prize + '</div>' +
-        '</div>' +
-        // 2nd place
-        '<div class="td-podium-card td-podium-2">' +
-            '<div class="td-podium-medal">🥈</div>' +
-            '<div class="td-podium-place">2-e ' + placeLabel + '</div>' +
-            '<div class="td-podium-name">' + runnerUp.name + '</div>' +
-            '<div class="td-podium-country">' + runnerUp.country + '</div>' +
-            '<div class="td-podium-prize">' + prizeLabel + ': ' + r.runnerUp.prize + '</div>' +
-        '</div>';
-
-    // Semifinalists
-    if (r.semifinalists && r.semifinalists.length > 0) {
-        r.semifinalists.forEach(function(sf) {
-            var player = getPlayer(tournament, sf.playerId);
-            html += '<div class="td-podium-card td-podium-3">' +
-                '<div class="td-podium-medal">🥉</div>' +
-                '<div class="td-podium-place">3-e ' + placeLabel + '</div>' +
-                '<div class="td-podium-name">' + player.name + '</div>' +
-                '<div class="td-podium-country">' + player.country + '</div>' +
-                '<div class="td-podium-prize">' + prizeLabel + ': ' + sf.prize + '</div>' +
-            '</div>';
-        });
-    }
-
-    html += '</div>';
-
-    // Кто проводил и кто судил — как в бумажном протоколе. Показываем только
-    // заполненное: клуб вводит имена не для каждого турнира
-    var директор = tournament.director_name || tournament.directorName;
-    var судья = tournament.referee_name || tournament.refereeName;
-    if (директор || судья) {
-        var подпись = function(звание, имя) {
-            if (!имя) return '';
-            return '<div class="td-official">' +
-                '<span class="td-official-role">' + звание + '</span>' +
-                '<span class="td-official-name">' + esc(имя) + '</span>' +
-            '</div>';
-        };
-        var язык = window.location.pathname;
-        var наАнгл = язык.indexOf('-en') !== -1;
-        var наКырг = язык.indexOf('-kg') !== -1;
-        var звания = наАнгл
-            ? { director: 'Tournament director', referee: 'Head referee' }
-            : (наКырг
-                ? { director: 'Турнир директору', referee: 'Башкы калыс' }
-                : { director: 'Директор турнира', referee: 'Главный судья' });
-        html += '<div class="td-officials">' +
-            подпись(звания.director, директор) +
-            подпись(звания.referee, судья) +
-        '</div>';
-    }
-
-    container.innerHTML = html;
-}
 
 // ========================================
 // TABS NAVIGATION
@@ -1161,23 +907,6 @@ function initTabsNavigation() {
 // SCHEDULE FILTERS
 // ========================================
 
-function initScheduleFilters() {
-    var filtersEl = document.getElementById('scheduleFilters');
-    if (!filtersEl) return;
-
-    filtersEl.addEventListener('click', function(e) {
-        var btn = e.target.closest('.filter-btn');
-        if (!btn) return;
-
-        filtersEl.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-
-        var dayFilter = btn.dataset.day;
-        document.querySelectorAll('.td-schedule-day').forEach(function(dayEl) {
-            dayEl.style.display = (dayFilter === 'all' || dayEl.dataset.day === dayFilter) ? 'block' : 'none';
-        });
-    });
-}
 
 // ========================================
 // LANGUAGE LINKS
@@ -2819,14 +2548,6 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             if (t.bracket_type === 'fic') {
                 // FIC results: bit-reversal for all places
-                function ficBitReverse(num, bits) {
-                    var result = 0;
-                    for (var i = 0; i < bits; i++) {
-                        result = (result << 1) | (num & 1);
-                        num >>= 1;
-                    }
-                    return result;
-                }
 
                 var ficFinalMatches = matches.filter(function(m) {
                     return m.round_number === totalRounds && m.status === 'completed' && m.winner_id;

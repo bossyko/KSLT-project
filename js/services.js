@@ -598,36 +598,6 @@
     function getInitials(name) { return window.KSLT_LICO.инициалы(name); }
 
     // --- Featured Partner ---
-    function renderFeaturedPartner(p) {
-        var name = getPartnerName(p);
-        var level = getPartnerLevel(p);
-        var online = isOnline(p.last_seen);
-        var href = partnersPage;
-
-        var avatarHtml;
-        if (p.avatar_url) {
-            avatarHtml = '<div class="sv-featured-bg"><img src="' + p.avatar_url + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>';
-        } else {
-            avatarHtml = '<div class="sv-featured-overlay" style="background:var(--bg-card)"></div>';
-        }
-
-        return '<a class="sv-featured" href="' + href + '">' +
-            avatarHtml +
-            '<div class="sv-featured-content">' +
-                (p.avatar_url ? '<img class="sv-coach-avatar" src="' + p.avatar_url + '" alt="" loading="lazy">' : '<div class="sv-partner-initials">' + getInitials(name) + '</div>') +
-                '<h3>' + name + '</h3>' +
-                '<div class="sv-featured-meta">' +
-                    '<span class="sv-partner-status ' + (online ? 'online' : 'offline') + '">' +
-                        '<span class="sv-partner-dot"></span>' + (online ? L.online : L.offline) +
-                    '</span>' +
-                '</div>' +
-                '<div class="sv-featured-details">' +
-                    '<div class="sv-featured-detail"><span class="sv-label">' + L.level + '</span><span class="sv-value">' + level + '</span></div>' +
-                '</div>' +
-                '<span class="sv-featured-link">' + L.details + '</span>' +
-            '</div>' +
-        '</a>';
-    }
 
     /**
      * Карточка игрока: категория крупно в углу, зелёная точка у тех, кто
@@ -725,27 +695,6 @@
     }
 
     // --- Re-render a single section ---
-    function renderSection(type) {
-        var items = type === 'courts' ? _courts : (type === 'coaches' ? _coaches : _partners);
-        var section = document.querySelector('.sv-section[data-type="' + type + '"]');
-        if (!section) return;
-
-        var grid = section.querySelector('.sv-card-grid');
-        if (!grid || !items.length) return;
-
-        var html = '';
-        if (type === 'courts') {
-            html += renderFeaturedCourt(items[0]);
-            if (items.length > 1) html += renderCarousel(items.slice(1), 'courts');
-        } else if (type === 'coaches') {
-            html += renderFeaturedCoach(items[0]);
-            if (items.length > 1) html += renderCarousel(items.slice(1), 'coaches');
-        } else {
-            html += renderFeaturedPartner(items[0]);
-            if (items.length > 1) html += renderCarousel(items.slice(1), 'partners');
-        }
-        grid.innerHTML = html;
-    }
 
     // --- Events ---
     function attachEvents() {

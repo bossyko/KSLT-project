@@ -2323,26 +2323,6 @@ function обновитьРасклад() {
     }
 
     // ---- Update Status Badge ----
-    function updateTrnStatusBadge() {
-        var badge = document.getElementById('adTrnStatusBadge');
-        if (!badge) return;
-        var label, cls;
-        if (!trnEditingPublishedAt) {
-            label = L.trnDraft;
-            cls = 'ad-status-draft';
-        } else {
-            var regStart = document.getElementById('adTrnRegStart').value || null;
-            var regEnd = document.getElementById('adTrnRegEnd').value || null;
-            var dateStart = document.getElementById('adTrnDateStart').value || null;
-            var dateEnd = document.getElementById('adTrnDateEnd').value || null;
-            var autoStatus = A.computeTournamentStatus(regStart, regEnd, dateStart, dateEnd);
-            label = A.TOURNAMENT_STATUSES[autoStatus] || L.statusUpcoming;
-            cls = 'ad-status-' + autoStatus.replace(/_/g, '-');
-        }
-        badge.className = 'ad-field-input ad-trn-status-field ' + cls;
-        badge.setAttribute('data-status-class', cls);
-        badge.textContent = label;
-    }
 
     // ---- Save Tournament ----
     /**

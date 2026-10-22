@@ -1962,19 +1962,6 @@
     }
 
     // ---- Partner Services (Courts) ----
-    async function loadCrtPartnerServices(courtId) {
-        if (!A.client) return;
-        var result = await A.client.from('partner_services')
-            .select('*')
-            .eq('entity_type', 'court')
-            .eq('entity_id', courtId)
-            .order('sort_order', { ascending: true });
-        crtPartnerServices = (result.data && result.data.length) ? result.data : [];
-        if (crtPartnerServices.length === 0) {
-            crtPartnerServices.push({ id: null, service_name: L.crtDefaultService, service_name_en: '', service_name_kg: '', discount_percent: 0 });
-        }
-        renderCrtPartnerServices();
-    }
 
     function renderCrtPartnerServices() {
         var container = document.getElementById('adCrtPartnerServicesRows');

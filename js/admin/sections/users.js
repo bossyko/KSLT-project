@@ -1035,95 +1035,7 @@
         return opts;
     }
 
-    async function openGiveMembershipModal(user) {
-        await A.loadCategories();
 
-        var catGender = userGenderToCategory(user.gender);
-        var catOpts = buildCatOptions(catGender, null);
-
-        /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
-           ловушка Tab, возврат фокуса, Esc и клик мимо — её работа.
-           Тело окна остаётся своим, оно сюда и передаётся. */
-        var окноГот = A.оболочкаОкна({ сырое:
-            '<div class="ad-confirm-modal" style="max-width:440px;">' +
-                '<div class="ad-confirm-title">' + L.usrGiveMembershipTitle + '</div>' +
-                (user.player_id ? '' :
-                    '<div style="margin-bottom:16px;">' +
-                        '<label class="ad-field-label">' + L.usrSelectCategory + '</label>' +
-                        '<select class="ad-field-input" id="adMemCategory">' + catOpts + '</select>' +
-                        '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-top:4px;">' + L.usrCategoryHint + '</div>' +
-                    '</div>'
-                ) +
-                '<div style="margin-bottom:16px;">' +
-                    '<label class="ad-field-label">' + L.usrMembershipPeriod + '</label>' +
-                    '<select class="ad-field-input" id="adUsrMemPeriod">' +
-                        '<option value="1">' + L.usrMonths1 + '</option>' +
-                        '<option value="3">' + L.usrMonths3 + '</option>' +
-                        '<option value="6">' + L.usrMonths6 + '</option>' +
-                        '<option value="12">' + L.usrMonths12 + '</option>' +
-                    '</select>' +
-                '</div>' +
-                '<div class="ad-confirm-actions">' +
-                    '<button class="ad-btn ad-btn-secondary" id="adMemCancel">' + L.cancel + '</button>' +
-                    '<button class="ad-btn ad-btn-primary" id="adMemSubmit">' + L.usrGiveMembership + '</button>' +
-                '</div>' +
-            '</div>' });
-        var overlay = окноГот.overlay;
-
-        document.getElementById('adMemCancel').addEventListener('click', function() { overlay.remove(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
-
-        document.getElementById('adMemSubmit').addEventListener('click', async function() {
-            var btn = document.getElementById('adMemSubmit');
-            btn.textContent = L.saving;
-            btn.disabled = true;
-
-            var months = parseInt(document.getElementById('adUsrMemPeriod').value, 10) || 1;
-            var categoryId = null;
-            var catEl = document.getElementById('adMemCategory');
-            if (catEl) categoryId = catEl.value;
-
-            try {
-                await giveMembership(user, months, categoryId);
-                overlay.remove();
-            } catch (err) {
-                A.showToast('Error: ' + err.message, 'error');
-                btn.textContent = L.usrGiveMembership;
-                btn.disabled = false;
-            }
-        });
-    }
-
-    async function giveMembership(user, months, categoryId) {
-        var now = new Date();
-        var end = new Date(now);
-        end.setMonth(end.getMonth() + months);
-
-        var result = await A.client.from('memberships').insert({
-            profile_id: user.id,
-            status: 'active',
-            starts_at: now.toISOString(),
-            expires_at: end.toISOString(),
-            note: isEn ? 'Admin: free membership' : 'Админ: бесплатное членство'
-        });
-
-        if (result.error) {
-            A.showToast(result.error.message, 'error');
-            return;
-        }
-
-        A.showToast(L.usrMembershipGiven, 'success');
-
-        // TG notification (fire and forget)
-        notifyMembershipTg('granted', user.id, end.toISOString());
-
-        // Auto-create player if no player_id
-        if (!user.player_id && categoryId) {
-            await autoCreatePlayer(user, categoryId);
-        }
-
-        loadAndEditUser(user.id);
-    }
 
     async function autoCreatePlayer(user, categoryId) {
         var name = (user.full_name || '').trim();
@@ -1182,54 +1094,7 @@
         A.showToast(L.usrPlayerCreated, 'success');
     }
 
-    async function extendMembership(memId, months) {
-        // Get current expiry
-        var res = await A.client.from('memberships').select('expires_at, profile_id').eq('id', memId).single();
-        if (res.error || !res.data) { A.showToast('Error', 'error'); return; }
 
-        var expiry = new Date(res.data.expires_at);
-        if (expiry < new Date()) expiry = new Date();
-        expiry.setMonth(expiry.getMonth() + months);
-
-        var result = await A.client.from('memberships').update({
-            expires_at: expiry.toISOString(),
-            status: 'active'
-        }).eq('id', memId);
-
-        if (result.error) {
-            A.showToast(result.error.message, 'error');
-        } else {
-            A.showToast(L.usrMembershipExtended, 'success');
-
-            // TG notification (fire and forget)
-            if (res.data.profile_id) {
-                notifyMembershipTg('extended', res.data.profile_id, expiry.toISOString());
-            }
-
-            // Reload current user
-            var profileRes = await A.client.from('memberships').select('profile_id').eq('id', memId).single();
-            if (profileRes.data) loadAndEditUser(profileRes.data.profile_id);
-        }
-    }
-
-    async function cancelMembership(memId, profileId) {
-        A.showConfirm(L.usrCancelMembership, L.deleteConfirmText, async function() {
-            var result = await A.client.from('memberships').update({
-                status: 'cancelled'
-            }).eq('id', memId);
-
-            if (result.error) {
-                A.showToast(result.error.message, 'error');
-            } else {
-                A.showToast(L.usrMembershipCancelled, 'success');
-
-                // TG notification (fire and forget)
-                notifyMembershipTg('cancelled', profileId);
-
-                loadAndEditUser(profileId);
-            }
-        }, L.usrCancelMembership);
-    }
 
     function notifyMembershipTg(action, profileId, expiresAt) {
         A.client.auth.getSession().then(function(res) {

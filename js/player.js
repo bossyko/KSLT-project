@@ -42,19 +42,7 @@
     }
 
     // Seeded random for consistent mock data per player
-    function seededRandom(seed) {
-        var x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    }
 
-    function hashStr(str) {
-        var hash = 0;
-        for (var i = 0; i < str.length; i++) {
-            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            hash |= 0;
-        }
-        return Math.abs(hash);
-    }
 
     // ---- Labels ----
     /* ════════ МЕТКИ СТРАНИЦЫ — НА ТРЁХ ЯЗЫКАХ, КАК LH НИЖЕ ════════

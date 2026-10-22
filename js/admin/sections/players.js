@@ -956,26 +956,6 @@
         }
 
         // --- Name translate buttons (EN / KG) ---
-        function translateNameFields(toLang, fnTargetId, lnTargetId, btn) {
-            var fnRu = document.getElementById('adPlrFirstName').value.trim();
-            var lnRu = document.getElementById('adPlrLastName').value.trim();
-            if (!fnRu && !lnRu) { A.showToast(L.fillRuFirst, 'error'); return; }
-            var origLabel = btn.textContent;
-            btn.textContent = L.translating;
-            btn.disabled = true;
-            var fullName = fnRu + (lnRu ? ' ' + lnRu : '');
-            A.translateFromRu(fullName, toLang).then(function(result) {
-                var parts = result.split(' ');
-                document.getElementById(fnTargetId).value = parts[0] || '';
-                document.getElementById(lnTargetId).value = parts.slice(1).join(' ') || '';
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            }).catch(function() {
-                A.showToast(L.translateError, 'error');
-                btn.textContent = origLabel;
-                btn.disabled = false;
-            });
-        }
 
         // Translate All — fill empty EN + KG from RU
         var translateAllBtn = document.getElementById('adPlrTranslateAll');

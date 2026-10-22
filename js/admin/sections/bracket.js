@@ -5310,99 +5310,6 @@
     }
 
     // ---- Group Panel HTML (Round-Robin) ----
-    /**
-     * Каким будет плей-офф — видно сразу после жеребьёвки групп.
-     *
-     * Размер сетки и свободные места считаются из настроек: сколько групп и
-     * сколько выходит из каждой. Пары первого круга собираются тем же
-     * правилом, что и настоящая жеребьёвка: победители групп — сеяные и
-     * расходятся по позициям посева, проход без игры достаётся первым из них,
-     * остальные занимают оставшиеся места.
-     *
-     * Слоты подписаны «A1», «B2» — место в своей группе. Как только группа
-     * доиграна, вместо подписи встаёт имя: ждать остальные группы не нужно.
-     */
-    function предпросмотрПлейофф(tournament, grpMatches, playersMap, groupCount, qualifiers, regsMap, isDbl) {
-
-        // Кто уже известен: в доигранной группе места окончательны
-        var именаСлотов = {};
-        for (var g = 1; g <= groupCount; g++) {
-            var матчиГруппы = grpMatches.filter(function(m) { return m.group_number === g; });
-            if (!матчиГруппы.length) continue;
-            var всеСыграны = матчиГруппы.every(function(m) { return m.status === 'completed'; });
-            if (!всеСыграны) continue;
-
-            var игроки = [];
-            матчиГруппы.forEach(function(m) {
-                if (m.player1_id && игроки.indexOf(m.player1_id) === -1) игроки.push(m.player1_id);
-                if (m.player2_id && игроки.indexOf(m.player2_id) === -1) игроки.push(m.player2_id);
-            });
-            var места = calculateGroupStandings(игроки, матчиГруппы, playersMap);
-            применитьРучныеМеста(места, (tournament.manual_group_places || {})[String(g)]);
-            места.forEach(function(м) {
-                именаСлотов[KSLT_RULES.букваГруппы(g) + м.place] = м.playerId;
-            });
-        }
-
-        // Расклад тот же, что при сборке сетки: одна функция на оба случая
-        var расклад = раскладСлотов(tournament, groupCount);
-        if (!расклад) return '';
-        var сетка = расклад.сетка.map(function(к) { return к ? к.метка : null; });
-        var размер = расклад.размер;
-
-        function подпись(слот) {
-            if (!слот) return '<span class="ad-reg-cell-muted">' + L.byeLabel + '</span>';
-            var id = именаСлотов[слот];
-            if (!id) return '<span class="ad-sched-slot-empty">' + слот + '</span>';
-            // Имена берём тем же способом, что и настоящая сетка: в парном
-            // турнире показываются оба, в одиночном — игрок
-            var имя;
-            if (isDbl && regsMap) {
-                имя = getTeamDisplayName(id, regsMap, playersMap, true);
-            } else {
-                var и = playersMap[id];
-                имя = A.esc(и ? (isEn ? (и.name_en || и.name) : и.name) : id);
-            }
-            return '<b>' + имя + '</b> <span class="ad-sched-slot">' + слот + '</span>';
-        }
-
-        var сыгранныхГрупп = 0;
-        for (var гг = 1; гг <= groupCount; гг++) {
-            var мг = grpMatches.filter(function(m) { return m.group_number === гг; });
-            if (мг.length && мг.every(function(m) { return m.status === 'completed'; })) сыгранныхГрупп++;
-        }
-
-        var html = '<div class="ad-grp-playoff-section ad-sched-playoff">';
-        html += '<div class="ad-grp-section-title">' + L.playoffPreviewTitle + '</div>';
-        html += '<p class="ad-sched-podskazka">' +
-            L.playoffPreviewHint
-                .replace('{done}', сыгранныхГрупп)
-                .replace('{all}', groupCount)
-                .replace('{size}', размер)
-                .replace('{free}', расклад.свободно) + '</p>';
-
-        html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><tbody>';
-        for (var м = 0; м < размер; м += 2) {
-            html += '<tr>' +
-                '<td class="ad-sched-num">' + (м / 2 + 1) + '</td>' +
-                '<td>' + подпись(сетка[м]) + '</td>' +
-                '<td class="ad-sched-vs">vs</td>' +
-                '<td>' + подпись(сетка[м + 1]) + '</td>' +
-            '</tr>';
-        }
-        html += '</tbody></table></div>';
-
-        // Доп. матчи: без них в сетке висят «IG1» и «IG2» непонятно откуда
-        if (расклад.допМатчи.length) {
-            html += '<div class="ad-sched-note ad-sched-note-top">' + L.igStageTitle + ': ' +
-                расклад.допМатчи.map(function(дм) {
-                    return 'IG' + дм.номер + ' — ' + дм.первый.метка + ' vs ' + дм.второй.метка;
-                }).join(', ') + '</div>';
-        }
-
-        html += '</div>';
-        return html;
-    }
 
     // ---- Helpers to distinguish group vs playoff matches ----
     function isGroupMatch(m) { return m.group_number && m.group_number > 0; }
@@ -5415,7 +5322,6 @@
     // Group League helpers
     function isPLMatch(m) { return m.round && m.round.indexOf('PL-') === 0; }
     function isCLMatch(m) { return m.round && m.round.indexOf('CL-') === 0; }
-    function isLeagueMatch(m) { return isPLMatch(m) || isCLMatch(m); }
     /**
      * В КАКУЮ ЛИГУ ИДЁТ ЭТО МЕСТО — ОДНО ОПРЕДЕЛЕНИЕ.
      *
@@ -5435,11 +5341,6 @@
         return (place && place <= выходит) ? 'PL' : 'CL';
     }
 
-    function getLeaguePrefix(m) {
-        if (isPLMatch(m)) return 'PL';
-        if (isCLMatch(m)) return 'CL';
-        return null;
-    }
 
     /**
      * Счета от игроков: что ждёт подтверждения и с чем не согласились.
@@ -6491,29 +6392,6 @@
     }
 
     // ---- Parse score into sets/games for standings ----
-    function parseScoreSetsGames(score, playerId, match) {
-        var result = { setsWon: 0, setsLost: 0, gamesWon: 0, gamesLost: 0 };
-        if (!score || score === 'BYE') return result;
-
-        var isPlayer1 = match.player1_id === playerId;
-        var ex = extractOutcome(score);
-        var sets = ex.sets ? ex.sets.split(' ') : [];
-
-        sets.forEach(function(s) {
-            var m = s.match(/^(\d+)\/(\d+)/);
-            if (!m) return;
-            var s1 = parseInt(m[1], 10);
-            var s2 = parseInt(m[2], 10);
-            var pGames = isPlayer1 ? s1 : s2;
-            var oGames = isPlayer1 ? s2 : s1;
-            result.gamesWon += pGames;
-            result.gamesLost += oGames;
-            if (pGames > oGames) result.setsWon++;
-            else result.setsLost++;
-        });
-
-        return result;
-    }
 
     /**
      * Ручные места менеджера поверх расчёта.
@@ -6570,9 +6448,6 @@
         return KSLT_GROUPS.ктоВыиграл(m);
     }
 
-    function parseScoreSetsGames(score, playerId, match) {
-        return KSLT_GROUPS.сетыИГеймы(score, playerId, match);
-    }
 
     // ---- Bracket Panel HTML ----
     function renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap) {
@@ -11324,16 +11199,6 @@
         return { sets: parts.join(' '), outcome: outcome };
     }
 
-    function formatScoreDisplay(score) {
-        if (!score || score === 'BYE') return score || '';
-        var ex = extractOutcome(score);
-        var suffix = ex.outcome ? '  ' + ex.outcome : '';
-        if (!ex.sets) return ex.outcome || '';
-        return ex.sets.split(' ').map(function(set) {
-            var p = set.split('/');
-            return p[0] + ':' + (p[1] || '0');
-        }).join('  ') + suffix;
-    }
 
     // ---- Правка результата задним числом ----
     //
@@ -11584,32 +11449,7 @@
         var _p1 = displayP1Id, _p2 = displayP2Id;
         var _имя1 = p1Name, _имя2 = p2Name, _посев1 = displaySeed1, _посев2 = displaySeed2;
 
-        function нарисоватьИмена() {
-            var верх = document.getElementById('adNameTop');
-            var низ = document.getElementById('adNameBottom');
-            верх.innerHTML = A.esc(_имя1) + (_посев1 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + _посев1 + ']</span>' : '');
-            низ.innerHTML = A.esc(_имя2) + (_посев2 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + _посев2 + ']</span>' : '');
-        }
 
-        function поменятьМестами() {
-            swapped = !swapped;
-            var t;
-            t = _p1; _p1 = _p2; _p2 = t;
-            t = _имя1; _имя1 = _имя2; _имя2 = t;
-            t = _посев1; _посев1 = _посев2; _посев2 = t;
-            // Цифры едут вместе с именами: что набрано, остаётся у своего игрока
-            for (var s = 1; s <= 3; s++) {
-                var a = document.getElementById('adS' + s + 'P1');
-                var b = document.getElementById('adS' + s + 'P2');
-                var ta = document.getElementById('adS' + s + 'TB1');
-                var tb = document.getElementById('adS' + s + 'TB2');
-                var v = a.value; a.value = b.value; b.value = v;
-                v = ta.value; ta.value = tb.value; tb.value = v;
-            }
-            нарисоватьИмена();
-            обновитьКнопкиСнятия();
-            updateState();
-        }
 
         // Победителя называет человек, а не счёт: нажал на имя — оно и
         // записано. Цифры при этом всегда со стороны победителя, разворот в
@@ -11627,16 +11467,6 @@
             });
         });
 
-        /** Кнопки «кто снялся» подписаны именами — их порядок тоже меняется. */
-        function обновитьКнопкиСнятия() {
-            var кнопки = overlay.querySelectorAll('.ad-retired-btn');
-            if (кнопки.length === 2) {
-                кнопки[0].dataset.retired = _p1;
-                кнопки[0].textContent = _имя1;
-                кнопки[1].dataset.retired = _p2;
-                кнопки[1].textContent = _имя2;
-            }
-        }
 
         // ---- Супер тай-брейк ----
         //
