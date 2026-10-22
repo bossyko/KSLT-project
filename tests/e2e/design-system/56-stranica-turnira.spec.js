@@ -158,7 +158,7 @@ test.describe('страница турнира · вкладки и шапки',
         await page.waitForTimeout(1500);
         const з = await page.evaluate((выр) => {
             const контраст = eval(выр);
-            return ['.td-group-table thead th', '.td-rr-table thead th', '.td-reg-table thead th', '.td-sched-table th']
+            return ['.td-group-table thead th', '.td-reg-table thead th', '.td-sched-table th']
                 .map(с => {
                     const n = Array.from(document.querySelectorAll(с)).find(x => x.getBoundingClientRect().height > 0);
                     return { шапка: с, контраст: n ? контраст(n) : null };
@@ -166,6 +166,13 @@ test.describe('страница турнира · вкладки и шапки',
         }, КОНТРАСТ);
 
         const нарисованные = з.filter(x => x.контраст !== null);
+        /* СЕЛЕКТОРОВ СТАЛО ТРИ (22.10). `.td-rr-table` снята куском 117 как
+           мёртвая: круговая переписана на `.td-group-table`, а `td-rr-*`
+           осталось от прежнего наименования.
+           ПОРОГ ОСТАЁТСЯ ЗАМЕРЕННЫМ, А НЕ ЖЕЛАЕМЫМ: сколько шапок РИСУЕТСЯ,
+           решает стадия конкретного турнира, а не css, и этого числа я не
+           мерил. Что селекторов в css не меньше трёх, держит отдельное
+           правило `check-oblozhka` — статикой, где это и проверяется. */
         expect(нарисованные.length, 'хотя бы одна шапка должна быть на экране').toBeGreaterThan(0);
         for (const ш of нарисованные) {
             expect(ш.контраст, ш.шапка + ' — было 3.21 на --text-dim').toBeGreaterThanOrEqual(4.5);

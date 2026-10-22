@@ -93,7 +93,11 @@ test.describe('эфир одной краской · ' + язык.код, () => 
                 '<span class="live-dot"></span>' +
                 '<span class="live-indicator"></span>' +
                 '<span class="trn-live-dot"></span>' +
-                '<span class="td-status-pill live">LIVE</span>' +
+                /* НОСИТЕЛЬ ПЕРЕВЯЗАН 22.10: `.td-status-pill.live` снят куском 117
+                   как мёртвый — раздел расписания переписан на `td-sched-*`,
+                   а значок статуса живёт как `.td-status-badge.live`.
+                   ПРОБА, МЕРЯЮЩАЯ МЁРТВЫЙ КЛАСС, МЕРИТ ПУСТОТУ. */
+                '<span class="td-status-badge live">LIVE</span>' +
                 '<span class="td-match-score live-score">6:4</span>';
             document.body.appendChild(гнездо);
             const краски = {};
