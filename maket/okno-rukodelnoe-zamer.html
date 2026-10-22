@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер рукодельного окна в общей оболочке</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=296">
+<link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<!--
+  ЗАЧЕМ. Окон `.ad-modal-overlay` в админке ЧЕТЫРНАДЦАТЬ, и десять из
+  них живут мимо общей оболочки (решение 04.10): замерено на боевой —
+  `role` нет, `aria-modal` нет, фокус остаётся на `body`, Tab уходит под
+  окно. Оболочка для них и сделана — вход `сырое` принимает готовую
+  разметку, — но её признак знал ОДНО имя окна (`.ad-confirm-modal`) и
+  рукодельное `.ad-modal` не находил вовсе.
+
+  Стенд зовёт НАСТОЯЩУЮ `A.оболочкаОкна` с разметкой окна «Детали
+  скидки», выписанной из продукта.
+-->
+<style>
+  body { background: var(--bg-base); color: var(--text-primary);
+         font-family: var(--font-sans); padding: 40px; }
+  .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="подпись">Нажми «Открыть» — окно поднимется общей оболочкой</div>
+<button class="ad-btn ad-btn-primary" id="звал">Открыть окно</button>
+
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/admin/core/constants.js?v=156"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<script src="../js/kslt-vremya.js?v=2"></script>
+<script src="../js/kslt-fokus.js?v=1"></script>
+<script src="../js/admin/core/utils.js?v=53"></script>
+<script>
+(function () {
+    var A = window.KSLT_ADMIN, L = window.KSLT_ADMIN.L || {};
+    /* ВЫПИСКА ИЗ ПРОДУКТА — `vouchers.js:523`, окно «Детали скидки» */
+    var html =
+        '<div class="ad-modal" style="max-width:500px;">' +
+            '<div class="ad-modal-header">' +
+                '<h3>🎫 Детали скидки</h3>' +
+                '<button class="ad-modal-close" id="adVchModalClose" aria-label="Закрыть">✕</button>' +
+            '</div>' +
+            '<div class="ad-modal-body" style="padding:20px;">' +
+                '<div class="ad-vch-detail-grid">' +
+                    '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">Игрок</span><span>Лера Ким</span></div>' +
+                    '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">Скидка</span><span>100%</span></div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    document.getElementById('звал').addEventListener('click', function () {
+        var готово = A.оболочкаОкна({ сырое: html });
+        готово.окно.querySelector('.ad-modal-close')
+            .addEventListener('click', готово.закрыть);
+        window.ОКНО = готово;
+    });
+})();
+</script>
+</body>
+</html>
