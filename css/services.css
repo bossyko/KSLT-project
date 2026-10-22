@@ -504,52 +504,13 @@
 }
 
 /* Partner initials (featured) */
-.sv-partner-initials {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--accent-subtle);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--fs-md);
-    font-weight: 700;
-    margin-bottom: var(--space-sm);
-    border: var(--bw-thick) solid var(--accent);
-}
 
 /* Partner online/offline status */
-.sv-partner-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: var(--fs-sm);
-}
 
-.sv-partner-status.online {
-    color: #4ade80;
-}
 
-.sv-partner-status.offline {
-    color: var(--text-muted);
-}
 
-.sv-partner-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
 
-.sv-partner-status.online .sv-partner-dot {
-    background: #4ade80;
-    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
-}
 
-.sv-partner-status.offline .sv-partner-dot {
-    background: var(--text-muted);
-}
 
 /* Empty state */
 .sv-empty {

@@ -474,12 +474,6 @@
     margin-bottom: var(--space-xs);
 }
 
-.td-section-subtitle {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: var(--space-lg) 0 var(--space-md);
-}
 
 /* ───────── ПОЛОСА «ПОКАЗАТЬ СЫГРАННЫЕ» ─────────
 
@@ -948,46 +942,11 @@ tr.td-rr-row-highlight {
 }
 
 /* === ROUND ROBIN === */
-.td-rr-groups {
-    max-width: var(--container-max);
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-}
 
-.td-rr-group {
-    background: var(--bg-card);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
 
-.td-rr-group-title {
-    font-size: var(--fs-base);
-    font-weight: 600;
-    color: var(--accent);
-    padding: var(--space-md) var(--space-md) 0;
-}
 
-.td-rr-table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
 
-.td-rr-table {
-    width: 100%;
-    min-width: 550px;
-    border-collapse: collapse;
-}
 
-.td-rr-table th,
-.td-rr-table td {
-    padding: 10px 12px;
-    text-align: center;
-    border-bottom: var(--bw-hair) solid var(--border-subtle);
-    font-size: var(--fs-sm);
-}
 
 /* ШАПКА ТАБЛИЦЫ — `--text-muted`, А НЕ `--text-dim`. Замер 04.10 на боевой:
    шапка таблицы группы давала контраст 3.21 при норме WCAG AA 4.5 — это
@@ -998,127 +957,29 @@ tr.td-rr-row-highlight {
    четыре стояли на одной и той же краске.
    `--text-dim` остаётся там, где он ОСМЫСЛЕН: им рисуется «TBD», и про это
    уже записано выше, у .td-slot-wait. */
-.td-rr-table thead th {
-    background: var(--bg-elevated);
-    color: var(--text-muted);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
 
-.td-rr-num {
-    width: 40px;
-}
 
-.td-rr-player-header {
-    text-align: left;
-}
 
-.td-rr-player {
-    text-align: left;
-    white-space: nowrap;
-    color: var(--text-primary);
-}
 
-.td-rr-diagonal {
-    background: var(--bg-elevated) !important;
-    position: relative;
-}
 
-.td-rr-diagonal::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 45%, var(--border-light) 45%, var(--border-light) 55%, transparent 55%);
-}
 
-.td-rr-cell {
-    font-size: var(--fs-xs);
-    vertical-align: middle;
-    line-height: 1.3;
-}
 
-.td-rr-win {
-    color: var(--accent);
-}
 
-.td-rr-loss {
-    color: var(--text-muted);
-}
 
-.td-rr-score-text {
-    display: block;
-    font-size: var(--fs-xs);
-}
 
-.td-rr-result {
-    display: block;
-    font-weight: 700;
-    font-size: var(--fs-xs);
-    margin-top: 2px;
-}
 
-.td-rr-stat {
-    font-weight: 500;
-    color: var(--text-secondary);
-}
 
-.td-rr-stat-header {
-    width: 50px;
-}
 
-.td-rr-points {
-    font-weight: 600;
-}
 
-.td-rr-place {
-    font-weight: 700 !important;
-    color: var(--accent) !important;
-    font-size: var(--fs-base);
-}
 
-.td-rr-table tbody tr {
-    transition: background 0.15s;
-}
 
-.td-rr-table tbody tr:hover {
-    background: var(--surface-glass-hover);
-}
 
-.td-rr-table tbody tr:last-child td {
-    border-bottom: none;
-}
 
 /* Round Robin Knockout */
-.td-rr-knockout {
-    max-width: var(--container-max);
-    margin: var(--space-lg) auto 0;
-}
 
-.td-rr-knockout-matches {
-    display: flex;
-    gap: var(--space-lg);
-    flex-wrap: wrap;
-}
 
-.td-rr-ko-match {
-    flex: 1;
-    min-width: 220px;
-}
 
-.td-rr-ko-label {
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-}
 
-.td-rr-ko-match .td-match {
-    width: 100%;
-}
 
 /* === VENUE === */
 .td-venue-card {
@@ -1232,126 +1093,22 @@ tr.td-rr-row-highlight {
     }
 }
 
-.td-schedule-day {
-    max-width: var(--container-max);
-    margin: 0 auto var(--space-lg);
-}
 
-.td-schedule-day-title {
-    font-size: var(--fs-base);
-    font-weight: 600;
-    color: var(--text-primary);
-    padding-bottom: var(--space-xs);
-    margin-bottom: var(--space-sm);
-    border-bottom: var(--bw-hair) solid var(--border-subtle);
-}
 
-.td-schedule-matches {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
 
-.td-schedule-match {
-    display: grid;
-    grid-template-columns: 55px 65px 1fr auto 90px auto;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: 12px var(--space-md);
-    background: var(--bg-card);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    transition: all 0.2s;
-}
 
-.td-schedule-match:hover {
-    background: var(--surface-glass-hover);
-    border-color: var(--border-light);
-}
 
-.td-schedule-match.live {
-    border-color: rgba(255, 71, 87, 0.4);
-}
 
-.td-schedule-time {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: var(--fs-sm);
-}
 
-.td-schedule-court {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    background: var(--bg-elevated);
-    padding: 3px 8px;
-    border-radius: var(--radius-sm);
-    text-align: center;
-    white-space: nowrap;
-}
 
-.td-schedule-players {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-}
 
-.td-schedule-p1.winner,
-.td-schedule-p2.winner {
-    color: var(--accent);
-    font-weight: 600;
-}
 
-.td-schedule-vs {
-    color: var(--text-muted);
-    font-size: var(--fs-xs);
-    flex-shrink: 0;
-}
 
-.td-schedule-round {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    text-align: right;
-}
 
-.td-schedule-score {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-    text-align: center;
-    min-width: 80px;
-}
 
-.td-status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-2xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-}
 
-.td-status-pill.completed {
-    background: var(--alpha-white-08);
-    color: var(--text-muted);
-}
 
-.td-status-pill.live {
-    background: var(--danger-subtle);
-    color: var(--danger);
-}
 
-.td-status-pill.upcoming {
-    background: var(--alpha-lime-06);
-    color: var(--accent-dim);
-}
 
 /* === PARTICIPANTS === */
 .td-participants-grid {
@@ -1368,42 +1125,11 @@ tr.td-rr-row-highlight {
     max-width: none;
 }
 
-.td-participant-card {
-    background: var(--bg-card);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 12px 16px;
-    transition: all 0.2s;
-}
 
-.td-participant-card:hover {
-    border-color: var(--border-light);
-    background: var(--surface-glass-hover);
-}
 
-.td-participant-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
 
-.td-participant-seed {
-    color: var(--accent);
-    font-weight: 700;
-    font-size: var(--fs-xs);
-    min-width: 28px;
-}
 
-.td-participant-name {
-    flex: 1;
-    font-weight: 500;
-    color: var(--text-primary);
-    font-size: var(--fs-sm);
-}
 
-.td-participant-country {
-    font-size: var(--fs-md);
-}
 
 .td-participants-subtitle {
     /* Кегль и вес НЕ объявлены: подзаголовок раздела определён один раз,
@@ -1921,35 +1647,9 @@ tr.td-rr-row-highlight {
 }
 
 /* Кто проводил турнир: строка под подиумом, как подпись в протоколе */
-.td-officials {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    justify-content: center;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: var(--bw-hair) solid var(--border-subtle);
-}
 
-.td-official {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
 
-.td-official-role {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
 
-.td-official-name {
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    color: var(--text-primary);
-}
 
 /* Подпись под местом: чем развели равных — личной встречей, сетами,
    геймами или жребием.
@@ -2031,14 +1731,7 @@ tr.td-rr-row-highlight {
         gap: var(--space-md);
     }
 
-    .td-schedule-match {
-        grid-template-columns: 50px 60px 1fr auto;
-    }
 
-    .td-schedule-round,
-    .td-schedule-status {
-        display: none;
-    }
 }
 
 
@@ -2084,20 +1777,8 @@ tr.td-rr-row-highlight {
         gap: var(--space-xs);
     }
 
-    .td-schedule-match {
-        grid-template-columns: 50px 1fr auto;
-        gap: 8px;
-        padding: 10px 12px;
-    }
 
-    .td-schedule-court {
-        display: none;
-    }
 
-    .td-schedule-score {
-        min-width: 60px;
-        font-size: var(--fs-xs);
-    }
 
     .td-participants-grid {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -2117,9 +1798,6 @@ tr.td-rr-row-highlight {
     .td-podium-2 .td-podium-name,
     .td-podium-3 .td-podium-name { font-size: var(--fs-sm); }
 
-    .td-rr-knockout-matches {
-        flex-direction: column;
-    }
 }
 
 @media (max-width: 640px) {
@@ -2137,9 +1815,6 @@ tr.td-rr-row-highlight {
         -webkit-overflow-scrolling: touch;
     }
 
-    .td-schedule-players {
-        font-size: var(--fs-xs);
-    }
 
     .td-participants-grid {
         grid-template-columns: 1fr;
