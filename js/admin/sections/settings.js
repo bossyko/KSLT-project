@@ -36,7 +36,7 @@
            администратору: они меняют не очки, а правила платформы. */
         var правит = A.currentRole === 'admin';
         if (!правит && A.currentRole !== 'manager') {
-            container.innerHTML = '<div class="ad-empty-state"><p>' + ('Доступ запрещён') + '</p></div>';
+            container.innerHTML = A.отказСостояние({ текст: L.setDostupZapreshchen });
             return;
         }
 
@@ -119,9 +119,7 @@
         var планы = {};
         var р = await A.client.from('pricing_plans').select('*');
         if (р.error) {
-            panel.innerHTML = '<div class="ad-empty-state"><p>' +
-                ('Таблица цен недоступна: ') +
-                р.error.message + '</p></div>';
+            panel.innerHTML = A.отказСостояние({ текст: L.setCenyNedostupny, подробности: р.error.message });
             return;
         }
         (р.data || []).forEach(function(p) { планы[p.kind] = p; });
@@ -391,7 +389,7 @@
         var html = '';
 
         if (cachedLevels.length === 0) {
-            html += '<div class="ad-empty-state"><p>' + L.ratNoLevels + '</p></div>';
+            html += A.пустоеСостояние({ всего: 0, пусто: L.ratNoLevels });
         } else {
             /* Разбор `{level_id: {место: {id, очки}}}` — чтобы сохранение
                знало id строки и не угадывало её по (level_id, place). */
@@ -1191,7 +1189,7 @@
         }
 
         if (!hasEligible) {
-            eligibleHtml += '<div class="ad-empty-state"><p>' + L.ratNoPlayers + '</p></div>';
+            eligibleHtml += A.пустоеСостояние({ всего: 0, пусто: L.ratNoPlayers });
         }
 
         // Existing promotions history
@@ -1207,7 +1205,7 @@
         }
 
         if (filteredPromotions.length === 0) {
-            historyHtml += '<div class="ad-empty-state"><p>' + L.ratNoPromotions + '</p></div>';
+            historyHtml += A.пустоеСостояние({ всего: 0, пусто: L.ratNoPromotions });
         } else {
             historyHtml += '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table ad-promo-history"><thead><tr>' +
                 '<th>' + L.ratPlayer + '</th>' +

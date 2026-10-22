@@ -2363,9 +2363,10 @@
            смотрели вовсе: при отказе базы `data` пуст, и экран писал «Нет
            игроков» — менеджер читал это как «никого нет в разряде». */
         if (res.error) {
-            body.innerHTML = '<div class="ad-empty-state"><p>' +
-                A.esc(L.ratLoadFailed) + '</p><p class="ad-modal-note">' +
-                A.esc(res.error.message) + '</p></div>';
+            body.innerHTML = A.отказСостояние({
+                текст: A.esc(L.ratLoadFailed),
+                подробности: A.esc(res.error.message)
+            });
             return;
         }
         var players = res.data || [];
@@ -2379,7 +2380,7 @@
         }
 
         if (players.length === 0) {
-            body.innerHTML = '<div class="ad-empty-state"><p>' + L.ratNoPlayers + '</p></div>';
+            body.innerHTML = A.пустоеСостояние({ всего: 0, пусто: L.ratNoPlayers });
             return;
         }
 
@@ -2646,7 +2647,7 @@
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = '<div class="ad-empty-state"><p>' + L.ratNoResults + '</p></div>';
+            container.innerHTML = A.пустоеСостояние({ всего: 0, пусто: L.ratNoResults });
             document.getElementById('ratResultsBody').innerHTML = '';
             return;
         }

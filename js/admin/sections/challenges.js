@@ -168,7 +168,7 @@
         if (!el) return;
 
         if (pendingList.length === 0) {
-            el.innerHTML = '<div class="ad-empty-state">' + L.chalNoPending + '</div>';
+            el.innerHTML = A.пустоеСостояние({ всего: 0, пусто: L.chalNoPending });
             return;
         }
 
@@ -211,7 +211,7 @@
         if (!el) return;
 
         if (acceptedList.length === 0) {
-            el.innerHTML = '<div class="ad-empty-state">' + L.chalNoAccepted + '</div>';
+            el.innerHTML = A.пустоеСостояние({ всего: 0, пусто: L.chalNoAccepted });
             return;
         }
 
@@ -309,7 +309,7 @@
         if (!el) return;
 
         if (publishedList.length === 0) {
-            el.innerHTML = '<div class="ad-empty-state">' + L.chalNoPublished + '</div>';
+            el.innerHTML = A.пустоеСостояние({ всего: 0, пусто: L.chalNoPublished });
             return;
         }
 
@@ -443,7 +443,7 @@
         var pMap = A._chalPlayersMap || {};
 
         if (completedList.length === 0) {
-            el.innerHTML = '<div class="ad-empty-state">' + L.chalNoCompleted + '</div>';
+            el.innerHTML = A.пустоеСостояние({ всего: 0, пусто: L.chalNoCompleted });
             return;
         }
 

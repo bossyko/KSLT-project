@@ -2863,7 +2863,7 @@
                 html += renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
             }
         } else {
-            html += '<div class="ad-empty-state" style="margin-top:24px;"><p>' + ('Сетка ещё не сгенерирована. Одобрите заявки и сгенерируйте жеребьёвку.') + '</p></div>';
+            html += A.пустоеСостояние({ всего: 0, пусто: ('Сетка ещё не сгенерирована. Одобрите заявки и сгенерируйте жеребьёвку.') });
         }
         html += '</div>';
 
@@ -4555,7 +4555,7 @@
            внести первого участника руками было нечем. Находка Кости 28.09. */
 
         if (mainDraw.length === 0 && waitlistRegs.length === 0 && rejected.length === 0 && withdrawn.length === 0 && blocked.length === 0) {
-            html += '<div class="ad-empty-state"><p>' + L.noRegistrations + '</p></div>';
+            html += A.пустоеСостояние({ всего: 0, пусто: L.noRegistrations });
         } else {
             // Посев ставит менеджер руками — колонка есть только там, где это
             // нужно: в рейтинговых турнирах сеет рейтинг, а не человек
@@ -4720,7 +4720,7 @@
                 });
                 html += '</tbody></table></div>';
             } else {
-                html += '<div class="ad-empty-state ad-reg-pusto"><p>' + L.noRegistrations + '</p></div>';
+                html += A.пустоеСостояние({ всего: 0, тесно: true, пусто: L.noRegistrations });
             }
 
             // ---- Waitlist ----
@@ -4735,7 +4735,7 @@
                 });
                 html += '</tbody></table></div>';
             } else {
-                html += '<div class="ad-empty-state ad-reg-pusto"><p>' + L.regNoWaitlist + '</p></div>';
+                html += A.пустоеСостояние({ всего: 0, тесно: true, пусто: L.regNoWaitlist });
             }
 
             // ---- Rejected (admin only) ----
@@ -5138,8 +5138,7 @@
         });
 
         if (!очередь.length) {
-            return '<div class="ad-empty-state"><p>' +
-                ('Расписание ещё не назначено.') + '</p></div>';
+            return A.пустоеСостояние({ всего: 0, пусто: L.brkNetRaspisaniya });
         }
 
         очередь.sort(function(a, b) {

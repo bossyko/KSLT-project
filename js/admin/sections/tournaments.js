@@ -2239,7 +2239,7 @@ function обновитьРасклад() {
             html += '</tbody></table></div>';
             html += '<div style="margin-top:8px;"><button class="ad-btn ad-btn-sm ad-btn-danger" id="adTrnRegRemoveMain" disabled>' + L.regRemoveSelected + '</button></div>';
         } else {
-            html += '<div class="ad-empty-state" style="padding:12px 0;"><p>' + L.noRegistrations + '</p></div>';
+            html += A.пустоеСостояние({ всего: 0, тесно: true, пусто: L.noRegistrations });
         }
         html += '</div>';
 
@@ -2254,7 +2254,7 @@ function обновитьРасклад() {
             html += '</tbody></table></div>';
             html += '<div style="margin-top:8px;"><button class="ad-btn ad-btn-sm ad-btn-danger" id="adTrnRegRemoveWait" disabled>' + L.regRemoveSelected + '</button></div>';
         } else {
-            html += '<div class="ad-empty-state" style="padding:12px 0;"><p>' + L.regNoWaitlist + '</p></div>';
+            html += A.пустоеСостояние({ всего: 0, тесно: true, пусто: L.regNoWaitlist });
         }
         html += '</div>';
 

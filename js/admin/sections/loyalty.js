@@ -102,7 +102,7 @@
             '</div>';
 
         if (rules.length === 0) {
-            html += '<div class="ad-empty-state"><div class="ad-empty-icon">⭐</div><h3>' + L.loyNoRules + '</h3></div>';
+            html += A.пустоеСостояние({ всего: 0, значок: '⭐', пусто: L.loyNoRules });
             wrap.innerHTML = html;
             document.getElementById('adLoyAddRule').addEventListener('click', function() { showRuleForm(null); });
             return;
@@ -235,7 +235,7 @@
             '</div>';
 
         if (rewards.length === 0) {
-            html += '<div class="ad-empty-state"><div class="ad-empty-icon">🎁</div><h3>' + L.loyNoRewards + '</h3></div>';
+            html += A.пустоеСостояние({ всего: 0, значок: '🎁', пусто: L.loyNoRewards });
             wrap.innerHTML = html;
             document.getElementById('adLoyAddReward').addEventListener('click', function() { showRewardForm(null); });
             return;
@@ -454,7 +454,7 @@
         var page = loyTxFiltered.slice(start, start + LOY_PER_PAGE);
 
         if (total === 0) {
-            wrap.innerHTML = '<div class="ad-empty-state"><div class="ad-empty-icon">⭐</div><h3>' + L.loyNoTransactions + '</h3></div>';
+            wrap.innerHTML = A.пустоеСостояние({ всего: loyTxAll.length, значок: '⭐', пусто: L.loyNoTransactions });
             return;
         }
 
