@@ -519,7 +519,7 @@
         });
 
         // Click bracket button / row
-        tbody.onclick = async function(e) {
+        A.наТелоТаблицы(tbody, async function(e) {
             var pubBtn = e.target.closest('.ad-pub-btn');
             if (pubBtn) {
                 e.stopPropagation();
@@ -568,7 +568,7 @@
             var row = e.target.closest('tr[data-trn-id]');
             if (!row) return;
             loadAndEditTournament(row.dataset.trnId);
-        };
+        });
 
         /* ОБЁРТКА БЕЗ `return` ПРОГЛАТЫВАЕТ ПРОМИС. Стояло
            `function() { loadTournamentsList(); }` — и полоса «Удалить

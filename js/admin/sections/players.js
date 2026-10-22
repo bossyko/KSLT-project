@@ -346,7 +346,7 @@
         });
 
         if (isAdm) {
-            tbody.addEventListener('click', function(e) {
+            A.наТелоТаблицы(tbody, function(e) {
                 if (e.target.closest('.ad-bulk-cell')) return;
                 var row = e.target.closest('tr[data-plr-id]');
                 if (!row) return;

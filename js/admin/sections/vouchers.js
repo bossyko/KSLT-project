@@ -383,7 +383,7 @@
         tbody.innerHTML = html;
 
         // Action handlers
-        tbody.addEventListener('click', function(e) {
+        A.наТелоТаблицы(tbody, function(e) {
             var viewBtn = e.target.closest('[data-vch-view]');
             if (viewBtn) {
                 var vid = viewBtn.dataset.vchView;

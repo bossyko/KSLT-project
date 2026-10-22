@@ -353,7 +353,7 @@
 
         tbody.innerHTML = html;
 
-        tbody.addEventListener('click', function(e) {
+        A.наТелоТаблицы(tbody, function(e) {
             var row = e.target.closest('tr[data-fin-id]');
             if (!row) return;
             var id = row.dataset.finId;

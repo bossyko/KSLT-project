@@ -193,7 +193,7 @@
         });
         tbody.innerHTML = html;
 
-        tbody.addEventListener('click', function(e) {
+        A.наТелоТаблицы(tbody, function(e) {
             if (e.target.closest('.ad-bulk-cell')) return;
             // Edit button → direct edit
             if (e.target.closest('.ad-crt-edit-btn')) {
