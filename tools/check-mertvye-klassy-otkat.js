@@ -14,9 +14,15 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-mert-'));
     const п = path.join(КОРЕНЬ, д);
     if (fs.existsSync(п)) fs.cpSync(п, path.join(песок, д), { recursive: true });
 });
+/* КОРНЕВЫЕ СТРАНИЦЫ КОПИРУЮТСЯ ТОЖЕ. Без них в песке весь лендинг
+   выглядит мёртвым, и правило падает НА ЧИСТОМ КОДЕ — прувер это и
+   сказал. ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО. */
+fs.readdirSync(КОРЕНЬ)
+    .filter(ф => ф.endsWith('.html'))
+    .forEach(ф => fs.cpSync(path.join(КОРЕНЬ, ф), path.join(песок, ф)));
 
-const CSS = 'css/dashboard.css', JS = 'js/dashboard.js';
-const ФАЙЛЫ = [CSS, JS];
+const CSS = 'css/dashboard.css', JS = 'js/dashboard.js', AD = 'css/admin.css';
+const ФАЙЛЫ = [CSS, JS, AD];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -53,6 +59,14 @@ const ОТКАТЫ = [
       "'<span class=\"db-status-badge\">'",
       "'<span class=\"db-status-badge2\">'"],
      'ни одного мёртвого класса в css кабинета'],
+
+    /* 3б. МЁРТВЫЙ КЛАСС В ЧУЖОМ ФАЙЛЕ — правило смотрит ВСЕ файлы css,
+       а не только кабинет. Семьдесят семь мёртвых 22.10 нашлись в
+       `admin.css`, и правило обязано видеть их там же. */
+    ['вернуть мёртвый класс в admin.css', AD,
+     '.ad-badge {\n    font-size: var(--fs-xs);',
+     '.ad-trn-photo-grid { display: grid; }\n\n.ad-badge {\n    font-size: var(--fs-xs);',
+     'ни одного мёртвого класса во всём css продукта'],
 
     /* 3. ПОТОЛОК КЛАССОВ: новая семья не копится молча */
     ['завести новую семью классов мимо потолка', CSS,
