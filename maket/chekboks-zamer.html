@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер чекбокса массового выбора</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=292">
+<!-- ДОМ УВЕДОМЛЕНИЯ ИДЁТ СО СВОИМ СТИЛЕМ. Без этой строки падает чужой
+     сторож «у модуля уведомления подключён его стиль» — и он прав:
+     стенд грузил дом и не грузил то, чем он рисуется. -->
+<link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<!--
+  СТЕНД РИСУЕТ НЕ КОПИЮ, А САМ ПРОДУКТ. Разметка чекбоксов берётся у
+  настоящей `A.bulkCheckboxTd` из `js/admin/core/utils.js` — если её
+  разметка уедет, стенд уедет вместе с ней, и проба это увидит.
+  СТЕНД, РИСУЮЩИЙ СВОЮ КОПИЮ, МЕРИТ СТЕНД.
+
+  Зачем: кусок 119 снял инлайн `width:18px;height:18px;accent-color;cursor`
+  и ДВЕ важности в css, которые его перебивали. На экране не должно
+  измениться ничего — это и меряется.
+-->
+<style>
+    body { background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); padding: 40px; }
+    table { border-collapse: collapse; }
+    .ряд { margin-bottom: 24px; }
+    .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="ряд">
+    <div class="подпись">шапка таблицы — `.ad-bulk-all`</div>
+    <table class="ad-table"><thead><tr id="шапка"></tr></thead></table>
+</div>
+<div class="ряд">
+    <div class="подпись">строка таблицы — `.ad-bulk-item`</div>
+    <table class="ad-table"><tbody><tr id="строка"></tr></tbody></table>
+</div>
+
+<!-- ЗАВИСИМОСТИ БЕРУТСЯ ТАК ЖЕ, КАК У setka-zamer: `constants.js` зовёт
+     `window.KSLT_STATUS.подписи(...)` на загрузке, и без источника статусов
+     словарь не собирается вовсе — стенд молча показывал бы пустоту. -->
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/admin/core/constants.js?v=153"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<script src="../js/kslt-vremya.js?v=2"></script>
+<script src="../js/kslt-fokus.js?v=1"></script>
+<script src="../js/admin/core/utils.js?v=52"></script>
+<script>
+(function () {
+    var A = window.KSLT_ADMIN;
+    /* шапка — тем же кодом, что и продукт (`добавитьМассовыйВыбор`) */
+    var th = document.createElement('th');
+    th.style.width = '36px';
+    th.innerHTML = '<input type="checkbox" class="ad-bulk-all">';
+    document.getElementById('шапка').appendChild(th);
+    /* строка — НАСТОЯЩЕЙ функцией продукта */
+    document.getElementById('строка').innerHTML = A.bulkCheckboxTd('proba-1');
+    window.ОТМЕТИТЬ = function () {
+        document.querySelectorAll('.ad-bulk-all, .ad-bulk-item')
+            .forEach(function (э) { э.checked = true; });
+    };
+    window.НЕПОЛНЫЙ = function () {
+        var в = document.querySelector('.ad-bulk-all');
+        в.checked = false; в.indeterminate = true;
+    };
+})();
+</script>
+</body>
+</html>
