@@ -922,7 +922,9 @@ body.ad-page {
     font-weight: var(--fw-regular);
     color: var(--text-secondary);
 }
-.ad-reg-pusto { padding: var(--space-4) 0; }
+/* Тесная пустота живёт рядом с остальными правилами пустоты: см.
+   `.ad-pusto-tesno`. Прежнее имя `.ad-reg-pusto` снято 22.10 вместе с
+   переводом всех пустых состояний на общий дом. */
 
 /* Заголовки блоков «Снятые» и «Не допущены» и их счётчики */
 .ad-reg-blok-title { margin-top: var(--space-6); }
@@ -2651,6 +2653,40 @@ input[type="date"]::-webkit-datetime-edit {
 .ad-pusto-podskazka {
     font-size: var(--fs-sm);
     color: var(--text-muted);
+}
+
+/* ТЕСНЫЙ ВИД: два пустых блока стоят рядом (заявки и очередь), и воздух
+   40 растащил бы колонки. Замерено 22.10 по прежним правилам: 16 у
+   заявок, 12 инлайном у турниров — берём ступень 16. */
+.ad-pusto-tesno {
+    padding: var(--space-4) 0;
+}
+
+/* ОТКАЗ — НЕ ПУСТОТА. Под именем `.ad-empty-state` жили три понятия:
+   список пуст, база отказала, доступ запрещён. Отказ красится своим
+   тоном и несёт подробность — сообщение базы, — потому что человеку
+   нужно знать, что именно сломалось, а не думать, что данных нет. */
+.ad-otkaz {
+    text-align: center;
+    padding: var(--space-10) var(--space-5);
+}
+
+.ad-otkaz-znak {
+    font-size: var(--fs-3xl);
+    opacity: 0.5;
+    margin-bottom: var(--space-2);
+}
+
+.ad-otkaz-text {
+    font-size: var(--fs-md);
+    color: var(--danger);
+    margin-bottom: var(--space-1);
+}
+
+.ad-otkaz-podrobno {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    word-break: break-word;
 }
 
 /* ЗНАЧКОВАЯ КНОПКА — ОДНО ОПРЕДЕЛЕНИЕ. Их было два: это и на :5907, и
