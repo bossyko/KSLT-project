@@ -64,9 +64,13 @@ const ОТКАТЫ = [
     /* ВЕРНУТЬ ВАЖНОСТЬ, КОТОРАЯ НЕ ПЕРЕБИВАЕТ НИЧЕГО. Одна из двадцати,
        снятых 21.10: другого объявления `text-align` на этот элемент нет
        ни в css, ни инлайном. Потолок такого не ловит — он считает число. */
+    /* ЯКОРЬ ПЕРЕВЯЗАН 22.10: `.td-rr-player-header` снят куском 117 как
+       мёртвый — круговая на странице турнира переписана на `td-grp-*`.
+       Берём живую шапку заявок: у неё `text-align: left` тоже без
+       конкурента, и смысл отката тот же. */
     ['вернуть важность без конкурента', TD,
-     '.td-rr-player-header {\n    text-align: left;',
-     '.td-rr-player-header {\n    text-align: left !important;',
+     '.td-reg-table th,\n.td-reg-table td {\n    padding: 8px 6px;\n    border-bottom: var(--bw-hair) solid var(--border-subtle);\n    font-size: var(--fs-sm);\n    text-align: left;',
+     '.td-reg-table th,\n.td-reg-table td {\n    padding: 8px 6px;\n    border-bottom: var(--bw-hair) solid var(--border-subtle);\n    font-size: var(--fs-sm);\n    text-align: left !important;',
      'ни одна важность «свой css» не стоит без конкурента'],
 
     /* ВЕТКА «КОНКУРЕНТ — ИНЛАЙН» ОТКАТОМ СЕГОДНЯ НЕ ДОКАЗЫВАЕТСЯ, И Я ЭТО

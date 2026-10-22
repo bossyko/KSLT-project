@@ -83,9 +83,11 @@ const ОТКАТЫ = [
  '--danger-subtle остаётся тинтом того же красного'],
 
 /* ── МОЛЧАНИЕ: та же краска в ЧУЖОЙ роли правило не трогает ── */
+/* ЯКОРЬ ПЕРЕВЯЗАН 22.10 на живого носителя: `.td-status-pill.live` снят
+   куском 117 вместе с мёртвым блоком. */
 ['та же краска в ЭФИРЕ — правило МОЛЧИТ', TD,
- '.td-status-pill.live',
- '.td-status-pill.live-ПРОБА { color: #ef4444; background: rgba(239, 68, 68, 0.15); }\n.td-status-pill.live',
+ '.td-status-badge.live',
+ '.td-status-badge.live-ПРОБА { color: #ef4444; background: rgba(239, 68, 68, 0.15); }\n.td-status-badge.live',
  null]
 
 ];

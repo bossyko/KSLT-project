@@ -46,9 +46,12 @@ const ОТКАТЫ = [
  '.live-dot {\n    width: 8px;\n    height: 8px;\n    background: #FF3B30;',
  'эфир говорит одной краской'],
 
+/* ЯКОРЬ ПЕРЕВЯЗАН 22.10: `.td-status-pill.live` снят куском 117 вместе с
+   мёртвым блоком `td-status-pill` — раздел переписан на `td-sched-*`.
+   Берём живого носителя роли эфира на той же странице. */
 ['вернуть #ef4444 значку матча в эфире', TD,
- '.td-status-pill.live {\n    background: var(--danger-subtle);\n    color: var(--danger);',
- '.td-status-pill.live {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;',
+ '.td-status-badge.live {\n    background: rgba(255, 71, 87, 0.25);\n    color: var(--danger);',
+ '.td-status-badge.live {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;',
  'эфир говорит одной краской'],
 
 ['вернуть зелёную точку значку «идёт сейчас»', TO,

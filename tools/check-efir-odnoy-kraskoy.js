@@ -87,8 +87,16 @@ const РОЛЬ = [
     ['css/tournament-detail.css', '.td-status-badge.live'],
     ['css/tournament-detail.css', '.td-match.live'],
     ['css/tournament-detail.css', '.td-match-score.live-score'],
-    ['css/tournament-detail.css', '.td-schedule-match.live'],
-    ['css/tournament-detail.css', '.td-status-pill.live'],
+    /* ДВА НОСИТЕЛЯ РОЛИ СНЯТЫ 22.10 ВМЕСТЕ С МЁРТВЫМ КОДОМ, и список
+       поправлен здесь же, как велит сама подсказка этого правила.
+       `.td-schedule-match.live` и `.td-status-pill.live` жили в блоках
+       `td-schedule-*` и `td-status-pill` — разделы страницы турнира
+       ПЕРЕПИСАНЫ на `td-sched-*`, и старое наименование осталось без
+       единого упоминания в продукте. Роль эфира на странице турнира держат
+       три ЖИВЫХ носителя: `.td-status-badge.live`, `.td-match.live`,
+       `.td-match-score.live-score` — они и остались в списке выше.
+       СПИСОК ПРАВИТСЯ ВМЕСТЕ С КОДОМ, ИНАЧЕ ПРАВИЛО ПЕРЕСТАЁТ СТОРОЖИТЬ
+       МОЛЧА — это сказано в его собственной подсказке. */
     ['css/tournaments-overview.css', '.to-cd-live'],
     ['css/tournaments-overview.css', '.to-cd-dot'],
     ['css/tournaments.css',       '.to-cd-live'],
