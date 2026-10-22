@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — варианты цели нажатия значка</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=295">
+<!--
+  ВАРИАНТЫ МЕРЯЮТСЯ ДО ПРАВКИ ФАЙЛА. Три варианта цели нажатия 44 для
+  `.ad-btn-icon`, в том же окружении, что и `znachok-zamer.html`: два
+  значка в ячейке строки таблицы. Прибор ниже меряет для каждого
+  варианта зону нажатия и перекрытие с соседом.
+-->
+<style>
+    body { background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); padding: 40px; }
+    .ряд { margin-bottom: 32px; }
+    .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin-bottom: 8px; }
+    table { border-collapse: collapse; }
+
+    /* A — слой 44×44 по эталону `.ad-bulk-item::before` (решение 04.10) */
+    .в-A .ad-btn-icon { position: relative; }
+    .в-A .ad-btn-icon::before {
+        content: ''; position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); width: 44px; height: 44px;
+    }
+
+    /* B — значки в ряд обёрткой, зазор 8, слой 40×44 (ширина кнопки + зазор) */
+    .в-B .ad-row-icons { display: flex; justify-content: flex-end; gap: var(--space-2); }
+    .в-B .ad-btn-icon { position: relative; flex-shrink: 0; }
+    .в-B .ad-btn-icon::before {
+        content: ''; position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); width: 40px; height: 44px;
+    }
+
+    /* C — кнопка 36×36, ряд с зазором 8, слой 44×44 ровно */
+    .в-C .ad-row-icons { display: flex; justify-content: flex-end; gap: var(--space-2); }
+    .в-C .ad-btn-icon { position: relative; flex-shrink: 0; width: 36px; height: 36px; }
+    .в-C .ad-btn-icon::before {
+        content: ''; position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); width: 44px; height: 44px;
+    }
+</style>
+</head>
+<body>
+
+<div class="ряд" id="сейчас">
+    <div class="подпись">СЕЙЧАС — как в продукте</div>
+    <table class="ad-table"><tbody><tr><td style="text-align:right;white-space:nowrap;" class="гнездо"></td></tr></tbody></table>
+</div>
+
+<div class="ряд в-A" id="вA">
+    <div class="подпись">A — слой 44×44, разметка не тронута</div>
+    <table class="ad-table"><tbody><tr><td style="text-align:right;white-space:nowrap;" class="гнездо"></td></tr></tbody></table>
+</div>
+
+<div class="ряд в-B" id="вB">
+    <div class="подпись">B — обёртка-ряд, зазор 8, слой 40×44</div>
+    <table class="ad-table"><tbody><tr><td style="text-align:right;" class="гнездо-ряд"></td></tr></tbody></table>
+</div>
+
+<div class="ряд в-C" id="вC">
+    <div class="подпись">C — кнопка 36×36, ряд, зазор 8, слой 44×44</div>
+    <table class="ad-table"><tbody><tr><td style="text-align:right;" class="гнездо-ряд"></td></tr></tbody></table>
+</div>
+
+<script>
+(function () {
+    var ЗНАЧКИ =
+        '<button class="ad-btn-icon ad-push-recall" title="Отозвать">↩</button>' +
+        '<button class="ad-btn-icon ad-push-del" title="Удалить рассылку">&times;</button>';
+    document.querySelectorAll('.гнездо').forEach(function (г) { г.innerHTML = ЗНАЧКИ; });
+    document.querySelectorAll('.гнездо-ряд').forEach(function (г) {
+        г.innerHTML = '<div class="ad-row-icons">' + ЗНАЧКИ + '</div>';
+    });
+})();
+</script>
+</body>
+</html>

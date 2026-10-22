@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер значковой кнопки админки</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=295">
+<!--
+  ЗАЧЕМ СТЕНД. `.ad-btn-icon` живёт в 22 местах шести разделов админки,
+  и ни одно из них не открывается без входа. Мерить надо каскад, а не
+  намерение: в css ДВА определения `.ad-btn-icon` (:2626 и :5907) и два
+  `:hover`. Побеждают разные свойства из разных правил, и комментарий у
+  `.ad-reg-act` (:7333) ссылается на первое, будто второго нет.
+
+  СТЕНД РИСУЕТ ОКРУЖЕНИЯ ДОСЛОВНО. Каждая строка ниже — выписка из
+  продукта с её адресом. Сторож `check-znachok-i-cel-nazhatiya.js`
+  сверяет каждую выписку с файлом: уедет разметка в продукте — сторож
+  уронит стенд. СТЕНД, РИСУЮЩИЙ СВОЮ КОПИЮ, МЕРИТ СТЕНД.
+-->
+<style>
+    body { background: var(--bg-base); color: var(--text-primary);
+           font-family: var(--font-sans); padding: 40px; }
+    .ряд { margin-bottom: 28px; }
+    .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin-bottom: 8px; }
+    table { border-collapse: collapse; }
+</style>
+</head>
+<body>
+
+<div class="ряд">
+    <div class="подпись">notifications.js:285,290 — два значка в строке таблицы</div>
+    <table class="ad-table"><tbody><tr><td id="о1" style="text-align:right;white-space:nowrap;"></td></tr></tbody></table>
+</div>
+
+<div class="ряд">
+    <div class="подпись">players.js:1962,1964 — правка и удаление записи истории</div>
+    <table class="ad-table"><tbody><tr><td id="о2"></td></tr></tbody></table>
+</div>
+
+<div class="ряд">
+    <div class="подпись">vouchers.js:359,361 — просмотр и отмена ваучера</div>
+    <table class="ad-table"><tbody><tr><td id="о3"></td></tr></tbody></table>
+</div>
+
+<div class="ряд">
+    <div class="подпись">settings.js:475 — удаление уровня в шапке таблицы очков</div>
+    <table class="ad-table"><thead><tr><th id="о4"></th></tr></thead></table>
+</div>
+
+<div class="ряд">
+    <div class="подпись">courts.js:1372 — значок ВНУТРИ метки чекбокса</div>
+    <div id="о5"></div>
+</div>
+
+<div class="ряд">
+    <div class="подпись">courts.js:1483 — значок в строке формы, рядом с полями</div>
+    <div id="о6"></div>
+</div>
+
+<div class="ряд">
+    <div class="подпись">coaches.js:513 — значок в строке списка достижений</div>
+    <div id="о7"></div>
+</div>
+
+<script>
+(function () {
+    /* ВЫПИСКИ ИЗ ПРОДУКТА. Переменные подставлены значениями, разметка — нет. */
+    var В = {
+        'о1':
+            '<div class="ad-icon-row">' +
+            '<button class="ad-btn-icon ad-push-recall" data-id="1" data-recalled="" title="Отозвать" aria-label="Отозвать">↩</button>' +
+            '<button class="ad-btn-icon ad-push-del" data-id="1" title="Удалить рассылку" aria-label="Удалить рассылку">&times;</button>' +
+            '</div>',
+        'о2':
+            '<div class="ad-icon-row">' +
+            '<button class="ad-btn-icon ad-rh-edit" data-rh-id="1" title="Изменить" aria-label="Изменить">✎</button>' +
+            '<button class="ad-btn-icon ad-rh-del" data-rh-id="1" title="Удалить" aria-label="Удалить">&times;</button>' +
+            '</div>',
+        'о3':
+            '<div class="ad-icon-row">' +
+            '<button class="ad-btn-icon" data-vch-view="1" title="Просмотр" aria-label="Просмотр">👁</button>' +
+            ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-cancel="1" title="Отменить скидку" aria-label="Отменить скидку">✕</button>' +
+            '</div>',
+        'о4':
+            '<span>Итоговый турнир</span>' +
+            '<span class="ad-pts-limit">до 8</span>' +
+            '<button class="ad-btn-icon set-del-level" data-level-id="1" title="Удалить уровень" aria-label="Удалить уровень">&times;</button>',
+        'о5':
+            '<label class="ad-checkbox-label"><input type="checkbox" class="ad-crt-amenity ad-crt-custom-amenity" value="Душ" checked> Душ' +
+            ' <button type="button" class="ad-btn-icon ad-crt-custom-amenity-remove" data-idx="0" style="font-size:var(--fs-2xs);" title="Убрать удобство" aria-label="Убрать удобство">&times;</button></label>',
+        'о6':
+            '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">' +
+            '<input type="text" class="ad-field-input" value="Хард" style="flex:1;">' +
+            '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-ct-partner"></label>' +
+            '<input type="text" class="ad-field-input ad-ct-discount" inputmode="numeric" pattern="[0-9]*" placeholder="%" value="">' +
+            '<button type="button" class="ad-btn-icon ad-ct-remove" title="Убрать тип корта" aria-label="Убрать тип корта">&times;</button>' +
+            '</div>',
+        'о7':
+            '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+            '<input type="text" class="ad-field-input ad-cch-achievement" data-idx="0" value="Мастер спорта" style="flex:1;">' +
+            '<button type="button" class="ad-btn-icon ad-cch-ach-remove" data-idx="0" title="Убрать достижение" aria-label="Убрать достижение">&times;</button>' +
+            '</div>'
+    };
+    Object.keys(В).forEach(function (к) {
+        document.getElementById(к).innerHTML = В[к];
+    });
+})();
+</script>
+</body>
+</html>

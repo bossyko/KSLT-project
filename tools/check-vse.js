@@ -135,7 +135,9 @@ const КУСКИ = [
     ['админка одним языком', 'check-admin-odin-yazyk.js', 'check-admin-odin-yazyk-otkat.js'],
     ['чекбокс и имена', 'check-chekboks-i-imena.js', 'check-chekboks-i-imena-otkat.js'],
     ['липкая шапка и роли кнопок', 'check-lipkaya-shapka-i-rol-knopki.js',
-     'check-lipkaya-shapka-i-rol-knopki-otkat.js']
+     'check-lipkaya-shapka-i-rol-knopki-otkat.js'],
+    ['значок и цель нажатия', 'check-znachok-i-cel-nazhatiya.js',
+     'check-znachok-i-cel-nazhatiya-otkat.js']
 ];
 
 function прогнать(файл) {
