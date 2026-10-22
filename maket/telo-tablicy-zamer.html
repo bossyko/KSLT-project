@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер слушателя на теле таблицы</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=296">
+<!-- ДОМ УВЕДОМЛЕНИЯ ИДЁТ СО СВОИМ СТИЛЕМ: стенд грузит `kslt-toast.js`,
+     и чужой сторож справедливо требует его стиль рядом. -->
+<link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<!--
+  ЗАЧЕМ. Кнопки в строках таблиц админки вешаются делегированием, и
+  слушатель ставился ВНУТРИ функции отрисовки: `tbody.addEventListener`.
+  Узел `tbody` при перерисовке не пересоздаётся — меняется только
+  `innerHTML`, — значит каждая перерисовка добавляла ЕЩЁ ОДИН слушатель.
+
+  ЗАМЕРЕНО НА БОЕВОЙ 22.10, раздел «Корты»: после четырёх перерисовок
+  ОДНО нажатие строки дало ПЯТЬ запросов к базе вместо одного.
+
+  Стенд зовёт НАСТОЯЩИЙ `A.наТелоТаблицы` столько же раз и считает,
+  сколько раз сработает обработчик на одно нажатие.
+-->
+<style>
+  body { background: var(--bg-base); color: var(--text-primary);
+         font-family: var(--font-sans); padding: 40px; }
+  .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin-bottom: 12px; }
+  #счёт { font-size: var(--fs-xl); font-weight: 600; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="подпись">Таблица перерисована ЧЕТЫРЕ раза, слушатель ставился каждый раз</div>
+<table class="ad-table" id="стол"><tbody></tbody></table>
+<div id="счёт">сработало обработчиков на одно нажатие: <span id="число">—</span></div>
+
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/admin/core/constants.js?v=156"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<script src="../js/kslt-vremya.js?v=2"></script>
+<script src="../js/kslt-fokus.js?v=1"></script>
+<script src="../js/admin/core/utils.js?v=54"></script>
+<script>
+(function () {
+    var A = window.KSLT_ADMIN;
+    var tbody = document.querySelector('#стол tbody');
+    window.СЧЁТ = 0;
+
+    /* ОТРИСОВКА — КАК В ПРОДУКТЕ: строки перерисовываются, слушатель
+       ставится тем же зовом, что и в разделах. */
+    function отрисовать() {
+        tbody.innerHTML = '<tr data-id="1"><td>Корт «К2»</td><td>Бишкек</td></tr>';
+        A.наТелоТаблицы(tbody, function (e) {
+            var row = e.target.closest('tr[data-id]');
+            if (!row) return;
+            window.СЧЁТ++;
+            document.getElementById('число').textContent = window.СЧЁТ;
+        });
+    }
+    отрисовать(); отрисовать(); отрисовать(); отрисовать();
+    window.НАЖАТЬ = function () {
+        window.СЧЁТ = 0;
+        tbody.querySelector('tr[data-id]').click();
+        return window.СЧЁТ;
+    };
+})();
+</script>
+</body>
+</html>

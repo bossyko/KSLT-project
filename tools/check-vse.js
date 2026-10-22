@@ -139,7 +139,8 @@ const КУСКИ = [
     ['значок и цель нажатия', 'check-znachok-i-cel-nazhatiya.js',
      'check-znachok-i-cel-nazhatiya-otkat.js'],
     ['окна в одной оболочке', 'check-okna-odna-obolochka.js',
-     'check-okna-odna-obolochka-otkat.js']
+     'check-okna-odna-obolochka-otkat.js'],
+    ['тело таблицы', 'check-telo-tablicy.js', 'check-telo-tablicy-otkat.js']
 ];
 
 function прогнать(файл) {
