@@ -2623,24 +2623,66 @@ input[type="date"]::-webkit-datetime-edit {
 
 
 
+/* ЗНАЧКОВАЯ КНОПКА — ОДНО ОПРЕДЕЛЕНИЕ. Их было два: это и на :5907, и
+   побеждали свойства ВПЕРЕМЕШКУ из обоих. Отсюда брались размер, flex и
+   цвет, оттуда — отсутствие рамки, кегль, отступ и переход. Мёртвыми
+   лежали `border: 1px solid`, `font-size: --fs-md`, `transition: all` и
+   при наведении `border-color` — рисовать нечего, рамки нет. Та же беда,
+   что с .ad-btn-sm 28.09, и шов на том же месте. Замерено 22.10 до
+   свёртки: 32×32, кегль 16, отступ 4, рамки нет, цвет --text-muted,
+   наведение — фон --alpha-white-08 и цвет --danger. Свёрнуто в это.
+
+   РАЗМЕР СТАЛ СТУПЕНЬЮ. 32 не было ни одной ступенью шкалы кнопок
+   (28 · 36 · 44 · 52, tokens.css:501) — стоит --btn-h-sm. */
 .ad-btn-icon {
-    width: 32px;
-    height: 32px;
+    position: relative;
+    width: var(--btn-h-sm);
+    height: var(--btn-h-sm);
+    flex-shrink: 0;
+    padding: var(--space-1);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: var(--bw-hair) solid var(--border-subtle);
+    border: none;
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: none;
     color: var(--text-muted);
-    font-size: var(--fs-md);
+    font-size: var(--fs-base);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.2s;
+}
+
+/* ЦЕЛЬ НАЖАТИЯ 44 — прозрачным слоем, по эталону .ad-bulk-item::before
+   (:1706, решение 04.10). Слой `absolute`, а не flex-элемент: иначе он
+   встал бы в ряд со значком и сдвинул его. Замерено 22.10 на четырёх
+   вариантах: слой 44 при кнопке 32, стоящей столбиком, съедал три точки
+   из девяти у соседней кнопки — «Отозвать» перекрывал «Удалить
+   рассылку». Поэтому значок 36, значки в ряд с зазором 8, слой 44: зона
+   ровно 44×44 и ни одного перекрытия. */
+.ad-btn-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--btn-h-md);
+    height: var(--btn-h-md);
 }
 
 .ad-btn-icon:hover {
-    border-color: var(--danger);
+    background: var(--alpha-white-08);
     color: var(--danger);
+}
+
+/* РЯД ЗНАЧКОВ В ЯЧЕЙКЕ. Значок — flex-контейнер, то есть блок: два
+   значка в одной ячейке встают СТОЛБИКОМ, и ни `text-align: right`, ни
+   `white-space: nowrap`, которые в тех ячейках стоят, на них не
+   действуют. Замерено 22.10: сдвиг вниз 32. Обёртка ставит их в ряд,
+   как разметка и просит, и даёт зазор, на котором держится цель 44 */
+.ad-icon-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
 }
 
 /* Gallery thumbnails */
@@ -5904,20 +5946,11 @@ select.ad-field-input {
     color: var(--danger);
 }
 
-.ad-btn-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: var(--fs-base);
-    padding: var(--space-1) var(--space-1);
-    border-radius: var(--radius-sm);
-    transition: background 0.2s;
-}
-
-.ad-btn-icon:hover {
-    background: var(--alpha-white-08);
-}
-
+/* ВТОРОЕ ОПРЕДЕЛЕНИЕ .ad-btn-icon УБРАНО 22.10, вместе со вторым
+   `:hover`. Их было два — одно на :2626, другое здесь, — и браузер брал
+   свойства из обоих вперемешку. Всё, что здесь жило, перенесено наверх
+   замером, а не на глаз. Правило .ad-btn-danger-icon:hover остаётся:
+   оно стоит ниже общего и перекрывает его фон осознанно */
 .ad-btn-danger-icon:hover {
     background: var(--danger-subtle);
 }
@@ -7330,7 +7363,8 @@ select.ad-field-input {
 }
 
 /* Действия в строке заявки — словами, а не значками. Отдельный класс:
-   у .ad-btn-icon ширина жёстко 32px, и надписи наезжали друг на друга */
+   у .ad-btn-icon ширина задана жёстко (--btn-h-sm, прежде 32px), и
+   надписи наезжали друг на друга */
 .ad-reg-act {
     padding: var(--space-1) var(--space-1);
     border: none;
