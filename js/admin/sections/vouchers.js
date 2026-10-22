@@ -356,15 +356,15 @@
             var statusLabel = L['vchStatus' + v.status.charAt(0).toUpperCase() + v.status.slice(1)] || v.status;
             var dateStr = v.created_at ? formatVchDate(v.created_at) : '—';
 
-            var actionHtml = '<button class="ad-btn-icon" data-vch-view="' + v.id + '" title="' + ('Просмотр') + '">👁</button>';
+            var actionHtml = '<button class="ad-btn-icon" data-vch-view="' + v.id + '" title="' + L.vchView + '" aria-label="' + L.vchView + '">👁</button>';
             if (isAdmin && v.status === 'active') {
-                actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-cancel="' + v.id + '" title="' + L.vchCancel + '">✕</button>';
+                actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-cancel="' + v.id + '" title="' + L.vchCancel + '" aria-label="' + L.vchCancel + '">✕</button>';
             }
             // Удаляем начисто только то, что уже не действует: выданный
             // ваучер — обязательство перед человеком, его сначала отменяют
             if (isAdmin && (v.status === 'cancelled' || v.status === 'expired')) {
                 actionHtml += ' <button class="ad-btn-icon ad-btn-danger-icon" data-vch-delete="' + v.id + '" title="' +
-                    ('Удалить') + '">🗑</button>';
+                    L.vchDelete + '" aria-label="' + L.vchDelete + '">🗑</button>';
             }
 
             html +=
@@ -376,7 +376,7 @@
                     '<td style="font-weight:600;color:var(--accent);">' + v.discount_percent + '%</td>' +
                     '<td style="font-size:var(--fs-xs);white-space:nowrap;">' + dateStr + '</td>' +
                     '<td><span class="ad-vch-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
-                    '<td style="white-space:nowrap;">' + actionHtml + '</td>' +
+                    '<td><div class="ad-icon-row">' + actionHtml + '</div></td>' +
                 '</tr>';
         });
 

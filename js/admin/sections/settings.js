@@ -473,7 +473,7 @@
                     (предел < строк ? '<span class="ad-pts-limit">' +
                         L.ratPlacesLimit.replace('{n}', предел) + '</span>' : '') +
                     (правит ? '<button class="ad-btn-icon set-del-level" data-level-id="' + lv.id +
-                        '" title="' + L.ratDeleteLevel + '">&times;</button>' : '') +
+                        '" title="' + L.ratDeleteLevel + '" aria-label="' + L.ratDeleteLevel + '">&times;</button>' : '') +
                 '</th>';
             });
             html += '</tr></thead><tbody>';

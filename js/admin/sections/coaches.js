@@ -510,7 +510,7 @@
             cchAchievements.forEach(function(ach, idx) {
                 html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
                     '<input type="text" class="ad-field-input ad-cch-achievement" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
-                    (cchAchievements.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                    (cchAchievements.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-remove" data-idx="' + idx + '" title="' + L.cchAchRemove + '" aria-label="' + L.cchAchRemove + '">&times;</button>' : '') +
                 '</div>';
             });
             return html;
@@ -520,7 +520,7 @@
             cchAchievementsEn.forEach(function(ach, idx) {
                 html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
                     '<input type="text" class="ad-field-input ad-cch-achievement-en" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
-                    (cchAchievementsEn.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-en-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                    (cchAchievementsEn.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-en-remove" data-idx="' + idx + '" title="' + L.cchAchRemove + ' (EN)" aria-label="' + L.cchAchRemove + ' (EN)">&times;</button>' : '') +
                 '</div>';
             });
             return html;
@@ -530,7 +530,7 @@
             cchAchievementsKg.forEach(function(ach, idx) {
                 html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
                     '<input type="text" class="ad-field-input ad-cch-achievement-kg" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
-                    (cchAchievementsKg.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-kg-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                    (cchAchievementsKg.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-kg-remove" data-idx="' + idx + '" title="' + L.cchAchRemove + ' (KG)" aria-label="' + L.cchAchRemove + ' (KG)">&times;</button>' : '') +
                 '</div>';
             });
             return html;
@@ -782,7 +782,7 @@
             cchAchievements.forEach(function(ach, idx) {
                 html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
                     '<input type="text" class="ad-field-input ad-cch-achievement" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
-                    (cchAchievements.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                    (cchAchievements.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-remove" data-idx="' + idx + '" title="' + L.cchAchRemove + '" aria-label="' + L.cchAchRemove + '">&times;</button>' : '') +
                 '</div>';
             });
             el.innerHTML = html;
@@ -810,7 +810,7 @@
             cchAchievementsEn.forEach(function(ach, idx) {
                 html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
                     '<input type="text" class="ad-field-input ad-cch-achievement-en" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
-                    (cchAchievementsEn.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-en-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                    (cchAchievementsEn.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-en-remove" data-idx="' + idx + '" title="' + L.cchAchRemove + ' (EN)" aria-label="' + L.cchAchRemove + ' (EN)">&times;</button>' : '') +
                 '</div>';
             });
             el.innerHTML = html;
@@ -838,7 +838,7 @@
             cchAchievementsKg.forEach(function(ach, idx) {
                 html += '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
                     '<input type="text" class="ad-field-input ad-cch-achievement-kg" data-idx="' + idx + '" value="' + A.esc(ach) + '" style="flex:1;">' +
-                    (cchAchievementsKg.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-kg-remove" data-idx="' + idx + '">&times;</button>' : '') +
+                    (cchAchievementsKg.length > 1 ? '<button type="button" class="ad-btn-icon ad-cch-ach-kg-remove" data-idx="' + idx + '" title="' + L.cchAchRemove + ' (KG)" aria-label="' + L.cchAchRemove + ' (KG)">&times;</button>' : '') +
                 '</div>';
             });
             el.innerHTML = html;
@@ -1172,7 +1172,7 @@
             html += '<div class="ad-partner-svc-row" data-idx="' + idx + '" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:6px;align-items:center;">' +
                 '<input type="text" class="ad-field-input ad-psvc-name" value="' + A.esc(svc.service_name || '') + '" placeholder="' + L.cchServiceName + '">' +
                 '<input type="number" class="ad-field-input ad-psvc-discount" value="' + (svc.discount_percent || '') + '" min="1" max="100" placeholder="%">' +
-                (cchPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove">&times;</button>' : '<div></div>') +
+                (cchPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove" title="' + L.psvcRemove + '" aria-label="' + L.psvcRemove + '">&times;</button>' : '<div></div>') +
             '</div>';
         });
         container.innerHTML = html;

@@ -282,14 +282,15 @@
             // \u0442\u043E\u0433\u043E, \u043A\u0430\u043A \u043F\u043E\u044F\u0432\u0438\u043B\u0430\u0441\u044C \u0441\u0432\u044F\u0437\u044C \u0441 \u0436\u0443\u0440\u043D\u0430\u043B\u043E\u043C. \u041F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439 \u043E\u0442\u0437\u044B\u0432 \u0431\u0435\u0437\u0432\u0440\u0435\u0434\u0435\u043D
             var actions = '';
             if (isStaff) {
+                var recallText = recalled ? recallAgainLabel : recallLabel;
                 actions += '<button class="ad-btn-icon ad-push-recall" data-id="' + r.id +
                     '" data-recalled="' + (recalled ? '1' : '') +
-                    '" title="' + (recalled ? recallAgainLabel : recallLabel) + '">\u21A9</button>';
+                    '" title="' + recallText + '" aria-label="' + recallText + '">\u21A9</button>';
             }
             if (isAdmin) {
                 actions += '<button class="ad-btn-icon ad-push-del" data-id="' + r.id +
                     '" data-recalled="' + (recalled ? '1' : '') +
-                    '" title="' + delLabel + '">&times;</button>';
+                    '" title="' + delLabel + '" aria-label="' + delLabel + '">&times;</button>';
             }
 
             return '<tr' + (recalled ? ' style="opacity:0.55;"' : '') + '>' +
@@ -301,7 +302,7 @@
                 '<td>' + (typeLabels[r.type] || r.type || '—') + '</td>' +
                 '<td class="ad-centr">' + (r.recipients_count || 0) + '</td>' +
                 '<td class="ad-centr">' + (r.fcm_sent || 0) + '</td>' +
-                '<td style="text-align:right;white-space:nowrap;">' + actions + '</td>' +
+                '<td style="text-align:right;"><div class="ad-icon-row">' + actions + '</div></td>' +
             '</tr>';
         }).join('');
 

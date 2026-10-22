@@ -1369,7 +1369,7 @@
             var html = '';
             crtCustomAmenities.forEach(function(a, idx) {
                 html += '<label class="ad-checkbox-label"><input type="checkbox" class="ad-crt-amenity ad-crt-custom-amenity" value="' + A.esc(a) + '" checked> ' + A.esc(a) +
-                    ' <button type="button" class="ad-btn-icon ad-crt-custom-amenity-remove" data-idx="' + idx + '" style="font-size:var(--fs-2xs);">&times;</button></label>';
+                    ' <button type="button" class="ad-btn-icon ad-crt-custom-amenity-remove" data-idx="' + idx + '" style="font-size:var(--fs-2xs);" title="' + L.crtAmenityRemove + '" aria-label="' + L.crtAmenityRemove + '">&times;</button></label>';
             });
             wrap.innerHTML = html;
         }
@@ -1480,7 +1480,7 @@
                     '<input type="text" class="ad-field-input ad-ct-price" inputmode="numeric" pattern="[0-9]*" value="' + (ct.price || '') + '">' +
                     '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-ct-partner"' + (ct.partner ? ' checked' : '') + '></label>' +
                     '<input type="text" class="ad-field-input ad-ct-discount" inputmode="numeric" pattern="[0-9]*" placeholder="%" value="' + (ct.discount || '') + '"' + (ct.partner ? '' : ' style="visibility:hidden"') + '>' +
-                    (crtCourtTypes.length > 1 ? '<button type="button" class="ad-btn-icon ad-ct-remove">&times;</button>' : '<div></div>') +
+                    (crtCourtTypes.length > 1 ? '<button type="button" class="ad-btn-icon ad-ct-remove" title="' + L.crtTypeRemove + '" aria-label="' + L.crtTypeRemove + '">&times;</button>' : '<div></div>') +
                 '</div>';
             });
             rowsEl.innerHTML = html;
@@ -1557,7 +1557,7 @@
                     '<input type="text" class="ad-field-input ad-svc-price" inputmode="numeric" pattern="[0-9]*" value="' + (svc.price || '') + '">' +
                     '<label class="ad-ct-partner-wrap"><input type="checkbox" class="ad-svc-partner"' + (svc.partner ? ' checked' : '') + '></label>' +
                     '<input type="text" class="ad-field-input ad-svc-discount" inputmode="numeric" pattern="[0-9]*" placeholder="%" value="' + (svc.discount || '') + '"' + (svc.partner ? '' : ' style="visibility:hidden"') + '>' +
-                    '<button type="button" class="ad-btn-icon ad-svc-remove">&times;</button>' +
+                    '<button type="button" class="ad-btn-icon ad-svc-remove" title="' + L.crtServiceRemove + '" aria-label="' + L.crtServiceRemove + '">&times;</button>' +
                 '</div>';
             });
             rowsEl.innerHTML = html;
@@ -1645,7 +1645,7 @@
                             '<input type="text" inputmode="numeric" class="ad-field-input ad-crt-phone" data-idx="' + idx + '" placeholder="' + hint + '" value="' + A.esc(shown) + '" style="flex:1;">' +
                         '</div>' +
                     '</div>' +
-                    (idx >= 1 ? '<button type="button" class="ad-btn-icon ad-phone-remove" data-idx="' + idx + '" title="' + ('Убрать') + '">&times;</button>' : '') +
+                    (idx >= 1 ? '<button type="button" class="ad-btn-icon ad-phone-remove" data-idx="' + idx + '" title="' + L.crtPhoneRemove + '" aria-label="' + L.crtPhoneRemove + '">&times;</button>' : '') +
                 '</div>';
             });
             phonesEl.innerHTML = html;
@@ -1970,7 +1970,7 @@
             html += '<div class="ad-partner-svc-row" data-idx="' + idx + '" style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:6px;align-items:center;">' +
                 '<input type="text" class="ad-field-input ad-psvc-name" value="' + A.esc(svc.service_name || '') + '" placeholder="' + L.crtServiceNameHint + '">' +
                 '<input type="number" class="ad-field-input ad-psvc-discount" value="' + (svc.discount_percent || '') + '" min="1" max="100" placeholder="%">' +
-                (crtPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove">&times;</button>' : '<div></div>') +
+                (crtPartnerServices.length > 1 ? '<button type="button" class="ad-btn-icon ad-psvc-remove" title="' + L.psvcRemove + '" aria-label="' + L.psvcRemove + '">&times;</button>' : '<div></div>') +
             '</div>';
         });
         container.innerHTML = html;

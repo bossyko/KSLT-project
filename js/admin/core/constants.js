@@ -732,6 +732,11 @@
         badgeHowTo: 'Как получить',
         badgeManualAward: 'Выдать бейдж',
         badgeRemove: 'Убрать',
+        /* ПОДПИСИ ЗНАЧКОВЫХ КНОПОК, кусок 124. Значок сам по себе
+           ничего не говорит диктору: «×», «↩», «👁». Один текст на
+           кнопку, и оба атрибута — `title` и `aria-label` — берут
+           его отсюда, а не повторяют литерал дважды. */
+        rhEdit: 'Изменить',
         badgeNewToast: 'Новый бейдж',
         badgeCheckBtn: 'Проверить бейджи',
         badgeNoEarned: 'Бейджей пока нет',
@@ -980,6 +985,12 @@
         ratLevelName: 'Название уровня',
         ratLevelNameEn: 'Название уровня (EN)',
         ratDeleteLevel: 'Удалить уровень',
+        cchAchRemove: 'Убрать достижение',
+        psvcRemove: 'Убрать услугу партнёра',
+        crtAmenityRemove: 'Убрать удобство',
+        crtTypeRemove: 'Убрать тип корта',
+        crtServiceRemove: 'Убрать услугу',
+        crtPhoneRemove: 'Убрать телефон',
         ratDeleteLevelConfirm: 'Удалить уровень? Вместе с ним исчезнут {n} строк таблицы очков за место. Отката нет.',
         ratLevelHasTournaments: 'Уровень не удалить: на нём турниров {n}, в них {m} строк итогов. Сначала переведите их на другой уровень — иначе их история перестанет быть рейтинговой, и по какой таблице платили, уже не узнать.',
         ratLevelAdded: 'Уровень добавлен',
@@ -1300,6 +1311,8 @@
         vchExcelExport: 'Экспорт Excel',
         vchReportTitle: 'KSLT — Отчёт по скидкам',
         vchCancel: 'Отменить скидку',
+        vchView: 'Просмотр',
+        vchDelete: 'Удалить скидку',
         vchCancelConfirm: 'Отменить эту скидку?',
         vchCancelled: 'Скидка отменена',
         vchTypeCourt: 'Корт',

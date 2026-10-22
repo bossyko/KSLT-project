@@ -1953,16 +1953,16 @@
                 '<td style="text-align:center;color:var(--accent);font-weight:600;">' +
                     (row.points_earned ? row.points_earned : '<span class="ad-tiho">—</span>') + '</td>' +
                 '<td class="ad-centr">' + ntrpCell + '</td>' +
-                '<td style="white-space:nowrap;">' +
+                '<td><div class="ad-icon-row">' +
                     // Править можно только начисления, заведённые руками.
                     // Очки за турнир считаются по сетке, а записи об оценке
                     // NTRP этой формой не правятся: у них нет ни категории,
                     // ни очков — форма их только испортила бы
                     (row.tournament_id || row.ntrp_after != null ? '' :
                         '<button class="ad-btn-icon ad-rh-edit" data-rh-id="' + row.id + '" title="' +
-                        ('Изменить') + '">\u270E</button>') +
-                    '<button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '">&times;</button>' +
-                '</td>' +
+                        L.rhEdit + '" aria-label="' + L.rhEdit + '">\u270E</button>') +
+                    '<button class="ad-btn-icon ad-rh-del" data-rh-id="' + row.id + '" title="' + L.delete + '" aria-label="' + L.delete + '">&times;</button>' +
+                '</div></td>' +
                 '</tr>';
         });
 
@@ -2144,7 +2144,7 @@
                     html += '<td>' + (byRule
                         ? '<span title="' + ('Начисляется автоматически') +
                           '" style="color:var(--text-muted);font-size:var(--fs-sm);">\u2699</span>'
-                        : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '">&times;</button>') +
+                        : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '" aria-label="' + L.badgeRemove + '">&times;</button>') +
                     '</td>';
                 }
                 html += '</tr>';
@@ -2777,7 +2777,7 @@
         roundCell += '</select></td>';
 
         var pointsCell = '<td><span class="rat-points-display">' + (points || 0) + '</span></td>';
-        var deleteCell = '<td><button class="ad-btn-icon rat-delete-row" title="' + L.delete + '">&times;</button></td>';
+        var deleteCell = '<td><button class="ad-btn-icon rat-delete-row" title="' + L.delete + '" aria-label="' + L.delete + '">&times;</button></td>';
 
         return playerCell + roundCell + pointsCell + deleteCell;
     }
