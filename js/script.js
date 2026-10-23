@@ -791,7 +791,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // SERVICE WORKER REGISTRATION (PWA)
     // ========================================
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(function() {});
+        /* АДРЕС СЛУЖБЫ СЧИТАЕТСЯ ОТ КОРНЯ ПРОЕКТА, А НЕ ОТ КОРНЯ ДОМЕНА.
+           Было `/sw.js`: на боевой это `bossyko.github.io/sw.js` — 404,
+           и служба не поднималась НИ РАЗУ (замер 22.10: зарегистрировано
+           ноль, кэшей ноль). Ошибку глушил пустой `catch`, поэтому её не
+           видел никто, кроме консоли.
+
+           Корень проекта НЕ вычисляется заново: его уже объявляет
+           `<link rel="manifest">` — он лежит в корне и на каждой странице
+           записан относительно неё (кусок 132, под сторожем). Замерено:
+           все 80 страниц, грузящих этот файл, манифест имеют.
+
+           Простое `'sw.js'` здесь неверно: со страницы в `pages/` оно
+           дало бы `pages/sw.js`, а область службы — это папка, где она
+           лежит; GitHub Pages заголовка `Service-Worker-Allowed` не
+           отдаёт, и такая регистрация не покрыла бы сайт. */
+        var объявлениеКорня = document.querySelector('link[rel="manifest"]');
+        if (объявлениеКорня) {
+            var корень = new URL('./', new URL(объявлениеКорня.getAttribute('href'), location.href));
+            navigator.serviceWorker.register(new URL('sw.js', корень).href).catch(function() {});
+        }
     }
 
     // Разделы подвала на телефоне складываются в гармошку
