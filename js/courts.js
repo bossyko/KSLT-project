@@ -285,49 +285,24 @@
         _accessLevel = await KSLT_DOSTUP.уровень();
     }
 
+    /* ЧЛЕНСКОЕ ОКНО — ДОМ ВИТРИНЫ (кусок 144). Своё здесь — приставка и
+       два текста: у кортов названы и корты, и тренеры. */
     function showMembershipModal(level) {
-        var authLink = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
-        var pricingLink = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
-        var isGuest = level === 'guest';
-
-        var title = isGuest
-            ? (KSLT_YAZYK.выбрать('Become a KSLT Member', 'KSLT мүчөсү болуңуз', 'Станьте членом KSLT'))
-            : (KSLT_YAZYK.выбрать('Membership Required', 'Мүчөлүк керек', 'Нужно членство'));
-        var text = isGuest
-            ? (KSLT_YAZYK.выбрать('Register and become a KSLT member to get discounts at partner courts and coaches', 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз', 'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'))
-            : (KSLT_YAZYK.выбрать('Become a KSLT member to unlock discounts at partner courts and coaches', 'KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз', 'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'));
-        var btnText = isGuest
-            ? (KSLT_YAZYK.выбрать('Sign Up', 'Каттоо', 'Регистрация'))
-            : (KSLT_YAZYK.выбрать('View Plans', 'Тарифтар', 'Тарифы'));
-        var btnLink = isGuest ? authLink : pricingLink;
-
-        var overlay = document.createElement('div');
-        overlay.className = 'ct-membership-overlay';
-        var svgIcon = isGuest
-            ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
-            : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-
-        overlay.innerHTML =
-            '<div class="ct-membership-modal">' +
-                '<button class="ct-membership-close">&times;</button>' +
-                '<div class="ct-membership-icon">' + svgIcon + '</div>' +
-                '<h3>' + title + '</h3>' +
-                '<p>' + text + '</p>' +
-                '<a href="' + btnLink + '" class="ct-membership-btn">' + btnText + '</a>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-        requestAnimationFrame(function() { overlay.classList.add('visible'); });
-
-        overlay.querySelector('.ct-membership-close').onclick = function() {
-            overlay.classList.remove('visible');
-            setTimeout(function() { overlay.remove(); }, 300);
-        };
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) {
-                overlay.classList.remove('visible');
-                setTimeout(function() { overlay.remove(); }, 300);
-            }
+        KSLT_VITRINA.членскоеОкно({
+            подложка: 'ct-membership-overlay',
+            окно: 'ct-membership-modal',
+            закрыть: 'ct-membership-close',
+            значок: 'ct-membership-icon',
+            кнопка: 'ct-membership-btn'
+        }, level, {
+            гостю: KSLT_YAZYK.выбрать(
+                'Register and become a KSLT member to get discounts at partner courts and coaches',
+                'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз',
+                'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'),
+            безЧленства: KSLT_YAZYK.выбрать(
+                'Become a KSLT member to unlock discounts at partner courts and coaches',
+                'KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз',
+                'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров')
         });
     }
 
@@ -583,15 +558,14 @@
         detectAccess();
     }
 
+    /* ОБЛОЖКА РАЗДЕЛА — ДОМ ВИТРИНЫ (кусок 144). */
     function renderHero() {
-        var hero = document.getElementById('courtsHero');
-        if (!hero) return;
-        hero.innerHTML =
-            '<div class="ct-hero-bg" style="background-image: url(\'../images/heroes/courts.jpg\')"></div>' +
-            '<div class="ct-hero-content">' +
-                '<h1 class="ct-hero-title">' + L_labels.heroTitle + '</h1>' +
-                '<p class="ct-hero-subtitle">' + L_labels.heroSubtitle + '</p>' +
-            '</div>';
+        KSLT_VITRINA.обложка(document.getElementById('courtsHero'), {
+            приставка: 'ct',
+            картинка: '../images/heroes/courts.jpg',
+            заголовок: L_labels.heroTitle,
+            подзаголовок: L_labels.heroSubtitle
+        });
     }
 
     /**
@@ -726,14 +700,8 @@
             '</div>';
         container.innerHTML = html;
 
-        // Sticky shadow on scroll
-        var observer = new IntersectionObserver(function(entries) {
-            container.classList.toggle('stuck', !entries[0].isIntersecting);
-        }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
-        var sentinel = document.createElement('div');
-        sentinel.style.height = '1px';
-        container.parentNode.insertBefore(sentinel, container);
-        observer.observe(sentinel);
+        /* ЛИПКОСТЬ ПОЛОСЫ — ДОМ ВИТРИНЫ (кусок 144). */
+        KSLT_VITRINA.липнетПолоса(container);
     }
 
     function hasSurface(c, key) {
@@ -868,17 +836,14 @@
         initScrollAnimations();
     }
 
-    /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
-       считается из живой сетки, а не из ширины окна. Возвращает true,
-       если шаг изменился и сетку надо перерисовать. */
-    function пересчитатьШаг() {
-        /* ШАГ СЧИТАЕТ ДОМ (js/kslt-vitrina.js). Здесь остаётся только своё
-           имя сетки и свой PER_PAGE: число живёт у зовущего. */
-        var шаг = KSLT_VITRINA.шаг('.ct-grid', '--ct-ryadov');
-        if (!шаг || шаг === PER_PAGE) return false;
-        PER_PAGE = шаг;
-        return true;
-    }
+    /* ШАГ И СЛЕЖЕНИЕ — ОДНИМ ЗОВОМ ДОМА (кусок 144). Своё здесь — имя
+       сетки, имя рядов и СВОЁ ЧИСЛО: дом его спрашивает и отдаёт. */
+    var пересчитатьШаг = KSLT_VITRINA.пересчётШага({
+        селектор: '.ct-grid',
+        ряды: '--ct-ryadov',
+        взять: function () { return PER_PAGE; },
+        поставить: function (н) { PER_PAGE = н; }
+    });
 
     /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
        поворота, и от появления полосы прокрутки, о чём окно не сообщает. */
@@ -912,27 +877,13 @@
 
     // ---- SPONSORS — loaded via sponsors-loader.js ----
 
+    /* НАЖАТИЕ КНОПКИ КАРТОЧКИ — ДОМ ВИТРИНЫ (кусок 144). Здесь было два
+       `if` подряд, у тренеров один со связкой — поведение одно. */
     function initCtaClicks() {
-        var grid = document.getElementById('courtsGrid');
-        if (!grid) return;
-        grid.addEventListener('click', function(e) {
-            var cta = e.target.closest('.ct-card-cta');
-            if (!cta) return;
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (_accessLevel === 'guest') {
-                showMembershipModal('guest');
-                return;
-            }
-            if (_accessLevel === 'registered') {
-                showMembershipModal('registered');
-                return;
-            }
-            // Member: inline voucher generation
-            var id = cta.getAttribute('data-id');
-            ctaLoadServices(cta, 'court', id);
-        });
+        KSLT_VITRINA.нажатияКарточки('courtsGrid', '.ct-card-cta',
+            function () { return _accessLevel; },
+            function (кнопка, id) { ctaLoadServices(кнопка, 'court', id); },
+            showMembershipModal);
     }
 
     async function ctaLoadServices(btnEl, entityType, entityId) {
@@ -1012,15 +963,13 @@
         });
     }
 
+    /* ПОЛЕ ПОИСКА — ДОМ ВИТРИНЫ (кусок 144). Обновление выпадашек —
+       СВОЁ: у кортов счётчики в списках зависят от набранного. */
     function initSearchInput() {
-        var searchInput = document.getElementById('courtsSearch');
-        if (!searchInput) return;
-        searchInput.addEventListener('input', function() {
-            _searchQuery = searchInput.value.trim();
+        KSLT_VITRINA.поиск('courtsSearch', function (строка) {
+            _searchQuery = строка;
             _currentPage = 1;
-            refreshDropdowns();
-            renderGrid();
-        });
+        }, renderGrid, refreshDropdowns);
     }
 
     /* Чипов типа в полосе больше нет — тип выбирается выпадашкой, и её
@@ -1743,17 +1692,9 @@
 
     /* ===== SCROLL ANIMATIONS ===== */
 
+    /* ПОЯВЛЕНИЕ — ДОМ ВИТРИНЫ (кусок 144). */
     function initScrollAnimations() {
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.ct-fade-in:not(.visible)').forEach(function(el) {
-            observer.observe(el);
-        });
+        KSLT_VITRINA.появление('ct');
     }
 
 })();

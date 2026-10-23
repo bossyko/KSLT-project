@@ -363,17 +363,15 @@
         detectAccess();
     }
 
+    /* ОБЛОЖКА РАЗДЕЛА — ДОМ ВИТРИНЫ (кусок 144). Название без лаймовой
+       подсветки: заголовки разделов на сайте белые. */
     function renderHero() {
-        var hero = document.getElementById('coachesHero');
-        if (!hero) return;
-        hero.innerHTML =
-            '<div class="co-hero-bg" style="background-image: url(\'../images/heroes/coaches.jpg\')"></div>' +
-            // Название без лаймовой подсветки: заголовки разделов на сайте
-            // белые, и «KSLT» тут выбивался цветом из общего ряда
-            '<div class="co-hero-content">' +
-                '<h1 class="co-hero-title">' + L.heroTitle + '</h1>' +
-                '<p class="co-hero-subtitle">' + L.heroSubtitle + '</p>' +
-            '</div>';
+        KSLT_VITRINA.обложка(document.getElementById('coachesHero'), {
+            приставка: 'co',
+            картинка: '../images/heroes/coaches.jpg',
+            заголовок: L.heroTitle,
+            подзаголовок: L.heroSubtitle
+        });
     }
 
     // Три выпадающих списка вместо семи чипов: столько же признаков,
@@ -447,14 +445,10 @@
         html += '</div></div>';
         container.innerHTML = html;
 
-        // Detect stuck state
-        var sentinel = document.createElement('div');
-        sentinel.style.height = '1px';
-        container.parentNode.insertBefore(sentinel, container);
-        var obs = new IntersectionObserver(function(entries) {
-            container.classList.toggle('stuck', !entries[0].isIntersecting);
-        }, { threshold: [1], rootMargin: '-65px 0px 0px 0px' });
-        obs.observe(sentinel);
+        /* ЛИПКОСТЬ ПОЛОСЫ — ДОМ ВИТРИНЫ (кусок 144). Это понятие написано
+           в ВОСЬМИ файлах сайта побайтово; сведены два, остальные шесть
+           записаны. */
+        KSLT_VITRINA.липнетПолоса(container);
     }
 
     function renderGrid(filter) {
@@ -560,16 +554,15 @@
         initScrollAnimations();
     }
 
-    /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
-       считается из живой сетки, а не из ширины окна. */
-    function пересчитатьШаг() {
-        /* ШАГ СЧИТАЕТ ДОМ (js/kslt-vitrina.js). Здесь остаётся только своё
-           имя сетки и свой PER_PAGE: число живёт у зовущего. */
-        var шаг = KSLT_VITRINA.шаг('.co-grid', '--co-ryadov');
-        if (!шаг || шаг === PER_PAGE) return false;
-        PER_PAGE = шаг;
-        return true;
-    }
+    /* ШАГ И СЛЕЖЕНИЕ — ОДНИМ ЗОВОМ ДОМА (кусок 144). Здесь остаётся только
+       своё: имя сетки, имя рядов и СВОЁ ЧИСЛО — его дом спрашивает и
+       отдаёт, а не хранит. */
+    var пересчитатьШаг = KSLT_VITRINA.пересчётШага({
+        селектор: '.co-grid',
+        ряды: '--co-ryadov',
+        взять: function () { return PER_PAGE; },
+        поставить: function (н) { PER_PAGE = н; }
+    });
 
     /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
        поворота, и от появления полосы прокрутки. */
@@ -600,69 +593,36 @@
 
     // ---- SPONSORS — loaded via sponsors-loader.js ----
 
+    /* ЧЛЕНСКОЕ ОКНО — ДОМ ВИТРИНЫ (кусок 144). Разметка, значки и
+       закрытие были побайтовой копией кортов; своё здесь — приставка и два
+       текста, в которых названы именно тренеры. */
     function showMembershipModal(level) {
-        var authLink = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
-        var pricingLink = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
-        var isGuest = level === 'guest';
-
-        var title = isGuest
-            ? (KSLT_YAZYK.выбрать('Become a KSLT Member', 'KSLT мүчөсү болуңуз', 'Станьте членом KSLT'))
-            : (KSLT_YAZYK.выбрать('Membership Required', 'Мүчөлүк керек', 'Нужно членство'));
-        var text = isGuest
-            ? (KSLT_YAZYK.выбрать('Register and become a KSLT member to get discounts at partner coaches', 'Катталыңыз жана KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз', 'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'))
-            : (KSLT_YAZYK.выбрать('Become a KSLT member to unlock discounts at partner coaches', 'KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз', 'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'));
-        var btnText = isGuest
-            ? (KSLT_YAZYK.выбрать('Sign Up', 'Каттоо', 'Регистрация'))
-            : (KSLT_YAZYK.выбрать('View Plans', 'Тарифтар', 'Тарифы'));
-        var btnLink = isGuest ? authLink : pricingLink;
-
-        var svgIcon = isGuest
-            ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
-            : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-
-        var overlay = document.createElement('div');
-        overlay.className = 'co-membership-overlay';
-        overlay.innerHTML =
-            '<div class="co-membership-modal">' +
-                '<button class="co-membership-close">&times;</button>' +
-                '<div class="co-membership-icon">' + svgIcon + '</div>' +
-                '<h3>' + title + '</h3>' +
-                '<p>' + text + '</p>' +
-                '<a href="' + btnLink + '" class="co-membership-btn">' + btnText + '</a>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-        requestAnimationFrame(function() { overlay.classList.add('visible'); });
-
-        overlay.querySelector('.co-membership-close').onclick = function() {
-            overlay.classList.remove('visible');
-            setTimeout(function() { overlay.remove(); }, 300);
-        };
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) {
-                overlay.classList.remove('visible');
-                setTimeout(function() { overlay.remove(); }, 300);
-            }
+        KSLT_VITRINA.членскоеОкно({
+            подложка: 'co-membership-overlay',
+            окно: 'co-membership-modal',
+            закрыть: 'co-membership-close',
+            значок: 'co-membership-icon',
+            кнопка: 'co-membership-btn'
+        }, level, {
+            гостю: KSLT_YAZYK.выбрать(
+                'Register and become a KSLT member to get discounts at partner coaches',
+                'Катталыңыз жана KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз',
+                'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'),
+            безЧленства: KSLT_YAZYK.выбрать(
+                'Become a KSLT member to unlock discounts at partner coaches',
+                'KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз',
+                'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров')
         });
     }
 
+    /* НАЖАТИЕ КНОПКИ КАРТОЧКИ — ДОМ ВИТРИНЫ (кусок 144). У кортов то же
+       самое было записано двумя `if` подряд вместо одного со связкой —
+       ПОВЕДЕНИЕ ОДНО, проверено по дереву. */
     function initCtaClicks() {
-        var grid = document.getElementById('coachesGrid');
-        if (!grid) return;
-        grid.addEventListener('click', function(e) {
-            var cta = e.target.closest('.co-card-cta');
-            if (!cta) return;
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (_accessLevel === 'guest' || _accessLevel === 'registered') {
-                showMembershipModal(_accessLevel);
-                return;
-            }
-            // Member: inline voucher generation
-            var id = cta.getAttribute('data-id');
-            coCtaLoadServices(cta, 'coach', id);
-        });
+        KSLT_VITRINA.нажатияКарточки('coachesGrid', '.co-card-cta',
+            function () { return _accessLevel; },
+            function (кнопка, id) { coCtaLoadServices(кнопка, 'coach', id); },
+            showMembershipModal);
     }
 
     async function coCtaLoadServices(btnEl, entityType, entityId) {
@@ -742,14 +702,13 @@
         });
     }
 
+    /* ПОЛЕ ПОИСКА — ДОМ ВИТРИНЫ (кусок 144). У кортов после перерисовки
+       обновляются выпадашки — это стало крючком, здесь крючка нет. */
     function initSearchInput() {
-        var searchInput = document.getElementById('coachesSearch');
-        if (!searchInput) return;
-        searchInput.addEventListener('input', function() {
-            _searchQuery = searchInput.value.trim();
+        KSLT_VITRINA.поиск('coachesSearch', function (строка) {
+            _searchQuery = строка;
             _currentPage = 1;
-            renderGrid();
-        });
+        }, renderGrid);
     }
 
     function перерисоватьСписки() {
@@ -1329,16 +1288,10 @@
         modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
     }
 
+    /* ПОЯВЛЕНИЕ — ДОМ ВИТРИНЫ (кусок 144). Своё тело было побайтовой
+       копией того, что в `courts.js`, и это понятие живёт ещё в семи
+       файлах — они записаны и ждут своего куска. */
     function initScrollAnimations() {
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.co-fade-in:not(.visible)').forEach(function(el) {
-            observer.observe(el);
-        });
+        KSLT_VITRINA.появление('co');
     }
 })();
