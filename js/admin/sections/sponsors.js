@@ -62,8 +62,12 @@
             '</tr>';
         });
 
+        /* ПУСТОТА ЗОВЁТ ОБЩИЙ ДОМ (кусок 130). Прежнее имя `.ad-empty`
+           было пятым мёртвым за день: правила под него нет ни в одном
+           css — блок рисовался голым текстом в потоке. */
         var emptyHtml = !data.length
-            ? '<div class="ad-empty"><h3>' + L.sponNoItems + '</h3><p>' + L.sponNoItemsText + '</p></div>'
+            ? A.пустоеСостояние({ всего: 0, значок: '\u2B50',
+                                  пусто: L.sponNoItems, подсказка: L.sponNoItemsText })
             : '';
 
         container.innerHTML =
