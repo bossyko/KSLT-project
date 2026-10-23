@@ -307,8 +307,8 @@
                         var ago = n.created_at ? timeAgo(new Date(n.created_at)) : '';
                         return '<button class="site-notif-item' + (n.is_read ? '' : ' unread') + '" ' +
                                 'data-id="' + n.id + '" type="button">' +
-                            '<div class="site-notif-item-title">' + esc(n.title || '') + '</div>' +
-                            '<div class="site-notif-item-msg">' + esc(n.message || '') + '</div>' +
+                            '<div class="site-notif-item-title">' + KSLT_экранировать(n.title || '') + '</div>' +
+                            '<div class="site-notif-item-msg">' + KSLT_экранировать(n.message || '') + '</div>' +
                             '<div class="site-notif-item-time">' + ago + '</div>' +
                         '</button>';
                     }
@@ -324,11 +324,11 @@
                         overlay.innerHTML =
                             '<div class="site-notif-modal">' +
                                 '<div class="site-notif-head">' +
-                                    '<span class="site-notif-title">' + esc(n.title || '') + '</span>' +
+                                    '<span class="site-notif-title">' + KSLT_экранировать(n.title || '') + '</span>' +
                                     '<button class="site-notif-close" type="button">&times;</button>' +
                                 '</div>' +
                                 '<div class="site-notif-body">' +
-                                    '<div class="site-notif-full">' + esc(n.message || '') + '</div>' +
+                                    '<div class="site-notif-full">' + KSLT_экранировать(n.message || '') + '</div>' +
                                     '<div class="site-notif-item-time" style="padding:0 20px 16px;">' +
                                         (n.created_at ? timeAgo(new Date(n.created_at)) : '') +
                                     '</div>' +
@@ -438,7 +438,7 @@
                                 } else {
                                     msg = accept ? L2.accept + ' \u2713' : L2.decline + ' \u2713';
                                 }
-                                if (box) box.outerHTML = '<div class="site-notif-answered">' + esc(msg) + '</div>';
+                                if (box) box.outerHTML = '<div class="site-notif-answered">' + KSLT_экранировать(msg) + '</div>';
                                 try {
                                     document.dispatchEvent(new CustomEvent('kslt:challenge-answered'));
                                 } catch(e) {}
@@ -478,11 +478,11 @@
                                 ? rows.map(function(r) {
                                     return '<a class="site-notif-contact site-notif-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
                                            '<span class="site-notif-contact-icon">' + (r[0] || '') + '</span>' +
-                                           '<span class="site-notif-contact-val">' + esc(r[1]) + '</span></a>';
+                                           '<span class="site-notif-contact-val">' + KSLT_экранировать(r[1]) + '</span></a>';
                                   }).join('')
-                                : '<div class="site-notif-answered">' + esc(L2.noContacts) + '</div>';
+                                : '<div class="site-notif-answered">' + KSLT_экранировать(L2.noContacts) + '</div>';
                             return '<div class="site-notif-contacts">' +
-                                (headline ? '<div class="site-notif-answered">' + esc(headline) + '</div>' : '') +
+                                (headline ? '<div class="site-notif-answered">' + KSLT_экранировать(headline) + '</div>' : '') +
                                 inner + '</div>';
                         }
 
@@ -501,13 +501,13 @@
                                     var msg = res.error === 'not_found' ? L2.gone
                                         : (res.error === 'already_answered' || res.error === 'not_yours') ? L2.done
                                         : res.error;
-                                    if (box) box.outerHTML = '<div class="site-notif-answered">' + esc(msg) + '</div>';
+                                    if (box) box.outerHTML = '<div class="site-notif-answered">' + KSLT_экранировать(msg) + '</div>';
                                     return;
                                 }
                                 if (accept && res.contacts) {
                                     if (box) box.outerHTML = contactsHtml(res.contacts, L2.accept + ' \u2713');
                                 } else if (box) {
-                                    box.outerHTML = '<div class="site-notif-answered">' + esc(L2.decline + ' \u2713') + '</div>';
+                                    box.outerHTML = '<div class="site-notif-answered">' + KSLT_экранировать(L2.decline + ' \u2713') + '</div>';
                                 }
                             }).catch(function(e) {
                                 console.warn('[KSLT] invite answer:', e);
@@ -526,7 +526,7 @@
                                     body: JSON.stringify({ p_invite_id: n.action_id })
                                 }).then(function(r) { return r.json(); }).then(function(res) {
                                     if (!res || res.error || !res.contacts) {
-                                        if (box) box.outerHTML = '<div class="site-notif-answered">' + esc(L2.gone) + '</div>';
+                                        if (box) box.outerHTML = '<div class="site-notif-answered">' + KSLT_экранировать(L2.gone) + '</div>';
                                         return;
                                     }
                                     if (box) box.outerHTML = contactsHtml(res.contacts);
@@ -553,7 +553,7 @@
                                     if (st === 'active') return;
                                     var box = overlay.querySelector('.site-notif-actions');
                                     if (box) box.outerHTML =
-                                        '<div class="site-notif-answered">' + esc(L2.done) + '</div>';
+                                        '<div class="site-notif-answered">' + KSLT_экранировать(L2.done) + '</div>';
                                 })
                                 .catch(function() {});
                         }
@@ -653,13 +653,7 @@
                     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
                        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
                        пишется в двойных кавычках», которого никто не сторожит. Эталон
-                       взят дословно у `js/kslt-lenta.js`. */
-                    function esc(s) {
-                        return String(s == null ? '' : s)
-                            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                    }
-                })();
+                       взят дословно у `js/kslt-lenta.js`. */                })();
 
                 if (isStaff) {
                     // ---- ADMIN / MANAGER: single "Админка" dropdown ----

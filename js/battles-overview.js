@@ -143,12 +143,6 @@
        атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
        или в адресе логотипа закрывает атрибут. Эталон взят дословно у
        `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function getPlayerName(p) {
         if (!p) return '?';
         if (isEn) return p.name_en || p.name || '?';
@@ -536,7 +530,7 @@
         side.names.forEach(function(n, i) {
             // Страны нет — считаем, что игрок из Кыргызстана: одно правило везде
             var флаг = CU ? CU.flagEmoji(CU.normalizeCountry((side.countries || [])[i] || '') || 'KG') : '';
-            html += '<span>' + (флаг ? флаг + '\u00A0' : '') + esc(n) + '</span>';
+            html += '<span>' + (флаг ? флаг + '\u00A0' : '') + KSLT_экранировать(n) + '</span>';
         });
         html += '</div>';
         if (cat) html += '<div class="bo-player-cat">' + cat + '</div>';
@@ -569,19 +563,19 @@
 
         var names = BF.shortSide(side1.names) + ' vs ' + BF.shortSide(side2.names);
         var venue = b.proposed_venue || '';
-        var sub = names + (venue ? ' · ' + esc(venue) : '');
+        var sub = names + (venue ? ' · ' + KSLT_экранировать(venue) : '');
 
         /* Те же слова, что на крупной карточке: состояние называет
            tournament-status, а не свой словарь этого файла. */
         var right = isCompleted
-            ? '<span class="bo-strip-badge bo-strip-done">' + esc(BF.stateLabel(b) || L.completedBadge) + '</span>'
+            ? '<span class="bo-strip-badge bo-strip-done">' + KSLT_экранировать(BF.stateLabel(b) || L.completedBadge) + '</span>'
             : '<span class="bo-strip-badge bo-strip-live">' + L.voteBadge + '</span>';
 
         // Так же, как в турнирах: у живого баттла баннер миниатюрой, у
         // завершённого — фоном под сильным затемнением
         var bg = b.banner_url
-            ? (isCompleted ? ' style="background-image:url(' + esc(b.banner_url) + ')"'
-                           : ' style="--poster:url(' + esc(b.banner_url) + ')"')
+            ? (isCompleted ? ' style="background-image:url(' + KSLT_экранировать(b.banner_url) + ')"'
+                           : ' style="--poster:url(' + KSLT_экранировать(b.banner_url) + ')"')
             : '';
 
         return '<a class="to-compact ' + (isCompleted ? 'to-compact-past' : 'to-compact-thumb') +
@@ -592,8 +586,8 @@
                 '<span class="to-month">' + month + '</span>' +
             '</div></div>' +
             '<div class="to-compact-info">' +
-                '<h4>' + esc(b.battle_title || 'Battle') +
-                    (fmt ? '<span class="bo-strip-fmt">' + esc(fmt) + '</span>' : '') + '</h4>' +
+                '<h4>' + KSLT_экранировать(b.battle_title || 'Battle') +
+                    (fmt ? '<span class="bo-strip-fmt">' + KSLT_экранировать(fmt) + '</span>' : '') + '</h4>' +
                 '<div class="bo-strip-sub">' + sub + '</div>' +
             '</div>' +
             '<div class="bo-strip-right">' + right + '</div>' +
@@ -642,13 +636,13 @@
             } else if (_userId && myVote) {
                 voteHtml = '<div class="bo-vote-status">' + L.yourVote + '</div>' +
                     '<div class="bo-vote-buttons">' +
-                        '<button class="bo-vote-btn bo-vote-btn-p1 bo-vote-locked' + (myVote === 1 ? ' bo-vote-selected' : '') + '" disabled>' + esc(BF.shortSide(side1.names)) + '</button>' +
-                        '<button class="bo-vote-btn bo-vote-btn-p2 bo-vote-locked' + (myVote === 2 ? ' bo-vote-selected' : '') + '" disabled>' + esc(BF.shortSide(side2.names)) + '</button>' +
+                        '<button class="bo-vote-btn bo-vote-btn-p1 bo-vote-locked' + (myVote === 1 ? ' bo-vote-selected' : '') + '" disabled>' + KSLT_экранировать(BF.shortSide(side1.names)) + '</button>' +
+                        '<button class="bo-vote-btn bo-vote-btn-p2 bo-vote-locked' + (myVote === 2 ? ' bo-vote-selected' : '') + '" disabled>' + KSLT_экранировать(BF.shortSide(side2.names)) + '</button>' +
                     '</div>';
             } else if (_userId) {
                 voteHtml = '<div class="bo-vote-buttons">' +
-                    '<button class="bo-vote-btn bo-vote-btn-p1" data-challenge="' + b.id + '" data-side="1">' + esc(BF.shortSide(side1.names)) + '</button>' +
-                    '<button class="bo-vote-btn bo-vote-btn-p2" data-challenge="' + b.id + '" data-side="2">' + esc(BF.shortSide(side2.names)) + '</button>' +
+                    '<button class="bo-vote-btn bo-vote-btn-p1" data-challenge="' + b.id + '" data-side="1">' + KSLT_экранировать(BF.shortSide(side1.names)) + '</button>' +
+                    '<button class="bo-vote-btn bo-vote-btn-p2" data-challenge="' + b.id + '" data-side="2">' + KSLT_экранировать(BF.shortSide(side2.names)) + '</button>' +
                 '</div>';
             } else {
                 voteHtml = '<div class="bo-vote-login">' + L.loginToVote + '</div>';
@@ -674,7 +668,7 @@
         var statusText = BF.stateLabel(b) || L.heroBadge;
 
         var bgHtml = b.banner_url
-            ? '<div class="bo-featured-bg"><img src="' + esc(b.banner_url) + '" alt="" loading="lazy"></div><div class="bo-featured-overlay"></div>'
+            ? '<div class="bo-featured-bg"><img src="' + KSLT_экранировать(b.banner_url) + '" alt="" loading="lazy"></div><div class="bo-featured-overlay"></div>'
             : '<div class="bo-featured-overlay bo-featured-plain"></div>';
 
         /* СЛОЙ-ССЫЛКА НА ВСЮ КАРТОЧКУ. Общий сборщик — js/kslt-sloy.js.
@@ -688,11 +682,11 @@
             bgHtml +
             '<div class="bo-featured-content">' +
                 '<div class="bo-featured-top">' +
-                    '<span class="bo-status ' + statusClass + '">' + esc(statusText) + '</span>' +
+                    '<span class="bo-status ' + statusClass + '">' + KSLT_экранировать(statusText) + '</span>' +
                     getCountdownHtml(date, time) +
                 '</div>' +
-                '<div class="bo-featured-title">' + esc(b.battle_title || 'Battle') + '</div>' +
-                (formatLabel ? '<div class="bo-format">' + esc(formatLabel) + '</div>' : '') +
+                '<div class="bo-featured-title">' + KSLT_экранировать(b.battle_title || 'Battle') + '</div>' +
+                (formatLabel ? '<div class="bo-format">' + KSLT_экранировать(formatLabel) + '</div>' : '') +
                 '<div class="bo-vs-row">' +
                     boSideHtml(side1, p1Cat) +
                     '<span class="bo-vs-badge">' + L.vs + '</span>' +
@@ -709,8 +703,8 @@
                     '<span class="bo-pct-p2">' + pct2 + '%</span>' +
                 '</div>' +
                 '<div class="bo-featured-meta">' +
-                    (date ? '<span>📅 ' + formatDate(date) + (time ? ' · ' + esc(time) : '') + '</span>' : '') +
-                    (venue ? '<span class="bo-meta-venue" data-venue="' + esc(venue) + '">📍 ' + esc(venue) + '</span>' : '') +
+                    (date ? '<span>📅 ' + formatDate(date) + (time ? ' · ' + KSLT_экранировать(time) : '') + '</span>' : '') +
+                    (venue ? '<span class="bo-meta-venue" data-venue="' + KSLT_экранировать(venue) + '">📍 ' + KSLT_экранировать(venue) + '</span>' : '') +
                 '</div>' +
                 /* НАДПИСЬ, А НЕ ВТОРАЯ ССЫЛКА. Утром 13.10 здесь стояла
                    настоящая <a>: она дала клавиатуре и поисковику переход,

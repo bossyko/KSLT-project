@@ -207,7 +207,7 @@
             return м === 'W' ? (L.win || 'победа') : (L.loss || 'поражение');
         }).join(', ');
         var out = '<div class="pg-form" role="img" aria-label="' +
-            esc((L.formLabel || 'форма') + ': ' + словами) + '">';
+            KSLT_экранировать((L.formLabel || 'форма') + ': ' + словами) + '">';
         for (var i = 0; i < form.length; i++) {
             out += '<i class="' + (form[i] === 'W' ? 'w' : 'l') + '" aria-hidden="true"></i>';
         }
@@ -243,19 +243,19 @@
         var isOnline = online(p);
 
         return '<div class="pt-card' + blur + '"' +
-                (guest ? '' : ' data-player-id="' + esc(p.id) + '"') + '>' +
+                (guest ? '' : ' data-player-id="' + KSLT_экранировать(p.id) + '"') + '>' +
             (p.ntrp_singles
                 ? '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_singles).toFixed(1) + '</div>'
                 : '') +
             '<div class="pt-avatar-wrap">' +
                 (p.avatar_url
-                    ? '<img class="pt-avatar" src="' + esc(p.avatar_url) + '" alt="" loading="lazy">'
-                    : '<div class="pt-avatar-placeholder">' + esc(initials(p.full_name)) + '</div>') +
+                    ? '<img class="pt-avatar" src="' + KSLT_экранировать(p.avatar_url) + '" alt="" loading="lazy">'
+                    : '<div class="pt-avatar-placeholder">' + KSLT_экранировать(initials(p.full_name)) + '</div>') +
                 /* ТОЧКА «ОНЛАЙН» — ЦВЕТ БЫЛ ЕДИНСТВЕННЫМ НОСИТЕЛЕМ СМЫСЛА.
                    WCAG 1.4.1: цвет не может быть единственным способом
                    передать сведения. Теперь у точки есть роль и подпись. */
                 (isOnline ? '<div class="pt-online-dot" role="img" aria-label="' +
-                    esc(L.online || 'сейчас на сайте') + '"></div>' : '') +
+                    KSLT_экранировать(L.online || 'сейчас на сайте') + '"></div>' : '') +
             '</div>' +
             /* КАРТОЧКА — РАСТЯНУТАЯ ССЫЛКА. Имя настоящая <a>, её
                псевдоэлемент накрывает карточку целиком (css), кнопка
@@ -263,11 +263,11 @@
                на div: ни role, ни tabindex, клавиатурой недостижимо. */
             '<div class="pt-name">' +
                 (guest || !p.id
-                    ? esc(name)
+                    ? KSLT_экранировать(name)
                     : '<a class="pt-name-link" href="' + playerPage + '?id=' +
-                      encodeURIComponent(p.id) + '">' + esc(name) + '</a>') +
+                      encodeURIComponent(p.id) + '">' + KSLT_экранировать(name) + '</a>') +
             '</div>' +
-            (cat ? '<div class="pt-category">' + esc(cat) + '</div>' : '') +
+            (cat ? '<div class="pt-category">' + KSLT_экранировать(cat) + '</div>' : '') +
             formHtml(p.form) +
             '<div class="pg-record">' + p.wins + ' ' + L.wins + ' · ' + p.losses + ' ' + L.losses + '</div>' +
             pairsHtml(p) +
@@ -304,10 +304,4 @@
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
-       взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-})();
+       взят дословно у `js/kslt-lenta.js`. */})();

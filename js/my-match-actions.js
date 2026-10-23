@@ -114,20 +114,20 @@
 
             var подпись, кнопки;
             if (x.что === 'confirm') {
-                подпись = esc(имя) + ' ' + L.entered + ': <b>' + esc(человечно(m.score)) + '</b>';
+                подпись = KSLT_экранировать(имя) + ' ' + L.entered + ': <b>' + KSLT_экранировать(человечно(m.score)) + '</b>';
                 кнопки = '<button class="mma-btn" data-open="' + m.id + '">' + L.confirm + '</button>';
             } else if (x.что === 'wait') {
-                подпись = esc(турнир);
+                подпись = KSLT_экранировать(турнир);
                 кнопки = '<span class="mma-wait">' + L.wait + '</span>';
             } else {
-                подпись = esc(турнир);
+                подпись = KSLT_экранировать(турнир);
                 кнопки = '<button class="mma-btn" data-open="' + m.id + '">' + L.enter + '</button>';
             }
 
             html += '<div class="mma-row">' +
                 '<div class="mma-when">' + датой(m.played_at) + '</div>' +
                 '<div class="mma-main">' +
-                    '<div class="mma-name">' + esc(имя) + '</div>' +
+                    '<div class="mma-name">' + KSLT_экранировать(имя) + '</div>' +
                     '<div class="mma-sub">' + подпись + '</div>' +
                 '</div>' + кнопки +
             '</div>';
@@ -172,10 +172,4 @@
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
-       взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-})();
+       взят дословно у `js/kslt-lenta.js`. */})();

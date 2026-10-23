@@ -29,21 +29,15 @@
     function инициалы(имя) { return window.KSLT_LICO.инициалы(имя); }
     function лицо(p, класс, alt) {
         return p.photo
-            ? '<img src="' + esc(p.photo) + '" alt="' + esc(alt || '') + '" class="' + класс + '">'
+            ? '<img src="' + KSLT_экранировать(p.photo) + '" alt="' + KSLT_экранировать(alt || '') + '" class="' + класс + '">'
             : '<span class="' + класс + ' avatar-initials" aria-hidden="true">'
-              + esc(инициалы(p.name)) + '</span>';
+              + KSLT_экранировать(инициалы(p.name)) + '</span>';
     }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     var PER_PAGE = 10;
     var CAT_PER_PAGE = 20;
     var currentTab = 'men-promasters';
@@ -205,7 +199,7 @@
         var show = badges.slice(0, maxCount || 5);
         for (var i = 0; i < show.length; i++) {
             var b = show[i];
-            html += '<span class="pl-badge" title="' + esc(getBadgeTooltip(b.badge_id)) + '">' + (b.icon || '') + '</span>';
+            html += '<span class="pl-badge" title="' + KSLT_экранировать(getBadgeTooltip(b.badge_id)) + '">' + (b.icon || '') + '</span>';
         }
         return html;
     }
@@ -588,7 +582,7 @@
            ЗАГОЛОВОК ДЛЯ ДИКТОРА: иерархия страницы шла H1 → H3, и у
            главного на странице не было заголовка вовсе. */
         var html = '<h2 class="pl-sr-only">' + labels.player + ' — ' +
-            (categoriesData[tab] ? esc(categoriesData[tab].name) : '') + '</h2>';
+            (categoriesData[tab] ? KSLT_экранировать(categoriesData[tab].name) : '') + '</h2>';
         html += '<div class="pl-table' + (logged ? ' pl-table-actions' : '') + '" role="table">';
 
         // Header
@@ -871,7 +865,7 @@
                     // Название НЕ снимается: при прокрутке обложки уже не
                     // видно, и полоса остаётся единственным местом, которое
                     // говорит, в каком ты разряде
-                    '<span class="trn-cat-name">' + esc(cat.name) + '</span>' +
+                    '<span class="trn-cat-name">' + KSLT_экранировать(cat.name) + '</span>' +
                 '</div>';
 
             // Sentinel before filters — when scrolled past hero, add .stuck
@@ -939,7 +933,7 @@
             '<div class="pl-hero-bg"></div>' +
             '<div class="pl-hero-overlay"></div>' +
             '<div class="pl-cat-hero-content">' +
-                '<h1 class="pl-cat-title">' + esc(cat.name) + '</h1>' +
+                '<h1 class="pl-cat-title">' + KSLT_экранировать(cat.name) + '</h1>' +
                 '<p class="pl-cat-subtitle">' + labels.subtitle + '</p>' +
             '</div>';
     }
@@ -993,7 +987,7 @@
             '<span class="pl-col-change">' + labels.change + '</span>' +
         '</div>';
 
-        var html = '<h2 class="pl-sr-only">' + labels.player + ' — ' + esc(cat.name) + '</h2>';
+        var html = '<h2 class="pl-sr-only">' + labels.player + ' — ' + KSLT_экранировать(cat.name) + '</h2>';
         html += '<div class="pl-cat-table-wrap">';
 
         // Table with header as first row (no separate sticky wrapper)
@@ -1034,9 +1028,9 @@
             // Name: link for all, guests get modal instead of navigation
             var nameHtml;
             if (isGuest) {
-                nameHtml = '<a href="#" class="pl-player-name" data-guest-profile="1">' + esc(p.name) + '</a>';
+                nameHtml = '<a href="#" class="pl-player-name" data-guest-profile="1">' + KSLT_экранировать(p.name) + '</a>';
             } else {
-                nameHtml = '<a href="' + playerPage + '?id=' + p.id + '" class="pl-player-name">' + esc(p.name) + '</a>';
+                nameHtml = '<a href="' + playerPage + '?id=' + p.id + '" class="pl-player-name">' + KSLT_экранировать(p.name) + '</a>';
             }
 
             html += '<div class="pl-row pl-cat-row pl-animate' + rowClass + blurClass + '" style="transition-delay:' + Math.min(i * 30, 300) + 'ms"' +

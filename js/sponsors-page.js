@@ -32,21 +32,15 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function render(box, list) {
         var html = '';
 
         list.forEach(function(s) {
             var inner = s.logo
-                ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '" loading="lazy">'
-                : '<span>' + esc(s.name) + '</span>';
+                ? '<img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '" loading="lazy">'
+                : '<span>' + KSLT_экранировать(s.name) + '</span>';
             html += s.url
-                ? '<a class="sn-logo filled" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer">' + inner + '</a>'
+                ? '<a class="sn-logo filled" href="' + KSLT_экранировать(s.url) + '" target="_blank" rel="noopener noreferrer">' + inner + '</a>'
                 : '<div class="sn-logo filled">' + inner + '</div>';
         });
 

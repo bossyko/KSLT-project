@@ -103,12 +103,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     var client = window.supabaseClient;
     var card = document.getElementById('vrCard');
     var token = new URLSearchParams(window.location.search).get('token');
@@ -165,10 +159,10 @@
             '<div class="vr-valid">' +
                 '<div class="vr-badge">' + L.validBadge + '</div>' +
                 '<div class="vr-details">' +
-                    '<div class="vr-row"><span class="vr-row-label">' + L.playerName + '</span><span class="vr-row-value">' + esc(data.player_name) + '</span></div>' +
-                    '<div class="vr-row"><span class="vr-row-label">' + L.service + '</span><span class="vr-row-value">' + esc(data.service_name) + '</span></div>' +
+                    '<div class="vr-row"><span class="vr-row-label">' + L.playerName + '</span><span class="vr-row-value">' + KSLT_экранировать(data.player_name) + '</span></div>' +
+                    '<div class="vr-row"><span class="vr-row-label">' + L.service + '</span><span class="vr-row-value">' + KSLT_экранировать(data.service_name) + '</span></div>' +
                     '<div class="vr-row"><span class="vr-row-label">' + L.discount + '</span><span class="vr-discount-badge">-' + data.discount_percent + '%</span></div>' +
-                    '<div class="vr-row"><span class="vr-row-label">' + L.venue + '</span><span class="vr-row-value">' + esc(data.entity_name) + '</span></div>' +
+                    '<div class="vr-row"><span class="vr-row-label">' + L.venue + '</span><span class="vr-row-value">' + KSLT_экранировать(data.entity_name) + '</span></div>' +
                     '<div class="vr-row"><span class="vr-row-label">' + L.validUntil + '</span><span class="vr-row-value">' + expiresStr + '</span></div>' +
                 '</div>' +
                 '<div class="vr-pin-section">' +
@@ -280,9 +274,9 @@
         card.innerHTML =
             '<div class="vr-error">' +
                 '<div class="vr-error-icon" aria-hidden="true">&#10060;</div>' +
-                '<h3 class="vr-error-title">' + esc(title) + '</h3>' +
-                (text ? '<p class="vr-error-text">' + esc(text) + '</p>' : '') +
-                (next ? '<p class="vr-error-next">' + esc(next) + '</p>' : '') +
+                '<h3 class="vr-error-title">' + KSLT_экранировать(title) + '</h3>' +
+                (text ? '<p class="vr-error-text">' + KSLT_экранировать(text) + '</p>' : '') +
+                (next ? '<p class="vr-error-next">' + KSLT_экранировать(next) + '</p>' : '') +
             '</div>';
     }
 

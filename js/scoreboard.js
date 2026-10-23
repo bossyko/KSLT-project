@@ -140,14 +140,14 @@
                 '<div class="sb-row sb-row-p1">' +
                     '<div class="sb-name">' +
                         (m.serving_player === 1 ? serveDot : '') +
-                        esc(p1Name) +
+                        KSLT_экранировать(p1Name) +
                     '</div>' +
                     '<div class="sb-scores">' + setsP1Html + '</div>' +
                 '</div>' +
                 '<div class="sb-row sb-row-p2">' +
                     '<div class="sb-name">' +
                         (m.serving_player === 2 ? serveDot : '') +
-                        esc(p2Name) +
+                        KSLT_экранировать(p2Name) +
                     '</div>' +
                     '<div class="sb-scores">' + setsP2Html + '</div>' +
                 '</div>' +
@@ -189,7 +189,7 @@
                   : идётПерерыв ? Т.слово(m.break_kind || 'changeover')
                   : '';
 
-        el.innerHTML = текст ? '<div class="sb-pause">' + esc(текст) + '</div>' : '';
+        el.innerHTML = текст ? '<div class="sb-pause">' + KSLT_экранировать(текст) + '</div>' : '';
     }
 
     function renderLogos(sponsorLogo) {
@@ -197,7 +197,7 @@
         if (!logosEl) return;
         var html = '';
         if (sponsorLogo) {
-            html += '<img src="' + esc(sponsorLogo) + '" class="sb-logo-img" alt="Sponsor">';
+            html += '<img src="' + KSLT_экранировать(sponsorLogo) + '" class="sb-logo-img" alt="Sponsor">';
         }
         html += '<img src="../favicon.svg" class="sb-logo-kslt" alt="KSLT">';
         logosEl.innerHTML = html;
@@ -209,12 +209,6 @@
        атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
        или в адресе логотипа закрывает атрибут. Эталон взят дословно у
        `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

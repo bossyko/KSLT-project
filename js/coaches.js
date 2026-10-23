@@ -5,20 +5,14 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function coachMapLinks(coach) {
         var gm = coach._courtMapGoogle || '';
         var tg = coach._courtMapTwogis || '';
         if (!gm && !tg) return '';
         var html = ' <span class="co-map-links">';
-        if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="co-map-link">Google Maps &#8599;</a>';
+        if (gm) html += '<a href="' + KSLT_экранировать(gm) + '" target="_blank" rel="noopener" class="co-map-link">Google Maps &#8599;</a>';
         if (gm && tg) html += ' ';
-        if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="co-map-link">2GIS &#8599;</a>';
+        if (tg) html += '<a href="' + KSLT_экранировать(tg) + '" target="_blank" rel="noopener" class="co-map-link">2GIS &#8599;</a>';
         html += '</span>';
         return html;
     }
@@ -35,8 +29,8 @@
         var html = '<div class="co-section co-fade-in">' +
             '<h2 class="co-section-title">' + (KSLT_YAZYK.выбрать('Location', 'Жайгашкан жери', 'Расположение')) + '</h2>' +
             '<div class="co-map-links-section">';
-        if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 2GIS</a>';
-        if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps</a>';
+        if (tg) html += '<a href="' + KSLT_экранировать(tg) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 2GIS</a>';
+        if (gm) html += '<a href="' + KSLT_экранировать(gm) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps</a>';
         html += '</div></div>';
         return html;
     }
@@ -533,14 +527,14 @@
 
             html += '<a href="' + detailBase + '?id=' + c.id + '" class="co-card co-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
                 '<div class="co-card-img-wrap">' +
-                    '<img src="' + esc(c.photo) + '" alt="' + esc(c.name) + '" class="co-card-photo">' +
+                    '<img src="' + KSLT_экранировать(c.photo) + '" alt="' + KSLT_экранировать(c.name) + '" class="co-card-photo">' +
                     promoBadge +
                 '</div>' +
                 /* Тело карточки отдельной коробкой — как у кортов и у
                    витрины лендинга: фотография во всю ширину, текст в
                    своих полях, и ритм задаёт один `gap`. */
                 '<div class="co-card-body">' +
-                    '<div class="co-card-name">' + esc(c.name) + '</div>' +
+                    '<div class="co-card-name">' + KSLT_экранировать(c.name) + '</div>' +
                     (c.specialization ? '<div class="co-card-spec">' + c.specialization + '</div>' : '') +
                     (c.shortDesc ? '<div class="co-card-desc">' + c.shortDesc + '</div>' : '') +
                     (statsHtml ? '<div class="co-card-stats">' + statsHtml + '</div>' : '') +
@@ -714,7 +708,7 @@
             var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
             optionsHtml += '<div class="co-picker-option' + (i === 0 ? ' selected' : '') + '" data-service-id="' + svc.id + '">' +
                 '<div class="co-picker-radio"></div>' +
-                '<span class="co-picker-label">' + esc(svcName) + '</span>' +
+                '<span class="co-picker-label">' + KSLT_экранировать(svcName) + '</span>' +
                 '<span class="co-picker-percent">-' + svc.discount_percent + '%</span>' +
             '</div>';
         });
@@ -902,7 +896,7 @@
 
         // Header
         html += '<div class="co-detail-header co-fade-in">' +
-            '<img src="' + esc(coach.photo) + '" alt="' + esc(coach.name) + '" class="co-detail-photo">' +
+            '<img src="' + KSLT_экранировать(coach.photo) + '" alt="' + KSLT_экранировать(coach.name) + '" class="co-detail-photo">' +
             '<div class="co-detail-info">' +
                 /* ВТОРОЙ `h1` СНЯТ 13.10 — та же правка, что на странице корта. */
                 '<div class="co-detail-title-row"><div class="co-detail-name">' + coach.name + '</div>' +
@@ -1068,7 +1062,7 @@
                 var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
                 html += '<div class="co-discount-item">' +
                     '<div class="co-discount-info">' +
-                        '<span class="co-discount-name">' + esc(svcName) + '</span>' +
+                        '<span class="co-discount-name">' + KSLT_экранировать(svcName) + '</span>' +
                         '<span class="co-discount-percent">-' + svc.discount_percent + '%</span>' +
                     '</div>';
                 if (accessLevel === 'member') {
@@ -1152,11 +1146,11 @@
 
                     listHtml += '<div class="co-vh-item">' +
                         '<span class="co-vh-date">' + dateStr + '</span>' +
-                        '<span class="co-vh-service">' + esc(svcName) + '</span>' +
+                        '<span class="co-vh-service">' + KSLT_экранировать(svcName) + '</span>' +
                         '<span class="co-vh-discount">-' + v.discount_percent + '%</span>' +
                         '<span class="' + statusClass + '">' + statusLabel + '</span>';
                     if (status === 'active') {
-                        listHtml += '<button class="co-vh-qr-btn" data-token="' + esc(v.qr_token) + '" data-service="' + esc(svcName) + '" data-percent="' + v.discount_percent + '" data-entity="' + esc(v.entity_name || '') + '" data-expires="' + v.expires_at + '">' + L.voucherShowQR + '</button>';
+                        listHtml += '<button class="co-vh-qr-btn" data-token="' + KSLT_экранировать(v.qr_token) + '" data-service="' + KSLT_экранировать(svcName) + '" data-percent="' + v.discount_percent + '" data-entity="' + KSLT_экранировать(v.entity_name || '') + '" data-expires="' + v.expires_at + '">' + L.voucherShowQR + '</button>';
                     }
                     listHtml += '</div>';
                 });
@@ -1253,9 +1247,9 @@
                 '<h3 class="co-voucher-title">' + L.voucherReady + '</h3>' +
                 '<div class="co-voucher-qr" id="coVoucherQR"></div>' +
                 '<div class="co-voucher-details">' +
-                    '<div class="co-voucher-row"><span>' + L.voucherService + ':</span><span>' + esc(voucher.service_name) + '</span></div>' +
+                    '<div class="co-voucher-row"><span>' + L.voucherService + ':</span><span>' + KSLT_экранировать(voucher.service_name) + '</span></div>' +
                     '<div class="co-voucher-row"><span>' + L.voucherDiscount + ':</span><span class="co-voucher-percent">-' + voucher.discount_percent + '%</span></div>' +
-                    '<div class="co-voucher-row"><span>' + esc(voucher.entity_name) + '</span></div>' +
+                    '<div class="co-voucher-row"><span>' + KSLT_экранировать(voucher.entity_name) + '</span></div>' +
                     '<div class="co-voucher-row"><span>' + L.voucherExpires + ':</span><span>' + expiresStr + '</span></div>' +
                 '</div>' +
                 '<div class="co-voucher-actions">' +

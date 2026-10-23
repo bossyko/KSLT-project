@@ -24,12 +24,6 @@
             function(с) { с.remove(); });
         return копия.textContent.trim();
     }
-
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
     function getLabels() { return { viewerTitle: ПОДПИСЬ }; }
 
 function собратьСнимкиВГалерею(root) {
@@ -76,7 +70,7 @@ function собратьСнимкиВГалерею(root) {
                 '<div class="news-carousel-stage">' +
                     '<button class="news-carousel-nav news-carousel-prev" aria-label="Предыдущее">&#8249;</button>' +
                     '<button type="button" class="news-carousel-kadr" aria-label="' + getLabels().viewerTitle + '">' +
-                        '<img class="news-carousel-main" src="' + esc(первый.вид === 'фото' ? первый.адрес : '') + '" alt="" data-index="0">' +
+                        '<img class="news-carousel-main" src="' + KSLT_экранировать(первый.вид === 'фото' ? первый.адрес : '') + '" alt="" data-index="0">' +
                     '</button>' +
                     /* Короб видео стоит рядом с кадром, а не вместо него:
                        переключение меняет видимость, а не разметку — иначе
@@ -98,7 +92,7 @@ function собратьСнимкиВГалерею(root) {
                                 '<span class="news-carousel-igrat">&#9654;</span></button>';
                         }
                         return '<button class="news-carousel-thumb' + активна + '" data-index="' + i + '">' +
-                            '<img src="' + esc(к.адрес) + '" alt="" loading="lazy">' +
+                            '<img src="' + KSLT_экранировать(к.адрес) + '" alt="" loading="lazy">' +
                         '</button>';
                     }).join('') +
                 '</div>';

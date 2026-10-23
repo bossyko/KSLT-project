@@ -40,12 +40,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     /**
      * Отсчёт до старта. Показываем только за двое суток: раньше он не помогает,
      * а место занимает. Завершённым не рисуем совсем — у них дата в прошлом,
@@ -81,8 +75,8 @@
     /** Строка подробностей. Пустое значение не показываем вовсе. */
     function строка(подпись, значение, класс, подсказка) {
         if (!значение) return '';
-        return '<div class="to-featured-detail"' + (подсказка ? ' title="' + esc(подсказка) + '"' : '') + '>' +
-            '<span class="to-label">' + esc(подпись) + '</span>' +
+        return '<div class="to-featured-detail"' + (подсказка ? ' title="' + KSLT_экранировать(подсказка) + '"' : '') + '>' +
+            '<span class="to-label">' + KSLT_экранировать(подпись) + '</span>' +
             '<span class="to-value' + (класс ? ' ' + класс : '') + '">' + значение + '</span></div>';
     }
 
@@ -102,8 +96,8 @@
         if (!t.боком || !TC || !t._row) return '';
         // Состояние и пол — на обёртке: по ним фильтрует страница. Без них
         // блок с единственным турниром считался пустым и прятался целиком
-        return '<div class="to-featured-side" data-status="' + esc(t.status) + '"' +
-            ' data-gender="' + esc(t._gender || 'all') + '">' +
+        return '<div class="to-featured-side" data-status="' + KSLT_экранировать(t.status) + '"' +
+            ' data-gender="' + KSLT_экранировать(t._gender || 'all') + '">' +
             TC.render(t._row, { featured: true, taken: t._taken }) +
         '</div>';
     }
@@ -120,40 +114,40 @@
            (см. ниже) и у карточки игрока: 13.10 крупная карточка осталась
            последней, кто вёл на турнир обработчиком `bindLinks`. Внутри
            живёт кнопка записи, поэтому слой, а не обёртка. */
-        return '<div class="to-featured" data-status="' + esc(t.status) + '"' +
-            ' data-gender="' + esc(t._gender || 'all') + '">' +
+        return '<div class="to-featured" data-status="' + KSLT_экранировать(t.status) + '"' +
+            ' data-gender="' + KSLT_экранировать(t._gender || 'all') + '">' +
             (window.KSLT_SLOY
                 ? window.KSLT_SLOY.слой('to-featured-cover', t.href, t.name || '')
                 : '') +
             (фон
-                ? '<div class="to-featured-bg"><img src="' + esc(фон) + '" alt="" loading="lazy"></div>' +
+                ? '<div class="to-featured-bg"><img src="' + KSLT_экранировать(фон) + '" alt="" loading="lazy"></div>' +
                   '<div class="to-featured-overlay"></div>'
                 : '<div class="to-featured-overlay" style="background:var(--bg-card)"></div>') +
             '<div class="to-featured-content">' +
                 '<div>' +
                     '<span class="to-featured-date">' +
-                        '<span class="to-day">' + esc(t.date.day) + '</span>' +
-                        '<span class="to-month">' + esc(t.date.month) + '</span></span>' +
-                    (t.genderLabel ? '<span class="to-gender-badge">' + esc(t.genderLabel) + '</span>' : '') +
+                        '<span class="to-day">' + KSLT_экранировать(t.date.day) + '</span>' +
+                        '<span class="to-month">' + KSLT_экранировать(t.date.month) + '</span></span>' +
+                    (t.genderLabel ? '<span class="to-gender-badge">' + KSLT_экранировать(t.genderLabel) + '</span>' : '') +
                     (t.noRating ? '<span class="to-norating-badge">' + L.noRating + '</span>' : '') +
                 '</div>' +
                 отсчёт(t._dateSort, t._startTime, t.status) +
-                '<span class="to-featured-status ' + esc(t.status) + '">' + esc(t.statusText) + '</span>' +
-                '<h3>' + esc(t.name) + '</h3>' +
-                (t.location ? '<div class="to-featured-meta"><span>' + pinSvg + ' ' + esc(t.location) + '</span></div>' : '') +
+                '<span class="to-featured-status ' + KSLT_экранировать(t.status) + '">' + KSLT_экранировать(t.statusText) + '</span>' +
+                '<h3>' + KSLT_экранировать(t.name) + '</h3>' +
+                (t.location ? '<div class="to-featured-meta"><span>' + pinSvg + ' ' + KSLT_экранировать(t.location) + '</span></div>' : '') +
                 '<div class="to-featured-details">' +
-                    строка(t.регПодпись, t.regLine ? esc(t.regLine) : '') +
-                    строка(t.форматПодпись, t.format ? esc(t.format) : '') +
+                    строка(t.регПодпись, t.regLine ? KSLT_экранировать(t.regLine) : '') +
+                    строка(t.форматПодпись, t.format ? KSLT_экранировать(t.format) : '') +
                     (участники
-                        ? строка(участники.label, esc(участники.value), участники.tight ? 'to-slots-tight' : '')
+                        ? строка(участники.label, KSLT_экранировать(участники.value), участники.tight ? 'to-slots-tight' : '')
                         : '') +
-                    строка(t.призПодпись, t.prize ? esc(t.prize) : '', 'prize') +
-                    (взнос ? строка(t.взносПодпись, esc(взнос.value), 'to-fee', взнос.title) : '') +
+                    строка(t.призПодпись, t.prize ? KSLT_экранировать(t.prize) : '', 'prize') +
+                    (взнос ? строка(t.взносПодпись, KSLT_экранировать(взнос.value), 'to-fee', взнос.title) : '') +
                 '</div>' +
                 '<div class="to-featured-actions">' +
                     '<span class="to-featured-link">' + L.details + '</span>' +
                     (t._rawStatus === 'registration_open'
-                        ? '<button class="btn-register to-register" data-tid="' + esc(t.id) + '">' + L.register + '</button>'
+                        ? '<button class="btn-register to-register" data-tid="' + KSLT_экранировать(t.id) + '">' + L.register + '</button>'
                         : '') +
                 '</div>' +
             '</div>' +

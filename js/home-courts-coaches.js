@@ -146,11 +146,11 @@
     }
 
     function badge(row) {
-        return row.partner ? '<span class="vn-partner">' + esc(L.partner) + '</span>' : '';
+        return row.partner ? '<span class="vn-partner">' + KSLT_экранировать(L.partner) + '</span>' : '';
     }
 
     function discount(row) {
-        return row.partner ? '<span class="vn-discount">' + esc(L.discount) + '</span>' : '';
+        return row.partner ? '<span class="vn-discount">' + KSLT_экранировать(L.discount) + '</span>' : '';
     }
 
     function localized(row, field) {
@@ -184,12 +184,12 @@
         var price = minPrice ? (L.from + ' ' + minPrice + ' ' + L.perHour).trim() : '';
 
         return '<a class="court-card" href="' + href + '">' +
-            '<img src="' + esc(courtPhoto(row, ct)) + '" alt="' + esc(localized(row, 'name')) + '" loading="lazy"' + FALLBACK + '>' +
+            '<img src="' + KSLT_экранировать(courtPhoto(row, ct)) + '" alt="' + KSLT_экранировать(localized(row, 'name')) + '" loading="lazy"' + FALLBACK + '>' +
             '<div class="court-info">' +
                 badge(row) +
-                '<h4>' + esc(localized(row, 'name')) + '</h4>' +
-                (line ? '<span class="court-surface">' + esc(line) + '</span>' : '') +
-                (city ? '<span>📍 ' + esc(city) + '</span>' : '') +
+                '<h4>' + KSLT_экранировать(localized(row, 'name')) + '</h4>' +
+                (line ? '<span class="court-surface">' + KSLT_экранировать(line) + '</span>' : '') +
+                (city ? '<span>📍 ' + KSLT_экранировать(city) + '</span>' : '') +
                 discount(row) +
                 foot(price) +
             '</div>' +
@@ -204,12 +204,12 @@
         var href = page('coach') + '?id=' + encodeURIComponent(row.id);
 
         return '<a class="coach-card" href="' + href + '">' +
-            '<img class="coach-photo" src="' + esc(row.photo || COACH_PHOTO) + '" alt="' + esc(name) + '" loading="lazy">' +
+            '<img class="coach-photo" src="' + KSLT_экранировать(row.photo || COACH_PHOTO) + '" alt="' + KSLT_экранировать(name) + '" loading="lazy">' +
             '<div class="coach-info">' +
                 badge(row) +
-                '<h4>' + esc(name) + '</h4>' +
-                (localized(row, 'position') ? '<span class="coach-speciality">' + esc(localized(row, 'position')) + '</span>' : '') +
-                (exp ? '<span class="coach-experience">' + esc(exp) + '</span>' : '') +
+                '<h4>' + KSLT_экранировать(name) + '</h4>' +
+                (localized(row, 'position') ? '<span class="coach-speciality">' + KSLT_экранировать(localized(row, 'position')) + '</span>' : '') +
+                (exp ? '<span class="coach-experience">' + KSLT_экранировать(exp) + '</span>' : '') +
                 discount(row) +
                 foot(price) +
             '</div>' +
@@ -222,7 +222,7 @@
      */
     function foot(price) {
         return '<div class="vn-foot">' +
-            (price ? '<span class="coach-price">' + esc(price) + '</span>' : '<span></span>') +
+            (price ? '<span class="coach-price">' + KSLT_экранировать(price) + '</span>' : '<span></span>') +
             '<span class="vn-go" aria-hidden="true">\u2192</span>' +
         '</div>';
     }
@@ -230,10 +230,4 @@
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
-       взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-})();
+       взят дословно у `js/kslt-lenta.js`. */})();

@@ -49,12 +49,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function today() { return new Date().toISOString().substring(0, 10); }
 
     /**
@@ -152,11 +146,11 @@
     function imageBlock(t, s) {
         var src = t.image || '';
         var inner = src
-            ? '<img src="' + esc(src) + '" alt="" loading="lazy">'
+            ? '<img src="' + KSLT_экранировать(src) + '" alt="" loading="lazy">'
             : '<div class="tc-noimage">🎾</div>';
-        var style = src ? ' style="--tc-poster:url(&quot;' + esc(src) + '&quot;)"' : '';
+        var style = src ? ' style="--tc-poster:url(&quot;' + KSLT_экранировать(src) + '&quot;)"' : '';
         return '<div class="tc-image"' + style + '>' + inner +
-               '<span class="tc-badge tc-badge-' + s + '">' + esc(statusLabel(s)) + '</span>' +
+               '<span class="tc-badge tc-badge-' + s + '">' + KSLT_экранировать(statusLabel(s)) + '</span>' +
                '</div>';
     }
 
@@ -168,8 +162,8 @@
         // Свободные места считает общий модуль — тот же, что на страницах
         // категорий и на самой странице турнира, чтобы цифры не разошлись
         var slots = window.KSLT_SLOTS && window.KSLT_SLOTS.line(t, opts.taken, s);
-        if (slots) meta.push('<span class="tc-slots' + (slots.tight ? ' tc-slots-tight' : '') + '">' + esc(slots.text) + '</span>');
-        if (t.location) meta.push('<span>' + esc(KSLT_YAZYK.выбрать(t.location_en || t.location, t.location_kg || t.location, t.location)) + '</span>');
+        if (slots) meta.push('<span class="tc-slots' + (slots.tight ? ' tc-slots-tight' : '') + '">' + KSLT_экранировать(slots.text) + '</span>');
+        if (t.location) meta.push('<span>' + KSLT_экранировать(KSLT_YAZYK.выбрать(t.location_en || t.location, t.location_kg || t.location, t.location)) + '</span>');
 
         // Завершённые и отменённые приглушаем: живое должно тянуть взгляд
         // первым, а архив — не спорить за внимание
@@ -177,13 +171,13 @@
         var html = '<a class="tc' + (opts.featured ? ' tc-featured' : '') + тускло + '" href="' + href + '">' +
             imageBlock(t, s) +
             '<div class="tc-body">' +
-                '<span class="tc-date">' + esc(dateText(t)) + '</span>' +
+                '<span class="tc-date">' + KSLT_экранировать(dateText(t)) + '</span>' +
                 countdown(t) +
-                '<h3 class="tc-title">' + esc(title(t)) + '</h3>';
+                '<h3 class="tc-title">' + KSLT_экранировать(title(t)) + '</h3>';
 
         if (opts.featured && t.description) {
             var d = KSLT_YAZYK.выбрать(t.description_en || t.description, t.description_kg || t.description, t.description);
-            html += '<p class="tc-desc">' + esc(d) + '</p>';
+            html += '<p class="tc-desc">' + KSLT_экранировать(d) + '</p>';
         }
         if (meta.length) html += '<div class="tc-meta">' + meta.join('') + '</div>';
 
@@ -192,12 +186,12 @@
         var парный = t.format === 'doubles' || t.format === 'mixed_doubles';
         if (s === 'open') {
             html += '<button type="button" class="tc-btn btn-register to-register" data-tid="' +
-                esc(t.id) + '"' + (парный ? ' data-doubles="1"' : '') + '>' +
-                esc(L.btnOpen) + '</button>';
+                KSLT_экранировать(t.id) + '"' + (парный ? ' data-doubles="1"' : '') + '>' +
+                KSLT_экранировать(L.btnOpen) + '</button>';
         } else {
             // Кнопка у каждой карточки, а не только у главной: рядом стояли два
             // идущих турнира, и «Смотреть сетку» было лишь у одного
-            html += '<span class="tc-btn">' + esc(buttonFor(s)) + '</span>';
+            html += '<span class="tc-btn">' + KSLT_экранировать(buttonFor(s)) + '</span>';
         }
 
         html += '</div></a>';

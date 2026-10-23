@@ -23,12 +23,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function полосаСтраниц(container, total, page, шаг, labels) {
         if (!container) return;
 
@@ -85,7 +79,7 @@
             ' ' + labels.shownOf + ' ' + total + '</span>';
         html += '<div class="pl-pagination-pages">';
         html += '<button class="pl-page-btn pl-page-prev" aria-label="' +
-            esc(labels.prevPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
+            KSLT_экранировать(labels.prevPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
             (page === 1 ? ' disabled' : '') + '>' + шеврон(true) + '</button>';
 
         if (узкий) {
@@ -105,7 +99,7 @@
         });
 
         html += '<button class="pl-page-btn pl-page-next" aria-label="' +
-            esc(labels.nextPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
+            KSLT_экранировать(labels.nextPage.replace(/[\u2190\u2192]/g, '').trim()) + '"' +
             (page === всего ? ' disabled' : '') + '>' + шеврон(false) + '</button>';
         html += '</div></div>';
 

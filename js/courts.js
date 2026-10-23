@@ -5,12 +5,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     /**
      * Номер хранится слитно: +996701111732. На странице показываем его
      * группами по правилам страны. Телефонов может быть несколько — они
@@ -682,8 +676,8 @@
         options.forEach(function(o) {
             var выбран = o.value === current;
             items += '<button class="ct-dd-item' + (выбран ? ' active' : '') +
-                '" data-dd-value="' + esc(o.value) + '"' + (выбран ? ' aria-current="true"' : '') + '>' +
-                esc(o.label) + (выбран ? ГАЛКА : '') +
+                '" data-dd-value="' + KSLT_экранировать(o.value) + '"' + (выбран ? ' aria-current="true"' : '') + '>' +
+                KSLT_экранировать(o.label) + (выбран ? ГАЛКА : '') +
                 '<span class="ct-dd-count">' + o.count + '</span></button>';
         });
 
@@ -694,7 +688,7 @@
         return '<div class="ct-dd" data-dd="' + kind + '">' +
             '<button class="trn-chip ct-dd-toggle' + (current !== 'all' ? ' active' : '') + '"' +
                 ' aria-haspopup="listbox" aria-expanded="false">' +
-                esc(title) +
+                KSLT_экранировать(title) +
                 '<svg class="ct-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
             '</button>' +
             '<div class="ct-dd-menu" role="listbox">' + items + '</div>' +
@@ -824,7 +818,7 @@
 
             html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
                 '<div class="ct-card-img-wrap">' +
-                    '<img src="' + esc(c.photo || FALLBACK_PHOTO) + '" alt="' + esc(c.name) + '" class="ct-card-img" loading="lazy">' +
+                    '<img src="' + KSLT_экранировать(c.photo || FALLBACK_PHOTO) + '" alt="' + KSLT_экранировать(c.name) + '" class="ct-card-img" loading="lazy">' +
                     newBadge +
                     promoBadge +
                     discountBadge +
@@ -984,7 +978,7 @@
             var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
             optionsHtml += '<div class="ct-picker-option' + (i === 0 ? ' selected' : '') + '" data-service-id="' + svc.id + '">' +
                 '<div class="ct-picker-radio"></div>' +
-                '<span class="ct-picker-label">' + esc(svcName) + '</span>' +
+                '<span class="ct-picker-label">' + KSLT_экранировать(svcName) + '</span>' +
                 '<span class="ct-picker-percent">-' + svc.discount_percent + '%</span>' +
             '</div>';
         });
@@ -1158,7 +1152,7 @@
         // общую картинку раздела — иначе шапка карточки просто чёрная
         var heroBg = court.photo || FALLBACK_PHOTO;
         hero.innerHTML =
-            '<div class="ct-hero-bg" style="background-image: url(\'' + esc(heroBg) + '\')"></div>' +
+            '<div class="ct-hero-bg" style="background-image: url(\'' + KSLT_экранировать(heroBg) + '\')"></div>' +
             '<div class="ct-hero-content">' +
                 '<h1 class="ct-hero-title">' + court.name + '</h1>' +
                 '<p class="ct-hero-subtitle">' + subtitle + '</p>' +
@@ -1189,7 +1183,7 @@
 
         // Header
         html += '<div class="ct-detail-header ct-fade-in">' +
-            '<img src="' + esc(court.photo || FALLBACK_PHOTO) + '" alt="' + esc(court.name) + '" class="ct-detail-photo">' +
+            '<img src="' + KSLT_экранировать(court.photo || FALLBACK_PHOTO) + '" alt="' + KSLT_экранировать(court.name) + '" class="ct-detail-photo">' +
             '<div class="ct-detail-info">' +
                 /* ВТОРОЙ `h1` СНЯТ 13.10. Обложка выше уже несёт имя корта заголовком
                    первого уровня — здесь был ещё один, с тем же текстом: диктор читал
@@ -1202,9 +1196,9 @@
                     (court.partner ? ' \u00b7 <span class="ct-partner-badge">' + L_labels.partnerBadge + '</span>' : '') +
                 '</div>' +
                 (court.address ? '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + court.address + '</div>' : '') +
-                (court.phone ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + court.phone.split(',')[0].replace(/\s/g, '') + '">' + esc(prettyPhone(court.phone)) + '</a></div>' : '') +
-                (court.whatsapp ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> <a href="https://wa.me/' + esc(court.whatsapp.replace(/\D/g, '')) + '" target="_blank" rel="noopener">' + esc(prettyPhone(court.whatsapp)) + '</a></div>' : '') +
-                (court.instagram ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> <a href="https://instagram.com/' + esc(court.instagram.replace(/^@/, '')) + '" target="_blank" rel="noopener">' + esc(court.instagram) + '</a></div>' : '') +
+                (court.phone ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + court.phone.split(',')[0].replace(/\s/g, '') + '">' + KSLT_экранировать(prettyPhone(court.phone)) + '</a></div>' : '') +
+                (court.whatsapp ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> <a href="https://wa.me/' + KSLT_экранировать(court.whatsapp.replace(/\D/g, '')) + '" target="_blank" rel="noopener">' + KSLT_экранировать(prettyPhone(court.whatsapp)) + '</a></div>' : '') +
+                (court.instagram ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> <a href="https://instagram.com/' + KSLT_экранировать(court.instagram.replace(/^@/, '')) + '" target="_blank" rel="noopener">' + KSLT_экранировать(court.instagram) + '</a></div>' : '') +
             '</div>' +
         '</div>';
 
@@ -1234,9 +1228,9 @@
         // Показываем только то, что известно. Раньше строка собиралась жёстко,
         // и у корта без данных выходило «0 кортов ·» — ноль и висячая точка
         var показатели = [];
-        if (court.courtsCount) показатели.push(esc(court.courtsCount + ' ' + словоКорты(court.courtsCount)));
-        if (surfacesText) показатели.push(esc(surfacesText));
-        if (priceFromText) показатели.push(esc(priceFromText));
+        if (court.courtsCount) показатели.push(KSLT_экранировать(court.courtsCount + ' ' + словоКорты(court.courtsCount)));
+        if (surfacesText) показатели.push(KSLT_экранировать(surfacesText));
+        if (priceFromText) показатели.push(KSLT_экранировать(priceFromText));
 
         if (показатели.length) {
             html += '<div class="ct-detail-stats ct-detail-stats-single ct-fade-in">' +
@@ -1269,8 +1263,8 @@
                     priceText += ' <span class="ct-svc-discount">KSLT</span>';
                 }
                 html += '<div class="ct-types-row">' +
-                    '<span>' + esc(typeLabel) + '</span>' +
-                    '<span>' + esc(surfaceLabel) + '</span>' +
+                    '<span>' + KSLT_экранировать(typeLabel) + '</span>' +
+                    '<span>' + KSLT_экранировать(surfaceLabel) + '</span>' +
                     '<span>' + (ct.count || '—') + '</span>' +
                     '<span>' + priceText + '</span>' +
                 '</div>';
@@ -1296,7 +1290,7 @@
                     priceText += ' <span class="ct-svc-discount">KSLT</span>';
                 }
                 html += '<div class="ct-services-row">' +
-                    '<span>' + esc(svcName || '') + '</span>' +
+                    '<span>' + KSLT_экранировать(svcName || '') + '</span>' +
                     '<span>' + priceText + '</span>' +
                 '</div>';
             });
@@ -1353,7 +1347,7 @@
                 '<h2 class="ct-section-title">' + L_labels.galleryTitle + '</h2>' +
                 '<div class="ct-gallery">';
             court.gallery.forEach(function(img) {
-                html += '<img src="' + esc(img) + '" alt="' + esc(court.name) + '" class="ct-gallery-img" loading="lazy">';
+                html += '<img src="' + KSLT_экранировать(img) + '" alt="' + KSLT_экранировать(court.name) + '" class="ct-gallery-img" loading="lazy">';
             });
             html += '</div></div>';
         }
@@ -1373,7 +1367,7 @@
             html += '<div class="ct-section ct-fade-in">';
             html += '<h2 class="ct-section-title">' + L_labels.locationTitle + '</h2>';
             if (mapEmbedUrl) {
-                html += '<div class="ct-map-embed"><iframe src="' + esc(mapEmbedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+                html += '<div class="ct-map-embed"><iframe src="' + KSLT_экранировать(mapEmbedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
             }
             html += '<div class="ct-map-links">';
             if (court.google_maps_url) html += '<a href="' + court.google_maps_url + '" target="_blank" rel="noopener" class="ct-map-link">Google Maps \u2197</a>';
@@ -1470,7 +1464,7 @@
                 var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
                 html += '<div class="ct-discount-item">' +
                     '<div class="ct-discount-info">' +
-                        '<span class="ct-discount-name">' + esc(svcName) + '</span>' +
+                        '<span class="ct-discount-name">' + KSLT_экранировать(svcName) + '</span>' +
                         '<span class="ct-discount-percent">-' + svc.discount_percent + '%</span>' +
                     '</div>';
                 if (accessLevel === 'member') {
@@ -1556,11 +1550,11 @@
 
                     listHtml += '<div class="ct-vh-item">' +
                         '<span class="ct-vh-date">' + dateStr + '</span>' +
-                        '<span class="ct-vh-service">' + esc(svcName) + '</span>' +
+                        '<span class="ct-vh-service">' + KSLT_экранировать(svcName) + '</span>' +
                         '<span class="ct-vh-discount">-' + v.discount_percent + '%</span>' +
                         '<span class="' + statusClass + '">' + statusLabel + '</span>';
                     if (status === 'active') {
-                        listHtml += '<button class="ct-vh-qr-btn" data-token="' + esc(v.qr_token) + '" data-service="' + esc(svcName) + '" data-percent="' + v.discount_percent + '" data-entity="' + esc(v.entity_name || '') + '" data-expires="' + v.expires_at + '">' + L_labels.voucherShowQR + '</button>';
+                        listHtml += '<button class="ct-vh-qr-btn" data-token="' + KSLT_экранировать(v.qr_token) + '" data-service="' + KSLT_экранировать(svcName) + '" data-percent="' + v.discount_percent + '" data-entity="' + KSLT_экранировать(v.entity_name || '') + '" data-expires="' + v.expires_at + '">' + L_labels.voucherShowQR + '</button>';
                     }
                     listHtml += '</div>';
                 });
@@ -1658,9 +1652,9 @@
                 '<h3 class="ct-voucher-title">' + L_labels.voucherReady + '</h3>' +
                 '<div class="ct-voucher-qr" id="ctVoucherQR"></div>' +
                 '<div class="ct-voucher-details">' +
-                    '<div class="ct-voucher-row"><span>' + L_labels.voucherService + ':</span><span>' + esc(voucher.service_name) + '</span></div>' +
+                    '<div class="ct-voucher-row"><span>' + L_labels.voucherService + ':</span><span>' + KSLT_экранировать(voucher.service_name) + '</span></div>' +
                     '<div class="ct-voucher-row"><span>' + L_labels.voucherDiscount + ':</span><span class="ct-voucher-percent">-' + voucher.discount_percent + '%</span></div>' +
-                    '<div class="ct-voucher-row"><span>' + esc(voucher.entity_name) + '</span></div>' +
+                    '<div class="ct-voucher-row"><span>' + KSLT_экранировать(voucher.entity_name) + '</span></div>' +
                     '<div class="ct-voucher-row"><span>' + L_labels.voucherExpires + ':</span><span>' + expiresStr + '</span></div>' +
                 '</div>' +
                 '<div class="ct-voucher-actions">' +

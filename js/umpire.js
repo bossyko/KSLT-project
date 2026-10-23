@@ -639,16 +639,16 @@
         var winnerHtml = '';
         if (isCompleted) {
             var winnerName = state.winner_player === 1 ? p1Name : p2Name;
-            winnerHtml = '<div class="um-winner">' + esc(winnerName) + ' побеждает! ' + state.final_score + '</div>';
+            winnerHtml = '<div class="um-winner">' + KSLT_экранировать(winnerName) + ' побеждает! ' + state.final_score + '</div>';
         }
 
         app.innerHTML =
             /* Судья видит, КАКОЙ матч ведёт: до 24.09 на экране были только
                счёт и кнопки, и при двух матчах подряд перепутать было легко. */
             '<div class="um-match-head">' +
-                '<div class="um-match-players">' + esc(p1Name) + ' — ' + esc(p2Name) + '</div>' +
+                '<div class="um-match-players">' + KSLT_экранировать(p1Name) + ' — ' + KSLT_экранировать(p2Name) + '</div>' +
                 (matchData.tournament_label
-                    ? '<div class="um-match-meta">' + esc(matchData.tournament_label) +
+                    ? '<div class="um-match-meta">' + KSLT_экранировать(matchData.tournament_label) +
                       ' · лучший из ' + (matchData.best_of || 3) + '</div>'
                     : '') +
             '</div>' +
@@ -658,14 +658,14 @@
                 // Player 1 row
                 '<div class="um-player-row' + (state.serving_player === 1 ? ' um-serving' : '') + (state.winner_player === 1 ? ' um-winner-row' : '') + '">' +
                     '<div class="um-serve-dot"' + (state.serving_player === 1 ? ' aria-label="подаёт"' : '') + '>' + (state.serving_player === 1 ? '<span></span>' : '') + '</div>' +
-                    '<div class="um-player-name">' + esc(p1Name) + '</div>' +
+                    '<div class="um-player-name">' + KSLT_экранировать(p1Name) + '</div>' +
                     '<div class="um-games">' + state.current_game_p1 + '</div>' +
                     '<div class="um-points">' + pts.p1 + '</div>' +
                 '</div>' +
                 // Player 2 row
                 '<div class="um-player-row' + (state.serving_player === 2 ? ' um-serving' : '') + (state.winner_player === 2 ? ' um-winner-row' : '') + '">' +
                     '<div class="um-serve-dot"' + (state.serving_player === 2 ? ' aria-label="подаёт"' : '') + '>' + (state.serving_player === 2 ? '<span></span>' : '') + '</div>' +
-                    '<div class="um-player-name">' + esc(p2Name) + '</div>' +
+                    '<div class="um-player-name">' + KSLT_экранировать(p2Name) + '</div>' +
                     '<div class="um-games">' + state.current_game_p2 + '</div>' +
                     '<div class="um-points">' + pts.p2 + '</div>' +
                 '</div>' +
@@ -697,8 +697,8 @@
                 ? '<div class="um-serve-choice">' +
                     '<div class="um-serve-choice-title">Кто подаёт первым?</div>' +
                     '<div class="um-serve-choice-btns">' +
-                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 1 ? ' um-btn-serve-active' : '') + '" id="umServe1">' + esc(p1Name) + '</button>' +
-                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 2 ? ' um-btn-serve-active' : '') + '" id="umServe2">' + esc(p2Name) + '</button>' +
+                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 1 ? ' um-btn-serve-active' : '') + '" id="umServe1">' + KSLT_экранировать(p1Name) + '</button>' +
+                        '<button class="um-btn um-btn-serve' + (serveChosen && state.serving_player === 2 ? ' um-btn-serve-active' : '') + '" id="umServe2">' + KSLT_экранировать(p2Name) + '</button>' +
                     '</div>' +
                   '</div>'
                 : '') +
@@ -713,9 +713,9 @@
                     var кПр = state.serving_player === 2 ? '' : ' um-to-p2';
                     return '<div class="um-marks">' +
                         '<button class="um-btn um-btn-mark' + кП + '" id="umAce">' +
-                            '<b>Эйс</b><span>очко · ' + esc(подающий) + '</span></button>' +
+                            '<b>Эйс</b><span>очко · ' + KSLT_экранировать(подающий) + '</span></button>' +
                         '<button class="um-btn um-btn-mark' + кПр + '" id="umDouble">' +
-                            '<b>Двойная</b><span>очко · ' + esc(принимающий) + '</span></button>' +
+                            '<b>Двойная</b><span>очко · ' + KSLT_экранировать(принимающий) + '</span></button>' +
                     '</div>';
                   })()
                 : '') +
@@ -726,8 +726,8 @@
                         : '')
                     : isCompleted
                         ? ''
-                        : '<button class="um-btn um-btn-p1" id="umP1">Очко<br>' + esc(p1Name) + '</button>' +
-                          '<button class="um-btn um-btn-p2" id="umP2">Очко<br>' + esc(p2Name) + '</button>'
+                        : '<button class="um-btn um-btn-p1" id="umP1">Очко<br>' + KSLT_экранировать(p1Name) + '</button>' +
+                          '<button class="um-btn um-btn-p2" id="umP2">Очко<br>' + KSLT_экранировать(p2Name) + '</button>'
                 ) +
             '</div>' +
             (!isCompleted && !isWarmup
@@ -783,12 +783,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     // Export engine for scoreboard/live-match reuse
     window.TennisEngine = {
         createInitialState: createInitialState,

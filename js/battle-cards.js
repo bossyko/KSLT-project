@@ -59,12 +59,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function formatDate(dateStr) {
         if (!dateStr) return '';
         // «2026-08-21» без времени браузер читает как полночь UTC, и при
@@ -197,9 +191,9 @@
            Avatar 29:82; размер общий с фотографией, объявлен один раз. */
         side.photos.forEach(function(src, i) {
             ph += src
-                ? '<img src="' + esc(src) + '" alt="">'
+                ? '<img src="' + KSLT_экранировать(src) + '" alt="">'
                 : '<span class="avatar-initials" aria-hidden="true">'
-                  + esc(инициалыИмени((side.names || [])[i])) + '</span>';
+                  + KSLT_экранировать(инициалыИмени((side.names || [])[i])) + '</span>';
         });
         ph += '</div>';
 
@@ -212,7 +206,7 @@
             var код = (side.countries || [])[i];
             // Страны нет — считаем, что игрок из Кыргызстана: так же на странице баттла
             var флаг = CU ? CU.flagEmoji(CU.normalizeCountry(код || '') || 'KG') : '';
-            names += '<span>' + (флаг ? '<span class="bc-flag">' + флаг + '</span>\u00A0' : '') + esc(n) + '</span>';
+            names += '<span>' + (флаг ? '<span class="bc-flag">' + флаг + '</span>\u00A0' : '') + KSLT_экранировать(n) + '</span>';
         });
         names += '</span>';
 
@@ -257,10 +251,10 @@
                 '<div class="bc-vote-voted">' + L.yourVote + ':</div>' +
                 '<div class="bc-vote-buttons">' +
                     '<button class="bc-vote-btn bc-vote-btn-p1 bc-vote-locked' + sel1 + '" disabled>' +
-                        esc(BF.shortSide(side1.names)) +
+                        KSLT_экранировать(BF.shortSide(side1.names)) +
                     '</button>' +
                     '<button class="bc-vote-btn bc-vote-btn-p2 bc-vote-locked' + sel2 + '" disabled>' +
-                        esc(BF.shortSide(side2.names)) +
+                        KSLT_экранировать(BF.shortSide(side2.names)) +
                     '</button>' +
                 '</div>';
         } else if (userId) {
@@ -268,10 +262,10 @@
             voteHtml =
                 '<div class="bc-vote-buttons">' +
                     '<button class="bc-vote-btn bc-vote-btn-p1" data-challenge="' + battle.id + '" data-side="1">' +
-                        esc(BF.shortSide(side1.names)) +
+                        KSLT_экранировать(BF.shortSide(side1.names)) +
                     '</button>' +
                     '<button class="bc-vote-btn bc-vote-btn-p2" data-challenge="' + battle.id + '" data-side="2">' +
-                        esc(BF.shortSide(side2.names)) +
+                        KSLT_экранировать(BF.shortSide(side2.names)) +
                     '</button>' +
                 '</div>';
         } else {
@@ -284,12 +278,12 @@
             headerMeta = '<div class="bc-datetime">';
             if (date) headerMeta += '<span class="bc-dt-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + formatDate(date) + '</span>';
             if (date && time) headerMeta += '<span class="bc-dt-sep"></span>';
-            if (time) headerMeta += '<span class="bc-dt-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + esc(time) + '</span>';
+            if (time) headerMeta += '<span class="bc-dt-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + KSLT_экранировать(time) + '</span>';
             headerMeta += '</div>';
         }
 
         var bannerHtml = battle.banner_url
-            ? '<img class="bc-banner" src="' + esc(battle.banner_url) + '" alt="">'
+            ? '<img class="bc-banner" src="' + KSLT_экранировать(battle.banner_url) + '" alt="">'
             : '';
 
         /* СЛОЙ-ССЫЛКА НА ВСЮ КАРТОЧКУ. Общий сборщик — js/kslt-sloy.js.
@@ -304,10 +298,10 @@
             bannerHtml +
             '<div class="bc-card-inner">' +
                 '<div class="bc-header">' +
-                    '<span class="bc-badge">' + L.battle + (formatLabel ? ' · ' + esc(formatLabel) : '') + '</span>' +
+                    '<span class="bc-badge">' + L.battle + (formatLabel ? ' · ' + KSLT_экранировать(formatLabel) : '') + '</span>' +
                     headerMeta +
                 '</div>' +
-                '<div class="bc-title">' + esc(battle.battle_title || 'Battle') + '</div>' +
+                '<div class="bc-title">' + KSLT_экранировать(battle.battle_title || 'Battle') + '</div>' +
                 '<div class="bc-vs-row">' +
                     sideHtml(side1) +
                     '<span class="bc-vs">' + L.vs + '</span>' +
@@ -323,7 +317,7 @@
                     '<span class="bc-total">' + vTotal + ' ' + L.votes + '</span>' +
                     '<span class="bc-pct bc-pct-p2">' + pct2 + '%</span>' +
                 '</div>' +
-                (venue ? '<div class="bc-meta"><span class="bc-meta-item bc-meta-venue" data-venue="' + esc(venue) + '">\uD83D\uDCCD ' + esc(venue) + '</span></div>' : '') +
+                (venue ? '<div class="bc-meta"><span class="bc-meta-item bc-meta-venue" data-venue="' + KSLT_экранировать(venue) + '">\uD83D\uDCCD ' + KSLT_экранировать(venue) + '</span></div>' : '') +
                 /* НАДПИСЬ, А НЕ ВТОРАЯ ССЫЛКА: переход несёт слой на всю
                    карточку. Две ссылки на один адрес диктор читает дважды. */
                 '<span class="bc-details-link" aria-hidden="true">' + L.moreDetails + ' →</span>' +

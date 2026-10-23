@@ -118,18 +118,18 @@
         var titleId = 'rk-title-' + пол;
         var html = '<div class="rankings-col">' +
             '<h3 class="rankings-col-title" id="' + titleId + '">' +
-                esc(разряды[0].кат.genderLabel ? заголовок(пол) : заголовок(пол)) + '</h3>' +
+                KSLT_экранировать(разряды[0].кат.genderLabel ? заголовок(пол) : заголовок(пол)) + '</h3>' +
             '<div class="rankings-tabs" role="tablist" aria-labelledby="' + titleId + '">';
 
         разряды.forEach(function (x, i) {
             var вкл = i === активный;
             html += '<button class="rankings-tab' + (вкл ? ' active' : '') + '"' +
                 ' role="tab" type="button"' +
-                ' id="tab-' + esc(x.ключ) + '"' +
+                ' id="tab-' + KSLT_экранировать(x.ключ) + '"' +
                 ' aria-selected="' + (вкл ? 'true' : 'false') + '"' +
-                ' aria-controls="' + esc(x.ключ) + '"' +
+                ' aria-controls="' + KSLT_экранировать(x.ключ) + '"' +
                 ' tabindex="' + (вкл ? '0' : '-1') + '"' +
-                ' data-target="' + esc(x.ключ) + '">' + esc(x.кат.name) + '</button>';
+                ' data-target="' + KSLT_экранировать(x.ключ) + '">' + KSLT_экранировать(x.кат.name) + '</button>';
         });
         html += '</div>';
 
@@ -137,8 +137,8 @@
             var вкл = i === активный;
             var список = x.кат.players || [];
             html += '<div class="rankings-panel' + (вкл ? ' active' : '') + '"' +
-                ' id="' + esc(x.ключ) + '" role="tabpanel"' +
-                ' aria-labelledby="tab-' + esc(x.ключ) + '"' +
+                ' id="' + KSLT_экранировать(x.ключ) + '" role="tabpanel"' +
+                ' aria-labelledby="tab-' + KSLT_экранировать(x.ключ) + '"' +
                 (вкл ? '' : ' hidden') + '>' +
                 (список.length ? (пьедестал(список) + table(список, guest)) : пусто()) +
             '</div>';
@@ -220,7 +220,7 @@
     }
 
     function пусто() {
-        return '<div class="rk-empty">' + esc(L.empty) + '</div>';
+        return '<div class="rk-empty">' + KSLT_экранировать(L.empty) + '</div>';
     }
 
     /* Вкладки: чип фильтрует список на месте (Filter chip 49:77), поэтому
@@ -306,8 +306,8 @@
 
         // Гостю имя не ссылка: страница игрока ему всё равно закрыта
         var name = guest
-            ? '<span>' + esc(p.name) + '</span>'
-            : '<a href="' + playerPage + '?id=' + encodeURIComponent(p.id) + '">' + esc(p.name) + '</a>';
+            ? '<span>' + KSLT_экранировать(p.name) + '</span>'
+            : '<a href="' + playerPage + '?id=' + encodeURIComponent(p.id) + '">' + KSLT_экранировать(p.name) + '</a>';
 
         return '<div class="rk-row">' +
             /* Класс `top` убран 24.09: тройку выделяет пьедестал, а лайм по
@@ -316,7 +316,7 @@
             '<div class="rk-player">' +
                 лицо(p) + name +
             '</div>' +
-            '<span class="rk-country">' + esc(p.country) + '</span>' +
+            '<span class="rk-country">' + KSLT_экранировать(p.country) + '</span>' +
             '<span class="rk-ntrp">' + ntrp + '</span>' +
             '<span class="rk-wl">' + (p.wins || 0) + '/' + (p.losses || 0) + '</span>' +
             '<span class="rk-points">' + Number(p.points || 0).toLocaleString('ru-RU') + '</span>' +
@@ -344,12 +344,12 @@
         return '<div class="pl-podium">' + тройка.map(function (p, i) {
             return '<div class="pl-podium-card ' + класс[i] + '">' +
                 '<div class="pl-podium-medal" role="img" aria-label="' +
-                    esc(L.places[i]) + '">' + медали[i] + '</div>' +
+                    KSLT_экранировать(L.places[i]) + '">' + медали[i] + '</div>' +
                 '<div class="pl-podium-photo-wrap">' + лицо(p, 'pl-podium-photo') + '</div>' +
                 '<div class="pl-podium-base">' +
-                    '<div class="pl-podium-name">' + esc(p.name) + '</div>' +
+                    '<div class="pl-podium-name">' + KSLT_экранировать(p.name) + '</div>' +
                     '<div class="pl-podium-points">' +
-                        Number(p.points || 0).toLocaleString('ru-RU') + ' ' + esc(L.ptsWord) +
+                        Number(p.points || 0).toLocaleString('ru-RU') + ' ' + KSLT_экранировать(L.ptsWord) +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -364,18 +364,12 @@
         var к = класс ? класс + ' ' : '';
         return p.photo
             ? '<img' + (класс ? ' class="' + класс + '"' : '') +
-              ' src="' + esc(p.photo) + '" alt="" loading="lazy">'
+              ' src="' + KSLT_экранировать(p.photo) + '" alt="" loading="lazy">'
             : '<span class="' + к + 'avatar-initials" aria-hidden="true">' +
-              esc(инициалы(p.name)) + '</span>';
+              KSLT_экранировать(инициалы(p.name)) + '</span>';
     }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
-       взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-})();
+       взят дословно у `js/kslt-lenta.js`. */})();

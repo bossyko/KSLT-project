@@ -6,12 +6,6 @@
    кавычка тоже. Иначе безопасность держится на соглашении «атрибут
    пишется в двойных кавычках», которого никто не сторожит. Эталон
    взят дословно у `js/kslt-lenta.js`. */
-function esc(str) {
-    return String(str == null ? '' : str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     var urlParams = new URLSearchParams(window.location.search);
     var slug = urlParams.get('slug');
@@ -507,7 +501,7 @@ function renderHero(article, readTime) {
 
     container.innerHTML =
         '<div class="news-hero-bg' + (article.ownCover ? ' news-own-cover' : '') + '">' +
-            '<img src="' + esc(article.heroImage) + '" alt="">' +
+            '<img src="' + KSLT_экранировать(article.heroImage) + '" alt="">' +
             (article.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
             '<div class="news-hero-overlay"></div>' +
             (article.imageOriginal
@@ -564,7 +558,7 @@ function renderContent(article) {
         // Insert inline photos after paragraph (index+1 = 1-based paragraph number)
         while (cimgIdx < cimgs.length && cimgs[cimgIdx].after_paragraph === index + 1) {
             html += '<figure class="news-figure news-animate">' +
-                '<img src="' + esc(cimgs[cimgIdx].url) + '" loading="lazy">' +
+                '<img src="' + KSLT_экранировать(cimgs[cimgIdx].url) + '" loading="lazy">' +
             '</figure>';
             cimgIdx++;
         }
@@ -573,7 +567,7 @@ function renderContent(article) {
     // Remaining content images (position > paragraph count) — render at end of text
     while (cimgIdx < cimgs.length) {
         html += '<figure class="news-figure news-animate">' +
-            '<img src="' + esc(cimgs[cimgIdx].url) + '" loading="lazy">' +
+            '<img src="' + KSLT_экранировать(cimgs[cimgIdx].url) + '" loading="lazy">' +
         '</figure>';
         cimgIdx++;
     }
@@ -842,7 +836,7 @@ function openPhotoViewer(urls, index) {
         overlay.innerHTML =
             '<button class="news-viewer-close" aria-label="Закрыть">&times;</button>' +
             '<button class="news-viewer-nav news-viewer-prev" aria-label="Предыдущее">&#8249;</button>' +
-            '<img class="news-viewer-img" src="' + esc(urls[index]) + '" alt="">' +
+            '<img class="news-viewer-img" src="' + KSLT_экранировать(urls[index]) + '" alt="">' +
             '<button class="news-viewer-nav news-viewer-next" aria-label="Следующее">&#8250;</button>' +
             '<div class="news-viewer-count"></div>';
         document.body.appendChild(overlay);
@@ -920,7 +914,7 @@ function renderBlock(block, index) {
 
         case 'image':
             return '<figure class="news-figure news-animate" style="' + style + '">' +
-                '<img src="' + esc(block.src) + '" alt="' + esc(block.alt || '') + '" loading="lazy">' +
+                '<img src="' + KSLT_экранировать(block.src) + '" alt="' + KSLT_экранировать(block.alt || '') + '" loading="lazy">' +
                 (block.caption ? '<figcaption>' + block.caption + '</figcaption>' : '') +
                 '</figure>';
 
@@ -931,7 +925,7 @@ function renderBlock(block, index) {
                     '<p>' + block.text + '</p>' +
                 '</div>' +
                 '<div class="news-quote-author">' +
-                    (block.photo ? '<img src="' + esc(block.photo) + '" alt="' + esc(block.author) + '">' : '') +
+                    (block.photo ? '<img src="' + KSLT_экранировать(block.photo) + '" alt="' + KSLT_экранировать(block.author) + '">' : '') +
                     '<span>' + block.author + (block.country ? ' ' + block.country : '') + '</span>' +
                 '</div>' +
             '</blockquote>';
@@ -1306,11 +1300,11 @@ function renderRelated(article) {
         if (!rel) return;
 
         var relВнешняя = !!rel.sourceUrl;
-        html += '<a href="' + esc(relВнешняя ? rel.sourceUrl : (basePage + '?slug=' + rel.slug)) + '"' +
+        html += '<a href="' + KSLT_экранировать(relВнешняя ? rel.sourceUrl : (basePage + '?slug=' + rel.slug)) + '"' +
                 (relВнешняя ? ' target="_blank" rel="noopener"' : '') +
                 ' class="news-related-card' + (relВнешняя ? ' news-outside' : '') + '">' +
             '<div class="news-related-img' + (rel.ownCover ? ' news-own-cover' : '') + '">' +
-                '<img src="' + esc(rel.heroImage) + '" alt="' + esc(rel.title) + '" loading="lazy">' +
+                '<img src="' + KSLT_экранировать(rel.heroImage) + '" alt="' + KSLT_экранировать(rel.title) + '" loading="lazy">' +
                 (rel.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
             '</div>' +
             '<div class="news-related-info">' +
@@ -1575,8 +1569,8 @@ function renderNewsList() {
                крупной, как у турнира), время чтения → .tc-meta,
                категория → .tc-badge. Кнопки у новости нет: карточка и есть
                ссылка, а кнопка внутри ссылки — недопустимая разметка. */
-            var афиша = esc(article.cardImage || article.heroImage || '');
-            html += '<a href="' + esc(адрес) + '"' + наружу + ' class="tc' + (isLarge ? ' tc-featured' : '') +
+            var афиша = KSLT_экранировать(article.cardImage || article.heroImage || '');
+            html += '<a href="' + KSLT_экранировать(адрес) + '"' + наружу + ' class="tc' + (isLarge ? ' tc-featured' : '') +
                     (внешняя ? ' news-outside' : '') + '">' +
                 /* ЗНАК НАШЕЙ ПОДМЕНЫ — И НА ВИТРИНЕ ТОЖЕ. До 08.10 он стоял
                    только в шапке статьи и на карточке «похожей», а на витрине
@@ -1585,14 +1579,14 @@ function renderNewsList() {
                 '<div class="tc-image' + (article.ownCover ? ' news-own-cover' : '') + '"' + (афиша ? ' style="--tc-poster:url(&quot;' + афиша + '&quot;)"' : '') + '>' +
                     (афиша ? '<img src="' + афиша + '" alt="" loading="lazy">' : '<div class="tc-noimage">\uD83C\uDFBE</div>') +
                     (article.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
-                    '<span class="tc-badge">' + esc(article.categoryLabel || '') + '</span>' +
+                    '<span class="tc-badge">' + KSLT_экранировать(article.categoryLabel || '') + '</span>' +
                 '</div>' +
                 '<div class="tc-body">' +
-                    '<span class="tc-date">' + esc(article.date || '') + '</span>' +
-                    (isLarge ? '<h2 class="tc-title">' : '<h3 class="tc-title">') + esc(article.title || '') +
+                    '<span class="tc-date">' + KSLT_экранировать(article.date || '') + '</span>' +
+                    (isLarge ? '<h2 class="tc-title">' : '<h3 class="tc-title">') + KSLT_экранировать(article.title || '') +
                     (isLarge ? '</h2>' : '</h3>') +
-                    (isLarge && article.subtitle ? '<p class="tc-desc">' + esc(article.subtitle) + '</p>' : '') +
-                    '<div class="tc-meta"><span>' + readTime + ' ' + esc(labels.readTime) + '</span></div>' +
+                    (isLarge && article.subtitle ? '<p class="tc-desc">' + KSLT_экранировать(article.subtitle) + '</p>' : '') +
+                    '<div class="tc-meta"><span>' + readTime + ' ' + KSLT_экранировать(labels.readTime) + '</span></div>' +
                 '</div>' +
             '</a>';
         });
@@ -1611,9 +1605,9 @@ function renderNewsList() {
                 document.getElementById('newsBento').parentNode.appendChild(пусто);
             }
             пусто.innerHTML = '<p class="news-empty-title">' +
-                esc(searchQuery ? (labels.emptySearch || 'Ничего не нашлось') : (labels.emptyCategory || 'В этой категории пока пусто')) +
+                KSLT_экранировать(searchQuery ? (labels.emptySearch || 'Ничего не нашлось') : (labels.emptyCategory || 'В этой категории пока пусто')) +
                 '</p><p class="news-empty-hint">' +
-                esc(searchQuery ? (labels.emptySearchHint || 'Проверьте написание или очистите поиск')
+                KSLT_экранировать(searchQuery ? (labels.emptySearchHint || 'Проверьте написание или очистите поиск')
                                 : (labels.emptyCategoryHint || 'Выберите другую категорию')) + '</p>';
             пусто.style.display = '';
         } else if (пусто) {

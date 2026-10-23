@@ -1326,7 +1326,7 @@
         var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
 
         var avatarHtml = profile.avatar_url
-            ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-sidebar-avatar" alt="">'
+            ? '<img src="' + KSLT_экранировать(profile.avatar_url) + '" class="db-sidebar-avatar" alt="">'
             : '<div class="db-sidebar-avatar-placeholder">' + initials + '</div>';
 
         // Role badge for admin/manager only
@@ -1379,7 +1379,7 @@
         var буквы = (profile.full_name || '?').split(' ')
             .map(function(n) { return n.charAt(0); }).join('').toUpperCase();
         var фото = profile.avatar_url
-            ? '<img src="' + escHtml(profile.avatar_url) + '" alt="" class="db-profile-card-photo">'
+            ? '<img src="' + KSLT_экранировать(profile.avatar_url) + '" alt="" class="db-profile-card-photo">'
             : '<div class="db-profile-card-photo db-profile-card-initials">' + буквы + '</div>';
 
         var строки = '';
@@ -1415,7 +1415,7 @@
                             ? await KSLT_RULES.местоВКатегории(client, р.category_id, р.points, игрок.data.gender)
                             : null;
                         строки += '<div class="db-profile-card-row' + (р.closed_at ? ' is-off' : '') + '">' +
-                            '<span>' + escHtml(имена[р.category_id] || р.category_id) + '</span>' +
+                            '<span>' + KSLT_экранировать(имена[р.category_id] || р.category_id) + '</span>' +
                             '<span>' + (р.points || 0) + (ступень ? ' \u00b7 #' + ступень : '') + '</span>' +
                         '</div>';
                     }
@@ -1441,7 +1441,7 @@
             '<div class="db-card db-profile-card">' +
                 '<div class="db-profile-card-head">' +
                     фото +
-                    '<div class="db-profile-card-name">' + escHtml(profile.full_name || '') + '</div>' +
+                    '<div class="db-profile-card-name">' + KSLT_экранировать(profile.full_name || '') + '</div>' +
                 '</div>' +
                 (строки ? '<div class="db-profile-card-rows">' + строки + '</div>' : '') +
                 '<div class="db-profile-card-actions">' +
@@ -1494,7 +1494,7 @@
                     : null;
                 html += '<div class="db-sidebar-rating-row' +
                         (row.closed_at ? ' db-sidebar-rating-off' : '') + '">' +
-                    '<span class="db-sidebar-rating-label">' + escHtml(catName[row.category_id] || row.category_id) + '</span>' +
+                    '<span class="db-sidebar-rating-label">' + KSLT_экранировать(catName[row.category_id] || row.category_id) + '</span>' +
                     '<span class="db-sidebar-rating-value">' + (row.points || 0) + (место ? ' · #' + место : '') + '</span>' +
                 '</div>';
             }
@@ -1552,7 +1552,7 @@
                 '<div class="db-qr-brand">KSLT</div>' +
                 '<div class="db-qr-sub" id="' + идЗаголовкаQR + '">' + L.qrTitle + '</div>' +
                 '<div id="dbQrCode" class="db-qr-code"></div>' +
-                '<div class="db-qr-name">' + escHtml(profile.full_name || '') + '</div>' +
+                '<div class="db-qr-name">' + KSLT_экранировать(profile.full_name || '') + '</div>' +
                 '<div id="dbQrCategory" class="db-qr-cat"></div>' +
                 '<div class="db-qr-actions">' +
                     '<button class="db-btn db-btn-primary" id="dbQrDownload">' + L.qrDownload + '</button>' +
@@ -1886,7 +1886,7 @@
                 ? KSLT_PHONE.selectHtml('profileWhatsappCountry', parts.iso, lang, 'db-field-input db-phone-country')
                 : '') +
             '<input class="db-field-input db-phone-number" type="tel" id="profileWhatsapp" value="' +
-                escHtml(stored ? parts.rest : '') + '" placeholder="' + L.whatsappSame + '" inputmode="tel">' +
+                KSLT_экранировать(stored ? parts.rest : '') + '" placeholder="' + L.whatsappSame + '" inputmode="tel">' +
         '</div>';
     }
 
@@ -1901,7 +1901,7 @@
                 ? KSLT_PHONE.selectHtml('profilePhoneCountry', parts.iso, lang, 'db-field-input db-phone-country')
                 : '') +
             '<input class="db-field-input db-phone-number" type="tel" id="profilePhone" value="' +
-                escHtml(parts.rest) + '" placeholder="555 123 456" inputmode="tel">' +
+                KSLT_экранировать(parts.rest) + '" placeholder="555 123 456" inputmode="tel">' +
         '</div>';
     }
 
@@ -1915,7 +1915,7 @@
         var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
 
         var avatarHtml = profile.avatar_url
-            ? '<img src="' + escHtml(profile.avatar_url) + '" class="db-avatar-preview" id="avatarPreview" alt="">'
+            ? '<img src="' + KSLT_экранировать(profile.avatar_url) + '" class="db-avatar-preview" id="avatarPreview" alt="">'
             : '<div class="db-avatar-preview-placeholder" id="avatarPreview">' + initials + '</div>';
 
         // Пол — двумя кнопками вместо списка: выбор из двух значений не
@@ -1935,7 +1935,7 @@
                 кнопкаПола('men', L.male) +
                 кнопкаПола('women', L.female) +
             '</div>' +
-            '<input type="hidden" id="profileGender" value="' + escHtml(profile.gender || '') + '">';
+            '<input type="hidden" id="profileGender" value="' + KSLT_экранировать(profile.gender || '') + '">';
 
         // Birthday selects
         var dayOpts = '<option value="">' + L.birthDay + '</option>';
@@ -1969,16 +1969,16 @@
                 '<div class="db-field-row">' +
                     '<div class="db-field">' +
                         '<label class="db-field-label">' + L.firstName + ' <span class="db-required">*</span></label>' +
-                        '<input class="db-field-input" type="text" id="profileFirstName" value="' + escHtml(firstName) + '">' +
+                        '<input class="db-field-input" type="text" id="profileFirstName" value="' + KSLT_экранировать(firstName) + '">' +
                     '</div>' +
                     '<div class="db-field">' +
                         '<label class="db-field-label">' + L.lastName + ' <span class="db-required">*</span></label>' +
-                        '<input class="db-field-input" type="text" id="profileLastName" value="' + escHtml(lastName) + '">' +
+                        '<input class="db-field-input" type="text" id="profileLastName" value="' + KSLT_экранировать(lastName) + '">' +
                     '</div>' +
                 '</div>' +
                 '<div class="db-field">' +
                     '<label class="db-field-label">' + L.email + '</label>' +
-                    '<input class="db-field-input" type="email" value="' + escHtml(profile.email || '') + '" readonly>' +
+                    '<input class="db-field-input" type="email" value="' + KSLT_экранировать(profile.email || '') + '" readonly>' +
                 '</div>' +
                 // Телефон занимает строку целиком: рядом с полом на список
                 // стран оставалась половина ширины, и названия обрезались
@@ -2032,14 +2032,14 @@
                             '<label class="db-field-label">' + L.instagram + '</label>' +
                             showToggle('profileShowInstagram', profile.show_instagram) +
                         '</div>' +
-                        '<input class="db-field-input" type="text" id="profileInstagram" value="' + escHtml(profile.instagram || '') + '" placeholder="@username" autocomplete="off" data-lpignore="true">' +
+                        '<input class="db-field-input" type="text" id="profileInstagram" value="' + KSLT_экранировать(profile.instagram || '') + '" placeholder="@username" autocomplete="off" data-lpignore="true">' +
                     '</div>' +
                     '<div class="db-field">' +
                         '<div class="db-contact-head">' +
                             '<label class="db-field-label">' + L.telegram + '</label>' +
                             showToggle('profileShowTelegram', profile.show_telegram) +
                         '</div>' +
-                        '<input class="db-field-input" type="text" id="profileTelegram" value="' + escHtml(profile.telegram || '') + '" placeholder="@username">' +
+                        '<input class="db-field-input" type="text" id="profileTelegram" value="' + KSLT_экранировать(profile.telegram || '') + '" placeholder="@username">' +
                     '</div>' +
                 '</div>' +
                 // Раньше здесь было написано только про напоминания о членстве —
@@ -2230,14 +2230,14 @@
         // Имя пользователя — общим правилом (js/kslt-rules.js): в поле
         // попадает и «@ivanov», и целая ссылка с хвостом utm_source
         var R = window.KSLT_RULES;
-        if (cn.phone) rows.push([CONTACT_ICON.phone, escHtml(cn.phone), 'tel:' + cn.phone, 'phone']);
-        if (cn.whatsapp) rows.push([CONTACT_ICON.whatsapp, escHtml(cn.whatsapp), R.socialUrl('wa', cn.whatsapp), 'wa']);
-        if (cn.telegram) rows.push([CONTACT_ICON.telegram, '@' + escHtml(R.handle(cn.telegram)), R.socialUrl('tg', cn.telegram), 'tg']);
-        if (cn.instagram) rows.push([CONTACT_ICON.instagram, '@' + escHtml(R.handle(cn.instagram)), R.socialUrl('ig', cn.instagram), 'ig']);
+        if (cn.phone) rows.push([CONTACT_ICON.phone, KSLT_экранировать(cn.phone), 'tel:' + cn.phone, 'phone']);
+        if (cn.whatsapp) rows.push([CONTACT_ICON.whatsapp, KSLT_экранировать(cn.whatsapp), R.socialUrl('wa', cn.whatsapp), 'wa']);
+        if (cn.telegram) rows.push([CONTACT_ICON.telegram, '@' + KSLT_экранировать(R.handle(cn.telegram)), R.socialUrl('tg', cn.telegram), 'tg']);
+        if (cn.instagram) rows.push([CONTACT_ICON.instagram, '@' + KSLT_экранировать(R.handle(cn.instagram)), R.socialUrl('ig', cn.instagram), 'ig']);
         if (!rows.length) return '<p class="db-modal-text">' + L.invNoContacts + '</p>';
 
         return '<div class="db-inv-contacts">' +
-            (cn.full_name ? '<div class="db-inv-contacts-name">' + escHtml(cn.full_name) + '</div>' : '') +
+            (cn.full_name ? '<div class="db-inv-contacts-name">' + KSLT_экранировать(cn.full_name) + '</div>' : '') +
             rows.map(function(r) {
                 return '<a class="db-inv-contact db-inv-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
                     '<span class="db-inv-contact-label">' + r[0] + '</span>' +
@@ -2281,7 +2281,7 @@
         if (res.error || (res.data && res.data.error)) {
             dbModal({
                 title: L.invAccept,
-                body: '<p class="db-modal-text">' + escHtml((res.error && res.error.message) || (res.data && res.data.error) || 'Error') + '</p>',
+                body: '<p class="db-modal-text">' + KSLT_экранировать((res.error && res.error.message) || (res.data && res.data.error) || 'Error') + '</p>',
                 actions: [{ label: L.close, primary: true }]
             });
             return;
@@ -2344,7 +2344,7 @@
                     if (r.error || (r.data && r.data.error)) {
                         dbModal({
                             title: L.invContactsTitle,
-                            body: '<p class="db-modal-text">' + escHtml((r.error && r.error.message) || r.data.error) + '</p>',
+                            body: '<p class="db-modal-text">' + KSLT_экранировать((r.error && r.error.message) || r.data.error) + '</p>',
                             actions: [{ label: L.close, primary: true }]
                         });
                         return;
@@ -2392,7 +2392,7 @@
                 '<td class="db-match-date">' + dateStr + '</td>' +
                 '<td><div class="db-match-opponent">' +
                     matchAvatar(name, inv.partner_avatar) +
-                    '<span>' + escHtml(name) + '</span>' + arrow +
+                    '<span>' + KSLT_экранировать(name) + '</span>' + arrow +
                 '</div></td>' +
                 '<td><span class="db-status-badge db-invite-' + statusClass + '">' + statusLabel + '</span></td>' +
                 '<td class="db-inv-actions">' + actions + '</td>' +
@@ -2457,8 +2457,8 @@
         box.innerHTML =
             '<div class="db-link-card">' +
                 '<div class="db-link-title">' + L.cardFoundTitle + '</div>' +
-                '<div class="db-link-text"><b>' + escHtml(карточка.name) + '</b>' +
-                    (подпись ? ' \u00B7 ' + escHtml(подпись) : '') + '</div>' +
+                '<div class="db-link-text"><b>' + KSLT_экранировать(карточка.name) + '</b>' +
+                    (подпись ? ' \u00B7 ' + KSLT_экранировать(подпись) : '') + '</div>' +
                 '<div class="db-link-actions">' +
                     '<button class="db-link-take" id="dbCardYes">' + L.cardFoundYes + '</button>' +
                     '<button class="db-link-other" id="dbCardNo">' + L.cardFoundNo + '</button>' +
@@ -2522,7 +2522,7 @@
             box.innerHTML =
                 '<div class="db-link-card db-link-card-pending">' +
                     '<div class="db-link-title">\u23F3 ' + L.linkPending + '</div>' +
-                    '<div class="db-link-text">' + escHtml((кто.data && кто.data.name) || '') + ' \u00B7 ' + L.linkPendingText + '</div>' +
+                    '<div class="db-link-text">' + KSLT_экранировать((кто.data && кто.data.name) || '') + ' \u00B7 ' + L.linkPendingText + '</div>' +
                     '<button class="db-link-other" id="dbLinkOther">' + L.linkOther + '</button>' +
                 '</div>';
             var other = document.getElementById('dbLinkOther');
@@ -2536,7 +2536,7 @@
     function нарисоватьПоиск(box, profile, отказ) {
         var шапкаОтказа = отказ
             ? '<div class="db-link-rejected">\u26A0 ' + L.linkRejected +
-              (отказ.note ? ' \u00B7 ' + escHtml(отказ.note) : '') + '</div>'
+              (отказ.note ? ' \u00B7 ' + KSLT_экранировать(отказ.note) : '') + '</div>'
             : '';
         box.innerHTML =
             '<div class="db-link-card">' +
@@ -2611,10 +2611,10 @@
             var подпись = [разряд, ntrp ? 'NTRP ' + ntrp : ''].filter(Boolean).join(' \u00B7 ');
             return '<div class="db-link-row">' +
                 '<div class="db-link-person">' +
-                    '<div class="db-link-name">' + escHtml(p.name) + '</div>' +
-                    (подпись ? '<div class="db-link-meta">' + escHtml(подпись) + '</div>' : '') +
+                    '<div class="db-link-name">' + KSLT_экранировать(p.name) + '</div>' +
+                    (подпись ? '<div class="db-link-meta">' + KSLT_экранировать(подпись) + '</div>' : '') +
                 '</div>' +
-                '<button class="db-link-take" data-player-id="' + escHtml(p.id) + '">' + L.linkItsMe + '</button>' +
+                '<button class="db-link-take" data-player-id="' + KSLT_экранировать(p.id) + '">' + L.linkItsMe + '</button>' +
             '</div>';
         }).join('');
 
@@ -2935,10 +2935,10 @@
         var name = KSLT_YAZYK.выбрать(t.title_en || t.title, t.title_kg || t.title, t.title);
         // Записи, добавленные админом руками: турнира с таким названием в базе
         // нет, открывать нечего
-        if (!t.id) return '<td class="db-match-tournament">' + escHtml(name) + '</td>';
+        if (!t.id) return '<td class="db-match-tournament">' + KSLT_экранировать(name) + '</td>';
         var page = 'tournament' + (KSLT_YAZYK.суффикс) + '.html?id=' + t.id;
         return '<td class="db-match-tournament">' +
-            '<a href="' + page + '" class="db-tour-link">' + escHtml(name) + '</a>' +
+            '<a href="' + page + '" class="db-tour-link">' + KSLT_экранировать(name) + '</a>' +
             (item ? напарникВЗаявке(item, _мойИгрок) : '') + '</td>';
     }
 
@@ -2969,7 +2969,7 @@
             : имя(reg.capitan);
         if (!сКем) return '';
 
-        var подпись = L.regWithPartner.replace('{имя}', escHtml(сКем));
+        var подпись = L.regWithPartner.replace('{имя}', KSLT_экранировать(сКем));
         if (яКапитан && !reg.partner_id && reg.partner_external_name) подпись += ' ' + L.regGuestMark;
         if (!яКапитан) подпись += ' ' + L.regByPartner;
         return '<div class="db-tour-partner">' + подпись + '</div>';
@@ -3006,16 +3006,16 @@
                 остаётся = isEn ? (reg.capitan.name_en || reg.capitan.name) : reg.capitan.name;
             }
             action = '<button class="db-withdraw-btn" data-reg="' + reg.id +
-                '" data-tid="' + escHtml(item.tournament.id) + '"' +
-                (остаётся ? ' data-pair="' + escHtml(остаётся) + '"' : '') +
-                (гостьВПаре ? ' data-guest="' + escHtml(гостьВПаре) + '"' : '') +
-                ' data-name="' + escHtml(item.tournament.title || '') + '">' +
+                '" data-tid="' + KSLT_экранировать(item.tournament.id) + '"' +
+                (остаётся ? ' data-pair="' + KSLT_экранировать(остаётся) + '"' : '') +
+                (гостьВПаре ? ' data-guest="' + KSLT_экранировать(гостьВПаре) + '"' : '') +
+                ' data-name="' + KSLT_экранировать(item.tournament.title || '') + '">' +
                 (остаётся ? L.regLeavePairYes : L.regWithdraw) + '</button>';
         } else if (canReenter(item)) {
             var парный = item.tournament.format === 'doubles' ||
                          item.tournament.format === 'mixed_doubles';
             action = '<button class="db-withdraw-btn db-reenter-btn" data-tid="' +
-                escHtml(item.tournament.id) + '"' +
+                KSLT_экранировать(item.tournament.id) + '"' +
                 (парный ? ' data-pair-format="1"' : '') + '>' + L.regAgain + '</button>';
         }
 
@@ -3042,7 +3042,7 @@
             '<td class="db-match-date">' + tourDate(item.tournament) + '</td>' +
             tourNameCell(item.tournament) +
             '<td class="db-tour-status' + (isWinner ? ' db-tournament-winner' : '') + '">' +
-                escHtml(result) + '</td>' +
+                KSLT_экранировать(result) + '</td>' +
             '<td class="db-tour-pts">' + pts + '</td>' +
         '</tr>';
     }
@@ -3140,7 +3140,7 @@
 
     function matchKindTag(m) {
         var kind = matchKind(m);
-        return '<span class="db-match-tag db-tag-' + kind + '">' + escHtml(L[KIND_LABEL[kind]]) + '</span>';
+        return '<span class="db-match-tag db-tag-' + kind + '">' + KSLT_экранировать(L[KIND_LABEL[kind]]) + '</span>';
     }
 
     /**
@@ -3311,16 +3311,16 @@
      * простой текст, и приходилось идти в рейтинг и искать по фамилии.
      */
     function playerLink(playerId, name) {
-        if (!playerId) return escHtml(name);
+        if (!playerId) return KSLT_экранировать(name);
         var page = 'player' + (KSLT_YAZYK.суффикс) + '.html?id=' + encodeURIComponent(playerId);
-        return '<a href="' + page + '" class="db-opp-link">' + escHtml(name) + '</a>';
+        return '<a href="' + page + '" class="db-opp-link">' + KSLT_экранировать(name) + '</a>';
     }
 
     function matchAvatar(name, photo, extraClass) {
         var cls = 'db-match-avatar' + (extraClass ? ' ' + extraClass : '');
         return photo
-            ? '<img src="' + escHtml(photo) + '" alt="" class="' + cls + '">'
-            : '<div class="' + cls + ' db-match-avatar-ph">' + escHtml(dbInitials(name)) + '</div>';
+            ? '<img src="' + KSLT_экранировать(photo) + '" alt="" class="' + cls + '">'
+            : '<div class="' + cls + ' db-match-avatar-ph">' + KSLT_экранировать(dbInitials(name)) + '</div>';
     }
 
     /** Имена и фото соперников — одним запросом на всю пачку матчей. */
@@ -3458,7 +3458,7 @@
                 // ломались на три строки. Даём по имени на строку — под два кружка
                 var oppTitle = oppMate
                     ? '<span class="db-match-pair"><span>' + playerLink(oppId, opp.name) + '</span>' +
-                      '<span>' + escHtml(oppMate.name) + '</span></span>'
+                      '<span>' + KSLT_экранировать(oppMate.name) + '</span></span>'
                     : '<span>' + playerLink(oppId, opp.name) + '</span>';
 
                 // С кем игрок был в паре. Своя половина пары в матче не записана:
@@ -3503,14 +3503,14 @@
                 html += '<td class="db-match-score">' + displayScore + '</td>';
                 html += '<td class="db-match-result-cell"><span class="db-match-result ' + resultCls + '">' + resultLabel + '</span></td>';
                 html += '<td class="db-match-tournament">' +
-                    escHtml(tName) + matchKindTag(m) +
+                    KSLT_экранировать(tName) + matchKindTag(m) +
                     (myMate ? '<div class="db-match-mate">' + L.matchWith +
-                        ' <span class="db-match-mate-name">' + escHtml(myMate) + '</span></div>' : '') +
+                        ' <span class="db-match-mate-name">' + KSLT_экранировать(myMate) + '</span></div>' : '') +
                     '</td>';
                 html += '<td class="db-match-round">' + roundLabel + '</td>';
                 // H2H — про личные встречи двоих, у пар состав меняется от турнира
                 html += '<td>' + (dbl ? '' :
-                    '<button class="db-match-h2h" data-opp-id="' + escHtml(oppId) + '" data-opp-name="' + escHtml(opp.name) + '" data-opp-photo="' + escHtml(opp.photo) + '" title="Head to Head">H2H</button>') +
+                    '<button class="db-match-h2h" data-opp-id="' + KSLT_экранировать(oppId) + '" data-opp-name="' + KSLT_экранировать(opp.name) + '" data-opp-photo="' + KSLT_экранировать(opp.photo) + '" title="Head to Head">H2H</button>') +
                     '</td>';
                 html += '</tr>';
             });
@@ -3604,7 +3604,7 @@
                 : L.chalExpired;
             var cls = (st === 'accepted' || st === 'completed') ? 'accepted' : 'declined';
             box.outerHTML = '<div class="db-modal-answered">' +
-                '<span class="db-status-badge db-invite-' + cls + '">' + escHtml(label) + '</span>' +
+                '<span class="db-status-badge db-invite-' + cls + '">' + KSLT_экранировать(label) + '</span>' +
             '</div>';
         } catch(e) { /* не смогли спросить — кнопки останутся, база всё равно откажет */ }
     }
@@ -3756,16 +3756,16 @@
         // Header
         html += '<div class="h2h-header">';
         html += '<div class="h2h-player">';
-        html += myPhoto ? '<img src="' + escHtml(myPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + escHtml(myName.charAt(0)) + '</div>';
-        html += '<div class="h2h-name">' + escHtml(myName) + '</div>';
+        html += myPhoto ? '<img src="' + KSLT_экранировать(myPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + KSLT_экранировать(myName.charAt(0)) + '</div>';
+        html += '<div class="h2h-name">' + KSLT_экранировать(myName) + '</div>';
         html += '</div>';
         html += '<div class="h2h-center">';
         html += '<div class="h2h-score">' + myWins + ' \u2014 ' + oppWins + '</div>';
         html += '<div class="h2h-label">' + matches.length + LH.matchesLabel + '</div>';
         html += '</div>';
         html += '<div class="h2h-player">';
-        html += oppPhoto ? '<img src="' + escHtml(oppPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + escHtml(oppName.charAt(0)) + '</div>';
-        html += '<div class="h2h-name">' + escHtml(oppName) + '</div>';
+        html += oppPhoto ? '<img src="' + KSLT_экранировать(oppPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + KSLT_экранировать(oppName.charAt(0)) + '</div>';
+        html += '<div class="h2h-name">' + KSLT_экранировать(oppName) + '</div>';
         html += '</div>';
         html += '</div>';
 
@@ -3792,7 +3792,7 @@
             html += '<div class="h2h-match">';
             html += '<span class="h2h-match-date">' + dbFormatDate(m.played_at) + '</span>';
             html += '<span class="h2h-match-tournament">' +
-                '<span class="h2h-tname">' + escHtml(tName) + '</span>' + matchKindTag(m) + '</span>';
+                '<span class="h2h-tname">' + KSLT_экранировать(tName) + '</span>' + matchKindTag(m) + '</span>';
             html += '<span class="h2h-match-score">' + displayScore + '</span>';
             html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</span>';
             html += '</div>';
@@ -3800,7 +3800,7 @@
         html += '</div>';
 
         // Profile link
-        html += '<a href="' + playerPage + '?id=' + escHtml(oppId) + '" class="h2h-profile-btn">' + LH.fullProfile + ' \u2192</a>';
+        html += '<a href="' + playerPage + '?id=' + KSLT_экранировать(oppId) + '" class="h2h-profile-btn">' + LH.fullProfile + ' \u2192</a>';
 
         modal.innerHTML = html;
     }
@@ -3911,18 +3911,18 @@
                 (isSent ? '\u2197 ' + L.chalDirSent : '\u2199 ' + L.chalDirGot) +
                 (sentStr ? ' \u00B7 ' + sentStr : '') + '</div>';
             if (ch.message) {
-                sub += '<div class="db-match-mate db-chal-msg">\u00AB' + escHtml(ch.message) + '\u00BB</div>';
+                sub += '<div class="db-match-mate db-chal-msg">\u00AB' + KSLT_экранировать(ch.message) + '\u00BB</div>';
             }
             if (ch.battle_published) {
                 sub += '<a class="db-match-mate db-battle-link" href="' + chalPage +
-                    '?id=' + escHtml(ch.id) + '&from=battles">\uD83D\uDD25 ' +
-                    escHtml(ch.battle_title || L.chalBattle) + '</a>';
+                    '?id=' + KSLT_экранировать(ch.id) + '&from=battles">\uD83D\uDD25 ' +
+                    KSLT_экранировать(ch.battle_title || L.chalBattle) + '</a>';
             }
 
             // Где играем — появляется вместе с публикацией баттла
             var place = ch.court_name || ch.proposed_venue || '';
             if (place) {
-                sub += '<div class="db-match-mate">\uD83D\uDCCD ' + escHtml(place) + '</div>';
+                sub += '<div class="db-match-mate">\uD83D\uDCCD ' + KSLT_экранировать(place) + '</div>';
             }
 
 
@@ -3937,9 +3937,9 @@
             // встречи существуют независимо от того, чем кончился этот вызов,
             // а если их не было — окно честно покажет 0 — 0
             var h2h = (myPlayerId && oppPid)
-                ? '<button class="db-match-h2h" data-opp-id="' + escHtml(oppPid) +
-                  '" data-opp-name="' + escHtml(partnerName) +
-                  '" data-opp-photo="' + escHtml(partnerAvatar || '') + '" title="Head to Head">H2H</button>'
+                ? '<button class="db-match-h2h" data-opp-id="' + KSLT_экранировать(oppPid) +
+                  '" data-opp-name="' + KSLT_экранировать(partnerName) +
+                  '" data-opp-photo="' + KSLT_экранировать(partnerAvatar || '') + '" title="Head to Head">H2H</button>'
                 : '';
 
             // Ответ на вызов живёт здесь и в колокольчике. Раньше он жил
@@ -3948,12 +3948,12 @@
                 (!ch.expires_at || new Date(ch.expires_at) > new Date());
             var actions = '';
             if (waiting && !isSent) {
-                actions = '<button class="db-chal-btn db-chal-yes" data-id="' + escHtml(ch.id) + '">' +
+                actions = '<button class="db-chal-btn db-chal-yes" data-id="' + KSLT_экранировать(ch.id) + '">' +
                         L.chalAccept + '</button>' +
-                    '<button class="db-chal-btn db-chal-no" data-id="' + escHtml(ch.id) + '">' +
+                    '<button class="db-chal-btn db-chal-no" data-id="' + KSLT_экранировать(ch.id) + '">' +
                         L.chalDecline + '</button>';
             } else if (waiting && isSent) {
-                actions = '<button class="db-chal-btn db-chal-off" data-id="' + escHtml(ch.id) + '">' +
+                actions = '<button class="db-chal-btn db-chal-off" data-id="' + KSLT_экранировать(ch.id) + '">' +
                     L.chalCancel + '</button>';
             }
 
@@ -3963,7 +3963,7 @@
                     matchAvatar(partnerName, partnerAvatar) +
                     '<span>' + playerLink(oppPid, partnerName) + sub + '</span>' +
                 '</div></td>' +
-                '<td class="db-match-score">' + escHtml(ch.match_score || '') + '</td>' +
+                '<td class="db-match-score">' + KSLT_экранировать(ch.match_score || '') + '</td>' +
                 '<td class="db-match-result-cell">' + outcome + '</td>' +
                 // КЛЕТКА НАЗЫВАЕТ, ЧТО В НЕЙ ЛЕЖИТ. На телефоне строка
                 // раскладывается списком, и значок статуса встаёт в первую
@@ -4092,12 +4092,12 @@
 
             function notifRow(n) {
                 return '<tr class="db-notif-row' + (n.is_read ? '' : ' unread') + '" data-id="' +
-                        escHtml(n.id) + '">' +
+                        KSLT_экранировать(n.id) + '">' +
                     '<td class="db-match-date">' + dbFormatDate(n.created_at) + '</td>' +
                     '<td class="db-notif-type">' + (ICONS[n.type] || ICONS.system) + '</td>' +
                     '<td>' +
-                        '<div class="db-notif-title">' + escHtml(n.title || '') + '</div>' +
-                        '<div class="db-notif-msg">' + escHtml(n.message || '') + '</div>' +
+                        '<div class="db-notif-title">' + KSLT_экранировать(n.title || '') + '</div>' +
+                        '<div class="db-notif-msg">' + KSLT_экранировать(n.message || '') + '</div>' +
                     '</td>' +
                 '</tr>';
             }
@@ -4159,8 +4159,8 @@
                     // спрашиваем у базы и гасим кнопки, если отвечать нечего
                     var isChal = n.action_type === 'challenge' && n.action_id;
                     var modal = dbModal({
-                        title: escHtml(n.title || ''),
-                        body: '<p style="line-height:1.5;white-space:pre-wrap;">' + escHtml(n.message || '') + '</p>' +
+                        title: KSLT_экранировать(n.title || ''),
+                        body: '<p style="line-height:1.5;white-space:pre-wrap;">' + KSLT_экранировать(n.message || '') + '</p>' +
                               '<p style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">' +
                               dbFormatDate(n.created_at) + '</p>',
                         actions: isChal ? [
@@ -4725,7 +4725,7 @@
                     '<button class="db-crop-close" id="cropClose">&times;</button>' +
                 '</div>' +
                 '<div class="db-crop-body">' +
-                    '<img id="cropImage" src="' + escHtml(imageSrc) + '">' +
+                    '<img id="cropImage" src="' + KSLT_экранировать(imageSrc) + '">' +
                 '</div>' +
                 '<div class="db-crop-footer">' +
                     '<button class="db-btn db-btn-outline" id="cropCancel">' + L.cropCancel + '</button>' +
@@ -4978,7 +4978,7 @@
             title: L.regLeavePairTitle,
             body: '<p class="db-modal-text">' +
                 L.regLeavePairText.replace('{имя}',
-                    '<strong>' + escHtml(ктоОстаётся) + '</strong>') + '</p>',
+                    '<strong>' + KSLT_экранировать(ктоОстаётся) + '</strong>') + '</p>',
             actions: [
                 { label: L.regWithdrawNo },
                 { label: L.regLeavePairYes, danger: true, onClick: async function(close) {
@@ -5011,13 +5011,13 @@
         // Говорим об этом заранее — иначе человек ждёт, что гость останется
         var проГостя = гость
             ? '<p class="db-modal-text">' +
-                L.regWithdrawGuest.replace('{имя}', '<strong>' + escHtml(гость) + '</strong>') + '</p>'
+                L.regWithdrawGuest.replace('{имя}', '<strong>' + KSLT_экранировать(гость) + '</strong>') + '</p>'
             : '';
         var modal = dbModal({
             title: L.regWithdrawTitle,
             body: '<p class="db-modal-text">' +
                 L.regWithdrawText.replace('{name}',
-                    '<strong>' + escHtml(tournamentName) + '</strong>') + '</p>' + проГостя,
+                    '<strong>' + KSLT_экранировать(tournamentName) + '</strong>') + '</p>' + проГостя,
             actions: [
                 { label: L.regWithdrawNo },
                 { label: L.regWithdrawYes, danger: true, onClick: async function(close) {
@@ -5201,9 +5201,9 @@
         var rate = Math.round(w / played * 100);
         return '<div class="db-pair-block">' +
             '<div class="db-pair-head">' +
-                '<span class="db-pair-title">' + escHtml(title) + '</span>' +
-                '<span class="db-pair-tag ' + tagClass + '">' + escHtml(tagText) + '</span>' +
-                '<span class="db-pair-note">' + escHtml(L.pairsNote) + '</span>' +
+                '<span class="db-pair-title">' + KSLT_экранировать(title) + '</span>' +
+                '<span class="db-pair-tag ' + tagClass + '">' + KSLT_экранировать(tagText) + '</span>' +
+                '<span class="db-pair-note">' + KSLT_экранировать(L.pairsNote) + '</span>' +
             '</div>' +
             '<div class="db-cat-top">' +
                 '<div class="db-stats-grid db-stats-grid-mini db-pair-grid">' +
@@ -5275,15 +5275,15 @@
             var isHome = row.category_id === p.category_id;
             html += '<div class="db-cat-block">' +
                 '<div class="db-cat-name">' +
-                    '<span class="db-cat-dot" style="background:' + escHtml(catColor[row.category_id] || '#8A8A8F') + '"></span>' +
-                    escHtml(catName[row.category_id] || row.category_id) +
+                    '<span class="db-cat-dot" style="background:' + KSLT_экранировать(catColor[row.category_id] || '#8A8A8F') + '"></span>' +
+                    KSLT_экранировать(catName[row.category_id] || row.category_id) +
                     (isHome ? ' <span class="db-cat-home">' + L.catHome + '</span>' : '') +
                     // Категория закрыта для новых заявок. Очки и матчи в ней
                     // остаются, поэтому она видна, но помечена. Причину игрок
                     // видит у себя: это про него
                     (row.closed_at
                         ? ' <span class="db-cat-closed">' + L.catClosed +
-                          (row.closed_reason ? ' \u00b7 ' + escHtml(row.closed_reason) : '') + '</span>'
+                          (row.closed_reason ? ' \u00b7 ' + KSLT_экранировать(row.closed_reason) : '') + '</span>'
                         : '') +
                 '</div>' +
                 '<div class="db-cat-top">' +
@@ -5392,9 +5392,9 @@
                 earned.forEach(function(pb) {
                     var b = pb.badge;
                     if (!b) return;
-                    html += '<div class="db-badge-item db-badge-earned" title="' + escHtml(bDesc(b) || bName(b)) + '">';
-                    html += '<span class="db-badge-icon">' + escHtml(b.icon) + '</span>';
-                    html += '<span class="db-badge-name">' + escHtml(bName(b)) + '</span>';
+                    html += '<div class="db-badge-item db-badge-earned" title="' + KSLT_экранировать(bDesc(b) || bName(b)) + '">';
+                    html += '<span class="db-badge-icon">' + KSLT_экранировать(b.icon) + '</span>';
+                    html += '<span class="db-badge-name">' + KSLT_экранировать(bName(b)) + '</span>';
                     html += '</div>';
                 });
                 html += '</div>';
@@ -5431,9 +5431,9 @@
                 nearest.forEach(function(d) {
                     var counter = d._left === Infinity ? ''
                         : '<span class="db-badge-progress">' + d._have + '/' + d._need + '</span>';
-                    html += '<div class="db-badge-item db-badge-locked" title="' + escHtml(bDesc(d) || bName(d)) + '">';
-                    html += '<span class="db-badge-icon db-badge-icon-locked">' + escHtml(d.icon) + '</span>';
-                    html += '<span class="db-badge-name">' + escHtml(bName(d)) + '</span>';
+                    html += '<div class="db-badge-item db-badge-locked" title="' + KSLT_экранировать(bDesc(d) || bName(d)) + '">';
+                    html += '<span class="db-badge-icon db-badge-icon-locked">' + KSLT_экранировать(d.icon) + '</span>';
+                    html += '<span class="db-badge-name">' + KSLT_экранировать(bName(d)) + '</span>';
                     html += counter;
                     html += '</div>';
                 });
@@ -6235,7 +6235,7 @@
                 var method = methodLabels[p.payment_method] || p.payment_method || '—';
                 var statusColor = p.status === 'completed' ? 'var(--accent)' : 'var(--text-muted)';
                 var statusText = statusLabels[p.status] || p.status || '—';
-                var note = p.note ? escHtml(p.note) : '—';
+                var note = p.note ? KSLT_экранировать(p.note) : '—';
 
                 html += '<tr class="db-pay-row">' +
                     '<td class="db-pay-date">' + date + '</td>' +
@@ -6318,7 +6318,7 @@
                 if (i >= ПОКАЗЫВАЕМ) классы += ' is-more';
                 html += '<div class="' + классы + '">' +
                     '<span class="db-device-icon">' + значокУстройства(у.user_agent) + '</span>' +
-                    '<span class="db-device-name">' + escHtml(названиеУстройства(у.user_agent)) +
+                    '<span class="db-device-name">' + KSLT_экранировать(названиеУстройства(у.user_agent)) +
                         (это ? ' <span class="db-device-current">· ' + L.devicesThis + '</span>' : '') +
                     '</span>' +
                     '<span class="db-device-time">' + когдаЗаходили(у.last_seen) + '</span>' +
@@ -6774,10 +6774,4 @@
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА: результат идёт в `src=` и `alt=`, а
        способ через `textContent` кавычек не экранирует вовсе. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function escHtml(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
 })();

@@ -571,9 +571,9 @@
             tableRows +=
                 '<tr>' +
                     '<td>' + (i + 1) + '</td>' +
-                    '<td>' + escHtml(v.player_name || '—') + '</td>' +
-                    '<td>' + typeIcon + ' ' + escHtml(v.entity_name || '—') + '</td>' +
-                    '<td>' + escHtml(v.service_name || '—') + '</td>' +
+                    '<td>' + A.esc(v.player_name || '—') + '</td>' +
+                    '<td>' + typeIcon + ' ' + A.esc(v.entity_name || '—') + '</td>' +
+                    '<td>' + A.esc(v.service_name || '—') + '</td>' +
                     '<td>' + v.discount_percent + '%</td>' +
                     '<td>' + formatVchDate(v.created_at) + '</td>' +
                     '<td>' + statusLabel + '</td>' +
@@ -607,8 +607,8 @@
             '</head><body>' +
 
             '<div class="report-header">' +
-                '<h1>' + escHtml(L.vchReportTitle) + '</h1>' +
-                '<div class="period">' + L.vchPeriod + ': ' + escHtml(periodLabel) + '</div>' +
+                '<h1>' + A.esc(L.vchReportTitle) + '</h1>' +
+                '<div class="period">' + L.vchPeriod + ': ' + A.esc(periodLabel) + '</div>' +
             '</div>' +
 
             '<div class="stats-grid">' +
@@ -680,16 +680,6 @@
         var mm = String(d.getMonth() + 1).padStart(2, '0');
         var yy = String(d.getFullYear()).slice(-2);
         return dd + '.' + mm + '.' + yy;
-    }
-
-    /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
-       кавычка тоже. Иначе безопасность держится на соглашении «атрибут
-       пишется в двойных кавычках», которого никто не сторожит. Эталон
-       взят дословно у `js/kslt-lenta.js`. */
-    function escHtml(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     // ---- Excel Export ----

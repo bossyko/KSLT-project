@@ -148,7 +148,7 @@
         };
 
         var тело =
-            '<div class="ms-trn">' + esc(имяТурнира(trn)) + '</div>' +
+            '<div class="ms-trn">' + KSLT_экранировать(имяТурнира(trn)) + '</div>' +
             пара(m, byId) +
             '<div class="ms-when"><span>' + L.date + '</span>' +
                 '<input type="date" class="ms-date" id="msDate" value="' + датой(сегодня) + '"></div>' +
@@ -207,12 +207,12 @@
         var выиграл = (_myIds || [_myPlayerId]).indexOf(m.winner_id) !== -1;
 
         var тело =
-            '<div class="ms-trn">' + esc(имяТурнира(trn)) + '</div>' +
+            '<div class="ms-trn">' + KSLT_экранировать(имяТурнира(trn)) + '</div>' +
             пара(m, byId) +
             '<div class="ms-outcome ' + (выиграл ? 'ms-won' : 'ms-lost') + '">' +
                 (выиграл ? L.youWon : L.youLost) + '</div>' +
-            '<div class="ms-score-big">' + esc(человечно(m.score)) + '</div>' +
-            '<div class="ms-hint ms-hint-center">' + esc(имя) + ' ' + L.confirmText + '<br>' + L.autoNote + '</div>' +
+            '<div class="ms-score-big">' + KSLT_экранировать(человечно(m.score)) + '</div>' +
+            '<div class="ms-hint ms-hint-center">' + KSLT_экранировать(имя) + ' ' + L.confirmText + '<br>' + L.autoNote + '</div>' +
             '<div class="ms-row2">' +
                 '<button class="ms-send" id="msYes">' + L.confirm + '</button>' +
                 '<button class="ms-send ms-ghost" id="msNo">' + L.dispute + '</button>' +
@@ -267,18 +267,18 @@
         var a = byId[m.player1_id] || {}, b = byId[m.player2_id] || {};
         var имяA = isEn ? (a.name_en || a.name || '?') : (a.name || '?');
         var имяB = isEn ? (b.name_en || b.name || '?') : (b.name || '?');
-        return '<div class="ms-vs">' + аватар(a) + '<b>' + esc(имяA) + '</b>' +
-               '<span>VS</span><b>' + esc(имяB) + '</b>' + аватар(b) + '</div>';
+        return '<div class="ms-vs">' + аватар(a) + '<b>' + KSLT_экранировать(имяA) + '</b>' +
+               '<span>VS</span><b>' + KSLT_экранировать(имяB) + '</b>' + аватар(b) + '</div>';
     }
 
     function аватар(p) {
         return p.photo
-            ? '<img src="' + esc(p.photo) + '" alt="">'
-            : '<i class="ms-noface">' + esc(инициалы(p.name || '?')) + '</i>';
+            ? '<img src="' + KSLT_экранировать(p.photo) + '" alt="">'
+            : '<i class="ms-noface">' + KSLT_экранировать(инициалы(p.name || '?')) + '</i>';
     }
 
     function фото(p, имя) {
-        return '<div class="ms-p">' + аватар(p) + esc(коротко(имя)) + '</div>';
+        return '<div class="ms-p">' + аватар(p) + KSLT_экранировать(коротко(имя)) + '</div>';
     }
 
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. Здесь была
@@ -347,10 +347,4 @@
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
-       взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-})();
+       взят дословно у `js/kslt-lenta.js`. */})();

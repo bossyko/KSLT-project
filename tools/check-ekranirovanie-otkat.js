@@ -18,10 +18,14 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-ekran-'));
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(песок, 'mobile/www/js'),
           { recursive: true });
+/* ACORN В ПЕСОК: с 23.10 правило «экранирование объявлено один раз»
+   читает ДЕРЕВО. ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО. */
+fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
+          path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
 const ФАЙЛЫ = ['js/live-match.js', 'js/scoreboard.js', 'js/sponsors-loader.js',
-                'js/player.js', 'js/kslt-lenta.js', 'mobile/www/js/screens/home.js',
-                'js/kslt-sloy.js'];
+                'js/player.js', 'js/kslt-ekranirovanie.js',
+                'mobile/www/js/screens/home.js', 'js/kslt-sloy.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -38,7 +42,7 @@ function прогон(замена) {
 }
 
 const ЛМ = 'js/live-match.js', ТБ = 'js/scoreboard.js', СП = 'js/sponsors-loader.js',
-      ИГ = 'js/player.js', ЭТ = 'js/kslt-lenta.js', МБ = 'mobile/www/js/screens/home.js',
+      ИГ = 'js/player.js', ЭТ = 'js/kslt-ekranirovanie.js', МБ = 'mobile/www/js/screens/home.js',
       СЛ = 'js/kslt-sloy.js';
 
 /* Полная замена тела — одним куском, чтобы якорь не держался за отступ. */
@@ -55,33 +59,39 @@ const ОТКАТЫ = [
      ".replace(/&/g, '&amp;').replace(/\"/g, '&quot;')\n            .replace(/</g, '&lt;').replace(/>/g, '&gt;');",
      'экранирование на сайте гасит обе кавычки'],
 
+    /* ПОСЛЕ КУСКА 141 СВОИХ ОБЪЯВЛЕНИЙ НА САЙТЕ НЕТ ВОВСЕ, и откаты,
+       портившие их тела, остались без якорей — это не поломка прувера, а
+       признак, что копии действительно сведены. Откаты переписаны: теперь
+       они ЗАВОДЯТ своё объявление заново, каждое своим написанием. */
+
     /* написание 1: textContent */
-    ['вернуть слабое экранирование через textContent', ЛМ,
-     ПОЛНОЕ_ЛМ,
-     "    function esc(s) {\n        if (!s) return '';\n        var d = document.createElement('div');\n        d.textContent = s;\n        return d.innerHTML;\n    }",
+    ['завести своё слабое экранирование через textContent', ЛМ,
+     "(function() {\n    'use strict';",
+     "(function() {\n    'use strict';\n    function esc(s) {\n        if (!s) return '';\n        var d = document.createElement('div');\n        d.textContent = s;\n        return d.innerHTML;\n    }",
      'экранирование на сайте гасит обе кавычки'],
 
     /* написание 2: createTextNode — его прибор по написанию пропускал */
-    ['вернуть слабое экранирование через createTextNode', СП,
-     "    function esc(str) {\n        return String(str == null ? '' : str)\n            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n            .replace(/\"/g, '&quot;').replace(/'/g, '&#39;');\n    }",
-     "    function esc(str) {\n        if (!str) return '';\n        var d = document.createElement('div');\n        d.appendChild(document.createTextNode(str));\n        return d.innerHTML;\n    }",
+    ['завести своё слабое через createTextNode', СП,
+     "(function() {\n    'use strict';",
+     "(function() {\n    'use strict';\n    function esc(str) {\n        if (!str) return '';\n        var d = document.createElement('div');\n        d.appendChild(document.createTextNode(str));\n        return d.innerHTML;\n    }",
      'экранирование на сайте гасит обе кавычки'],
 
-    /* написание 3: частичное — двойная есть, одинарной нет */
-    ['вернуть частичное экранирование: одинарную кавычку пропустить', ИГ,
+    /* написание 3: ПОЛНОЕ тело рядом с домом — второе определение */
+    ['завести на сайте второе полное объявление', ИГ,
+     "(function () {",
+     "(function () {\n" + ПОЛНОЕ_ЛМ + "\n",
+     'экранирование объявлено один раз на весь продукт'],
+
+    /* дом: одинарная кавычка пропущена */
+    ['отнять у дома одинарную кавычку', ЭТ,
      ".replace(/\"/g, '&quot;').replace(/'/g, '&#39;');",
      ".replace(/\"/g, '&quot;');",
-     'экранирование на сайте гасит обе кавычки'],
+     'эталон экранирования на месте'],
 
-    ['убрать двойную кавычку, оставив одинарную', ТБ,
+    /* дом: двойная кавычка пропущена */
+    ['отнять у дома двойную кавычку', ЭТ,
      ".replace(/\"/g, '&quot;').replace(/'/g, '&#39;');",
      ".replace(/'/g, '&#39;');",
-     'экранирование на сайте гасит обе кавычки'],
-
-    /* эталон */
-    ['испортить эталон — образец для следующей правки', ЭТ,
-     ".replace(/\"/g, '&quot;').replace(/'/g, '&#39;');",
-     ".replace(/\"/g, '&quot;');",
      'эталон экранирования на месте'],
 
     /* храповик приложения: рост роняет */

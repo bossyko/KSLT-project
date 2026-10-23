@@ -211,12 +211,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function escHtml(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     // ---- Hero ----
     function renderHero() {
         var el = document.getElementById('ptHero');
@@ -501,7 +495,7 @@
     // ---- Render single card ----
     function renderCard(p, extraClass) {
         var online = isOnline(p.last_seen);
-        var name = escHtml(p.full_name);
+        var name = KSLT_экранировать(p.full_name);
         var category = KSLT_YAZYK.выбрать(p.category_name_en || p.category_name, p.category_name_kg || p.category_name, p.category_name);
 
         // Play level fallback if no official category
@@ -522,7 +516,7 @@
         }
 
         var playerPage = KSLT_YAZYK.выбрать('player-en.html', 'player-kg.html', 'player.html');
-        var адрес = playerPage + '?id=' + escHtml(p.id);
+        var адрес = playerPage + '?id=' + KSLT_экранировать(p.id);
 
         /* СЛОЙ-ССЫЛКА, А НЕ ОБРАБОТЧИК. Померено 13.10: девять карточек были
            `div` с `cursor:pointer` инлайном, фокусируемых внутри ОДИН —
@@ -547,12 +541,12 @@
             '</div>' +
             '<div class="pt-name">' + name + '</div>';
 
-        html += '<div class="' + badgeClass + '">' + escHtml(badgeText) + '</div>';
+        html += '<div class="' + badgeClass + '">' + KSLT_экранировать(badgeText) + '</div>';
 
         html += '<div class="pt-status ' + (online ? 'online' : 'offline') + '">' + (online ? L.online : L.offline) + '</div>';
 
         // Invite button — visible for all access levels
-        html += '<button class="pt-invite-btn" data-player-id="' + escHtml(p.id) + '" data-has-tg="' + (p.has_telegram ? '1' : '0') + '">' + L.inviteBtn + '</button>';
+        html += '<button class="pt-invite-btn" data-player-id="' + KSLT_экранировать(p.id) + '" data-has-tg="' + (p.has_telegram ? '1' : '0') + '">' + L.inviteBtn + '</button>';
 
         html += '</div>';
         return html;

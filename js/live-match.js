@@ -173,7 +173,7 @@
             '<span aria-hidden="true">←</span>' + L.backHome + '</a>';
 
         var titleHtml =
-            '<h1 class="lm-title">' + esc(p1Name) + ' — ' + esc(p2Name) + '</h1>' +
+            '<h1 class="lm-title">' + KSLT_экранировать(p1Name) + ' — ' + KSLT_экранировать(p2Name) + '</h1>' +
             /* ИМЯ ТУРНИРА — ОТДЕЛЬНЫМ ЭЛЕМЕНТОМ. Решение Кости 25.09:
                «это название турнира же». В строке под заголовком стояли
                рядом имя турнира и формат, одинаково тихие, — а это две
@@ -181,7 +181,7 @@
                «сколько сетов». Отличаем весом, а не вторым цветом. */
             '<p class="lm-meta">' +
                 (m.tournament_label
-                    ? '<span class="lm-meta-tour">' + esc(m.tournament_label) + '</span> · '
+                    ? '<span class="lm-meta-tour">' + KSLT_экранировать(m.tournament_label) + '</span> · '
                     : '') +
                 formatValue(m.best_of) +
             '</p>';
@@ -210,7 +210,7 @@
         var videoHtml = естьВидео
             ? '<div class="lm-video"><div class="lm-video-wrapper">' +
                 '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1&mute=1&rel=0" ' +
-                'title="' + esc(p1Name) + ' — ' + esc(p2Name) + '" ' +
+                'title="' + KSLT_экранировать(p1Name) + ' — ' + KSLT_экранировать(p2Name) + '" ' +
                 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
                 '</div></div>'
             : '';
@@ -285,8 +285,8 @@
                 (m.is_tiebreak && !isCompleted ? '<div class="lm-tiebreak-badge">' + L.tiebreak + '</div>' : '') +
                 (isCompleted && m.winner_player
                     ? '<div class="lm-winner-block">' +
-                        '<div class="lm-winner-text">' + esc(m.winner_player === 1 ? p1Name : p2Name) + ' ' + L.wins + '</div>' +
-                        (m.final_score ? '<div class="lm-final-score">' + esc(m.final_score) + '</div>' : '') +
+                        '<div class="lm-winner-text">' + KSLT_экранировать(m.winner_player === 1 ? p1Name : p2Name) + ' ' + L.wins + '</div>' +
+                        (m.final_score ? '<div class="lm-final-score">' + KSLT_экранировать(m.final_score) + '</div>' : '') +
                       '</div>'
                     : '') +
                 /* СПОНСОР МАТЧА. Имя — не украшение: картинка без имени
@@ -295,9 +295,9 @@
                 (m.sponsor_logo || m.sponsor_name
                     ? '<div class="lm-sponsor"><span>' + L.sponsor + '</span>' +
                       (m.sponsor_logo
-                        ? '<img class="lm-sponsor-logo" src="' + esc(m.sponsor_logo) + '" alt="' + esc(m.sponsor_name || L.sponsor) + '">'
+                        ? '<img class="lm-sponsor-logo" src="' + KSLT_экранировать(m.sponsor_logo) + '" alt="' + KSLT_экранировать(m.sponsor_name || L.sponsor) + '">'
                         : '') +
-                      (m.sponsor_name ? '<span class="lm-sponsor-name">' + esc(m.sponsor_name) + '</span>' : '') +
+                      (m.sponsor_name ? '<span class="lm-sponsor-name">' + KSLT_экранировать(m.sponsor_name) + '</span>' : '') +
                       '</div>'
                     : '') +
             '</div>';
@@ -314,9 +314,9 @@
         var infoHtml =
             '<div class="lm-info">' +
                 (servingName && !isCompleted
-                    ? '<div class="lm-info-row"><span>' + L.serving + '</span><span class="lm-info-val">' + esc(servingName) + '</span></div>'
+                    ? '<div class="lm-info-row"><span>' + L.serving + '</span><span class="lm-info-val">' + KSLT_экранировать(servingName) + '</span></div>'
                     : '') +
-                (m.tournament_label ? '<div class="lm-info-row"><span>' + L.tournament + '</span><span class="lm-info-val">' + esc(m.tournament_label) + '</span></div>' : '') +
+                (m.tournament_label ? '<div class="lm-info-row"><span>' + L.tournament + '</span><span class="lm-info-val">' + KSLT_экранировать(m.tournament_label) + '</span></div>' : '') +
                 '<div class="lm-info-row"><span>' + L.format + '</span><span class="lm-info-val">' + formatValue(m.best_of) + '</span></div>' +
             '</div>';
 
@@ -395,9 +395,9 @@
     function playerRow(p, name, scoresHtml, serving, winner) {
         return '<div class="lm-player-row' + (serving ? ' lm-serving' : '') + (winner ? ' lm-winner-row' : '') + '">' +
             avatarHtml(p, name) +
-            '<div class="lm-name-block"><div class="lm-player-name" title="' + esc(name) + '">' +
+            '<div class="lm-name-block"><div class="lm-player-name" title="' + KSLT_экранировать(name) + '">' +
                 (serving ? '<span class="lm-serve-indicator" aria-hidden="true"></span>' : '') +
-                esc(короткоеИмя(name)) +
+                KSLT_экранировать(короткоеИмя(name)) +
             '</div></div>' +
             '<div class="lm-scores">' + scoresHtml + '</div>' +
         '</div>';
@@ -537,14 +537,14 @@
             итог = '<span class="lm-break">' + L.breakLabel + '</span>';
         } else {
             итог = '<span class="lm-game-res">' +
-                esc(короткоеИмя(nameOf(m, g.won)) + ' \u2014 ' + (g.g1 + ' : ' + g.g2)) +
+                KSLT_экранировать(короткоеИмя(nameOf(m, g.won)) + ' \u2014 ' + (g.g1 + ' : ' + g.g2)) +
                 '</span>';
         }
 
         return '<div class="lm-game' + (идёт ? ' is-now' : '') + '"' +
                 (идёт ? ' aria-live="polite"' : '') + '>' +
             '<div class="lm-game-head">' +
-                '<span class="lm-game-no">' + esc(L.game + ' ' + g.game_no) + '</span>' +
+                '<span class="lm-game-no">' + KSLT_экранировать(L.game + ' ' + g.game_no) + '</span>' +
                 итог +
             '</div>' +
             строкаИгрока(m, 1, подаёт1, ячеек1) +
@@ -556,7 +556,7 @@
         return '<div class="lm-game-row lm-row-' + n + '">' +
             '<span class="lm-row-name">' +
                 (подаёт ? '<i class="lm-row-serve" aria-hidden="true"></i>' : '') +
-                esc(короткоеИмя(nameOf(m, n))) +
+                KSLT_экранировать(короткоеИмя(nameOf(m, n))) +
             '</span>' +
             '<span class="lm-row-cells">' + ячейки + '</span>' +
         '</div>';
@@ -573,7 +573,7 @@
      */
     function ячейка(текст, взял, гейм, метка) {
         return '<span class="lm-cell' + (взял ? ' is-won' : '') +
-            (гейм ? ' is-game' : '') + '">' + esc(String(текст)) +
+            (гейм ? ' is-game' : '') + '">' + KSLT_экранировать(String(текст)) +
             (метка ? '<i class="lm-cell-mark">' + метка + '</i>' : '') +
         '</span>';
     }
@@ -607,8 +607,8 @@
             '<ul class="lm-feed-list">' +
             строки.map(function(it) {
                 return '<li class="lm-feed-item' + (it.now ? ' is-now' : '') + '">' +
-                    '<span>' + esc(it.lead) + '</span>' +
-                    (it.note ? '<span class="lm-feed-note">' + esc(it.note) + '</span>' : '') +
+                    '<span>' + KSLT_экранировать(it.lead) + '</span>' +
+                    (it.note ? '<span class="lm-feed-note">' + KSLT_экранировать(it.note) + '</span>' : '') +
                 '</li>';
             }).join('') +
             '</ul></div>';
@@ -618,7 +618,7 @@
         return '<button type="button" class="lm-chip' + (active ? ' is-active' : '') +
             '" data-set="' + (value === null ? '' : value) + '"' +
             (active ? ' aria-pressed="true"' : ' aria-pressed="false"') + '>' +
-            esc(label) + '</button>';
+            KSLT_экранировать(label) + '</button>';
     }
 
     function nameOf(m, n) {
@@ -647,7 +647,7 @@
 
     function avatarHtml(player, name) {
         if (player && player.photo) {
-            return '<img class="lm-avatar" src="' + esc(player.photo) + '" alt="' + esc(name) + '">';
+            return '<img class="lm-avatar" src="' + KSLT_экранировать(player.photo) + '" alt="' + KSLT_экранировать(name) + '">';
         }
         var initial = name ? name.charAt(0).toUpperCase() : '?';
         return '<div class="lm-avatar-placeholder" aria-hidden="true">' + initial + '</div>';
@@ -664,12 +664,6 @@
        атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
        или в адресе логотипа закрывает атрибут. Эталон взят дословно у
        `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function extractYoutubeId(url) {
         if (!url) return null;
         var m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);

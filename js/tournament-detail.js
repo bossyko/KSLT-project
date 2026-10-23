@@ -41,12 +41,6 @@ function включитьОтсечку(контейнер) {
    кавычка тоже. Иначе безопасность держится на соглашении «атрибут
    пишется в двойных кавычках», которого никто не сторожит. Эталон
    взят дословно у `js/kslt-lenta.js`. */
-function esc(str) {
-    return String(str == null ? '' : str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 /**
  * Подпись под местом в группе: почему оно такое.
  *
@@ -116,7 +110,7 @@ function buildPublicRegsMap(registrations) {
 function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
     var p = playersMap[playerId];
     var captainName = p
-        ? esc(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name))
+        ? KSLT_экранировать(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name))
         : (playerId ? 'TBD' : 'BYE');
 
     var reg = regsMap ? regsMap[playerId] : null;
@@ -126,10 +120,10 @@ function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
     if (reg.partner_id) {
         var pp = playersMap[reg.partner_id];
         partnerName = pp
-            ? esc(KSLT_YAZYK.выбрать(pp.name_en || pp.name, pp.name_kg || pp.name, pp.name))
+            ? KSLT_экранировать(KSLT_YAZYK.выбрать(pp.name_en || pp.name, pp.name_kg || pp.name, pp.name))
             : '?';
     } else if (reg.partner_external_name) {
-        partnerName = esc(reg.partner_external_name);
+        partnerName = KSLT_экранировать(reg.partner_external_name);
     }
 
     if (partnerName) {
@@ -412,7 +406,7 @@ function renderHero(tournament) {
 
     container.innerHTML =
         '<div class="td-hero-bg">' +
-            '<img src="' + esc(tournament.bgImage) + '" alt="">' +
+            '<img src="' + KSLT_экранировать(tournament.bgImage) + '" alt="">' +
             '<div class="td-hero-overlay"></div>' +
         '</div>' +
         '<div class="td-hero-content">' +
@@ -645,13 +639,13 @@ function renderMatch(tournament, match, predOpts) {
            мест ровно два, и admin их тоже зовёт BYE. */
         if (!match.player1Id && p1.name === 'TBD') {
             p1 = слоты.s1
-                ? { name: '<span class="td-slot-wait">' + esc(слоты.s1) + '</span>',
+                ? { name: '<span class="td-slot-wait">' + KSLT_экранировать(слоты.s1) + '</span>',
                     seed: null, country: '' }
                 : { name: 'BYE', seed: null, country: '' };
         }
         if (!match.player2Id && p2.name === 'TBD') {
             p2 = слоты.s2
-                ? { name: '<span class="td-slot-wait">' + esc(слоты.s2) + '</span>',
+                ? { name: '<span class="td-slot-wait">' + KSLT_экранировать(слоты.s2) + '</span>',
                     seed: null, country: '' }
                 : { name: 'BYE', seed: null, country: '' };
         }
@@ -703,10 +697,10 @@ function renderMatch(tournament, match, predOpts) {
             var p2Short = краткоеИмя(p2.name);
             html += '<div class="td-prediction">' +
                 '<div class="td-pred-names">' +
-                    '<span class="td-pred-name">' + esc(p1Short) + '</span>' +
-                    '<span class="td-pred-name">' + esc(p2Short) + '</span>' +
+                    '<span class="td-pred-name">' + KSLT_экранировать(p1Short) + '</span>' +
+                    '<span class="td-pred-name">' + KSLT_экранировать(p2Short) + '</span>' +
                 '</div>' +
-                '<div class="td-pred-bar" title="' + esc(predOpts.tooltip) + '">' +
+                '<div class="td-pred-bar" title="' + KSLT_экранировать(predOpts.tooltip) + '">' +
                     '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-fav' : 'td-pred-dog') + '" data-width="' + pred.p1Pct + '%" style="width:0">' +
                         '<span class="td-pred-pct">' + pred.p1Pct + '%</span>' +
                     '</div>' +
@@ -1109,7 +1103,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     function pName(playerId) {
         if (isDbl) return getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg);
         var p = playersMap[playerId];
-        return p ? esc(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : (playerId ? 'TBD' : 'BYE');
+        return p ? KSLT_экранировать(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : (playerId ? 'TBD' : 'BYE');
     }
 
     var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
@@ -1245,7 +1239,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         var bgImage = t.image || '../images/heroes/tournaments.jpg';
         hero.innerHTML =
             '<div class="td-hero-bg">' +
-                '<img src="' + esc(bgImage) + '" alt="">' +
+                '<img src="' + KSLT_экранировать(bgImage) + '" alt="">' +
                 '<div class="td-hero-overlay"></div>' +
             '</div>' +
             '<div class="td-hero-content">' +
@@ -1453,19 +1447,19 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 расписаниеHtml += '<tr' + (классыСтроки.trim() ? ' class="' + классыСтроки.trim() + '"' : '') +
                     (вСыгранные ? ' data-sygran="1"' : '') + '>' +
                     '<td class="td-sched-num">' + (i + 1) + '</td>' +
-                    '<td class="td-sched-time">' + esc(String(m.scheduled_time).slice(0, 5)) + '</td>' +
+                    '<td class="td-sched-time">' + KSLT_экранировать(String(m.scheduled_time).slice(0, 5)) + '</td>' +
                     // Короткая подпись для телефона: там колонка узкая, и вместо
                     // «Группа A» показываем только букву — её берёт стиль из
                     // data-short
                     '<td><span class="td-sched-round" data-short="' +
-                        esc(m.group_number ? (KSLT_RULES.букваГруппы(m.group_number) || m.group_number) : круг) +
-                        '">' + esc(круг) + '</span></td>' +
+                        KSLT_экранировать(m.group_number ? (KSLT_RULES.букваГруппы(m.group_number) || m.group_number) : круг) +
+                        '">' + KSLT_экранировать(круг) + '</span></td>' +
                     '<td class="td-sched-p">' + pName(m.player1_id) + '</td>' +
                     '<td class="td-sched-vs">vs</td>' +
                     '<td class="td-sched-p">' + pName(m.player2_id) + '</td>' +
                     '<td class="td-sched-court-cell" data-short="' +
-                        (m.court ? esc(String(m.court)) : '\u2014') + '">' +
-                        (m.court ? подписи.court + ' ' + esc(String(m.court)) : '\u2014') + '</td>' +
+                        (m.court ? KSLT_экранировать(String(m.court)) : '\u2014') + '">' +
+                        (m.court ? подписи.court + ' ' + KSLT_экранировать(String(m.court)) : '\u2014') + '</td>' +
                     '<td><span class="td-sched-status ' + классСост + '">' + состояние + '</span></td>' +
                 '</tr>';
             });
@@ -1488,7 +1482,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                        указывающий в пустоту, хуже отсутствующего. */
                     'aria-expanded="false" aria-controls="tdSchedTable">' +
                     '<span class="td-sched-ranshe-znak" aria-hidden="true"></span>' +
-                    esc(словоСыгранные) + ' — ' + сыграноШтук + '</button>';
+                    KSLT_экранировать(словоСыгранные) + ' — ' + сыграноШтук + '</button>';
             }
 
             расписаниеHtml = полосаHtml + расписаниеHtml + '</tbody></table>' +
@@ -2211,12 +2205,12 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             if (ficВидимые.length > 1) {
                 var подписьЛенты = KSLT_YAZYK.выбрать('Bracket blocks', 'Тор блокторy', 'Блоки сетки');
                 var лентаHtml = '<div class="td-fic-lenta" role="radiogroup" aria-label="' +
-                    esc(подписьЛенты) + '">';
+                    KSLT_экранировать(подписьЛенты) + '">';
                 ficВидимые.forEach(function(имя, i) {
                     лентаHtml += '<button type="button" class="td-fic-chip' +
                         (i ? '' : ' is-active') + '" role="radio" aria-checked="' +
                         (i ? 'false' : 'true') + '" data-fic-chip="' + i + '">' +
-                        esc(имя) + '</button>';
+                        KSLT_экранировать(имя) + '</button>';
                 });
                 лентаHtml += '</div>';
                 bHtml = лентаHtml + bHtml;
@@ -2420,7 +2414,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var pName = regDisplayName;
                 var photo = p.photo || '';
                 var photoHtml = photo
-                    ? '<img class="td-reg-photo" src="' + esc(photo) + '" alt="">'
+                    ? '<img class="td-reg-photo" src="' + KSLT_экранировать(photo) + '" alt="">'
                     : '<div class="td-reg-photo td-reg-photo-empty">—</div>';
                 // Вместо категории — NTRP: в списке заявок важен уровень игры,
                 // а не разряд. У пары показываем обоих через косую черту.
@@ -2450,8 +2444,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 return '<tr' + (скрыта ? ' class="' + скрыта.trim() + '"' : '') + '>' +
                     '<td>' + idx + '</td>' +
                     '<td>' + photoHtml + '</td>' +
-                    '<td>' + esc(pName) + '</td>' +
-                    '<td>' + esc(catLabel) + '</td>' +
+                    '<td>' + KSLT_экранировать(pName) + '</td>' +
+                    '<td>' + KSLT_экранировать(catLabel) + '</td>' +
                     '<td>' + regDate + '</td>' +
                     '<td>' + regTime + '</td>' +
                 '</tr>';
@@ -2524,10 +2518,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 return '<div class="td-podium-card td-podium-' + place + '">' +
                     '<div class="td-podium-medal">' + medal + '</div>' +
                     '<div class="td-podium-photo-wrap">' +
-                        '<img class="td-podium-photo" src="' + esc(photo) + '" alt="' + esc(podName) + '">' +
+                        '<img class="td-podium-photo" src="' + KSLT_экранировать(photo) + '" alt="' + KSLT_экранировать(podName) + '">' +
                     '</div>' +
                     '<div class="td-podium-place">' + place + '-e ' + placeLabel + '</div>' +
-                    '<div class="td-podium-name">' + esc(podName) + '</div>' +
+                    '<div class="td-podium-name">' + KSLT_экранировать(podName) + '</div>' +
                 '</div>';
             }
 
@@ -2928,22 +2922,22 @@ function renderVenueSection(court, isEn) {
     // Info block
     html += '<div class="td-venue-info">' +
         (черновик
-            ? '<span class="td-venue-name td-venue-name-plain">' + esc(courtName) + '</span>'
-            : '<a href="' + esc(courtUrl) + '" class="td-venue-name">' + esc(courtName) + '</a>');
+            ? '<span class="td-venue-name td-venue-name-plain">' + KSLT_экранировать(courtName) + '</span>'
+            : '<a href="' + KSLT_экранировать(courtUrl) + '" class="td-venue-name">' + KSLT_экранировать(courtName) + '</a>');
     if (address) {
         html += '<div class="td-venue-address">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-            ' ' + esc(address) +
+            ' ' + KSLT_экранировать(address) +
         '</div>';
     }
 
     // Map links
     var linksHtml = '';
     if (court.google_maps_url) {
-        linksHtml += '<a href="' + esc(court.google_maps_url) + '" target="_blank" rel="noopener" class="td-venue-link">Google Maps</a>';
+        linksHtml += '<a href="' + KSLT_экранировать(court.google_maps_url) + '" target="_blank" rel="noopener" class="td-venue-link">Google Maps</a>';
     }
     if (court.twogis_url) {
-        linksHtml += '<a href="' + esc(court.twogis_url) + '" target="_blank" rel="noopener" class="td-venue-link">2GIS</a>';
+        linksHtml += '<a href="' + KSLT_экранировать(court.twogis_url) + '" target="_blank" rel="noopener" class="td-venue-link">2GIS</a>';
     }
     if (linksHtml) {
         html += '<div class="td-venue-links">' + linksHtml + '</div>';
@@ -2953,7 +2947,7 @@ function renderVenueSection(court, isEn) {
     // Map embed
     if (embedUrl) {
         html += '<div class="td-venue-map">' +
-            '<iframe src="' + esc(embedUrl) + '" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>' +
+            '<iframe src="' + KSLT_экранировать(embedUrl) + '" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>' +
         '</div>';
     }
 

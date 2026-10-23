@@ -63,12 +63,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     /** Открыть окно. Возвращает промис: true — заявка ушла. */
     function открыть(opts) {
         var client = opts.client;
@@ -81,10 +75,10 @@
             '<div class="de-modal">' +
                 '<button class="de-close" type="button">&times;</button>' +
                 '<h3 class="de-title">' + (opts.заменить ? L.titleChange : L.title) + '</h3>' +
-                (t.title ? '<p class="de-trn">' + esc(t.title) + '</p>' : '') +
+                (t.title ? '<p class="de-trn">' + KSLT_экранировать(t.title) + '</p>' : '') +
 
                 '<div class="de-row"><span class="de-label">' + L.you + '</span>' +
-                    '<span class="de-me">' + esc(opts.playerName || '') + '</span></div>' +
+                    '<span class="de-me">' + KSLT_экранировать(opts.playerName || '') + '</span></div>' +
 
                 (t.ntrp_combined_max
                     ? '<div class="de-limit">' + L.limit + ': ' + t.ntrp_combined_max + '</div>' : '') +
@@ -213,8 +207,8 @@
                 список.innerHTML = найдены.map(function (p) {
                     var имя = isEn ? (p.name_en || p.name) : p.name;
                     var ntrp = p.ntrp_doubles || p.ntrp_singles;
-                    return '<div class="de-item" data-id="' + esc(p.id) + '" data-name="' + esc(имя) + '">' +
-                        '<span>' + esc(имя) + '</span>' +
+                    return '<div class="de-item" data-id="' + KSLT_экранировать(p.id) + '" data-name="' + KSLT_экранировать(имя) + '">' +
+                        '<span>' + KSLT_экранировать(имя) + '</span>' +
                         (ntrp ? '<span class="de-ntrp">NTRP ' + ntrp + '</span>' : '') +
                     '</div>';
                 }).join('');

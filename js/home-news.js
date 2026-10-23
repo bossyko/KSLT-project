@@ -29,12 +29,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     /** Дата словами: «10 сентября 2026». */
     function дата(iso) {
         if (!iso) return '';
@@ -72,16 +66,16 @@
             : '');
         var внешняя = row.source_url && row.category === 'world';
 
-        return '<a class="hn-card" href="' + esc(ссылка(row)) + '"' +
+        return '<a class="hn-card" href="' + KSLT_экранировать(ссылка(row)) + '"' +
                 (внешняя ? ' target="_blank" rel="noopener"' : '') + '>' +
             '<div class="hn-img' + (своя ? ' hn-own-cover' : '') + '">' +
-                (обложка ? '<img src="' + esc(обложка) + '" alt="" loading="lazy">' : '') +
-                '<span class="hn-cat">' + esc(L.cats[row.category] || row.category || '') + '</span>' +
+                (обложка ? '<img src="' + KSLT_экранировать(обложка) + '" alt="" loading="lazy">' : '') +
+                '<span class="hn-cat">' + KSLT_экранировать(L.cats[row.category] || row.category || '') + '</span>' +
             '</div>' +
             '<div class="hn-body">' +
-                '<h3>' + esc(заголовок(row)) + '</h3>' +
-                (подпись(row) ? '<p>' + esc(подпись(row)) + '</p>' : '') +
-                '<span class="hn-date">' + esc(дата(row.published_at)) + '</span>' +
+                '<h3>' + KSLT_экранировать(заголовок(row)) + '</h3>' +
+                (подпись(row) ? '<p>' + KSLT_экранировать(подпись(row)) + '</p>' : '') +
+                '<span class="hn-date">' + KSLT_экранировать(дата(row.published_at)) + '</span>' +
             '</div>' +
         '</a>';
     }

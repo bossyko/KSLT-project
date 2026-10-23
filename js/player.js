@@ -11,12 +11,6 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
-    function esc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     var isEn = KSLT_YAZYK.en;
     var _бесплатныйПериод = false;
     var isKg = KSLT_YAZYK.kg;
@@ -324,22 +318,22 @@
         // была строка во всю ширину с одним словом «Instagram @имя» —
         // выглядела как пустая полоса и не читалась как ссылка
         if (phone) {
-            html += '<a href="tel:' + esc(phone) + '" class="pp-contact">' + ICON.phone +
-                '<span>' + esc(window.KSLT_PHONE && window.KSLT_PHONE.pretty ? window.KSLT_PHONE.pretty(phone) : phone) + '</span></a>';
+            html += '<a href="tel:' + KSLT_экранировать(phone) + '" class="pp-contact">' + ICON.phone +
+                '<span>' + KSLT_экранировать(window.KSLT_PHONE && window.KSLT_PHONE.pretty ? window.KSLT_PHONE.pretty(phone) : phone) + '</span></a>';
         }
         if (wa) {
-            html += '<a href="https://wa.me/' + esc(wa.replace(/[^0-9]/g, '')) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">' +
+            html += '<a href="https://wa.me/' + KSLT_экранировать(wa.replace(/[^0-9]/g, '')) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-wa">' +
                 ICON.whatsapp + '<span>WhatsApp</span></a>';
         }
         if (tg) {
             var handle = tg.replace('@', '');
-            html += '<a href="https://t.me/' + esc(handle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-tg">' +
-                ICON.telegram + '<span>@' + esc(handle) + '</span></a>';
+            html += '<a href="https://t.me/' + KSLT_экранировать(handle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-tg">' +
+                ICON.telegram + '<span>@' + KSLT_экранировать(handle) + '</span></a>';
         }
         if (ig) {
             var ighandle = ig.replace('@', '');
-            html += '<a href="https://instagram.com/' + esc(ighandle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-ig">' +
-                ICON.instagram + '<span>@' + esc(ighandle) + '</span></a>';
+            html += '<a href="https://instagram.com/' + KSLT_экранировать(ighandle) + '" target="_blank" rel="noopener" class="pp-contact pp-contact-ig">' +
+                ICON.instagram + '<span>@' + KSLT_экранировать(ighandle) + '</span></a>';
         }
 
         box.innerHTML = html + '</div></div>';
@@ -432,7 +426,7 @@
 
     function matchKindTag(m) {
         var kind = matchKind(m);
-        return '<span class="pp-match-tag pp-tag-' + kind + '">' + esc(L[KIND_LABEL[kind]] || '') + '</span>';
+        return '<span class="pp-match-tag pp-tag-' + kind + '">' + KSLT_экранировать(L[KIND_LABEL[kind]] || '') + '</span>';
     }
 
     // ---- Score helpers ----
@@ -475,9 +469,9 @@
         var rate = Math.round(w / played * 100);
         return '<div class="pp-pair-block pp-fade-in">' +
             '<div class="pp-pair-head">' +
-                '<span class="pp-pair-title">' + esc(title) + '</span>' +
-                '<span class="pp-pair-tag ' + tagClass + '">' + esc(tagText) + '</span>' +
-                '<span class="pp-pair-note">' + esc(L.pairsNote || '') + '</span>' +
+                '<span class="pp-pair-title">' + KSLT_экранировать(title) + '</span>' +
+                '<span class="pp-pair-tag ' + tagClass + '">' + KSLT_экранировать(tagText) + '</span>' +
+                '<span class="pp-pair-note">' + KSLT_экранировать(L.pairsNote || '') + '</span>' +
             '</div>' +
             '<div class="pp-stats">' +
                 statCard(played, L.pairsMatches, '', '') +
@@ -608,7 +602,7 @@
             '<div class="pp-guest-block">' +
                 '<div class="pp-guest-preview">' +
                     кружокИгрока(player.name, photoUrl, 'pp-guest-photo') +
-                    '<h2 class="pp-guest-name">' + esc(player.name) + '</h2>' +
+                    '<h2 class="pp-guest-name">' + KSLT_экранировать(player.name) + '</h2>' +
                 '</div>' +
                 '<div class="pp-guest-cta">' +
                     '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
@@ -680,7 +674,7 @@
         // Motto under photo
         var motto = KSLT_YAZYK.выбрать(player.bio_en || player.bio, player.bio_kg || player.bio, player.bio);
         if (motto) {
-            hero += '<div style="text-align:center;font-style:italic;color:var(--text-secondary);font-size:0.85rem;margin-top:10px;opacity:0.8;">&laquo;' + esc(motto) + '&raquo;</div>';
+            hero += '<div style="text-align:center;font-style:italic;color:var(--text-secondary);font-size:0.85rem;margin-top:10px;opacity:0.8;">&laquo;' + KSLT_экранировать(motto) + '&raquo;</div>';
         }
         hero += '</div>'; // .pp-photo-wrap
 
@@ -711,7 +705,7 @@
                 // очков рейтинга ещё нет, и вместо номера выходило «#null»
                 var placeStr = c.rank ? ' \u00b7 #' + c.rank : '';
                 hero += '<div class="pp-rating-row">' +
-                    '<span class="pp-rating-label">' + esc(c.name) + '</span>' +
+                    '<span class="pp-rating-label">' + KSLT_экранировать(c.name) + '</span>' +
                     '<span class="pp-rating-value">' + c.points + placeStr + '</span>' +
                 '</div>';
             });
@@ -736,7 +730,7 @@
             _earnedBadges.forEach(function (pb) {
                 var b = pb.badge;
                 if (b) {
-                    hero += '<span class="pp-badge" title="' + esc(getBadgeName(b)) + '"><span class="pp-badge-icon">' + b.icon + '</span></span>';
+                    hero += '<span class="pp-badge" title="' + KSLT_экранировать(getBadgeName(b)) + '"><span class="pp-badge-icon">' + b.icon + '</span></span>';
                 }
             });
             hero += '</div>';
@@ -800,7 +794,7 @@
 
                 html += '<div class="pp-cat-block pp-fade-in">';
                 html += '<div class="pp-cat-head">' +
-                    '<span class="pp-cat-name">' + esc(c.name) + '</span>' +
+                    '<span class="pp-cat-name">' + KSLT_экранировать(c.name) + '</span>' +
                     (c.isHome ? '<span class="pp-cat-home">' + homeLabel + '</span>' : '') +
                     // У только что назначенной категории места ещё нет
                     (c.rank ? '<span class="pp-cat-place">#' + c.rank + '</span>' : '') +
@@ -827,7 +821,7 @@
         // Без этой строчки цифры выглядят враньём: в истории матчей ниже
         // одиннадцать игр, а побед и поражений здесь четыре. Дружеские,
         // парные, микст и баттлы в зачёт не идут
-        html += '<div class="pp-stats-note">' + esc(L.statsNote || '') + '</div>';
+        html += '<div class="pp-stats-note">' + KSLT_экранировать(L.statsNote || '') + '</div>';
         html += pairBlocksHtml(player);
 
         // ---- Rating history: линия на категорию ----
@@ -996,9 +990,9 @@
     function кружокИгрока(имя, фото, класс) {
         var кл = класс || 'pp-match-opponent-photo';
         return фото
-            ? '<img src="' + esc(фото) + '" alt="' + esc(имя || '') + '" class="' + кл + '">'
+            ? '<img src="' + KSLT_экранировать(фото) + '" alt="' + KSLT_экранировать(имя || '') + '" class="' + кл + '">'
             : '<span class="' + кл + ' pp-photo-ph" aria-hidden="true">' +
-                esc(инициалыИмени(имя)) + '</span>';
+                KSLT_экранировать(инициалыИмени(имя)) + '</span>';
     }
 
     // Look up player from static data or cache
@@ -1187,10 +1181,10 @@
 
             html += '<div class="pp-match' + (pairGame ? '' : ' pp-match-clickable') +
                 window.KSLT_OTSECHKA.класс(индекс, matches.length) + '"' +
-                (tId ? ' data-tournament-id="' + esc(tId) + '"' : '') +
-                (pairGame ? '' : ' data-opponent-id="' + esc(opp.id) +
-                    '" data-opponent-name="' + esc(opp.name) +
-                    '" data-opponent-photo="' + esc(oppPhoto) + '"') + '>';
+                (tId ? ' data-tournament-id="' + KSLT_экранировать(tId) + '"' : '') +
+                (pairGame ? '' : ' data-opponent-id="' + KSLT_экранировать(opp.id) +
+                    '" data-opponent-name="' + KSLT_экранировать(opp.name) +
+                    '" data-opponent-photo="' + KSLT_экранировать(oppPhoto) + '"') + '>';
             html += '<div class="pp-match-date">' + formatMatchDate(m.played_at) + '</div>';
             var tPage = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
 
@@ -1213,11 +1207,11 @@
 
             html += '<div class="pp-match-tournament">' +
                 '<span class="pp-match-tournament-row">' +
-                    (tName ? '<a href="' + tPage + '?id=' + esc(tId) + '&tab=bracket">' + esc(tName) + '</a>' : '') +
+                    (tName ? '<a href="' + tPage + '?id=' + KSLT_экранировать(tId) + '&tab=bracket">' + KSLT_экранировать(tName) + '</a>' : '') +
                     matchKindTag(m) +
                 '</span>' +
                 (мойНапарник ? '<span class="pp-match-mate">' + словоВПаре +
-                    ' <span class="pp-match-mate-name">' + esc(мойНапарник.name) + '</span></span>' : '') +
+                    ' <span class="pp-match-mate-name">' + KSLT_экранировать(мойНапарник.name) + '</span></span>' : '') +
                 '</div>';
 
             html += '<div class="pp-match-opponent">';
@@ -1230,12 +1224,12 @@
                         'pp-match-opponent-photo pp-match-opponent-photo-2') +
                     '</span>';
                 html += '<span class="pp-match-opponent-pair">' +
-                    '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>' +
-                    '<span class="pp-match-opponent-name">' + esc(напарникСоперника.name) + '</span>' +
+                    '<span class="pp-match-opponent-name">' + KSLT_экранировать(opp.name) + '</span>' +
+                    '<span class="pp-match-opponent-name">' + KSLT_экранировать(напарникСоперника.name) + '</span>' +
                     '</span>';
             } else {
                 html += кружокИгрока(opp.name, oppPhoto);
-                html += '<span class="pp-match-opponent-name">' + esc(opp.name) + '</span>';
+                html += '<span class="pp-match-opponent-name">' + KSLT_экранировать(opp.name) + '</span>';
             }
             html += '</div>';
             html += '<div class="pp-match-score">' + displayScore + '</div>';
@@ -1434,11 +1428,11 @@
             ? '<div class="pp-tournament pp-tournament-plain' + отсечка + '">'
             : '<a class="pp-tournament' + отсечка + '" href="' + tPage + '">';
         if (tImg) {
-            html += '<img src="' + esc(tImg) + '" alt="' + esc(tName) + '" class="pp-tournament-photo">';
+            html += '<img src="' + KSLT_экранировать(tImg) + '" alt="' + KSLT_экранировать(tName) + '" class="pp-tournament-photo">';
         } else {
             html += '<div class="pp-tournament-photo pp-tournament-photo-empty">\uD83C\uDFBE</div>';
         }
-        html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + esc(tName) + '</span>';
+        html += '<div class="pp-tournament-info"><span class="pp-tournament-name">' + KSLT_экранировать(tName) + '</span>';
         if (dateStr) html += '<span class="pp-tournament-date">' + dateStr + '</span>';
         html += '</div>';
         html += '<span class="pp-tournament-result' + resultClass + '">' + result + '</span>';
@@ -1496,21 +1490,21 @@
 
             var playerPage = KSLT_YAZYK.выбрать('player-en.html', 'player-kg.html', 'player.html');
 
-            html += '<div class="pp-match' + (oppId ? ' pp-match-clickable' : '') + '" data-opponent-id="' + esc(oppId || '') + '" data-opponent-name="' + esc(oppName) + '" data-opponent-photo="' + esc(oppPhoto) + '">';
+            html += '<div class="pp-match' + (oppId ? ' pp-match-clickable' : '') + '" data-opponent-id="' + KSLT_экранировать(oppId || '') + '" data-opponent-name="' + KSLT_экранировать(oppName) + '" data-opponent-photo="' + KSLT_экранировать(oppPhoto) + '">';
             html += '<div class="pp-match-date">' + formatChalDate(date) + '</div>';
             html += '<div class="pp-match-tournament"></div>';
             html += '<div class="pp-match-opponent">';
             if (oppId) {
-                html += '<a href="' + playerPage + '?id=' + esc(oppId) + '">';
+                html += '<a href="' + playerPage + '?id=' + KSLT_экранировать(oppId) + '">';
                 html += кружокИгрока(oppName, oppPhoto);
                 html += '</a>';
-                html += '<a href="' + playerPage + '?id=' + esc(oppId) + '" class="pp-match-opponent-name" style="color:inherit;text-decoration:none;">' + esc(oppName) + '</a>';
+                html += '<a href="' + playerPage + '?id=' + KSLT_экранировать(oppId) + '" class="pp-match-opponent-name" style="color:inherit;text-decoration:none;">' + KSLT_экранировать(oppName) + '</a>';
             } else {
                 html += кружокИгрока(oppName, oppPhoto);
-                html += '<span class="pp-match-opponent-name" style="color:rgba(255,255,255,0.5);">' + esc(oppName || 'Unknown') + '</span>';
+                html += '<span class="pp-match-opponent-name" style="color:rgba(255,255,255,0.5);">' + KSLT_экранировать(oppName || 'Unknown') + '</span>';
             }
             html += '</div>';
-            html += '<div class="pp-match-score">' + esc(score || '—') + '</div>';
+            html += '<div class="pp-match-score">' + KSLT_экранировать(score || '—') + '</div>';
             if (c.status === 'completed' && result) {
                 html += '<div class="pp-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</div>';
             } else {
@@ -1670,7 +1664,7 @@
         html += '<div class="h2h-header">';
         html += '<div class="h2h-player">';
         html += кружокИгрока(_playerName, _playerPhoto, 'h2h-photo');
-        html += '<div class="h2h-name">' + esc(_playerName) + '</div>';
+        html += '<div class="h2h-name">' + KSLT_экранировать(_playerName) + '</div>';
         html += '</div>';
         html += '<div class="h2h-center">';
         var totalMatches = matches.length;
@@ -1680,7 +1674,7 @@
         html += '</div>';
         html += '<div class="h2h-player">';
         html += кружокИгрока(oppName, oppPhoto, 'h2h-photo');
-        html += '<div class="h2h-name">' + esc(oppName) + '</div>';
+        html += '<div class="h2h-name">' + KSLT_экранировать(oppName) + '</div>';
         html += '</div>';
         html += '</div>';
 
@@ -1714,7 +1708,7 @@
 
             html += '<div class="h2h-match">';
             html += '<span class="h2h-match-date">' + formatMatchDate(m.played_at) + '</span>';
-            html += '<span class="h2h-match-tournament"><span class="h2h-tname">' + esc(tName) +
+            html += '<span class="h2h-match-tournament"><span class="h2h-tname">' + KSLT_экранировать(tName) +
                 '</span>' + matchKindTag(m) + '</span>';
             html += '<span class="h2h-match-score">' + displayScore + '</span>';
             html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</span>';
@@ -1794,10 +1788,10 @@
         // All earned badges (always visible)
         earned.forEach(function(item) {
             var b = item.def;
-            html += '<div class="pp-achievement pp-achievement-earned" title="' + esc(getBadgeName(b)) + ' — ' + formatBadgeDate(item.pb.earned_at) + '">';
+            html += '<div class="pp-achievement pp-achievement-earned" title="' + KSLT_экранировать(getBadgeName(b)) + ' — ' + formatBadgeDate(item.pb.earned_at) + '">';
             html += '<div class="pp-achievement-icon">' + b.icon + '</div>';
             html += '<div class="pp-achievement-info">';
-            html += '<div class="pp-achievement-name">' + esc(getBadgeName(b)) + '</div>';
+            html += '<div class="pp-achievement-name">' + KSLT_экранировать(getBadgeName(b)) + '</div>';
             html += '<div class="pp-achievement-desc">' + formatBadgeDate(item.pb.earned_at) + '</div>';
             html += '</div></div>';
         });
@@ -1808,8 +1802,8 @@
             html += '<div class="pp-achievement pp-achievement-locked' + hidden + '">';
             html += '<div class="pp-achievement-icon pp-achievement-icon-locked">' + b.icon + '</div>';
             html += '<div class="pp-achievement-info">';
-            html += '<div class="pp-achievement-name pp-achievement-name-locked">' + esc(getBadgeName(b)) + '</div>';
-            html += '<div class="pp-achievement-desc">' + esc(getBadgeDesc(b)) + '</div>';
+            html += '<div class="pp-achievement-name pp-achievement-name-locked">' + KSLT_экранировать(getBadgeName(b)) + '</div>';
+            html += '<div class="pp-achievement-desc">' + KSLT_экранировать(getBadgeDesc(b)) + '</div>';
             html += '</div></div>';
         });
 
@@ -2202,11 +2196,11 @@
             '<div class="pp-chal-modal">' +
                 '<button class="pp-chal-close">&times;</button>' +
                 '<h3 class="pp-chal-title' + (type === 'warn' ? ' pp-chal-title-warn' : '') + '">' +
-                    esc(title) + '</h3>' +
+                    KSLT_экранировать(title) + '</h3>' +
                 // Абзацы: каждое предложение — своя мысль, слитым куском
                 // они читаются как одна длинная строка
                 String(text).split('\n').map(function(line) {
-                    return '<p class="pp-chal-alert-text">' + esc(line) + '</p>';
+                    return '<p class="pp-chal-alert-text">' + KSLT_экранировать(line) + '</p>';
                 }).join('') +
             '</div>';
         document.body.appendChild(overlay);
@@ -2231,14 +2225,14 @@
         overlay.innerHTML =
             '<div class="pp-chal-modal">' +
                 '<button class="pp-chal-close">&times;</button>' +
-                '<h3 class="pp-chal-title">\uD83D\uDD25 ' + esc(L.challengeModalTitle) +
-                    ' <span class="pp-chal-rival">' + esc(playerName) + '</span></h3>' +
+                '<h3 class="pp-chal-title">\uD83D\uDD25 ' + KSLT_экранировать(L.challengeModalTitle) +
+                    ' <span class="pp-chal-rival">' + KSLT_экранировать(playerName) + '</span></h3>' +
                 '<div class="pp-chal-form">' +
                     '<div class="pp-chal-field">' +
                         '<label class="pp-chal-label">' + L.challengeMessage +
                             ' <span class="pp-chal-req">*</span></label>' +
                         '<textarea class="pp-chal-input pp-chal-textarea" id="ppChalMsg" maxlength="150" rows="3" ' +
-                            'placeholder="' + esc(L.challengeMsgHint) + '"></textarea>' +
+                            'placeholder="' + KSLT_экранировать(L.challengeMsgHint) + '"></textarea>' +
                         '<div class="pp-chal-counter"><span id="ppChalMsgCount">0</span>/150</div>' +
                     '</div>' +
                     '<button class="pp-chal-submit" id="ppChalSubmit" disabled>' + L.challengeSend + '</button>' +

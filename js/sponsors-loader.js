@@ -156,7 +156,7 @@
             '<span class="spon-modal-action-icon">' + icon + '</span>' +
             '<span class="spon-modal-action-text">' +
                 '<span class="spon-modal-action-label">' + label + '</span>' +
-                (value ? '<span class="spon-modal-action-value">' + esc(value) + '</span>' : '') +
+                (value ? '<span class="spon-modal-action-value">' + KSLT_экранировать(value) + '</span>' : '') +
             '</span>' +
         '</a>';
     }
@@ -173,10 +173,10 @@
         var actions = '';
 
         if (s.url) {
-            actions += action(esc(s.url), '', ICON.site, modalLabels.website, siteLabel(s.url), true);
+            actions += action(KSLT_экранировать(s.url), '', ICON.site, modalLabels.website, siteLabel(s.url), true);
         }
         if (s.phone) {
-            actions += action('tel:' + esc(s.phone.replace(/[^0-9+]/g, '')), 'spon-action-phone',
+            actions += action('tel:' + KSLT_экранировать(s.phone.replace(/[^0-9+]/g, '')), 'spon-action-phone',
                 ICON.phone, modalLabels.phone, s.phone, false);
         }
         if (s.whatsapp) {
@@ -192,14 +192,14 @@
                 ICON.telegram, modalLabels.telegram, readableHandle(s.telegram), true);
         }
         if (s.email) {
-            actions += action('mailto:' + esc(s.email), 'spon-action-email',
+            actions += action('mailto:' + KSLT_экранировать(s.email), 'spon-action-email',
                 ICON.email, modalLabels.email, s.email, false);
         }
 
         var addressHtml = '';
         if (s.address) {
             addressHtml = '<div class="spon-modal-address">' +
-                '<span class="spon-modal-address-icon">' + ICON.pin + '</span>' + esc(s.address) + '</div>';
+                '<span class="spon-modal-address-icon">' + ICON.pin + '</span>' + KSLT_экранировать(s.address) + '</div>';
         }
 
         var overlay = document.createElement('div');
@@ -208,11 +208,11 @@
         // До 24.09 не было ни role, ни aria-modal, ни метки: окно открывалось,
         // а для чтения с экрана ничего не происходило.
         overlay.innerHTML =
-            '<div class="spon-modal" role="dialog" aria-modal="true" aria-label="' + esc(s.name) + '">' +
+            '<div class="spon-modal" role="dialog" aria-modal="true" aria-label="' + KSLT_экранировать(s.name) + '">' +
                 '<button class="spon-modal-close" aria-label="' + modalLabels.close + '">&times;</button>' +
-                (s.logo ? '<div class="spon-modal-logo"><img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '"></div>' : '') +
-                '<div class="spon-modal-name">' + esc(s.name) + '</div>' +
-                (desc ? '<div class="spon-modal-desc">' + esc(desc) + '</div>' : '') +
+                (s.logo ? '<div class="spon-modal-logo"><img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '"></div>' : '') +
+                '<div class="spon-modal-name">' + KSLT_экранировать(s.name) + '</div>' +
+                (desc ? '<div class="spon-modal-desc">' + KSLT_экранировать(desc) + '</div>' : '') +
                 addressHtml +
                 (actions ? '<div class="spon-modal-actions">' + actions + '</div>' : '') +
                 '<button class="spon-modal-close-btn">' + modalLabels.close + '</button>' +
@@ -294,18 +294,18 @@
 
         // Modal if: has description/address, or has 2+ links
         if (hasExtra || hasMultipleLinks >= 2) {
-            return '<a href="#" class="' + className + '" data-sponsor-id="' + esc(s.id) + '" title="' + esc(s.name) + '">' +
+            return '<a href="#" class="' + className + '" data-sponsor-id="' + KSLT_экранировать(s.id) + '" title="' + KSLT_экранировать(s.name) + '">' +
                 innerHtml + '</a>';
         }
         // Single link — direct
         if (s.url) {
-            return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" class="' + className + '" title="' + esc(s.name) + '">' +
+            return '<a href="' + KSLT_экранировать(s.url) + '" target="_blank" rel="noopener noreferrer" class="' + className + '" title="' + KSLT_экранировать(s.name) + '">' +
                 innerHtml + '</a>';
         }
         // Ни ссылок, ни описания — нажимать не на что. Раньше здесь стояла
         // ссылка на «#»: она прыгала наверх страницы и цепляла решётку к
         // адресу, будто что-то произошло
-        return '<span class="' + className + ' spon-static" title="' + esc(s.name) + '">' + innerHtml + '</span>';
+        return '<span class="' + className + ' spon-static" title="' + KSLT_экранировать(s.name) + '">' + innerHtml + '</span>';
     }
 
     /**
@@ -344,7 +344,7 @@
             var html = '<div class="section-header"><h2>' + title + '</h2></div>';
 
             heroes.forEach(function(s) {
-                var inner = s.logo ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '">' : '<span>' + esc(s.name) + '</span>';
+                var inner = s.logo ? '<img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '">' : '<span>' + KSLT_экранировать(s.name) + '</span>';
                 html += '<div class="sponsor-hero">' +
                     '<span class="sponsor-hero-label">' + general + '</span>' +
                     buildSponsorElement(s, 'sponsor-hero-logo', inner) +
@@ -354,7 +354,7 @@
             if (regular.length) {
                 html += '<div class="sponsors-cloud">';
                 regular.forEach(function(s) {
-                    var inner = s.logo ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '">' : '<span>' + esc(s.name) + '</span>';
+                    var inner = s.logo ? '<img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '">' : '<span>' + KSLT_экранировать(s.name) + '</span>';
                     html += buildSponsorElement(s, 'sponsor-logo-link', inner);
                 });
                 html += '</div>';
@@ -389,8 +389,8 @@
             // одной странице. Сейчас порядок задан один раз при загрузке —
             // главный первым, остальные перемешаны, — и оба блока берут его.
             data.forEach(function(s) {
-                var inner = (s.logo ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '">' : '') +
-                    '<span>' + esc(s.name) + '</span>';
+                var inner = (s.logo ? '<img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '">' : '') +
+                    '<span>' + KSLT_экранировать(s.name) + '</span>';
                 slides += buildSponsorElement(s, 'carousel-slide-infinite', inner);
             });
 
@@ -415,10 +415,10 @@
             if (!hero) { badge.style.display = 'none'; return; }
 
             var label = KSLT_YAZYK.выбрать('supported by', 'колдоосу менен', 'при поддержке');
-            var href = hero.url ? ' href="' + esc(hero.url) + '" target="_blank" rel="noopener"' : '';
+            var href = hero.url ? ' href="' + KSLT_экранировать(hero.url) + '" target="_blank" rel="noopener"' : '';
             var logoHtml = hero.logo
-                ? '<img src="' + esc(hero.logo) + '" alt="' + esc(hero.name) + '" class="sponsor-logo-img">'
-                : '<span class="sponsor-logo-img" style="font-weight:600;color:var(--accent)">' + esc(hero.name) + '</span>';
+                ? '<img src="' + KSLT_экранировать(hero.logo) + '" alt="' + KSLT_экранировать(hero.name) + '" class="sponsor-logo-img">'
+                : '<span class="sponsor-logo-img" style="font-weight:600;color:var(--accent)">' + KSLT_экранировать(hero.name) + '</span>';
 
             badge.innerHTML =
                 '<span class="sponsor-label">' + label + '</span>' +
@@ -483,10 +483,4 @@
        слабого приёма: кавычки он не экранирует вовсе, а результат идёт в
        `src=`, `alt=` и `title=` логотипов спонсоров (10 мест в этом
        файле). Эталон взят дословно у `js/kslt-lenta.js`. */
-    function esc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
 })();

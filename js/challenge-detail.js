@@ -164,8 +164,8 @@
         var tg = b.court_twogis || '';
         if (!gm && !tg) return '';
         var html = '<div class="ch-detail-map-links">';
-        if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="ch-map-link">Google Maps &#8599;</a>';
-        if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="ch-map-link">2GIS &#8599;</a>';
+        if (gm) html += '<a href="' + KSLT_экранировать(gm) + '" target="_blank" rel="noopener" class="ch-map-link">Google Maps &#8599;</a>';
+        if (tg) html += '<a href="' + KSLT_экранировать(tg) + '" target="_blank" rel="noopener" class="ch-map-link">2GIS &#8599;</a>';
         html += '</div>';
         return html;
     }
@@ -175,7 +175,7 @@
         var tg = b.court_twogis || '';
         var embedUrl = window.KSLT_KARTA.встроить(gm) || window.KSLT_KARTA.встроить(tg);
         if (!embedUrl) return '';
-        return '<div class="ch-detail-map"><iframe src="' + esc(embedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+        return '<div class="ch-detail-map"><iframe src="' + KSLT_экранировать(embedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
     }
 
     var _userId = null;
@@ -322,7 +322,7 @@
         // он стал фоном шапки, а заголовок и главное о матче лежат поверх.
         // Нет постера — остаётся ровный тёмный фон, вёрстка не рассыпается
         var poster = b.banner_url
-            ? '<div class="ch-hero-bg"><img src="' + esc(b.banner_url) + '" alt=""></div>'
+            ? '<div class="ch-hero-bg"><img src="' + KSLT_экранировать(b.banner_url) + '" alt=""></div>'
             : '';
 
         var kicker = b.status === 'completed' ? L.kickerDone
@@ -330,17 +330,17 @@
 
         var meta = [];
         if (formattedDate || time) {
-            meta.push('<span><b>' + esc(formattedDate) + '</b>' + (formattedDate && time ? ', ' : '') + esc(time) + '</span>');
+            meta.push('<span><b>' + KSLT_экранировать(formattedDate) + '</b>' + (formattedDate && time ? ', ' : '') + KSLT_экранировать(time) + '</span>');
         }
-        if (venue) meta.push('<span>' + esc(venue) + '</span>');
-        if (formatLabel) meta.push('<span>' + esc(formatLabel) + '</span>');
+        if (venue) meta.push('<span>' + KSLT_экранировать(venue) + '</span>');
+        if (formatLabel) meta.push('<span>' + KSLT_экранировать(formatLabel) + '</span>');
 
         hero.innerHTML =
             poster +
             '<div class="ch-hero-overlay"></div>' +
             '<div class="ch-hero-inner">' +
                 '<span class="ch-hero-kicker">' + kicker + '</span>' +
-                '<h1 class="ch-battle-title">' + esc(b.battle_title || 'Battle') + '</h1>' +
+                '<h1 class="ch-battle-title">' + KSLT_экранировать(b.battle_title || 'Battle') + '</h1>' +
                 (meta.length ? '<div class="ch-hero-meta">' + meta.join('') + '</div>' : '') +
             '</div>';
         hero.classList.toggle('ch-hero-photo', !!b.banner_url);
@@ -481,8 +481,8 @@
                 '<span class="ch-forecast-hint">' + L.forecastHint + '</span>' +
             '</div>' +
             '<div class="ch-forecast-names">' +
-                '<span>' + esc(c1Name) + '</span>' +
-                '<span>' + esc(c2Name) + '</span>' +
+                '<span>' + KSLT_экранировать(c1Name) + '</span>' +
+                '<span>' + KSLT_экранировать(c2Name) + '</span>' +
             '</div>' +
             '<div class="ch-forecast-bar">' +
                 '<i class="ch-forecast-left" data-width="' + pred.p1Pct + '%" style="width:0">' +
@@ -575,9 +575,9 @@
         return '<div class="ch-pair-side">' +
             /* Нет фотографии — инициалы, а не чужой CDN. js/kslt-lico.js */
             window.KSLT_LICO.лицо(photo, name, 'ch-player-photo') +
-            '<div class="ch-player-name">' + (flag ? flag + '\u00A0' : '') + esc(name) + '</div>' +
-            (cat ? '<div class="ch-player-cat">' + esc(cat) + '</div>' : '') +
-            (ntrp ? '<div class="ch-player-ntrp">NTRP: ' + esc(String(ntrp)) + '</div>' : '') +
+            '<div class="ch-player-name">' + (flag ? flag + '\u00A0' : '') + KSLT_экранировать(name) + '</div>' +
+            (cat ? '<div class="ch-player-cat">' + KSLT_экранировать(cat) + '</div>' : '') +
+            (ntrp ? '<div class="ch-player-ntrp">NTRP: ' + KSLT_экранировать(String(ntrp)) + '</div>' : '') +
             stats +
         '</div>';
     }
@@ -627,7 +627,7 @@
             var votedName = _myVoteSide === 1 ? c1Name : c2Name;
             var voteLabel = _myVoteSource === 'telegram' ? L.youVotedViaTg : L.youVotedFor;
             var tgIcon = _myVoteSource === 'telegram' ? '<svg class="ch-tg-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> ' : '';
-            votedBadgeHtml = '<div class="ch-voted-badge">' + tgIcon + '&#10003; ' + voteLabel + ' <strong>' + esc(votedName) + '</strong></div>';
+            votedBadgeHtml = '<div class="ch-voted-badge">' + tgIcon + '&#10003; ' + voteLabel + ' <strong>' + KSLT_экранировать(votedName) + '</strong></div>';
         }
 
         section.innerHTML =
@@ -649,13 +649,13 @@
                 '<div class="ch-vote-buttons" id="voteButtons">' +
                     '<button class="' + btn1Class + '" id="voteBtn1" data-side="1"' + (btnDisabled ? ' disabled' : '') + '>' +
                         btn1Check + '<span class="ch-vote-dot-red">●</span>' +
-                        '<span class="ch-vote-name">' + esc(c1Name) + '</span>' +
+                        '<span class="ch-vote-name">' + KSLT_экранировать(c1Name) + '</span>' +
                         '<span class="ch-vote-count">' + v1 + ' ' + L.votes + '</span>' +
                         (!btnDisabled ? '<span class="ch-vote-cta">' + L.voteCta + '</span>' : '') +
                     '</button>' +
                     '<button class="' + btn2Class + '" id="voteBtn2" data-side="2"' + (btnDisabled ? ' disabled' : '') + '>' +
                         btn2Check + '<span class="ch-vote-dot-blue">●</span>' +
-                        '<span class="ch-vote-name">' + esc(c2Name) + '</span>' +
+                        '<span class="ch-vote-name">' + KSLT_экранировать(c2Name) + '</span>' +
                         '<span class="ch-vote-count">' + v2 + ' ' + L.votes + '</span>' +
                         (!btnDisabled ? '<span class="ch-vote-cta">' + L.voteCta + '</span>' : '') +
                     '</button>' +
@@ -818,7 +818,7 @@
         if (!date && !time && !venue) return;
 
         var formattedDate = date ? formatDate(date) : '';
-        var dateTimeStr = (formattedDate ? formattedDate : '') + (formattedDate && time ? ', ' : '') + (time ? esc(time) : '');
+        var dateTimeStr = (formattedDate ? formattedDate : '') + (formattedDate && time ? ', ' : '') + (time ? KSLT_экранировать(time) : '');
 
         var html = '<div class="ch-details-inner">' +
             '<h2 class="ch-details-title">' + L.details + '</h2>';
@@ -838,7 +838,7 @@
                     '<span class="ch-detail-icon">📍</span>' +
                     '<div>' +
                         '<div class="ch-detail-label">' + L.venue + '</div>' +
-                        '<div class="ch-detail-value">' + esc(venue) + '</div>' +
+                        '<div class="ch-detail-value">' + KSLT_экранировать(venue) + '</div>' +
                     '</div>' +
                 '</div>' +
                 buildMapLinks(b) +
@@ -940,8 +940,8 @@
                 ? ' <span class="ch-h2h-duel">' + duelLabel + '</span>' : '';
             return '<div class="ch-h2h-match' + (hidden ? ' ch-h2h-hidden' : '') + '">' +
                 '<span class="ch-h2h-date">' + formatDate(m.created_at) + typeTag + '</span>' +
-                '<span class="ch-h2h-score-text">' + esc(m.score || '-') + '</span>' +
-                '<span class="ch-h2h-winner">' + esc(winName) + '</span>' +
+                '<span class="ch-h2h-score-text">' + KSLT_экранировать(m.score || '-') + '</span>' +
+                '<span class="ch-h2h-winner">' + KSLT_экранировать(winName) + '</span>' +
             '</div>';
         }
 
@@ -1019,7 +1019,7 @@
         var sets = (match.score || '').split(' ').filter(Boolean);
         var setsHtml = '<div class="ch-score-sets">';
         sets.forEach(function(s) {
-            setsHtml += '<span class="ch-score-set">' + esc(s.replace('/', ':')) + '</span>';
+            setsHtml += '<span class="ch-score-set">' + KSLT_экранировать(s.replace('/', ':')) + '</span>';
         });
         setsHtml += '</div>';
 
@@ -1040,14 +1040,14 @@
             '<div class="ch-score-inner">' +
                 '<h2 class="ch-score-title">' + L.result + '</h2>' +
                 '<div class="ch-score-display">' +
-                    '<span class="ch-score-player' + (isP1Winner ? ' winner' : '') + '">' + esc(c1Name) + '</span>' +
+                    '<span class="ch-score-player' + (isP1Winner ? ' winner' : '') + '">' + KSLT_экранировать(c1Name) + '</span>' +
                     setsHtml +
-                    '<span class="ch-score-player' + (!isP1Winner ? ' winner' : '') + '">' + esc(c2Name) + '</span>' +
+                    '<span class="ch-score-player' + (!isP1Winner ? ' winner' : '') + '">' + KSLT_экранировать(c2Name) + '</span>' +
                 '</div>' +
                 /* Стороны не знаем — молчим. Соврать нельзя, промолчать можно:
                    то же правило, по которому состав пары не называется полом,
                    когда пол участников неизвестен (battle-format.js). */
-                (winnerName ? '<div class="ch-winner-badge">' + L.winner + ': ' + esc(winnerName) + '</div>' : '') +
+                (winnerName ? '<div class="ch-winner-badge">' + L.winner + ': ' + KSLT_экранировать(winnerName) + '</div>' : '') +
                 (total > 0 && сторона ? '<div class="ch-prediction-result"><strong>' + pctCorrect + '%</strong> ' + L.predictionResult + '</div>' : '') +
             '</div>';
 
@@ -1061,12 +1061,6 @@
        атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
        или в адресе логотипа закрывает атрибут. Эталон взят дословно у
        `js/kslt-lenta.js`. */
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
     function formatDate(dateStr) {
         if (!dateStr) return '';
         // «2026-08-21» без времени читается как полночь UTC, и при часовом
