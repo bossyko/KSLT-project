@@ -229,7 +229,7 @@
 
         // Hide role=user with active membership (they are in Players section)
         items = items.filter(function(u) {
-            if (u.role === 'admin' || u.role === 'manager') return true;
+            if (A.сотрудник(u.role)) return true;
             var mem = memMap[u.id];
             return !(mem && mem.status === 'active');
         });
@@ -345,7 +345,7 @@
             // Membership badge with expiry date
             var mem = memMap[u.id];
             var memBadge;
-            if (u.role === 'admin' || u.role === 'manager') {
+            if (A.сотрудник(u.role)) {
                 // У сотрудников клуба членства нет и быть не может: под этой
                 // почтой они ведут клуб, а не играют. Срок писать нечему
                 memBadge = '<span class="ad-podpis">' + L.usrStaffNoMembership + '</span>';
@@ -383,7 +383,7 @@
             // Персоналу без привязки к Телеграму не дойдут спорные счета,
             // заявки на турнир и предложения новостей. Подключить за него
             // нельзя — только напомнить, поэтому метка стоит рядом с ролью.
-            var безТелеграма = (u.role === 'admin' || u.role === 'manager') && !u.telegram_chat_id
+            var безТелеграма = A.сотрудник(u.role) && !u.telegram_chat_id
                 ? '<span title="Телеграм не подключён — уведомления не приходят" ' +
                   'style="margin-left:6px;cursor:help;">\u26A0\uFE0F</span>'
                 : '';
@@ -481,7 +481,7 @@
         // Членство и карточка игрока — только у игроков. Сотрудник клуба под
         // своей рабочей почтой не член КСЛТ: он клуб ведёт, а не выступает,
         // и срока у него нет — ни платить, ни продлевать нечего
-        var сотрудник = (user.role === 'admin' || user.role === 'manager');
+        var сотрудник = A.сотрудник(user.role);
         var вестиЧленство = canManageMembership && !сотрудник;
 
         var tgStatus = user.telegram_chat_id ? L.usrTgConnected : L.usrTgNotConnected;
@@ -1041,6 +1041,16 @@
 
 
     async function autoCreatePlayer(user, categoryId) {
+        /* СОТРУДНИКУ КАРТОЧКА НЕ ЗАВОДИТСЯ — кусок 143, 23.10, слово Кости.
+           Сюда приходят из сохранения пользователя: выбрана категория, а
+           карточки нет — значит её создают. Роль здесь не спрашивалась
+           вовсе, и админ мог завести карточку сотруднику, пока кабинет и
+           членство уже считали, что тот не играет. Отказ ГОВОРИТСЯ, а не
+           молчит: тихий возврат читается как «кнопка не работает». */
+        if (A.сотрудник(user.role)) {
+            A.showToast(L.usrStaffNoCardErr, 'error');
+            return;
+        }
         var name = (user.full_name || '').trim();
         if (!name) return;
 
@@ -1764,7 +1774,7 @@
         if (!заявки.length) { box.innerHTML = ''; return; }
 
         var профили = {}, карточки = {};
-        var pr = await A.client.from('profiles').select('id, full_name, email, phone')
+        var pr = await A.client.from('profiles').select('id, full_name, email, phone, role')
             .in('id', заявки.map(function(z) { return z.profile_id; }));
         (pr.data || []).forEach(function(p) { профили[p.id] = p; });
         var pl = await A.client.from('players').select('id, name, category_id, ntrp_singles')
@@ -1783,7 +1793,14 @@
                 '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
                     new Date(z.created_at).toLocaleDateString('ru-RU') + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' +
-                    '<button class="ad-btn ad-btn-primary ad-btn-sm ad-link-yes" data-id="' + z.id + '">' + L.linkApprove + '</button> ' +
+                    /* ЗАЯВКА ОТ СОТРУДНИКА НЕ ОДОБРЯЕТСЯ — кусок 143. Подать
+                       её из кабинета он больше не может (кусок 142 убрал
+                       предложение), но заявка могла остаться с прежних дней,
+                       и одобрить её было нечем остановить. Причина названа
+                       на месте кнопки, а не спрятана в отказе. */
+                    (A.сотрудник(ч.role)
+                        ? '<span class="ad-podpis">' + A.esc(L.linkStaffNo) + '</span> '
+                        : '<button class="ad-btn ad-btn-primary ad-btn-sm ad-link-yes" data-id="' + z.id + '">' + L.linkApprove + '</button> ') +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm ad-link-no" data-id="' + z.id + '">' + L.linkReject + '</button>' +
                 '</td>' +
             '</tr>';

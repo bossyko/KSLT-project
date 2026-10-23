@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: сотрудник клуба — предикат админки</title>
+<!--
+  СТЕНД КУСКА 143. Админка за входом, пароля у прибора нет, поэтому
+  предикат «этот человек — сотрудник клуба» и фразы отказа проверяются
+  ЗДЕСЬ, на настоящих файлах админки, а не на их копии.
+
+  СТЕНД ОБЯЗАН БЫТЬ НЕУДОБНЫМ (правило куска 139): роли подаются не
+  только «admin», но и пустая, чужая и опечатка — именно на них правило
+  «сотрудник» молча врёт, если написано через поиск подстроки.
+
+  РАЗМЕТКУ СТРОКИ ЗАЯВКИ СТЕНД НЕ ПОВТОРЯЕТ: вторая копия той же
+  разметки и есть беда, против которой кусок. Отказ в заведении карточки
+  и кнопку заявки держат сторож и прувер.
+-->
+<style>
+  body { background: #111; color: #ddd; font: 14px/1.5 system-ui, sans-serif; padding: 24px; }
+  table { border-collapse: collapse; margin-top: 16px; }
+  td, th { border: 1px solid #333; padding: 8px 12px; text-align: left; }
+  code { color: #cfff4f; }
+</style>
+</head>
+<body>
+<h1>Сотрудник клуба — предикат админки</h1>
+<table id="stRoli"><thead><tr><th>роль</th><th><code>A.сотрудник</code></th></tr></thead>
+<tbody></tbody></table>
+<p id="stFrazy"></p>
+
+<!-- ЗАВИСИМОСТЬ ЗАМЕРЕНА, А НЕ УГАДАНА: словарь админки берёт подписи
+     статусов у дома `js/tournament-status.js` (одно определение на одно
+     понятие, 19.10). Без него стенд падал на первой же строке. -->
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/admin/core/constants.js?v=165"></script>
+<script src="../js/admin/core/utils.js?v=60"></script>
+<script>
+(function () {
+    var A = window.KSLT_ADMIN;
+    var РОЛИ = ['admin', 'manager', 'user', '', 'Admin', 'админ', undefined, null];
+    var тело = document.querySelector('#stRoli tbody');
+    РОЛИ.forEach(function (р) {
+        var tr = document.createElement('tr');
+        var имя = document.createElement('td');
+        имя.textContent = (р === undefined ? 'undefined' : (р === null ? 'null' : (р === '' ? '(пусто)' : р)));
+        var знач = document.createElement('td');
+        знач.textContent = String(A.сотрудник(р));
+        знач.dataset.rol = имя.textContent;
+        tr.appendChild(имя); tr.appendChild(знач); тело.appendChild(tr);
+    });
+    var p = document.getElementById('stFrazy');
+    p.dataset.card = A.L.usrStaffNoCardErr || '';
+    p.dataset.link = A.L.linkStaffNo || '';
+    p.textContent = 'Фраза отказа: ' + p.dataset.card + ' || Заявка: ' + p.dataset.link;
+})();
+</script>
+</body>
+</html>

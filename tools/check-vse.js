@@ -153,7 +153,8 @@ const КУСКИ = [
     ['кыргызский вслух', 'check-kyrgyzskiy-polnyy.js', 'check-kyrgyzskiy-polnyy-otkat.js'],
     ['три пункта долга', 'check-tri-dolga.js', 'check-tri-dolga-otkat.js'],
     ['близнецы и дома', 'check-vitrina.js', 'check-vitrina-otkat.js'],
-    ['сотрудник не член клуба', 'check-sotrudnik-ne-chlen.js', 'check-sotrudnik-ne-chlen-otkat.js']
+    ['сотрудник не член клуба', 'check-sotrudnik-ne-chlen.js', 'check-sotrudnik-ne-chlen-otkat.js'],
+    ['карточка не заводится сотруднику', 'check-karta-ne-sotrudniku.js', 'check-karta-ne-sotrudniku-otkat.js']
 ];
 
 function прогнать(файл) {
