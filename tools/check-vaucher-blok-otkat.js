@@ -9,14 +9,17 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vauch-'));
-['js', 'tools', 'maket'].forEach(д =>
+/* ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО: с куска 146 правило
+   читает и страницы кабинета — там проверяется порядок подключения. */
+['js', 'tools', 'maket', 'pages'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
 const ДОМ = 'js/kslt-vaucher-blok.js', ТР = 'js/coaches.js', КТ = 'js/courts.js',
-      СТ = 'maket/stend-vaucher-blok.html';
-const ФАЙЛЫ = [ДОМ, ТР, КТ, СТ];
+      СТ = 'maket/stend-vaucher-blok.html', КАБ = 'js/dashboard.js',
+      СТРК = 'pages/dashboard.html';
+const ФАЙЛЫ = [ДОМ, ТР, КТ, СТ, КАБ, СТРК];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -72,17 +75,27 @@ const ОТКАТЫ = [
      "            подложка: 'co' + '-picker-overlay',",
      'у тренеров имена классов ваучера стоят целиком'],
 
-    /* 11: ветвь без QR снесена */
-    ['снести ветвь «библиотеки QR нет»', ДОМ,
-     "        } else {\n            /* ВЗЯТО ЛУЧШЕЕ ИЗ ДВУХ И ПОЧИНЕНО:",
-     "        }\n        if (false) {\n            /* ВЗЯТО ЛУЧШЕЕ ИЗ ДВУХ И ПОЧИНЕНО:",
+    /* 11: ветвь без QR снесена. ЯКОРЬ ПЕРЕЕХАЛ КУСКОМ 146 — надпись живёт
+          в `Б.нарисоватьQR`, а не внутри окна ваучера; прувер сказал об
+          этом сам: «якоря нет». */
+    ['снести надпись «библиотеки QR нет»', ДОМ,
+     "        коробка.textContent = KSLT_YAZYK.выбрать(\n" +
+     "            'QR could not be drawn — show this screen at the venue',",
+     "        if (false) KSLT_YAZYK.выбрать(\n" +
+     "            'QR could not be drawn — show this screen at the venue',",
      'без библиотеки QR надпись есть'],
 
-    /* 12: надпись снова по-английски одним языком */
+    /* 12: надпись снова одноязычная — присваивание ЕСТЬ, но не зовом языка */
     ['сделать надпись без QR одноязычной', ДОМ,
-     "            коробкаQR.textContent = KSLT_YAZYK.выбрать(",
-     "            коробкаQR.textContent = 'QR library not loaded'; if (false) KSLT_YAZYK.выбрать(",
+     "        коробка.textContent = KSLT_YAZYK.выбрать(",
+     "        коробка.textContent = 'QR library not loaded'; if (false) KSLT_YAZYK.выбрать(",
      'надпись без QR говорит на языке страницы'],
+
+    /* 13: рисование QR ушло из дома */
+    ['отнять у дома рисование QR', ДОМ,
+     "            new QRCode(коробка, {",
+     "            window.КакНибудьПотом(коробка, {",
+     'QR рисует дом, и рисует он его сам'],
 
     /* 13: экранирование убрано — пол пробит */
     ['снять в доме одно экранирование', ДОМ,
@@ -99,10 +112,24 @@ const ОТКАТЫ = [
      "            if (сост === 'udobnyy') return Promise.resolve({ data: { error: 'nothing' }, error: null });",
      'стенд показывает крайние случаи, а не удобные'],
 
+    /* 16–17: кабинет снова строит своё (кусок 146) */
+    ['вернуть кабинету свой адрес проверки', КАБ,
+     "        var verifyUrl = KSLT_VAUCHER_BLOK.адресПроверки(token);",
+     "        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify.html?token=' + token;",
+     'кабинет зовёт `адресПроверки` у дома 1 раз'],
+    ['вернуть кабинету свой формат срока', КАБ,
+     "        var expiresStr = KSLT_VAUCHER_BLOK.дата(voucher.expires_at, true);",
+     "        var expiresStr = String(voucher.expires_at || '');",
+     'кабинет зовёт `дата` у дома 3 раз'],
+    ['убрать дом ваучера со страницы кабинета', СТРК,
+     '    <script src="../js/kslt-vaucher-blok.js?v=2"></script>\n',
+     '',
+     'дом ваучерного блока стоит в кабинете раньше dashboard.js'],
+
     /* 15: стенд перестал гонять дом */
     ['отключить дом от стенда', СТ,
-     '<script src="../js/kslt-vaucher-blok.js?v=1"></script>',
-     '<script src="../js/kslt-vaucher-net.js?v=1"></script>',
+     '<script src="../js/kslt-vaucher-blok.js?v=2"></script>',
+     '<script src="../js/kslt-vaucher-net.js?v=2"></script>',
      'стенд ваучерного блока на месте']
 ];
 

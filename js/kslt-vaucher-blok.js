@@ -38,6 +38,85 @@
 
     var Б = {};
 
+    /**
+     * ДАТА И СРОК ВАУЧЕРА. Одно место на продукт.
+     *
+     * КЫРГЫЗСКОЙ ЛОКАЛИ В БРАУЗЕРЕ НЕТ — ЗАМЕРЕНО 23.10:
+     * `Intl.DateTimeFormat.supportedLocalesOf(['ky-KG','ky'])` отдаёт ПУСТО,
+     * и `ky-KG` разрешается в `en-US`. То есть на кыргызской странице дата
+     * печаталась ПО-АНГЛИЙСКИ: «Oct 15» вместо «15 окт.».
+     * А кусок 138 замерил обратное и записал решением: сокращения месяцев и
+     * порядок даты в кыргызском ТЕ ЖЕ, ЧТО В РУССКОМ. Значит кыргызскому
+     * нужна русская раскладка даты, а не английская.
+     * ЛОКАЛЬ, КОТОРОЙ НЕТ В БРАУЗЕРЕ, МОЛЧА СТАНОВИТСЯ АНГЛИЙСКОЙ.
+     */
+    Б.дата = function (значение, сЧасами) {
+        if (!значение) return '';
+        var раскладка = { day: 'numeric', month: 'short' };
+        if (сЧасами) { раскладка.hour = '2-digit'; раскладка.minute = '2-digit'; }
+        /* кыргызскому — русская раскладка, см. выше */
+        var локаль = KSLT_YAZYK.выбрать('en-US', 'ru-RU', 'ru-RU');
+        return new Date(значение).toLocaleString(локаль, раскладка);
+    };
+
+    /** АДРЕС ПРОВЕРКИ ВАУЧЕРА — один на продукт, и он несёт язык. */
+    Б.адресПроверки = function (токен) {
+        /* ЯЗЫК ВАУЧЕРА — 13.10. `verify-en.html` и `verify-kg.html`
+           существуют и верны, но все три генератора QR строили только
+           русский адрес, и обе переведённые страницы были недостижимы. */
+        return window.KSLT_SAYT.адрес + '/pages/verify' +
+               KSLT_YAZYK.суффикс + '.html?token=' + токен;
+    };
+
+    /**
+     * НАРИСОВАТЬ QR В КОРОБКЕ. Отдаёт true, если холст появился.
+     * Без библиотеки — надпись на языке страницы, а не пустота молча.
+     */
+    Б.нарисоватьQR = function (коробка, адрес) {
+        if (!коробка) return false;
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(коробка, {
+                text: адрес, width: 200, height: 200,
+                colorDark: '#000000', colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            return true;
+        }
+        /* ВЗЯТО ЛУЧШЕЕ ИЗ ТРЁХ И ПОЧИНЕНО: у кортов надпись была
+           по-английски и инлайн-стилем, у тренеров и в кабинете её не было
+           вовсе — коробка оставалась пустой МОЛЧА. */
+        коробка.textContent = KSLT_YAZYK.выбрать(
+            'QR could not be drawn — show this screen at the venue',
+            'QR тартылбай калды — бул экранды көрсөтүңүз',
+            'QR не нарисовался — покажите этот экран на месте');
+        return false;
+    };
+
+    /**
+     * СКАЧИВАНИЕ КАРТОЧКИ. Рисует её ДРУГОЙ дом —
+     * `js/kslt-vaucher-kartochka.js`; здесь только повод и поля.
+     * Задержка нужна QR: холст появляется не в тот же кадр.
+     */
+    Б.повеситьСкачивание = function (кнопка, коробка, ваучер, срок) {
+        if (!кнопка) return;
+        кнопка.addEventListener('click', function () {
+            setTimeout(function () {
+                var холст = коробка.querySelector('canvas');
+                if (!холст) return;
+                var карточка = window.KSLT_VAUCHER.нарисовать({
+                    qrCanvas: холст,
+                    скидка: ваучер.discount_percent,
+                    услуга: ваучер.service_name,
+                    заведение: ваучер.entity_name,
+                    срок: срок,
+                    язык: KSLT_YAZYK.выбрать('en', 'kg', 'ru')
+                });
+                window.KSLT_VAUCHER.скачать(карточка,
+                    'KSLT-voucher-' + String(ваучер.qr_token).substring(0, 8) + '.png');
+            }, 300);
+        });
+    };
+
     /** Название услуги на языке страницы; запасное — русское из базы. */
     function имяУслуги(у) {
         return KSLT_YAZYK.выбрать(у.service_name_en || у.service_name,
@@ -191,15 +270,8 @@
         var было = document.getElementById(к.id);
         if (было) было.remove();
 
-        /* ЯЗЫК ВАУЧЕРА — 13.10. `verify-en.html` и `verify-kg.html`
-           существуют и верны, но все три генератора QR строили только
-           русский адрес, и обе переведённые страницы были недостижимы.
-           Язык здесь уже известен — им подписан сам QR. */
-        var адресПроверки = window.KSLT_SAYT.адрес + '/pages/verify' +
-            KSLT_YAZYK.суффикс + '.html?token=' + в.qr_token;
-        var срок = new Date(в.expires_at).toLocaleString(
-            KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'),
-            { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var адресПроверки = Б.адресПроверки(в.qr_token);
+        var срок = Б.дата(в.expires_at, true);
 
         var окно = document.createElement('div');
         окно.id = к.id;
@@ -227,46 +299,13 @@
         document.body.appendChild(окно);
 
         var коробкаQR = document.getElementById(к.idQR);
-        if (typeof QRCode !== 'undefined') {
-            new QRCode(коробкаQR, {
-                text: адресПроверки, width: 200, height: 200,
-                colorDark: '#000000', colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        } else {
-            /* ВЗЯТО ЛУЧШЕЕ ИЗ ДВУХ И ПОЧИНЕНО: у кортов эта надпись была
-               по-английски и инлайн-стилем, у тренеров её не было вовсе —
-               коробка оставалась пустой МОЛЧА. Теперь надпись есть, на
-               языке страницы и без инлайна: НЕЗАПОЛНЕННОЕ МЕСТО ДОЛЖНО
-               БРОСАТЬСЯ В ГЛАЗА. */
-            коробкаQR.textContent = KSLT_YAZYK.выбрать(
-                'QR could not be drawn — show this screen at the venue',
-                'QR тартылбай калды — бул экранды көрсөтүңүз',
-                'QR не нарисовался — покажите этот экран на месте');
-        }
+        Б.нарисоватьQR(коробкаQR, адресПроверки);
 
         document.getElementById(к.idЗакрыть)
             .addEventListener('click', function () { окно.remove(); });
         окно.addEventListener('click', function (e) { if (e.target === окно) окно.remove(); });
 
-        /* Скачать картинку рисует ДРУГОЙ дом — `js/kslt-vaucher-kartochka.js`.
-           Задержка нужна QR: холст появляется не в тот же кадр. */
-        document.getElementById(к.idСкачать).addEventListener('click', function () {
-            setTimeout(function () {
-                var холст = коробкаQR.querySelector('canvas');
-                if (!холст) return;
-                var карточка = window.KSLT_VAUCHER.нарисовать({
-                    qrCanvas: холст,
-                    скидка: в.discount_percent,
-                    услуга: в.service_name,
-                    заведение: в.entity_name,
-                    срок: срок,
-                    язык: KSLT_YAZYK.выбрать('en', 'kg', 'ru')
-                });
-                window.KSLT_VAUCHER.скачать(карточка,
-                    'KSLT-voucher-' + в.qr_token.substring(0, 8) + '.png');
-            }, 300);
-        });
+        Б.повеситьСкачивание(document.getElementById(к.idСкачать), коробкаQR, в, срок);
         return окно;
     };
 
@@ -353,9 +392,7 @@
                 var сейчас = new Date();
                 var список = '<div class="' + к.список + '">';
                 ваучеры.forEach(function (в) {
-                    var дата = new Date(в.created_at).toLocaleDateString(
-                        KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'),
-                        { day: 'numeric', month: 'short' });
+                    var дата = Б.дата(в.created_at);
                     var имя = имена[в.service_id] || в.service_id;
                     var состояние = в.status;
                     if (состояние === 'active' && в.expires_at &&

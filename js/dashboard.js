@@ -934,10 +934,16 @@
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
        пишется в двойных кавычках», которого никто не сторожит. Эталон
        взят дословно у `js/kslt-lenta.js`. */
+    /* ЭКРАНИРОВАНИЕ — ДОМ `js/kslt-ekranirovanie.js` (кусок 146, 23.10).
+       Здесь стояло своё тело, побайтово равное дому, и кусок 141, свёдший
+       тридцать одну копию, ЕГО НЕ УВИДЕЛ: его правило отбирало функции по
+       ИМЕНИ (`esc`, `escHtml`, `escapeHtml`), а эта зовётся `dbEsc`.
+       Тридцать вторая копия, найденная чтением кабинета.
+       ПРАВИЛО, ОТБИРАЮЩЕЕ ПО ИМЕНИ, НЕ ВИДИТ ТЕЛО — правило куска 141
+       переведено на ПРИЗНАК: гасит ли функция обе кавычки.
+       Имя оставлено: его зовут восемь мест кабинета. */
     function dbEsc(str) {
-        return String(str == null ? '' : str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        return window.KSLT_экранировать(str);
     }
 
     // ---- Проверка имени ----
@@ -5539,11 +5545,13 @@
     function renderVoucherItem(v, hiddenType) {
         var statusClass = v.status === 'active' ? 'db-status-active' : (v.status === 'used' ? 'db-status-approved' : 'db-status-rejected');
         var statusLabel = v.status === 'active' ? L.voucherActive : (v.status === 'used' ? L.voucherUsed : L.voucherExpired);
-        var dateStr = new Date(v.created_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short' });
-        var expiresStr = '';
-        if (v.expires_at) {
-            expiresStr = new Date(v.expires_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-        }
+        /* ДАТА И СРОК — ДОМ ВАУЧЕРНОГО БЛОКА (кусок 146). Здесь стояла
+           локаль `ky-KG`, которой в браузере НЕТ: замерено 23.10 —
+           `supportedLocalesOf(['ky-KG','ky'])` пусто, и локаль молча
+           становится английской. На кыргызской странице срок печатался
+           «Oct 15» вместо «15 окт.». */
+        var dateStr = KSLT_VAUCHER_BLOK.дата(v.created_at);
+        var expiresStr = KSLT_VAUCHER_BLOK.дата(v.expires_at, true);
         var isHidden = !!hiddenType;
         // Размеры вынесены в классы: на телефоне карточка перестраивается,
         // а в разметке их было не достать
@@ -5702,16 +5710,14 @@
         if (existing) existing.remove();
 
         var token = voucher.qr_token;
-        /* ЯЗЫК ВАУЧЕРА — 13.10. Страницы verify-en.html и verify-kg.html
-           существуют и верны, но до сегодня все три генератора QR строили
-           только русский адрес: обе переведённые страницы были недостижимы.
-           Язык здесь уже известен — им подписан сам QR. */
-        var verifySuffix = KSLT_YAZYK.суффикс;
-        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + token;
-        var expiresStr = '';
-        if (voucher.expires_at) {
-            expiresStr = new Date(voucher.expires_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-        }
+        /* АДРЕС ПРОВЕРКИ И СРОК — ДОМ ВАУЧЕРНОГО БЛОКА (кусок 146). Оба
+           были здесь третьей копией: адрес с языком, срок с локалью,
+           которой в браузере нет. ВИД ОКНА ОСТАЁТСЯ СВОИМ — он у кабинета
+           ДРУГОЙ (узкое окно с размытием, крупный процент сверху, без
+           строк деталей), и сведение вида — правка на глаз, не правка
+           копии. */
+        var verifyUrl = KSLT_VAUCHER_BLOK.адресПроверки(token);
+        var expiresStr = KSLT_VAUCHER_BLOK.дата(voucher.expires_at, true);
 
         var modal = document.createElement('div');
         modal.id = 'dbVoucherQRModal';
@@ -5731,39 +5737,18 @@
         document.body.appendChild(modal);
 
         var qrContainer = document.getElementById('dbVQRCode');
-        if (typeof QRCode !== 'undefined') {
-            new QRCode(qrContainer, {
-                text: verifyUrl,
-                width: 200,
-                height: 200,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        }
+        /* РИСОВАНИЕ QR — ДОМ (кусок 146). Здесь не было ветви «библиотеки
+           нет»: коробка оставалась пустой МОЛЧА. Теперь надпись есть. */
+        KSLT_VAUCHER_BLOK.нарисоватьQR(qrContainer, verifyUrl);
 
         document.getElementById('dbVQRClose').addEventListener('click', function() { modal.remove(); });
         modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
 
-        /* Скачать картинку. Рисует ОДИН дом — `js/kslt-vaucher-kartochka.js`.
-           Эта копия единственная из трёх проверяла пустую скидку и срок —
-           проверки перенесены в дом, и теперь их знают все три места. */
-        document.getElementById('dbVQRDownload').addEventListener('click', function() {
-            setTimeout(function() {
-                var qrCanvas = qrContainer.querySelector('canvas');
-                if (!qrCanvas) return;
-                var карточка = window.KSLT_VAUCHER.нарисовать({
-                    qrCanvas: qrCanvas,
-                    скидка: voucher.discount_percent,
-                    услуга: voucher.service_name,
-                    заведение: voucher.entity_name,
-                    срок: expiresStr,
-                    язык: KSLT_YAZYK.выбрать('en', 'kg', 'ru')
-                });
-                window.KSLT_VAUCHER.скачать(карточка,
-                    'KSLT-voucher-' + token.substring(0, 8) + '.png');
-            }, 300);
-        });
+        /* СКАЧИВАНИЕ — ДОМ (кусок 146): повод и поля были третьей копией
+           знак в знак. Саму картинку рисует `js/kslt-vaucher-kartochka.js`
+           с 19.10 — это другое понятие и другой дом. */
+        KSLT_VAUCHER_BLOK.повеситьСкачивание(
+            document.getElementById('dbVQRDownload'), qrContainer, voucher, expiresStr);
     }
 
     // ---- Notification Preferences ----

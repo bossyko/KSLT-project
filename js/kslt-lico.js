@@ -32,10 +32,9 @@
 (function () {
     'use strict';
 
+    /* ЭКРАНИРОВАНИЕ — ДОМ (кусок 146). */
     function экр(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        return window.KSLT_экранировать(s);
     }
 
     function инициалы(имя) {
