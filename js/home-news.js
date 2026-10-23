@@ -34,7 +34,9 @@
         if (!iso) return '';
         var d = new Date(iso);
         if (isNaN(d.getTime())) return '';
-        return d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'),
+        /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147): `ky-KG` в браузере нет, и она
+           молча становилась английской. */
+        return d.toLocaleDateString(KSLT_YAZYK.локаль,
             { day: 'numeric', month: 'long', year: 'numeric' });
     }
 

@@ -42,7 +42,9 @@
     };
 
     var isEn = KSLT_YAZYK.en;
-    var LOCALE = KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU');
+    /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147): числа и даты статистики кыргызу
+       печатались английской раскладкой. */
+    var LOCALE = KSLT_YAZYK.локаль;
 
     var client = window.supabaseClient;
     if (!client) return;

@@ -20,7 +20,8 @@
     'use strict';
 
     var isEn = KSLT_YAZYK.en;
-    var LOCALE = KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU');
+    /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
+    var LOCALE = KSLT_YAZYK.локаль;
 
     var L = KSLT_YAZYK.выбрать({
         live: 'In progress', open: 'Registration open', soon: 'Upcoming',

@@ -269,14 +269,16 @@ function getPlayer(tournament, playerId) {
 var TD_OUTCOMES = ['RET', 'W/O', 'DEF', 'NA'];
 
 
-function getStatusLabel(status) {
-    var labels = typeof window.statusLabels !== 'undefined' ? window.statusLabels : {
-        completed: 'Завершён',
-        live: 'Live',
-        upcoming: 'Предстоит'
-    };
-    return labels[status] || status;
-}
+/* СНЕСЕНО КУСКОМ 147, 23.10 — МЁРТВОЕ, И ЭТО ПРОВЕРЕНО, А НЕ ПО ВИДУ.
+   Здесь стоял `getStatusLabel`: его звал только `renderHero` ниже, а тот
+   не зовётся нигде — обход по всем `js/`, `pages/` и корневым страницам
+   дал ноль зовов.
+   ВАЖНЕЕ ТОГО, ЧТО ОНО МЁРТВО: внутри лежала ВТОРАЯ КАРТА ПОДПИСЕЙ
+   СТАТУСА турнира — `{completed, live, upcoming}`, по-русски и с ключом
+   `live`, которого у понятия нет вовсе (в доме он `ongoing`). Живая карта
+   — дом `js/tournament-status.js`, и он знает три языка. Будь эта функция
+   живой, статус печатался бы по-русски на всех языках и половиной ключей
+   мимо. */
 
 // ========================================
 // LEAGUE BRACKET PUBLIC RENDER
@@ -393,65 +395,11 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
 // HERO
 // ========================================
 
-function renderHero(tournament) {
-    var container = document.getElementById('tournamentHero');
-    if (!container) return;
-
-    var statusClass = tournament.status;
-    var statusText = getStatusLabel(tournament.status);
-    /* Назад — в список турниров НА ЯЗЫКЕ СТРАНИЦЫ. Было три ветки и три
-       раза собранный один и тот же хвост запроса. */
-    var backUrl = KSLT_YAZYK.выбрать('tournaments-en.html', 'tournaments-kg.html', 'tournaments.html')
-                + '?category=' + tournament.category;
-
-    container.innerHTML =
-        '<div class="td-hero-bg">' +
-            '<img src="' + KSLT_экранировать(tournament.bgImage) + '" alt="">' +
-            '<div class="td-hero-overlay"></div>' +
-        '</div>' +
-        '<div class="td-hero-content">' +
-            '<a href="' + backUrl + '" class="td-back-link">' +
-                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>' +
-                ' ' + tournament.categoryName +
-            '</a>' +
-            '<div class="td-hero-badges">' +
-                '<span class="tournament-category-badge">' + tournament.categoryName + '</span>' +
-                '<span class="td-status-badge ' + statusClass + '">' +
-                    (tournament.status === 'live' ? '<span class="live-dot"></span> ' : '') +
-                    statusText +
-                '</span>' +
-            '</div>' +
-            '<h1>' + tournament.name + '</h1>' +
-            '<div class="td-hero-meta">' +
-                '<div class="td-meta-item">' +
-                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-                    ' ' + tournament.dateRange +
-                '</div>' +
-                '<div class="td-meta-item">' +
-                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-                    ' ' + tournament.location +
-                '</div>' +
-                '<div class="td-meta-item">' +
-                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-                    ' ' + tournament.time +
-                '</div>' +
-            '</div>' +
-            '<div class="td-hero-stats">' +
-                '<div class="hero-stat">' +
-                    '<span class="hero-stat-value">' + tournament.drawSize + '</span>' +
-                    '<span class="hero-stat-label">' + (typeof window.heroLabels !== 'undefined' ? window.heroLabels.players : 'Участников') + '</span>' +
-                '</div>' +
-                '<div class="hero-stat">' +
-                    '<span class="hero-stat-value">' + tournament.prize + '</span>' +
-                    '<span class="hero-stat-label">' + (typeof window.heroLabels !== 'undefined' ? window.heroLabels.prize : 'Призовой фонд') + '</span>' +
-                '</div>' +
-                '<div class="hero-stat">' +
-                    '<span class="hero-stat-value">' + (tournament.bracketType === 'single_elimination' ? (typeof window.heroLabels !== 'undefined' ? window.heroLabels.elimination : 'На вылет') : tournament.bracketType === 'fic' ? (typeof window.heroLabels !== 'undefined' ? (window.heroLabels.fic || 'All Places') : 'Все места') : (typeof window.heroLabels !== 'undefined' ? window.heroLabels.roundRobin : 'Круговая')) + '</span>' +
-                    '<span class="hero-stat-label">' + (typeof window.heroLabels !== 'undefined' ? window.heroLabels.format : 'Формат') + '</span>' +
-                '</div>' +
-            '</div>' +
-        '</div>';
-}
+/* СНЕСЕНО КУСКОМ 147: `renderHero` этого файла не зовётся нигде — ни
+   внутри него, ни из страниц. Одноимённые `renderHero` в шести других
+   файлах лежат каждая в своей обёртке: это чужие функции, а не зовы этой.
+   Внутри была ТРЕТЬЯ копия подписей — `window.heroLabels` с русскими
+   запасными значениями: та же беда, что и выше, только в заголовке. */
 
 // ========================================
 // FIC SECTIONS (public)
@@ -1388,7 +1336,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             var подписи = KSLT_YAZYK.выбрать({ court: 'Court', time: 'Time', round: 'Round', status: 'Status', group: 'Group',
                     done: 'Done', live: 'Live', soon: 'Upcoming' }, { court: 'Корт', time: 'Убакыт', round: 'Раунд', status: 'Абалы', group: 'Топ',
-                        done: 'Аяктады', live: 'Live', soon: 'Күтүүдө' }, { court: 'Корт', time: 'Время', round: 'Раунд', status: 'Статус', group: 'Группа',
+                        /* БЫЛО `live: 'Live'` — кыргызу давали английское
+                           слово, пока русскому стояло «Идёт». Слово взято У
+                           ДОМА СТАТУСОВ (`js/tournament-status.js`,
+                           kg.ongoing), а не придумано здесь. */
+                        done: 'Аяктады', live: 'Жүрүп жатат', soon: 'Күтүүдө' }, { court: 'Корт', time: 'Время', round: 'Раунд', status: 'Статус', group: 'Группа',
                         done: 'Завершён', live: 'Идёт', soon: 'Ожидает' });
 
             var естьГруппы = очередь.some(function(m) { return !!m.group_number; });
@@ -2437,8 +2389,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var regDate = '', regTime = '';
                 if (reg.registered_at) {
                     var d = new Date(reg.registered_at);
-                    regDate = d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: '2-digit', month: '2-digit', year: '2-digit' });
-                    regTime = d.toLocaleTimeString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
+                    regDate = d.toLocaleDateString(KSLT_YAZYK.локаль, { day: '2-digit', month: '2-digit', year: '2-digit' });
+                    regTime = d.toLocaleTimeString(KSLT_YAZYK.локаль, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 }
                 var скрыта = классОтсечки(idx - 1, всего);
                 return '<tr' + (скрыта ? ' class="' + скрыта.trim() + '"' : '') + '>' +
@@ -3208,7 +3161,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm
                         ? (KSLT_YAZYK.выбрать('permanently', 'түбөлүккө', 'навсегда'))
-                        : new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'));
+                        : new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.локаль);
                     var banReasonText = plRes.data.ban_reason
                         ? '<div class="td-zapis-note-pod">' +
                             (KSLT_YAZYK.выбрать('Reason: ', 'Себеби: ', 'Причина: ')) + plRes.data.ban_reason + '</div>'

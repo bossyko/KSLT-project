@@ -5976,7 +5976,8 @@
             else typeLabel = L.loyAdjust;
 
             var actionLabel = LOY_ACTION_MAP[t.action] || (t.action || '—');
-            var dateStr = new Date(t.created_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short' });
+            /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
+            var dateStr = new Date(t.created_at).toLocaleDateString(KSLT_YAZYK.локаль, { day: 'numeric', month: 'short' });
 
             /* КРАСКА — КЛАССОМ ИЗ СИСТЕМЫ. Стояли #4caf50 и #f44336
                инлайном: Material мимо палитры, и инлайн бьёт правило по
@@ -6434,7 +6435,8 @@
         if (!когда) return L.devicesNever;
         var д = new Date(когда);
         var сейчас = new Date();
-        var язык = KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU');
+        /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
+        var язык = KSLT_YAZYK.локаль;
         var время = д.toLocaleTimeString(язык, { hour: '2-digit', minute: '2-digit' });
 
         var сутки = 24 * 60 * 60 * 1000;

@@ -156,7 +156,8 @@ const КУСКИ = [
     ['сотрудник не член клуба', 'check-sotrudnik-ne-chlen.js', 'check-sotrudnik-ne-chlen-otkat.js'],
     ['карточка не заводится сотруднику', 'check-karta-ne-sotrudniku.js', 'check-karta-ne-sotrudniku-otkat.js'],
     ['остаток близнецов', 'check-bliznetsy-ostatok.js', 'check-bliznetsy-ostatok-otkat.js'],
-    ['ваучерный блок', 'check-vaucher-blok.js', 'check-vaucher-blok-otkat.js']
+    ['ваучерный блок', 'check-vaucher-blok.js', 'check-vaucher-blok-otkat.js'],
+    ['по языкам, а не вперемешку', 'check-yazyk-bez-peremeshki.js', 'check-yazyk-bez-peremeshki-otkat.js']
 ];
 
 function прогнать(файл) {

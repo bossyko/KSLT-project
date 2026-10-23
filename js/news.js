@@ -43,7 +43,8 @@ function mapDbArticle(row) {
     var dateStr = '';
     if (row.published_at) {
         var d = new Date(row.published_at);
-        dateStr = d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), {
+        /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
+        dateStr = d.toLocaleDateString(KSLT_YAZYK.локаль, {
             day: 'numeric', month: 'long', year: 'numeric'
         });
     }
