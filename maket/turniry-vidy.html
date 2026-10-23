@@ -38,9 +38,9 @@
 У горизонтальных видов показан <b>первый экран</b>, у остальных — <b>карточки</b>.</p>
 
 <div class="кнопки">
-  <a href="/maket/turniry-zamer.html" target="_blank">Открыть во весь экран</a>
-  <a href="/maket/turniry-slot.html" target="_blank">Варианты слота</a>
-  <a href="/maket/turniry-maket.html" target="_blank">Макет «было / стало»</a>
+  <a href="turniry-zamer.html" target="_blank">Открыть во весь экран</a>
+  <a href="turniry-slot.html" target="_blank">Варианты слота</a>
+  <a href="turniry-maket.html" target="_blank">Макет «было / стало»</a>
 </div>
 
 <h2 class="группа">ГОРИЗОНТАЛЬНЫЕ — про них и был вопрос</h2>
@@ -89,7 +89,7 @@ var ВИДЫ = [
 
     /* Адрес даём ПОСЛЕ того, как рамка встала в свой размер: иначе страница
        успевает решить, что она узкая, и рисует ленту на десктопе */
-    setTimeout(function () { f.src = '/maket/turniry-zamer.html?v=' + Date.now(); }, 200 + i * 220);
+    setTimeout(function () { f.src = 'turniry-zamer.html?v=' + Date.now(); }, 200 + i * 220);
 
     f.addEventListener('load', function () {
         if (в.где !== 'карточки') return;
