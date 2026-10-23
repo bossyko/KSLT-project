@@ -84,21 +84,16 @@
             return { active: false, paid: false, membership: null, daysLeft: 0 };
         }
 
-        // Staff bypass — admin and manager skip membership check
-        var role = window.ksltProfile && window.ksltProfile.role;
-        if (!role) {
-            // Public pages may not have ksltProfile — check from localStorage or DB
-            role = localStorage.getItem('kslt_role');
-            if (!role) {
-                try {
-                    var pr = await client.from('profiles').select('role').eq('id', window.ksltUser.id).single();
-                    if (pr.data) role = pr.data.role;
-                } catch (e) { /* ignore */ }
-            }
-        }
-        if (role === 'admin' || role === 'manager') {
-            return { active: true, paid: true, membership: { staff_bypass: true }, daysLeft: 999 };
-        }
+        /* СОТРУДНИК КЛУБА НЕ ЧЛЕН КЛУБА — кусок 142, 23.10, слово Кости.
+           Здесь с 03.03 (коммит 0663822) стоял обход по роли: `admin` и
+           `manager` получали `active: true, paid: true` не глядя в базу.
+           Он ПРОТИВОРЕЧИЛ решению, записанному в коде же —
+           `js/dashboard.js`: сотрудникам не предлагают привязать карточку
+           игрока, «под рабочей почтой они не играют». Одно понятие было
+           определено дважды и в разные стороны: кабинет говорил «не
+           игрок», членство — «член клуба по должности».
+           РОЛЬ ДАЁТ ДОСТУП В АДМИНКУ, А НЕ ЧЛЕНСТВО. Членство теперь
+           спрашивается у базы для всех одинаково. */
 
         // Бесплатный период: вошёл — значит доступ есть
         if (await window.бесплатныйПериод()) {

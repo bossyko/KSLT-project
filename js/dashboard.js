@@ -1027,7 +1027,7 @@
      */
     function showOnboarding(profile) {
         if (localStorage.getItem('kslt_onboarding_done')) return;
-        if (profile.role === 'admin' || profile.role === 'manager') return;
+        if (KSLT_DOSTUP.сотрудникПоРоли(profile.role)) return;
 
         var steps = [
             {
@@ -1127,9 +1127,19 @@
         renderMobileTabs();
         renderProfile(user, profile);
         карточкаВПрофиле(profile);
-        renderMembershipCard().then(function(state) {
-            applyMembershipRestrictions(state);
-        });
+        /* СОТРУДНИКУ НЕ ПРЕДЛАГАЮТ ЧЛЕНСТВО И НЕ ЗАПИРАЮТ РАЗДЕЛЫ —
+           кусок 142, 23.10. До него роль молча получала членство в
+           `checkMembership()` (обход с 03.03), и карточка показывала
+           «активно, 999 дней». Обход снят — без этой ветви кабинет
+           сотрудника закрыл бы «Турниры» и «Статистику» замком с
+           предложением оплатить. Он не «не заплатил», он НЕ ИГРАЕТ под
+           рабочей почтой: то же решение, что и отказ предлагать ему
+           карточку игрока ниже. */
+        if (!KSLT_DOSTUP.сотрудникПоРоли(profile.role)) {
+            renderMembershipCard().then(function(state) {
+                applyMembershipRestrictions(state);
+            });
+        }
         _dashProfile = profile;
         renderGames(profile);
         renderStats(profile);
@@ -1331,7 +1341,7 @@
 
         // Role badge for admin/manager only
         var roleHtml = '';
-        if (profile.role === 'admin' || profile.role === 'manager') {
+        if (KSLT_DOSTUP.сотрудникПоРоли(profile.role)) {
             roleHtml = '<div class="kslt-role kslt-role-' + profile.role + ' db-sidebar-role">' + (L['role_' + profile.role] || profile.role) + '</div>';
         }
 
@@ -2661,7 +2671,7 @@
         // Карточка игрока ещё не привязана — первым делом предлагаем найти
         // свою: без неё в кабинете нет ни рейтинга, ни истории. Сотрудникам
         // клуба не предлагаем: под рабочей почтой они не играют
-        var сотрудник = profile.role === 'admin' || profile.role === 'manager';
+        var сотрудник = KSLT_DOSTUP.сотрудникПоРоли(profile.role);
         if (!profile.player_id && !сотрудник) html += '<div id="dbLinkCard"></div>';
 
         html += sub('dbSubUpcoming', '\uD83D\uDCC5', L.subUpcoming, 'dbGamesUpcoming');

@@ -3033,10 +3033,9 @@ function renderRegistrationButton(tournament, registrations, isEn) {
         }
         var userId = userRes.data.user.id;
 
-        client.from('profiles').select('player_id, role, full_name').eq('id', userId).single().then(function(profRes) {
+        client.from('profiles').select('player_id, full_name').eq('id', userId).single().then(function(profRes) {
             if (!profRes.data || !profRes.data.player_id) return;
             var playerId = profRes.data.player_id;
-            var isStaff = profRes.data.role === 'admin' || profRes.data.role === 'manager';
             window.ksltProfileName = profRes.data.full_name || '';
 
             // Check if already registered
@@ -3089,13 +3088,20 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 // предлагала оплатить, хотя вход открыт всем. То же правило
                 // действует и в функции записи — здесь оно просто повторяется,
                 // чтобы человек не видел лишнего окна
-                var membershipOk = isStaff;
-                var paidOk = isStaff;
+                /* РОЛЬ ЗДЕСЬ НИЧЕГО НЕ РЕШАЕТ — кусок 142, 23.10. Было
+                   `membershipOk = isStaff`: роль выдавала членство и оплату
+                   напрямую, минуя зов. Померено: без `player_id` кнопка
+                   записи не рисуется вовсе (условие выше), а сотруднику
+                   карточку не привязывают — значит ветвь роли работала
+                   только у сотрудника С карточкой и противоречила решению
+                   «под рабочей почтой они не играют». */
+                var membershipOk = false;
+                var paidOk = false;
                 var бесплатно = window.бесплатныйПериод ? await window.бесплатныйПериод() : false;
                 if (бесплатно) {
                     membershipOk = true;
                     paidOk = true;
-                } else if (!isStaff && window.checkMembership) {
+                } else if (window.checkMembership) {
                     var memResult = await window.checkMembership();
                     membershipOk = memResult && memResult.active;
                     paidOk = memResult && memResult.paid;
