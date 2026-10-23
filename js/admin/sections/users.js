@@ -123,7 +123,7 @@
                             '<th>' + L.thUser + '</th>' +
                             '<th>' + L.thEmail + '</th>' +
                             '<th>' + L.thRole + '</th>' +
-                            '<th>' + L.usrThStatus + '</th>' +
+                            '<th>' + L.thStatus + '</th>' +
                             '<th style="cursor:pointer;user-select:none;" id="adUsrSortMem">' + L.usrThMembership + ' <span style="opacity:0.4;">⇅</span></th>' +
                             '<th>' + L.thDate + '</th>' +
                         '</tr></thead>' +

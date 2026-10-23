@@ -436,7 +436,7 @@
                             crtColHeader('city', L.crtCity) +
                             crtColHeader('partner', L.crtPartner) +
                             crtColHeader('promoted', L.crtPromoted) +
-                            '<th style="text-align:center;width:50px;">&#128065;</th>' +
+                            '<th style="text-align:center;width:50px;">' + A.столбецЗнаком('&#128065;', L.thViews) + '</th>' +
                         '</tr></thead>' +
                         '<tbody><tr><td class="ad-tablica-pusto" colspan="11">...</td></tr></tbody>' +
                     '</table>' +
@@ -619,7 +619,7 @@
                         '<th>' + L.crtViewAmount + '</th>' +
                         '<th>' + L.crtViewActiveUntil + '</th>' +
                         '<th>' + L.crtViewMethod + '</th>' +
-                        '<th>' + L.crtViewStatus + '</th>' +
+                        '<th>' + L.thStatus + '</th>' +
                     '</tr></thead><tbody>';
 
             payments.forEach(function(p) {

@@ -318,7 +318,7 @@
             '<th>' + L.chalChallenger + '</th>' +
             '<th>' + L.chalOpponent + '</th>' +
             '<th>' + L.chalVotes + '</th>' +
-            '<th>' + L.chalStatus + '</th>' +
+            '<th>' + L.thStatus + '</th>' +
             '<th>' + L.chalBroadcast + '</th>' +
             '<th>' + L.chalActions + '</th>' +
             '</tr></thead><tbody>';

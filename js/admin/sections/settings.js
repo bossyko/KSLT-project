@@ -1212,7 +1212,7 @@
                 '<th>' + L.ratFromCat + '</th>' +
                 '<th>' + L.ratToCat + '</th>' +
                 '<th style="width:70px">' + L.ratSeason + '</th>' +
-                '<th style="width:100px">' + L.ratStatus + '</th>' +
+                '<th style="width:100px">' + L.thStatus + '</th>' +
                 '<th style="width:200px">' + L.ratActions + '</th>' +
             '</tr></thead><tbody>';
 

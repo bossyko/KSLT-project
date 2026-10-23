@@ -91,7 +91,7 @@
                         '<th class="ad-centr">' + L.sponContacts + '</th>' +
                         '<th class="ad-centr">' + L.sponIsHero + '</th>' +
                         '<th style="text-align:center;width:80px">' + L.sponSort + '</th>' +
-                        '<th style="text-align:center;width:50px">&#128065;</th>' +
+                        '<th style="text-align:center;width:50px">' + A.столбецЗнаком('&#128065;', L.thViews) + '</th>' +
                         '<th style="width:130px"></th>' +
                     '</tr></thead>' +
                     '<tbody>' + rows + '</tbody>' +

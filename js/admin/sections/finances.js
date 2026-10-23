@@ -87,7 +87,7 @@
                         '<th>' + L.payAmount + '</th>' +
                         '<th>' + ('Активен до') + '</th>' +
                         '<th>' + L.payMethod + '</th>' +
-                        '<th>' + L.payStatus + '</th>' +
+                        '<th>' + L.thStatus + '</th>' +
                         '<th>' + L.payCreatedAt + '</th>' +
                     '</tr></thead>' +
                     '<tbody></tbody>' +
@@ -1054,7 +1054,7 @@
                     '<th>' + ('Тип') + '</th>' +
                     '<th>' + L.payAmount + '</th>' +
                     '<th>' + ('Активен до') + '</th>' +
-                    '<th>' + L.payStatus + '</th>' +
+                    '<th>' + L.thStatus + '</th>' +
                     '<th>' + L.payCreatedAt + '</th>' +
                 '</tr></thead>' +
                 '<tbody>' + tableRows + '</tbody>' +
@@ -1091,7 +1091,7 @@
             filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) <= finDateTo; });
         }
 
-        var headers = ['№', L.payEntity, 'Тип', L.payAmount, 'Валюта', 'Активен до', L.payStatus, L.payCreatedAt];
+        var headers = ['№', L.payEntity, 'Тип', L.payAmount, 'Валюта', 'Активен до', L.thStatus, L.payCreatedAt];
         var rows = filtered.map(function(p, i) {
             var isAct = p.period_end >= today;
             var statusLabel = isAct ? L.payActive : L.payExpired;

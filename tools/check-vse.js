@@ -142,7 +142,8 @@ const КУСКИ = [
      'check-okna-odna-obolochka-otkat.js'],
     ['тело таблицы', 'check-telo-tablicy.js', 'check-telo-tablicy-otkat.js'],
     ['имена классов', 'check-imena-klassov-zhivye.js', 'check-imena-klassov-zhivye-otkat.js'],
-    ['пустое состояние', 'check-pustoe-sostoyanie.js', 'check-pustoe-sostoyanie-otkat.js']
+    ['пустое состояние', 'check-pustoe-sostoyanie.js', 'check-pustoe-sostoyanie-otkat.js'],
+    ['семь находок обхода', 'check-sem-nahodok.js', 'check-sem-nahodok-otkat.js']
 ];
 
 function прогнать(файл) {

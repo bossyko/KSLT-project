@@ -272,9 +272,9 @@
                 buildActivityTableHtml('adDashRecentUsers', L.actRecentRegistrations, 'neutral',
                     [L.thUser, L.thEmail, L.thRole, L.thDate], 'users') +
                 buildActivityTableHtml('adDashRecentTournaments', L.actRecentTournaments, 'neutral',
-                    [L.thTournament, L.thDateStart, L.thStatus, '&#128065;'], 'tournaments') +
+                    [L.thTournament, L.thDateStart, L.thStatus, A.столбецЗнаком('&#128065;', L.thViews)], 'tournaments') +
                 buildActivityTableHtml('adDashRecentNews', L.actRecentNews, 'neutral',
-                    [L.thArticle, L.thCategory, L.thExecutor, L.thStatus, L.thPubDate, '&#128065;'], 'content') +
+                    [L.thArticle, L.thCategory, L.thExecutor, L.thStatus, L.thPubDate, A.столбецЗнаком('&#128065;', L.thViews)], 'content') +
             '</div>';
 
         loadStats();
@@ -304,7 +304,15 @@
                 '<div class="ad-table-card-title">' + title +
                     '<span class="ad-dash-count-badge ad-dash-count-badge--' + badgeType + '" id="' + id + 'Count"></span>' +
                 '</div>' +
-                '<a class="ad-dash-view-all" data-tab="' + tabTarget + '">' + L.viewAll + ' →</a>' +
+                /* ССЫЛКА НАЗЫВАЕТ, КУДА ВЕДЁТ (кусок 131). Шесть ссылок на
+                   дашборде звались одинаково «Все →», а вели в три разных
+                   раздела — три из шести в «Пользователей». Одно слово на
+                   три цели: человек не знал, куда попадёт, пока не нажал.
+                   Слово раздела берётся из того же словаря, что и пункт
+                   меню, — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. */
+                '<a class="ad-dash-view-all" data-tab="' + tabTarget + '">' +
+                    L.viewAll + ' ' + (L[tabTarget] || '').toLowerCase() + ' →' +
+                '</a>' +
             '</div>' +
             '<div class="ad-table-wrap">' +
                 '<table class="ad-table">' +

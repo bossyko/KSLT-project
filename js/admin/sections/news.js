@@ -87,8 +87,14 @@
             var cls = 'ad-col-header' + (isActive || hasFilter ? ' ad-col-active' : '');
             // Колонки со значками без подписи непонятны — вешаем всплывающую
             var title = подсказка ? ' title="' + A.esc(подсказка) + '"' : '';
+            /* ЗНАЧОК БЕЗ СЛОВА ДИКТОРУ НЕ ГОВОРИТ НИЧЕГО (кусок 131).
+               `title` читается им слабо и не везде; слово кладём рядом —
+               видно только диктору, вид не меняется. */
+            var знаком = подсказка && !/[A-Za-zА-Яа-я]/.test(label);
             return '<th' + title + '><div class="' + cls + '" data-col="' + col + '"' + title + '>' +
-                '<span>' + label + '</span>' +
+                (знаком
+                    ? A.столбецЗнаком(label, A.esc(подсказка))
+                    : '<span>' + label + '</span>') +
                 (isActive ? '<span class="ad-sort-arrow">' + (newsSortAsc ? '↑' : '↓') + '</span>' : '') +
                 '<span class="ad-col-filter-btn' + (hasFilter ? ' ad-col-filtered' : '') + '">▼</span>' +
             '</div></th>';

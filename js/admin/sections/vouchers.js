@@ -28,10 +28,10 @@
 
         var statusOptions =
             '<option value="">' + L.vchAllStatuses + '</option>' +
-            '<option value="active"' + (vchFilterStatus === 'active' ? ' selected' : '') + '>' + L.vchStatusActive + '</option>' +
-            '<option value="used"' + (vchFilterStatus === 'used' ? ' selected' : '') + '>' + L.vchStatusUsed + '</option>' +
-            '<option value="expired"' + (vchFilterStatus === 'expired' ? ' selected' : '') + '>' + L.vchStatusExpired + '</option>' +
-            '<option value="cancelled"' + (vchFilterStatus === 'cancelled' ? ' selected' : '') + '>' + L.vchStatusCancelled + '</option>';
+            '<option value="active"' + (vchFilterStatus === 'active' ? ' selected' : '') + '>' + L.payStatusActive + '</option>' +
+            '<option value="used"' + (vchFilterStatus === 'used' ? ' selected' : '') + '>' + L.payStatusUsed + '</option>' +
+            '<option value="expired"' + (vchFilterStatus === 'expired' ? ' selected' : '') + '>' + L.payStatusExpired + '</option>' +
+            '<option value="cancelled"' + (vchFilterStatus === 'cancelled' ? ' selected' : '') + '>' + L.payStatusCancelled + '</option>';
 
         var typeOptions =
             '<option value="">' + L.vchAllTypes + '</option>' +
@@ -103,7 +103,7 @@
                         '<th>' + L.vchServiceType + '</th>' +
                         '<th>' + L.vchDiscount + '</th>' +
                         '<th>' + L.vchDate + '</th>' +
-                        '<th>' + L.vchStatus + '</th>' +
+                        '<th>' + L.thStatus + '</th>' +
                         '<th></th>' +
                     '</tr></thead>' +
                     '<tbody></tbody>' +
@@ -535,7 +535,7 @@
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchEntity + '</span><span>' + typeIcon + ' ' + A.esc(v.entity_name || '—') + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchService + '</span><span>' + A.esc(v.service_name || '—') + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDiscount + '</span><span style="font-weight:600;color:var(--accent);">' + v.discount_percent + '% (' + discountAmount + ' ' + L.vchCurrency + ')</span></div>' +
-                            '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchStatus + '</span><span class="ad-vch-badge ' + statusCls + '">' + statusLabel + '</span></div>' +
+                            '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.thStatus + '</span><span class="ad-vch-badge ' + statusCls + '">' + statusLabel + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDate + '</span><span>' + formatVchDate(v.created_at) + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + ('Истекает') + '</span><span>' + formatVchDate(v.expires_at) + '</span></div>' +
                             (v.used_at ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchUsedAt + '</span><span>' + formatVchDate(v.used_at) + '</span></div>' : '') +
@@ -627,7 +627,7 @@
                     '<th>' + L.vchService + '</th>' +
                     '<th>' + L.vchDiscount + '</th>' +
                     '<th>' + L.vchDate + '</th>' +
-                    '<th>' + L.vchStatus + '</th>' +
+                    '<th>' + L.thStatus + '</th>' +
                 '</tr></thead>' +
                 '<tbody>' + tableRows + '</tbody>' +
             '</table>' +
@@ -697,7 +697,7 @@
         var data = vchFilteredData;
         var today = KSLT_VREMYA.сегодня();
 
-        var headers = ['№', L.vchPlayer, L.vchEntity, L.vchServiceType, L.vchDiscount + '%', L.vchDate, L.vchStatus];
+        var headers = ['№', L.vchPlayer, L.vchEntity, L.vchServiceType, L.vchDiscount + '%', L.vchDate, L.thStatus];
         var rows = data.map(function(v, i) {
             var typeIcon = v.entity_type === 'court' ? '🏟️' : '🎓';
             var statusLabel = L['vchStatus' + v.status.charAt(0).toUpperCase() + v.status.slice(1)] || v.status;

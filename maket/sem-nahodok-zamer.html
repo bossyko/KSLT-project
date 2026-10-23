@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — замер семи находок обхода</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/admin.css?v=299">
+<link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<!--
+  СЕМЬ НАХОДОК ОБХОДА, кусок 131. Здесь меряется то, что видно:
+  цель нажатия у мелкой кнопки и колонка, названная значком.
+  Остальные четыре (manifest, словарь, ссылки дашборда, липкость)
+  проверяются кодом и на боевой.
+-->
+<style>
+  body { background: var(--bg-base); color: var(--text-primary);
+         font-family: var(--font-sans); padding: 40px; }
+  .подпись { color: var(--text-secondary); font-size: var(--fs-sm); margin: 24px 0 8px; }
+</style>
+</head>
+<body>
+<div class="подпись">Мелкая кнопка: вид тот же, цель нажатия 44</div>
+<div><button class="ad-btn ad-btn-sm" id="мелкая">Редактировать</button></div>
+
+<div class="подпись">Колонка, названная значком: глазами значок, диктору слово</div>
+<table class="ad-table"><thead><tr><th>Название</th><th id="глаз"></th></tr></thead>
+<tbody><tr><td>Корт «К2»</td><td>128</td></tr></tbody></table>
+
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/admin/core/constants.js?v=161"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<script src="../js/kslt-vremya.js?v=2"></script>
+<script src="../js/kslt-fokus.js?v=1"></script>
+<script src="../js/admin/core/utils.js?v=57"></script>
+<script>
+(function () {
+    var A = window.KSLT_ADMIN, L = A.L;
+    document.getElementById('глаз').innerHTML = A.столбецЗнаком('&#128065;', L.thViews);
+})();
+</script>
+</body>
+</html>

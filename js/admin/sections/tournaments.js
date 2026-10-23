@@ -162,7 +162,7 @@
                         '<thead><tr>' +
                             trnColHeader('title', L.trnTitle) +
                             trnColHeader('category', L.trnCategory) +
-                            trnColHeader('status', L.trnStatus) +
+                            trnColHeader('status', L.thStatus) +
                             trnColHeader('date_start', L.trnDateStart) +
                             trnColHeader('date_end', L.trnDateEndShort) +
                             trnColHeader('participants', L.trnMaxParticipantsShort) +
@@ -658,7 +658,7 @@
         dd.style.left = Math.max(0, rect.left - cardRect.left) + 'px';
         dd.style.top = (rect.bottom - cardRect.top + 4) + 'px';
 
-        var colLabels = { title: L.trnTitle, category: L.trnCategory, status: L.trnStatus, date_start: L.trnDateStart, date_end: L.trnDateEnd, participants: L.trnMaxParticipants };
+        var colLabels = { title: L.trnTitle, category: L.trnCategory, status: L.thStatus, date_start: L.trnDateStart, date_end: L.trnDateEnd, participants: L.trnMaxParticipants };
         var isNumeric = col === 'participants';
         var isDate = col === 'date_start' || col === 'date_end';
 
@@ -1081,7 +1081,7 @@
                         '<div class="ad-field-hint">' + L.trnNtrpHint + '</div>' +
                     '</div>' +
                     '<div class="ad-field">' +
-                        '<label class="ad-field-label">' + L.trnStatus + '</label>' +
+                        '<label class="ad-field-label">' + L.thStatus + '</label>' +
                         '<div class="ad-field-input ad-trn-status-field" id="adTrnStatusBadge" data-status-class="' + trnStatusBadgeClass + '">' + trnStatusBadgeLabel + '</div>' +
                     '</div>' +
                 '</div>' +

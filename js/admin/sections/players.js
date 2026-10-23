@@ -245,7 +245,7 @@
                             '<th>' + L.plrCategory + '</th>' +
                             '<th>' + L.thPoints + '</th>' +
                             '<th>' + L.thWL + '</th>' +
-                            '<th style="text-align:center;width:50px;">&#128065;</th>' +
+                            '<th style="text-align:center;width:50px;">' + A.столбецЗнаком('&#128065;', L.thViews) + '</th>' +
                         '</tr></thead>' +
                         '<tbody><tr><td class="ad-tablica-pusto" colspan="6">...</td></tr></tbody>' +
                     '</table>' +
