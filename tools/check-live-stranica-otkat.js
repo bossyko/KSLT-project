@@ -111,9 +111,12 @@ const ОТКАТЫ = [
    '.lm-back-link:focus-visible {\n    outline-offset: 3px;\n    text-decoration: underline;\n    color: inherit;',
    'у «назад» есть кольцо фокуса'],
 
+  /* ЯКОРЬ ПОСЛЕ КУСКА 137: ключ словаря и его зов выбора. Прежний
+     `backHome:   isEn` держался на форме тернарника и перестал
+     встречаться — прувер честно сказал «якорь встречается 0 раз». */
   ['js/live-match.js',
-   '        backHome:   isEn',
-   '        backToList:   isEn',
+   "        backHome:   KSLT_YAZYK.выбрать('Home',",
+   "        backToList:   KSLT_YAZYK.выбрать('Home',",
    '«назад» ведёт на главную и так и называется'],
 
   ['css/live-match.css',
@@ -225,8 +228,8 @@ const ОТКАТЫ = [
    'стиль страницы подключён с версией · ru'],
 
   ['js/live-match.js',
-   "isKg ? 'Мелдеш' : 'Турнир'",
-   "isKg ? 'Турнир' : 'Турнир'",
+   "выбрать('Tournament', 'Мелдеш', 'Турнир')",
+   "выбрать('Tournament', 'Турнир', 'Турнир')",
    'кыргызские подписи переведены, а не повторяют русские'],
 
   ['css/live-match.css',

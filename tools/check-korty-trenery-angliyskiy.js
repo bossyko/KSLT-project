@@ -27,6 +27,7 @@ const fs = require('fs');
 const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
+const acorn = require('acorn');
 const чит = ф => fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8');
 const безКом = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/[^\n]*$/gm, '');
 
@@ -39,21 +40,43 @@ const ошибки = [];
 let ВСЕГО = 0;
 const правило = (имя, условие, подсказка) => { ВСЕГО++; if (!условие) ошибки.push({ имя, подсказка }); };
 
-/** Три ветки словаря: en · kg · ru. Возвращает списки ключей. */
+/** Три ветки словаря: en · kg · ru. Возвращает списки ключей.
+ *
+ * ЧИТАЕТСЯ ДЕРЕВО, А НЕ СКОБКИ. До 23.10 ветки искались подстроками
+ * `var L = isEn ? {`, `} : (isKg ? {`, `} : {`. Кусок 137 свёл тройку к
+ * одному зову `KSLT_YAZYK.выбрать(en, kg, ru)` — и разбор возвращал
+ * `null`, то есть «английской ветки нет». Правило упало на словаре,
+ * который на месте и цел: ЯКОРЬ НА ФОРМУ ЖИВЁТ РОВНО ДО СМЕНЫ ФОРМЫ.
+ * Парсер отдаёт три довода зова как три объекта, и порядок доводов
+ * (английский, кыргызский, русский) ему известен из дома языка. */
 function ветки(текст, перем) {
-    const н = текст.indexOf('var ' + перем + ' = isEn ? {');
-    if (н === -1) return null;
-    const нEn = н + ('var ' + перем + ' = isEn ? {').length;
-    const нKg = текст.indexOf('} : (isKg ? {', нEn);
-    if (нKg === -1) return null;
-    const нRu = текст.indexOf('} : {', нKg);
-    const кон = текст.indexOf('\n    });', нRu);
-    const ключи = б => (б.match(/^\s+([A-Za-z_]\w*)\s*:/gm) || []).map(с => с.trim().replace(/:$/, ''));
+    let д;
+    try { д = acorn.parse(текст, { ecmaVersion: 2020 }); } catch (e) { return null; }
+    let найдено = null;
+    (function обход(у) {
+        if (!у || typeof у.type !== 'string' || найдено) return;
+        if (у.type === 'VariableDeclarator' && у.id && у.id.name === перем &&
+            у.init && у.init.type === 'CallExpression' && у.init.callee &&
+            текст.slice(у.init.callee.start, у.init.callee.end) === 'KSLT_YAZYK.выбрать' &&
+            у.init.arguments.length === 3 &&
+            у.init.arguments.every(a => a.type === 'ObjectExpression')) {
+            найдено = у.init.arguments;
+            return;
+        }
+        for (const к of Object.keys(у)) {
+            if (к === 'type' || к === 'start' || к === 'end' || к === 'loc') continue;
+            const v = у[к];
+            if (Array.isArray(v)) v.forEach(x => x && typeof x.type === 'string' && обход(x));
+            else if (v && typeof v.type === 'string') обход(v);
+        }
+    })(д);
+    if (!найдено) return null;
+    const ключи = о => о.properties.map(с => с.key && (с.key.name || с.key.value)).filter(Boolean);
     return {
-        en: ключи(текст.slice(нEn, нKg)),
-        kg: ключи(текст.slice(нKg + '} : (isKg ? {'.length, нRu)),
-        ru: ключи(текст.slice(нRu + '} : {'.length, кон)),
-        телоEn: текст.slice(нEn, нKg)
+        en: ключи(найдено[0]),
+        kg: ключи(найдено[1]),
+        ru: ключи(найдено[2]),
+        телоEn: текст.slice(найдено[0].start, найдено[0].end)
     };
 }
 
@@ -86,13 +109,16 @@ function ветки(текст, перем) {
 
 /* ══ 2. ОДНО ОПРЕДЕЛЕНИЕ ПОКРЫТИЯ ══════════════════════════════════════ */
 
+/* ЯКОРЬ НА СОДЕРЖИМОЕ: карта называется по именам всех трёх карт в
+   одном зове — так же, как прежде называлась в тернарнике. */
 правило('покрытие выбирается по языку ОДНОЙ картой',
-    /var ПОКРЫТИЯ = isEn \? SURFACE_MAP_EN/.test(КОРТЫ),
+    /var ПОКРЫТИЯ = KSLT_YAZYK\.выбрать\(SURFACE_MAP_EN, SURFACE_MAP_KG, SURFACE_MAP\)/.test(КОРТЫ),
     'карта ПОКРЫТИЯ снята. Покрытие снова будет названо дважды — картами\n' +
     '          SURFACE_MAP* и ключами filterHard/filterClay словаря');
 
 правило('выбор языка покрытия не повторяется по файлу',
-    (КОРТЫ.match(/isEn \? \(SURFACE_MAP_EN/g) || []).length === 0,
+    (КОРТЫ.match(/isEn \? \(SURFACE_MAP_EN/g) || []).length === 0 &&
+    (КОРТЫ.match(/выбрать\(SURFACE_MAP_EN/g) || []).length === 1,
     'вернулся поштучный выбор `isEn ? SURFACE_MAP_EN[...] : ...`. Таких мест\n' +
     '          было четыре, и они расходились бы при правке по одному');
 

@@ -60,15 +60,27 @@ const ОТКАТЫ = [
  'пустое состояние говорит, ПОЧЕМУ пусто'],
 
 /* ── словарь ── */
+/* ЯКОРЬ ПОСЛЕ КУСКА 137: тройка словаря стала одним зовом `выбрать`.
+   ОТКАТ ОСТАВЛЯЕТ ФАЙЛ РАЗБИРАЕМЫМ — сторож читает дерево, и сломанный
+   разбор уронил бы правило не по делу. */
 ['сделать словарь одноязычным', PJ,
- 'var L = window.playerProfileLabels || (isEn ? {',
- 'var L = window.playerProfileLabels || ({',
+ 'var L = window.playerProfileLabels || (KSLT_YAZYK.выбрать({',
+ 'var L = window.playerProfileLabels || (КАКОЙ_ТО_ОДИН_ЯЗЫК({',
  'словарь страницы игрока знает три языка'],
 
 ['завести в словаре ключ, которого никто не зовёт', PJ,
- "    var L = window.playerProfileLabels || (isEn ? {\n        online: 'Online',",
- "    var L = window.playerProfileLabels || (isEn ? {\n        nikomuNeNuzhnyyKlyuch: 'nobody calls me',\n        online: 'Online',",
- 'в словаре нет ключей, которых не зовёт никто']
+ "    var L = window.playerProfileLabels || (KSLT_YAZYK.выбрать({\n        online: 'Online',",
+ "    var L = window.playerProfileLabels || (KSLT_YAZYK.выбрать({\n        nikomuNeNuzhnyyKlyuch: 'nobody calls me',\n        online: 'Online',",
+ 'в словаре нет ключей, которых не зовёт никто'],
+
+/* НОВОЕ ПРАВИЛО 23.10 — свой откат: ключ убран ИЗ ОДНОЙ ветви. */
+/* ЯКОРЬ ВЗЯТ ДВУМЯ СТРОКАМИ: `online: 'Онлайн'` стоит и в кыргызской
+   ветви, и в русской — одно и то же слово на двух языках. Соседняя
+   строка `message: 'Жазуу'` отличает кыргызскую. */
+['забыть ключ в кыргызской ветви словаря игрока', PJ,
+ "        online: 'Онлайн',\n        message: 'Жазуу',",
+ "        message: 'Жазуу',",
+ 'состав ключей словаря игрока одинаков во всех трёх ветках']
 
 ];
 
@@ -78,6 +90,11 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-mertvoe-'));
         const от = path.join(КОРЕНЬ, д), до = path.join(песок, д);
         if (fs.existsSync(от)) fs.cpSync(от, до, { recursive: true });
     });
+/* ACORN В ПЕСОК: с 23.10 сторож читает ДЕРЕВО словаря, а не скобки.
+   Без парсера он падает целиком, и прувер видит «упало: — ничего —» у
+   всех откатов разом. ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО. */
+fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
+          path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
 function прогон(замена) {
     try {

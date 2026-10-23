@@ -164,23 +164,68 @@ const PJч = безКом(PJ);
 
 /* ───────── словарь страницы игрока ───────── */
 
+/* СЛОВАРЬ ЧИТАЕТСЯ ДЕРЕВОМ. До 23.10 оба правила ниже держались на форме
+   `var L = window.playerProfileLabels || (isEn ? { … } : isKg ? { … } : …)`
+   и на подстроке `\n    });` как на конце блока. Кусок 137 свёл тройку к
+   одному зову — и правило о трёх языках упало на целом словаре, а второе
+   насчитало 18 мёртвых ключей там, где мёртвых нет: граница блока уехала.
+   ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ: имя `playerProfileLabels`, зов выбора и
+   три объекта-ветви — это то, что живёт в блоке постоянно. */
+const acorn = require('acorn');
+const словарьИгрока = (function () {
+    let д;
+    try { д = acorn.parse(PJ, { ecmaVersion: 2020 }); } catch (e) { return null; }
+    let из = null;
+    (function обход(у) {
+        if (!у || typeof у.type !== 'string' || из) return;
+        if (у.type === 'VariableDeclarator' && у.id && у.id.name === 'L' && у.init &&
+            у.init.type === 'LogicalExpression' && у.init.operator === '||' &&
+            /playerProfileLabels/.test(PJ.slice(у.init.left.start, у.init.left.end))) {
+            const пр = у.init.right;
+            if (пр && пр.type === 'CallExpression' && пр.callee &&
+                PJ.slice(пр.callee.start, пр.callee.end) === 'KSLT_YAZYK.выбрать' &&
+                пр.arguments.length === 3 &&
+                пр.arguments.every(a => a.type === 'ObjectExpression')) {
+                из = { зов: пр, ветви: пр.arguments };
+            }
+            return;
+        }
+        for (const к of Object.keys(у)) {
+            if (к === 'type' || к === 'start' || к === 'end' || к === 'loc') continue;
+            const v = у[к];
+            if (Array.isArray(v)) v.forEach(x => x && typeof x.type === 'string' && обход(x));
+            else if (v && typeof v.type === 'string') обход(v);
+        }
+    })(д);
+    return из;
+})();
+
 правило('словарь страницы игрока знает три языка',
-    /var L = window\.playerProfileLabels \|\| \(isEn \?/.test(PJч) &&
-    /\}\s*:\s*isKg \?\s*\{/.test(PJч.slice(PJч.indexOf('var L = window.playerProfileLabels'))),
+    словарьИгрока !== null,
     'Словарь меток снова знает один язык. Он НЕ МЁРТВ — он ЖИВ И РАБОТАЕТ\n' +
     'НЕПРАВИЛЬНО: `window.playerProfileLabels` не заводится нигде, и на\n' +
     'player-en.html с player-kg.html человек читал «Вызвать на матч»\n' +
     'по-русски. Приём взят из этого же файла: LH ниже сделан трёхъязычным\n' +
     'с самого начала — ОДНО ПОНЯТИЕ, ДВА ПОВЕДЕНИЯ В ОДНОМ ФАЙЛЕ.');
 
+правило('состав ключей словаря игрока одинаков во всех трёх ветках',
+    (() => {
+        if (!словарьИгрока) return false;
+        const кл = о => о.properties.map(с => с.key && (с.key.name || с.key.value)).filter(Boolean);
+        const [en, kg, ru] = словарьИгрока.ветви.map(кл);
+        const нEn = new Set(en), нKg = new Set(kg), нRu = new Set(ru);
+        return ru.every(к => нEn.has(к) && нKg.has(к)) && en.every(к => нRu.has(к));
+    })(),
+    'Ветви словаря игрока разъехались составом ключей. Забытый ключ в одной\n' +
+    'ветви — это `undefined` на экране, и увидит его только тот, кто открыл\n' +
+    'именно эту страницу именно на этом языке.');
+
 (function ключиСловаря() {
-    const нач = PJ.indexOf('var L = window.playerProfileLabels');
-    if (нач === -1) return;
-    const кон = PJ.indexOf('\n    });', нач);
-    const блок = PJ.slice(нач, кон);
-    const тело = PJ.slice(0, нач) + PJ.slice(кон);
-    const ключи = [...new Set((блок.match(/(?:^|[{,]\s*)([a-zA-Z][\w]*)\s*:/gm) || [])
-        .map(s => s.replace(/[{,\s:]/g, '')))];
+    if (!словарьИгрока) return;
+    const з = словарьИгрока.зов;
+    const тело = PJ.slice(0, з.start) + PJ.slice(з.end);
+    const ключи = [...new Set(словарьИгрока.ветви.flatMap(о =>
+        о.properties.map(с => с.key && (с.key.name || с.key.value)).filter(Boolean)))];
     const мёртвые = ключи.filter(к => !new RegExp('\\bL\\.' + к + '\\b').test(тело));
     правило('в словаре нет ключей, которых не зовёт никто',
         мёртвые.length === 0,
