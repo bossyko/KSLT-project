@@ -21,7 +21,7 @@
     var _бесплатныйПериод = false;
     var isKg = KSLT_YAZYK.kg;
     var CU = window.KSLT_COUNTRY;
-    var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+    var lang = KSLT_YAZYK.код;
     var client = window.supabaseClient;
     var _playerId = null;
     var _playerName = '';
@@ -442,9 +442,7 @@
         // поясе западнее нуля дата съезжает на день назад. Полные метки
         // времени оставляем как есть
         var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T00:00:00' : dateStr);
-        var months = isEn
-            ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-            : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+        var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
         return d.getDate() + ' ' + months[d.getMonth()];
     }
 
@@ -745,7 +743,7 @@
         // приложении, чтобы вид не разошёлся.
         var ntrpСтрока = (window.KSLT_RULES && window.KSLT_RULES.ntrpСтрока)
             ? window.KSLT_RULES.ntrpСтрока(player.ntrp_singles, player.ntrp_doubles,
-                                           isEn ? 'en' : 'ru')
+                                           KSLT_YAZYK.код)
             : '';
         if (ntrpСтрока) {
             hero += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpСтрока + '</span></div>';

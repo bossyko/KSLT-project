@@ -521,7 +521,7 @@
             gym: KSLT_YAZYK.выбрать('Gym', 'Спорт зал', 'Тренажёрный зал'),
             pool: KSLT_YAZYK.выбрать('Pool', 'Бассейн', 'Бассейн'),
             sauna: KSLT_YAZYK.выбрать('Sauna', 'Сауна', 'Сауна'),
-            climate: KSLT_YAZYK.выбрать('Climate control', 'Климат-контроль', 'Климат-контроль'),
+            climate: KSLT_YAZYK.выбрать('Climate control', 'Климат көзөмөлү', 'Климат-контроль'),
             lighting: KSLT_YAZYK.выбрать('Lighting', 'Кечки жарык', 'Вечернее освещение'),
             kids_area: KSLT_YAZYK.выбрать('Kids area', 'Балдар аянтчасы', 'Детская площадка'),
             kids_school: KSLT_YAZYK.выбрать('Kids school', 'Балдар мектеби', 'Детская школа'),
@@ -1586,7 +1586,7 @@
                 var now = new Date();
                 vouchers.forEach(function(v) {
                     var d = new Date(v.created_at);
-                    var dateStr = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+                    var dateStr = d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short' });
                     var svcName = svcMap[v.service_id] || v.service_id;
                     var status = v.status;
                     // Auto-expire display
@@ -1689,7 +1689,7 @@
         var verifySuffix = KSLT_YAZYK.суффикс;
         var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
         var expiresDate = new Date(voucher.expires_at);
-        var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var expiresStr = expiresDate.toLocaleString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
         var modal = document.createElement('div');
         modal.id = 'ctVoucherModal';

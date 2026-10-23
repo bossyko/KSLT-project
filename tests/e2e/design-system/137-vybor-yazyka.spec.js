@@ -17,6 +17,16 @@
  */
 const { test, expect } = require('@playwright/test');
 
+/** ПРОБА ЖДЁТ ПРИЗНАК, А НЕ ВИДИМЫЙ УЗЕЛ.
+ *  Первый прогон ждал `header` — и три теста страницы матча упали на
+ *  ТЕЛЕФОНЕ БОКОМ: там полноэкранный вид, и шапки нет вовсе (снимок
+ *  падения: один `main` и «Матч табылган жок»). ТАЙМАУТ ОЖИДАНИЯ — НЕ
+ *  ПАДЕНИЕ КОДА, А ОШИБКА ПРИБОРА. Признак этой пробы — САМ ДОМ: он есть
+ *  на всех видах, потому что это скрипт, а не вёрстка. */
+async function дом(page) {
+    await page.waitForFunction(() => !!window.KSLT_YAZYK, null, { timeout: 15000 });
+}
+
 const ЯЗЫКИ = [
     ['русская',    '',    'ru', 'ru', ''],
     ['английская', '-en', 'en', 'en', '-en'],
@@ -29,7 +39,7 @@ test.describe('выбор языка одним зовом', () => {
 
         test(имя + ' главная: суффикс страницы берётся у дома', async ({ page }) => {
             await page.goto('/index' + суф + '.html');
-            await page.waitForSelector('header', { timeout: 15000 });
+            await дом(page);
 
             const м = await page.evaluate(() => ({
                 объявлен: document.documentElement.getAttribute('lang'),
@@ -46,7 +56,7 @@ test.describe('выбор языка одним зовом', () => {
 
         test(имя + ' страница: адреса, собранные из суффикса, существуют', async ({ page }) => {
             await page.goto('/pages/courts' + суф + '.html');
-            await page.waitForSelector('header', { timeout: 15000 });
+            await дом(page);
 
             /* Собираем те же имена, что собирает продукт: страница игрока,
                турнира, входа и кабинета. 404 здесь означает, что суффикс
@@ -72,7 +82,7 @@ test.describe('выбор языка одним зовом', () => {
 
         test(имя + ' страница матча: словарь эфира отвечает языком дома', async ({ page }) => {
             await page.goto('/pages/live-match' + суф + '.html');
-            await page.waitForSelector('header', { timeout: 15000 });
+            await дом(page);
 
             const м = await page.evaluate(() => ({
                 дом: window.KSLT_YAZYK && window.KSLT_YAZYK.код,
@@ -93,7 +103,7 @@ test.describe('выбор языка одним зовом', () => {
         const ответы = [];
         for (const [, суф] of ЯЗЫКИ.map(я => [я[0], я[1]])) {
             await page.goto('/index' + суф + '.html');
-            await page.waitForSelector('header', { timeout: 15000 });
+            await дом(page);
             ответы.push(await page.evaluate(() => ({
                 выбор: window.KSLT_YAZYK.выбрать('EN', 'KG', 'RU'),
                 суффикс: window.KSLT_YAZYK.суффикс
@@ -109,17 +119,28 @@ test.describe('выбор языка одним зовом', () => {
         /* КНОПКУ ВЫХОДА НЕ НАЖИМАЕМ — она трогает сессию. Проверяем, что
            имя страницы входа, собранное из суффикса, существует: именно
            это имя `session-monitor.js` строит при выходе, и до 23.10 он
-           считал суффикс сам, читая адрес. */
+           считал суффикс сам, читая адрес.
+
+           КАБИНЕТ УВОДИТ ГОСТЯ НА ВХОД, И ЭТО ЧАСТЬ ЗАМЕРА. Первый прогон
+           читал дом сразу после `goto` и падал на desktop и планшете боком,
+           а на телефоне был ПЛАВАЮЩИМ: перенаправление уносило контекст
+           из-под `evaluate`. Теперь ждём, пока адрес устоится, и читаем дом
+           на той странице, где оказались, — суффикс обязан остаться
+           кыргызским в любом случае. */
         await page.goto('/pages/dashboard-kg.html');
+        await page.waitForLoadState('domcontentloaded');
+        await дом(page);
+
+        const где = new URL(page.url()).pathname;
+        expect(где, 'кабинет увёл на страницу не своего языка').toMatch(/-kg\.html$/);
+
         const адрес = await page.evaluate(async () => {
-            const с = (window.KSLT_YAZYK && window.KSLT_YAZYK.суффикс);
-            if (с === undefined || с === null) return { суффикс: null };
+            const с = window.KSLT_YAZYK.суффикс;
             const имя = 'auth' + с + '.html';
             const о = await fetch('/pages/' + имя, { method: 'HEAD' });
             return { суффикс: с, имя: имя, статус: о.status };
         });
-        /* Кабинет может увести гостя на вход — тогда суффикс мы читаем уже
-           на странице входа, и он всё равно обязан быть кыргызским. */
+
         expect(адрес.суффикс, 'суффикс на кыргызской странице не кыргызский').toBe('-kg');
         expect(адрес.статус, 'страница входа с кыргызским суффиксом не отдалась').toBe(200);
     });

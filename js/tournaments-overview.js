@@ -56,9 +56,7 @@
         }
     }
 
-    var months = isEn
-        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-        : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+    var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
 
     var formatLabels = KSLT_YAZYK.выбрать({ singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }, { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }, { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 

@@ -10,7 +10,311 @@
     var isKg = KSLT_YAZYK.kg;
 
     // Labels
-    var L = isKg ? {
+    var L = KSLT_YAZYK.выбрать({
+        profile: 'Profile', tournaments: 'My Tournaments',
+        stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
+        profileTitle: 'My Profile', tournamentsTitle: 'My Tournaments',
+        statsTitle: 'Statistics', settingsTitle: 'Settings',
+        membership: 'Membership',
+        memberActive: 'Active',
+        memberExpired: 'Expired',
+        memberNone: 'No Membership',
+        memberExpiresIn: 'Expires in',
+        memberDays: 'days',
+        memberExpiredText: 'Your membership has expired',
+        memberNoneText: 'Get a membership to participate in tournaments',
+        memberRenew: 'Renew',
+        memberGet: 'Get Membership',
+        firstName: 'First Name', lastName: 'Last Name',
+        email: 'Email', phone: 'Phone', gender: 'Gender',
+        birthday: 'Date of Birth', birthDay: 'Day', birthMonth: 'Month', birthYear: 'Year',
+        months: ['','January','February','March','April','May','June','July','August','September','October','November','December'],
+        male: 'Male', female: 'Female', selectGender: '— Select —',
+        instagram: 'Instagram', telegram: 'Telegram',
+        tgConnected: 'Telegram connected',
+        tgConnect: 'Connect Telegram',
+        notifTgOff: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.',
+        close: 'Close',
+        cancel: 'Cancel',
+        tgConnectTitle: 'Connect the Telegram bot',
+        tgOpenBot: 'Open the bot',
+        tgSteps: ['Press «Start» in Telegram', 'Come back to this page — the status updates on its own'],
+        tgOpened: 'Telegram has opened in a new tab.',
+        tgOpenAgain: 'Open again',
+        tgWaiting: 'Waiting for the connection…',
+        tgConnectedNow: 'Connected!',
+        tgDisconnectTitle: 'Disconnect the bot',
+        tgDisconnectYes: 'Disconnect',
+        tgDisconnect: 'disconnect',
+        tgDisconnectAsk: 'Disconnect the bot? Telegram notifications will stop arriving.',
+        tgWhy: 'What you get after connecting the bot:',
+        tgBenefits: ['Match time and opponent', 'Challenges and tournament reminders', 'Membership expiry notice', 'Security alerts when your password changes', 'Sign-in codes — instantly, instead of email'],
+        tgWhatComes: 'Matches, challenges, tournaments and security alerts arrive here. You can choose which ones in Settings.',
+        tgConnectHint: 'Get membership expiry reminders via Telegram',
+        visibleToClub: 'visible to KSLT members',
+        hiddenFromAll: 'hidden from everyone',
+        showToClub: 'Visible to club members',
+        showShort: 'to club members',
+        contactsHint: 'Contact details are visible only to KSLT members with an active membership. Guests and registered users without one do not see them.',
+        whatsappHint: 'Leave empty if it is the same as your phone',
+        unsavedTitle: 'Unsaved changes',
+        unsavedText: 'Your profile has changes that are not saved yet. Save them?',
+        unsavedSave: 'Save', unsavedDrop: 'Leave without saving',
+        unsavedPwTitle: 'Password not changed',
+        unsavedPwText: 'The password you typed is not stored anywhere. Leave, and you will have to type it again.',
+        unsavedStay: 'Stay', unsavedLeave: 'Leave',
+        whatsappCopy: 'Same as my phone',
+        whatsappSame: 'same as phone',
+        showPhone: 'Show my phone to club members',
+        save: 'Save', saving: 'Saving...', saved: 'Saved!',
+        changeAvatar: 'Change Photo', removeAvatar: 'Remove',
+        avatarHint: 'JPG or PNG, max 2MB',
+        required: 'Required',
+        profileIncomplete: 'Complete your profile to participate in tournaments',
+        profileIncompleteFields: 'Please fill in: ',
+        fieldName: 'Name', fieldGender: 'Gender', fieldPhone: 'Phone',
+        noTournaments: 'You have not participated in tournaments yet',
+        noTournamentsText: 'Register for a tournament to see your history here',
+        noStats: 'No statistics available',
+        noStatsText: 'Link your account with a player profile to see stats',
+        playerNotLinked: 'Player profile not linked',
+        playerNotLinkedText: 'Contact admin to link your account with a player profile',
+        linkTitle: 'Find your player card',
+        linkText: 'The club created player cards in advance. Find yours — it holds your rating, points and match history. A club manager confirms the link.',
+        linkSearch: 'Type your last name',
+        linkItsMe: 'This is me',
+        linkNothing: 'Nobody found',
+        cardFoundTitle: 'This may be your player card',
+        cardFoundYes: 'Yes, that is me',
+        cardFoundNo: 'No, not me',
+        cyrTitle: 'Write your name in Cyrillic',
+        cyrText: 'Club lists use Cyrillic names. Fix your name in the profile so it matches the rankings.',
+        pointsShort: 'pts',
+        linkPending: 'Request sent',
+        linkPendingText: 'Waiting for a club manager to confirm the card is yours.',
+        linkOther: 'Pick another card',
+        linkTaken: 'This card is already taken by another account',
+        linkDone: 'Card linked',
+        linkRejected: 'The request was rejected. Pick another card or contact a club manager',
+        changePassword: 'Change Password',
+        devicesTitle: 'Devices and sign-in',
+        devicesThis: 'this device',
+        devicesNever: 'no sign-in recorded',
+        devicesEmpty: 'No devices yet',
+        devicesLogoutAll: 'Sign out on all devices',
+        devicesAskTitle: 'Sign out everywhere?',
+        devicesAskText: 'You will have to sign in again on your computer, tablet, phone and on this device.',
+        devicesApp: 'KSLT app',
+        devicesShowAll: 'Show all',
+        currentPassword: 'Current Password',
+        phCurrentPassword: 'Your current password',
+        phNewPassword: 'At least 8 characters',
+        phConfirmPassword: 'Repeat the password',
+        newPassword: 'New Password',
+        confirmPassword: 'Confirm Password',
+        updatePassword: 'Update Password',
+        updating: 'Updating...',
+        passwordUpdated: 'Password updated successfully',
+        errWrongPw: 'Current password is incorrect',
+        language: 'Language',
+        dangerZone: 'Danger Zone',
+        deleteAccount: 'Delete Account',
+        deleteLoses: ['Your ranking position and points', 'Tournament and match history', 'Loyalty points and discounts', 'Your account on the site and in the app'],
+        deleteConfirm: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.',
+        errPwMatch: 'Passwords do not match',
+        errPwShort: 'Password must be at least 8 characters',
+        pwRuleLength: 'At least 8 characters',
+        pwRuleUpper: 'One uppercase letter',
+        pwRuleDigit: 'One digit',
+        pwRuleSpecial: 'One special character',
+        showPassword: 'Show password',
+        role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
+        category: 'Category', points: 'Points',
+        regWithdraw: 'Withdraw',
+        regAgain: 'Enter again',
+        regWaitlist: 'On the waiting list',
+        regRefused: 'Not admitted',
+        tourUpcoming: 'Upcoming',
+        tourPlayed: 'Played',
+        regWithdrawn: 'Withdrawn',
+        regWithdrawTitle: 'Withdraw from the tournament?',
+        regWithPartner: 'in a pair with {имя}',
+        regWithdrawGuest: 'The entry is withdrawn entirely: {имя} is a guest without a club card, so the place cannot stay with them.',
+        regGuestMark: '(guest)',
+        regByPartner: '— entered by your partner',
+        regLeavePairTitle: 'Leave the pair?',
+        regLeavePairText: 'You leave the pair. The place stays with {имя} — they can find another partner.',
+        regLeavePairYes: 'Leave the pair',
+        regLeavePairDone: 'You left the pair',
+        regWithdrawText: 'Your entry for {name} will be withdrawn. You can enter again while registration is open.',
+        regWithdrawYes: 'Withdraw',
+        regWithdrawNo: 'Cancel',
+        regWithdrawDone: 'Entry withdrawn',
+        regWithdrawError: 'Could not withdraw the entry',
+        wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
+        catsTitle: 'Points by category', catHome: 'home', place: 'Place',
+        catWins: ['win', 'wins', 'wins'],
+        catLosses: ['loss', 'losses', 'losses'],
+        catTotal: 'Matches played', catWinRate: 'wins', catNoMatches: 'no matches yet',
+        pairsTitle: 'Doubles', mixedTitle: 'Mixed', pairsTag: 'doubles', mixedTag: 'mixed',
+        pairsNote: 'not counted in rating', pairsMatches: 'Matches',
+        notificationsTab: 'Notifications', notifEmpty: 'No notifications',
+        notifEmptyText: 'Messages about tournaments, challenges and payments appear here',
+        catClosed: 'closed',
+        socialMedia: 'Social Media',
+        cropTitle: 'Crop Photo',
+        cropApply: 'Apply',
+        cropCancel: 'Cancel',
+        lockedTitle: 'Get Membership',
+        lockedTitleExpired: 'Renew Membership',
+        lockedText: 'Subscribe to KSLT membership to access tournaments and statistics',
+        lockedTextExpired: 'Your membership has expired. Renew to access tournaments and statistics',
+        lockedBtn: 'Get Membership',
+        lockedBtnExpired: 'Renew',
+        payHistory: 'Payment History',
+        payDate: 'Date',
+        payAmount: 'Amount',
+        payMethod: 'Method',
+        payStatus: 'Status',
+        payNoPayments: 'No payments yet',
+        payNoPaymentsText: 'Your club and tournament payments will appear here',
+        payCash: 'Cash',
+        payTransfer: 'Transfer',
+        payCard: 'Card',
+        payments: 'Payments',
+        payPurposeMembership: 'Membership',
+        payPurposeTournament: 'Tournament',
+        payPurposeOther: 'Other',
+        payCompleted: 'Completed',
+        payPending: 'Pending',
+        payNote: 'Note',
+        invitationsTitle: 'Game Invitations',
+        invSent: 'Sent',
+        invReceived: 'Received',
+        invAccepted: 'Accepted',
+        invDeclined: 'Declined',
+        invPending: 'Pending',
+        invAccept: 'Accept', invDecline: 'Decline',
+        invContactsTitle: 'Contacts',
+        invShareWarn: 'If you accept, you will exchange contact details',
+        invShowContacts: 'Show contacts',
+        invNoContacts: 'No contacts provided',
+        invNoInvites: 'No invitations yet',
+        invNoInvitesText: 'Send game invitations from the Player Search page',
+        ratingHistory: 'Points',
+        rhTotalPoints: 'Total Points',
+        qrShare: 'QR Code',
+        qrTitle: 'Share Profile',
+        profileNoCard: 'No player card linked to this account yet',
+        profileOpenPublic: 'My public page',
+        profileWinLoss: 'Wins — losses',
+        qrDownload: 'Download PNG',
+        qrCopy: 'Copy Link',
+        qrCopied: 'Copied!',
+        games: 'My Games',
+        gamesTitle: 'My Games',
+        subTournaments: 'Past tournaments',
+        subMatches: 'Matches',
+        subChallenges: 'Challenges',
+        subBattles: 'Battles',
+        subUpcoming: 'Upcoming tournaments',
+        chalAccept: 'Accept', chalDecline: 'Decline', chalCancel: 'Withdraw',
+        chalCancelledBySelf: 'Withdrawn', chalCancelledByOpp: 'Withdrawn',
+        chalDirSent: 'you challenged', chalDirGot: 'you were challenged', chalSentOn: 'sent',
+        chalTheyAccepted: 'Opponent accepted', chalYouAccepted: 'You accepted',
+        chalTheyDeclined: 'Opponent declined', chalYouDeclined: 'You declined',
+        chalActionDone: 'This challenge has already been answered',
+        chalGone: 'This challenge no longer exists',
+        tourNoResults: 'Results not entered',
+        regRefusedShort: 'Declined',
+        tourStatus: 'Status', tourResult: 'Result', invDirection: 'Direction',
+        showAll: 'Show all',
+        collapseBtn: 'Collapse',
+        loadingList: 'Loading...',
+        noMatches: 'No matches yet',
+        noMatchesText: 'Your matches will appear here after tournaments',
+        matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round', matchDoubles: 'Doubles', matchWith: 'with',
+        shownOf: 'of', pageOf: 'of', prevPage: '\u2190 Previous', nextPage: 'Next \u2192',
+        tagRating: 'rating', tagFriendly: 'friendly', tagDoubles: 'doubles', tagMixed: 'mixed', tagBattle: 'battle',
+        statsNote: 'Statistics from rating singles tournaments only',
+        challenges: 'Challenges',
+        challengesTitle: 'Match Challenges',
+        chalSent: 'Sent',
+        chalReceived: 'Received',
+        chalBattle: 'Battle',
+        chalWon: 'Won',
+        chalLost: 'Lost',
+        chalActive: 'Active',
+        chalNegotiating: 'Negotiating',
+        chalCountered: 'Counter-proposal',
+        chalAccepted: 'Accepted',
+        chalDeclined: 'Declined',
+        chalExpired: 'Expired',
+        chalCompleted: 'Completed',
+        chalNoChallenges: 'No challenges yet',
+        chalNoChallengesText: 'Send a match challenge from a player\'s profile page',
+        chalDate: 'Date',
+        chalTime: 'Time',
+        chalVenue: 'Venue',
+        vouchers: 'Discounts',
+        vouchersTitle: 'My Discounts',
+        voucherActive: 'Active',
+        voucherUsed: 'Used',
+        voucherExpired: 'Expired',
+        voucherNoVouchers: 'No discounts yet',
+        voucherNoVouchersText: 'Get a discount from a partner court or coach page',
+        voucherSaved: 'Saved',
+        voucherShowQR: 'Show QR',
+        voucherService: 'Service',
+        voucherDiscount: 'Discount',
+        voucherExpires: 'Expires',
+        voucherVenue: 'Venue',
+        voucherCourts: 'Courts',
+        voucherCoaches: 'Coaches',
+        voucherShowAll: 'Show all',
+        notifications: 'Notifications',
+        notifMembership: 'Membership',
+        notifTournaments: 'Tournaments',
+        notifMatches: 'Matches',
+        notifChallenges: 'Challenges',
+        notifSite: 'Site and app',
+        notifTelegram: 'Telegram',
+        notifEmail: 'Email',
+        notifSaved: 'Notification settings saved',
+        errPhoneTaken: 'This phone number is already linked to another account',
+        // Loyalty
+        loyaltyTab: 'Points',
+        loyBalance: 'Balance',
+        loyPoints: 'pts',
+        loyHistory: 'History',
+        loyDate: 'Date',
+        loyAction: 'Action',
+        loyPointsCol: 'Points',
+        loySource: 'Source',
+        loyEarn: 'Earned',
+        loyRedeem: 'Redeemed',
+        loyExpire: 'Expired',
+        loyAdjust: 'Adjusted',
+        loyNoHistory: 'No points yet',
+        loyNoHistoryText: 'Earn points by participating in tournaments, booking courts, and more',
+        loyRedeemTitle: 'Redeem Points',
+        loyRedeemBtn: 'Redeem',
+        loyRedeemed: 'Points redeemed successfully',
+        loyNotEnough: 'Not enough points',
+        loyNextExpiry: 'Next expiry',
+        loyPointsIn: 'pts in',
+        loyDays: 'days',
+        // Onboarding
+        obStep1Title: 'Welcome to KSLT!',
+        obStep1Text: 'Tennis community of Kyrgyzstan. Tournaments, rankings, partners for a game — all in one place.',
+        obStep2Title: 'Become a Club Member',
+        obStep2Text: 'Participate in tournaments, get ranked, enjoy partner discounts. Sign up in the "Membership" section.',
+        obStep3Title: 'Connect Telegram',
+        obStep3Text: 'Get notifications about tournaments and matches. Tap the button below to connect the bot.',
+        obConnectTg: 'Connect Telegram',
+        obNext: 'Next',
+        obDone: 'Let\'s go!'
+    }, {
         profile: 'Профиль', tournaments: 'Менин мелдештерим',
         stats: 'Статистика', invitations: 'Чакыруулар', settings: 'Жөндөөлөр',
         profileTitle: 'Менин профилим', tournamentsTitle: 'Менин мелдештерим',
@@ -317,311 +621,7 @@
         obConnectTg: 'Telegram байлоо',
         obNext: 'Кийинки',
         obDone: 'Баштайлы!'
-    } : isEn ? {
-        profile: 'Profile', tournaments: 'My Tournaments',
-        stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
-        profileTitle: 'My Profile', tournamentsTitle: 'My Tournaments',
-        statsTitle: 'Statistics', settingsTitle: 'Settings',
-        membership: 'Membership',
-        memberActive: 'Active',
-        memberExpired: 'Expired',
-        memberNone: 'No Membership',
-        memberExpiresIn: 'Expires in',
-        memberDays: 'days',
-        memberExpiredText: 'Your membership has expired',
-        memberNoneText: 'Get a membership to participate in tournaments',
-        memberRenew: 'Renew',
-        memberGet: 'Get Membership',
-        firstName: 'First Name', lastName: 'Last Name',
-        email: 'Email', phone: 'Phone', gender: 'Gender',
-        birthday: 'Date of Birth', birthDay: 'Day', birthMonth: 'Month', birthYear: 'Year',
-        months: ['','January','February','March','April','May','June','July','August','September','October','November','December'],
-        male: 'Male', female: 'Female', selectGender: '— Select —',
-        instagram: 'Instagram', telegram: 'Telegram',
-        tgConnected: 'Telegram connected',
-        tgConnect: 'Connect Telegram',
-        notifTgOff: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.',
-        close: 'Close',
-        cancel: 'Cancel',
-        tgConnectTitle: 'Connect the Telegram bot',
-        tgOpenBot: 'Open the bot',
-        tgSteps: ['Press «Start» in Telegram', 'Come back to this page — the status updates on its own'],
-        tgOpened: 'Telegram has opened in a new tab.',
-        tgOpenAgain: 'Open again',
-        tgWaiting: 'Waiting for the connection…',
-        tgConnectedNow: 'Connected!',
-        tgDisconnectTitle: 'Disconnect the bot',
-        tgDisconnectYes: 'Disconnect',
-        tgDisconnect: 'disconnect',
-        tgDisconnectAsk: 'Disconnect the bot? Telegram notifications will stop arriving.',
-        tgWhy: 'What you get after connecting the bot:',
-        tgBenefits: ['Match time and opponent', 'Challenges and tournament reminders', 'Membership expiry notice', 'Security alerts when your password changes', 'Sign-in codes — instantly, instead of email'],
-        tgWhatComes: 'Matches, challenges, tournaments and security alerts arrive here. You can choose which ones in Settings.',
-        tgConnectHint: 'Get membership expiry reminders via Telegram',
-        visibleToClub: 'visible to KSLT members',
-        hiddenFromAll: 'hidden from everyone',
-        showToClub: 'Visible to club members',
-        showShort: 'to club members',
-        contactsHint: 'Contact details are visible only to KSLT members with an active membership. Guests and registered users without one do not see them.',
-        whatsappHint: 'Leave empty if it is the same as your phone',
-        unsavedTitle: 'Unsaved changes',
-        unsavedText: 'Your profile has changes that are not saved yet. Save them?',
-        unsavedSave: 'Save', unsavedDrop: 'Leave without saving',
-        unsavedPwTitle: 'Password not changed',
-        unsavedPwText: 'The password you typed is not stored anywhere. Leave, and you will have to type it again.',
-        unsavedStay: 'Stay', unsavedLeave: 'Leave',
-        whatsappCopy: 'Same as my phone',
-        whatsappSame: 'same as phone',
-        showPhone: 'Show my phone to club members',
-        save: 'Save', saving: 'Saving...', saved: 'Saved!',
-        changeAvatar: 'Change Photo', removeAvatar: 'Remove',
-        avatarHint: 'JPG or PNG, max 2MB',
-        required: 'Required',
-        profileIncomplete: 'Complete your profile to participate in tournaments',
-        profileIncompleteFields: 'Please fill in: ',
-        fieldName: 'Name', fieldGender: 'Gender', fieldPhone: 'Phone',
-        noTournaments: 'You have not participated in tournaments yet',
-        noTournamentsText: 'Register for a tournament to see your history here',
-        noStats: 'No statistics available',
-        noStatsText: 'Link your account with a player profile to see stats',
-        playerNotLinked: 'Player profile not linked',
-        playerNotLinkedText: 'Contact admin to link your account with a player profile',
-        linkTitle: 'Find your player card',
-        linkText: 'The club created player cards in advance. Find yours — it holds your rating, points and match history. A club manager confirms the link.',
-        linkSearch: 'Type your last name',
-        linkItsMe: 'This is me',
-        linkNothing: 'Nobody found',
-        cardFoundTitle: 'This may be your player card',
-        cardFoundYes: 'Yes, that is me',
-        cardFoundNo: 'No, not me',
-        cyrTitle: 'Write your name in Cyrillic',
-        cyrText: 'Club lists use Cyrillic names. Fix your name in the profile so it matches the rankings.',
-        pointsShort: 'pts',
-        linkPending: 'Request sent',
-        linkPendingText: 'Waiting for a club manager to confirm the card is yours.',
-        linkOther: 'Pick another card',
-        linkTaken: 'This card is already taken by another account',
-        linkDone: 'Card linked',
-        linkRejected: 'The request was rejected. Pick another card or contact a club manager',
-        changePassword: 'Change Password',
-        devicesTitle: 'Devices and sign-in',
-        devicesThis: 'this device',
-        devicesNever: 'no sign-in recorded',
-        devicesEmpty: 'No devices yet',
-        devicesLogoutAll: 'Sign out on all devices',
-        devicesAskTitle: 'Sign out everywhere?',
-        devicesAskText: 'You will have to sign in again on your computer, tablet, phone and on this device.',
-        devicesApp: 'KSLT app',
-        devicesShowAll: 'Show all',
-        currentPassword: 'Current Password',
-        phCurrentPassword: 'Your current password',
-        phNewPassword: 'At least 8 characters',
-        phConfirmPassword: 'Repeat the password',
-        newPassword: 'New Password',
-        confirmPassword: 'Confirm Password',
-        updatePassword: 'Update Password',
-        updating: 'Updating...',
-        passwordUpdated: 'Password updated successfully',
-        errWrongPw: 'Current password is incorrect',
-        language: 'Language',
-        dangerZone: 'Danger Zone',
-        deleteAccount: 'Delete Account',
-        deleteLoses: ['Your ranking position and points', 'Tournament and match history', 'Loyalty points and discounts', 'Your account on the site and in the app'],
-        deleteConfirm: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.',
-        errPwMatch: 'Passwords do not match',
-        errPwShort: 'Password must be at least 8 characters',
-        pwRuleLength: 'At least 8 characters',
-        pwRuleUpper: 'One uppercase letter',
-        pwRuleDigit: 'One digit',
-        pwRuleSpecial: 'One special character',
-        showPassword: 'Show password',
-        role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
-        category: 'Category', points: 'Points',
-        regWithdraw: 'Withdraw',
-        regAgain: 'Enter again',
-        regWaitlist: 'On the waiting list',
-        regRefused: 'Not admitted',
-        tourUpcoming: 'Upcoming',
-        tourPlayed: 'Played',
-        regWithdrawn: 'Withdrawn',
-        regWithdrawTitle: 'Withdraw from the tournament?',
-        regWithPartner: 'in a pair with {имя}',
-        regWithdrawGuest: 'The entry is withdrawn entirely: {имя} is a guest without a club card, so the place cannot stay with them.',
-        regGuestMark: '(guest)',
-        regByPartner: '— entered by your partner',
-        regLeavePairTitle: 'Leave the pair?',
-        regLeavePairText: 'You leave the pair. The place stays with {имя} — they can find another partner.',
-        regLeavePairYes: 'Leave the pair',
-        regLeavePairDone: 'You left the pair',
-        regWithdrawText: 'Your entry for {name} will be withdrawn. You can enter again while registration is open.',
-        regWithdrawYes: 'Withdraw',
-        regWithdrawNo: 'Cancel',
-        regWithdrawDone: 'Entry withdrawn',
-        regWithdrawError: 'Could not withdraw the entry',
-        wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
-        catsTitle: 'Points by category', catHome: 'home', place: 'Place',
-        catWins: ['win', 'wins', 'wins'],
-        catLosses: ['loss', 'losses', 'losses'],
-        catTotal: 'Matches played', catWinRate: 'wins', catNoMatches: 'no matches yet',
-        pairsTitle: 'Doubles', mixedTitle: 'Mixed', pairsTag: 'doubles', mixedTag: 'mixed',
-        pairsNote: 'not counted in rating', pairsMatches: 'Matches',
-        notificationsTab: 'Notifications', notifEmpty: 'No notifications',
-        notifEmptyText: 'Messages about tournaments, challenges and payments appear here',
-        catClosed: 'closed',
-        socialMedia: 'Social Media',
-        cropTitle: 'Crop Photo',
-        cropApply: 'Apply',
-        cropCancel: 'Cancel',
-        lockedTitle: 'Get Membership',
-        lockedTitleExpired: 'Renew Membership',
-        lockedText: 'Subscribe to KSLT membership to access tournaments and statistics',
-        lockedTextExpired: 'Your membership has expired. Renew to access tournaments and statistics',
-        lockedBtn: 'Get Membership',
-        lockedBtnExpired: 'Renew',
-        payHistory: 'Payment History',
-        payDate: 'Date',
-        payAmount: 'Amount',
-        payMethod: 'Method',
-        payStatus: 'Status',
-        payNoPayments: 'No payments yet',
-        payNoPaymentsText: 'Your club and tournament payments will appear here',
-        payCash: 'Cash',
-        payTransfer: 'Transfer',
-        payCard: 'Card',
-        payments: 'Payments',
-        payPurposeMembership: 'Membership',
-        payPurposeTournament: 'Tournament',
-        payPurposeOther: 'Other',
-        payCompleted: 'Completed',
-        payPending: 'Pending',
-        payNote: 'Note',
-        invitationsTitle: 'Game Invitations',
-        invSent: 'Sent',
-        invReceived: 'Received',
-        invAccepted: 'Accepted',
-        invDeclined: 'Declined',
-        invPending: 'Pending',
-        invAccept: 'Accept', invDecline: 'Decline',
-        invContactsTitle: 'Contacts',
-        invShareWarn: 'If you accept, you will exchange contact details',
-        invShowContacts: 'Show contacts',
-        invNoContacts: 'No contacts provided',
-        invNoInvites: 'No invitations yet',
-        invNoInvitesText: 'Send game invitations from the Player Search page',
-        ratingHistory: 'Points',
-        rhTotalPoints: 'Total Points',
-        qrShare: 'QR Code',
-        qrTitle: 'Share Profile',
-        profileNoCard: 'No player card linked to this account yet',
-        profileOpenPublic: 'My public page',
-        profileWinLoss: 'Wins — losses',
-        qrDownload: 'Download PNG',
-        qrCopy: 'Copy Link',
-        qrCopied: 'Copied!',
-        games: 'My Games',
-        gamesTitle: 'My Games',
-        subTournaments: 'Past tournaments',
-        subMatches: 'Matches',
-        subChallenges: 'Challenges',
-        subBattles: 'Battles',
-        subUpcoming: 'Upcoming tournaments',
-        chalAccept: 'Accept', chalDecline: 'Decline', chalCancel: 'Withdraw',
-        chalCancelledBySelf: 'Withdrawn', chalCancelledByOpp: 'Withdrawn',
-        chalDirSent: 'you challenged', chalDirGot: 'you were challenged', chalSentOn: 'sent',
-        chalTheyAccepted: 'Opponent accepted', chalYouAccepted: 'You accepted',
-        chalTheyDeclined: 'Opponent declined', chalYouDeclined: 'You declined',
-        chalActionDone: 'This challenge has already been answered',
-        chalGone: 'This challenge no longer exists',
-        tourNoResults: 'Results not entered',
-        regRefusedShort: 'Declined',
-        tourStatus: 'Status', tourResult: 'Result', invDirection: 'Direction',
-        showAll: 'Show all',
-        collapseBtn: 'Collapse',
-        loadingList: 'Loading...',
-        noMatches: 'No matches yet',
-        noMatchesText: 'Your matches will appear here after tournaments',
-        matchDate: 'Date', matchOpponent: 'Opponent', matchScore: 'Score', matchResult: 'Result', matchTournament: 'Tournament', matchRound: 'Round', matchDoubles: 'Doubles', matchWith: 'with',
-        shownOf: 'of', pageOf: 'of', prevPage: '\u2190 Previous', nextPage: 'Next \u2192',
-        tagRating: 'rating', tagFriendly: 'friendly', tagDoubles: 'doubles', tagMixed: 'mixed', tagBattle: 'battle',
-        statsNote: 'Statistics from rating singles tournaments only',
-        challenges: 'Challenges',
-        challengesTitle: 'Match Challenges',
-        chalSent: 'Sent',
-        chalReceived: 'Received',
-        chalBattle: 'Battle',
-        chalWon: 'Won',
-        chalLost: 'Lost',
-        chalActive: 'Active',
-        chalNegotiating: 'Negotiating',
-        chalCountered: 'Counter-proposal',
-        chalAccepted: 'Accepted',
-        chalDeclined: 'Declined',
-        chalExpired: 'Expired',
-        chalCompleted: 'Completed',
-        chalNoChallenges: 'No challenges yet',
-        chalNoChallengesText: 'Send a match challenge from a player\'s profile page',
-        chalDate: 'Date',
-        chalTime: 'Time',
-        chalVenue: 'Venue',
-        vouchers: 'Discounts',
-        vouchersTitle: 'My Discounts',
-        voucherActive: 'Active',
-        voucherUsed: 'Used',
-        voucherExpired: 'Expired',
-        voucherNoVouchers: 'No discounts yet',
-        voucherNoVouchersText: 'Get a discount from a partner court or coach page',
-        voucherSaved: 'Saved',
-        voucherShowQR: 'Show QR',
-        voucherService: 'Service',
-        voucherDiscount: 'Discount',
-        voucherExpires: 'Expires',
-        voucherVenue: 'Venue',
-        voucherCourts: 'Courts',
-        voucherCoaches: 'Coaches',
-        voucherShowAll: 'Show all',
-        notifications: 'Notifications',
-        notifMembership: 'Membership',
-        notifTournaments: 'Tournaments',
-        notifMatches: 'Matches',
-        notifChallenges: 'Challenges',
-        notifSite: 'Site and app',
-        notifTelegram: 'Telegram',
-        notifEmail: 'Email',
-        notifSaved: 'Notification settings saved',
-        errPhoneTaken: 'This phone number is already linked to another account',
-        // Loyalty
-        loyaltyTab: 'Points',
-        loyBalance: 'Balance',
-        loyPoints: 'pts',
-        loyHistory: 'History',
-        loyDate: 'Date',
-        loyAction: 'Action',
-        loyPointsCol: 'Points',
-        loySource: 'Source',
-        loyEarn: 'Earned',
-        loyRedeem: 'Redeemed',
-        loyExpire: 'Expired',
-        loyAdjust: 'Adjusted',
-        loyNoHistory: 'No points yet',
-        loyNoHistoryText: 'Earn points by participating in tournaments, booking courts, and more',
-        loyRedeemTitle: 'Redeem Points',
-        loyRedeemBtn: 'Redeem',
-        loyRedeemed: 'Points redeemed successfully',
-        loyNotEnough: 'Not enough points',
-        loyNextExpiry: 'Next expiry',
-        loyPointsIn: 'pts in',
-        loyDays: 'days',
-        // Onboarding
-        obStep1Title: 'Welcome to KSLT!',
-        obStep1Text: 'Tennis community of Kyrgyzstan. Tournaments, rankings, partners for a game — all in one place.',
-        obStep2Title: 'Become a Club Member',
-        obStep2Text: 'Participate in tournaments, get ranked, enjoy partner discounts. Sign up in the "Membership" section.',
-        obStep3Title: 'Connect Telegram',
-        obStep3Text: 'Get notifications about tournaments and matches. Tap the button below to connect the bot.',
-        obConnectTg: 'Connect Telegram',
-        obNext: 'Next',
-        obDone: 'Let\'s go!'
-    } : {
+    }, {
         profile: 'Профиль', tournaments: 'Мои турниры',
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
         profileTitle: 'Мой профиль', tournamentsTitle: 'Мои турниры',
@@ -925,7 +925,7 @@
         obConnectTg: 'Подключить Telegram',
         obNext: 'Далее',
         obDone: 'Начнём!'
-    };
+    });
 
     // Use shared Supabase client from supabase-config.js
     var client = window.supabaseClient;
@@ -953,9 +953,7 @@
     // цифры и посторонние знаки.
     var SCRIPT_ANY = /^[а-яА-ЯёЁңҢүҮөӨa-zA-Z\s\-'.]+$/;
     var scriptRegex = SCRIPT_ANY;
-    var scriptHint = isKg ? 'Ат тамгалардан турушу керек' :
-                     isEn ? 'Letters only — no digits or symbols' :
-                            'Только буквы, без цифр и символов';
+    var scriptHint = KSLT_YAZYK.выбрать('Letters only — no digits or symbols', 'Ат тамгалардан турушу керек', 'Только буквы, без цифр и символов');
 
     function attachScriptCheck(inputId) {
         var el = document.getElementById(inputId);
@@ -982,7 +980,7 @@
 
     // ---- Badge Toast ----
     function showBadgeToast(icon, name) {
-        var label = isKg ? 'Жаңы бейдж' : isEn ? 'New badge' : 'Новый бейдж';
+        var label = KSLT_YAZYK.выбрать('New badge', 'Жаңы бейдж', 'Новый бейдж');
         var el = document.createElement('div');
         el.className = 'db-badge-toast';
         el.innerHTML = '<span class="db-badge-toast-icon">' + icon + '</span> ' + label + ': ' + name;
@@ -1155,7 +1153,7 @@
     };
 
     // ---- Render Membership Card ----
-    var pricingUrl = isKg ? 'pricing-kg.html' : isEn ? 'pricing-en.html' : 'pricing.html';
+    var pricingUrl = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
 
     async function renderMembershipCard() {
         var noMembership = { active: false, membership: null, daysLeft: 0, state: 'none' };
@@ -1290,7 +1288,7 @@
         var title = isExpired ? L.lockedTitleExpired : L.lockedTitle;
         var text = isExpired ? L.lockedTextExpired : L.lockedText;
         var btnLabel = isExpired ? L.lockedBtnExpired : L.lockedBtn;
-        var btnUrl = isEn ? 'pricing-en.html' : 'pricing.html';
+        var btnUrl = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
 
         var lockSvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
 
@@ -1425,7 +1423,7 @@
 
                 var R = window.KSLT_RULES;
                 var ntrp = (R && R.ntrpСтрока)
-                    ? R.ntrpСтрока(игрок.data.ntrp_singles, игрок.data.ntrp_doubles, isEn ? 'en' : 'ru') : '';
+                    ? R.ntrpСтрока(игрок.data.ntrp_singles, игрок.data.ntrp_doubles, KSLT_YAZYK.код) : '';
                 if (ntrp) {
                     строки += '<div class="db-profile-card-row"><span>NTRP</span><span>' + ntrp + '</span></div>';
                 }
@@ -1505,7 +1503,7 @@
         // NTRP: одиночный разряд и парные турниры, с подписями
         var R = window.KSLT_RULES;
         var ntrpСтрока = (R && R.ntrpСтрока)
-            ? R.ntrpСтрока(player.ntrp_singles, player.ntrp_doubles, isEn ? 'en' : 'ru') : '';
+            ? R.ntrpСтрока(player.ntrp_singles, player.ntrp_doubles, KSLT_YAZYK.код) : '';
         if (ntrpСтрока) {
             html += '<div class="db-sidebar-rating-row">' +
                 '<span class="db-sidebar-rating-label">NTRP</span>' +
@@ -1877,7 +1875,7 @@
      * номере — впишет свой.
      */
     function whatsappFieldHtml(profile) {
-        var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        var lang = KSLT_YAZYK.код;
         var stored = profile.whatsapp_phone || '';
         var parts = window.KSLT_PHONE
             ? KSLT_PHONE.split(stored, profile.whatsapp_country || profile.phone_country)
@@ -1893,7 +1891,7 @@
     }
 
     function phoneFieldHtml(profile) {
-        var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        var lang = KSLT_YAZYK.код;
         var parts = window.KSLT_PHONE
             ? KSLT_PHONE.split(profile.phone || '', profile.phone_country)
             : { iso: 'KG', rest: profile.phone || '' };
@@ -2608,7 +2606,7 @@
 
         var R = window.KSLT_RULES;
         список.innerHTML = люди.map(function(p) {
-            var разряд = p.category_id ? (R && R.categoryLabel ? R.categoryLabel(p.category_id, isEn ? 'en' : 'ru') : p.category_id) : '';
+            var разряд = p.category_id ? (R && R.categoryLabel ? R.categoryLabel(p.category_id, KSLT_YAZYK.код) : p.category_id) : '';
             var ntrp = (R && R.ntrpКоротко) ? R.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles) : '';
             var подпись = [разряд, ntrp ? 'NTRP ' + ntrp : ''].filter(Boolean).join(' \u00B7 ');
             return '<div class="db-link-row">' +
@@ -3073,9 +3071,7 @@
             new Intl.DateTimeFormat('en-GB', {
                 timeZone: DB_TZ, day: '2-digit', month: '2-digit', year: '2-digit'
             }).formatToParts(d).forEach(function(p) { parts[p.type] = p.value; });
-            return isEn
-                ? parts.month + '/' + parts.day + '/' + parts.year
-                : parts.day + '.' + parts.month + '.' + parts.year;
+            return KSLT_YAZYK.выбрать(parts.month + '/' + parts.day + '/' + parts.year, parts.day + '.' + parts.month + '.' + parts.year, parts.day + '.' + parts.month + '.' + parts.year);
         } catch(e) { return '\u2014'; }
     }
 
@@ -3087,22 +3083,22 @@
     var dbРазборСчёта = function (с) { return window.KSLT_RULES.разборСчёта(с); };
 
     // ---- H2H labels ----
-    var LH = isKg ? {
-        setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
-        last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
-        noMatches: 'Бетме-бет матчтар жок', notMet: 'Азырынча беттешкен жок', loading: 'Жүктөлүүдө...',
-        matchesLabel: ' матч'
-    } : isEn ? {
+    var LH = KSLT_YAZYK.выбрать({
         setsWon: 'Sets won', gamesWon: 'Games won',
         last5: 'Last 5 matches', fullProfile: 'Open full profile',
         noMatches: 'No head-to-head matches found', notMet: 'Haven\u2019t met yet', loading: 'Loading...',
         matchesLabel: ' matches'
-    } : {
+    }, {
+        setsWon: 'Утулган сеттер', gamesWon: 'Утулган геймдер',
+        last5: 'Акыркы 5 матч', fullProfile: 'Толук профилди ачуу',
+        noMatches: 'Бетме-бет матчтар жок', notMet: 'Азырынча беттешкен жок', loading: 'Жүктөлүүдө...',
+        matchesLabel: ' матч'
+    }, {
         setsWon: 'Выигранные сеты', gamesWon: 'Выигранные геймы',
         last5: 'Последние 5 матчей', fullProfile: 'Открыть полный профиль',
         noMatches: 'Матчей между игроками не найдено', notMet: 'Ещё не встречались', loading: 'Загрузка...',
         matchesLabel: ' матчей'
-    };
+    });
 
     // ---- Games: Matches subsection ----
     var _matchesOpponents = {}; // cache: oppId → { name, photo }
@@ -4498,12 +4494,12 @@
 
         // Script validation
         if (firstName && !scriptRegex.test(firstName)) {
-            var msg = isKg ? 'Атта тамгалар гана болушу керек' : isEn ? 'The first name may contain letters only' : 'В имени допустимы только буквы';
+            var msg = KSLT_YAZYK.выбрать('The first name may contain letters only', 'Атта тамгалар гана болушу керек', 'В имени допустимы только буквы');
             сказать(msg, 'err');
             return;
         }
         if (lastName && !scriptRegex.test(lastName)) {
-            var msg2 = isKg ? 'Фамилияда тамгалар гана болушу керек' : isEn ? 'The last name may contain letters only' : 'В фамилии допустимы только буквы';
+            var msg2 = KSLT_YAZYK.выбрать('The last name may contain letters only', 'Фамилияда тамгалар гана болушу керек', 'В фамилии допустимы только буквы');
             сказать(msg2, 'err');
             return;
         }
@@ -4519,8 +4515,7 @@
         var phoneDigits = phone.replace(/[^0-9]/g, '');
         if (phone && (phoneDigits.length < 8 || phoneDigits.length > 15)) {
             showMessage('profileMessage',
-                isKg ? 'Номер телефонду толук жазыңыз' :
-                isEn ? 'Enter the full phone number' : 'Введите номер телефона полностью', true);
+                KSLT_YAZYK.выбрать('Enter the full phone number', 'Номер телефонду толук жазыңыз', 'Введите номер телефона полностью'), true);
             return;
         }
         var gender = document.getElementById('profileGender').value;
@@ -4536,21 +4531,19 @@
             var нынешний = new Date().getFullYear();
             if (isNaN(год) || год < 1930 || год > нынешний) {
                 showMessage('profileMessage',
-                    isKg ? 'Туулган жылы: 1930 менен ' + нынешний + ' аралыгында'
-                    : isEn ? 'Year of birth: between 1930 and ' + нынешний
-                    : 'Год рождения: от 1930 до ' + нынешний, true);
+                    KSLT_YAZYK.выбрать('Year of birth: between 1930 and ' + нынешний, 'Туулган жылы: 1930 менен ' + нынешний + ' аралыгында', 'Год рождения: от 1930 до ' + нынешний), true);
                 return;
             }
         }
 
         // Validate Instagram handle
         if (instagram && !/^@?[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
-            ошибкаПоля('profileInstagram', isKg ? 'Instagram: @username (тамгалар, сандар, чекит, _)' : isEn ? 'Instagram: @username (letters, digits, dot, _)' : 'Instagram: @username (буквы, цифры, точка, _)');
+            ошибкаПоля('profileInstagram', KSLT_YAZYK.выбрать('Instagram: @username (letters, digits, dot, _)', 'Instagram: @username (тамгалар, сандар, чекит, _)', 'Instagram: @username (буквы, цифры, точка, _)'));
             return;
         }
         // Validate Telegram handle
         if (telegram && !/^@?[a-zA-Z0-9_]{5,32}$/.test(telegram)) {
-            ошибкаПоля('profileTelegram', isKg ? 'Telegram: @username (5-32 белги, тамгалар, сандар, _)' : isEn ? 'Telegram: @username (5-32 chars, letters, digits, _)' : 'Telegram: @username (5-32 символа, буквы, цифры, _)');
+            ошибкаПоля('profileTelegram', KSLT_YAZYK.выбрать('Telegram: @username (5-32 chars, letters, digits, _)', 'Telegram: @username (5-32 белги, тамгалар, сандар, _)', 'Telegram: @username (5-32 символа, буквы, цифры, _)'));
             return;
         }
 
@@ -5158,7 +5151,7 @@
         var map = {};
         (res.data || []).forEach(function(c) {
             map[c.id] = {
-                name: isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name),
+                name: KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name),
                 color: '#8A8A8F',
                 sort: c.sort_order || 0
             };
@@ -5358,7 +5351,7 @@
         var container = document.getElementById('dbBadgesCard');
         if (!container || !client) return;
 
-        var badgesLabel = isKg ? 'Жетишкендиктер' : isEn ? 'Achievements' : 'Достижения';
+        var badgesLabel = KSLT_YAZYK.выбрать('Achievements', 'Жетишкендиктер', 'Достижения');
 
         try {
             // Load all definitions + earned in parallel
@@ -5428,7 +5421,7 @@
 
             var nearest = lockedDefs.slice(0, 3);
             if (nearest.length > 0) {
-                var nextLabel = isKg ? 'Кийинки максаттар' : isEn ? 'Next goals' : 'Следующие цели';
+                var nextLabel = KSLT_YAZYK.выбрать('Next goals', 'Кийинки максаттар', 'Следующие цели');
                 // Обёртка нужна, чтобы прятать цели при развороте полного
                 // списка: ближайшие три и так стоят в нём первыми, и рядом
                 // они читались как повтор
@@ -5449,8 +5442,8 @@
             }
 
             // "All achievements" expandable grid
-            var allLabel = isKg ? 'Бардык жетишкендиктер' : isEn ? 'All achievements' : 'Все достижения';
-            var collapseLabel = isKg ? 'Жашыруу' : isEn ? 'Collapse' : 'Свернуть';
+            var allLabel = KSLT_YAZYK.выбрать('All achievements', 'Бардык жетишкендиктер', 'Все достижения');
+            var collapseLabel = KSLT_YAZYK.выбрать('Collapse', 'Жашыруу', 'Свернуть');
             html += '<button class="db-badges-expand-btn" id="dbBadgesExpandBtn">' + allLabel + ' (' + total + ')</button>';
             html += '<div class="db-badges-all" id="dbBadgesAll" style="display:none;">';
 
@@ -5536,10 +5529,10 @@
     function renderVoucherItem(v, hiddenType) {
         var statusClass = v.status === 'active' ? 'db-status-active' : (v.status === 'used' ? 'db-status-approved' : 'db-status-rejected');
         var statusLabel = v.status === 'active' ? L.voucherActive : (v.status === 'used' ? L.voucherUsed : L.voucherExpired);
-        var dateStr = new Date(v.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+        var dateStr = new Date(v.created_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short' });
         var expiresStr = '';
         if (v.expires_at) {
-            expiresStr = new Date(v.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            expiresStr = new Date(v.expires_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
         var isHidden = !!hiddenType;
         // Размеры вынесены в классы: на телефоне карточка перестраивается,
@@ -5707,7 +5700,7 @@
         var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + token;
         var expiresStr = '';
         if (voucher.expires_at) {
-            expiresStr = new Date(voucher.expires_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            expiresStr = new Date(voucher.expires_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
         var modal = document.createElement('div');
@@ -5866,12 +5859,12 @@
     var loyAllTx = [];
 
     var LOY_ACTION_MAP = {
-        tournament: isKg ? 'Мелдеш' : isEn ? 'Tournament' : 'Турнир',
-        court: isKg ? 'Корт' : isEn ? 'Court' : 'Корт',
-        coach: isKg ? 'Машыктыруучу' : isEn ? 'Coach' : 'Тренер',
-        membership: isKg ? 'Мүчөлүк' : isEn ? 'Membership' : 'Членство',
-        expiry: isKg ? 'Сгорание' : isEn ? 'Expiry' : 'Сгорание',
-        admin: isKg ? 'Администратор' : isEn ? 'Admin' : 'Админ'
+        tournament: KSLT_YAZYK.выбрать('Tournament', 'Мелдеш', 'Турнир'),
+        court: KSLT_YAZYK.выбрать('Court', 'Корт', 'Корт'),
+        coach: KSLT_YAZYK.выбрать('Coach', 'Машыктыруучу', 'Тренер'),
+        membership: KSLT_YAZYK.выбрать('Membership', 'Мүчөлүк', 'Членство'),
+        expiry: KSLT_YAZYK.выбрать('Expiry', 'Мөөнөт бүтүшү', 'Сгорание'),
+        admin: KSLT_YAZYK.выбрать('Admin', 'Администратор', 'Админ')
     };
 
     async function renderLoyalty(user) {
@@ -5988,7 +5981,7 @@
             else typeLabel = L.loyAdjust;
 
             var actionLabel = LOY_ACTION_MAP[t.action] || (t.action || '—');
-            var dateStr = new Date(t.created_at).toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' });
+            var dateStr = new Date(t.created_at).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short' });
 
             /* КРАСКА — КЛАССОМ ИЗ СИСТЕМЫ. Стояли #4caf50 и #f44336
                инлайном: Material мимо палитры, и инлайн бьёт правило по
@@ -6061,7 +6054,7 @@
             '</div>';
 
         rewards.forEach(function(rw) {
-            var title = isEn ? (rw.title_en || rw.title) : rw.title;
+            var title = KSLT_YAZYK.выбрать(rw.title_en || rw.title, rw.title_kg || rw.title, rw.title);
             var canRedeem = balance >= rw.cost;
 
             html += '<div class="db-redeem-item">' +

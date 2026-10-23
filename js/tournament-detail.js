@@ -1112,9 +1112,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         return p ? esc(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : (playerId ? 'TBD' : 'BYE');
     }
 
-    var months = isEn
-        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-        : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+    var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
 
     // Format date range
     var d1 = new Date(t.date_start + 'T00:00:00');
@@ -2445,8 +2443,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var regDate = '', regTime = '';
                 if (reg.registered_at) {
                     var d = new Date(reg.registered_at);
-                    regDate = d.toLocaleDateString(isEn ? 'en-US' : 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
-                    regTime = d.toLocaleTimeString(isEn ? 'en-US' : 'ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    regDate = d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: '2-digit', month: '2-digit', year: '2-digit' });
+                    regTime = d.toLocaleTimeString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 }
                 var скрыта = классОтсечки(idx - 1, всего);
                 return '<tr' + (скрыта ? ' class="' + скрыта.trim() + '"' : '') + '>' +
@@ -2515,7 +2513,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var drawSize = t.draw_size || 16;
             var totalRounds = Math.log2(drawSize);
 
-            var placeLabel = isEn ? 'place' : 'место';
+            var placeLabel = KSLT_YAZYK.выбрать('place', "орун", 'место');
             var defaultPhoto = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect fill="%231a1f2e" width="80" height="80" rx="40"/><text x="40" y="48" text-anchor="middle" fill="%23666" font-size="28">?</text></svg>');
 
             function podiumCard(player, place, medal) {
@@ -3210,7 +3208,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm
                         ? (KSLT_YAZYK.выбрать('permanently', 'түбөлүккө', 'навсегда'))
-                        : new Date(plRes.data.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
+                        : new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'));
                     var banReasonText = plRes.data.ban_reason
                         ? '<div class="td-zapis-note-pod">' +
                             (KSLT_YAZYK.выбрать('Reason: ', 'Себеби: ', 'Причина: ')) + plRes.data.ban_reason + '</div>'

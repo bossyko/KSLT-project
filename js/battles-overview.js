@@ -411,7 +411,11 @@
         var months = KSLT_YAZYK.выбрать(['January','February','March','April','May','June','July','August','September','October','November','December'], ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'], ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
         var d = new Date(iso + 'T00:00:00');
         if (isNaN(d.getTime())) return '';
-        return isEn ? (months[d.getMonth()] + ' ' + d.getDate()) : (d.getDate() + ' ' + months[d.getMonth()]);
+        /* ЧИСЛО И МЕСЯЦ СЧИТАЮТСЯ ОДИН РАЗ, А НЕ ТРИЖДЫ: доводы зова
+           вычисляются ВСЕ ТРИ, и `d.getDate()` внутри довода — это вызов
+           в трёх экземплярах. Правило куска 137 ловит именно это. */
+        var число = d.getDate(), месяц = months[d.getMonth()];
+        return KSLT_YAZYK.выбрать(месяц + ' ' + число, число + ' ' + месяц, число + ' ' + месяц);
     }
 
     function renderSections(active, completed, only) {

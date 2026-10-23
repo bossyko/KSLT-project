@@ -24,7 +24,56 @@
         return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(адрес || '');
     }
 
-    var L = isKg ? {
+    var L = KSLT_YAZYK.выбрать({
+        signingIn: 'Signing in...',
+        signIn: 'Sign In',
+        creatingAccount: 'Creating account...',
+        createAccount: 'Create Account',
+        sendingLink: 'Sending...',
+        sendLink: 'Send Reset Link',
+        sent: 'Sent!',
+        resend: 'Resend',
+        errEmailMatch: 'Email addresses do not match',
+        errPwRules: 'Password does not meet requirements:',
+        errPwMatch: 'Passwords do not match',
+        ruleLength: '8+ characters',
+        ruleUpper: 'Uppercase letter (A-Z)',
+        ruleDigit: 'Number (0-9)',
+        ruleSpecial: 'Special character (!@#$)',
+        errGeneric: 'An error occurred. Please try again.',
+        errInvalidLogin: 'Invalid email or password',
+        errCaptcha: 'Please complete the verification',
+        errEmailBad: 'Check the email address',
+        errTooMany: 'Too many attempts. Please wait 60 seconds.',
+        errEmailTaken: 'An account with this email already exists',
+        tgLoggingIn: 'Signing in via Telegram...',
+        tgRegistering: 'Creating account...',
+        tgNewUserTitle: 'Complete Registration',
+        tgNewUserSubtitle: 'Telegram: ',
+        tgEmailRequired: 'Please enter your email',
+        tgEmailTaken: 'This email is already registered. Sign in and link Telegram in your profile.',
+        resetTitle: 'New Password',
+        resetSaving: 'Saving...',
+        resetSave: 'Save Password',
+        resetSuccess: 'Password updated successfully!',
+        errResetPwRules: 'Password does not meet requirements',
+        errResetPwMatch: 'Passwords do not match',
+        successCheckEmail: 'Check your email to confirm your account!',
+        successResetSent: 'Password reset link sent to your email',
+        redirecting: 'Success! Redirecting...',
+        otpSentToEmail: 'to your email',
+        otpSentToTelegram: 'to Telegram bot',
+        otpWrongCode: 'Wrong code',
+        otpExpired: 'Code expired. Please request a new one.',
+        otpExhausted: 'Too many attempts. Please request a new code.',
+        otpSavingPw: 'Saving...',
+        otpSavePw: 'Save Password',
+        otpVerifying: 'Verifying...',
+        otpTimerPrefix: 'Code valid for: ',
+        otpAttemptsLeft: function (n) { return n + (n === 1 ? ' attempt left' : ' attempts left'); },
+        sendCode: 'Send Code',
+        sendingCode: 'Sending...'
+    }, {
         signingIn: 'Кирүү...',
         signIn: 'Кирүү',
         creatingAccount: 'Аккаунт түзүлүүдө...',
@@ -76,56 +125,7 @@
         otpAttemptsLeft: function (n) { return n + ' аракет калды'; },
         sendCode: 'Код жөнөтүү',
         sendingCode: 'Жөнөтүлүүдө...'
-    } : isEn ? {
-        signingIn: 'Signing in...',
-        signIn: 'Sign In',
-        creatingAccount: 'Creating account...',
-        createAccount: 'Create Account',
-        sendingLink: 'Sending...',
-        sendLink: 'Send Reset Link',
-        sent: 'Sent!',
-        resend: 'Resend',
-        errEmailMatch: 'Email addresses do not match',
-        errPwRules: 'Password does not meet requirements:',
-        errPwMatch: 'Passwords do not match',
-        ruleLength: '8+ characters',
-        ruleUpper: 'Uppercase letter (A-Z)',
-        ruleDigit: 'Number (0-9)',
-        ruleSpecial: 'Special character (!@#$)',
-        errGeneric: 'An error occurred. Please try again.',
-        errInvalidLogin: 'Invalid email or password',
-        errCaptcha: 'Please complete the verification',
-        errEmailBad: 'Check the email address',
-        errTooMany: 'Too many attempts. Please wait 60 seconds.',
-        errEmailTaken: 'An account with this email already exists',
-        tgLoggingIn: 'Signing in via Telegram...',
-        tgRegistering: 'Creating account...',
-        tgNewUserTitle: 'Complete Registration',
-        tgNewUserSubtitle: 'Telegram: ',
-        tgEmailRequired: 'Please enter your email',
-        tgEmailTaken: 'This email is already registered. Sign in and link Telegram in your profile.',
-        resetTitle: 'New Password',
-        resetSaving: 'Saving...',
-        resetSave: 'Save Password',
-        resetSuccess: 'Password updated successfully!',
-        errResetPwRules: 'Password does not meet requirements',
-        errResetPwMatch: 'Passwords do not match',
-        successCheckEmail: 'Check your email to confirm your account!',
-        successResetSent: 'Password reset link sent to your email',
-        redirecting: 'Success! Redirecting...',
-        otpSentToEmail: 'to your email',
-        otpSentToTelegram: 'to Telegram bot',
-        otpWrongCode: 'Wrong code',
-        otpExpired: 'Code expired. Please request a new one.',
-        otpExhausted: 'Too many attempts. Please request a new code.',
-        otpSavingPw: 'Saving...',
-        otpSavePw: 'Save Password',
-        otpVerifying: 'Verifying...',
-        otpTimerPrefix: 'Code valid for: ',
-        otpAttemptsLeft: function (n) { return n + (n === 1 ? ' attempt left' : ' attempts left'); },
-        sendCode: 'Send Code',
-        sendingCode: 'Sending...'
-    } : {
+    }, {
         signingIn: 'Вход...',
         signIn: 'Войти',
         creatingAccount: 'Создание аккаунта...',
@@ -184,7 +184,7 @@
         },
         sendCode: 'Отправить код',
         sendingCode: 'Отправка...'
-    };
+    });
 
     // Turnstile CAPTCHA
     var TURNSTILE_SITE_KEY = '0x4AAAAAAEDoNUH1Z2T9Iiab';
@@ -233,7 +233,7 @@
     (function fillCountries() {
         var sel = document.getElementById('forgot-country');
         if (!sel || !window.KSLT_PHONE) return;
-        var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        var lang = KSLT_YAZYK.код;
         sel.innerHTML = KSLT_PHONE.countries.map(function(c) {
             return '<option value="' + c.iso + '">' + c.flag + '  ' + KSLT_PHONE.name(c, lang) + '  ' + c.code + '</option>';
         }).join('');
@@ -735,7 +735,7 @@
 
     // ---- Name script validation (allow Cyrillic + Kyrgyz + Latin on all versions) ----
     var _sRe = /^[a-zA-Zа-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
-    var _sHint = isKg ? 'Туура эмес символдор' : isEn ? 'Invalid characters in name' : 'Допустимы буквы, пробел, дефис';
+    var _sHint = KSLT_YAZYK.выбрать('Invalid characters in name', 'Туура эмес символдор', 'Допустимы буквы, пробел, дефис');
 
     ['signup-firstname', 'signup-lastname'].forEach(function(id) {
         var el = document.getElementById(id);
@@ -920,7 +920,7 @@
 
         // Script validation (allow Cyrillic + Kyrgyz + Latin)
         var _scriptRe = /^[a-zA-Zа-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
-        var _scriptMsg = isKg ? 'Туура эмес символдор' : isEn ? 'Invalid characters in name' : 'Допустимы буквы, пробел, дефис';
+        var _scriptMsg = KSLT_YAZYK.выбрать('Invalid characters in name', 'Туура эмес символдор', 'Допустимы буквы, пробел, дефис');
 
         if ((firstName && !_scriptRe.test(firstName)) || (lastName && !_scriptRe.test(lastName))) {
             showMessage(signupForm, _scriptMsg, true);
@@ -1212,7 +1212,7 @@
         // Язык страницы: при регистрации профиля ещё нет, и сервер не знает,
         // на каком языке писать. Код придёт на том, с которого человек
         // регистрируется
-        body.lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        body.lang = KSLT_YAZYK.код;
         if (telegramChatId) body.telegram_chat_id = telegramChatId;
         if (flow === 'forgot_password' && _forgotToken) body.turnstile_token = _forgotToken;
 
@@ -1792,7 +1792,7 @@
             await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html'),
+                    redirectTo: basePath + (KSLT_YAZYK.выбрать('dashboard-en.html', 'dashboard-kg.html', 'dashboard.html')),
                     queryParams: { prompt: 'select_account' }
                 }
             });
@@ -1816,7 +1816,7 @@
                 await client.auth.signInWithOAuth({
                     provider: 'apple',
                     options: {
-                        redirectTo: basePath + (isKg ? 'dashboard-kg.html' : isEn ? 'dashboard-en.html' : 'dashboard.html')
+                        redirectTo: basePath + (KSLT_YAZYK.выбрать('dashboard-en.html', 'dashboard-kg.html', 'dashboard.html'))
                     }
                 });
             });

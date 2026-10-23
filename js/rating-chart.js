@@ -56,7 +56,7 @@
         var map = {};
         (res.data || []).forEach(function(c) {
             map[c.id] = {
-                name: isKg ? (c.name_kg || c.name) : (isEn ? (c.name_en || c.name) : c.name),
+                name: KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name),
                 color: c.color || FALLBACK_COLOR(),
                 sort: c.sort_order || 0
             };

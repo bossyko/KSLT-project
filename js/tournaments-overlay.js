@@ -28,9 +28,9 @@
 
     // Format prize fund total: 500000 → "500 000 сом", 0 → "0 сом"
     function formatPrize(num) {
-        if (!num) return '0 ' + (isEn ? 'som' : 'сом');
+        if (!num) return '0 ' + (KSLT_YAZYK.выбрать('som', "сом", 'сом'));
         var str = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-        return str + ' ' + (isEn ? 'som' : 'сом');
+        return str + ' ' + (KSLT_YAZYK.выбрать('som', "сом", 'сом'));
     }
 
     function trackPageView(pageName) {
@@ -295,9 +295,7 @@
                 console.warn('Registration counts unavailable:', re.message);
             }
 
-            var months = isEn
-                ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-                : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+            var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
 
             var formatLabels = KSLT_YAZYK.выбрать({ singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }, { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }, { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
@@ -602,8 +600,11 @@
         if (!iso) return '';
         var months = KSLT_YAZYK.выбрать(['January','February','March','April','May','June','July','August','September','October','November','December'], ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'], ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
         var d = new Date(iso + 'T00:00:00');
-        return isEn ? (months[d.getMonth()] + ' ' + d.getDate())
-                    : (d.getDate() + ' ' + months[d.getMonth()]);
+        /* ЧИСЛО И МЕСЯЦ СЧИТАЮТСЯ ОДИН РАЗ, А НЕ ТРИЖДЫ: доводы зова
+           вычисляются ВСЕ ТРИ, и `d.getDate()` внутри довода — это вызов
+           в трёх экземплярах. Правило куска 137 ловит именно это. */
+        var число = d.getDate(), месяц = months[d.getMonth()];
+        return KSLT_YAZYK.выбрать(месяц + ' ' + число, число + ' ' + месяц, число + ' ' + месяц);
     }
 
     function setSub(id, text) {

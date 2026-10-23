@@ -239,7 +239,7 @@
         }
 
         var name = guest ? shortName(p.full_name) : (p.full_name || '');
-        var cat = isEn ? (p.category_name_en || p.category_name) : p.category_name;
+        var cat = KSLT_YAZYK.выбрать(p.category_name_en || p.category_name, p.category_name_kg || p.category_name, p.category_name);
         var isOnline = online(p);
 
         return '<div class="pt-card' + blur + '"' +

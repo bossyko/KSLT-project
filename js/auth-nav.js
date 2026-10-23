@@ -53,7 +53,7 @@
      * рядом, в браузере.
      */
     function запомнитьЯзык(session) {
-        var язык = isKg ? 'kg' : (isEn ? 'en' : 'ru');
+        var язык = KSLT_YAZYK.код;
         // Своё имя, не kslt_lang: под тем приложение держит свой язык
         // (mobile/www/js/i18n.js), и мы бы принимали его выбор за отметку
         // «уже записано в базу»
@@ -644,10 +644,10 @@
 
                     function timeAgo(date) {
                         var diff = Math.floor((new Date() - date) / 1000);
-                        if (diff < 60) return isEn ? 'just now' : 'только что';
-                        if (diff < 3600) return Math.floor(diff / 60) + (isEn ? 'm ago' : ' мин.');
-                        if (diff < 86400) return Math.floor(diff / 3600) + (isEn ? 'h ago' : ' ч.');
-                        return Math.floor(diff / 86400) + (isEn ? 'd ago' : ' дн.');
+                        if (diff < 60) return KSLT_YAZYK.выбрать('just now', "азыр эле", 'только что');
+                        if (diff < 3600) return Math.floor(diff / 60) + (KSLT_YAZYK.выбрать('m ago', " мүн.", ' мин.'));
+                        if (diff < 86400) return Math.floor(diff / 3600) + (KSLT_YAZYK.выбрать('h ago', " с.", ' ч.'));
+                        return Math.floor(diff / 86400) + (KSLT_YAZYK.выбрать('d ago', " күн", ' дн.'));
                     }
 
                     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная

@@ -8,35 +8,7 @@
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
 
-    var L = isKg ? {
-        loading: 'Жүктөлүүдө...',
-        validBadge: 'ЖАРАКТУУ ВАУЧЕР',
-        playerName: 'Мүчө',
-        service: 'Кызмат',
-        discount: 'Арзандатуу',
-        venue: 'Жер',
-        validUntil: 'Мөөнөтү',
-        enterPin: 'Администратор PIN-кодду киргизиңиз',
-        confirm: 'Ырастоо',
-        confirming: 'Ырасталууда...',
-        successTitle: 'Скидка ырасталды!',
-        successText: 'Арзандатуу колдонулду',
-        errorInvalid: 'Жараксыз QR-код',
-        errorInvalidText: 'Бул скидка табылган жок',
-        errorExpired: 'Скидка мөөнөтү бүттү',
-        errorExpiredText: 'Бул скидканын мөөнөтү бүттү',
-        errorUsed: 'QR мурунтан колдонулган',
-        errorUsedText: 'Бул скидка колдонулду',
-        errorWrongPin: 'Туура эмес PIN-код',
-        errorNoToken: 'Жараксыз шилтеме',
-        errorNoTokenText: 'QR-код табылган жок',
-        errorPinShort: 'Код төрт сандан турат',
-        errorSystem: 'Текшерүү мүмкүн болбоду',
-        errorSystemText: 'Байланыш үзүлдү',
-        nextScan: 'QR-кодду кайра көрсөтүүнү сураңыз.',
-        nextNew: 'КСЛТ колдонмосунан жаңы ваучер түзүүнү сураңыз.',
-        nextRetry: 'Кайра аракет кылыңыз же бетти жаңылаңыз.'
-    } : (isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         loading: 'Loading...',
         validBadge: 'VALID DISCOUNT',
         playerName: 'Member',
@@ -64,7 +36,35 @@
         nextScan: 'Ask the member to show the QR code again.',
         nextNew: 'Ask the member to create a new voucher in the KSLT app.',
         nextRetry: 'Try again or reload the page.'
-    } : {
+    }, {
+        loading: 'Жүктөлүүдө...',
+        validBadge: 'ЖАРАКТУУ ВАУЧЕР',
+        playerName: 'Мүчө',
+        service: 'Кызмат',
+        discount: 'Арзандатуу',
+        venue: 'Жер',
+        validUntil: 'Мөөнөтү',
+        enterPin: 'Администратор PIN-кодду киргизиңиз',
+        confirm: 'Ырастоо',
+        confirming: 'Ырасталууда...',
+        successTitle: 'Скидка ырасталды!',
+        successText: 'Арзандатуу колдонулду',
+        errorInvalid: 'Жараксыз QR-код',
+        errorInvalidText: 'Бул скидка табылган жок',
+        errorExpired: 'Скидка мөөнөтү бүттү',
+        errorExpiredText: 'Бул скидканын мөөнөтү бүттү',
+        errorUsed: 'QR мурунтан колдонулган',
+        errorUsedText: 'Бул скидка колдонулду',
+        errorWrongPin: 'Туура эмес PIN-код',
+        errorNoToken: 'Жараксыз шилтеме',
+        errorNoTokenText: 'QR-код табылган жок',
+        errorPinShort: 'Код төрт сандан турат',
+        errorSystem: 'Текшерүү мүмкүн болбоду',
+        errorSystemText: 'Байланыш үзүлдү',
+        nextScan: 'QR-кодду кайра көрсөтүүнү сураңыз.',
+        nextNew: 'КСЛТ колдонмосунан жаңы ваучер түзүүнү сураңыз.',
+        nextRetry: 'Кайра аракет кылыңыз же бетти жаңылаңыз.'
+    }, {
         loading: 'Загрузка...',
         validBadge: 'ДЕЙСТВИТЕЛЬНАЯ СКИДКА',
         playerName: 'Член КСЛТ',

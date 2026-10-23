@@ -42,7 +42,7 @@
     };
 
     var isEn = KSLT_YAZYK.en;
-    var LOCALE = isEn ? 'en-US' : 'ru-RU';
+    var LOCALE = KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU');
 
     var client = window.supabaseClient;
     if (!client) return;

@@ -65,15 +65,13 @@
                         'justify-content:center;padding:24px;text-align:center;font-family:Inter,sans-serif;">' +
                         '<div style="max-width:420px;">' +
                         '<h1 style="font-size:1.2rem;margin-bottom:12px;">' +
-                        (isEn ? 'Profile not found' : 'Профиль не найден') + '</h1>' +
+                        (KSLT_YAZYK.выбрать('Profile not found', "Профиль табылган жок", 'Профиль не найден')) + '</h1>' +
                         '<p style="color:#999;line-height:1.6;margin-bottom:20px;">' +
-                        (isEn
-                            ? 'Your sign-in works, but the profile is missing. Write to us and we will restore it.'
-                            : 'Вход работает, но профиля в базе нет. Напишите нам — восстановим.') +
+                        (KSLT_YAZYK.выбрать('Your sign-in works, but the profile is missing. Write to us and we will restore it.', "Кирүү иштейт, бирок базада профиль жок. Бизге жазыңыз — калыбына келтиребиз.", 'Вход работает, но профиля в базе нет. Напишите нам — восстановим.')) +
                         '</p>' +
                         '<button id="ksltDeadLogout" style="padding:10px 24px;border-radius:999px;' +
                         'border:1px solid #333;background:var(--accent);color:var(--accent-on);font-weight:600;cursor:pointer;">' +
-                        (isEn ? 'Sign out' : 'Выйти') + '</button>' +
+                        (KSLT_YAZYK.выбрать('Sign out', "Чыгуу", 'Выйти')) + '</button>' +
                         '</div></div>';
                     document.getElementById('ksltDeadLogout').addEventListener('click', async function() {
                         await client.auth.signOut().catch(function() {});

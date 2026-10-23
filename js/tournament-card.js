@@ -169,7 +169,7 @@
         // категорий и на самой странице турнира, чтобы цифры не разошлись
         var slots = window.KSLT_SLOTS && window.KSLT_SLOTS.line(t, opts.taken, s);
         if (slots) meta.push('<span class="tc-slots' + (slots.tight ? ' tc-slots-tight' : '') + '">' + esc(slots.text) + '</span>');
-        if (t.location) meta.push('<span>' + esc(isEn ? (t.location_en || t.location) : t.location) + '</span>');
+        if (t.location) meta.push('<span>' + esc(KSLT_YAZYK.выбрать(t.location_en || t.location, t.location_kg || t.location, t.location)) + '</span>');
 
         // Завершённые и отменённые приглушаем: живое должно тянуть взгляд
         // первым, а архив — не спорить за внимание
