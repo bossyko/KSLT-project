@@ -343,7 +343,7 @@
                     '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
                         (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
-                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + ('Гость') + '</span>' : '') +
+                        (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + L.regGuest + '</span>' : '') +
                     '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
@@ -390,7 +390,7 @@
             html += '<button class="ad-crt-page-btn' + (p === plrPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         });
         html += '<button class="ad-crt-page-btn" data-page="' + (plrPage + 1) + '"' + (plrPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.plrTotal + '</span>';
 
         wrap.innerHTML = html;
 
@@ -566,7 +566,7 @@
             // игрока этих колонок либо нет, либо их никто не заполняет.
             (plrEditingId ? (
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + ('Контакты') + '</div>' +
+                '<div class="ad-form-card-title">' + L.chalContacts + '</div>' +
                 '<div class="ad-field-row ad-field-row-2">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.plrPhone + '</label>' +
@@ -795,7 +795,7 @@
             (plrEditingId ? (function() {
                 var isPlayerBanned = item && item.banned_until && new Date(item.banned_until) > new Date();
                 var banHtml = '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
-                    '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + ('Модерация') + '</h3>';
+                    '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + L.usrModeration + '</h3>';
                 if (isPlayerBanned) {
                     var isPerm = new Date(item.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString('ru-RU'));
@@ -836,7 +836,7 @@
                 var ptsVal = parseInt(document.getElementById('adPlrRhPoints').value) || 0;
 
                 if (!dateVal || !nameVal) {
-                    A.showToast(L.fillRequired || 'Fill required fields', 'error');
+                    A.showToast(L.plrFillRequired, 'error');
                     return;
                 }
 
@@ -1414,7 +1414,7 @@
                     '</select>' +
                 '</div>' +
                 '<div style="margin-bottom:16px;display:none;" id="adPlrBanCustomWrap">' +
-                    '<label class="ad-field-label">' + ('Дата') + '</label>' +
+                    '<label class="ad-field-label">' + L.plrDate + '</label>' +
                     '<input type="date" class="ad-field-input" id="adPlrBanCustomDate">' +
                 '</div>' +
                 '<div style="margin-bottom:16px;">' +
@@ -1576,11 +1576,11 @@
         // Render matches table
         var html = '<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);">' +
             '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);color:var(--text-muted);font-size:var(--fs-xs);">' +
-                '<th style="text-align:left;padding:6px 8px;">' + ('Дата') + '</th>' +
-                '<th style="text-align:left;padding:6px 8px;">' + ('Соперник') + '</th>' +
-                '<th style="text-align:center;padding:6px 8px;">' + ('Счёт') + '</th>' +
-                '<th style="text-align:center;padding:6px 8px;">' + ('Итог') + '</th>' +
-                '<th style="text-align:left;padding:6px 8px;">' + ('Турнир') + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + L.plrDate + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + L.plrSopernik + '</th>' +
+                '<th style="text-align:center;padding:6px 8px;">' + L.plrScore + '</th>' +
+                '<th style="text-align:center;padding:6px 8px;">' + L.qualResult + '</th>' +
+                '<th style="text-align:left;padding:6px 8px;">' + L.plrTournament + '</th>' +
             '</tr></thead><tbody>';
 
         res.data.forEach(function(m) {
@@ -1630,7 +1630,7 @@
                 '<td style="padding:6px 8px;text-align:center;font-family:monospace;">' + A.esc(score) + '</td>' +
                 '<td style="padding:6px 8px;text-align:center;">' + resultBadge + '</td>' +
                 '<td style="padding:6px 8px;font-size:var(--fs-xs);color:var(--text-muted);">' +
-                    (isDblTrn ? '<span style="font-size:var(--fs-md);vertical-align:middle;" title="' + ('Парный') + '">\uD83D\uDC65</span> ' : '') +
+                    (isDblTrn ? '<span style="font-size:var(--fs-md);vertical-align:middle;" title="' + L.plrParnyy + '">\uD83D\uDC65</span> ' : '') +
                     A.esc(trnName) + (roundLabel ? ' <span style="opacity:0.6;">(' + A.esc(roundLabel) + ')</span>' : '') +
                 '</td>' +
             '</tr>';
@@ -1716,7 +1716,7 @@
             var name = c.name;
             var off = !allowed[c.id];
             html += '<option value="' + c.id + '"' + (off ? ' disabled' : '') + '>' +
-                A.esc(name) + (off ? ' \u00b7 ' + ('нет карточки категории') : '') +
+                A.esc(name) + (off ? ' \u00b7 ' + L.plrNoKartochkiKategorii : '') +
             '</option>';
         });
         sel.innerHTML = html;
@@ -1983,11 +1983,11 @@
             html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">' +
                 '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrRhMore">' +
                 ('Показать ещё ' + step) +
-                ' \u00b7 ' + ('осталось') + ' ' + left + '</button></div>';
+                ' \u00b7 ' + L.plrOstalos + ' ' + left + '</button></div>';
         } else if (reversed.length > RH_PAGE) {
             html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">' +
                 '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrRhLess">' +
-                ('Свернуть') + '</button></div>';
+                L.plrSvernut + '</button></div>';
         }
 
         tableEl.innerHTML = html;
@@ -2301,8 +2301,8 @@
                 '<input type="text" class="ad-field-input ad-filter-search" id="ratSearch" placeholder="' + L.ratSearchPlayer + '">' +
                 '<select class="ad-field-input ad-filter-select" id="ratGenderFilter">' + genderOpts + '</select>' +
                 '<select class="ad-field-input ad-filter-select" id="ratCatFilter">' + catOpts + '</select>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratRecalcAllBtn" style="margin-left:auto">🔄 ' + ('Пересчитать все') + '</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + ('Смена сезона') + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratRecalcAllBtn" style="margin-left:auto">🔄 ' + L.plrPereschitatVse + '</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="ratSeasonResetBtn" style="margin-left:8px;">🗓 ' + L.plrSmenaSezona + '</button>' +
             '</div>' +
             '<div id="ratRankingsBody"></div>';
 
@@ -3094,7 +3094,7 @@
                     '</div>' +
                 '</div>' +
                 '<div class="ad-modal-footer ad-skryt" id="adImportFooter">' +
-                    '<button class="ad-btn ad-btn-outline" id="adImportCancelBtn">' + ('Отмена') + '</button>' +
+                    '<button class="ad-btn ad-btn-outline" id="adImportCancelBtn">' + L.cancel + '</button>' +
                     '<button class="ad-btn" id="adImportDoBtn" style="margin-left:8px;">' + L.plrImportBtn + '</button>' +
                 '</div>' +
             '</div>';
@@ -3355,10 +3355,10 @@
 
             var total = parsedRows.length;
             document.getElementById('adImportStats').innerHTML =
-                '<span>' + ('Найдено') + ': <strong>' + total + '</strong> ' + L.plrImportRows + '</span>' +
+                '<span>' + L.plrNotFound + ': <strong>' + total + '</strong> ' + L.plrImportRows + '</span>' +
                 '<span>\ud83d\udd04 ' + L.plrImportUpdated + ': <strong>' + countUpdate + '</strong></span>' +
                 '<span>\u2795 ' + L.plrImportCreated + ': <strong>' + countCreate + '</strong></span>' +
-                '<span>\u26a0\ufe0f ' + ('Ошибки') + ': <strong>' + countError + '</strong></span>';
+                '<span>\u26a0\ufe0f ' + L.plrOshibki + ': <strong>' + countError + '</strong></span>';
         }
 
         // Step 4: Do import

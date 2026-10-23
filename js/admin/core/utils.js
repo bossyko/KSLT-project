@@ -580,7 +580,7 @@
             заголовок: title,
             тело: text,
             кнопки: '<button class="ad-btn ' + (вид === 'warn' ? 'ad-btn-danger' : 'ad-btn-primary') +
-                    '" id="adNoticeOk">' + (okLabel || (L.ok || 'Понятно')) + '</button>'
+                    '" id="adNoticeOk">' + (okLabel || (L.ok)) + '</button>'
         });
         if (вид === 'warn') окноГот.окно.classList.add('ad-confirm-warn');
         окноГот.overlay.querySelector('#adNoticeOk').addEventListener('click', окноГот.закрыть);
@@ -613,7 +613,7 @@
                           'value="' + (opts.value || '') + '">',
                 кнопки:
                     '<button class="ad-btn ad-btn-secondary" id="adPromptCancel">' + L.cancel + '</button>' +
-                    '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + (opts.okLabel || L.confirm || 'OK') + '</button>',
+                    '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + (opts.okLabel || L.confirm) + '</button>',
                 приЗакрытии: function() { if (!готово) { готово = true; resolve(null); } }
             });
 
@@ -645,7 +645,7 @@
                 title,
                 text || '',
                 function() { resolve(true); },
-                confirmLabel || L.confirm || 'OK',
+                confirmLabel || L.confirm,
                 function() { resolve(false); }
             );
         });
@@ -992,13 +992,13 @@
         // растровая копия на экранах с высокой плотностью выглядит мыльной
         var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
         if (allowed.indexOf(file.type) === -1) {
-            showToast(L.uploadFormatError || 'Формат: JPEG, PNG, WebP, GIF, SVG', 'error');
+            showToast(L.uploadFormatError, 'error');
             return null;
         }
 
         // Hard size limit (before compression)
         if (file.size > MAX_FILE_SIZE) {
-            showToast(L.uploadSizeError || 'Макс. размер файла: 5 МБ', 'error');
+            showToast(L.uploadSizeError, 'error');
             return null;
         }
 
@@ -1015,7 +1015,7 @@
                 ext = compressed.ext;
                 var saved = Math.round((1 - uploadBlob.size / file.size) * 100);
                 if (saved > 5) {
-                    showToast((L.imageCompressed || 'Сжато') + ': ' + formatBytes(file.size) + ' → ' + formatBytes(uploadBlob.size) + ' (-' + saved + '%)');
+                    showToast((L.imageCompressed) + ': ' + formatBytes(file.size) + ' → ' + formatBytes(uploadBlob.size) + ' (-' + saved + '%)');
                 }
             } catch (e) {
                 // Compression failed — upload original
@@ -1325,13 +1325,13 @@
         var L = о.подписи || {};
         var обёртка = о.обёртка || 'ad-brk-actions';
         var незаписано = о.незаписано || 0;
-        var пояснение = (L.finalizeLeft || '').replace('{n}', незаписано);
+        var пояснение = (L.finalizeLeft).replace('{n}', незаписано);
 
         if (о.завершён) {
             return '<div class="ad-brk-done">' +
-                '<span class="ad-brk-accent">' + (L.tournamentDone || '') + '</span>' +
+                '<span class="ad-brk-accent">' + (L.tournamentDone) + '</span>' +
                 '&nbsp;&nbsp;<button class="ad-btn ad-btn-sm ad-btn-secondary" ' +
-                'id="adBrkRecalc">' + (L.recalcPoints || '') + '</button>' +
+                'id="adBrkRecalc">' + (L.recalcPoints) + '</button>' +
             '</div>';
         }
 
@@ -1339,7 +1339,7 @@
         html += '<button class="ad-btn ad-btn-primary' +
             (о.широкая === false ? '' : ' ad-btn-wide') + '" id="adBrkFinalize"' +
             (о.всёСыграно ? '' : ' disabled title="' + пояснение + '"') +
-            '>' + (L.finalizeTournament || '') + '</button>';
+            '>' + (L.finalizeTournament) + '</button>';
         /* КНОПКА И ПОЯСНЕНИЕ СТОЯТ В ОДНОЙ СТРОКЕ — ЗНАЧИТ И ПО ОДНОЙ
            ЛИНИИ. Замер 01.10: с `margin-top: 10px` верх полосы был ниже
            верха кнопки на 10, низ — на 11, и 10 мимо шкалы. Высота

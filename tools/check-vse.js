@@ -146,7 +146,8 @@ const КУСКИ = [
     ['семь находок обхода', 'check-sem-nahodok.js', 'check-sem-nahodok-otkat.js'],
     ['относительные пути', 'check-puti-otnositelnye.js', 'check-puti-otnositelnye-otkat.js'],
     ['язык страницы', 'check-yazyk-odin-dom.js', 'check-yazyk-odin-dom-otkat.js'],
-    ['офлайн-служба', 'check-sluzhba-i-koren.js', 'check-sluzhba-i-koren-otkat.js']
+    ['офлайн-служба', 'check-sluzhba-i-koren.js', 'check-sluzhba-i-koren-otkat.js'],
+    ['подписи в словаре', 'check-podpisi-v-slovare.js', 'check-podpisi-v-slovare-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -435,7 +435,7 @@
                 '<div id="adPartnerDbBlock">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.doublesPartnerSearch + '</label>' +
-                        '<input type="text" class="ad-field-input" id="adPartnerSearch" placeholder="' + ('Введите имя...') + '" autocomplete="off">' +
+                        '<input type="text" class="ad-field-input" id="adPartnerSearch" placeholder="' + L.brkEnterName + '" autocomplete="off">' +
                         '<div id="adPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
                         '<input type="hidden" id="adPartnerSelectedId" value="">' +
                     '</div>' +
@@ -688,7 +688,7 @@
                 var найдены = (res.data || []).filter(function(p) { return !(занятые && занятые[p.id]); });
                 if (!найдены.length) {
                     список.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:var(--fs-sm);">' +
-                        ('Игроков не найдено') + '</div>';
+                        L.brkPlayersNeNotFound + '</div>';
                     return;
                 }
                 var html = '';
@@ -913,7 +913,7 @@
             return '<div class="ad-field">' +
                 '<label class="ad-field-label">' + подпись + '</label>' +
                 '<input type="text" class="ad-field-input" id="' + id + 'Search" placeholder="' +
-                    ('Введите имя...') + '" autocomplete="off">' +
+                    L.brkEnterName + '" autocomplete="off">' +
                 '<div id="' + id + 'Results" style="max-height:150px;overflow-y:auto;margin-top:4px;"></div>' +
                 '<input type="hidden" id="' + id + 'Id" value="">' +
             '</div>';
@@ -1739,7 +1739,7 @@
             return p.name || id;
         };
         var чейМатч = function(m) {
-            if (m.group_number) return (L.groupLabel || 'Группа') + ' ' + m.group_number;
+            if (m.group_number) return (L.groupLabel) + ' ' + m.group_number;
             if (m.round === 'IG') return L.igStageTitle;
             return m.round || '';
         };
@@ -2884,12 +2884,12 @@
             html += renderResultsPanel(tournament, tournamentResults, playersMap, matches, registrations, isDbl);
             html += '<div class="ad-res-podval">' +
                 '<button class="ad-btn ad-btn-primary" id="adBrkRecalcPoints">' +
-                ('Пересчитать очки') + '</button></div>';
+                L.recalcPoints + '</button></div>';
             html += '</div>';
 
             // News panel
             html += '<div class="ad-brk-panel" id="adBrkNewsPanel" style="padding-top:8px;' + (activeTab !== 'news' ? 'display:none;' : '') + '">';
-            html += '<div id="adBrkNewsContent"><div style="text-align:center;padding:40px;color:var(--text-secondary);">⏳ ' + ('Загрузка...') + '</div></div>';
+            html += '<div id="adBrkNewsContent"><div style="text-align:center;padding:40px;color:var(--text-secondary);">⏳ ' + L.brkLoading + '</div></div>';
             html += '</div>';
         }
 
@@ -3545,7 +3545,7 @@
                     '<div style="display:flex;flex-direction:column;gap:12px;min-width:300px;">' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.regExternalName + ' *</label>' +
-                            '<input type="text" class="ad-field-input" id="adExtName" placeholder="' + ('Иванов Иван') + '">' +
+                            '<input type="text" class="ad-field-input" id="adExtName" placeholder="' + L.brkIvanovIvan + '">' +
                         '</div>' +
                         // Страна, NTRP и пол — одним рядом и одного размера
                         '<div style="display:flex;gap:12px;">' +
@@ -3570,7 +3570,7 @@
                         '<hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:4px 0;">' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerName + '</label>' +
-                            '<input type="text" class="ad-field-input" id="adExtPartnerName" placeholder="' + ('Имя партнёра') + '">' +
+                            '<input type="text" class="ad-field-input" id="adExtPartnerName" placeholder="' + L.doublesExtPartnerName + '">' +
                         '</div>' +
                         '<div style="display:flex;gap:12px;">' +
                             '<div class="ad-field ad-rastyanut">' +
@@ -3790,7 +3790,7 @@
                         var players = res.data || [];
                         if (players.length === 0) {
                             resultsDiv.innerHTML = '<div style="color:var(--text-secondary);padding:12px;text-align:center;">' +
-                                ('Игроки не найдены') + '</div>';
+                                L.brkPlayersNeNotFound2 + '</div>';
                             return;
                         }
                         var html = '';
@@ -4608,7 +4608,7 @@
             // Overflow warning
             if (mainDraw.length > maxPart) {
                 html += '<div class="ad-alert ad-alert-warning ad-reg-note">' +
-                    ('Внимание: ') + mainDraw.length + ' ' + L.regCount + ', ' +
+                    L.brkWarning + mainDraw.length + ' ' + L.regCount + ', ' +
                     ('но макс. участников — ') + maxPart +
                 '</div>';
             }
@@ -4760,9 +4760,9 @@
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     '<th class="ad-reg-num-sm">#</th>' +
                     '<th>' + L.plrName + '</th>' +
-                    (isDbl ? '<th>' + L.doublesPartner + '</th>' : '<th>' + ('Категория') + '</th>') +
+                    (isDbl ? '<th>' + L.doublesPartner + '</th>' : '<th>' + L.brkCategory + '</th>') +
                     '<th>' + L.regOutWhy + '</th>' +
-                    '<th>' + ('Регистрация') + '</th>' +
+                    '<th>' + L.brkRegistration + '</th>' +
                     '<th class="ad-reg-w-act-sm">' + thActions + '</th>' +
                 '</tr></thead><tbody>';
 
@@ -4815,9 +4815,9 @@
                 html += '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
                     '<th class="ad-reg-num-sm">#</th>' +
                     '<th>' + L.plrName + '</th>' +
-                    '<th>' + ('Категория') + '</th>' +
-                    '<th>' + ('Причина') + '</th>' +
-                    '<th>' + ('Регистрация') + '</th>' +
+                    '<th>' + L.brkCategory + '</th>' +
+                    '<th>' + L.regOutWhy + '</th>' +
+                    '<th>' + L.brkRegistration + '</th>' +
                 '</tr></thead><tbody>';
                 blocked.forEach(function(reg, idx) {
                     var bPlayer = reg.players || playersMap[reg.player_id] || {};
@@ -4995,7 +4995,7 @@
         var actionsTd = '<td class="ad-reg-actions-cell">' +
             '<div class="ad-reg-ryad">' + вынесено +
             '<div class="ad-reg-menu">' +
-            '<button type="button" class="ad-reg-menu-btn" title="' + ('Действия') + '">\u22EF</button>' +
+            '<button type="button" class="ad-reg-menu-btn" title="' + L.brkActions + '">\u22EF</button>' +
             '<div class="ad-reg-menu-list">';
 
         // Гость ждёт решения: подтвердить пару или убрать напарника. Заявку
@@ -5192,9 +5192,9 @@
                 '<th class="sched-round">' +
                     '<select class="ad-sched-round-filter" title="' + L.schedRound + '">' +
                     фильтрКругов + '</select></th>' +
-                '<th class="sched-p">' + ('Пара 1') + '</th>' +
+                '<th class="sched-p">' + L.brkPair + '</th>' +
                 '<th class="sched-vs"></th>' +
-                '<th class="sched-p">' + ('Пара 2') + '</th>' +
+                '<th class="sched-p">' + L.brkPair2 + '</th>' +
                 '<th class="sched-court">' + L.schedCourt + '</th>' +
                 // Статус и зов живут в одном меню: пять кнопок в строке не
                 // сжимались и держали таблицу шире экрана
@@ -5273,7 +5273,7 @@
                         ? статусHtml
                         : '<div class="ad-reg-menu ad-sched-menu">' +
                             '<button type="button" class="ad-reg-menu-btn" title="' +
-                                ('Действия') + '">\u22EF</button>' +
+                                L.brkActions + '">\u22EF</button>' +
                             '<div class="ad-reg-menu-list">' + статусHtml + зовHtml + '</div>' +
                           '</div>') +
                 '</td>' +
@@ -5363,7 +5363,7 @@
                     (m.score_dispute_note
                         ? '<span class="ad-sq-note">' + A.esc(m.score_dispute_note) + '</span>' : '') +
                     '<button class="ad-btn ad-btn-sm ad-sq-fix" data-match-edit="' + m.id + '">' +
-                        ('Править') + '</button>' +
+                        L.brkEdit + '</button>' +
                 '</div>';
             }).join('');
         }
@@ -5371,12 +5371,12 @@
         var html = '<div class="ad-score-queue">';
         if (спорные.length) {
             html += '<div class="ad-sq-title ad-sq-title-hot">' +
-                ('Спорные счета') + ' (' + спорные.length + ')</div>' +
+                L.brkDisputedScheta + ' (' + спорные.length + ')</div>' +
                 строки(спорные, 'hot');
         }
         if (ждут.length) {
             html += '<div class="ad-sq-title">' +
-                ('Ждут подтверждения') + ' (' + ждут.length + ')</div>' +
+                L.brkAwaitingConfirm + ' (' + ждут.length + ')</div>' +
                 '<div class="ad-sq-hint">' + ('Соперник ещё не ответил. Откройте счёт и сохраните — это закроет матч и двинет сетку.') + '</div>' +
                 строки(ждут, 'wait');
         }
@@ -5583,7 +5583,7 @@
             // Header
             html += '<thead><tr>';
             html += '<th class="ad-grp-th-num">№</th>';
-            html += '<th>' + ('Игрок') + '</th>';
+            html += '<th>' + L.brkPlayer + '</th>';
             for (var c = 0; c < standings.length; c++) {
                 html += '<th class="ad-grp-score ad-grp-th-score">' + (c + 1) + '</th>';
             }
@@ -5620,7 +5620,7 @@
                         L.qualAddedHint + '">' + L.qualAdded + '</span>' : '') +
                     (номерДопа ? ' <span class="ad-badge ad-badge-ig" title="' +
                         ('Играет дополнительный матч за место в сетке') + '">' +
-                        ('доп. матч ') + номерДопа + '</span>' : '') +
+                        L.brkExtraMatch + номерДопа + '</span>' : '') +
                     /* КТО НЕ БЕРЁТСЯ В ЗАЧЁТ — НАПИСАНО СЛОВАМИ, А НЕ ВЫВЕДЕНО
                        ИЗ ПУСТЫХ ЦИФР. Дал неявку и не доиграл группу — все его
                        матчи выкинуты из расчёта у всех. Без подписи его нули
@@ -5881,7 +5881,7 @@
                 html += '<div class="ad-table-wrap"><table class="ad-table ad-grp-matrix">';
                 html += '<thead><tr>' +
                     '<th class="ad-grp-th-num">№</th>' +
-                    '<th>' + ('Игрок') + '</th>' +
+                    '<th>' + L.brkPlayer + '</th>' +
                     /* 40 хватало на одну цифру, но под ней встала подпись
                        «по доле побед» и разорвалась на три строки. Ширину
                        задаёт ПОДПИСЬ, а не значение. */
@@ -6059,7 +6059,7 @@
                 } else {
                     if (canEdit) {
                         html += '<button class="ad-brk-edit" data-match-edit="' + m.id + '">' +
-                            (isCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                            (isCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
                     }
                     // Отменить можно каждый доп. матч по отдельности, пока он
                     // не сыгран: клуб решает по ходу, сколько их проводить.
@@ -6202,7 +6202,7 @@
                 html += '<div class="' + matchClass + '">';
                 if (match.scheduled_time) {
                     var schedInfo = match.scheduled_time.slice(0, 5);
-                    if (match.court) schedInfo += ' · ' + ('Корт ') + match.court;
+                    if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
                 // Player 1 with group label (always render placeholders for alignment)
@@ -6244,7 +6244,7 @@
                     var снятиеЕсть = isCompleted && !isBye;
                     if (снятиеЕсть) html += '<div class="ad-brk-actions">';
                     html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
-                        (isCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                        (isCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
                     if (снятиеЕсть) {
                         /* ТИШЕ ВЕЗДЕ, ГРОМЧЕ ТАМ, ГДЕ НАДО. Снятие — действие
                            редкое и необратимое, спорить по яркости с «Изм.»
@@ -6320,7 +6320,7 @@
                 (thirdMatch.status === 'cancelled' ? ' ad-brk-cancelled' : '') + '">';
             if (thirdMatch.scheduled_time) {
                 html += '<div class="ad-brk-schedule">' + thirdMatch.scheduled_time.slice(0, 5) +
-                    (thirdMatch.court ? ' · ' + ('Корт ') + thirdMatch.court : '') + '</div>';
+                    (thirdMatch.court ? ' · ' + L.brkCourt + thirdMatch.court : '') + '</div>';
             }
             html += '<div class="ad-brk-player' + (tp1Win ? ' winner' : (tp2Win ? ' loser' : '')) + '">' +
                 '<span class="ad-brk-name">' + tp1Name + '</span><span class="ad-brk-sets">';
@@ -6340,7 +6340,7 @@
             } else {
                 if (tCanEdit) {
                     html += '<button class="ad-brk-edit" data-match-edit="' + thirdMatch.id + '">' +
-                        (tCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                        (tCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
                 }
                 var третийСыгран = tCompleted && thirdMatch.score && thirdMatch.score !== 'BYE';
                 if (!третийСыгран) {
@@ -6492,7 +6492,7 @@
                 // Schedule info
                 if (match.scheduled_time) {
                     var schedInfo = match.scheduled_time.slice(0, 5);
-                    if (match.court) schedInfo += ' · ' + ('Корт ') + match.court;
+                    if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
 
@@ -6518,7 +6518,7 @@
                 // Edit score button
                 if (canEdit) {
                     html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
-                        (isCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                        (isCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
                 }
 
                 html += '</div>'; // /ad-brk-match
@@ -6576,7 +6576,7 @@
             html += '<div class="' + tMatchClass + '">';
             if (thirdMatch.scheduled_time) {
                 html += '<div class="ad-brk-schedule">' + thirdMatch.scheduled_time.slice(0, 5) +
-                    (thirdMatch.court ? ' · ' + ('Корт ') + thirdMatch.court : '') + '</div>';
+                    (thirdMatch.court ? ' · ' + L.brkCourt + thirdMatch.court : '') + '</div>';
             }
             html += '<div class="ad-brk-player' + (tp1Win ? ' winner' : (tp2Win ? ' loser' : '')) + '">' +
                 (thirdMatch.seed1 ? '<span class="ad-brk-seed">[' + thirdMatch.seed1 + ']</span>' : '') +
@@ -6597,7 +6597,7 @@
             } else {
                 if (tCanEdit) {
                     html += '<button class="ad-brk-edit" data-match-edit="' + thirdMatch.id + '">' +
-                        (tCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                        (tCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
                 }
                 var третийСыгранЗд = tCompleted && thirdMatch.score && thirdMatch.score !== 'BYE';
                 if (!третийСыгранЗд) {
@@ -6678,7 +6678,7 @@
 
         if (match.scheduled_time) {
             var schedInfo = match.scheduled_time.slice(0, 5);
-            if (match.court) schedInfo += ' · ' + ('Корт ') + match.court;
+            if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
             html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
         }
 
@@ -6712,10 +6712,10 @@
             var снятие = isCompleted && !isBye;
             if (снятие) html += '<div class="ad-brk-actions">';
             html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
-                (isCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                (isCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
             if (снятие) {
                 html += '<button class="ad-brk-edit ad-brk-clear" data-match-clear="' +
-                    match.id + '">' + ('Снять') + '</button>';
+                    match.id + '">' + L.regMoveToWaitlistShort + '</button>';
                 html += '</div>';
             }
         } else if (этоПроход) {
@@ -6726,7 +6726,7 @@
         } else if (isCompleted && isBye && (match.player1_id || match.player2_id)) {
             // Проход поставлен руками — его можно снять.
             html += '<button class="ad-brk-edit" data-match-unbye="' + match.id + '">' +
-                ('Отменить проход') + '</button>';
+                L.brkCancelBye + '</button>';
         } else {
             html += '<div class="ad-brk-edit ad-brk-edit-empty">&nbsp;</div>';
         }
@@ -7112,11 +7112,11 @@
                 '<div class="ad-stat-value ad-stat-value--neutral">' + results.length + '</div>' +
             '</div>' +
             '<div class="ad-stat-card">' +
-                '<div class="ad-stat-label">' + ('Всего очков распределено') + '</div>' +
+                '<div class="ad-stat-label">' + L.brkTotalOchkovRaspredeleno + '</div>' +
                 '<div class="ad-stat-value">' + totalPoints + '</div>' +
             '</div>' +
             '<div class="ad-stat-card">' +
-                '<div class="ad-stat-label">' + ('Уровень турнира') + '</div>' +
+                '<div class="ad-stat-label">' + L.brkUrovenTurnira + '</div>' +
                 '<div class="ad-stat-value ad-stat-value--neutral">' + (function() {
                     if (!tournament.level_id) return '—';
                     var lv = A.cachedLevels.find(function(l) { return l.id === tournament.level_id; });
@@ -7163,16 +7163,16 @@
                 if (!кат) return '';
                 var имя = кат.name;
                 return ' <span class="ad-res-zachet">— ' +
-                    ('зачёт ') + A.esc(имя) + '</span>';
+                    L.brkCounted + A.esc(имя) + '</span>';
             };
 
             // Premier League section
             if (plResults.length > 0) {
                 html += '<h3 class="ad-res-group-title ad-res-group-title--pl">' +
                     '<span class="ad-res-group-icon">🏆</span> ' +
-                    ('Высшая лига') +
+                    L.premierLeague +
                     зачёт(plResults) +
-                    ' <span class="ad-res-group-count">(' + plResults.length + (' уч.') + ')</span>' +
+                    ' <span class="ad-res-group-count">(' + plResults.length + L.brkMembers + ')</span>' +
                 '</h3>';
                 html += renderTable(plResults);
             }
@@ -7181,9 +7181,9 @@
             if (clResults.length > 0) {
                 html += '<h3 class="ad-res-group-title ad-res-group-title--cl">' +
                     '<span class="ad-res-group-icon">🎯</span> ' +
-                    ('Утешительная лига') +
+                    L.consolationLeague +
                     зачёт(clResults) +
-                    ' <span class="ad-res-group-count">(' + clResults.length + (' уч.') + ')</span>' +
+                    ' <span class="ad-res-group-count">(' + clResults.length + L.brkMembers + ')</span>' +
                 '</h3>';
                 html += renderTable(clResults);
             }
@@ -9686,10 +9686,10 @@
                 '</p>' +
                 '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">' +
                     '<thead><tr style="border-bottom:2px solid var(--border-subtle, #333);">' +
-                        '<th style="padding:8px 10px;text-align:left;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + ('Игрок') + '</th>' +
+                        '<th style="padding:8px 10px;text-align:left;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.brkPlayer + '</th>' +
                         '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateGroup + '</th>' +
                         '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateWL + '</th>' +
-                        '<th style="padding:8px 10px;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + ('Действие') + '</th>' +
+                        '<th style="padding:8px 10px;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.loyAction + '</th>' +
                     '</tr></thead>' +
                     '<tbody>' + rowsHtml + '</tbody>' +
                 '</table>' +
@@ -11211,17 +11211,17 @@
                         '</p>' +
                         (список.length
                             ? '<table class="ad-table"><thead><tr>' +
-                              '<th>' + ('Клетка') + '</th>' +
-                              '<th>' + ('Пара') + '</th>' +
-                              '<th>' + ('Счёт') + '</th>' +
-                              '<th>' + ('Победитель') + '</th>' +
+                              '<th>' + L.brkCell + '</th>' +
+                              '<th>' + L.regReplacePair + '</th>' +
+                              '<th>' + L.brkScore + '</th>' +
+                              '<th>' + L.brkPobeditel + '</th>' +
                               '</tr></thead><tbody>' + строки + '</tbody></table>'
                             : '<p>' + ('От этого матча ничего не зависит.') + '</p>') +
                     '</div>' +
                     '<div class="ad-modal-footer">' +
-                        '<button class="ad-btn" data-нет>' + ('Отмена') + '</button>' +
+                        '<button class="ad-btn" data-нет>' + L.cancel + '</button>' +
                         '<button class="ad-btn ad-btn-primary" data-да>' +
-                        ('Применить') + '</button>' +
+                        L.brkPrimenit + '</button>' +
                     '</div>' +
                 '</div>';
             /* ОКНО ПОДНИМАЕТ ОБЩАЯ ОБОЛОЧКА (решение 04.10): своя разметка
@@ -11306,7 +11306,7 @@
             var idTB2 = 'adS' + setNum + 'TB2';
             return '<div class="ad-score-set-row" data-set="' + setNum + '" id="adSetRow' + setNum + '">' +
                 '<label class="ad-field-label" style="min-width:52px;text-align:right;" id="adSetLabel' + setNum + '">' +
-                    ('Сет ') + setNum + '</label>' +
+                    L.brkSet + setNum + '</label>' +
                 '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
                 '<span style="font-weight:600;">:</span>' +
                 '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
@@ -11346,7 +11346,7 @@
                         '<button class="ad-btn ad-btn-secondary" id="adAddSet" style="font-size:var(--fs-xs);padding:4px 12px;">' + L.addSet + '</button>' +
                         '<button class="ad-btn ad-btn-secondary" id="adRemoveSet" style="font-size:var(--fs-xs);padding:4px 12px;">' + L.removeSet + '</button>' +
                         '<button class="ad-btn ad-btn-secondary" id="adSuperTb" style="font-size:var(--fs-xs);padding:4px 12px;">' +
-                            ('+ Супер ТБ') + '</button>' +
+                            L.brkSuperTb + '</button>' +
                     '</div>' +
                     '<div style="margin-top:16px;">' +
                         '<label class="ad-field-label" style="text-align:center;display:block;margin-bottom:6px;">' + L.matchOutcome + '</label>' +
@@ -12059,7 +12059,7 @@
 
             html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
             html += '<span style="min-width:80px;color:var(--text-muted);font-size:var(--fs-sm);">' +
-                ('Матч ') + xs.matchOrder +
+                L.brkMatch + xs.matchOrder +
                 (opponentName ? ' vs ' + A.esc(opponentName) : '') +
                 '</span>';
             html += '<select class="ad-input" data-xslot-idx="' + idx + '" data-match-id="' + xs.matchId + '" data-field="' + xs.field + '" data-opponent-group="' + opponentGroup + '" style="flex:1;max-width:300px;">';
@@ -13304,7 +13304,7 @@
             html += '<table class="ad-table ad-grp-matrix">';
             html += '<thead><tr>';
             html += '<th class="ad-grp-th-num">№</th>';
-            html += '<th>' + ('Игрок') + '</th>';
+            html += '<th>' + L.brkPlayer + '</th>';
             for (var c = 0; c < standings.length; c++) {
                 html += '<th class="ad-grp-score ad-grp-th-score">' + (c + 1) + '</th>';
             }
@@ -13509,7 +13509,7 @@
                 html += '<div class="' + matchClass + '">';
                 if (match.scheduled_time) {
                     var schedInfo = match.scheduled_time.slice(0, 5);
-                    if (match.court) schedInfo += ' · ' + ('Корт ') + match.court;
+                    if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
                 var p1SeedHtml = '<span class="ad-brk-seed">' + (match.seed1 ? '[' + match.seed1 + ']' : '') + '</span>';
@@ -13529,7 +13529,7 @@
                 if (setData.outcome) html += '<span class="ad-brk-outcome">' + setData.outcome + '</span>';
                 if (canEdit) {
                     html += '<button class="ad-brk-edit" data-match-edit="' + match.id + '">' +
-                        (isCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                        (isCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
                 }
                 html += '</div>';
             });
@@ -13578,7 +13578,7 @@
             if (tSetData.outcome) html += '<span class="ad-brk-outcome">' + tSetData.outcome + '</span>';
             if (tCanEdit) {
                 html += '<button class="ad-brk-edit" data-match-edit="' + thirdMatch.id + '">' +
-                    (tCompleted ? ('Изм.') : ('Счёт')) + '</button>';
+                    (tCompleted ? L.brkEdit2 : L.brkScore) + '</button>';
             }
             html += '</div></div></div>';
         }

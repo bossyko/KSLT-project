@@ -264,7 +264,7 @@
             // Activity tables
             '<div class="ad-dash-activity-grid">' +
                 buildActivityTableHtml('adDashPendingRegs', L.actPendingRegs, 'warning',
-                    [L.thPlayer, L.thCategory || ('Категория'), L.thRating || ('Рейтинг'), L.thTournament, L.thDate, ''], 'tournaments') +
+                    [L.thPlayer, L.thCategory || L.navCategory, L.navRating, L.thTournament, L.thDate, ''], 'tournaments') +
                 buildActivityTableHtml('adDashApproaching', L.actApproaching, 'warning',
                     [L.thName, L.thExpires, L.thDaysLeft], 'users') +
                 buildActivityTableHtml('adDashOverdue', L.actOverdue, 'danger',
@@ -455,7 +455,7 @@
             return '<tr>' +
                 '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:var(--fs-2xs);color:var(--text-muted);">' + email + '</div></td>' +
                 '<td>' + A.fmtDate(m.expires_at) + '</td>' +
-                '<td class="' + dCls + '">' + diff + (' дн.') + '</td>' +
+                '<td class="' + dCls + '">' + diff + L.navDays + '</td>' +
             '</tr>';
         }, L.noApproaching);
 
@@ -468,7 +468,7 @@
             return '<tr>' +
                 '<td><div style="font-weight:500;">' + name + '</div><div style="font-size:var(--fs-2xs);color:var(--text-muted);">' + email + '</div></td>' +
                 '<td style="color:var(--danger);">' + A.fmtDate(m.expires_at) + '</td>' +
-                '<td class="ad-days-danger">' + diff + (' дн.') + '</td>' +
+                '<td class="ad-days-danger">' + diff + L.navDays + '</td>' +
             '</tr>';
         }, L.noOverdue);
 

@@ -178,7 +178,7 @@
             '<th>' + L.chalOpponent + '</th>' +
             '<th>' + L.chalDate + '</th>' +
             '<th>' + L.chalVenue + '</th>' +
-            '<th>' + ('Отправлено') + '</th>' +
+            '<th>' + L.chalNotified + '</th>' +
             '</tr></thead><tbody>';
 
         pendingList.forEach(function(c) {
@@ -352,7 +352,7 @@
                     : '<span class="ad-badge" style="opacity:0.5;">—</span>';
             } else {
                 broadcastCell = notified
-                    ? '<span class="ad-badge ad-badge-success" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + ('Повторить') + '</button>'
+                    ? '<span class="ad-badge ad-badge-success" title="' + A.fmtDate(c.battle_notified_at) + '">✅ ' + L.chalNotified + '</span><br><button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" style="margin-top:4px;" title="' + L.chalNotify + '">' + L.chalPovtorit + '</button>'
                     : '<button class="ad-btn ad-btn-sm ad-btn-secondary" data-notify="' + c.id + '" title="' + L.chalNotify + '">' + L.chalNotify + '</button>';
             }
 
@@ -656,7 +656,7 @@
                     // Title
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalBattleTitle + '</label>' +
-                        '<input type="text" class="ad-field-input" id="cbTitle" placeholder="' + ('напр. Дерби Чемпионов') + '" maxlength="100">' +
+                        '<input type="text" class="ad-field-input" id="cbTitle" placeholder="' + L.chalNaprDerbiChempionov + '" maxlength="100">' +
                     '</div>' +
                     // Date + Time
                     '<div style="display:flex;gap:12px;">' +
@@ -675,7 +675,7 @@
                     '</div>' +
                     // Set Format
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + ('Формат сетов') + '</label>' +
+                        '<label class="ad-field-label">' + L.chalFormatSets + '</label>' +
                         '<select class="ad-field-input" id="cbSetFormat">' +
                             '<option value="standard">' + L.formatStandard + '</option>' +
                             '<option value="short">' + L.formatShort + '</option>' +
@@ -1730,7 +1730,7 @@
                     '</div>' +
                     // Set Format
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + ('Формат сетов') + '</label>' +
+                        '<label class="ad-field-label">' + L.chalFormatSets + '</label>' +
                         '<select class="ad-field-input" id="ebSetFormat">' +
                             '<option value="standard"' + ((challenge.set_format || 'standard') === 'standard' ? ' selected' : '') + '>' + L.formatStandard + '</option>' +
                             '<option value="short"' + (challenge.set_format === 'short' ? ' selected' : '') + '>' + L.formatShort + '</option>' +

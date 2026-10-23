@@ -137,10 +137,10 @@
                 '<div style="flex:1;min-width:160px;">' +
                     '<label class="ad-field-label">' + (в.ru) + '</label>' +
                     '<input type="number" min="0" step="1" class="ad-field-input" id="pp-' + в.kind + '" ' +
-                        'value="' + сумма + '" placeholder="' + ('уточняется') + '">' +
+                        'value="' + сумма + '" placeholder="' + L.setUtochnyaetsya + '">' +
                 '</div>' +
                 '<div style="width:120px;">' +
-                    '<label class="ad-field-label">' + ('Валюта') + '</label>' +
+                    '<label class="ad-field-label">' + L.payCurrency + '</label>' +
                     '<input type="text" class="ad-field-input" id="pc-' + в.kind + '" value="' + (p.currency || 'сом') + '">' +
                 '</div>' +
             '</div>';
@@ -164,12 +164,12 @@
 
         panel.innerHTML =
             '<div class="ad-card" style="max-width:720px;">' +
-                '<h3 style="margin-bottom:8px;">' + ('Членские взносы') + '</h3>' +
+                '<h3 style="margin-bottom:8px;">' + L.setChlenskieVznosy + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
                     ('Суммы, которые видно на странице «Цены». Пустая сумма — не ошибка: страница пишет «уточняется», а кнопка оплаты выключена.') +
                 '</p>' +
                 строки +
-                '<button class="ad-btn ad-btn-primary" id="ppSave">' + ('Сохранить суммы') + '</button>' +
+                '<button class="ad-btn ad-btn-primary" id="ppSave">' + L.setSaveSummy + '</button>' +
             '</div>' +
             '<div class="ad-card" style="max-width:720px;margin-top:24px;">' +
                 '<h3 style="margin-bottom:8px;">' + ('Плашка бесплатного периода') + '</h3>' +
@@ -177,8 +177,8 @@
                     ('Видна на странице «Цены», пока не прошла дата бесплатного доступа. Пустой текст оставит только строку с датой; стёртая дата во вкладке «Доступ» убирает блок целиком.') +
                 '</p>' +
                 поле('pricing_free_title', ('Заголовок'), false) +
-                поле('pricing_free_text', ('Текст'), true) +
-                '<button class="ad-btn ad-btn-primary" id="scSave">' + ('Сохранить текст') + '</button>' +
+                поле('pricing_free_text', L.setTekst, true) +
+                '<button class="ad-btn ad-btn-primary" id="scSave">' + L.setSaveTekst + '</button>' +
             '</div>';
 
         var сохрСуммы = document.getElementById('ppSave');
@@ -258,13 +258,13 @@
                 '</p>' +
                 '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
                     '<div>' +
-                        '<label class="ad-field-label">' + ('Бесплатно до') + '</label>' +
+                        '<label class="ad-field-label">' + L.setBesplatnoDo + '</label>' +
                         '<input type="date" class="ad-field-input" id="setFreeUntil" value="' + дата + '">' +
                     '</div>' +
                     '<button class="ad-btn ad-btn-primary" id="setFreeSave">' +
-                        ('Сохранить') + '</button>' +
+                        L.setSave + '</button>' +
                     (дата ? '<button class="ad-btn ad-btn-secondary" id="setFreeClear">' +
-                        ('Выключить') + '</button>' : '') +
+                        L.setVyklyuchit + '</button>' : '') +
                 '</div>' +
                 '<p style="margin-top:14px;color:' + (идёт ? 'var(--accent)' : 'var(--text-secondary)') + ';">' +
                     (идёт

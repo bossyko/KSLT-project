@@ -66,7 +66,7 @@
                 '</div>' +
                 '<div class="ad-usr-card" id="adUsrStatNewMonth">' +
                     '<div class="ad-usr-card-icon" style="background:rgba(0,136,204,0.12);color:#0088cc;">📈</div>' +
-                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + ('Новых') + ' (' + curMonthName + ')</div></div>' +
+                    '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrNovyh + ' (' + curMonthName + ')</div></div>' +
                 '</div>' +
             '</div>' +
 
@@ -352,7 +352,7 @@
             } else if (mem && mem.status === 'active') {
                 var expDate = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted = expDate ? expDate[2] + '.' + expDate[1] + '.' + expDate[0] : '';
-                memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + (expFormatted ? ' ' + ('до') + ' ' + expFormatted : '') + '</span>';
+                memBadge = '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + (expFormatted ? ' ' + L.usrBannedUntil + ' ' + expFormatted : '') + '</span>';
             } else if (mem && mem.status === 'expired') {
                 var expDate2 = mem.expires_at ? mem.expires_at.split('T')[0].split('-') : null;
                 var expFormatted2 = expDate2 ? expDate2[2] + '.' + expDate2[1] + '.' + expDate2[0] : '';
@@ -512,7 +512,7 @@
                 memHtml =
                     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
                         '<span class="ad-mem-badge ad-mem-active">' + L.usrActive + '</span>' +
-                        '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' + ('до ') + expDate + daysLeft + '</span>' +
+                        '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' + L.usrDo + expDate + daysLeft + '</span>' +
                     '</div>';
             } else {
                 memHtml =
@@ -661,11 +661,11 @@
                 '</div>' +
                 '<div class="ad-field-row">' +
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + ('Пол') + '</label>' +
-                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'men' ? ('Мужской') : user.gender === 'women' ? ('Женский') : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<label class="ad-field-label">' + L.usrGender + '</label>' +
+                        '<input type="text" class="ad-field-input" value="' + (user.gender === 'men' ? L.genderMen : user.gender === 'women' ? L.genderWomen : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                     '<div class="ad-field-group">' +
-                        '<label class="ad-field-label">' + ('Дата рождения') + '</label>' +
+                        '<label class="ad-field-label">' + L.usrDateRozhdeniya + '</label>' +
                         '<input type="text" class="ad-field-input" value="' + (user.birth_day && user.birth_month && user.birth_year ? (user.birth_day < 10 ? '0' : '') + user.birth_day + '.' + (user.birth_month < 10 ? '0' : '') + user.birth_month + '.' + user.birth_year : '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                 '</div>' +
@@ -715,7 +715,7 @@
                             '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">' +
                                 '<span style="font-size:var(--fs-sm);color:' + statusColor + ';">' + statusText + '</span>' +
                                 (isBlocked
-                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:var(--fs-xs);padding:4px 12px;">' + ('Разблокировать OTP') + '</button>'
+                                    ? '<button class="ad-btn ad-btn-secondary" id="adUnblockOtp" style="margin-left:auto;font-size:var(--fs-xs);padding:4px 12px;">' + L.usrRazblokirovat + '</button>'
                                     : '') +
                             '</div>';
 

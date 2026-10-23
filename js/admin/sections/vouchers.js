@@ -28,10 +28,10 @@
 
         var statusOptions =
             '<option value="">' + L.vchAllStatuses + '</option>' +
-            '<option value="active"' + (vchFilterStatus === 'active' ? ' selected' : '') + '>' + L.payStatusActive + '</option>' +
-            '<option value="used"' + (vchFilterStatus === 'used' ? ' selected' : '') + '>' + L.payStatusUsed + '</option>' +
-            '<option value="expired"' + (vchFilterStatus === 'expired' ? ' selected' : '') + '>' + L.payStatusExpired + '</option>' +
-            '<option value="cancelled"' + (vchFilterStatus === 'cancelled' ? ' selected' : '') + '>' + L.payStatusCancelled + '</option>';
+            '<option value="active"' + (vchFilterStatus === 'active' ? ' selected' : '') + '>' + L.vchStatusActive + '</option>' +
+            '<option value="used"' + (vchFilterStatus === 'used' ? ' selected' : '') + '>' + L.vchStatusUsed + '</option>' +
+            '<option value="expired"' + (vchFilterStatus === 'expired' ? ' selected' : '') + '>' + L.vchStatusExpired + '</option>' +
+            '<option value="cancelled"' + (vchFilterStatus === 'cancelled' ? ' selected' : '') + '>' + L.vchStatusCancelled + '</option>';
 
         var typeOptions =
             '<option value="">' + L.vchAllTypes + '</option>' +
@@ -425,7 +425,7 @@
         if (vchPage < totalPages) {
             html += '<button class="ad-crt-page-btn" data-vch-page="' + (vchPage + 1) + '">&raquo;</button>';
         }
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.vchTotal3 + '</span>';
 
         wrap.innerHTML = html;
         var container = document.getElementById('ad-vouchers');
@@ -526,7 +526,7 @@
         var html =
                 '<div class="ad-modal" style="max-width:500px;">' +
                     '<div class="ad-modal-header">' +
-                        '<h3>🎫 ' + ('Детали скидки') + '</h3>' +
+                        '<h3>🎫 ' + L.vchDetaliSkidki + '</h3>' +
                         '<button class="ad-modal-close" id="adVchModalClose" aria-label="' + L.modalClose + '">✕</button>' +
                     '</div>' +
                     '<div class="ad-modal-body" style="padding:20px;">' +
@@ -537,7 +537,7 @@
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDiscount + '</span><span style="font-weight:600;color:var(--accent);">' + v.discount_percent + '% (' + discountAmount + ' ' + L.vchCurrency + ')</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.thStatus + '</span><span class="ad-vch-badge ' + statusCls + '">' + statusLabel + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDate + '</span><span>' + formatVchDate(v.created_at) + '</span></div>' +
-                            '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + ('Истекает') + '</span><span>' + formatVchDate(v.expires_at) + '</span></div>' +
+                            '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.thExpires + '</span><span>' + formatVchDate(v.expires_at) + '</span></div>' +
                             (v.used_at ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchUsedAt + '</span><span>' + formatVchDate(v.used_at) + '</span></div>' : '') +
                         '</div>' +
                     '</div>' +

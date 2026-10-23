@@ -181,7 +181,7 @@
         var html = '<table class="ad-table"><thead><tr>' +
             '<th>' + L.livePlayer1 + ' vs ' + L.livePlayer2 + '</th>' +
             '<th>' + L.chalScore + '</th>' +
-            '<th>' + ('Дата') + '</th>' +
+            '<th>' + L.liveDate + '</th>' +
             '<th></th>' +
             '</tr></thead><tbody>';
 

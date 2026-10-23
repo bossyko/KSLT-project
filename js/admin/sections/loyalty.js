@@ -98,7 +98,7 @@
         var rules = res.data || [];
 
         var html = '<div style="margin-bottom:16px;">' +
-            '<button class="ad-btn ad-btn-primary" id="adLoyAddRule">+ ' + ('Добавить правило') + '</button>' +
+            '<button class="ad-btn ad-btn-primary" id="adLoyAddRule">+ ' + L.loyAddPravilo + '</button>' +
             '</div>';
 
         if (rules.length === 0) {
@@ -110,7 +110,7 @@
 
         html += '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
             '<th>' + L.loyAction + '</th>' +
-            '<th>' + ('Название') + '</th>' +
+            '<th>' + L.loyRewardTitle + '</th>' +
             '<th>' + L.loyPoints + '</th>' +
             '<th>' + L.thStatus + '</th>' +
             '<th></th>' +
@@ -127,7 +127,7 @@
                 '<td style="font-weight:600;color:var(--accent);">' + r.points + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td class="ad-table-actions">' +
-                    '<button class="ad-btn ad-btn-sm" data-loyedit="' + r.id + '">' + ('Ред.') + '</button>' +
+                    '<button class="ad-btn ad-btn-sm" data-loyedit="' + r.id + '">' + L.loyEdit + '</button>' +
                     ' <button class="ad-btn ad-btn-sm ad-btn-danger" data-loyruledel="' + r.id + '">✕</button>' +
                 '</td>' +
             '</tr>';
@@ -164,15 +164,15 @@
         var formHtml =
             '<div style="text-align:left;">' +
                 '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + ('Код действия') + '</label>' +
+                    '<label class="ad-field-label">' + L.loyCodeActions + '</label>' +
                     '<input type="text" id="adLoyRuleAction" class="ad-field-input" placeholder="court_premium" value="' + (existing ? A.esc(existing.action) : '') + '"' + (isEdit ? ' readonly style="opacity:0.5;"' : '') + '>' +
                 '</div>' +
                 '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + ('Название (RU)') + '</label>' +
+                    '<label class="ad-field-label">' + L.loyTitle + '</label>' +
                     '<input type="text" id="adLoyRuleLabel" class="ad-field-input" value="' + (existing ? A.esc(existing.label || '') : '') + '">' +
                 '</div>' +
                 '<div class="ad-field">' +
-                    '<label class="ad-field-label">' + ('Название (EN)') + '</label>' +
+                    '<label class="ad-field-label">' + L.loyTitle2 + '</label>' +
                     '<input type="text" id="adLoyRuleLabelEn" class="ad-field-input" value="' + (existing ? A.esc(existing.label_en || '') : '') + '">' +
                 '</div>' +
                 '<div class="ad-field">' +
@@ -260,7 +260,7 @@
                 '<td style="font-weight:600;color:var(--accent);">' + r.cost + '</td>' +
                 '<td><span class="ad-status-badge ' + statusCls + '">' + statusLabel + '</span></td>' +
                 '<td class="ad-table-actions">' +
-                    '<button class="ad-btn ad-btn-sm" data-loyrewardedit="' + r.id + '">' + ('Ред.') + '</button> ' +
+                    '<button class="ad-btn ad-btn-sm" data-loyrewardedit="' + r.id + '">' + L.loyEdit + '</button> ' +
                     '<button class="ad-btn ad-btn-sm ad-btn-danger" data-loyrewarddel="' + r.id + '">✕</button>' +
                 '</td>' +
             '</tr>';

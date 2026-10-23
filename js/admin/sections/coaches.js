@@ -88,11 +88,11 @@
                         '</colgroup>' +
                         '<thead><tr>' +
                             '<th style="width:36px;"></th>' +
-                            '<th>' + ('ФИО') + '</th>' +
+                            '<th>' + L.regExternalName + '</th>' +
                             '<th>' + L.cchPosition + '</th>' +
                             '<th>' + L.cchCourt + '</th>' +
                             '<th>' + L.cchTags + '</th>' +
-                            '<th class="ad-centr">' + ('Цена') + '</th>' +
+                            '<th class="ad-centr">' + L.cchPrice2 + '</th>' +
                             '<th class="ad-centr">' + L.cchPromoted + '</th>' +
                             '<th style="text-align:center;width:50px;">' + A.столбецЗнаком('&#128065;', L.thViews) + '</th>' +
                         '</tr></thead>' +
@@ -232,7 +232,7 @@
             html += '<button class="ad-crt-page-btn' + (p === cchPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         }
         html += '<button class="ad-crt-page-btn" data-page="' + (cchPage + 1) + '"' + (cchPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.cchTotal + '</span>';
 
         wrap.innerHTML = html;
 
@@ -374,7 +374,7 @@
             '<div class="ad-form-card">' +
                 '<div class="ad-form-card-title">' + L.cchViewInfo + '</div>' +
                 '<div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:var(--fs-sm);">' +
-                    '<span class="ad-tiho">' + ('ФИО') + '</span>' +
+                    '<span class="ad-tiho">' + L.regExternalName + '</span>' +
                     '<span style="color:var(--text-primary);font-weight:500;">' + A.esc(fullName.trim()) + '</span>' +
                     '<span class="ad-tiho">' + L.cchPosition + '</span>' +
                     '<span class="ad-vtoroy">' + A.esc(pos || '—') + '</span>' +
@@ -462,7 +462,7 @@
             var cRes = await A.client.from('courts').select('id,name,name_en,name_kg').order('name');
             if (cRes.data) courtsList = cRes.data;
         }
-        var courtOptionsHtml = '<option value="">' + ('— Выберите —') + '</option>';
+        var courtOptionsHtml = '<option value="">' + L.cchSelect + '</option>';
         courtsList.forEach(function(c) {
             var courtName = c.name;
             var sel = (item && item.court === c.name) ? ' selected' : '';
@@ -568,7 +568,7 @@
 
             // ФИО (Last Name / First Name / Patronymic)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + ('ФИО') + '</div>' +
+                '<div class="ad-form-card-title">' + L.regExternalName + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
@@ -605,7 +605,7 @@
                     '<button class="ad-lang-tab" data-lang="kg">KG</button>' +
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
-                    '<input type="text" class="ad-field-input" id="adCchPosition" placeholder="' + ('Старший тренер') + '" value="' + A.esc(item ? item.position : '') + '">' +
+                    '<input type="text" class="ad-field-input" id="adCchPosition" placeholder="' + L.cchStarshiyTrener + '" value="' + A.esc(item ? item.position : '') + '">' +
                 '</div>' +
                 '<div class="ad-lang-panel" data-lang-panel="en">' +
                     '<input type="text" class="ad-field-input" id="adCchPositionEn" value="' + A.esc(item ? item.position_en : '') + '">' +
@@ -642,7 +642,7 @@
 
             // Contacts
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + ('Контакты') + '</div>' +
+                '<div class="ad-form-card-title">' + L.chalContacts + '</div>' +
                 '<div class="ad-form-row" style="grid-template-columns:1fr 1fr 1fr;">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.cchPhone + '</label>' +
@@ -745,7 +745,7 @@
                         '</div>' +
                     '</div>' +
                     '<div style="margin-top:16px;">' +
-                        '<label class="ad-field-label">' + ('Услуги партнёра') + '</label>' +
+                        '<label class="ad-field-label">' + L.cchUslugiPartnera + '</label>' +
                         '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:8px;margin-bottom:4px;font-size:var(--fs-xs);color:var(--text-muted);">' +
                             '<span>' + L.cchServiceName + '</span>' +
                             '<span>' + L.cchDiscount + '</span>' +
@@ -1021,7 +1021,7 @@
             srcEl.addEventListener('blur', function() {
                 var srcText = srcEl.value.trim();
                 if (!srcText || targetEl.value.trim()) return;
-                targetEl.placeholder = L.translating || 'Translating...';
+                targetEl.placeholder = L.translating;
                 A.translateFromRu(srcText, 'en').then(function(result) {
                     if (!targetEl.value.trim()) targetEl.value = result;
                     targetEl.placeholder = '';

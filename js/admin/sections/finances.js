@@ -59,7 +59,7 @@
 
             // Period row
             '<div class="ad-vch-period-row">' +
-                '<span style="color:var(--text-secondary);font-size:var(--fs-sm);font-weight:500;">' + ('Дата:') + '</span>' +
+                '<span style="color:var(--text-secondary);font-size:var(--fs-sm);font-weight:500;">' + L.finDate + '</span>' +
                 '<select class="ad-field-input" id="adFinPeriod" style="max-width:160px;">' +
                     '<option value=""' + (finPeriodMode === '' ? ' selected' : '') + '>' + L.payPrdAll + '</option>' +
                     '<option value="this_month"' + (finPeriodMode === 'this_month' ? ' selected' : '') + '>' + L.payPrdThis + '</option>' +
@@ -83,9 +83,9 @@
                 '<table class="ad-table ad-table-clickable" id="adFinTable">' +
                     '<thead><tr>' +
                         '<th>' + L.payEntity + '</th>' +
-                        '<th>' + ('Тип') + '</th>' +
+                        '<th>' + L.finTip + '</th>' +
                         '<th>' + L.payAmount + '</th>' +
-                        '<th>' + ('Активен до') + '</th>' +
+                        '<th>' + L.crtViewActiveUntil + '</th>' +
                         '<th>' + L.payMethod + '</th>' +
                         '<th>' + L.thStatus + '</th>' +
                         '<th>' + L.payCreatedAt + '</th>' +
@@ -384,7 +384,7 @@
         if (finPage < totalPages) {
             html += '<button class="ad-crt-page-btn" data-fin-page="' + (finPage + 1) + '">&raquo;</button>';
         }
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.finTotal + '</span>';
 
         wrap.innerHTML = html;
         var container = document.getElementById('ad-finances');
@@ -464,7 +464,7 @@
 
             // Profile search (membership only)
             '<div class="ad-form-card" id="adFinProfileBlock"' + (isMembership ? '' : ' style="display:none;"') + '>' +
-                '<div class="ad-form-card-title">' + ('Пользователь') + '</div>' +
+                '<div class="ad-form-card-title">' + L.finPolzovatel + '</div>' +
                 '<div class="ad-pay-entity-wrap">' +
                     '<input type="text" class="ad-field-input" id="adFinProfileSearch" placeholder="' + L.paySearchProfile + '" value="' + A.esc(isMembership && item ? item.entity_name || '' : '') + '" autocomplete="off">' +
                     '<div class="ad-pay-entity-results ad-skryt" id="adFinProfileResults"></div>' +
@@ -488,7 +488,7 @@
 
             // Period (court/coach)
             '<div class="ad-form-card" id="adFinPeriodBlock"' + (isClub || isMembership ? ' style="display:none;"' : '') + '>' +
-                '<div class="ad-form-card-title">' + ('Период') + '</div>' +
+                '<div class="ad-form-card-title">' + L.finPeriod + '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinPeriodStart" value="' + (item && !isMembership ? item.period_start : '') + '" style="flex:1;">' +
                     '<span class="ad-tiho">—</span>' +
@@ -500,10 +500,10 @@
             '<div class="ad-form-card" id="adFinMemberPeriodBlock"' + (isMembership ? '' : ' style="display:none;"') + '>' +
                 '<div class="ad-form-card-title">' + L.payMemberPeriod + '</div>' +
                 '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="1">1 ' + ('мес') + '</button>' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="3">3 ' + ('мес') + '</button>' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="6">6 ' + ('мес') + '</button>' +
-                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="12">1 ' + ('год') + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="1">1 ' + L.finMonth + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="3">3 ' + L.finMonth + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="6">6 ' + L.finMonth + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-sm ad-btn-outline ad-mem-preset" data-months="12">1 ' + L.finGod + '</button>' +
                 '</div>' +
                 '<div style="display:flex;gap:10px;align-items:center;">' +
                     '<input type="date" class="ad-field-input" id="adFinMemberStart" value="' + (isMembership && item && item._raw ? (item._raw.memberships ? item._raw.memberships.starts_at || '' : '').slice(0, 10) : todayStr) + '" style="flex:1;">' +
@@ -738,7 +738,7 @@
         }
 
         if (items.length === 0) {
-            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:var(--fs-sm);">' + ('Не найдено') + '</div>';
+            resultsDiv.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:var(--fs-sm);">' + L.finNeNotFound + '</div>';
             resultsDiv.style.display = 'block';
             return;
         }
@@ -1051,9 +1051,9 @@
                 '<thead><tr>' +
                     '<th>№</th>' +
                     '<th>' + L.payEntity + '</th>' +
-                    '<th>' + ('Тип') + '</th>' +
+                    '<th>' + L.finTip + '</th>' +
                     '<th>' + L.payAmount + '</th>' +
-                    '<th>' + ('Активен до') + '</th>' +
+                    '<th>' + L.crtViewActiveUntil + '</th>' +
                     '<th>' + L.thStatus + '</th>' +
                     '<th>' + L.payCreatedAt + '</th>' +
                 '</tr></thead>' +

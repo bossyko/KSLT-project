@@ -152,8 +152,8 @@
             '</tr>';
         });
         return '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
-            '<th>' + ('Страница') + '</th>' +
-            '<th style="text-align:right">' + ('Просмотры') + '</th>' +
+            '<th>' + L.chalViewPage + '</th>' +
+            '<th style="text-align:right">' + L.thViews + '</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table></div>';
     }
 

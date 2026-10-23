@@ -141,7 +141,7 @@
         if (!панель) return;
 
         var строки = строкиПанели(панель);
-        if (!строки.length) { A.showToast(L.empty, 'warning'); return; }
+        if (!строки.length) { A.showToast(L.expEmpty, 'warning'); return; }
 
         var ширина = строки.reduce(function (м, с) { return Math.max(м, с.length); }, 1);
 
@@ -376,9 +376,9 @@
     /** Пара кнопок для шапки вкладки. */
     function кнопки(панельId, что) {
         return '<button class="ad-btn ad-btn-secondary ad-btn-sm ad-export-csv"' +
-                   ' data-panel="' + панельId + '" data-what="' + что + '">⤓ ' + L.download + '</button>' +
+                   ' data-panel="' + панельId + '" data-what="' + что + '">⤓ ' + L.expDownload + '</button>' +
                '<button class="ad-btn ad-btn-secondary ad-btn-sm ad-export-print"' +
-                   ' data-panel="' + панельId + '" data-what="' + что + '">⎙ ' + L.print + '</button>';
+                   ' data-panel="' + панельId + '" data-what="' + что + '">⎙ ' + L.expPrint + '</button>';
     }
 
     /** Повесить обработчики на кнопки внутри контейнера. */

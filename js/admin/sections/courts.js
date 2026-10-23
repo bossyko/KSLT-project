@@ -67,8 +67,8 @@
         var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
 
         if (isNumeric) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала больше') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала меньше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.crtFirstMoreDesc + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.crtFirstLessAsc + '</div>';
         } else {
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
@@ -353,7 +353,7 @@
         // Next
         html += '<button class="ad-crt-page-btn" data-page="' + (crtPage + 1) + '"' + (crtPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
         // Info
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.crtTotal + '</span>';
 
         wrap.innerHTML = html;
 
@@ -588,7 +588,7 @@
                 '</span>' +
                 '<span style="color:var(--text-secondary);margin-right:12px;">' +
                     (A.COURT_SURFACES[t.surface] || t.surface || '') + ' × ' + (t.count || 1) +
-                    ' — ' + (t.price || 0) + ' ' + ('сом') +
+                    ' — ' + (t.price || 0) + ' ' + L.vchCurrency +
                 '</span>';
         });
         if (!typesHtml) typesHtml = '<span class="ad-tiho">' + L.noData + '</span>';
@@ -600,8 +600,8 @@
 
         // Partner
         var partnerHtml = item.partner
-            ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + ('Да')
-            : '<span class="ad-tiho">' + ('Нет') + '</span>';
+            ? '<span class="ad-partner-badge" style="margin-right:4px;">✓</span>' + L.crtYes
+            : '<span class="ad-tiho">' + L.usrNone + '</span>';
 
         // Payments table
         var paymentsHtml = '';
@@ -665,7 +665,7 @@
                     '<span>' + partnerHtml + '</span>' +
                     '<span class="ad-tiho">' + L.crtPromoted + '</span>' +
                     '<span>' + promotedHtml + '</span>' +
-                    '<span class="ad-tiho">' + ('Телефон') + '</span>' +
+                    '<span class="ad-tiho">' + L.crtPhone + '</span>' +
                     '<span class="ad-vtoroy">' + A.esc(item.phone || '—') + '</span>' +
                     '<span class="ad-tiho">WhatsApp</span>' +
                     '<span class="ad-vtoroy">' + A.esc(item.whatsapp || '—') + '</span>' +
@@ -1043,7 +1043,7 @@
 
             // Address form (RU/EN/KG)
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + ('Адрес') + '</div>' +
+                '<div class="ad-form-card-title">' + L.crtAddress + '</div>' +
                 '<div class="ad-lang-tabs">' +
                     '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
                     '<button class="ad-lang-tab" data-lang="en">EN</button>' +
@@ -1145,7 +1145,7 @@
 
             // Phones + Email
             '<div class="ad-form-card">' +
-                '<div class="ad-form-card-title">' + ('Контакты') + '</div>' +
+                '<div class="ad-form-card-title">' + L.chalContacts + '</div>' +
                 '<div id="adCrtPhones"></div>' +
                 '<button type="button" class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtAddPhone">' + L.crtAddPhone + '</button>' +
                 '<div class="ad-form-row" style="margin-top:12px;">' +
@@ -1915,7 +1915,7 @@
         var grid = document.getElementById('adCrtGalleryGrid');
         if (!grid) return;
         if (crtGalleryUrls.length === 0) {
-            grid.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-xs);padding:8px 0;">' + ('Фото ещё нет') + '</div>';
+            grid.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-xs);padding:8px 0;">' + L.crtPhotoEscheNo + '</div>';
             return;
         }
         var html = '';

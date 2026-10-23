@@ -514,8 +514,8 @@
                         ' <button class="ad-btn ad-btn-sm ' +
                         (t.published_at ? 'ad-btn-warning' : 'ad-btn-primary') +
                         ' ad-pub-btn" data-pub-id="' + t.id + '" data-pub-on="' + (t.published_at ? '1' : '') + '" title="' +
-                        (t.published_at ? ('Снять с публикации')
-                                        : ('Опубликовать')) + '">' +
+                        (t.published_at ? L.trnSnyatSPublikacii
+                                        : L.trnNewsPublish) + '">' +
                         // Коротко: «Снять с публикации» распирало колонку, и таблица
                         // уезжала вбок. Полная подпись осталась подсказкой
                         (t.published_at ? ('Снять')
@@ -627,7 +627,7 @@
             html += '<button class="ad-crt-page-btn' + (p === trnPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         }
         html += '<button class="ad-crt-page-btn" data-page="' + (trnPage + 1) + '"' + (trnPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.trnTotal + '</span>';
 
         wrap.innerHTML = html;
 
@@ -665,11 +665,11 @@
         var html = '<div class="ad-col-dd-title">' + (colLabels[col] || col) + '</div>';
 
         if (isNumeric) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала больше') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала меньше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.trnFirstMoreDesc + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.trnFirstLessAsc + '</div>';
         } else if (isDate) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала новые') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала старые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.trnFirstNewestDesc + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.trnFirstOldestAsc + '</div>';
         } else {
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
@@ -815,7 +815,7 @@
                              число(п.сНачислениями) + ' / ' + число(турниров));
         }
         return '<div class="ad-udalenie">' +
-                   '<p class="ad-udalenie-zagolovok">' + ('Безвозвратно уйдёт:') + '</p>' +
+                   '<p class="ad-udalenie-zagolovok">' + L.trnBezvozvratnoUydet + '</p>' +
                    '<ul class="ad-udalenie-spisok">' + строки + '</ul>' +
                '</div>';
     }

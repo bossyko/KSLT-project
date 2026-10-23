@@ -281,7 +281,7 @@
 
             // Select All + Title on same line
             html += '<div class="ad-col-dd-title-row">' +
-                '<label class="ad-col-dd-check-all"><input type="checkbox" id="adColSelectAll"' + (allChecked ? ' checked' : '') + '> ' + ('Все') + '</label>' +
+                '<label class="ad-col-dd-check-all"><input type="checkbox" id="adColSelectAll"' + (allChecked ? ' checked' : '') + '> ' + L.newsAll + '</label>' +
                 '<span class="ad-col-dd-title">' + (colLabels[col] || col) + '</span>' +
             '</div>';
 
@@ -298,11 +298,11 @@
 
         // Sort options after checkboxes
         if (isDateCol) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала новые') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала старые') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.newsFirstNewestDesc + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.newsFirstOldestAsc + '</div>';
         } else if (isNumericCol) {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Сначала больше') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ Сначала меньше') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.newsFirstMoreDesc + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.newsFirstLessAsc + '</div>';
         } else {
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
@@ -432,7 +432,7 @@
             html += '<button class="ad-crt-page-btn' + (p === newsPage ? ' ad-crt-page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
         }
         html += '<button class="ad-crt-page-btn" data-page="' + (newsPage + 1) + '"' + (newsPage >= totalPages ? ' disabled' : '') + '>&raquo;</button>';
-        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + ('всего') + '</span>';
+        html += '<span class="ad-crt-page-info">' + totalItems + ' ' + L.newsTotal + '</span>';
 
         wrap.innerHTML = html;
 
@@ -1375,15 +1375,14 @@
                        знать, что делать, а не читать текст сервера. */
                     var причина = result.error.message || result.error.code || '';
                     if (/news_slug_key|duplicate key/i.test(причина)) {
-                        причина = L.draftSlugTaken ||
-                            'статья с таким адресом (slug) уже есть — открой её или измени адрес';
+                        причина = L.draftSlugTaken;
                     }
                     if (statusEl) {
                         statusEl.classList.add('ad-draft-status-err');
-                        statusEl.textContent = '\u26A0 ' + (L.draftFailed || 'Черновик НЕ сохранён') +
+                        statusEl.textContent = '\u26A0 ' + (L.draftFailed) +
                             ': ' + причина;
                     }
-                    A.showToast((L.draftFailed || 'Черновик НЕ сохранён') + ': ' + причина, 'error');
+                    A.showToast((L.draftFailed) + ': ' + причина, 'error');
                 }
             } catch (e) {
                 console.error('Autosave error:', e);
@@ -1391,7 +1390,7 @@
                 var elErr = document.getElementById('adDraftStatus');
                 if (elErr) {
                     elErr.classList.add('ad-draft-status-err');
-                    elErr.textContent = '\u26A0 ' + (L.draftFailed || 'Черновик НЕ сохранён') +
+                    elErr.textContent = '\u26A0 ' + (L.draftFailed) +
                         ': ' + (e.message || '');
                 }
             }
@@ -1536,10 +1535,10 @@
            (js/kslt-lenta.js). Своя сборка показывала одни снимки, и видео
            в предпросмотре стояло отдельно: Костя увидел это глазами 08.10. */
         if (window.KSLT_LENTA) {
-            window.KSLT_LENTA.собрать(container, L.viewerTitle || 'Открыть');
+            window.KSLT_LENTA.собрать(container, L.newsViewerTitle);
             Array.prototype.forEach.call(container.querySelectorAll('.news-carousel'), function(лента) {
                 var кадры = лента.dataset.kadry ? JSON.parse(лента.dataset.kadry) : [];
-                window.KSLT_LENTA.завести(лента, кадры, L.viewerTitle || 'Открыть');
+                window.KSLT_LENTA.завести(лента, кадры, L.newsViewerTitle);
             });
         } else {
             собратьГалереиВПредпросмотре(container);
