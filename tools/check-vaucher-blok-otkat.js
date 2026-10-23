@@ -11,15 +11,18 @@ const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vauch-'));
 /* ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО: с куска 146 правило
    читает и страницы кабинета — там проверяется порядок подключения. */
-['js', 'tools', 'maket', 'pages'].forEach(д =>
+/* ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО: с куска 148 правило
+   читает и `css/` — там лежит общий вид ваучера. */
+['js', 'tools', 'maket', 'pages', 'css'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
 const ДОМ = 'js/kslt-vaucher-blok.js', ТР = 'js/coaches.js', КТ = 'js/courts.js',
       СТ = 'maket/stend-vaucher-blok.html', КАБ = 'js/dashboard.js',
-      СТРК = 'pages/dashboard.html';
-const ФАЙЛЫ = [ДОМ, ТР, КТ, СТ, КАБ, СТРК];
+      СТРК = 'pages/dashboard.html', ВИД = 'css/kslt-vaucher.css',
+      ВИД_ТР = 'css/coaches.css';
+const ФАЙЛЫ = [ДОМ, ТР, КТ, СТ, КАБ, СТРК, ВИД, ВИД_ТР];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -69,12 +72,6 @@ const ОТКАТЫ = [
      "    Б.завести = async function (о) {\n        о.видСущности = о.видСущности || 'coach';",
      'дом ваучерного блока не знает о разделах'],
 
-    /* 10: имя класса стало склейкой */
-    ['склеить у тренеров имя класса из приставки', ТР,
-     "            подложка: 'co-picker-overlay',",
-     "            подложка: 'co' + '-picker-overlay',",
-     'у тренеров имена классов ваучера стоят целиком'],
-
     /* 11: ветвь без QR снесена. ЯКОРЬ ПЕРЕЕХАЛ КУСКОМ 146 — надпись живёт
           в `Б.нарисоватьQR`, а не внутри окна ваучера; прувер сказал об
           этом сам: «якоря нет». */
@@ -112,24 +109,76 @@ const ОТКАТЫ = [
      "            if (сост === 'udobnyy') return Promise.resolve({ data: { error: 'nothing' }, error: null });",
      'стенд показывает крайние случаи, а не удобные'],
 
-    /* 16–17: кабинет снова строит своё (кусок 146) */
-    ['вернуть кабинету свой адрес проверки', КАБ,
-     "        var verifyUrl = KSLT_VAUCHER_BLOK.адресПроверки(token);",
-     "        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify.html?token=' + token;",
-     'кабинет зовёт `адресПроверки` у дома 1 раз'],
-    ['вернуть кабинету свой формат срока', КАБ,
-     "        var expiresStr = KSLT_VAUCHER_BLOK.дата(voucher.expires_at, true);",
-     "        var expiresStr = String(voucher.expires_at || '');",
-     'кабинет зовёт `дата` у дома 3 раз'],
+    /* 16–19: кабинет и общий вид (кусок 148) */
+    ['отнять у кабинета зов общего окна', КАБ,
+     "        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: voucher, L: L });",
+     "        return;",
+     'кабинет зовёт окно ваучера у дома'],
+    ['вернуть кабинету инлайновую разметку окна', КАБ,
+     "    function showDashboardVoucherQR(voucher) {",
+     "    function showDashboardVoucherQR(voucher) {\n" +
+     "        var m = document.createElement('div');\n" +
+     "        m.id = 'dbVoucherQRModal';\n" +
+     "        m.innerHTML = '<div id=\"dbVQRCode\"></div>';\n" +
+     "        document.body.appendChild(m);",
+     'инлайновой разметки окна в кабинете нет'],
+    ['вернуть кабинету свой формат даты в списке', КАБ,
+     "        var dateStr = KSLT_VAUCHER_BLOK.дата(v.created_at);",
+     "        var dateStr = String(v.created_at || '');",
+     'кабинет берёт дату ваучера у дома'],
+    ['отнять у дома набор имён', ДОМ,
+     "    var КЛАССЫ = {",
+     "    var КЛАССЫиначе = {",
+     'дом держит один набор имён классов'],
+    ['вернуть в набор приставку раздела', ДОМ,
+     "            подложка: 'kslt-picker-overlay',",
+     "            подложка: 'co-picker-overlay',",
+     'все имена набора — общие, без приставки раздела'],
+    ['вернуть тренерам своё описание вида', ВИД_ТР,
+     "/* ВАУЧЕРНОЕ ОКНО, ВЫБОР УСЛУГИ И ИСТОРИЯ — ПЕРЕЕХАЛИ В",
+     ".co-voucher-overlay { position: fixed; }\n/* ВАУЧЕРНОЕ ОКНО, ВЫБОР УСЛУГИ И ИСТОРИЯ — ПЕРЕЕХАЛИ В",
+     'в разделах не осталось своего описания вида'],
+    ['объявить анимацию окна дважды', ВИД,
+     "@keyframes kslt-modal-fade-in { to { opacity: 1; } }",
+     "@keyframes kslt-modal-fade-in { to { opacity: 1; } }\n@keyframes kslt-modal-fade-in { to { opacity: 1; } }",
+     'анимация окна объявлена в общем виде один раз'],
+    ['снять общий вид со страницы кабинета', СТРК,
+     '    <link rel="stylesheet" href="../css/kslt-vaucher.css?v=1">\n',
+     '',
+     'страницы с ваучером несут общий файл вида'],
     ['убрать дом ваучера со страницы кабинета', СТРК,
-     '    <script src="../js/kslt-vaucher-blok.js?v=2"></script>\n',
+     '    <script src="../js/kslt-vaucher-blok.js?v=4"></script>\n',
      '',
      'дом ваучерного блока стоит в кабинете раньше dashboard.js'],
 
+    /* 16-19: подложка окна — одна на три, и окно на ней не срезается */
+    ['вернуть подложке жёсткое центрирование', ВИД,
+     'align-items: flex-start;',
+     'align-items: center;',
+     'подложка прижимает окно к верху и прокручивается'],
+    ['отнять у подложки прокрутку', ВИД,
+     '    overflow-y: auto;\n',
+     '',
+     'подложка прижимает окно к верху и прокручивается'],
+    ['развести подложки обратно на два описания', ВИД,
+     '.kslt-voucher-overlay,\n.kslt-picker-overlay {',
+     '.kslt-voucher-overlay {',
+     'подложка окна описана одним блоком на три окна'],
+    ['снять авто-поля у окна ваучера', ВИД,
+     'padding: 32px;\n    margin: auto;',
+     'padding: 32px;',
+     'окна центруются авто-полями, а не выравниванием подложки'],
+
+    /* 20: храповик на числа мимо шкалы */
+    ['завести в виде новый отступ мимо шкалы', ВИД,
+     '    border-radius: 16px;\n    padding: 32px;\n    margin: auto;',
+     '    border-radius: 16px;\n    padding: 32px;\n    margin: auto;\n    margin-right: 18px;',
+     'отступов мимо шкалы не больше потолка'],
+
     /* 15: стенд перестал гонять дом */
     ['отключить дом от стенда', СТ,
-     '<script src="../js/kslt-vaucher-blok.js?v=2"></script>',
-     '<script src="../js/kslt-vaucher-net.js?v=2"></script>',
+     '<script src="../js/kslt-vaucher-blok.js?v=4"></script>',
+     '<script src="../js/kslt-vaucher-net.js?v=3"></script>',
      'стенд ваучерного блока на месте']
 ];
 

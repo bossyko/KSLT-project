@@ -78,8 +78,9 @@ const ДОЛГ_КОНТРОЛОВ = [
     ['.ad-pts-in:hover', 0.16],
     ['.bo-vote-btn', 0.15],
     ['.ch-vote-btn', 0.15],
-    ['.co-picker-option', 0.06],
-    ['.ct-picker-option', 0.06],
+    /* ОДНО ИМЯ ВМЕСТО ДВУХ — кусок 148 (см. выше). Долг по границе
+       контрола остался тем же, но числится один раз, а не дважды. */
+    ['.kslt-picker-option', 0.06],
     ['.db-field-input.is-saved', 0.05],
     ['.rat-rule-input', 0.15]
 ];
@@ -250,7 +251,10 @@ const ОСВОБОЖДЕНЫ = [
     '.ad-pts-in.ad-pts-zero', '.ad-pts-off',
     '.pl-row-guest .pl-col-rank', '.pl-guest-mark',
     '.ad-brk-schedule', '.ad-brk-player.loser .ad-brk-name',
-    '.co-vh-status-used', '.ct-vh-status-used',
+    /* ОДНО ИМЯ ВМЕСТО ДВУХ — кусок 148: вид ваучера сведён в
+       `css/kslt-vaucher.css`, и «использованный ваучер» описан один раз.
+       Освобождение тут по делу: это НЕАКТИВНОЕ состояние (WCAG 1.4.3). */
+    '.kslt-vh-status-used',
     '.site-notif-item-time',
     '.io-card .io-card-icon', '.io-card:hover .io-card-icon',
     '.footer-bottom-links li + li a::before'
