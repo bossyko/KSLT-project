@@ -615,6 +615,103 @@
         });
     }
 
+    /* ИМЕНА КЛАССОВ И ОКОН — ЦЕЛИКОМ, А НЕ СКЛЕЙКОЙ (урок куска 144):
+       склеенный класс сторож мёртвого кода не находит, а человек не находит
+       поиском. Поведение живёт в доме `js/kslt-vaucher-blok.js`, здесь — своё
+       оформление. */
+    var ВАУЧЕР_КЛАССЫ = {
+        выбор: {
+            id: 'coPickerModal',
+            подложка: 'co-picker-overlay',
+            окно: 'co-picker-modal',
+            закрыть: 'co-picker-close',
+            заголовок: 'co-picker-title',
+            список: 'co-picker-options',
+            пункт: 'co-picker-option',
+            точка: 'co-picker-radio',
+            подпись: 'co-picker-label',
+            процент: 'co-picker-percent',
+            кнопка: 'co-picker-submit'
+        },
+        ваучер: {
+            id: 'coVoucherModal',
+            idЗакрыть: 'coVoucherClose',
+            idQR: 'coVoucherQR',
+            idСкачать: 'coVoucherDownload',
+            подложка: 'co-voucher-overlay',
+            окно: 'co-voucher-modal',
+            закрыть: 'co-voucher-close',
+            заголовок: 'co-voucher-title',
+            qr: 'co-voucher-qr',
+            детали: 'co-voucher-details',
+            строка: 'co-voucher-row',
+            процент: 'co-voucher-percent',
+            действия: 'co-voucher-actions',
+            скачать: 'co-voucher-download'
+        },
+        лимит: {
+            id: 'coLimitModal',
+            idЗакрыть: 'coLimitClose',
+            idOk: 'coLimitOk'
+        },
+        история: {
+            коробка: 'co-voucher-history',
+            пусто: 'co-vh-empty',
+            список: 'co-vh-list',
+            строка: 'co-vh-item',
+            дата: 'co-vh-date',
+            услуга: 'co-vh-service',
+            скидка: 'co-vh-discount',
+            состояние: 'co-vh-status',
+            состояния: {
+                active: 'co-vh-status-active',
+                used: 'co-vh-status-used',
+                expired: 'co-vh-status-expired'
+            },
+            кнопкаQR: 'co-vh-qr-btn'
+        }
+    };
+
+    /* ВАУЧЕРНЫЙ БЛОК — ДОМ `js/kslt-vaucher-blok.js` (кусок 145). Эти шесть
+       функций стояли здесь и у близнеца СЛОВО В СЛОВО, 271 строка на
+       сторону: расходились только приставки классов, адреса окон и имена
+       самих функций. Имена оставлены прежними — их зовут соседние места. */
+    function coCtaLoadServices(кнопка, видСущности, idСущности) {
+        KSLT_VAUCHER_BLOK.услугиПоКнопке({
+            кнопка: кнопка, видСущности: видСущности, idСущности: idСущности,
+            L: L, класс: ВАУЧЕР_КЛАССЫ
+        });
+    }
+
+    function coShowServicePicker(видСущности, idСущности, услуги) {
+        KSLT_VAUCHER_BLOK.выборУслуги({
+            видСущности: видСущности, idСущности: idСущности, услуги: услуги,
+            L: L, класс: ВАУЧЕР_КЛАССЫ
+        });
+    }
+
+    function coLoadVoucherHistory(видСущности, idСущности, услуги, уровень, коробка) {
+        KSLT_VAUCHER_BLOK.история({
+            видСущности: видСущности, idСущности: idСущности, услуги: услуги,
+            уровень: уровень, коробка: коробка, L: L, класс: ВАУЧЕР_КЛАССЫ
+        });
+    }
+
+    function coGenerateVoucher(видСущности, idСущности, idУслуги, послеУспеха) {
+        KSLT_VAUCHER_BLOK.завести({
+            видСущности: видСущности, idСущности: idСущности, idУслуги: idУслуги,
+            послеУспеха: послеУспеха, L: L, класс: ВАУЧЕР_КЛАССЫ
+        });
+    }
+
+    function coShowVoucherModal(ваучер) {
+        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L, класс: ВАУЧЕР_КЛАССЫ });
+    }
+
+    function coShowLimitModal(причина) {
+        KSLT_VAUCHER_BLOK.окноЛимита({ причина: причина, L: L, класс: ВАУЧЕР_КЛАССЫ });
+    }
+
     /* НАЖАТИЕ КНОПКИ КАРТОЧКИ — ДОМ ВИТРИНЫ (кусок 144). У кортов то же
        самое было записано двумя `if` подряд вместо одного со связкой —
        ПОВЕДЕНИЕ ОДНО, проверено по дереву. */
@@ -625,82 +722,7 @@
             showMembershipModal);
     }
 
-    async function coCtaLoadServices(btnEl, entityType, entityId) {
-        var client = window.supabaseClient;
-        if (!client) return;
-        var origText = btnEl.textContent;
-        btnEl.textContent = '...';
-        btnEl.style.pointerEvents = 'none';
-        try {
-            var res = await client.from('partner_services')
-                .select('*')
-                .eq('entity_type', entityType)
-                .eq('entity_id', entityId)
-                .eq('is_active', true);
-            var services = res.data || [];
-            if (!services.length) {
-                showToast(L.noDiscountsConfigured, 'info');
-                return;
-            }
-            if (services.length === 1) {
-                coGenerateVoucher(entityType, entityId, services[0].id);
-            } else {
-                coShowServicePicker(entityType, entityId, services);
-            }
-        } catch(e) {
-            showToast(e.message || 'Error', 'error');
-        } finally {
-            btnEl.textContent = origText;
-            btnEl.style.pointerEvents = '';
-        }
-    }
 
-    function coShowServicePicker(entityType, entityId, services) {
-        var existing = document.getElementById('coPickerModal');
-        if (existing) existing.remove();
-
-        var overlay = document.createElement('div');
-        overlay.id = 'coPickerModal';
-        overlay.className = 'co-picker-overlay';
-
-        var optionsHtml = '';
-        services.forEach(function(svc, i) {
-            var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
-            optionsHtml += '<div class="co-picker-option' + (i === 0 ? ' selected' : '') + '" data-service-id="' + svc.id + '">' +
-                '<div class="co-picker-radio"></div>' +
-                '<span class="co-picker-label">' + KSLT_экранировать(svcName) + '</span>' +
-                '<span class="co-picker-percent">-' + svc.discount_percent + '%</span>' +
-            '</div>';
-        });
-
-        overlay.innerHTML =
-            '<div class="co-picker-modal">' +
-                '<button class="co-picker-close">&times;</button>' +
-                '<div class="co-picker-title">' + L.pickService + '</div>' +
-                '<div class="co-picker-options">' + optionsHtml + '</div>' +
-                '<button class="co-picker-submit">' + L.pickSubmit + '</button>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-
-        var selectedId = services[0].id;
-
-        overlay.querySelectorAll('.co-picker-option').forEach(function(opt) {
-            opt.addEventListener('click', function() {
-                overlay.querySelectorAll('.co-picker-option').forEach(function(o) { o.classList.remove('selected'); });
-                this.classList.add('selected');
-                selectedId = this.dataset.serviceId;
-            });
-        });
-
-        overlay.querySelector('.co-picker-close').addEventListener('click', function() { overlay.remove(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
-
-        overlay.querySelector('.co-picker-submit').addEventListener('click', function() {
-            overlay.remove();
-            coGenerateVoucher(entityType, entityId, selectedId);
-        });
-    }
 
     /* ПОЛЕ ПОИСКА — ДОМ ВИТРИНЫ (кусок 144). У кортов после перерисовки
        обновляются выпадашки — это стало крючком, здесь крючка нет. */
@@ -1052,241 +1074,11 @@
         }
     }
 
-    async function coLoadVoucherHistory(entityType, entityId, services, accessLevel, parentContainer) {
-        if (accessLevel !== 'member') return;
-        var client = window.supabaseClient;
-        if (!client) return;
 
-        try {
-            var sess = await client.auth.getSession();
-            if (!sess.data || !sess.data.session) return;
-            var userId = sess.data.session.user.id;
 
-            var res = await client.from('discount_vouchers')
-                .select('*')
-                .eq('entity_type', entityType)
-                .eq('entity_id', entityId)
-                .eq('profile_id', userId)
-                .order('created_at', { ascending: false })
-                .limit(10);
-
-            var vouchers = res.data || [];
-
-            // Build service name map
-            var svcMap = {};
-            services.forEach(function(s) {
-                var nm = KSLT_YAZYK.выбрать(s.service_name_en || s.service_name, s.service_name_kg || s.service_name, s.service_name);
-                svcMap[s.id] = nm;
-            });
-
-            // Remove old history block
-            var oldHist = parentContainer.querySelector('.co-voucher-history');
-            if (oldHist) oldHist.remove();
-
-            var histDiv = document.createElement('div');
-            histDiv.className = 'co-voucher-history';
-            histDiv.innerHTML = '<h4>' + L.myVouchers + '</h4>';
-
-            if (!vouchers.length) {
-                histDiv.innerHTML += '<p class="co-vh-empty">' + L.noVouchersYet + '</p>';
-            } else {
-                var listHtml = '<div class="co-vh-list">';
-                var now = new Date();
-                vouchers.forEach(function(v) {
-                    var d = new Date(v.created_at);
-                    var dateStr = d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short' });
-                    var svcName = svcMap[v.service_id] || v.service_id;
-                    var status = v.status;
-                    if (status === 'active' && v.expires_at && new Date(v.expires_at) < now) {
-                        status = 'expired';
-                    }
-                    var statusLabel = status === 'active' ? L.voucherActive : (status === 'used' ? L.voucherUsed : L.voucherExpired);
-                    var statusClass = 'co-vh-status co-vh-status-' + status;
-
-                    listHtml += '<div class="co-vh-item">' +
-                        '<span class="co-vh-date">' + dateStr + '</span>' +
-                        '<span class="co-vh-service">' + KSLT_экранировать(svcName) + '</span>' +
-                        '<span class="co-vh-discount">-' + v.discount_percent + '%</span>' +
-                        '<span class="' + statusClass + '">' + statusLabel + '</span>';
-                    if (status === 'active') {
-                        listHtml += '<button class="co-vh-qr-btn" data-token="' + KSLT_экранировать(v.qr_token) + '" data-service="' + KSLT_экранировать(svcName) + '" data-percent="' + v.discount_percent + '" data-entity="' + KSLT_экранировать(v.entity_name || '') + '" data-expires="' + v.expires_at + '">' + L.voucherShowQR + '</button>';
-                    }
-                    listHtml += '</div>';
-                });
-                listHtml += '</div>';
-                histDiv.innerHTML += listHtml;
-            }
-
-            parentContainer.appendChild(histDiv);
-
-            // QR button clicks in history
-            histDiv.querySelectorAll('.co-vh-qr-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    coShowVoucherModal({
-                        qr_token: this.dataset.token,
-                        service_name: this.dataset.service,
-                        discount_percent: this.dataset.percent,
-                        entity_name: this.dataset.entity,
-                        expires_at: this.dataset.expires
-                    });
-                });
-            });
-        } catch(e) {
-            console.error('Voucher history error:', e);
-        }
-    }
-
-    async function coGenerateVoucher(entityType, entityId, serviceId, onSuccess) {
-        var client = window.supabaseClient;
-        if (!client) return;
-
-        try {
-            var result = await client.rpc('generate_voucher', {
-                p_entity_type: entityType,
-                p_entity_id: entityId,
-                p_service_id: serviceId
-            });
-
-            if (result.error) {
-                console.error('Voucher RPC error:', result.error);
-                showToast(result.error.message || (KSLT_YAZYK.выбрать('Error getting discount', 'Арзандатуу алууда ката', 'Ошибка получения скидки')), 'error');
-                return;
-            }
-            var data = result.data;
-            if (!data) {
-                showToast(KSLT_YAZYK.выбрать('Error getting discount', 'Арзандатуу алууда ката', 'Ошибка получения скидки'), 'error');
-                return;
-            }
-            if (data.error) {
-                if (data.error === 'active_voucher_exists') {
-                    coShowLimitModal('active');
-                    return;
-                }
-                if (data.error === 'daily_limit') {
-                    coShowLimitModal('daily');
-                    return;
-                }
-                var msgs = {
-                    not_authenticated: KSLT_YAZYK.выбрать('Please log in', 'Кириңиз', 'Войдите в систему'),
-                    not_member: KSLT_YAZYK.выбрать('Membership required', 'Мүчөлүк керек', 'Требуется членство'),
-                    service_not_found: KSLT_YAZYK.выбрать('Service not found', 'Кызмат табылган жок', 'Услуга не найдена'),
-                    entity_not_partner: KSLT_YAZYK.выбрать('Not a partner', 'Өнөктөш эмес', 'Не партнёр')
-                };
-                showToast(msgs[data.error] || data.error, 'error');
-                return;
-            }
-            if (data.success && data.voucher) {
-                coShowVoucherModal(data.voucher);
-                if (typeof onSuccess === 'function') onSuccess();
-            }
-        } catch (e) {
-            showToast(e.message || 'Error', 'error');
-        }
-    }
-
-    function coShowVoucherModal(voucher) {
-        var existing = document.getElementById('coVoucherModal');
-        if (existing) existing.remove();
-
-        /* ЯЗЫК ВАУЧЕРА — 13.10. Страницы verify-en.html и verify-kg.html
-           существуют и верны, но до сегодня все три генератора QR строили
-           только русский адрес: обе переведённые страницы были недостижимы.
-           Язык здесь уже известен — им подписан сам QR. */
-        var verifySuffix = KSLT_YAZYK.суффикс;
-        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
-        var expiresDate = new Date(voucher.expires_at);
-        var expiresStr = expiresDate.toLocaleString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-
-        var modal = document.createElement('div');
-        modal.id = 'coVoucherModal';
-        modal.className = 'co-voucher-overlay';
-        modal.innerHTML =
-            '<div class="co-voucher-modal">' +
-                '<button class="co-voucher-close" id="coVoucherClose">&times;</button>' +
-                '<h3 class="co-voucher-title">' + L.voucherReady + '</h3>' +
-                '<div class="co-voucher-qr" id="coVoucherQR"></div>' +
-                '<div class="co-voucher-details">' +
-                    '<div class="co-voucher-row"><span>' + L.voucherService + ':</span><span>' + KSLT_экранировать(voucher.service_name) + '</span></div>' +
-                    '<div class="co-voucher-row"><span>' + L.voucherDiscount + ':</span><span class="co-voucher-percent">-' + voucher.discount_percent + '%</span></div>' +
-                    '<div class="co-voucher-row"><span>' + KSLT_экранировать(voucher.entity_name) + '</span></div>' +
-                    '<div class="co-voucher-row"><span>' + L.voucherExpires + ':</span><span>' + expiresStr + '</span></div>' +
-                '</div>' +
-                '<div class="co-voucher-actions">' +
-                    '<button class="co-voucher-download" id="coVoucherDownload">' + L.voucherDownload + '</button>' +
-                '</div>' +
-            '</div>';
-
-        document.body.appendChild(modal);
-
-        var qrContainer = document.getElementById('coVoucherQR');
-        if (typeof QRCode !== 'undefined') {
-            new QRCode(qrContainer, {
-                text: verifyUrl,
-                width: 200,
-                height: 200,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        }
-
-        document.getElementById('coVoucherClose').addEventListener('click', function() { modal.remove(); });
-        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
-
-        /* Скачать картинку. Рисует ОДИН дом — `js/kslt-vaucher-kartochka.js`.
-           Прежде эти 60 строк стояли здесь и у кортов СЛОВО В СЛОВО
-           (сходство 1.00), и ни одна из двух копий не проверяла пустую
-           скидку: ваучер без неё рисовал «-undefined%». */
-        document.getElementById('coVoucherDownload').addEventListener('click', function() {
-            setTimeout(function() {
-                var qrCanvas = qrContainer.querySelector('canvas');
-                if (!qrCanvas) return;
-                var карточка = window.KSLT_VAUCHER.нарисовать({
-                    qrCanvas: qrCanvas,
-                    скидка: voucher.discount_percent,
-                    услуга: voucher.service_name,
-                    заведение: voucher.entity_name,
-                    срок: expiresStr,
-                    язык: KSLT_YAZYK.выбрать('en', 'kg', 'ru')
-                });
-                window.KSLT_VAUCHER.скачать(карточка,
-                    'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png');
-            }, 300);
-        });
-    }
 
     /* ===== LIMIT MODAL ===== */
 
-    function coShowLimitModal(reason) {
-        var existing = document.getElementById('coLimitModal');
-        if (existing) existing.remove();
-
-        var title, desc;
-        if (reason === 'daily') {
-            title = KSLT_YAZYK.выбрать('Daily limit reached', 'Күнүмдүк лимит', 'Дневной лимит');
-            desc = KSLT_YAZYK.выбрать('You can get a new discount for this service tomorrow', 'Бул кызмат үчүн жаңы арзандатууну эртең ала аласыз', 'Новую скидку на эту услугу можно получить завтра');
-        } else {
-            title = L.voucherLimit;
-            desc = KSLT_YAZYK.выбрать('Use or wait for your current discount to expire', 'Учурдагы арзандатууңузду колдонуңуз же мөөнөтү бүткөнчө күтүңүз', 'Используйте текущую скидку или дождитесь её истечения');
-        }
-
-        var modal = document.createElement('div');
-        modal.id = 'coLimitModal';
-        modal.className = 'co-voucher-overlay';
-        modal.innerHTML =
-            '<div class="co-voucher-modal" style="text-align:center;">' +
-                '<button class="co-voucher-close" id="coLimitClose">&times;</button>' +
-                '<div style="font-size:2.5rem;margin-bottom:12px;">&#9203;</div>' +
-                '<h3 class="co-voucher-title">' + title + '</h3>' +
-                '<p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' + desc + '</p>' +
-                '<button class="co-voucher-download" id="coLimitOk">OK</button>' +
-            '</div>';
-
-        document.body.appendChild(modal);
-        document.getElementById('coLimitClose').addEventListener('click', function() { modal.remove(); });
-        document.getElementById('coLimitOk').addEventListener('click', function() { modal.remove(); });
-        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
-    }
 
     /* ПОЯВЛЕНИЕ — ДОМ ВИТРИНЫ (кусок 144). Своё тело было побайтовой
        копией того, что в `courts.js`, и это понятие живёт ещё в семи

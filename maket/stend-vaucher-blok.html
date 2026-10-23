@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд: ваучерный блок</title>
+<!--
+  СТЕНД КУСКА 145. Весь путь ваучера виден ТОЛЬКО ЧЛЕНУ КЛУБА, а входа в
+  кабинет у прибора нет — поэтому дом гоняется здесь, на настоящем файле
+  `js/kslt-vaucher-blok.js`, с подставным клиентом базы. В базу ничего не
+  пишется: `generate_voucher` отвечает заготовкой.
+
+  СТЕНД ОБЯЗАН БЫТЬ НЕУДОБНЫМ (правило куска 139), поэтому здесь крайние
+  случаи, а не удобные:
+    ?sost=odna          одна услуга — ваучер заводится без выбора
+    ?sost=mnogo         три услуги, одна с длинным именем и кавычками
+    ?sost=limit-active  у человека уже есть действующий ваучер
+    ?sost=limit-daily   дневной лимит
+    ?sost=otkaz         база отвечает `not_member`
+    ?sost=istoriya      история: действующий, использованный, истёкший
+    ?sost=net-qr        библиотека QR не загрузилась — надпись на языке
+    &pr=co|ct           приставка раздела (тренеры или корты)
+    &yaz=ru|en|kg       язык страницы
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=461">
+<link rel="stylesheet" href="../css/coaches.css?v=78">
+<link rel="stylesheet" href="../css/courts.css?v=89">
+<link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<style>
+  body { background: #0a0a0a; color: #ddd; font: 14px/1.6 system-ui, sans-serif; padding: 20px; }
+  .st-knopki { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .st-knopki a { color: #cfff4f; border: 1px solid #333; padding: 6px 10px; text-decoration: none; }
+  .st-podpis { color: #888; margin-bottom: 12px; }
+  #stKarta { min-height: 80px; border: 1px dashed #333; padding: 12px; }
+</style>
+</head>
+<body>
+<div class="st-podpis">СТЕНД · данные подставные, в базу не пишется · состояние: <b id="stSost"></b> · раздел: <b id="stPr"></b> · язык: <b id="stYaz"></b></div>
+<div class="st-knopki" id="stSsylki"></div>
+<p><span class="co-card-cta ct-card-cta" id="stCta" data-id="stend-1" style="cursor:pointer;border:1px solid #cfff4f;padding:6px 10px;">Получить скидку</span></p>
+<div id="stKarta"></div>
+
+<script>
+(function () {
+    var п = new URLSearchParams(location.search);
+    var сост = п.get('sost') || 'mnogo';
+    var пр = п.get('pr') === 'ct' ? 'ct' : 'co';
+    var яз = п.get('yaz') || 'ru';
+    document.getElementById('stSost').textContent = сост;
+    document.getElementById('stPr').textContent = пр === 'ct' ? 'корты' : 'тренеры';
+    document.getElementById('stYaz').textContent = яз;
+    document.documentElement.lang = яз === 'kg' ? 'ky' : яз;
+
+    document.getElementById('stSsylki').innerHTML =
+        ['odna', 'mnogo', 'limit-active', 'limit-daily', 'otkaz', 'istoriya', 'net-qr']
+            .map(function (с) {
+                return '<a href="?sost=' + с + '&pr=' + пр + '&yaz=' + яз + '">' + с + '</a>';
+            }).join('') +
+        ['co', 'ct'].map(function (р) {
+            return '<a href="?sost=' + сост + '&pr=' + р + '&yaz=' + яз + '">раздел ' + р + '</a>';
+        }).join('') +
+        ['ru', 'en', 'kg'].map(function (я) {
+            return '<a href="?sost=' + сост + '&pr=' + пр + '&yaz=' + я + '">' + я + '</a>';
+        }).join('');
+
+    /* КРАЙНИЕ СЛУЧАИ, А НЕ УДОБНЫЕ: кавычки и длинное имя — чтобы было
+       видно, что экранирование на месте и строка не ломает разметку. */
+    var УСЛУГИ_МНОГО = [
+        { id: 'u1', service_name: 'Аренда корта «Витязь» 1 час', service_name_en: 'Court rent 1 h', service_name_kg: 'Корт 1 саат', discount_percent: 10 },
+        { id: 'u2', service_name: 'Тренировка с "кавычками" & амперсандом', service_name_en: 'Training with "quotes" & amp', service_name_kg: 'Машыктыруу', discount_percent: 15 },
+        { id: 'u3', service_name: 'Очень длинное название услуги, которое не помещается в одну строку ни на телефоне, ни на десктопе', discount_percent: 5 }
+    ];
+    var УСЛУГИ_ОДНА = [УСЛУГИ_МНОГО[0]];
+    var услуги = сост === 'odna' ? УСЛУГИ_ОДНА : УСЛУГИ_МНОГО;
+
+    var ВАУЧЕР = {
+        qr_token: 'stend-token-0123456789',
+        service_name: 'Аренда корта «Витязь» 1 час',
+        discount_percent: 10,
+        entity_name: 'Пансионат «Мурас»',
+        expires_at: new Date(Date.now() + 36e5 * 5).toISOString()
+    };
+    /* ДЕЙСТВУЮЩИЙ ВАУЧЕР — ИМЕННО У УСЛУГИ С КАВЫЧКАМИ И АМПЕРСАНДОМ.
+       Так проверяется ОБРАТНЫЙ ПУТЬ через атрибут `data-service`: имя
+       уходит в разметку экранированным и должно вернуться в окно знак в
+       знак. Пока действующей была «Аренда корта», этот путь не проверялся
+       вовсе — кнопку QR рисуют только действующему. */
+    var ИСТОРИЯ = [
+        { created_at: new Date().toISOString(), service_id: 'u2', status: 'active', discount_percent: 15, qr_token: 't-active', entity_name: 'Пансионат «Мурас» & "Витязь"', expires_at: new Date(Date.now() + 36e5).toISOString() },
+        { created_at: new Date(Date.now() - 864e5).toISOString(), service_id: 'u1', status: 'used', discount_percent: 10, qr_token: 't-used', entity_name: 'Мурас', expires_at: new Date(Date.now() - 36e5).toISOString() },
+        { created_at: new Date(Date.now() - 864e5 * 3).toISOString(), service_id: 'u3', status: 'active', discount_percent: 5, qr_token: 't-old', entity_name: 'Мурас', expires_at: new Date(Date.now() - 864e5).toISOString() }
+    ];
+
+    /* ПОДСТАВНОЙ КЛИЕНТ. Цепочка повторяет ту, что зовёт дом: from →
+       select → eq → eq → eq, и then на конце. */
+    function звено(данные) {
+        var о = {
+            select: function () { return о; },
+            eq: function () { return о; },
+            order: function () { return о; },
+            limit: function () { return Promise.resolve({ data: данные, error: null }); },
+            then: function (ок) { return Promise.resolve({ data: данные, error: null }).then(ок); }
+        };
+        return о;
+    }
+    window.supabaseClient = {
+        from: function (таблица) {
+            /* ПУСТАЯ ИСТОРИЯ ТОЖЕ ВИДНА: при любом другом состоянии список
+               пуст, и стенд показывает пустое состояние. А для `net-qr`
+               история НУЖНА — иначе нечем открыть окно без библиотеки QR
+               (первый прогон стенда на этом и показал пустоту). */
+            if (таблица === 'discount_vouchers') {
+                return звено((сост === 'istoriya' || сост === 'net-qr') ? ИСТОРИЯ : []);
+            }
+            return звено(услуги);
+        },
+        auth: {
+            getSession: function () {
+                return Promise.resolve({ data: { session: { user: { id: 'stend-user' } } } });
+            }
+        },
+        rpc: function (имя, арг) {
+            if (имя !== 'generate_voucher') return Promise.resolve({ data: null, error: null });
+            if (сост === 'limit-active') return Promise.resolve({ data: { error: 'active_voucher_exists' }, error: null });
+            if (сост === 'limit-daily') return Promise.resolve({ data: { error: 'daily_limit' }, error: null });
+            if (сост === 'otkaz') return Promise.resolve({ data: { error: 'not_member' }, error: null });
+            var в = JSON.parse(JSON.stringify(ВАУЧЕР));
+            var своя = услуги.filter(function (у) { return у.id === арг.p_service_id; })[0];
+            if (своя) { в.service_name = своя.service_name; в.discount_percent = своя.discount_percent; }
+            return Promise.resolve({ data: { success: true, voucher: в }, error: null });
+        }
+    };
+    window.KSLT_SAYT = { адрес: 'https://stend.local', подпись: 'kslt.kg' };
+
+    /* СЛОВАРЬ — те же ключи, что у разделов. Тексты короткие: стенд
+       проверяет путь, а не перевод. */
+    var словарь = {
+        ru: { pickService: 'Выберите услугу', pickSubmit: 'Получить', noDiscountsConfigured: 'Скидок пока нет',
+              voucherReady: 'Скидка готова', voucherService: 'Услуга', voucherDiscount: 'Скидка',
+              voucherExpires: 'Действует до', voucherDownload: 'Скачать', voucherLimit: 'Скидка уже есть',
+              myVouchers: 'Мои скидки', noVouchersYet: 'Скидок пока не было', voucherActive: 'активна',
+              voucherUsed: 'использована', voucherExpired: 'истекла', voucherShowQR: 'Показать QR' },
+        en: { pickService: 'Pick a service', pickSubmit: 'Get', noDiscountsConfigured: 'No discounts yet',
+              voucherReady: 'Discount ready', voucherService: 'Service', voucherDiscount: 'Discount',
+              voucherExpires: 'Valid until', voucherDownload: 'Download', voucherLimit: 'Discount exists',
+              myVouchers: 'My discounts', noVouchersYet: 'No discounts yet', voucherActive: 'active',
+              voucherUsed: 'used', voucherExpired: 'expired', voucherShowQR: 'Show QR' },
+        kg: { pickService: 'Кызматты тандаңыз', pickSubmit: 'Алуу', noDiscountsConfigured: 'Арзандатуу жок',
+              voucherReady: 'Арзандатуу даяр', voucherService: 'Кызмат', voucherDiscount: 'Арзандатуу',
+              voucherExpires: 'Мөөнөтү', voucherDownload: 'Жүктөө', voucherLimit: 'Арзандатуу бар',
+              myVouchers: 'Менин арзандатууларым', noVouchersYet: 'Арзандатуу болгон жок', voucherActive: 'активдүү',
+              voucherUsed: 'колдонулду', voucherExpired: 'мөөнөтү бүттү', voucherShowQR: 'QR көрсөтүү' }
+    };
+    window.СТЕНД = { сост: сост, пр: пр, яз: яз, L: словарь[яз] || словарь.ru, услуги: услуги };
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../js/kslt-yazyk.js?v=2"></script>
+<script src="../js/kslt-ekranirovanie.js?v=1"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<!-- ДОМ КРАСОК — ЕГО ЗОВЁТ ДОМ КАРТОЧКИ, и сторож сказал это сразу:
+     «страница, зовущая дом красок, его подключает». Без него рисование
+     карточки упало бы с TypeError ровно в миг нажатия «Скачать». -->
+<script src="../js/kslt-kraska.js?v=5"></script>
+<script src="../js/kslt-vaucher-kartochka.js?v=1"></script>
+<script src="../js/kslt-vaucher-blok.js?v=1"></script>
+<script>
+(function () {
+    var С = window.СТЕНД;
+    /* ЛИБО QR ЕСТЬ, ЛИБО ЕГО НЕТ — И ВТОРОЕ ТОЖЕ НАДО ВИДЕТЬ. */
+    if (С.сост === 'net-qr') { window.QRCode = undefined; }
+
+    var пр = С.пр;
+    var КЛАССЫ = {
+        выбор: {
+            id: пр + 'PickerModal', подложка: пр + '-picker-overlay', окно: пр + '-picker-modal',
+            закрыть: пр + '-picker-close', заголовок: пр + '-picker-title', список: пр + '-picker-options',
+            пункт: пр + '-picker-option', точка: пр + '-picker-radio', подпись: пр + '-picker-label',
+            процент: пр + '-picker-percent', кнопка: пр + '-picker-submit'
+        },
+        ваучер: {
+            id: пр + 'VoucherModal', idЗакрыть: пр + 'VoucherClose', idQR: пр + 'VoucherQR',
+            idСкачать: пр + 'VoucherDownload', подложка: пр + '-voucher-overlay', окно: пр + '-voucher-modal',
+            закрыть: пр + '-voucher-close', заголовок: пр + '-voucher-title', qr: пр + '-voucher-qr',
+            детали: пр + '-voucher-details', строка: пр + '-voucher-row', процент: пр + '-voucher-percent',
+            действия: пр + '-voucher-actions', скачать: пр + '-voucher-download'
+        },
+        лимит: { id: пр + 'LimitModal', idЗакрыть: пр + 'LimitClose', idOk: пр + 'LimitOk' },
+        история: {
+            коробка: пр + '-voucher-history', пусто: пр + '-vh-empty', список: пр + '-vh-list',
+            строка: пр + '-vh-item', дата: пр + '-vh-date', услуга: пр + '-vh-service',
+            скидка: пр + '-vh-discount', состояние: пр + '-vh-status',
+            состояния: { active: пр + '-vh-status-active', used: пр + '-vh-status-used', expired: пр + '-vh-status-expired' },
+            кнопкаQR: пр + '-vh-qr-btn'
+        }
+    };
+    window.СТЕНД.КЛАССЫ = КЛАССЫ;
+
+    document.getElementById('stCta').addEventListener('click', function () {
+        KSLT_VAUCHER_BLOK.услугиПоКнопке({
+            кнопка: this, видСущности: пр === 'ct' ? 'court' : 'coach',
+            idСущности: 'stend-1', L: С.L, класс: КЛАССЫ
+        });
+    });
+
+    if (С.сост === 'istoriya' || С.сост === 'net-qr') {
+        KSLT_VAUCHER_BLOK.история({
+            видСущности: пр === 'ct' ? 'court' : 'coach', idСущности: 'stend-1',
+            услуги: С.услуги, уровень: 'member',
+            коробка: document.getElementById('stKarta'), L: С.L, класс: КЛАССЫ
+        });
+    }
+})();
+</script>
+</body>
+</html>
