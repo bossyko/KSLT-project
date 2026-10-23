@@ -105,13 +105,18 @@ test.describe('лестница прозрачности · ' + язык.код,
             /* Карточка на карточке: подложка у текста не фон страницы, а
                два прозрачных слоя поверх него. Именно здесь «посчитано по
                формуле» и «видно на экране» расходятся. */
+            /* ИМЕНА ВАУЧЕРНОГО ВИДА ПЕРЕИМЕНОВАНЫ КУСКОМ 148: приставки
+               `co-`/`ct-` сняты, вид лежит в `css/kslt-vaucher.css`. Со
+               старыми именами проба молча мерила бы НЕНАЙДЕННЫЕ правила:
+               цвет наследовался бы от карточки, контраст проходил бы, и
+               проверка не проверяла бы ничего. */
             const гнездо = document.createElement('div');
             гнездо.className = 'co-card';
             гнездо.innerHTML =
-                '<div class="co-voucher-history">' +
-                  '<div class="co-vh-item">' +
-                    '<span class="co-vh-date" id="дата">12.10.2026</span>' +
-                    '<span class="co-vh-empty" id="пусто">Ваучеров пока нет</span>' +
+                '<div class="kslt-voucher-history">' +
+                  '<div class="kslt-vh-item">' +
+                    '<span class="kslt-vh-date" id="дата">12.10.2026</span>' +
+                    '<span class="kslt-vh-empty" id="пусто">Ваучеров пока нет</span>' +
                   '</div>' +
                   '<p class="co-discount-hint" id="подсказка">Доступно зарегистрированным</p>' +
                 '</div>';
@@ -168,9 +173,9 @@ test.describe('лестница прозрачности · ' + язык.код,
             гнездо.innerHTML =
                 '<div class="ct-card" id="карточка">' +
                   '<div class="ct-services-row" id="строка"></div>' +
-                  '<div class="ct-vh-item" id="ваучер"></div>' +
+                  '<div class="kslt-vh-item" id="ваучер"></div>' +
                 '</div>' +
-                '<div class="ct-picker-overlay" id="затемнение"></div>';
+                '<div class="kslt-picker-overlay" id="затемнение"></div>';
             document.body.appendChild(гнездо);
             const из = {};
             ['карточка', 'строка', 'ваучер', 'затемнение'].forEach(id => {

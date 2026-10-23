@@ -7,6 +7,12 @@
  * ничего не пишется, `generate_voucher` отвечает заготовкой. Это сказано
  * вслух, а не выдано за живой экран.
  *
+ * ИМЕНА КЛАССОВ СМЕНИЛИСЬ КУСКОМ 148: приставки `co-`/`ct-` сняты совсем,
+ * весь набор живёт в доме как `KSLT_VAUCHER_BLOK.КЛАССЫ` с приставкой
+ * `kslt-`. Проба переписана на новые имена. Параметр `pr` у стенда
+ * остался, но означает теперь ТОЛЬКО вид сущности (тренер или корт) —
+ * данные, а не вид.
+ *
  * СТЕНД НЕУДОБНЫЙ НАМЕРЕНО: имя услуги с кавычками и амперсандом, имя
  * длиннее строки, лимиты, отказ базы, история из трёх состояний и
  * отсутствие библиотеки QR.
@@ -32,13 +38,13 @@ test.describe('ваучерный блок сведён в дом', () => {
             const былТекст = кнопка.textContent;
             кнопка.click();
             await new Promise(ок => setTimeout(ок, 900));
-            const в = document.getElementById('ctVoucherModal');
+            const в = document.getElementById('ksltVoucherModal');
             return {
-                выбораНет: !document.getElementById('ctPickerModal'),
+                выбораНет: !document.getElementById('ksltPickerModal'),
                 окно: !!в,
-                процент: в ? в.querySelector('.ct-voucher-percent').textContent : null,
-                строк: в ? в.querySelectorAll('.ct-voucher-row').length : 0,
-                qr: в ? !!в.querySelector('.ct-voucher-qr canvas') : false,
+                процент: в ? в.querySelector('.kslt-voucher-percent').textContent : null,
+                строк: в ? в.querySelectorAll('.kslt-voucher-row').length : 0,
+                qr: в ? !!в.querySelector('.kslt-voucher-qr canvas') : false,
                 кнопкаВернулась: кнопка.textContent === былТекст,
                 нажатияВернулись: кнопка.style.pointerEvents === ''
             };
@@ -60,27 +66,27 @@ test.describe('ваучерный блок сведён в дом', () => {
         const м = await page.evaluate(async () => {
             document.getElementById('stCta').click();
             await new Promise(ок => setTimeout(ок, 700));
-            const п = document.getElementById('coPickerModal');
+            const п = document.getElementById('ksltPickerModal');
             const снято = {
-                пунктов: п.querySelectorAll('.co-picker-option').length,
-                выбранПервый: п.querySelectorAll('.co-picker-option')[0].classList.contains('selected'),
+                пунктов: п.querySelectorAll('.kslt-picker-option').length,
+                выбранПервый: п.querySelectorAll('.kslt-picker-option')[0].classList.contains('selected'),
                 /* ЭКРАНИРОВАНИЕ ПРОВЕРЯЕТСЯ ЦЕЛОСТНОСТЬЮ ИМЕНИ, А НЕ
                    ВИДОМ РАЗМЕТКИ. Первая запись пробы требовала `&quot;` в
                    `innerHTML` — и это ошибка прибора: браузер отдаёт
                    кавычку в тексте как есть, экранируй её или нет.
                    Настоящий признак: имя с кавычками и амперсандом дошло
                    до экрана ЗНАК В ЗНАК и не порвало разметку. */
-                имяВторой: п.querySelectorAll('.co-picker-label')[1].textContent,
+                имяВторой: п.querySelectorAll('.kslt-picker-label')[1].textContent,
                 амперсандГашен: п.innerHTML.indexOf('&amp;') !== -1
             };
-            п.querySelectorAll('.co-picker-option')[1].click();
-            снято.переключилось = п.querySelectorAll('.co-picker-option.selected').length === 1 &&
-                п.querySelectorAll('.co-picker-option')[1].classList.contains('selected');
-            п.querySelector('.co-picker-submit').click();
+            п.querySelectorAll('.kslt-picker-option')[1].click();
+            снято.переключилось = п.querySelectorAll('.kslt-picker-option.selected').length === 1 &&
+                п.querySelectorAll('.kslt-picker-option')[1].classList.contains('selected');
+            п.querySelector('.kslt-picker-submit').click();
             await new Promise(ок => setTimeout(ок, 900));
-            const в = document.getElementById('coVoucherModal');
-            снято.выборУбран = !document.getElementById('coPickerModal');
-            снято.процент = в ? в.querySelector('.co-voucher-percent').textContent : null;
+            const в = document.getElementById('ksltVoucherModal');
+            снято.выборУбран = !document.getElementById('ksltPickerModal');
+            снято.процент = в ? в.querySelector('.kslt-voucher-percent').textContent : null;
             return снято;
         });
 
@@ -101,19 +107,19 @@ test.describe('ваучерный блок сведён в дом', () => {
         const м = await page.evaluate(async () => {
             document.getElementById('stCta').click();
             await new Promise(ок => setTimeout(ок, 700));
-            const п = document.getElementById('coPickerModal');
-            if (п) п.querySelector('.co-picker-submit').click();
+            const п = document.getElementById('ksltPickerModal');
+            if (п) п.querySelector('.kslt-picker-submit').click();
             await new Promise(ок => setTimeout(ок, 800));
-            const л = document.getElementById('coLimitModal');
+            const л = document.getElementById('ksltLimitModal');
             const снято = л ? {
-                заголовок: л.querySelector('.co-voucher-title').textContent.trim(),
+                заголовок: л.querySelector('.kslt-voucher-title').textContent.trim(),
                 пояснение: л.querySelector('p').textContent.trim(),
-                ok: !!document.getElementById('coLimitOk')
+                ok: !!document.getElementById('ksltLimitOk')
             } : null;
-            if (л) document.getElementById('coLimitOk').click();
+            if (л) document.getElementById('ksltLimitOk').click();
             await new Promise(ок => setTimeout(ок, 300));
-            return { снято: снято, убралось: !document.getElementById('coLimitModal'),
-                     ваучераНет: !document.getElementById('coVoucherModal') };
+            return { снято: снято, убралось: !document.getElementById('ksltLimitModal'),
+                     ваучераНет: !document.getElementById('ksltVoucherModal') };
         });
 
         expect(м.снято, 'окно лимита не открылось').not.toBeNull();
@@ -131,13 +137,13 @@ test.describe('ваучерный блок сведён в дом', () => {
         const м = await page.evaluate(async () => {
             document.getElementById('stCta').click();
             await new Promise(ок => setTimeout(ок, 700));
-            const п = document.getElementById('coPickerModal');
-            if (п) п.querySelector('.co-picker-submit').click();
+            const п = document.getElementById('ksltPickerModal');
+            if (п) п.querySelector('.kslt-picker-submit').click();
             await new Promise(ок => setTimeout(ок, 900));
             const ярлык = document.querySelector('.kslt-toasts');
             return {
-                ваучераНет: !document.getElementById('coVoucherModal'),
-                лимитаНет: !document.getElementById('coLimitModal'),
+                ваучераНет: !document.getElementById('ksltVoucherModal'),
+                лимитаНет: !document.getElementById('ksltLimitModal'),
                 текст: ярлык ? ярлык.textContent.trim() : ''
             };
         });
@@ -150,14 +156,14 @@ test.describe('ваучерный блок сведён в дом', () => {
     test('история: три состояния, QR только у действующего, окно из истории', async ({ page }) => {
         await page.goto(адрес('istoriya', 'co', 'ru'));
         await дом(page);
-        await page.waitForSelector('.co-vh-item', { timeout: 15000 });
+        await page.waitForSelector('.kslt-vh-item', { timeout: 15000 });
 
         const м = await page.evaluate(async () => {
-            const строки = [...document.querySelectorAll('.co-vh-item')].map(с => ({
+            const строки = [...document.querySelectorAll('.kslt-vh-item')].map(с => ({
                 состояние: с.querySelector('[class*="vh-status"]').className,
-                кнопка: !!с.querySelector('.co-vh-qr-btn')
+                кнопка: !!с.querySelector('.kslt-vh-qr-btn')
             }));
-            const кнопка = document.querySelector('.co-vh-qr-btn');
+            const кнопка = document.querySelector('.kslt-vh-qr-btn');
             /* ОБРАТНЫЙ ПУТЬ ЧЕРЕЗ АТРИБУТ. Действующий ваучер на стенде —
                именно у услуги с кавычками и амперсандом: имя уходит в
                `data-service` экранированным и должно вернуться знак в
@@ -166,7 +172,7 @@ test.describe('ваучерный блок сведён в дом', () => {
             const изАтрибута = { услуга: кнопка.dataset.service, заведение: кнопка.dataset.entity };
             кнопка.click();
             await new Promise(ок => setTimeout(ок, 800));
-            const в = document.getElementById('coVoucherModal');
+            const в = document.getElementById('ksltVoucherModal');
             return {
                 строк: строки.length,
                 состояния: строки.map(с => с.состояние),
@@ -174,17 +180,17 @@ test.describe('ваучерный блок сведён в дом', () => {
                 окно: !!в,
                 qr: в ? !!в.querySelector('canvas') : false,
                 изАтрибута: изАтрибута,
-                вОкне: в ? в.querySelectorAll('.co-voucher-row')[0].textContent : null
+                вОкне: в ? в.querySelectorAll('.kslt-voucher-row')[0].textContent : null
             };
         });
 
         expect(м.строк, 'в истории не три строки').toBe(3);
-        expect(м.состояния[0], 'первая строка не действующая').toContain('co-vh-status-active');
-        expect(м.состояния[1], 'вторая строка не использованная').toContain('co-vh-status-used');
+        expect(м.состояния[0], 'первая строка не действующая').toContain('kslt-vh-status-active');
+        expect(м.состояния[1], 'вторая строка не использованная').toContain('kslt-vh-status-used');
         /* СРОК РЕШАЕТ, А НЕ ПОЛЕ: у третьей строки в базе `active`, но срок
            истёк — и на экране она истёкшая. */
         expect(м.состояния[2], 'истёкший срок не пересилил поле состояния')
-            .toContain('co-vh-status-expired');
+            .toContain('kslt-vh-status-expired');
         expect(м.кнопок, 'кнопка QR есть не только у действующего').toBe(1);
         expect(м.окно, 'окно ваучера из истории не открылось').toBe(true);
         expect(м.qr, 'QR в окне из истории не нарисовался').toBe(true);
@@ -199,19 +205,19 @@ test.describe('ваучерный блок сведён в дом', () => {
     test('без библиотеки QR: надпись на языке страницы и без инлайна', async ({ page }) => {
         await page.goto(адрес('net-qr', 'co', 'kg'));
         await дом(page);
-        await page.waitForSelector('.co-vh-qr-btn', { timeout: 15000 });
+        await page.waitForSelector('.kslt-vh-qr-btn', { timeout: 15000 });
 
         const м = await page.evaluate(async () => {
-            document.querySelector('.co-vh-qr-btn').click();
+            document.querySelector('.kslt-vh-qr-btn').click();
             await new Promise(ок => setTimeout(ок, 700));
-            const в = document.getElementById('coVoucherModal');
-            const коробка = в ? в.querySelector('.co-voucher-qr') : null;
+            const в = document.getElementById('ksltVoucherModal');
+            const коробка = в ? в.querySelector('.kslt-voucher-qr') : null;
             return {
                 окно: !!в,
                 холста: коробка ? !!коробка.querySelector('canvas') : null,
                 надпись: коробка ? коробка.textContent.trim() : '',
                 инлайн: коробка ? коробка.innerHTML.indexOf('style=') !== -1 : null,
-                скачать: !!document.getElementById('coVoucherDownload')
+                скачать: !!document.getElementById('ksltVoucherDownload')
             };
         });
 
