@@ -1696,10 +1696,16 @@
            разведут. */
         navDays: ' дн.',
         brkEnterName: 'Введите имя...',
-        brkPlayersNeNotFound: 'Игроков не найдено',
+        /* ОДИН СМЫСЛ — ОДИН КЛЮЧ. Было два: `brkPlayersNeNotFound`
+           («Игроков не найдено») и `brkPlayersNeNotFound2` («Игроки не
+           найдены») — оба на ОДИН случай: поиск игрока ничего не нашёл.
+           Плюс третья копия, зашитая строкой в `players.js`. Слово взято
+           то, что уже стоит на сайте (`js/players.js`, ключ `noResults`):
+           СОВПАДЕНИЕ ТЕКСТА — НЕ СОВПАДЕНИЕ ПОНЯТИЯ, а здесь понятие ОДНО,
+           и расходиться им незачем. */
+        brkPlayersNeNotFound: 'Игроки не найдены',
         brkLoading: 'Загрузка...',
         brkIvanovIvan: 'Иванов Иван',
-        brkPlayersNeNotFound2: 'Игроки не найдены',
         brkWarning: 'Внимание: ',
         brkRegistration: 'Регистрация',
         brkPair: 'Пара 1',

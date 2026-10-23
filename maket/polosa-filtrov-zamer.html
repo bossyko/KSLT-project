@@ -49,5 +49,31 @@
         <tr><td>Строка списка</td><td>для видимости границы</td></tr>
     </tbody></table>
 </div>
+
+<div class="подпись">ЛИПНЕТ ЛИ — продуктовая цепочка предков и высокий список</div>
+<!--
+  ТРЕТИЙ БЛОК ДОБАВЛЕН 23.10. Два верхних показывали ВИД полосы, но не
+  отвечали на вопрос Кости: липнет ли она на самом деле. В «Транзакциях»
+  это нечем было доказать — список короче окна, прокручивать нечего.
+  Здесь воспроизведена ПРОДУКТОВАЯ ЦЕПОЧКА: `.ad-section.active` вокруг
+  полосы (именно её `overflow: visible` снимает капкан прокручиваемого
+  предка) и список, заведомо длиннее экрана. Проба читает верх полосы при
+  прокрутке: он обязан стоять на `--header-h` и не уезжать.
+-->
+<div class="ad-section active" id="цепочка">
+    <div class="ad-filter-row ad-filter-sticky" id="липкая">
+        <input type="text" class="ad-field-input" placeholder="Поиск" style="max-width:220px;">
+        <select class="ad-field-input" style="max-width:150px;"><option>Все типы</option></select>
+    </div>
+    <table class="ad-table"><tbody id="длинный"></tbody></table>
+</div>
+<script>
+    var тело = document.getElementById('длинный');
+    var строки = '';
+    for (var i = 1; i <= 60; i++) {
+        строки += '<tr><td>Строка ' + i + '</td><td>чтобы список был длиннее экрана</td></tr>';
+    }
+    тело.innerHTML = строки;
+</script>
 </body>
 </html>

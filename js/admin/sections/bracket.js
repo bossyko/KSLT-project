@@ -3789,7 +3789,7 @@
                         var players = res.data || [];
                         if (players.length === 0) {
                             resultsDiv.innerHTML = '<div style="color:var(--text-secondary);padding:12px;text-align:center;">' +
-                                L.brkPlayersNeNotFound2 + '</div>';
+                                L.brkPlayersNeNotFound + '</div>';
                             return;
                         }
                         var html = '';

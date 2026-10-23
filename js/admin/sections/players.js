@@ -2999,7 +2999,7 @@
         try {
             var res = await A.client.from('players').select('id');
             var ids = (res.data || []).map(function(p) { return p.id; });
-            if (ids.length === 0) { A.showToast('Игроки не найдены', 'error'); return; }
+            if (ids.length === 0) { A.showToast(L.brkPlayersNeNotFound, 'error'); return; }
             var total = ids.length;
             for (var i = 0; i < total; i++) {
                 await recalcPlayerPoints([ids[i]]);
