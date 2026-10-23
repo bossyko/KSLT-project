@@ -25,8 +25,8 @@
     var client = window.supabaseClient;
 
     var PER_ROW = 6;
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
     var L = isEn
         ? { desc: 'Play in tournaments and earn awards', btn: 'My badges' }

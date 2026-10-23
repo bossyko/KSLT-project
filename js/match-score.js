@@ -21,8 +21,8 @@
     var MS = {};
     window.KSLT_MATCH_SCORE = MS;
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
     // Надписи — из общего файла js/match-score-texts.js: они одни на сайт и
     // приложение, вид у каждого свой

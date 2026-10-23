@@ -145,8 +145,8 @@ function applyPlayerHighlight() {
     var сразуВСетку = window._tdOpenBracket || !!pid;
     if (!сразуВСетку) return;
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     var playerPage = 'player' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + pid;
 
     // 1) Пришли из карточки игрока — «назад» возвращает туда же
@@ -402,14 +402,10 @@ function renderHero(tournament) {
 
     var statusClass = tournament.status;
     var statusText = getStatusLabel(tournament.status);
-    var backUrl = 'tournaments.html?category=' + tournament.category;
-
-    // Check if we're on English or Kyrgyz page
-    if (window.location.pathname.indexOf('-en') !== -1) {
-        backUrl = 'tournaments-en.html?category=' + tournament.category;
-    } else if (window.location.pathname.indexOf('-kg') !== -1) {
-        backUrl = 'tournaments-kg.html?category=' + tournament.category;
-    }
+    /* Назад — в список турниров НА ЯЗЫКЕ СТРАНИЦЫ. Было три ветки и три
+       раза собранный один и тот же хвост запроса. */
+    var backUrl = KSLT_YAZYK.выбрать('tournaments-en.html', 'tournaments-kg.html', 'tournaments.html')
+                + '?category=' + tournament.category;
 
     container.innerHTML =
         '<div class="td-hero-bg">' +
@@ -1101,8 +1097,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     matches = matches || [];
     registrations = registrations || [];
     playersMap = playersMap || {};
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     var isDbl = isDoublesTournamentPublic(t);
     var regsMap = isDbl ? buildPublicRegsMap(registrations) : null;
 
@@ -2920,7 +2916,7 @@ function показатьРаскладкуОчков(t, контейнер, п�
 // ========================================
 
 function renderVenueSection(court, isEn) {
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isKg = KSLT_YAZYK.kg;
     var venueSection = document.getElementById('venue');
     var venueContent = document.getElementById('venueContent');
     if (!venueSection || !venueContent) return;
@@ -3002,7 +2998,7 @@ async function обновитьБлокЗаявки() {
 
     var res = await client.from('tournament_registrations')
         .select('*').eq('tournament_id', t.id);
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isEn = KSLT_YAZYK.en;
     renderRegistrationButton(t, res.data || [], isEn);
 }
 
@@ -3042,7 +3038,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
     // isKg объявлялся только в renderVenueSection — здесь его не было,
     // и первое же обращение роняло функцию с ReferenceError внутри .then(),
     // то есть молча. Кнопка не рисовалась с 24.02.2026 (коммит 0cdd6d6).
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isKg = KSLT_YAZYK.kg;
 
     // Check if user is logged in and has a player_id
     client.auth.getUser().then(function(userRes) {
@@ -3449,8 +3445,8 @@ function initCountdown(t) {
     var container = document.getElementById('tdCountdown');
     if (!container) return;
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     var CL = isEn ? {
         title: 'TOURNAMENT STARTS IN',
         days: 'days', hours: 'hours', min: 'min', sec: 'sec',
@@ -3618,8 +3614,8 @@ function спрятатьТелоСтраницы() {
  * нарочно: человек уже вошёл, и предлагать ему войти значит врать о причине.
  */
 function renderNotFoundPage() {
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     var backUrl = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
 
     var texts = isEn ? {
@@ -3662,8 +3658,8 @@ function renderNotFoundPage() {
 }
 
 function renderLockedPage(tournamentId) {
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     var authUrl = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
     var backUrl = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
 

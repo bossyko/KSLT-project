@@ -29,8 +29,8 @@
 
     var SLOTS = 4;   // по четыре в ряд
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     // Фотографий у кортов и тренеров пока нет: реестр собирали из 2ГИС и
     // гидов. Без запасной картинки на месте снимка зияла пустая рамка
     var COURT_PHOTO = 'images/heroes/courts.jpg';

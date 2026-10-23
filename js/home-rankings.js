@@ -22,8 +22,8 @@
                            // пьедестале плюс пять строк таблицы
     var ПЬЕДЕСТАЛ = 3;     // мест уносит пьедестал; таблица начинается с 4-го
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
     var L = isEn
         ? { rank: '#', player: 'Player', country: 'Ctry', ntrp: 'NTRP', ntrpSub: 'sng / dbl', wl: 'W/L', points: 'Pts', change: 'Δ', empty: 'No players in this category yet',

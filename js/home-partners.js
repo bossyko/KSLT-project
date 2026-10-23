@@ -29,8 +29,8 @@
     var SHOW = 10;         // два ряда по пять
     var GUEST_CLEAR = 5;   // гостю чётко видны первые пять
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
     /* Подписи для диктора на всех трёх языках: форма и точка «онлайн»
        несли смысл ОДНИМ ЦВЕТОМ, а это WCAG 1.4.1. */

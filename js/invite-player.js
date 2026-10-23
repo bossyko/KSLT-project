@@ -20,8 +20,8 @@
     var INV = {};
     window.KSLT_INVITE = INV;
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
     // Адрес берём из общей настройки, а не зашиваем: автотесты подставляют
     // отдельную базу через window.KSLT_DB, и зашитый адрес уводил запрос

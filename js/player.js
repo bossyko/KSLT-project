@@ -17,9 +17,9 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isEn = KSLT_YAZYK.en;
     var _бесплатныйПериод = false;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isKg = KSLT_YAZYK.kg;
     var CU = window.KSLT_COUNTRY;
     var lang = isKg ? 'kg' : (isEn ? 'en' : 'ru');
     var client = window.supabaseClient;

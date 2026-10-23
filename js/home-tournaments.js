@@ -72,11 +72,10 @@
                        на телефоне боком: у полосы должен быть конец, иначе
                        непонятно, докуда листать. В сетке она скрыта css —
                        там ту же роль исполняет ссылка в шапке раздела. */
-                    var всеСсылка = (window.location.pathname.indexOf('-en') !== -1)
-                        ? { href: 'pages/tournaments-overview-en.html', текст: 'All tournaments' }
-                        : (window.location.pathname.indexOf('-kg') !== -1)
-                            ? { href: 'pages/tournaments-overview-kg.html', текст: 'Бардык мелдештер' }
-                            : { href: 'pages/tournaments-overview.html', текст: 'Все турниры' };
+                    var всеСсылка = KSLT_YAZYK.выбрать(
+                        { href: 'pages/tournaments-overview-en.html', текст: 'All tournaments' },
+                        { href: 'pages/tournaments-overview-kg.html', текст: 'Бардык мелдештер' },
+                        { href: 'pages/tournaments-overview.html',    текст: 'Все турниры' });
                     grid.innerHTML = picked.map(function(t, i) {
                         return TC.render(t, { featured: i === 0, taken: taken[t.id] || 0 });
                     }).join('') +
@@ -99,8 +98,8 @@
         var поId = {};
         турниры.forEach(function(t) { поId[t.id] = t; });
 
-        var isEn = location.pathname.indexOf('-en') !== -1;
-        var isKg = location.pathname.indexOf('-kg') !== -1;
+        var isEn = KSLT_YAZYK.en;
+        var isKg = KSLT_YAZYK.kg;
 
         // Состояние уже поданных заявок: кнопка сразу скажет «вы в сетке»
         if (window.KSLT_REG) window.KSLT_REG.markRegistered(client);
@@ -162,8 +161,8 @@
 
     /** База не ответила — говорим об этом, а не притворяемся пустотой. */
     function showNotice() {
-        var isEn = window.location.pathname.indexOf('-en') !== -1;
-        var isKg = window.location.pathname.indexOf('-kg') !== -1;
+        var isEn = KSLT_YAZYK.en;
+        var isKg = KSLT_YAZYK.kg;
         grid.innerHTML = '<div class="tc-notice">' +
             (isEn ? 'Tournaments are temporarily unavailable. Please try again later.'
                   : (isKg ? 'Мелдештер убактылуу жеткиликсиз. Кийинчерээк аракет кылыңыз.'

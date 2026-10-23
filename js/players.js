@@ -181,11 +181,11 @@
     }
 
     function isEnPage() {
-        return window.location.pathname.indexOf('-en') !== -1;
+        return KSLT_YAZYK.en;
     }
 
     function isKgPage() {
-        return window.location.pathname.indexOf('-kg') !== -1;
+        return KSLT_YAZYK.kg;
     }
 
     function getAuthUrl() {

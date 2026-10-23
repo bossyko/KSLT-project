@@ -41,7 +41,7 @@
         return ARCHIVE_TOURNAMENTS + (изБазы || 0);
     };
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
+    var isEn = KSLT_YAZYK.en;
     var LOCALE = isEn ? 'en-US' : 'ru-RU';
 
     var client = window.supabaseClient;

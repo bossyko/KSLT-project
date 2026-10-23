@@ -3,8 +3,8 @@
 // ========================================
 
 (function() {
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
     var L = isEn ? {
         heroTagline: 'KSLT Information',

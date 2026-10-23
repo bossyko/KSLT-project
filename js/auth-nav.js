@@ -81,8 +81,8 @@
     var btn = document.querySelector('.btn-auth');
     if (!btn) return;
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     var inPages = window.location.pathname.indexOf('/pages/') !== -1;
     var prefix = inPages ? '' : 'pages/';
     var dashUrl = prefix + (isEn ? 'dashboard-en.html' : (isKg ? 'dashboard-kg.html' : 'dashboard.html'));

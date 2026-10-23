@@ -626,8 +626,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (await isLoggedIn()) return;
 
-        var isEn = window.location.pathname.indexOf('-en') !== -1;
-        var isKg = window.location.pathname.indexOf('-kg') !== -1;
+        var isEn = KSLT_YAZYK.en;
+        var isKg = KSLT_YAZYK.kg;
         var authUrl = isEn ? 'pages/auth-en.html' : (isKg ? 'pages/auth-kg.html' : 'pages/auth.html');
         var ctaBtn = isEn ? 'Sign In / Register' : (isKg ? 'Кирүү / Каттоо' : 'Войти / Регистрация');
 

@@ -549,8 +549,8 @@
         var btns = Array.prototype.slice.call(document.querySelectorAll('.tournament-card[data-id] .btn-register, .btn-register[data-tid]'));
         if (btns.length === 0 || !client) return;
 
-        var isEn = location.pathname.indexOf('-en') !== -1;
-        var isKg = location.pathname.indexOf('-kg') !== -1;
+        var isEn = KSLT_YAZYK.en;
+        var isKg = KSLT_YAZYK.kg;
 
         try {
             var session = await client.auth.getSession();

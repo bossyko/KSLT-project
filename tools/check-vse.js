@@ -144,7 +144,8 @@ const КУСКИ = [
     ['имена классов', 'check-imena-klassov-zhivye.js', 'check-imena-klassov-zhivye-otkat.js'],
     ['пустое состояние', 'check-pustoe-sostoyanie.js', 'check-pustoe-sostoyanie-otkat.js'],
     ['семь находок обхода', 'check-sem-nahodok.js', 'check-sem-nahodok-otkat.js'],
-    ['относительные пути', 'check-puti-otnositelnye.js', 'check-puti-otnositelnye-otkat.js']
+    ['относительные пути', 'check-puti-otnositelnye.js', 'check-puti-otnositelnye-otkat.js'],
+    ['язык страницы', 'check-yazyk-odin-dom.js', 'check-yazyk-odin-dom-otkat.js']
 ];
 
 function прогнать(файл) {

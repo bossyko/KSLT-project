@@ -41,8 +41,8 @@
         return html;
     }
 
-    var isEn = window.location.pathname.indexOf('-en') !== -1;
-    var isKg = window.location.pathname.indexOf('-kg') !== -1;
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
     /* АНГЛИЙСКАЯ ВЕТКА ЗАВЕДЕНА 12.10 — её не было, как и у кортов.
        `experience` на КАРТОЧКЕ намеренно короткое: замер 12.10 дал
        «лет опыта» 53.4 против «years of experience» 103.3 — почти вдвое,
