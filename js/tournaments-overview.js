@@ -47,7 +47,7 @@
                 if (c.is_rating === false) NO_RATING[c.id] = true;
                 return {
                     key: c.id,
-                    name: isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name),
+                    name: KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name),
                     color: c.color || ''
                 };
             });
@@ -60,15 +60,12 @@
         ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
         : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
-    var formatLabels = isEn
-        ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
-        : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
-        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
+    var formatLabels = KSLT_YAZYK.выбрать({ singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }, { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }, { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
     /* Подписи статусов живут в js/tournament-status.js — одно определение на одно понятие */
-    var statusLabels = window.KSLT_STATUS.подписи(isEn ? 'en' : (isKg ? 'kg' : 'ru'));
+    var statusLabels = window.KSLT_STATUS.подписи(KSLT_YAZYK.выбрать('en', 'kg', 'ru'));
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         heroTitle: 'Tournaments',
         heroSub: 'All KSLT tournament categories',
         heroDesc: 'From beginner to professional level',
@@ -88,7 +85,7 @@
         noRating: 'Unranked',
         fee: 'Fee', feeMember: 'KSLT members', feeGuest: 'non-members',
         perPair: 'per player', som: 'som'
-    } : (isKg ? {
+    }, {
         heroTitle: 'Мелдештер',
         heroSub: 'KSLT мелдештеринин бардык категориялары',
         heroDesc: 'Башталгычтан профессионал деңгээлге чейин',
@@ -108,7 +105,7 @@
         noRating: 'Рейтингсиз',
         fee: 'Взнос', feeMember: 'КСЛТ мүчөлөрүнө', feeGuest: 'калгандарга',
         perPair: 'оюнчудан', som: 'сом'
-    } : {
+    }, {
         heroTitle: 'Турниры',
         heroSub: 'Все категории турниров KSLT',
         heroDesc: 'От начального до профессионального уровня',
@@ -130,25 +127,25 @@
         perPair: 'с участника', som: 'сом'
     });
 
-    var SL = isEn ? {
+    var SL = KSLT_YAZYK.выбрать({
         totalLabel: 'Tournaments',
         participantsLabel: 'Participants',
         prizeLabel: 'Prize Fund',
         categoriesLabel: 'Categories'
-    } : (isKg ? {
+    }, {
         totalLabel: 'Мелдештер',
         participantsLabel: 'Катышуучулар',
         prizeLabel: 'Сыйлык фонду',
         categoriesLabel: 'Категориялар'
-    } : {
+    }, {
         totalLabel: 'Турниров',
         participantsLabel: 'Участников',
         prizeLabel: 'Призовой фонд',
         categoriesLabel: 'Категорий'
     });
 
-    var tournamentPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
-    var tournamentsPage = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
+    var tournamentPage = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
+    var tournamentsPage = KSLT_YAZYK.выбрать('tournaments-en.html', 'tournaments-kg.html', 'tournaments.html');
 
     var _grouped = {};
     var _allGrouped = {};
@@ -168,11 +165,7 @@
 
     // Countdown helpers
     var _countdownInterval = null;
-    var CL = isEn
-        ? { days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }
-        : (isKg
-            ? { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }
-            : { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
+    var CL = KSLT_YAZYK.выбрать({ days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }, { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }, { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
 
     function getCountdownHtml(dateSort, startTime) {
         if (!dateSort) return '';
@@ -470,10 +463,10 @@
 
             map[cat].push({
                 id: t.id,
-                name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
+                name: KSLT_YAZYK.выбрать(t.title_en || t.title, t.title_kg || t.title, t.title),
                 date: { day: day, month: month },
                 _dateSort: t.date_start,
-                location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
+                location: KSLT_YAZYK.выбрать(t.location_en || t.location, t.location_kg || t.location || '', t.location || ''),
                 format: formatLabels[t.format] || t.format || '',
                 _rawFormat: t.format || '',
                 participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
@@ -784,7 +777,7 @@
 
             var wasLabel = btn.textContent;
             btn.disabled = true;
-            btn.textContent = isEn ? 'Sending...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+            btn.textContent = KSLT_YAZYK.выбрать('Sending...', 'Жөнөтүлүүдө...', 'Отправка...');
 
             window.KSLT_REG.submit(client, btn.dataset.tid, { isEn: isEn, isKg: isKg }).then(function(info) {
                 if (info && info.created) {
@@ -832,7 +825,7 @@
             prize: t.prize,
             участники: t.slotsStat || null,
             взнос: взносДляКарточки(t),
-            регПодпись: isEn ? 'Reg' : (isKg ? 'Кат' : 'Рег'),
+            регПодпись: KSLT_YAZYK.выбрать('Reg', 'Кат', 'Рег'),
             форматПодпись: L.format,
             призПодпись: L.prize,
             взносПодпись: L.fee,
@@ -913,7 +906,7 @@
                 '<h4>' + t.name + '</h4>' +
                 '<div class="to-compact-sub">' +
                     '<span>' + pinSvg + ' ' + t.location + '</span>' +
-                    (t.regLine ? '<span class="to-compact-reg">' + (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + t.regLine + '</span>' : '') +
+                    (t.regLine ? '<span class="to-compact-reg">' + (KSLT_YAZYK.выбрать('Reg: ', 'Кат: ', 'Рег: ')) + t.regLine + '</span>' : '') +
                     (t.slots ? '<span class="to-compact-slots' + (t.slots.tight ? ' to-slots-tight' : '') + '">' + t.slots.text + '</span>' : '') +
                 '</div>' +
             '</div>' +
@@ -1016,7 +1009,7 @@
         });
 
         if (!html) {
-            html = '<div class="to-category-block"><div class="to-card-grid"><div class="to-empty">' + emptySvg + '<p>' + (isEn ? 'Nothing found' : (isKg ? 'Эч нерсе табылган жок' : 'Ничего не найдено')) + '</p></div></div></div>';
+            html = '<div class="to-category-block"><div class="to-card-grid"><div class="to-empty">' + emptySvg + '<p>' + (KSLT_YAZYK.выбрать('Nothing found', 'Эч нерсе табылган жок', 'Ничего не найдено')) + '</p></div></div></div>';
         }
 
         container.innerHTML = html;

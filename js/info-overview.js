@@ -3,10 +3,8 @@
 // ========================================
 
 (function() {
-    var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         heroTagline: 'KSLT Information',
         heroTitle: 'All about <span>KSLT</span>',
         heroFull: 'Kyrgyzstan Social Lawn Tennis',
@@ -38,7 +36,7 @@
         privacyTitle: 'Privacy Policy',
         privacySub: 'What data we collect, why, and how to delete it.',
         more: 'Learn more'
-    } : isKg ? {
+    }, {
         heroTagline: 'КСЛТ Маалымат',
         heroTitle: '<span>КСЛТ</span> жөнүндө баары',
         // Название пишем как имя собственное, с заглавных — как русское и
@@ -72,7 +70,7 @@
         privacyTitle: 'Купуялык саясаты',
         privacySub: 'Кандай маалымат чогултабыз, эмне үчүн жана кантип өчүрүү.',
         more: 'Толугураак'
-    } : {
+    }, {
         heroTagline: 'КСЛТ Информация',
         heroTitle: 'Всё о <span>КСЛТ</span>',
         heroFull: 'Кыргызстанское Сообщество Любителей Тенниса',
@@ -103,16 +101,16 @@
         privacyTitle: 'Политика конфиденциальности',
         privacySub: 'Какие данные мы собираем, зачем и как их удалить.',
         more: 'Подробнее'
-    };
+    });
 
-    var aboutPage = isEn ? 'about-en.html' : (isKg ? 'about-kg.html' : 'about.html');
-    var rulesPage = isEn ? 'rules-en.html' : (isKg ? 'rules-kg.html' : 'rules.html');
-    var faqPage = isEn ? 'faq-en.html' : (isKg ? 'faq-kg.html' : 'faq.html');
-    var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
-    var offerPage = isEn ? 'offer-en.html' : (isKg ? 'offer-kg.html' : 'offer.html');
-    var termsPage = isEn ? 'terms-en.html' : (isKg ? 'terms-kg.html' : 'terms.html');
-    var privacyPage = isEn ? 'privacy-policy-en.html' : (isKg ? 'privacy-policy-kg.html' : 'privacy-policy.html');
-    var downloadPage = isEn ? 'download-en.html' : (isKg ? 'download-kg.html' : 'download.html');
+    var aboutPage = KSLT_YAZYK.выбрать('about-en.html', 'about-kg.html', 'about.html');
+    var rulesPage = KSLT_YAZYK.выбрать('rules-en.html', 'rules-kg.html', 'rules.html');
+    var faqPage = KSLT_YAZYK.выбрать('faq-en.html', 'faq-kg.html', 'faq.html');
+    var pricingPage = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
+    var offerPage = KSLT_YAZYK.выбрать('offer-en.html', 'offer-kg.html', 'offer.html');
+    var termsPage = KSLT_YAZYK.выбрать('terms-en.html', 'terms-kg.html', 'terms.html');
+    var privacyPage = KSLT_YAZYK.выбрать('privacy-policy-en.html', 'privacy-policy-kg.html', 'privacy-policy.html');
+    var downloadPage = KSLT_YAZYK.выбрать('download-en.html', 'download-kg.html', 'download.html');
 
     // SVG icons
     var bookSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';

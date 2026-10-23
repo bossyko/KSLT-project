@@ -22,12 +22,11 @@
     window.KSLT_MATCH_SCORE = MS;
 
     var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
     // Надписи — из общего файла js/match-score-texts.js: они одни на сайт и
     // приложение, вид у каждого свой
     var L = window.KSLT_SCORE_TEXTS
-        ? window.KSLT_SCORE_TEXTS.of(isEn ? 'en' : (isKg ? 'kg' : 'ru'))
+        ? window.KSLT_SCORE_TEXTS.of(KSLT_YAZYK.выбрать('en', 'kg', 'ru'))
         : {};
 
     var _myPlayerId = null;
@@ -261,7 +260,7 @@
 
     function имяТурнира(t) {
         if (!t) return '';
-        return isEn ? (t.title_en || t.title || '') : (isKg ? (t.title_kg || t.title || '') : (t.title || ''));
+        return KSLT_YAZYK.выбрать(t.title_en || t.title || '', t.title_kg || t.title || '', t.title || '');
     }
 
     function пара(m, byId) {

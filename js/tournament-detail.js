@@ -9,11 +9,14 @@
    и `getFicSectionsPublic`, где есть только `isEn`, и страница упала целиком:
    `isKg is not defined`. Заморозка этого не видит — она читает текст, а не
    область видимости; поймал прогон, тридцатью шестью падениями.
-   Язык берётся из адреса и не зависит от того, что объявлено рядом. */
+   Язык спрашивается У ДОМА (js/kslt-yazyk.js) и не зависит от того, что
+   объявлено рядом. До 23.10 он читался ЗДЕСЬ из адреса — второе
+   определение понятия, которое кусок 133 уже свёл к одному: сторож того
+   куска искал текст `pathname.indexOf('-en')` и не видел этой формы,
+   где путь сперва кладётся в переменную. ПРИБОР, ЗНАЮЩИЙ ОДНУ ФОРМУ,
+   ВИДИТ ЧАСТЬ — теперь правило читает дерево. */
 function языкСтраницы() {
-    var путь = window.location.pathname;
-    return путь.indexOf('-en') !== -1 ? 'en'
-         : (путь.indexOf('-kg') !== -1 ? 'kg' : 'ru');
+    return KSLT_YAZYK.код;
 }
 
 /* ОТСЕЧКА ДЛИННОГО СПИСКА ЖИВЁТ В ОДНОМ МЕСТЕ — js/kslt-otsechka.js.
@@ -52,7 +55,7 @@ function esc(str) {
  * таблице выглядели произволом.
  */
 function почемуМесто(st, isEn, isKg) {
-    var pick3 = function(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); };
+    var pick3 = function(en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); };
 
     if (st.жребий) {
         return '<span class="td-grp-lot" title="' +
@@ -113,7 +116,7 @@ function buildPublicRegsMap(registrations) {
 function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
     var p = playersMap[playerId];
     var captainName = p
-        ? esc(isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name))
+        ? esc(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name))
         : (playerId ? 'TBD' : 'BYE');
 
     var reg = regsMap ? regsMap[playerId] : null;
@@ -123,7 +126,7 @@ function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
     if (reg.partner_id) {
         var pp = playersMap[reg.partner_id];
         partnerName = pp
-            ? esc(isEn ? (pp.name_en || pp.name) : (isKg ? (pp.name_kg || pp.name) : pp.name))
+            ? esc(KSLT_YAZYK.выбрать(pp.name_en || pp.name, pp.name_kg || pp.name, pp.name))
             : '?';
     } else if (reg.partner_external_name) {
         partnerName = esc(reg.partner_external_name);
@@ -147,11 +150,11 @@ function applyPlayerHighlight() {
 
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
-    var playerPage = 'player' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html?id=' + pid;
+    var playerPage = 'player' + (KSLT_YAZYK.суффикс) + '.html?id=' + pid;
 
     // 1) Пришли из карточки игрока — «назад» возвращает туда же
     if (pid) {
-        var backLabel = isEn ? 'Back to player profile' : (isKg ? 'Оюнчунун профилине кайтуу' : 'Назад к профилю игрока');
+        var backLabel = KSLT_YAZYK.выбрать('Back to player profile', 'Оюнчунун профилине кайтуу', 'Назад к профилю игрока');
         var backSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg> ';
 
         var goBackToPlayer = function(e) {
@@ -306,7 +309,7 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
                     // как назвать участника, и тогда в сетке видно обоих
                     name: имяУчастника
                         ? имяУчастника(pid)
-                        : (p ? (isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : 'TBD'),
+                        : (p ? (KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : 'TBD'),
                     seed: null,
                     country: p ? tdCountryFlag(p.country) : ''
                 });
@@ -381,7 +384,7 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
     });
     if (thirdMatch) {
         bHtml += '<div style="margin-top:20px;max-width:200px;">';
-        bHtml += '<div class="td-round-title">' + (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
+        bHtml += '<div class="td-round-title">' + (KSLT_YAZYK.выбрать('3rd Place', '3-орун үчүн', 'За 3-е место')) + '</div>';
         bHtml += renderMatch(plTournObj, {
             matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
             score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
@@ -1106,7 +1109,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     function pName(playerId) {
         if (isDbl) return getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg);
         var p = playersMap[playerId];
-        return p ? esc(isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name)) : (playerId ? 'TBD' : 'BYE');
+        return p ? esc(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : (playerId ? 'TBD' : 'BYE');
     }
 
     var months = isEn
@@ -1148,10 +1151,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     var statusText = statusLabels[effectiveStatus] || effectiveStatus;
 
     // Format labels
-    var formatLabels = isEn
-        ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
-        : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
-        : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
+    var formatLabels = KSLT_YAZYK.выбрать({ singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }, { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }, { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
     // Category name from category_id
     var catId = t.category_id || '';
@@ -1161,19 +1161,16 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // Gender badge (from tournament.gender field)
     var gender = t.gender || '';
     var genderLabel = gender === 'women'
-        ? (isEn ? 'Women' : (isKg ? 'Аялдар' : 'Женский'))
+        ? (KSLT_YAZYK.выбрать('Women', 'Аялдар', 'Женский'))
         : gender === 'men'
-        ? (isEn ? 'Men' : (isKg ? 'Эркектер' : 'Мужской'))
+        ? (KSLT_YAZYK.выбрать('Men', 'Эркектер', 'Мужской'))
         : gender === 'mixed'
-        ? (isEn ? 'Mixed' : (isKg ? 'Аралаш' : 'Смешанный'))
+        ? (KSLT_YAZYK.выбрать('Mixed', 'Аралаш', 'Смешанный'))
         : '';
 
-    var backUrl = isEn
-        ? 'tournaments-en.html?category=' + category
-        : (isKg ? 'tournaments-kg.html?category=' + category
-        : 'tournaments.html?category=' + category);
+    var backUrl = KSLT_YAZYK.выбрать('tournaments-en.html?category=' + category, 'tournaments-kg.html?category=' + category, 'tournaments.html?category=' + category);
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         format: 'Format', participants: 'Participants', pairs: 'Pairs', prizeFund: 'Prize Fund',
         fee: 'Entry fee', feePair: 'Entry fee per player', som: 'som',
         feeYouMember: 'You are a KSLT member — your fee is {sum} {cur}',
@@ -1188,7 +1185,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         countdownDays: 'days', countdownHours: 'hours', countdownMin: 'min', countdownSec: 'sec',
         tournamentLive: 'Tournament in progress',
         regClosingSoon: 'Registration closes in less than 24 hours!'
-    } : (isKg ? {
+    }, {
         format: 'Формат', participants: 'Катышуучулар', pairs: 'Жуптар', prizeFund: 'Сыйлык фонду',
         fee: 'Катышуу акысы', feePair: 'Катышуу акысы оюнчудан', som: 'сом',
         feeYouMember: 'Сиз КСЛТ мүчөсүсүз — сиздин акыңыз {sum} {cur}',
@@ -1208,7 +1205,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         countdownDays: 'күн', countdownHours: 'саат', countdownMin: 'мүн', countdownSec: 'сек',
         tournamentLive: 'Мелдеш жүрүп жатат',
         regClosingSoon: 'Каттоо 24 сааттан кийин жабылат!'
-    } : {
+    }, {
         format: 'Формат', participants: 'Участники', pairs: 'Пар', prizeFund: 'Призовой фонд',
         fee: 'Взнос', feePair: 'Взнос с участника', som: 'сом',
         feeYouMember: 'Вы член КСЛТ — ваш взнос {sum} {cur}',
@@ -1238,8 +1235,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     var predOpts = (isDbl || !предсказаниеВидно) ? null : {
         playersMap: playersMap,
         h2hMap: h2hMap,
-        label: isEn ? 'KSLT AI Prediction' : (isKg ? 'KSLT AI Болжолу' : 'Прогноз KSLT AI'),
-        tooltip: isEn ? 'Based on rating, form, and head-to-head' : (isKg ? 'Рейтинг, форма жана жолугушуулар тарыхы' : 'На основе рейтинга, формы и истории встреч')
+        label: KSLT_YAZYK.выбрать('KSLT AI Prediction', 'KSLT AI Болжолу', 'Прогноз KSLT AI'),
+        tooltip: KSLT_YAZYK.выбрать('Based on rating, form, and head-to-head', 'Рейтинг, форма жана жолугушуулар тарыхы', 'На основе рейтинга, формы и истории встреч')
     };
 
     // ---- Render Hero ----
@@ -1263,7 +1260,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     (genderLabel ? '<span class="tournament-gender-badge">' + genderLabel + '</span>' : '') +
                     '<span class="td-status-badge ' + statusClass + '">' + statusText + '</span>' +
                 '</div>' +
-                '<h1>' + (isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title)) + '</h1>' +
+                '<h1>' + (KSLT_YAZYK.выбрать(t.title_en || t.title, t.title_kg || t.title, t.title)) + '</h1>' +
                 '<div class="td-hero-meta">' +
                     '<div class="td-meta-item">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
@@ -1271,11 +1268,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '</div>' +
                     (regDateRange ? '<div class="td-meta-item td-meta-reg">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>' +
-                        ' ' + (isEn ? 'Reg: ' : (isKg ? 'Кат: ' : 'Рег: ')) + regDateRange +
+                        ' ' + (KSLT_YAZYK.выбрать('Reg: ', 'Кат: ', 'Рег: ')) + regDateRange +
                     '</div>' : '') +
                     '<div class="td-meta-item">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-                        ' ' + (isEn ? (t.location_en || t.location || '') : (isKg ? (t.location_kg || t.location || '') : (t.location || ''))) +
+                        ' ' + (KSLT_YAZYK.выбрать(t.location_en || t.location || '', t.location_kg || t.location || '', t.location || '')) +
                     '</div>' +
                 '</div>' +
                 '<div class="td-hero-stats">' +
@@ -1359,11 +1356,11 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // ---- Description section ----
     var descContent = document.getElementById('descriptionContent');
     if (descContent) {
-        var descText = isEn ? (t.description_en || t.description || '') : (isKg ? (t.description_kg || t.description || '') : (t.description || ''));
+        var descText = KSLT_YAZYK.выбрать(t.description_en || t.description || '', t.description_kg || t.description || '', t.description || '');
         if (descText) {
             descContent.innerHTML = '<div class="td-description-text">' + descText.replace(/\n/g, '<br>') + '</div>';
         } else {
-            descContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'No description available.' : (isKg ? 'Сүрөттөмө жок.' : 'Описание отсутствует.')) + '</p></div>';
+            descContent.innerHTML = '<div class="td-no-results"><p>' + (KSLT_YAZYK.выбрать('No description available.', 'Сүрөттөмө жок.', 'Описание отсутствует.')) + '</p></div>';
         }
     }
 
@@ -1378,8 +1375,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         });
 
         if (!расписанные.length) {
-            var нетРасписания = isEn ? 'The schedule is not published yet'
-                : (isKg ? 'Жадыбал азырынча жарыяланган жок' : 'Расписание пока не опубликовано');
+            var нетРасписания = KSLT_YAZYK.выбрать('The schedule is not published yet', 'Жадыбал азырынча жарыяланган жок', 'Расписание пока не опубликовано');
             scheduleContainer.innerHTML = '<div class="td-no-results"><p>' + нетРасписания + '</p></div>';
             var вкладкаРасп = document.querySelector('.td-tab[data-target="schedule"]');
             if (вкладкаРасп) вкладкаРасп.style.display = 'none';
@@ -1398,13 +1394,9 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 return String(a.court || '').localeCompare(String(b.court || ''), undefined, { numeric: true });
             });
 
-            var подписи = isEn
-                ? { court: 'Court', time: 'Time', round: 'Round', status: 'Status', group: 'Group',
-                    done: 'Done', live: 'Live', soon: 'Upcoming' }
-                : (isKg
-                    ? { court: 'Корт', time: 'Убакыт', round: 'Раунд', status: 'Абалы', group: 'Топ',
-                        done: 'Аяктады', live: 'Live', soon: 'Күтүүдө' }
-                    : { court: 'Корт', time: 'Время', round: 'Раунд', status: 'Статус', group: 'Группа',
+            var подписи = KSLT_YAZYK.выбрать({ court: 'Court', time: 'Time', round: 'Round', status: 'Status', group: 'Group',
+                    done: 'Done', live: 'Live', soon: 'Upcoming' }, { court: 'Корт', time: 'Убакыт', round: 'Раунд', status: 'Абалы', group: 'Топ',
+                        done: 'Аяктады', live: 'Live', soon: 'Күтүүдө' }, { court: 'Корт', time: 'Время', round: 'Раунд', status: 'Статус', group: 'Группа',
                         done: 'Завершён', live: 'Идёт', soon: 'Ожидает' });
 
             var естьГруппы = очередь.some(function(m) { return !!m.group_number; });
@@ -1416,7 +1408,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // Заголовок по содержимому: в групповых турнирах в этой
                     // колонке стоит «Группа A», а не круг сетки
                     '<th>' + (естьГруппы ? подписи.group : подписи.round) + '</th>' +
-                    '<th colspan="3">' + (isEn ? 'Match' : (isKg ? 'Оюн' : 'Игра')) + '</th>' +
+                    '<th colspan="3">' + (KSLT_YAZYK.выбрать('Match', 'Оюн', 'Игра')) + '</th>' +
                     '<th>' + подписи.court + '</th>' +
                     '<th>' + подписи.status + '</th>' +
                 '</tr></thead>';
@@ -1491,7 +1483,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                чего прятать. */
             var полосаHtml = '';
             if (сыграноШтук && ждутШтук) {
-                var словоСыгранные = isEn ? 'Played matches' : (isKg ? 'Ойнолгон оюндар' : 'Сыгранные');
+                var словоСыгранные = KSLT_YAZYK.выбрать('Played matches', 'Ойнолгон оюндар', 'Сыгранные');
                 полосаHtml = '<button type="button" class="td-sched-ranshe" ' +
                     /* Называем ТАБЛИЦУ, а не исчезнувшее тело: строки прячутся
                        каждая у себя, общего узла у них нет, а `aria-controls`,
@@ -1584,7 +1576,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 }
 
                 // ---- Group tables (below) ----
-                группыЛиг += '<h3 class="td-bracket-subtitle">' + (isEn ? 'Group Stage' : (isKg ? 'Топтук этап' : 'Групповой этап')) + '</h3>';
+                группыЛиг += '<h3 class="td-bracket-subtitle">' + (KSLT_YAZYK.выбрать('Group Stage', 'Топтук этап', 'Групповой этап')) + '</h3>';
                 группыЛиг += '<div class="td-groups-grid">';
 
                 for (var gg = 1; gg <= glGroupCount; gg++) {
@@ -1621,13 +1613,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     var ggLetter = KSLT_RULES.букваГруппы(gg) || String(gg);
                     группыЛиг += '<div class="td-gt-block">';
-                    группыЛиг += '<div class="td-group-name">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + ggLetter + '</div>';
+                    группыЛиг += '<div class="td-group-name">' + (KSLT_YAZYK.выбрать('Group ', 'Топ ', 'Группа ')) + ggLetter + '</div>';
                     группыЛиг += '<div class="td-gt-scroll"><table class="td-group-table">';
-                    группыЛиг += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
+                    группыЛиг += '<thead><tr><th>№</th><th>' + (KSLT_YAZYK.выбрать('Player', 'Оюнчу', 'Игрок')) + '</th>';
                     for (var gc = 0; gc < ggStandings.length; gc++) группыЛиг += '<th class="td-gt-opp">' + (gc + 1) + '</th>';
-                    группыЛиг += '<th class="td-gt-wins">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
-                    группыЛиг += '<th class="td-gt-games">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
-                    группыЛиг += '<th class="td-gt-place">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
+                    группыЛиг += '<th class="td-gt-wins">' + (KSLT_YAZYK.выбрать('W', 'Ж', 'П')) + '</th>';
+                    группыЛиг += '<th class="td-gt-games">' + (KSLT_YAZYK.выбрать('Games', 'Геймдер', 'Геймы')) + '</th>';
+                    группыЛиг += '<th class="td-gt-place">' + (KSLT_YAZYK.выбрать('Pos', 'О', 'М')) + '</th>';
                     группыЛиг += '</tr></thead><tbody>';
 
                     for (var grow = 0; grow < ggStandings.length; grow++) {
@@ -1802,7 +1794,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                        тем, что играется сейчас, а видел пустые клетки.
                        Порядок блоков — свойство того, что живое. */
                     var плейофф = '';
-                    плейофф += '<h3 class="td-bracket-subtitle">' + (isEn ? 'Playoff' : (isKg ? 'Плей-офф' : 'Плей-офф')) + '</h3>';
+                    плейофф += '<h3 class="td-bracket-subtitle">' + (KSLT_YAZYK.выбрать('Playoff', 'Плей-офф', 'Плей-офф')) + '</h3>';
                     плейофф += '<div class="td-bracket-scroll"><div class="td-bracket">';
                     plRounds.forEach(function(round, ri) {
                         var isLastRound = ri === plRounds.length - 1;
@@ -1821,7 +1813,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         if (isLastRound && thirdMatch) {
                             плейофф += '<div class="td-third-place">';
                             плейофф += '<div class="td-round-title">' +
-                                (isEn ? '3rd Place' : (isKg ? '3-орун үчүн' : 'За 3-е место')) + '</div>';
+                                (KSLT_YAZYK.выбрать('3rd Place', '3-орун үчүн', 'За 3-е место')) + '</div>';
                             плейофф += renderMatch(plTournObj, {
                                 matchId: thirdMatch.id, player1Id: thirdMatch.player1_id, player2Id: thirdMatch.player2_id,
                                 score: thirdMatch.score || '', winnerId: thirdMatch.winner_id, status: thirdMatch.status || 'upcoming'
@@ -1852,7 +1844,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                 // Inter-group matches section
                 if (hasIG) {
-                    плейофф += '<h3 class="td-bracket-subtitle">' + (isEn ? 'Additional Matches' : (isKg ? 'Кошумча матчтар' : 'Дополнительные матчи')) + '</h3>';
+                    плейофф += '<h3 class="td-bracket-subtitle">' + (KSLT_YAZYK.выбрать('Additional Matches', 'Кошумча матчтар', 'Дополнительные матчи')) + '</h3>';
                     // Класс нужен, чтобы на телефоне поставить карточки по две
                     // в ряд: минимум в 220 пикселей оставлял их по одной
                     плейофф += '<div class="td-ig-grid">';
@@ -1876,7 +1868,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                             if (igOutcomeLabel) { p1Score = (p1Score ? p1Score + ' ' : '') + igOutcomeLabel; }
                         }
 
-                        var matchLabel = isEn ? 'Match ' : (isKg ? 'Матч ' : 'Матч ');
+                        var matchLabel = KSLT_YAZYK.выбрать('Match ', 'Матч ', 'Матч ');
                         плейофф += '<div class="td-ig-match" data-p1="' + (m.player1_id || '') + '" data-p2="' + (m.player2_id || '') + '">';
                         плейофф += '<div class="td-ig-head">' + matchLabel + (idx + 1) + '</div>';
                         // P1
@@ -1894,7 +1886,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 }
 
                 // Group tables (2-column grid)
-                группы += '<h3 class="td-bracket-subtitle">' + (isEn ? 'Group Stage' : (isKg ? 'Топтук этап' : 'Групповой этап')) + '</h3>';
+                группы += '<h3 class="td-bracket-subtitle">' + (KSLT_YAZYK.выбрать('Group Stage', 'Топтук этап', 'Групповой этап')) + '</h3>';
                 группы += '<div class="td-groups-grid">';
 
                 for (var g = 1; g <= groupCount; g++) {
@@ -1936,13 +1928,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                     var letter = KSLT_RULES.букваГруппы(g) || String(g);
                     группы += '<div class="td-gt-block">';
-                    группы += '<div class="td-group-name">' + (isEn ? 'Group ' : (isKg ? 'Топ ' : 'Группа ')) + letter + '</div>';
+                    группы += '<div class="td-group-name">' + (KSLT_YAZYK.выбрать('Group ', 'Топ ', 'Группа ')) + letter + '</div>';
                     группы += '<div class="td-gt-scroll"><table class="td-group-table">';
-                    группы += '<thead><tr><th>№</th><th>' + (isEn ? 'Player' : (isKg ? 'Оюнчу' : 'Игрок')) + '</th>';
+                    группы += '<thead><tr><th>№</th><th>' + (KSLT_YAZYK.выбрать('Player', 'Оюнчу', 'Игрок')) + '</th>';
                     for (var c = 0; c < standings.length; c++) группы += '<th class="td-gt-opp">' + (c + 1) + '</th>';
-                    группы += '<th class="td-gt-wins">' + (isEn ? 'W' : (isKg ? 'Ж' : 'П')) + '</th>';
-                    группы += '<th class="td-gt-games">' + (isEn ? 'Games' : (isKg ? 'Геймдер' : 'Геймы')) + '</th>';
-                    группы += '<th class="td-gt-place">' + (isEn ? 'Pos' : (isKg ? 'О' : 'М')) + '</th>';
+                    группы += '<th class="td-gt-wins">' + (KSLT_YAZYK.выбрать('W', 'Ж', 'П')) + '</th>';
+                    группы += '<th class="td-gt-games">' + (KSLT_YAZYK.выбрать('Games', 'Геймдер', 'Геймы')) + '</th>';
+                    группы += '<th class="td-gt-place">' + (KSLT_YAZYK.выбрать('Pos', 'О', 'М')) + '</th>';
                     группы += '</tr></thead><tbody>';
 
                     for (var row = 0; row < standings.length; row++) {
@@ -2073,7 +2065,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 var p = playersMap[pid];
                 ficPlayersArr.push({
                     id: pid,
-                    name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
+                    name: KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name),
                     seed: null,
                     country: tdCountryFlag(p.country)
                 });
@@ -2219,8 +2211,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             /* Лента рисуется ТОЛЬКО когда блоков больше одного: при одном
                она не выбирает ничего и лишь отнимает ступень высоты. */
             if (ficВидимые.length > 1) {
-                var подписьЛенты = isEn ? 'Bracket blocks'
-                    : (isKg ? 'Тор блокторy' : 'Блоки сетки');
+                var подписьЛенты = KSLT_YAZYK.выбрать('Bracket blocks', 'Тор блокторy', 'Блоки сетки');
                 var лентаHtml = '<div class="td-fic-lenta" role="radiogroup" aria-label="' +
                     esc(подписьЛенты) + '">';
                 ficВидимые.forEach(function(имя, i) {
@@ -2289,7 +2280,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // Strip HTML tags for SE bracket (uses text rendering)
                     displayName = getPublicTeamName(pid, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '');
                 } else {
-                    displayName = isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name);
+                    displayName = KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name);
                 }
                 playersArr.push({
                     id: pid,
@@ -2351,7 +2342,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             // Build tournament object for renderer
             var tournamentObj = {
                 id: t.id,
-                name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
+                name: KSLT_YAZYK.выбрать(t.title_en || t.title, t.title_kg || t.title, t.title),
                 bracketType: 'single_elimination',
                 drawSize: drawSize,
                 players: playersArr,
@@ -2416,18 +2407,18 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
         if (mainDraw.length > 0) {
             var partHtml = '';
-            var mainDrawLabel = isEn ? 'Main Draw' : (isKg ? 'Негизги тор' : 'Основная сетка');
-            var waitlistLabel = isEn ? 'Waitlist' : (isKg ? 'Күтүү тизмеси' : 'Лист ожидания');
-            var thName = isEn ? 'Name' : (isKg ? 'Аты-жөнү' : 'ФИО');
+            var mainDrawLabel = KSLT_YAZYK.выбрать('Main Draw', 'Негизги тор', 'Основная сетка');
+            var waitlistLabel = KSLT_YAZYK.выбрать('Waitlist', 'Күтүү тизмеси', 'Лист ожидания');
+            var thName = KSLT_YAZYK.выбрать('Name', 'Аты-жөнү', 'ФИО');
             var thCat = 'NTRP';
-            var thDate = isEn ? 'Date' : (isKg ? 'Датасы' : 'Дата');
-            var thTime = isEn ? 'Time' : (isKg ? 'Убактысы' : 'Время');
+            var thDate = KSLT_YAZYK.выбрать('Date', 'Датасы', 'Дата');
+            var thTime = KSLT_YAZYK.выбрать('Time', 'Убактысы', 'Время');
 
             function pubRegRow(reg, idx, всего) {
                 var p = reg.players || playersMap[reg.player_id] || {};
                 var regDisplayName = isDbl
                     ? getPublicTeamName(reg.player_id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
-                    : (isEn ? (p.name_en || p.name || '—') : (isKg ? (p.name_kg || p.name || '—') : (p.name || '—')));
+                    : (KSLT_YAZYK.выбрать(p.name_en || p.name || '—', p.name_kg || p.name || '—', p.name || '—'));
                 var pName = regDisplayName;
                 var photo = p.photo || '';
                 var photoHtml = photo
@@ -2494,7 +2485,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                 partHtml += '</tbody></table></div>';
                 partHtml += кнопкаОтсечки(waitlist.length);
             } else {
-                partHtml += '<div class="td-no-results"><p>' + (isEn ? 'No waitlisted players' : (isKg ? 'Күтүү тизмесинде оюнчулар жок' : 'Нет игроков в листе ожидания')) + '</p></div>';
+                partHtml += '<div class="td-no-results"><p>' + (KSLT_YAZYK.выбрать('No waitlisted players', 'Күтүү тизмесинде оюнчулар жок', 'Нет игроков в листе ожидания')) + '</p></div>';
             }
             partHtml += '</div>';
 
@@ -2530,7 +2521,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             function podiumCard(player, place, medal) {
                 var podName = isDbl
                     ? getPublicTeamName(player.id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
-                    : (isEn ? (player.name_en || player.name || '?') : (isKg ? (player.name_kg || player.name || '?') : (player.name || '?')));
+                    : (KSLT_YAZYK.выбрать(player.name_en || player.name || '?', player.name_kg || player.name || '?', player.name || '?'));
                 var photo = player.photo || defaultPhoto;
                 return '<div class="td-podium-card td-podium-' + place + '">' +
                     '<div class="td-podium-medal">' + medal + '</div>' +
@@ -2734,7 +2725,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     if (courtData) {
         renderVenueSection(courtData, isEn);
     } else if (venueContent) {
-        venueContent.innerHTML = '<div class="td-no-results"><p>' + (isEn ? 'Venue information not available.' : (isKg ? 'Өткөрүлүүчү жер жөнүндө маалымат жок.' : 'Информация о месте проведения отсутствует.')) + '</p></div>';
+        venueContent.innerHTML = '<div class="td-no-results"><p>' + (KSLT_YAZYK.выбрать('Venue information not available.', 'Өткөрүлүүчү жер жөнүндө маалымат жок.', 'Информация о месте проведения отсутствует.')) + '</p></div>';
     }
 
     // Init tabs navigation
@@ -2773,7 +2764,7 @@ function подписьЛиги(вид, isEn, isKg) {
         PL: { ru: 'Высшая лига',       en: 'Premier League',     kg: 'Жогорку лига' },
         CL: { ru: 'Утешительная лига', en: 'Consolation League', kg: 'Сооротуу лигасы' }
     }[вид] || { ru: '', en: '', kg: '' };
-    return isEn ? П.en : (isKg ? П.kg : П.ru);
+    return KSLT_YAZYK.выбрать(П.en, П.kg, П.ru);
 }
 
 function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста, лиги, пьедесталыЛиг) {
@@ -2921,7 +2912,7 @@ function renderVenueSection(court, isEn) {
     var venueContent = document.getElementById('venueContent');
     if (!venueSection || !venueContent) return;
 
-    var courtName = isEn ? (court.name_en || court.name) : (isKg ? (court.name_kg || court.name) : court.name);
+    var courtName = KSLT_YAZYK.выбрать(court.name_en || court.name, court.name_kg || court.name, court.name);
     /* Адрес собирается в одном месте — js/court-address.js */
     var address = window.KSLT_ADDRESS.адрес(court, языкСтраницы());
 
@@ -2929,7 +2920,7 @@ function renderVenueSection(court, isEn) {
        нет, и вести на неё некуда. Название остаётся текстом, карта работает:
        доехать до места важнее, чем открыть карточку */
     var черновик = !court.published_at;
-    var courtUrl = черновик ? '' : (isEn ? 'court-en.html?id=' + court.id : (isKg ? 'court-kg.html?id=' + court.id : 'court.html?id=' + court.id));
+    var courtUrl = черновик ? '' : (KSLT_YAZYK.выбрать('court-en.html?id=' + court.id, 'court-kg.html?id=' + court.id, 'court.html?id=' + court.id));
     var mapUrl = court.google_maps_url || court.twogis_url || '';
     var fullAddress = [courtName, address, 'Bishkek'].filter(Boolean).join(', ');
     var embedUrl = window.KSLT_KARTA.встроить(mapUrl, fullAddress);
@@ -3009,8 +3000,7 @@ function гостюКнопкуЗаписи(isEn, isKg) {
     document.querySelectorAll('.td-register-wrap, .td-registration-area')
         .forEach(function(эл) { эл.remove(); });
 
-    var подпись = isEn ? 'Register for Tournament'
-        : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир');
+    var подпись = KSLT_YAZYK.выбрать('Register for Tournament', 'Мелдешке каттоо', 'Записаться на турнир');
 
     heroContent.insertAdjacentHTML('beforeend',
         '<div class="td-register-wrap" style="margin-top:20px;">' +
@@ -3119,7 +3109,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     paidOk = memResult && memResult.paid;
                 }
 
-                var pricingUrl = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+                var pricingUrl = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
 
                 // Find hero content to append button
                 var heroContent = document.querySelector('.td-hero-content');
@@ -3136,10 +3126,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // Подписи те же, что на карточках турниров: человек должен
                     // видеть одно и то же слово везде — «Вы в основной сетке»,
                     // а не «зарегистрированы» здесь и «в сетке» там
-                    var statusLabels = isEn
-                        ? { pending: 'Entry under review', approved: 'You are in the draw', draw: 'You are in the draw', rejected: 'Entry declined', withdrawn: 'Withdrawn', waitlist: 'On the waiting list', blocked: 'Not admitted' }
-                        : (isKg ? { pending: 'Арыз каралууда', approved: 'Сиз негизги сеткадасыз', draw: 'Сиз негизги сеткадасыз', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде', blocked: 'Уруксат жок' }
-                        : { pending: 'Заявка на рассмотрении', approved: 'Вы в основной сетке', draw: 'Вы в основной сетке', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания', blocked: 'Не допущен' });
+                    var statusLabels = KSLT_YAZYK.выбрать({ pending: 'Entry under review', approved: 'You are in the draw', draw: 'You are in the draw', rejected: 'Entry declined', withdrawn: 'Withdrawn', waitlist: 'On the waiting list', blocked: 'Not admitted' }, { pending: 'Арыз каралууда', approved: 'Сиз негизги сеткадасыз', draw: 'Сиз негизги сеткадасыз', rejected: 'Арыз четке кагылды', withdrawn: 'Арыз кайтарылды', waitlist: 'Күтүү тизмесинде', blocked: 'Уруксат жок' }, { pending: 'Заявка на рассмотрении', approved: 'Вы в основной сетке', draw: 'Вы в основной сетке', rejected: 'Заявка отклонена', withdrawn: 'Заявка отозвана', waitlist: 'В листе ожидания', blocked: 'Не допущен' });
 
                     // Отказ подписываем красным и показываем причину — она приходит
                     // из правил допуска и написана человеческим языком
@@ -3149,7 +3136,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var ждётГостя = alreadyRegistered.partner_external_name && !alreadyRegistered.guest_confirmed;
                     var ожидание = alreadyRegistered.status === 'waitlist' || alreadyRegistered.status === 'pending';
                     var подписьСтатуса = ждётГостя
-                        ? (isEn ? 'Entry under review' : (isKg ? 'Арыз каралууда' : 'Заявка на рассмотрении'))
+                        ? (KSLT_YAZYK.выбрать('Entry under review', 'Арыз каралууда', 'Заявка на рассмотрении'))
                         : (statusLabels[alreadyRegistered.status] || statusLabels.approved);
                     // Вид состояния общий на весь сайт — класс из style.css.
                     // Раньше цвета были прописаны прямо здесь, и страница
@@ -3159,13 +3146,11 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     btnHtml += '<span class="kslt-status ' + видСтатуса + '">' + подписьСтатуса + '</span>';
                     if (ждётГостя) {
                         var местоТекст = alreadyRegistered.status === 'waitlist'
-                            ? (isEn ? 'On the waiting list' : (isKg ? 'Күтүү тизмесинде' : 'В листе ожидания'))
-                            : (isEn ? 'In the main draw' : (isKg ? 'Негизги сеткада' : 'В основной сетке'));
+                            ? (KSLT_YAZYK.выбрать('On the waiting list', 'Күтүү тизмесинде', 'В листе ожидания'))
+                            : (KSLT_YAZYK.выбрать('In the main draw', 'Негизги сеткада', 'В основной сетке'));
                         btnHtml += '<div class="td-zapis-note">' +
                             местоТекст + ' \u00B7 ' +
-                            (isEn ? 'the guest partner is confirmed by the manager'
-                                  : (isKg ? 'конок өнөктөштү менеджер ырастайт'
-                                          : 'напарника-гостя подтверждает менеджер')) +
+                            (KSLT_YAZYK.выбрать('the guest partner is confirmed by the manager', 'конок өнөктөштү менеджер ырастайт', 'напарника-гостя подтверждает менеджер')) +
                         '</div>';
                     }
                     if (isRefused && alreadyRegistered.block_reason) {
@@ -3186,8 +3171,8 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             (вПаре ? ' data-leave="1"' : '') +
                             ' class="td-zapis-btn-kontur">' +
                             (вПаре
-                                ? (isEn ? 'Leave the pair' : (isKg ? 'Жуптан чыгуу' : 'Выйти из пары'))
-                                : (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку'))) + '</button>';
+                                ? (KSLT_YAZYK.выбрать('Leave the pair', 'Жуптан чыгуу', 'Выйти из пары'))
+                                : (KSLT_YAZYK.выбрать('Withdraw', 'Арызды алуу', 'Снять заявку'))) + '</button>';
                     }
 
                     // В паре напарник либо есть, либо нет — и кнопка должна
@@ -3205,8 +3190,8 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         var естьНапарник = alreadyRegistered.partner_id || alreadyRegistered.partner_external_name;
                         кнопкиHtml += '<button id="tdAddPartnerBtn" class="td-zapis-btn-kontur td-zapis-btn-kontur-accent">' +
                             (естьНапарник
-                                ? (isEn ? 'Change partner' : (isKg ? 'Өнөктөштү алмаштыруу' : 'Заменить напарника'))
-                                : (isEn ? 'Add Partner' : (isKg ? 'Өнөктөш кошуу' : 'Добавить партнёра'))) + '</button>';
+                                ? (KSLT_YAZYK.выбрать('Change partner', 'Өнөктөштү алмаштыруу', 'Заменить напарника'))
+                                : (KSLT_YAZYK.выбрать('Add Partner', 'Өнөктөш кошуу', 'Добавить партнёра'))) + '</button>';
                     }
 
                     // Отказ менеджера окончателен: подать заявку заново игрок не
@@ -3214,9 +3199,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // решение клуба ничего не значило бы
                     if (alreadyRegistered.status === 'rejected') {
                         btnHtml += '<div class="td-zapis-note">' +
-                            (isEn ? 'The club closed this entry. To return to the tournament, contact a manager'
-                                  : (isKg ? 'Арызды клуб жапты. Мелдешке кайра кирүү үчүн менеджерге кайрылыңыз'
-                                          : 'Заявку закрыл клуб. Чтобы вернуться в турнир, обратитесь к менеджеру')) +
+                            (KSLT_YAZYK.выбрать('The club closed this entry. To return to the tournament, contact a manager', 'Арызды клуб жапты. Мелдешке кайра кирүү үчүн менеджерге кайрылыңыз', 'Заявку закрыл клуб. Чтобы вернуться в турнир, обратитесь к менеджеру')) +
                         '</div>';
                     }
 
@@ -3226,30 +3209,26 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 } else if (playerBanned) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm
-                        ? (isEn ? 'permanently' : (isKg ? 'түбөлүккө' : 'навсегда'))
+                        ? (KSLT_YAZYK.выбрать('permanently', 'түбөлүккө', 'навсегда'))
                         : new Date(plRes.data.banned_until).toLocaleDateString(isEn ? 'en-US' : 'ru-RU');
                     var banReasonText = plRes.data.ban_reason
                         ? '<div class="td-zapis-note-pod">' +
-                            (isEn ? 'Reason: ' : (isKg ? 'Себеби: ' : 'Причина: ')) + plRes.data.ban_reason + '</div>'
+                            (KSLT_YAZYK.выбрать('Reason: ', 'Себеби: ', 'Причина: ')) + plRes.data.ban_reason + '</div>'
                         : '';
                     btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-otkaz">' +
                         '<div class="td-zapis-plashka-title">' +
-                            (isEn ? 'You are banned from tournaments until ' + banDateStr
-                                : (isKg ? 'Сиз мелдештерден ' + banDateStr + ' чейин бөгөттөлгөнсүз'
-                                : 'Вы заблокированы для участия в турнирах до ' + banDateStr)) +
+                            (KSLT_YAZYK.выбрать('You are banned from tournaments until ' + banDateStr, 'Сиз мелдештерден ' + banDateStr + ' чейин бөгөттөлгөнсүз', 'Вы заблокированы для участия в турнирах до ' + banDateStr)) +
                         '</div>' +
                         banReasonText +
                     '</div>';
                 } else if (genderBlocked) {
                     var tGender = tournament.gender;
                     var genderMsg = tGender === 'men'
-                        ? (isEn ? 'This tournament is for men only' : (isKg ? 'Бул мелдеш эркектер үчүн гана' : 'Этот турнир только для мужчин'))
-                        : (isEn ? 'This tournament is for women only' : (isKg ? 'Бул мелдеш аялдар үчүн гана' : 'Этот турнир только для женщин'));
+                        ? (KSLT_YAZYK.выбрать('This tournament is for men only', 'Бул мелдеш эркектер үчүн гана', 'Этот турнир только для мужчин'))
+                        : (KSLT_YAZYK.выбрать('This tournament is for women only', 'Бул мелдеш аялдар үчүн гана', 'Этот турнир только для женщин'));
                     btnHtml += '<span class="td-zapis-note">' + genderMsg + '</span>';
                 } else if (ntrpBlocked) {
-                    var ntrpMsg = isEn ? 'Your NTRP (' + (playerNtrp || '?') + ') does not meet tournament requirements'
-                        : (isKg ? 'Сиздин NTRP (' + (playerNtrp || '?') + ') мелдеш талаптарына туура келбейт'
-                        : 'Ваш NTRP (' + (playerNtrp || '?') + ') не соответствует требованиям турнира');
+                    var ntrpMsg = KSLT_YAZYK.выбрать('Your NTRP (' + (playerNtrp || '?') + ') does not meet tournament requirements', 'Сиздин NTRP (' + (playerNtrp || '?') + ') мелдеш талаптарына туура келбейт', 'Ваш NTRP (' + (playerNtrp || '?') + ') не соответствует требованиям турнира');
                     var rangeStr = '';
                     if (tournament.ntrp_min && tournament.ntrp_max) rangeStr = tournament.ntrp_min + ' – ' + tournament.ntrp_max;
                     else if (tournament.ntrp_min) rangeStr = '≥ ' + tournament.ntrp_min;
@@ -3257,24 +3236,24 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-otkaz">' +
                         '<div class="td-zapis-plashka-title">' + ntrpMsg + '</div>' +
                         (rangeStr ? '<div class="td-zapis-note-pod">' +
-                            (isEn ? 'Required NTRP: ' : (isKg ? 'Талап кылынган NTRP: ' : 'Требуемый NTRP: ')) + rangeStr + '</div>' : '') +
+                            (KSLT_YAZYK.выбрать('Required NTRP: ', 'Талап кылынган NTRP: ', 'Требуемый NTRP: ')) + rangeStr + '</div>' : '') +
                     '</div>';
                 } else if (!membershipOk) {
                     btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-vnimanie">' +
                         '<div class="td-zapis-plashka-title">' +
-                            (isEn ? 'Active KSLT membership required' : (isKg ? 'KSLT активдүү мүчөлүгү талап кылынат' : 'Требуется активное членство KSLT')) +
+                            (KSLT_YAZYK.выбрать('Active KSLT membership required', 'KSLT активдүү мүчөлүгү талап кылынат', 'Требуется активное членство KSLT')) +
                         '</div>' +
                         '<a href="' + pricingUrl + '" class="td-zapis-plashka-link">' +
-                            (isEn ? 'View membership plans →' : (isKg ? 'Мүчөлүк жөнүндө билүү →' : 'Узнать о членстве →')) +
+                            (KSLT_YAZYK.выбрать('View membership plans →', 'Мүчөлүк жөнүндө билүү →', 'Узнать о членстве →')) +
                         '</a>' +
                     '</div>';
                 } else if (!paidOk) {
                     btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-vnimanie">' +
                         '<div class="td-zapis-plashka-title">' +
-                            (isEn ? 'Please pay your membership to register' : (isKg ? 'Каттоо үчүн мүчөлүк төлөмүн төлөңүз' : 'Оплатите членство для записи на турнир')) +
+                            (KSLT_YAZYK.выбрать('Please pay your membership to register', 'Каттоо үчүн мүчөлүк төлөмүн төлөңүз', 'Оплатите членство для записи на турнир')) +
                         '</div>' +
                         '<a href="' + pricingUrl + '" class="td-zapis-plashka-link">' +
-                            (isEn ? 'Go to payment →' : (isKg ? 'Төлөмгө өтүү →' : 'Перейти к оплате →')) +
+                            (KSLT_YAZYK.выбрать('Go to payment →', 'Төлөмгө өтүү →', 'Перейти к оплате →')) +
                         '</a>' +
                     '</div>';
                 } else {
@@ -3282,7 +3261,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     // Что вышло — заявка в сетку или в лист ожидания — скажет модалка
                     // после нажатия, по ответу сервера.
                     btnHtml += '<button class="td-register-btn" id="tdRegisterBtn">' +
-                        (isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир')) + '</button>';
+                        (KSLT_YAZYK.выбрать('Register for Tournament', 'Мелдешке каттоо', 'Записаться на турнир')) + '</button>';
                 }
 
                 btnHtml += '</div>';
@@ -3316,27 +3295,22 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                 var withdrawBtn = document.getElementById('tdWithdrawBtn');
                 if (withdrawBtn) {
                     withdrawBtn.addEventListener('click', async function() {
-                        var tName = isEn ? (tournament.title_en || tournament.title) : (isKg ? (tournament.title_kg || tournament.title) : tournament.title);
+                        var tName = KSLT_YAZYK.выбрать(tournament.title_en || tournament.title, tournament.title_kg || tournament.title, tournament.title);
 
                         // Модалка та же, что у результата регистрации на этой странице
                         var выходИзПары = !!withdrawBtn.dataset.leave;
                         var ok = await window.KSLT_REG.confirm({
                             icon: '\uD83C\uDFBE',
                             title: выходИзПары
-                                ? (isEn ? 'Leave the pair?' : (isKg ? 'Жуптан чыгасызбы?' : 'Выйти из пары?'))
-                                : (isEn ? 'Withdraw from the tournament?'
-                                    : (isKg ? 'Турнирден арызды аласызбы?' : 'Снять заявку с турнира?')),
+                                ? (KSLT_YAZYK.выбрать('Leave the pair?', 'Жуптан чыгасызбы?', 'Выйти из пары?'))
+                                : (KSLT_YAZYK.выбрать('Withdraw from the tournament?', 'Турнирден арызды аласызбы?', 'Снять заявку с турнира?')),
                             text: выходИзПары
-                                ? (isEn ? 'You leave, your partner keeps the place in <b>' + tName + '</b> and looks for a new partner.'
-                                    : (isKg ? 'Сиз чыгасыз, өнөктөшүңүз <b>' + tName + '</b> турниринде орун сактап, жаңы өнөктөш издейт.'
-                                    : 'Вы выходите, напарник остаётся в <b>' + tName + '</b> с вашим общим местом и ищет нового напарника.'))
-                                : (isEn ? 'Your entry for <b>' + tName + '</b> will be withdrawn. You can enter again while registration is open.'
-                                    : (isKg ? '<b>' + tName + '</b> турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.'
-                                    : 'Заявка на <b>' + tName + '</b> будет снята. Записаться снова можно, пока открыта регистрация.')),
+                                ? (KSLT_YAZYK.выбрать('You leave, your partner keeps the place in <b>' + tName + '</b> and looks for a new partner.', 'Сиз чыгасыз, өнөктөшүңүз <b>' + tName + '</b> турниринде орун сактап, жаңы өнөктөш издейт.', 'Вы выходите, напарник остаётся в <b>' + tName + '</b> с вашим общим местом и ищет нового напарника.'))
+                                : (KSLT_YAZYK.выбрать('Your entry for <b>' + tName + '</b> will be withdrawn. You can enter again while registration is open.', '<b>' + tName + '</b> турнирине берилген арыз алынат. Каттоо ачык турганда кайра катталса болот.', 'Заявка на <b>' + tName + '</b> будет снята. Записаться снова можно, пока открыта регистрация.')),
                             okText: выходИзПары
-                                ? (isEn ? 'Leave' : (isKg ? 'Чыгуу' : 'Выйти'))
-                                : (isEn ? 'Withdraw' : (isKg ? 'Арызды алуу' : 'Снять заявку')),
-                            cancelText: isEn ? 'Cancel' : (isKg ? 'Жокко чыгаруу' : 'Отмена'),
+                                ? (KSLT_YAZYK.выбрать('Leave', 'Чыгуу', 'Выйти'))
+                                : (KSLT_YAZYK.выбрать('Withdraw', 'Арызды алуу', 'Снять заявку')),
+                            cancelText: KSLT_YAZYK.выбрать('Cancel', 'Жокко чыгаруу', 'Отмена'),
                             tone: 'error'
                         });
                         if (!ok) return;
@@ -3361,7 +3335,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                                 withdrawBtn.disabled = false;
                                 window.KSLT_REG.notice({
                                     icon: '\u26A0\uFE0F',
-                                    title: isEn ? 'Could not leave the pair' : (isKg ? 'Жуптан чыгуу мүмкүн болгон жок' : 'Не удалось выйти из пары'),
+                                    title: KSLT_YAZYK.выбрать('Could not leave the pair', 'Жуптан чыгуу мүмкүн болгон жок', 'Не удалось выйти из пары'),
                                     text: д.error || '',
                                     tone: 'error'
                                 }, isEn, isKg);
@@ -3379,7 +3353,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                             withdrawBtn.disabled = false;
                             window.KSLT_REG.notice({
                                 icon: '\u26A0\uFE0F',
-                                title: isEn ? 'Could not withdraw the entry' : (isKg ? 'Арызды алуу мүмкүн болгон жок' : 'Не удалось снять заявку'),
+                                title: KSLT_YAZYK.выбрать('Could not withdraw the entry', 'Арызды алуу мүмкүн болгон жок', 'Не удалось снять заявку'),
                                 text: upd.error.message || '',
                                 tone: 'error'
                             }, isEn, isKg);
@@ -3396,7 +3370,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var partnerBtn = document.getElementById('tdRegisterBtn');
                     if (partnerBtn) {
                         partnerBtn.outerHTML = '<span class="td-reg-status">' +
-                            (isEn ? 'Registered as partner' : (isKg ? 'Өнөктөш катары катталган' : 'Зарегистрирован как партнёр')) + '</span>';
+                            (KSLT_YAZYK.выбрать('Registered as partner', 'Өнөктөш катары катталган', 'Зарегистрирован как партнёр')) + '</span>';
                     }
                 }
 
@@ -3418,7 +3392,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         }
 
                         regBtn.disabled = true;
-                        regBtn.textContent = isEn ? 'Registering...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+                        regBtn.textContent = KSLT_YAZYK.выбрать('Registering...', 'Жөнөтүлүүдө...', 'Отправка...');
 
                         // Статус определяет сервер по правилам допуска
                         var info = await window.KSLT_REG.submit(client, tournament.id, { isEn: isEn, isKg: isKg });
@@ -3426,7 +3400,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         // Заявку не создали вообще — возвращаем кнопку
                         if (!info.created) {
                             regBtn.disabled = false;
-                            regBtn.textContent = isEn ? 'Register for Tournament' : (isKg ? 'Мелдешке каттоо' : 'Записаться на турнир');
+                            regBtn.textContent = KSLT_YAZYK.выбрать('Register for Tournament', 'Мелдешке каттоо', 'Записаться на турнир');
                             return;
                         }
 
@@ -3447,17 +3421,17 @@ function initCountdown(t) {
 
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
-    var CL = isEn ? {
+    var CL = KSLT_YAZYK.выбрать({
         title: 'TOURNAMENT STARTS IN',
         days: 'days', hours: 'hours', min: 'min', sec: 'sec',
         live: 'Tournament in progress',
         regClosing: 'Registration closes in less than 24 hours!'
-    } : (isKg ? {
+    }, {
         title: 'МЕЛДЕШ БАШТАЛГАНГА',
         days: 'күн', hours: 'саат', min: 'мүн', sec: 'сек',
         live: 'Мелдеш жүрүп жатат',
         regClosing: 'Каттоо 24 сааттан кийин жабылат!'
-    } : {
+    }, {
         title: 'ТУРНИР НАЧИНАЕТСЯ ЧЕРЕЗ',
         days: 'дней', hours: 'часов', min: 'минут', sec: 'секунд',
         live: 'Турнир идёт',
@@ -3616,17 +3590,17 @@ function спрятатьТелоСтраницы() {
 function renderNotFoundPage() {
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
-    var backUrl = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
+    var backUrl = KSLT_YAZYK.выбрать('tournaments-en.html', 'tournaments-kg.html', 'tournaments.html');
 
-    var texts = isEn ? {
+    var texts = KSLT_YAZYK.выбрать({
         title: 'Tournament not found',
         subtitle: 'The link may be out of date, or the tournament has been removed.',
         back: 'Back to Tournaments'
-    } : (isKg ? {
+    }, {
         title: 'Мелдеш табылган жок',
         subtitle: 'Шилтеме эскирген болушу мүмкүн же мелдеш өчүрүлгөн.',
         back: 'Мелдештерге кайтуу'
-    } : {
+    }, {
         title: 'Турнир не найден',
         subtitle: 'Возможно, ссылка устарела или турнир удалили.',
         back: 'Назад к турнирам'
@@ -3660,24 +3634,24 @@ function renderNotFoundPage() {
 function renderLockedPage(tournamentId) {
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
-    var authUrl = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
-    var backUrl = isEn ? 'tournaments-en.html' : (isKg ? 'tournaments-kg.html' : 'tournaments.html');
+    var authUrl = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
+    var backUrl = KSLT_YAZYK.выбрать('tournaments-en.html', 'tournaments-kg.html', 'tournaments.html');
 
-    var texts = isEn ? {
+    var texts = KSLT_YAZYK.выбрать({
         title: 'Tournament Details',
         subtitle: 'Sign in to view the full bracket and match results',
         features: ['Full tournament bracket', 'Live scores and results', 'Player statistics'],
         btn: 'Sign In',
         btnRegister: 'Create Account',
         back: 'Back to Tournaments'
-    } : (isKg ? {
+    }, {
         title: 'Мелдештин чоо-жайы',
         subtitle: 'Толук торду жана матч жыйынтыктарын көрүү үчүн кириңиз',
         features: ['Толук мелдеш тору', 'Түз эфирдеги упайлар жана жыйынтыктар', 'Оюнчулардын статистикасы'],
         btn: 'Кирүү',
         btnRegister: 'Аккаунт түзүү',
         back: 'Мелдештерге кайтуу'
-    } : {
+    }, {
         title: 'Детали турнира',
         subtitle: 'Войдите, чтобы увидеть полную сетку и результаты матчей',
         features: ['Полная турнирная сетка', 'Счёт в реальном времени', 'Статистика игроков'],

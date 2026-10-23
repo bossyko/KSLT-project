@@ -16,24 +16,23 @@
     'use strict';
 
     var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         title: 'Needs your answer',
         enter: 'Enter score', confirm: 'Confirm', dispute: 'Not correct',
         entered: 'entered the score', wait: 'waiting for opponent',
         vs: 'vs', noTrn: 'Battle'
-    } : isKg ? {
+    }, {
         title: 'Жооп күтөт',
         enter: 'Эсепти жазуу', confirm: 'Ырастоо', dispute: 'Туура эмес',
         entered: 'эсепти жазды', wait: 'каршылашты күтөбүз',
         vs: 'каршы', noTrn: 'Баттл'
-    } : {
+    }, {
         title: 'Ждёт вашего ответа',
         enter: 'Вписать счёт', confirm: 'Подтвердить', dispute: 'Не согласен',
         entered: 'вписал счёт', wait: 'ждём соперника',
         vs: 'против', noTrn: 'Баттл'
-    };
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         var попыток = 0;
@@ -110,7 +109,7 @@
 
             var т = m.tournament;
             var турнир = т
-                ? (isEn ? (т.title_en || т.title) : (isKg ? (т.title_kg || т.title) : т.title))
+                ? (KSLT_YAZYK.выбрать(т.title_en || т.title, т.title_kg || т.title, т.title))
                 : L.noTrn;
 
             var подпись, кнопки;

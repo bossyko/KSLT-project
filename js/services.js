@@ -8,7 +8,7 @@
     var isKg = KSLT_YAZYK.kg;
     var client = window.supabaseClient;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         heroTagline: 'KSLT Services',
         heroTitle: 'Your tennis starts here',
         heroDesc: 'Courts, coaches and hitting partners',
@@ -37,7 +37,7 @@
         levelIntermediate: 'Intermediate',
         levelAdvanced: 'Advanced',
         levelUnknown: 'Level not specified'
-    } : isKg ? {
+    }, {
         heroTagline: 'KSLT Кызматтар',
         heroTitle: 'Сенин теннисиң ушул жерден башталат',
         heroDesc: 'Корттор, машыктыруучулар жана оюн боюнча өнөктөштөр',
@@ -66,7 +66,7 @@
         levelIntermediate: 'Орточо',
         levelAdvanced: 'Алдыңкы',
         levelUnknown: 'Деңгээл көрсөтүлгөн эмес'
-    } : {
+    }, {
         heroTagline: 'KSLT Услуги',
         heroTitle: 'Ваш теннис начинается здесь',
         heroDesc: 'Корты, тренеры и партнёры по игре',
@@ -95,7 +95,7 @@
         levelIntermediate: 'Средний',
         levelAdvanced: 'Продвинутый',
         levelUnknown: 'Уровень не указан'
-    };
+    });
 
     // Фотографий у кортов и тренеров пока нет: реестр собирали из 2ГИС и
     // гидов. Без запасной картинки на месте снимка оставалась пустая рамка —
@@ -103,11 +103,11 @@
     var COURT_PHOTO = '../images/heroes/courts.jpg';
     var COACH_PHOTO = '../images/heroes/coaches.jpg';
 
-    var courtPage = isEn ? 'court-en.html' : (isKg ? 'court-kg.html' : 'court.html');
-    var coachPage = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
-    var courtsPage = isEn ? 'courts-en.html' : (isKg ? 'courts-kg.html' : 'courts.html');
-    var coachesPage = isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html');
-    var partnersPage = isEn ? 'partners-en.html' : (isKg ? 'partners-kg.html' : 'partners.html');
+    var courtPage = KSLT_YAZYK.выбрать('court-en.html', 'court-kg.html', 'court.html');
+    var coachPage = KSLT_YAZYK.выбрать('coach-en.html', 'coach-kg.html', 'coach.html');
+    var courtsPage = KSLT_YAZYK.выбрать('courts-en.html', 'courts-kg.html', 'courts.html');
+    var coachesPage = KSLT_YAZYK.выбрать('coaches-en.html', 'coaches-kg.html', 'coaches.html');
+    var partnersPage = KSLT_YAZYK.выбрать('partners-en.html', 'partners-kg.html', 'partners.html');
 
     var _courts = [];
     var _coaches = [];
@@ -273,7 +273,7 @@
 
     function getCourtAddress(c) {
         /* Адрес собирается в одном месте — js/court-address.js */
-        return window.KSLT_ADDRESS.адрес(c, isEn ? 'en' : (isKg ? 'kg' : 'ru')) || '';
+        return window.KSLT_ADDRESS.адрес(c, KSLT_YAZYK.выбрать('en', 'kg', 'ru')) || '';
     }
 
     function getCourtMinPrice(c) {
@@ -307,14 +307,14 @@
     }
 
     function getCoachSpec(ch) {
-        return isEn ? (ch.position_en || ch.position || '') : (isKg ? (ch.position_kg || ch.position || '') : (ch.position || ''));
+        return KSLT_YAZYK.выбрать(ch.position_en || ch.position || '', ch.position_kg || ch.position || '', ch.position || '');
     }
 
     function getCoachLevel(ch) {
         if (!ch.tags || !ch.tags.length) return '';
         var levelTags = [];
-        if (ch.tags.indexOf('beginner') !== -1) levelTags.push(isEn ? 'Beginner' : (isKg ? 'Башталгыч' : 'Начинающие'));
-        if (ch.tags.indexOf('advanced') !== -1) levelTags.push(isEn ? 'Advanced' : (isKg ? 'Алдыңкы' : 'Продвинутые'));
+        if (ch.tags.indexOf('beginner') !== -1) levelTags.push(KSLT_YAZYK.выбрать('Beginner', 'Башталгыч', 'Начинающие'));
+        if (ch.tags.indexOf('advanced') !== -1) levelTags.push(KSLT_YAZYK.выбрать('Advanced', 'Алдыңкы', 'Продвинутые'));
         return levelTags.join(', ');
     }
 
@@ -469,14 +469,14 @@
 
     // --- Featured Court ---
     function renderFeaturedCourt(c) {
-        var name = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
+        var name = KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name);
         var addr = getCourtAddress(c);
         var surface = getCourtSurface(c);
         var price = getCourtMinPrice(c);
         var photo = c.photo || COURT_PHOTO;
         var href = courtPage + '?id=' + c.id;
 
-        var discountHtml = c._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + c._maxDiscount + '%</span>' : '';
+        var discountHtml = c._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (KSLT_YAZYK.выбрать('up to', 'чейин', 'до')) + ' -' + c._maxDiscount + '%</span>' : '';
 
         return '<a class="sv-featured" href="' + href + '">' +
             (photo
@@ -506,7 +506,7 @@
         var href = coachPage + '?id=' + ch.id;
         var exp = ch.experience ? ch.experience + ' ' + L.years : '';
         var price = ch.price ? ch.price + ' сом/ч' : '';
-        var discountHtml = ch._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + ch._maxDiscount + '%</span>' : '';
+        var discountHtml = ch._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (KSLT_YAZYK.выбрать('up to', 'чейин', 'до')) + ' -' + ch._maxDiscount + '%</span>' : '';
 
         return '<a class="sv-featured" href="' + href + '">' +
             (photo
@@ -531,7 +531,7 @@
 
     // --- Compact Court (card for carousel) ---
     function renderCompactCourt(c, idx) {
-        var name = isEn ? (c.name_en || c.name) : (isKg ? (c.name_kg || c.name) : c.name);
+        var name = KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name);
         var addr = getCourtAddress(c);
         var price = getCourtMinPrice(c);
         var photo = c.photo || COURT_PHOTO;
@@ -588,7 +588,7 @@
     }
 
     function getPartnerLevel(p) {
-        var category = isEn ? (p.category_name_en || p.category_name) : (isKg ? (p.category_name_kg || p.category_name) : p.category_name);
+        var category = KSLT_YAZYK.выбрать(p.category_name_en || p.category_name, p.category_name_kg || p.category_name, p.category_name);
         if (category) return category;
         var levelMap = { beginner: L.levelBeginner, intermediate: L.levelIntermediate, advanced: L.levelAdvanced };
         return (p.play_level && levelMap[p.play_level]) || L.levelUnknown;

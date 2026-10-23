@@ -16,14 +16,8 @@
     var client = window.supabaseClient;
     if (!client) return;
 
-    var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn
-        ? { kicker: 'New achievement', next: 'Next', done: 'Great', left: 'more to go: ' }
-        : (isKg
-            ? { kicker: 'Жаңы жетишкендик', next: 'Кийинки', done: 'Сонун', left: 'дагы калды: ' }
-            : { kicker: 'Новое достижение', next: 'Дальше', done: 'Отлично', left: 'осталось ещё ' });
+    var L = KSLT_YAZYK.выбрать({ kicker: 'New achievement', next: 'Next', done: 'Great', left: 'more to go: ' }, { kicker: 'Жаңы жетишкендик', next: 'Кийинки', done: 'Сонун', left: 'дагы калды: ' }, { kicker: 'Новое достижение', next: 'Дальше', done: 'Отлично', left: 'осталось ещё ' });
 
     var queue = [];
     var overlay = null;
@@ -83,9 +77,8 @@
 
         var b = queue.shift().badge;
         var left = queue.length;
-        var name = isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name);
-        var desc = isEn ? (b.description_en || b.description)
-                        : (isKg ? (b.description_kg || b.description) : b.description);
+        var name = KSLT_YAZYK.выбрать(b.name_en || b.name, b.name_kg || b.name, b.name);
+        var desc = KSLT_YAZYK.выбрать(b.description_en || b.description, b.description_kg || b.description, b.description);
 
         overlay.querySelector('.ach-card').innerHTML =
             '<div class="ach-fx balls">' + balls(26) + '</div>' +

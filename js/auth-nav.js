@@ -85,11 +85,11 @@
     var isKg = KSLT_YAZYK.kg;
     var inPages = window.location.pathname.indexOf('/pages/') !== -1;
     var prefix = inPages ? '' : 'pages/';
-    var dashUrl = prefix + (isEn ? 'dashboard-en.html' : (isKg ? 'dashboard-kg.html' : 'dashboard.html'));
+    var dashUrl = prefix + (KSLT_YAZYK.выбрать('dashboard-en.html', 'dashboard-kg.html', 'dashboard.html'));
     // Админка одна и только на русском
     var adminUrl = prefix + 'admin.html';
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         profile: 'My Profile',
         loyalty: 'Points',
         settings: 'Settings',
@@ -97,7 +97,7 @@
         payments: 'Payments',
         vouchers: 'Discounts',
         logout: 'Sign Out'
-    } : isKg ? {
+    }, {
         profile: 'Менин профилим',
         loyalty: 'Баллдар',
         payments: 'Төлөмдөр',
@@ -105,7 +105,7 @@
         settings: 'Жөндөөлөр',
         admin: 'Админка',
         logout: 'Чыгуу'
-    } : {
+    }, {
         profile: 'Мой профиль',
         loyalty: 'Баллы',
         payments: 'Платежи',
@@ -113,7 +113,7 @@
         settings: 'Настройки',
         admin: 'Админка',
         logout: 'Выйти'
-    };
+    });
 
     // Admin dropdown sections
     var ADMIN_SECTIONS = isEn ? [
@@ -178,7 +178,7 @@
             var now = Math.floor(Date.now() / 1000);
             if (session.expires_at > now) {
                 var role = localStorage.getItem('kslt_role');
-                var userName = localStorage.getItem('kslt_name') || (isEn ? 'User' : (isKg ? 'Колдонуучу' : 'Пользователь'));
+                var userName = localStorage.getItem('kslt_name') || (KSLT_YAZYK.выбрать('User', 'Колдонуучу', 'Пользователь'));
                 var userAvatar = localStorage.getItem('kslt_avatar') || '';
                 var isStaff = role === 'admin' || role === 'manager';
 
@@ -188,7 +188,7 @@
                 var bellWrap = document.createElement('div');
                 bellWrap.className = 'site-notif-wrap';
                 bellWrap.innerHTML =
-                    '<button class="site-notif-btn" id="siteNotifBell" title="' + (isEn ? 'Notifications' : isKg ? 'Билдирмелер' : 'Уведомления') + '">' +
+                    '<button class="site-notif-btn" id="siteNotifBell" title="' + (KSLT_YAZYK.выбрать('Notifications', 'Билдирмелер', 'Уведомления')) + '">' +
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' +
                         '<span class="site-notif-dot" id="siteNotifDot" style="display:none;"></span>' +
                     '</button>' +
@@ -213,28 +213,24 @@
                     var bellBtn = document.getElementById('siteNotifBell');
                     var dot = document.getElementById('siteNotifDot');
 
-                    var L2 = isEn
-                        ? { title: 'New notifications', empty: 'Nothing new', all: 'All notifications',
+                    var L2 = KSLT_YAZYK.выбрать({ title: 'New notifications', empty: 'Nothing new', all: 'All notifications',
                             accept: 'Accept', decline: 'Decline', done: 'This challenge has already been answered',
                             gone: 'This challenge no longer exists',
                             noContacts: 'The player has not provided any contacts',
-                            showContacts: 'Show contacts', openScore: 'Open the score' }
-                        : isKg
-                            ? { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер',
+                            showContacts: 'Show contacts', openScore: 'Open the score' }, { title: 'Жаңы билдирмелер', empty: 'Жаңылык жок', all: 'Бардык билдирмелер',
                                 accept: 'Кабыл алуу', decline: 'Четке кагуу', done: 'Бул чакырыкка мурун жооп берилген',
                                 gone: 'Бул чакырык эми жок',
                                 noContacts: 'Оюнчу байланыш маалыматын көрсөткөн эмес',
-                                showContacts: 'Байланыштарды көрүү', openScore: 'Эсепти ачуу' }
-                            : { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления',
+                                showContacts: 'Байланыштарды көрүү', openScore: 'Эсепти ачуу' }, { title: 'Новые уведомления', empty: 'Новых нет', all: 'Все уведомления',
                                 accept: 'Принять', decline: 'Отклонить', done: 'На этот вызов уже ответили',
                                 gone: 'Этого вызова больше нет',
                                 noContacts: 'Игрок не указал контактов',
-                                showContacts: 'Показать контакты', openScore: 'Открыть счёт' };
+                                showContacts: 'Показать контакты', openScore: 'Открыть счёт' });
 
                     /** Куда вести, если окно счёта на этой странице не подключено. */
                     function кабинет() {
                         var в = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
-                        return в + 'dashboard' + (isEn ? '-en' : isKg ? '-kg' : '') + '.html#games';
+                        return в + 'dashboard' + (KSLT_YAZYK.суффикс) + '.html#games';
                     }
 
                     /**
@@ -627,7 +623,7 @@
                             console.warn('[KSLT] notifications:', e);
                             dropdown.innerHTML =
                                 '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.85rem;">' +
-                                (isEn ? 'Failed to load' : isKg ? 'Жүктөлгөн жок' : 'Не удалось загрузить') +
+                                (KSLT_YAZYK.выбрать('Failed to load', 'Жүктөлгөн жок', 'Не удалось загрузить')) +
                                 '</div>';
                         });
                     }
@@ -706,7 +702,7 @@
                         if (window.supabaseClient) {
                             await window.supabaseClient.auth.signOut();
                         }
-                        window.location.href = prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
+                        window.location.href = prefix + (KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html'));
                     });
 
                 } else {
@@ -772,7 +768,7 @@
                         if (window.supabaseClient) {
                             await window.supabaseClient.auth.signOut();
                         }
-                        window.location.href = prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
+                        window.location.href = prefix + (KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html'));
                     });
                 }
             }

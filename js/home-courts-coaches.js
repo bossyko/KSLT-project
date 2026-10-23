@@ -56,7 +56,7 @@
     var FALLBACK = ' onerror="this.onerror=null;this.src=\'' + COURT_PHOTO + '\'"';
 
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         partner: 'KSLT partner', discount: 'Discount for KSLT members',
         details: 'Details', courts: 'courts', years: 'yrs',
         from: 'from', perHour: 'som/h',
@@ -64,7 +64,7 @@
         emptyCourts: 'Courts appear here as soon as they join the KSLT registry',
         emptyCoaches: 'Coaches appear here as soon as they join the KSLT registry',
         failed: 'Could not load this row — please refresh the page'
-    } : (isKg ? {
+    }, {
         partner: 'КСЛТ өнөктөшү', discount: 'КСЛТ мүчөлөрүнө арзандатуу',
         details: 'Толугураак', courts: 'корт', years: 'жыл',
         from: '', perHour: 'сом/саат',
@@ -72,7 +72,7 @@
         emptyCourts: 'Корттор КСЛТ реестрине кошулганда ушул жерде көрүнөт',
         emptyCoaches: 'Машыктыруучулар КСЛТ реестрине кошулганда ушул жерде көрүнөт',
         failed: 'Жүктөлгөн жок — баракты жаңыртыңыз'
-    } : {
+    }, {
         partner: 'Партнёр КСЛТ', discount: 'Скидка членам КСЛТ',
         details: 'Подробнее', courts: 'кортов', years: 'лет',
         from: 'от', perHour: 'сом/час',
@@ -83,7 +83,7 @@
     });
 
     var page = function(name) {
-        return 'pages/' + name + (isEn ? '-en' : (isKg ? '-kg' : '')) + '.html';
+        return 'pages/' + name + (KSLT_YAZYK.суффикс) + '.html';
     };
 
     start();

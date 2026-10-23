@@ -40,22 +40,16 @@ document.addEventListener('DOMContentLoaded', function() {
 var NEWS_HERO_IMAGE = '../images/heroes/tournaments.jpg';
 
 function mapDbArticle(row) {
-    var isEn = isEnPage();
-    var isKg = isKgPage();
-    var title = isEn ? (row.title_en || row.title) : (isKg ? (row.title_kg || row.title) : row.title);
-    var content = isEn ? (row.content_en || row.content) : (isKg ? (row.content_kg || row.content) : row.content);
-    var excerpt = isEn ? (row.excerpt_en || row.excerpt) : (isKg ? (row.excerpt_kg || row.excerpt) : row.excerpt);
+    var title = KSLT_YAZYK.выбрать(row.title_en || row.title, row.title_kg || row.title, row.title);
+    var content = KSLT_YAZYK.выбрать(row.content_en || row.content, row.content_kg || row.content, row.content);
+    var excerpt = KSLT_YAZYK.выбрать(row.excerpt_en || row.excerpt, row.excerpt_kg || row.excerpt, row.excerpt);
 
-    var catLabels = isEn
-        ? { results: 'Results', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }
-        : (isKg
-            ? { results: 'Жыйынтыктар', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }
-            : { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
+    var catLabels = KSLT_YAZYK.выбрать({ results: 'Results', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' }, { results: 'Жыйынтыктар', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' }, { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' });
 
     var dateStr = '';
     if (row.published_at) {
         var d = new Date(row.published_at);
-        dateStr = d.toLocaleDateString(isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU'), {
+        dateStr = d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'), {
             day: 'numeric', month: 'long', year: 'numeric'
         });
     }
@@ -118,7 +112,7 @@ function mapDbArticle(row) {
            по-английски над русской заметкой человека только запутает. Поэтому
            на английской и киргизской версиях показываем ТОЛЬКО то, что
            переведено в админке. Признак — непустой заголовок на этом языке. */
-        переведена: isEn ? !!row.title_en : (isKg ? !!row.title_kg : true),
+        переведена: KSLT_YAZYK.выбрать(!!row.title_en, !!row.title_kg, true),
         relatedSlugs: [],
         _publishedAt: row.published_at || row.created_at || ''
     };
@@ -1063,25 +1057,19 @@ async function getAuthUser() {
 }
 
 function getAuthRedirectUrl() {
-    var isEn = isEnPage();
-    var isKg = isKgPage();
     var prefix = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
-    return prefix + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html'));
+    return prefix + (KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html'));
 }
 
 function showGuestModal() {
     var old = document.querySelector('.news-guest-overlay');
     if (old) old.remove();
 
-    var isEn = isEnPage();
-    var isKg = isKgPage();
     var authUrl = getAuthRedirectUrl();
 
-    var title = isEn ? 'Join us!' : (isKg ? 'Кошулуңуз!' : 'Присоединяйтесь!');
-    var text = isEn
-        ? 'Sign up to vote in polls and react to articles'
-        : (isKg ? 'Опростко катышуу жана макалаларды баалоо үчүн катталыңыз' : 'Зарегистрируйтесь, чтобы голосовать в опросах и оценивать статьи');
-    var btnLabel = isEn ? 'Sign Up' : (isKg ? 'Каттоо' : 'Регистрация');
+    var title = KSLT_YAZYK.выбрать('Join us!', 'Кошулуңуз!', 'Присоединяйтесь!');
+    var text = KSLT_YAZYK.выбрать('Sign up to vote in polls and react to articles', 'Опростко катышуу жана макалаларды баалоо үчүн катталыңыз', 'Зарегистрируйтесь, чтобы голосовать в опросах и оценивать статьи');
+    var btnLabel = KSLT_YAZYK.выбрать('Sign Up', 'Каттоо', 'Регистрация');
 
     var overlay = document.createElement('div');
     overlay.className = 'news-guest-overlay';

@@ -30,23 +30,18 @@
     var GUEST_CLEAR = 5;   // гостю чётко видны первые пять
 
     var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
     /* Подписи для диктора на всех трёх языках: форма и точка «онлайн»
        несли смысл ОДНИМ ЦВЕТОМ, а это WCAG 1.4.1. */
-    var L = isEn
-        ? { invite: 'Invite', wins: 'wins', losses: 'losses', empty: 'No players yet',
+    var L = KSLT_YAZYK.выбрать({ invite: 'Invite', wins: 'wins', losses: 'losses', empty: 'No players yet',
             pairs: 'Doubles', mixed: 'Mixed',
-            online: 'online now', formLabel: 'Recent form', win: 'win', loss: 'loss' }
-        : (isKg
-            ? { invite: 'Чакыруу', wins: 'жеңиш', losses: 'жеңилүү', empty: 'Оюнчулар жок',
+            online: 'online now', formLabel: 'Recent form', win: 'win', loss: 'loss' }, { invite: 'Чакыруу', wins: 'жеңиш', losses: 'жеңилүү', empty: 'Оюнчулар жок',
                 pairs: 'Жуптук', mixed: 'Аралаш',
-                online: 'азыр сайтта', formLabel: 'Акыркы оюндар', win: 'жеңиш', loss: 'жеңилүү' }
-            : { invite: 'Пригласить', wins: 'побед', losses: 'поражений', empty: 'Игроков пока нет',
+                online: 'азыр сайтта', formLabel: 'Акыркы оюндар', win: 'жеңиш', loss: 'жеңилүү' }, { invite: 'Пригласить', wins: 'побед', losses: 'поражений', empty: 'Игроков пока нет',
                 pairs: 'Пара', mixed: 'Микст',
                 online: 'сейчас на сайте', formLabel: 'Последние матчи', win: 'победа', loss: 'поражение' });
 
-    var playerPage = isEn ? 'pages/player-en.html' : (isKg ? 'pages/player-kg.html' : 'pages/player.html');
+    var playerPage = KSLT_YAZYK.выбрать('pages/player-en.html', 'pages/player-kg.html', 'pages/player.html');
 
     start();
 
@@ -291,7 +286,7 @@
 
             if (guest || !id) {
                 // Гостю показываем то же окно, что и в других местах сайта
-                var auth = isEn ? 'pages/auth-en.html' : (isKg ? 'pages/auth-kg.html' : 'pages/auth.html');
+                var auth = KSLT_YAZYK.выбрать('pages/auth-en.html', 'pages/auth-kg.html', 'pages/auth.html');
                 window.location.href = auth;
                 return;
             }

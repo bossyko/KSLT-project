@@ -816,7 +816,7 @@
         var labels = getLabels();
         var isEn = isEnPage();
         var isKg = isKgPage();
-        var playersPage = isEn ? 'players-en.html' : (isKg ? 'players-kg.html' : 'players.html');
+        var playersPage = KSLT_YAZYK.выбрать('players-en.html', 'players-kg.html', 'players.html');
 
         // Extract base category ID (e.g. "men-promasters" → "promasters")
         var baseCatId = tabId.indexOf('-') !== -1 ? tabId.split('-').slice(1).join('-') : tabId;
@@ -990,7 +990,7 @@
         }
 
         var isGuest = _accessLevel === 'guest';
-        var playerPage = isEn ? 'player-en.html' : (isKg ? 'player-kg.html' : 'player.html');
+        var playerPage = KSLT_YAZYK.выбрать('player-en.html', 'player-kg.html', 'player.html');
 
         // Guest: limit visible rows
         var clearRows = catSearchQuery ? GUEST_SEARCH_VISIBLE : GUEST_CAT_VISIBLE;
@@ -1287,7 +1287,7 @@
                     '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
                 '</div>' +
                 '<h3>' + labels.guestTitle + '</h3>' +
-                '<p>' + (isEn ? 'Sign up to view player profiles and full rankings' : (isKg ? 'Оюнчулардын профилдерин жана толук рейтингди көрүү үчүн катталыңыз' : 'Зарегистрируйтесь, чтобы просматривать профили игроков и полный рейтинг')) + '</p>' +
+                '<p>' + (KSLT_YAZYK.выбрать('Sign up to view player profiles and full rankings', 'Оюнчулардын профилдерин жана толук рейтингди көрүү үчүн катталыңыз', 'Зарегистрируйтесь, чтобы просматривать профили игроков и полный рейтинг')) + '</p>' +
                 '<a href="' + authUrl + '" class="pl-search-modal-btn">' + labels.guestBtn + '</a>' +
             '</div>';
 

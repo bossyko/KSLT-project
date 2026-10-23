@@ -73,7 +73,7 @@
      * @returns {{title:string, text:string, note:string, tone:string, short:string}}
      */
     function resultText(data, isEn, isKg) {
-        function pick(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+        function pick(en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); }
 
         var errors = {
             already_registered: pick('You have already applied for this tournament',
@@ -271,7 +271,7 @@
                 '<p class="trn-register-modal-text">' + info.text + '</p>' +
                 (info.note ? '<div class="trn-register-modal-note">' + info.note + '</div>' : '') +
                 '<button class="trn-register-modal-btn' + (info.tone === 'error' ? ' is-error' : '') + '">' +
-                    (isEn ? 'Got it' : (isKg ? 'Түшүндүм' : 'Понятно')) +
+                    (KSLT_YAZYK.выбрать('Got it', 'Түшүндүм', 'Понятно')) +
                 '</button>' +
             '</div>';
 
@@ -292,13 +292,13 @@
      * возвращает обратно, чтобы человек не искал турнир заново.
      */
     function предложитьВойти(isEn, isKg) {
-        function pick(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+        function pick(en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); }
         injectStyles();
 
         var old = document.querySelector('.trn-register-modal-overlay');
         if (old) old.remove();
 
-        var путьВхода = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var путьВхода = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
         var вПапке = window.location.pathname.indexOf('/pages/') !== -1;
         var адрес = (вПапке ? '' : 'pages/') + путьВхода +
             '?return=' + encodeURIComponent(window.location.href);
@@ -343,28 +343,20 @@
      * человек уверен, что уже играет.
      */
     function приписатьПроГостя(info, isEn, isKg) {
-        var текст = isEn
-            ? 'Your partner is a guest: the place is held, but the manager confirms the pair.'
-            : (isKg
-                ? 'Өнөктөшүңүз конок: орун сакталат, бирок жупту менеджер ырастайт.'
-                : 'Напарник — гость: место за вами, но пару подтверждает менеджер.');
+        var текст = KSLT_YAZYK.выбрать('Your partner is a guest: the place is held, but the manager confirms the pair.', 'Өнөктөшүңүз конок: орун сакталат, бирок жупту менеджер ырастайт.', 'Напарник — гость: место за вами, но пару подтверждает менеджер.');
         info.note = info.note ? (info.note + ' ' + текст) : текст;
-        info.short = isEn ? 'Under review' : (isKg ? 'Каралууда' : 'На рассмотрении');
+        info.short = KSLT_YAZYK.выбрать('Under review', 'Каралууда', 'На рассмотрении');
         return info;
     }
 
     function приписатьПроСостав(info, isEn, isKg) {
-        var текст = isEn
-            ? 'The lineup does not match the tournament by gender: the place is held, the manager decides.'
-            : (isKg
-                ? 'Курам мелдешке жынысы боюнча дал келбейт: орун сакталат, чечимди менеджер кабыл алат.'
-                : 'Состав не совпадает с турниром по полу: место за вами, решение принимает менеджер.');
+        var текст = KSLT_YAZYK.выбрать('The lineup does not match the tournament by gender: the place is held, the manager decides.', 'Курам мелдешке жынысы боюнча дал келбейт: орун сакталат, чечимди менеджер кабыл алат.', 'Состав не совпадает с турниром по полу: место за вами, решение принимает менеджер.');
         info.note = info.note ? (info.note + ' ' + текст) : текст;
-        info.short = isEn ? 'Under review' : (isKg ? 'Каралууда' : 'На рассмотрении');
+        info.short = KSLT_YAZYK.выбрать('Under review', 'Каралууда', 'На рассмотрении');
         return info;
     }
 
-    function pick3(isEn, isKg, en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+    function pick3(isEn, isKg, en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); }
 
     /**
      * Чего не хватает в профиле для участия: ФИО, пол, телефон.
@@ -590,14 +582,14 @@
             });
 
             var labels = {
-                approved: isEn ? 'You are in the draw' : (isKg ? 'Сиз негизги сеткадасыз' : 'Вы в основной сетке'),
-                draw: isEn ? 'You are in the draw' : (isKg ? 'Сиз негизги сеткадасыз' : 'Вы в основной сетке'),
-                pending: isEn ? 'Entry sent' : (isKg ? 'Арыз жөнөтүлдү' : 'Заявка подана'),
-                waitlist: isEn ? 'On the waiting list' : (isKg ? 'Күтүү тизмесинде' : 'В листе ожидания'),
-                rejected: isEn ? 'Entry declined' : (isKg ? 'Арыз четке кагылды' : 'Заявка отклонена'),
-                blocked: isEn ? 'Not admitted' : (isKg ? 'Уруксат жок' : 'Не допущен')
+                approved: KSLT_YAZYK.выбрать('You are in the draw', 'Сиз негизги сеткадасыз', 'Вы в основной сетке'),
+                draw: KSLT_YAZYK.выбрать('You are in the draw', 'Сиз негизги сеткадасыз', 'Вы в основной сетке'),
+                pending: KSLT_YAZYK.выбрать('Entry sent', 'Арыз жөнөтүлдү', 'Заявка подана'),
+                waitlist: KSLT_YAZYK.выбрать('On the waiting list', 'Күтүү тизмесинде', 'В листе ожидания'),
+                rejected: KSLT_YAZYK.выбрать('Entry declined', 'Арыз четке кагылды', 'Заявка отклонена'),
+                blocked: KSLT_YAZYK.выбрать('Not admitted', 'Уруксат жок', 'Не допущен')
             };
-            var ждётГостя = isEn ? 'Entry under review' : (isKg ? 'Арыз каралууда' : 'Заявка на рассмотрении');
+            var ждётГостя = KSLT_YAZYK.выбрать('Entry under review', 'Арыз каралууда', 'Заявка на рассмотрении');
 
             btns.forEach(function(btn) {
                 var заявка = byTournament[idOf(btn)];

@@ -25,38 +25,32 @@
     var client = window.supabaseClient;
 
     var PER_ROW = 6;
-    var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn
-        ? { desc: 'Play in tournaments and earn awards', btn: 'My badges' }
-        : (isKg
-            ? { desc: 'Мелдештерде ойноп, сыйлыктарга ээ бол', btn: 'Менин белгилерим' }
-            : { desc: 'Играй в турнирах и получай награды за достижения', btn: 'Мои бейджи' });
+    var L = KSLT_YAZYK.выбрать({ desc: 'Play in tournaments and earn awards', btn: 'My badges' }, { desc: 'Мелдештерде ойноп, сыйлыктарга ээ бол', btn: 'Менин белгилерим' }, { desc: 'Играй в турнирах и получай награды за достижения', btn: 'Мои бейджи' });
 
     // Запасной набор — только то, что точно заведено в базе
-    var FALLBACK = isEn ? [
+    var FALLBACK = KSLT_YAZYK.выбрать([
         { e: '🎾', n: 'First match',  d: 'Play your first match' },
         { e: '🥇', n: 'First win',    d: 'Win your first match' },
         { e: '🔟', n: 'Ten',          d: 'Play 10 matches' },
         { e: '🏆', n: 'Champion',     d: 'Win a tournament' },
         { e: '🥈', n: 'Finalist',     d: 'Reach a final' },
         { e: '💚', n: 'KSLT member',  d: 'Active membership' }
-    ] : isKg ? [
+    ], [
         { e: '🎾', n: 'Биринчи матч',  d: 'Биринчи оюнуңду ойно' },
         { e: '🥇', n: 'Биринчи жеңиш', d: 'Биринчи матчты утуп ал' },
         { e: '🔟', n: 'Ондук',         d: '10 матч ойно' },
         { e: '🏆', n: 'Чемпион',       d: 'Мелдешти утуп ал' },
         { e: '🥈', n: 'Финалист',      d: 'Финалга чык' },
         { e: '💚', n: 'КСЛТ мүчөсү',   d: 'Активдүү мүчөлүк' }
-    ] : [
+    ], [
         { e: '🎾', n: 'Первый матч',   d: 'Сыграй свой первый матч' },
         { e: '🥇', n: 'Первая победа', d: 'Выиграй первый матч' },
         { e: '🔟', n: 'Десятка',       d: 'Сыграй 10 матчей' },
         { e: '🏆', n: 'Чемпион',       d: 'Выиграй турнир' },
         { e: '🥈', n: 'Финалист',      d: 'Дойди до финала' },
         { e: '💚', n: 'Член КСЛТ',     d: 'Действующее членство' }
-    ];
+    ]);
 
     start();
 
@@ -88,8 +82,7 @@
 
                 if (desc) desc.textContent = L.desc;
                 if (btn) {
-                    btn.href = (isEn ? 'pages/dashboard-en.html'
-                                     : (isKg ? 'pages/dashboard-kg.html' : 'pages/dashboard.html'));
+                    btn.href = (KSLT_YAZYK.выбрать('pages/dashboard-en.html', 'pages/dashboard-kg.html', 'pages/dashboard.html'));
                     btn.textContent = L.btn;
                 }
             }
@@ -127,9 +120,8 @@
         return {
             id: b.id,
             e: b.icon || '🏅',
-            n: isEn ? (b.name_en || b.name) : (isKg ? (b.name_kg || b.name) : b.name),
-            d: isEn ? (b.description_en || b.description)
-                    : (isKg ? (b.description_kg || b.description) : b.description),
+            n: KSLT_YAZYK.выбрать(b.name_en || b.name, b.name_kg || b.name, b.name),
+            d: KSLT_YAZYK.выбрать(b.description_en || b.description, b.description_kg || b.description, b.description),
             locked: false
         };
     }

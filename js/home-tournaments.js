@@ -131,7 +131,7 @@
 
             var прежний = btn.textContent;
             btn.disabled = true;
-            btn.textContent = isEn ? 'Sending...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+            btn.textContent = KSLT_YAZYK.выбрать('Sending...', 'Жөнөтүлүүдө...', 'Отправка...');
             var info = await window.KSLT_REG.submit(client, btn.dataset.tid, { isEn: isEn, isKg: isKg });
             if (info && info.created) {
                 window.KSLT_REG.markRegistered(client);
@@ -164,9 +164,7 @@
         var isEn = KSLT_YAZYK.en;
         var isKg = KSLT_YAZYK.kg;
         grid.innerHTML = '<div class="tc-notice">' +
-            (isEn ? 'Tournaments are temporarily unavailable. Please try again later.'
-                  : (isKg ? 'Мелдештер убактылуу жеткиликсиз. Кийинчерээк аракет кылыңыз.'
-                          : 'Турниры временно недоступны. Загляните чуть позже.')) +
+            (KSLT_YAZYK.выбрать('Tournaments are temporarily unavailable. Please try again later.', 'Мелдештер убактылуу жеткиликсиз. Кийинчерээк аракет кылыңыз.', 'Турниры временно недоступны. Загляните чуть позже.')) +
             '</div>';
     }
 })();

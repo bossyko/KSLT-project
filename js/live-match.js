@@ -17,38 +17,36 @@
     var isKg = KSLT_YAZYK.kg;
 
     var L = {
-        loading:   isEn ? 'Loading...'      : isKg ? 'Жүктөлүүдө...'   : 'Загрузка...',
-        notFound:  isEn ? 'Match not found' : isKg ? 'Матч табылган жок': 'Матч не найден',
+        loading:   KSLT_YAZYK.выбрать('Loading...', 'Жүктөлүүдө...', 'Загрузка...'),
+        notFound:  KSLT_YAZYK.выбрать('Match not found', 'Матч табылган жок', 'Матч не найден'),
         /* ПОДПИСИ СОСТОЯНИЯ УШЛИ В ОБЩИЙ СЛОВАРЬ js/live-texts.js.
            Слово paused трогают четыре файла проекта, а человеческое слово до
            25.09 стояло только здесь — и причина перерыва разошлась бы ровно
            на этом шве. Одно определение на одно понятие. */
-        tiebreak:  isEn ? 'Tiebreak'  : isKg ? 'Тайбрейк' : 'Тайбрейк',
+        tiebreak:  KSLT_YAZYK.выбрать('Tiebreak', 'Тайбрейк', 'Тайбрейк'),
         /* Кыргызские подписи до 24.09 повторяли русские — перевод мой. */
-        tournament: isEn ? 'Tournament' : isKg ? 'Мелдеш' : 'Турнир',
-        format:     isEn ? 'Format'     : isKg ? 'Формат' : 'Формат',
-        serving:    isEn ? 'Serving'    : isKg ? 'Берүүдө': 'Подаёт',
-        wins:       isEn ? 'wins!'      : isKg ? 'жеңет!' : 'побеждает!',
-        backHome:   isEn ? 'Home'       : isKg ? 'Башкы бетке' : 'На главную',
-        sponsor:    isEn ? 'Match supported by' : isKg ? 'Матчты колдогон' : 'Матч при поддержке',
-        feedTitle:  isEn ? 'Match progress' : isKg ? 'Матчтын жүрүшү' : 'Ход матча',
-        setN:       isEn ? 'set'  : isKg ? 'сет' : 'сет',
-        gameNow:    isEn ? 'Current game' : isKg ? 'Учурдагы гейм' : 'Текущий гейм',
-        ace:        isEn ? 'ace'    : isKg ? 'эйс'     : 'эйс',
-        doubleF:    isEn ? 'double' : isKg ? 'кош ката': 'двойная',
-        game:       isEn ? 'game'  : isKg ? 'гейм' : 'гейм',
-        allSets:    isEn ? 'All'   : isKg ? 'Баары' : 'Все',
-        breakLabel: isEn ? 'break' : isKg ? 'брейк' : 'брейк',
+        tournament: KSLT_YAZYK.выбрать('Tournament', 'Мелдеш', 'Турнир'),
+        format:     KSLT_YAZYK.выбрать('Format', 'Формат', 'Формат'),
+        serving:    KSLT_YAZYK.выбрать('Serving', 'Берүүдө', 'Подаёт'),
+        wins:       KSLT_YAZYK.выбрать('wins!', 'жеңет!', 'побеждает!'),
+        backHome:   KSLT_YAZYK.выбрать('Home', 'Башкы бетке', 'На главную'),
+        sponsor:    KSLT_YAZYK.выбрать('Match supported by', 'Матчты колдогон', 'Матч при поддержке'),
+        feedTitle:  KSLT_YAZYK.выбрать('Match progress', 'Матчтын жүрүшү', 'Ход матча'),
+        setN:       KSLT_YAZYK.выбрать('set', 'сет', 'сет'),
+        gameNow:    KSLT_YAZYK.выбрать('Current game', 'Учурдагы гейм', 'Текущий гейм'),
+        ace:        KSLT_YAZYK.выбрать('ace', 'эйс', 'эйс'),
+        doubleF:    KSLT_YAZYK.выбрать('double', 'кош ката', 'двойная'),
+        game:       KSLT_YAZYK.выбрать('game', 'гейм', 'гейм'),
+        allSets:    KSLT_YAZYK.выбрать('All', 'Баары', 'Все'),
+        breakLabel: KSLT_YAZYK.выбрать('break', 'брейк', 'брейк'),
         /* Ячейка того, кто выиграл гейм. Короткое слово, а не нули:
            база пишет выигравшее очко уже со сброшенным счётом. */
-        gameCell:   isEn ? 'game'  : isKg ? 'гейм'  : 'гейм',
+        gameCell:   KSLT_YAZYK.выбрать('game', 'гейм', 'гейм'),
         /* Пометка идущего гейма. Короче, чем «Текущий гейм»: стоит
            в правом углу заголовка, где места на одно слово. */
-        gameLive:   isEn ? 'live'  : isKg ? 'жүрүүдө' : 'идёт',
-        emptyTitle: isEn ? 'The match has not started yet' : isKg ? 'Матч азырынча башталган жок' : 'Матч ещё не начался',
-        emptyText:  isEn ? 'Match progress will appear here with the first point.'
-                  : isKg ? 'Матчтын жүрүшү биринчи розыгрыштан кийин ушул жерде чыгат.'
-                         : 'Ход матча появится здесь с первым розыгрышем.'
+        gameLive:   KSLT_YAZYK.выбрать('live', 'жүрүүдө', 'идёт'),
+        emptyTitle: KSLT_YAZYK.выбрать('The match has not started yet', 'Матч азырынча башталган жок', 'Матч ещё не начался'),
+        emptyText:  KSLT_YAZYK.выбрать('Match progress will appear here with the first point.', 'Матчтын жүрүшү биринчи розыгрыштан кийин ушул жерде чыгат.', 'Ход матча появится здесь с первым розыгрышем.')
     };
 
     /** «Лучший из 3» по-русски, «Best of 3» по-английски, «3 сет» по-кыргызски. */
@@ -170,7 +168,7 @@
         var isWarmup    = m.status === 'warmup';
         var isPaused    = m.status === 'paused';
 
-        var pageSuffix = isEn ? '-en' : isKg ? '-kg' : '';
+        var pageSuffix = KSLT_YAZYK.суффикс;
         var backHtml = '<a href="../index' + pageSuffix + '.html" class="lm-back-link">' +
             '<span aria-hidden="true">←</span>' + L.backHome + '</a>';
 

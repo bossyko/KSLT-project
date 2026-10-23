@@ -28,12 +28,8 @@
         kg: { doubles: 'жуптук', men: 'эркектер жуптугу', women: 'аялдар жуптугу', mixed: 'аралаш' }
     };
 
-    function lang() {
-        var p = window.location.pathname;
-        if (p.indexOf('-en') !== -1) return 'en';
-        if (p.indexOf('-kg') !== -1) return 'kg';
-        return 'ru';
-    }
+    /* Язык — у дома (js/kslt-yazyk.js). */
+    function lang() { return KSLT_YAZYK.код; }
 
     BF.isPair = function(b) {
         return !!b && b.format && b.format !== 'singles';

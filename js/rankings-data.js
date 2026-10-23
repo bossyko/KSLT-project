@@ -20,8 +20,6 @@
     async function load() {
         if (!window.supabaseClient) return null;
         var client = window.supabaseClient;
-        var isEn = KSLT_YAZYK.en;
-        var isKg = KSLT_YAZYK.kg;
 
         try {
             // Load categories
@@ -99,7 +97,7 @@
             var genders = ['men', 'women'];
             categories.forEach(function(cat) {
                 if (cat.is_rating === false || cat.id === 'friendly') return;
-                var catName = isEn ? (cat.name_en || cat.name) : (isKg ? (cat.name_kg || cat.name) : cat.name);
+                var catName = KSLT_YAZYK.выбрать(cat.name_en || cat.name, cat.name_kg || cat.name, cat.name);
                 genders.forEach(function(g) {
                     // Разряды заданы списком, а не наличием людей: у мужчин
                     // их пять, у женщин три. Pro-Masters пока пуст, но он
@@ -123,11 +121,11 @@
                     result[key] = {
                         name: catName,
                         gender: g,
-                        genderLabel: isEn ? (g === 'men' ? 'Men' : 'Women') : (isKg ? (g === 'men' ? 'Эркектер' : 'Аялдар') : (g === 'men' ? 'Мужчины' : 'Женщины')),
+                        genderLabel: KSLT_YAZYK.выбрать(g === 'men' ? 'Men' : 'Women', g === 'men' ? 'Эркектер' : 'Аялдар', g === 'men' ? 'Мужчины' : 'Женщины'),
                         players: catPlayers.map(function(p) {
                             return {
                                 id: p.id,
-                                name: isEn ? (p.name_en || p.name) : (isKg ? (p.name_kg || p.name) : p.name),
+                                name: KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name),
                                 // СЛОЙ ДАННЫХ НЕ ВЫДУМЫВАЕТ КАРТИНКУ. Здесь
                                 // стоял адрес placehold.co, и из-за него фото
                                 // «было» у каждого игрока: вид не мог отличить

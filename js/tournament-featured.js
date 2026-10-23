@@ -25,17 +25,11 @@
 (function () {
     'use strict';
 
-    var путь = window.location.pathname;
-    var isEn = путь.indexOf('-en') !== -1;
-    var isKg = путь.indexOf('-kg') !== -1;
+    /* Язык — у дома (js/kslt-yazyk.js). */
 
-    var L = isEn
-        ? { details: 'Details', register: 'Register', noRating: 'No rating',
-            live: 'IN PROGRESS', prefix: 'Starts in', days: 'd', hours: 'h', min: 'm', sec: 's' }
-        : (isKg
-            ? { details: 'Толугураак', register: 'Катталуу', noRating: 'Рейтингсиз',
-                live: 'АЗЫР ЖҮРҮҮДӨ', prefix: 'Башталууга', days: 'к', hours: 'с', min: 'м', sec: 'сек' }
-            : { details: 'Подробнее', register: 'Регистрация', noRating: 'Без рейтинга',
+    var L = KSLT_YAZYK.выбрать({ details: 'Details', register: 'Register', noRating: 'No rating',
+            live: 'IN PROGRESS', prefix: 'Starts in', days: 'd', hours: 'h', min: 'm', sec: 's' }, { details: 'Толугураак', register: 'Катталуу', noRating: 'Рейтингсиз',
+                live: 'АЗЫР ЖҮРҮҮДӨ', prefix: 'Башталууга', days: 'к', hours: 'с', min: 'м', sec: 'сек' }, { details: 'Подробнее', register: 'Регистрация', noRating: 'Без рейтинга',
                 live: 'ИДЁТ СЕЙЧАС', prefix: 'Старт через', days: 'д', hours: 'ч', min: 'м', sec: 'с' });
 
     var pinSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +

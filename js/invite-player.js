@@ -20,8 +20,6 @@
     var INV = {};
     window.KSLT_INVITE = INV;
 
-    var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
     // Адрес берём из общей настройки, а не зашиваем: автотесты подставляют
     // отдельную базу через window.KSLT_DB, и зашитый адрес уводил запрос
@@ -29,7 +27,7 @@
     var FUNCTIONS_URL = (window.SUPABASE_URL || '') + '/functions/v1';
     var ANON_KEY = window.SUPABASE_ANON_KEY || '';
 
-    var authFile = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+    var authFile = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
 
     /**
      * Путь до страницы из папки pages.
@@ -41,7 +39,7 @@
         return window.location.pathname.indexOf('/pages/') !== -1 ? file : 'pages/' + file;
     }
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         modalGuestTitle: 'Join us!',
         modalGuestText: 'Sign up and become a KSLT member to send game invitations',
         modalGuestBtn: 'Sign Up',
@@ -56,7 +54,7 @@
         inviteLimit: 'Daily invite limit reached (5/day)',
         invitePending: 'Invitation already sent',
         inviteSelf: 'Cannot invite yourself'
-    } : isKg ? {
+    }, {
         modalGuestTitle: 'Кошулуңуз!',
         modalGuestText: 'Оюнга чакыруу жөнөтүү үчүн катталып, КСЛТ мүчөсү болуңуз',
         modalGuestBtn: 'Каттоо',
@@ -71,7 +69,7 @@
         inviteLimit: 'Күнүнө 5 чакыруудан ашык болбойт',
         invitePending: 'Чакыруу мурун жөнөтүлгөн',
         inviteSelf: 'Өзүңүздү чакыра албайсыз'
-    } : {
+    }, {
         modalGuestTitle: 'Присоединяйтесь!',
         modalGuestText: 'Зарегистрируйтесь и станьте членом КСЛТ, чтобы отправлять приглашения на игру',
         modalGuestBtn: 'Регистрация',
@@ -86,7 +84,7 @@
         inviteLimit: 'Дневной лимит приглашений исчерпан (5 в день)',
         invitePending: 'Приглашение уже отправлено',
         inviteSelf: 'Нельзя пригласить самого себя'
-    };
+    });
 
     var _accessLevel = null;   // 'guest' | 'registered' | 'member'
     var _myPlayerId = null;
@@ -295,25 +293,19 @@
         var old = document.querySelector('.pt-modal-overlay');
         if (old) old.remove();
 
-        var rulesPage = путь(isEn ? 'rules-en.html' : (isKg ? 'rules-kg.html' : 'rules.html'));
-        var pricePage = путь(isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html'));
+        var rulesPage = путь(KSLT_YAZYK.выбрать('rules-en.html', 'rules-kg.html', 'rules.html'));
+        var pricePage = путь(KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html'));
 
-        var title = isEn ? 'Become a KSLT Member' : (isKg ? 'КСЛТ мүчөсү болуңуз' : 'Станьте членом КСЛТ');
-        var subtitle = isEn
-            ? 'Monthly membership — <strong style="color:var(--accent)">1,000 KGS/mo</strong>'
-            : (isKg ? 'Ай сайынкы мүчөлүк — <strong style="color:var(--accent)">1 000 сом/ай</strong>' : 'Ежемесячное членство — <strong style="color:var(--accent)">1 000 сом/мес</strong>');
-        var cardsLabel = isEn ? 'Bank cards' : (isKg ? 'Банк карталары' : 'Банковские карты');
-        var mobileLabel = isEn ? 'Mobile banks' : (isKg ? 'Мобилдик банктар' : 'Мобильные банки');
-        var walletsLabel = isEn ? 'E-wallets' : (isKg ? 'Электрондук капчыктар' : 'Электронные кошельки');
-        var orLabel = isEn ? 'or' : (isKg ? 'же' : 'или');
-        var tgBtn = isEn ? 'Message in Telegram' : (isKg ? 'Telegram\'га жазуу' : 'Написать в Telegram');
-        var noteText = isEn
-            ? 'Online payment on the site is coming soon. For now, membership is arranged through the KSLT manager.'
-            : (isKg ? 'Сайтта төлөм жакында пайда болот. Азырынча мүчөлүк КСЛТ менеджери аркылуу тариздөлөт.' : 'Оплата на сайте скоро появится. Пока членство оформляется через менеджера КСЛТ.');
-        var disclaimer = isEn
-            ? 'By paying, you agree to the <a href="' + rulesPage + '" target="_blank">rules</a> and <a href="' + pricePage + '" target="_blank">pricing</a> of KSLT'
-            : (isKg ? 'Баскычты басуу менен, <a href="' + rulesPage + '" target="_blank">эрежелер</a> жана <a href="' + pricePage + '" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз' : 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="' + rulesPage + '" target="_blank">правилами</a> и <a href="' + pricePage + '" target="_blank">тарифами</a> КСЛТ');
-        var soonLabel = isEn ? 'soon' : (isKg ? 'жакында' : 'скоро');
+        var title = KSLT_YAZYK.выбрать('Become a KSLT Member', 'КСЛТ мүчөсү болуңуз', 'Станьте членом КСЛТ');
+        var subtitle = KSLT_YAZYK.выбрать('Monthly membership — <strong style="color:var(--accent)">1,000 KGS/mo</strong>', 'Ай сайынкы мүчөлүк — <strong style="color:var(--accent)">1 000 сом/ай</strong>', 'Ежемесячное членство — <strong style="color:var(--accent)">1 000 сом/мес</strong>');
+        var cardsLabel = KSLT_YAZYK.выбрать('Bank cards', 'Банк карталары', 'Банковские карты');
+        var mobileLabel = KSLT_YAZYK.выбрать('Mobile banks', 'Мобилдик банктар', 'Мобильные банки');
+        var walletsLabel = KSLT_YAZYK.выбрать('E-wallets', 'Электрондук капчыктар', 'Электронные кошельки');
+        var orLabel = KSLT_YAZYK.выбрать('or', 'же', 'или');
+        var tgBtn = KSLT_YAZYK.выбрать('Message in Telegram', 'Telegram\'га жазуу', 'Написать в Telegram');
+        var noteText = KSLT_YAZYK.выбрать('Online payment on the site is coming soon. For now, membership is arranged through the KSLT manager.', 'Сайтта төлөм жакында пайда болот. Азырынча мүчөлүк КСЛТ менеджери аркылуу тариздөлөт.', 'Оплата на сайте скоро появится. Пока членство оформляется через менеджера КСЛТ.');
+        var disclaimer = KSLT_YAZYK.выбрать('By paying, you agree to the <a href="' + rulesPage + '" target="_blank">rules</a> and <a href="' + pricePage + '" target="_blank">pricing</a> of KSLT', 'Баскычты басуу менен, <a href="' + rulesPage + '" target="_blank">эрежелер</a> жана <a href="' + pricePage + '" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз', 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="' + rulesPage + '" target="_blank">правилами</a> и <a href="' + pricePage + '" target="_blank">тарифами</a> КСЛТ');
+        var soonLabel = KSLT_YAZYK.выбрать('soon', 'жакында', 'скоро');
 
         var overlay = document.createElement('div');
         overlay.className = 'pt-modal-overlay';

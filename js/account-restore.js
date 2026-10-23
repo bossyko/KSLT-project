@@ -41,12 +41,9 @@
         }
     };
 
-    function lang() {
-        var p = window.location.pathname;
-        if (p.indexOf('-en') !== -1) return 'en';
-        if (p.indexOf('-kg') !== -1) return 'kg';
-        return 'ru';
-    }
+    /* Язык — у дома (js/kslt-yazyk.js). Своё чтение из адреса было
+       вторым определением того же понятия. */
+    function lang() { return KSLT_YAZYK.код; }
 
     function locale() {
         var l = lang();

@@ -37,15 +37,8 @@
         return /\/(dashboard|admin|player|offer)(-en|-kg)?\.html/.test(path);
     }
 
-    function getLangSuffix() {
-        var path = window.location.pathname;
-        if (path.indexOf('-kg') !== -1) return '-kg';
-        if (path.indexOf('-en') !== -1) return '-en';
-        return '';
-    }
-
     function doLogout() {
-        var suffix = getLangSuffix();
+        var suffix = KSLT_YAZYK.суффикс;
         var authPage = 'auth' + suffix + '.html';
         var inPages = window.location.pathname.indexOf('/pages/') !== -1;
         var href = inPages ? authPage : 'pages/' + authPage;
@@ -95,7 +88,7 @@
         if (e.key === AUTH_TOKEN_KEY && !e.newValue) {
             localStorage.removeItem(SESSION_START_KEY);
             if (isProtectedPage()) {
-                var suffix = getLangSuffix();
+                var suffix = KSLT_YAZYK.суффикс;
                 var authPage = 'auth' + suffix + '.html';
                 var inPages = window.location.pathname.indexOf('/pages/') !== -1;
                 window.location.href = inPages ? authPage : 'pages/' + authPage;

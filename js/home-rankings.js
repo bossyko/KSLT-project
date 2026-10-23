@@ -25,16 +25,12 @@
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn
-        ? { rank: '#', player: 'Player', country: 'Ctry', ntrp: 'NTRP', ntrpSub: 'sng / dbl', wl: 'W/L', points: 'Pts', change: 'Δ', empty: 'No players in this category yet',
-            ptsWord: 'pts', places: ['1st place', '2nd place', '3rd place'] }
-        : (isKg
-            ? { rank: '#', player: 'Оюнчу', country: 'Өлк.', ntrp: 'NTRP', ntrpSub: 'жеке / жуп', wl: 'Ж/Ж', points: 'Упай', change: 'Δ', empty: 'Бул категорияда оюнчулар жок',
-                ptsWord: 'упай', places: ['1-орун', '2-орун', '3-орун'] }
-            : { rank: '#', player: 'Игрок', country: 'Стр.', ntrp: 'NTRP', ntrpSub: 'од. / пар.', wl: 'В/П', points: 'Очки', change: 'Δ', empty: 'В этой категории пока нет игроков',
+    var L = KSLT_YAZYK.выбрать({ rank: '#', player: 'Player', country: 'Ctry', ntrp: 'NTRP', ntrpSub: 'sng / dbl', wl: 'W/L', points: 'Pts', change: 'Δ', empty: 'No players in this category yet',
+            ptsWord: 'pts', places: ['1st place', '2nd place', '3rd place'] }, { rank: '#', player: 'Оюнчу', country: 'Өлк.', ntrp: 'NTRP', ntrpSub: 'жеке / жуп', wl: 'Ж/Ж', points: 'Упай', change: 'Δ', empty: 'Бул категорияда оюнчулар жок',
+                ptsWord: 'упай', places: ['1-орун', '2-орун', '3-орун'] }, { rank: '#', player: 'Игрок', country: 'Стр.', ntrp: 'NTRP', ntrpSub: 'од. / пар.', wl: 'В/П', points: 'Очки', change: 'Δ', empty: 'В этой категории пока нет игроков',
                 ptsWord: 'очков', places: ['1 место', '2 место', '3 место'] });
 
-    var playerPage = isEn ? 'pages/player-en.html' : (isKg ? 'pages/player-kg.html' : 'pages/player.html');
+    var playerPage = KSLT_YAZYK.выбрать('pages/player-en.html', 'pages/player-kg.html', 'pages/player.html');
 
     start();
 

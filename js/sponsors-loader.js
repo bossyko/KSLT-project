@@ -13,19 +13,19 @@
         // «Партнёры» на сайте уже означают партнёра по игре — так называется
         // страница поиска. В блоке спонсоров это слово путало: партнёр,
         // пришедший по письму о спонсорстве, попадал в поиск игроков
-        title: isEn ? 'KSLT Sponsors' : (isKg ? 'КСЛТ демөөрчүлөрү' : 'Спонсоры КСЛТ'),
-        general: isEn ? 'General Sponsor' : (isKg ? 'Башкы демөөрчү' : 'Генеральный спонсор')
+        title: KSLT_YAZYK.выбрать('KSLT Sponsors', 'КСЛТ демөөрчүлөрү', 'Спонсоры КСЛТ'),
+        general: KSLT_YAZYK.выбрать('General Sponsor', 'Башкы демөөрчү', 'Генеральный спонсор')
     };
 
     var modalLabels = {
-        website: isEn ? 'Website' : (isKg ? 'Веб-сайт' : 'Веб-сайт'),
+        website: KSLT_YAZYK.выбрать('Website', 'Веб-сайт', 'Веб-сайт'),
         whatsapp: 'WhatsApp',
         instagram: 'Instagram',
         telegram: 'Telegram',
-        phone: isEn ? 'Call' : (isKg ? 'Чалуу' : 'Позвонить'),
-        email: isEn ? 'Email' : (isKg ? 'Электрондук почта' : 'Эл. почта'),
-        address: isEn ? 'Address' : (isKg ? 'Дарек' : 'Адрес'),
-        close: isEn ? 'Close' : (isKg ? 'Жабуу' : 'Закрыть')
+        phone: KSLT_YAZYK.выбрать('Call', 'Чалуу', 'Позвонить'),
+        email: KSLT_YAZYK.выбрать('Email', 'Электрондук почта', 'Эл. почта'),
+        address: KSLT_YAZYK.выбрать('Address', 'Дарек', 'Адрес'),
+        close: KSLT_YAZYK.выбрать('Close', 'Жабуу', 'Закрыть')
     };
 
     // Cache sponsors data (loaded once, reused for both section and carousel)
@@ -414,7 +414,7 @@
             }
             if (!hero) { badge.style.display = 'none'; return; }
 
-            var label = isEn ? 'supported by' : (isKg ? 'колдоосу менен' : 'при поддержке');
+            var label = KSLT_YAZYK.выбрать('supported by', 'колдоосу менен', 'при поддержке');
             var href = hero.url ? ' href="' + esc(hero.url) + '" target="_blank" rel="noopener"' : '';
             var logoHtml = hero.logo
                 ? '<img src="' + esc(hero.logo) + '" alt="' + esc(hero.name) + '" class="sponsor-logo-img">'

@@ -16,13 +16,9 @@
         'women-masters': 'Masters', 'women-promasters': 'Pro-Masters'
     };
 
-    var months = isEn
-        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-        : (isKg
-            ? ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']
-            : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
+    var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         heroTitle: 'Battles',
         heroDesc: 'The challenge is out — the court settles the rest.',
         heroBadge: 'BATTLES',
@@ -51,7 +47,7 @@
         nothingFound: 'Nothing found',
         openIn: 'Open in',
         cancel: 'Cancel'
-    } : (isKg ? {
+    }, {
         heroTitle: 'Баттлдар',
         heroDesc: 'Чакырык ташталды — калганын корт чечет.',
         heroBadge: 'БАТТЛДАР',
@@ -80,7 +76,7 @@
         nothingFound: 'Эч нерсе табылган жок',
         openIn: 'Ачуу',
         cancel: 'Жокко чыгаруу'
-    } : {
+    }, {
         heroTitle: 'Баттлы',
         heroDesc: 'Вызов брошен — остальное решает корт.',
         heroBadge: 'БАТТЛЫ',
@@ -111,27 +107,23 @@
         cancel: 'Отмена'
     });
 
-    var CL = isEn
-        ? { days: 'd', hours: 'h', min: 'm', sec: 's', prefix: 'STARTS IN' }
-        : (isKg
-            ? { days: 'к', hours: 'с', min: 'м', sec: 'с', prefix: 'БАШТАЛАТ' }
-            : { days: 'д', hours: 'ч', min: 'м', sec: 'с', prefix: 'СТАРТ ЧЕРЕЗ' });
+    var CL = KSLT_YAZYK.выбрать({ days: 'd', hours: 'h', min: 'm', sec: 's', prefix: 'STARTS IN' }, { days: 'к', hours: 'с', min: 'м', sec: 'с', prefix: 'БАШТАЛАТ' }, { days: 'д', hours: 'ч', min: 'м', sec: 'с', prefix: 'СТАРТ ЧЕРЕЗ' });
 
-    var BL = isEn ? {
+    var BL = KSLT_YAZYK.выбрать({
         total: 'Total this season',
         upcoming: 'Upcoming',
         completed: 'Completed'
-    } : (isKg ? {
+    }, {
         total: 'Мезгилде баары',
         upcoming: 'Алдыдагы',
         completed: 'Аяктаган'
-    } : {
+    }, {
         total: 'Всего за сезон',
         upcoming: 'Предстоящих',
         completed: 'Завершённых'
     });
 
-    var challengePage = isEn ? 'challenge-en.html' : (isKg ? 'challenge-kg.html' : 'challenge.html');
+    var challengePage = KSLT_YAZYK.выбрать('challenge-en.html', 'challenge-kg.html', 'challenge.html');
 
     // Пламя, а не лист бумаги: заглушка стояла от общего набора значков и
     // на странице баттлов читалась как сломанная картинка
@@ -416,11 +408,7 @@
     }
 
     function humanDate(iso) {
-        var months = isEn
-            ? ['January','February','March','April','May','June','July','August','September','October','November','December']
-            : (isKg
-                ? ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь']
-                : ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
+        var months = KSLT_YAZYK.выбрать(['January','February','March','April','May','June','July','August','September','October','November','December'], ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'], ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
         var d = new Date(iso + 'T00:00:00');
         if (isNaN(d.getTime())) return '';
         return isEn ? (months[d.getMonth()] + ' ' + d.getDate()) : (d.getDate() + ' ' + months[d.getMonth()]);

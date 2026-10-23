@@ -6,9 +6,8 @@
     'use strict';
 
     var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
-    var authPage = isEn ? 'auth-en.html' : isKg ? 'auth-kg.html' : 'auth.html';
-    var homePage = isEn ? '../index-en.html' : isKg ? '../index-kg.html' : '../index.html';
+    var authPage = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
+    var homePage = KSLT_YAZYK.выбрать('../index-en.html', '../index-kg.html', '../index.html');
 
     // Use shared client from supabase-config.js
     var client = window.supabaseClient;

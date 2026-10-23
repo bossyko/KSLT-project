@@ -17,11 +17,12 @@
 (function () {
     'use strict';
 
-    var путь = window.location.pathname;
-    var isEn = путь.indexOf('-en') !== -1;
-    var isKg = путь.indexOf('-kg') !== -1;
+    /* Язык — у дома (js/kslt-yazyk.js). Флаги оставлены: их ждёт
+       `KSLT_REG.submit` ниже, строка 296. */
+    var isEn = KSLT_YAZYK.en;
+    var isKg = KSLT_YAZYK.kg;
 
-    function pick(en, kg, ru) { return isEn ? en : (isKg ? kg : ru); }
+    function pick(en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); }
 
     var L = {
         title: pick('Doubles entry', 'Жупта катталуу', 'Заявка в парный турнир'),
@@ -109,7 +110,7 @@
                         // приезжие редки, и обычно трогать поле не придётся
                         '<select class="de-input de-guest-country" style="max-width:120px">' +
                             (window.KSLT_COUNTRY && window.KSLT_COUNTRY.вариантыСтран
-                                ? window.KSLT_COUNTRY.вариантыСтран('🇰🇬', isEn ? 'en' : (isKg ? 'kg' : 'ru'))
+                                ? window.KSLT_COUNTRY.вариантыСтран('🇰🇬', KSLT_YAZYK.выбрать('en', 'kg', 'ru'))
                                 : '<option value="🇰🇬" selected>🇰🇬</option>') +
                         '</select>' +
                         '<select class="de-input de-guest-ntrp">' +

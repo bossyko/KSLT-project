@@ -36,13 +36,9 @@
         set_break:  { ru: 'Перерыв между сетами', en: 'Set break',  kg: 'Сеттер арасындагы тыныгуу' }
     };
 
-    /** Язык берётся из имени файла — так же, как в js/live-match.js:16–17. */
-    function язык(path) {
-        var p = path || window.location.pathname;
-        if (p.indexOf('-en') !== -1) return 'en';
-        if (p.indexOf('-kg') !== -1) return 'kg';
-        return 'ru';
-    }
+    /** Язык — у дома (js/kslt-yazyk.js). Довода `path` ни один зов не
+        передавал (замерено: `scoreboard.js:175`, `live-match.js:231`). */
+    function язык() { return KSLT_YAZYK.код; }
 
     /**
      * Слово по коду. Неизвестный код отдаёт пустую строку, а не сам код:

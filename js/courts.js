@@ -39,7 +39,7 @@
 
        Крючок `window.courtsLabels` снят: его не задавал никто с момента
        написания, а он создавал вид, что словарь можно подменить снаружи. */
-    var L_labels = isEn ? {
+    var L_labels = KSLT_YAZYK.выбрать({
         heroTitle: "Courts",
         heroSubtitle: "Where to play in Kyrgyzstan: surface, prices, rental",
         filterAll: "All",
@@ -106,7 +106,7 @@
         additionalServicesTitle: "Additional services",
         thService: "Service",
         thServicePrice: "Price"
-    } : (isKg ? {
+    }, {
         heroTitle: 'Корттор',
         heroSubtitle: 'Кыргызстанда кайда ойноо керек: жабуу, баа, ижара',
         filterAll: 'Баары',
@@ -173,7 +173,7 @@
         additionalServicesTitle: 'Кошумча кызматтар',
         thService: 'Кызмат',
         thServicePrice: 'Баасы'
-    } : {
+    }, {
         heroTitle: "Корты",
         heroSubtitle: "Где играть в Кыргызстане: покрытие, цены, аренда",
         filterAll: "Все",
@@ -252,7 +252,7 @@
        звали фильтры. Пока английской ветки не было, расхождение не было
        видно: обе копии отдавали русское. Теперь карта одна, выбранная по
        языку, а ключи словаря остались для совместимости и ничем не правят. */
-    var ПОКРЫТИЯ = isEn ? SURFACE_MAP_EN : (isKg ? SURFACE_MAP_KG : SURFACE_MAP);
+    var ПОКРЫТИЯ = KSLT_YAZYK.выбрать(SURFACE_MAP_EN, SURFACE_MAP_KG, SURFACE_MAP);
 
     // Фотографий у кортов пока нет ни у одного: реестр собирали из 2ГИС и
     // гидов, снимки добавим по мере получения. До тех пор общая картинка
@@ -302,19 +302,19 @@
     }
 
     function showMembershipModal(level) {
-        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
-        var pricingLink = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+        var authLink = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
+        var pricingLink = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
         var isGuest = level === 'guest';
 
         var title = isGuest
-            ? (isEn ? 'Become a KSLT Member' : isKg ? 'KSLT мүчөсү болуңуз' : 'Станьте членом KSLT')
-            : (isEn ? 'Membership Required' : isKg ? 'Мүчөлүк керек' : 'Нужно членство');
+            ? (KSLT_YAZYK.выбрать('Become a KSLT Member', 'KSLT мүчөсү болуңуз', 'Станьте членом KSLT'))
+            : (KSLT_YAZYK.выбрать('Membership Required', 'Мүчөлүк керек', 'Нужно членство'));
         var text = isGuest
-            ? (isEn ? 'Register and become a KSLT member to get discounts at partner courts and coaches' : isKg ? 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз' : 'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров')
-            : (isEn ? 'Become a KSLT member to unlock discounts at partner courts and coaches' : isKg ? 'KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз' : 'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров');
+            ? (KSLT_YAZYK.выбрать('Register and become a KSLT member to get discounts at partner courts and coaches', 'Катталыңыз жана KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз', 'Зарегистрируйтесь и оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'))
+            : (KSLT_YAZYK.выбрать('Become a KSLT member to unlock discounts at partner courts and coaches', 'KSLT мүчөсү болуп, өнөктөш корттордо арзандатуу алыңыз', 'Оформите членство KSLT, чтобы получать скидки у партнёрских кортов и тренеров'));
         var btnText = isGuest
-            ? (isEn ? 'Sign Up' : isKg ? 'Каттоо' : 'Регистрация')
-            : (isEn ? 'View Plans' : isKg ? 'Тарифтар' : 'Тарифы');
+            ? (KSLT_YAZYK.выбрать('Sign Up', 'Каттоо', 'Регистрация'))
+            : (KSLT_YAZYK.выбрать('View Plans', 'Тарифтар', 'Тарифы'));
         var btnLink = isGuest ? authLink : pricingLink;
 
         var overlay = document.createElement('div');
@@ -501,33 +501,33 @@
         });
 
         /* Адрес собирается в одном месте — js/court-address.js */
-        var address = window.KSLT_ADDRESS.адрес(row, isEn ? 'en' : (isKg ? 'kg' : 'ru'));
+        var address = window.KSLT_ADDRESS.адрес(row, KSLT_YAZYK.выбрать('en', 'kg', 'ru'));
 
         // Description
-        var desc = isEn ? (row.description_en || row.description || '') : isKg ? (row.description_kg || row.description || '') : (row.description || '');
+        var desc = KSLT_YAZYK.выбрать(row.description_en || row.description || '', row.description_kg || row.description || '', row.description || '');
         var shortDesc = desc.length > 120 ? desc.substr(0, 120) + '...' : desc;
 
         // Name
-        var name = isEn ? (row.name_en || row.name) : isKg ? (row.name_kg || row.name) : row.name;
+        var name = KSLT_YAZYK.выбрать(row.name_en || row.name, row.name_kg || row.name, row.name);
 
         // Amenities — map keys to labels
         var AMENITY_LABELS = {
-            locker_rooms: isEn ? 'Locker rooms' : isKg ? 'Кийим алмаштыруучу' : 'Раздевалки',
-            showers: isEn ? 'Showers' : isKg ? 'Душ' : 'Душевые',
-            parking: isEn ? 'Parking' : isKg ? 'Токтоочу жай' : 'Парковка',
-            racket_rental: isEn ? 'Racket rental' : isKg ? 'Ракетка ижарасы' : 'Прокат ракеток',
+            locker_rooms: KSLT_YAZYK.выбрать('Locker rooms', 'Кийим алмаштыруучу', 'Раздевалки'),
+            showers: KSLT_YAZYK.выбрать('Showers', 'Душ', 'Душевые'),
+            parking: KSLT_YAZYK.выбрать('Parking', 'Токтоочу жай', 'Парковка'),
+            racket_rental: KSLT_YAZYK.выбрать('Racket rental', 'Ракетка ижарасы', 'Прокат ракеток'),
             pro_shop: 'Pro-shop',
-            cafe: isEn ? 'Café' : isKg ? 'Кафе' : 'Кафе',
-            gym: isEn ? 'Gym' : isKg ? 'Спорт зал' : 'Тренажёрный зал',
-            pool: isEn ? 'Pool' : isKg ? 'Бассейн' : 'Бассейн',
-            sauna: isEn ? 'Sauna' : isKg ? 'Сауна' : 'Сауна',
-            climate: isEn ? 'Climate control' : isKg ? 'Климат-контроль' : 'Климат-контроль',
-            lighting: isEn ? 'Lighting' : isKg ? 'Кечки жарык' : 'Вечернее освещение',
-            kids_area: isEn ? 'Kids area' : isKg ? 'Балдар аянтчасы' : 'Детская площадка',
-            kids_school: isEn ? 'Kids school' : isKg ? 'Балдар мектеби' : 'Детская школа',
-            video: isEn ? 'Video' : isKg ? 'Видео талдоо' : 'Видеоанализ',
+            cafe: KSLT_YAZYK.выбрать('Café', 'Кафе', 'Кафе'),
+            gym: KSLT_YAZYK.выбрать('Gym', 'Спорт зал', 'Тренажёрный зал'),
+            pool: KSLT_YAZYK.выбрать('Pool', 'Бассейн', 'Бассейн'),
+            sauna: KSLT_YAZYK.выбрать('Sauna', 'Сауна', 'Сауна'),
+            climate: KSLT_YAZYK.выбрать('Climate control', 'Климат-контроль', 'Климат-контроль'),
+            lighting: KSLT_YAZYK.выбрать('Lighting', 'Кечки жарык', 'Вечернее освещение'),
+            kids_area: KSLT_YAZYK.выбрать('Kids area', 'Балдар аянтчасы', 'Детская площадка'),
+            kids_school: KSLT_YAZYK.выбрать('Kids school', 'Балдар мектеби', 'Детская школа'),
+            video: KSLT_YAZYK.выбрать('Video', 'Видео талдоо', 'Видеоанализ'),
             wifi: 'Wi-Fi',
-            benches: isEn ? 'Benches' : isKg ? 'Отургучтар' : 'Скамейки'
+            benches: KSLT_YAZYK.выбрать('Benches', 'Отургучтар', 'Скамейки')
         };
         var amenities = (row.amenities || []).map(function(key) {
             return AMENITY_LABELS[key] || key;
@@ -536,7 +536,7 @@
         // Type labels for mixed courts
         var typeDesc = '';
         if (hasIndoor && hasOutdoor) {
-            typeDesc = (isEn ? 'Indoor + Outdoor' : isKg ? 'Жабык + Ачык' : 'Крытый + Открытый');
+            typeDesc = (KSLT_YAZYK.выбрать('Indoor + Outdoor', 'Жабык + Ачык', 'Крытый + Открытый'));
         }
 
         return {
@@ -573,7 +573,7 @@
                30 дней, слово Кости 13.10. */
             _isNew: новыйЛи(row.created_at),
             _isDb: true,
-            city: isEn ? (row.city_en || row.city || '') : (isKg ? (row.city_kg || row.city || '') : (row.city || '')),
+            city: KSLT_YAZYK.выбрать(row.city_en || row.city || '', row.city_kg || row.city || '', row.city || ''),
             _typeDesc: typeDesc,
             _promoted: row.promoted || false
         };
@@ -735,14 +735,14 @@
         // весь сайт. Классы trn- лежат в style.css
         container.className = 'trn-filters';
 
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var servicesLink = KSLT_YAZYK.выбрать('services-en.html', 'services-kg.html', 'services.html');
 
         // Возврат живёт ВНУТРИ прилипающего блока с поиском и фильтрами.
         // Стоя над ним, он уезжал при первой же прокрутке
         var html =
             '<div class="trn-filters-inner">' +
                 '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' +
-                    (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+                    (KSLT_YAZYK.выбрать('Services', 'Кызматтар', 'Услуги')) + '</a>' +
                 '<div class="trn-search-wrap">' +
                     '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
                     '<input type="text" class="trn-search-input" id="courtsSearch" placeholder="' + L_labels.searchPlaceholder + '" autocomplete="off">' +
@@ -822,15 +822,11 @@
         if (filtered.length === 0) {
             var text;
             if (loadFailed) {
-                text = isEn ? 'Could not load the courts. Please refresh the page.'
-                    : (isKg ? 'Корттордун тизмеси жүктөлгөн жок. Баракты жаңылаңыз.'
-                    : 'Не удалось загрузить список кортов. Обновите страницу.');
+                text = KSLT_YAZYK.выбрать('Could not load the courts. Please refresh the page.', 'Корттордун тизмеси жүктөлгөн жок. Баракты жаңылаңыз.', 'Не удалось загрузить список кортов. Обновите страницу.');
             } else if (_searchQuery || currentTypeFilter !== 'all' || currentSurfaceFilter !== 'all' || currentCityFilter !== 'all') {
-                text = isEn ? 'No courts match your search'
-                    : (isKg ? 'Издөө боюнча корт табылган жок' : 'По вашему запросу кортов не нашлось');
+                text = KSLT_YAZYK.выбрать('No courts match your search', 'Издөө боюнча корт табылган жок', 'По вашему запросу кортов не нашлось');
             } else {
-                text = isEn ? 'The list of courts will appear soon'
-                    : (isKg ? 'Корттордун тизмеси жакында пайда болот' : 'Список кортов скоро появится');
+                text = KSLT_YAZYK.выбрать('The list of courts will appear soon', 'Корттордун тизмеси жакында пайда болот', 'Список кортов скоро появится');
             }
             container.innerHTML = '<div class="ct-empty">' +
                 '<div class="ct-empty-icon">' + (loadFailed ? '\u26A0\uFE0F' : '\uD83C\uDFBE') + '</div>' +
@@ -843,14 +839,14 @@
         var start = (_currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
 
-        var detailBase = isEn ? 'court-en.html' : (isKg ? 'court-kg.html' : 'court.html');
+        var detailBase = KSLT_YAZYK.выбрать('court-en.html', 'court-kg.html', 'court.html');
 
         var html = '<div class="ct-grid">';
         pageItems.forEach(function(c) {
             var typeLabel = c._typeDesc || (c.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
             var newBadge = c._isNew ? '<span class="ct-new-badge">' + L_labels.newBadge + '</span>' : '';
             var promoBadge = c._promoted ? '<span class="kslt-recommended-badge">' + L_labels.recommendedBadge + '</span>' : '';
-            var discountBadge = c._maxDiscount ? '<span class="ct-discount-overlay">\uD83C\uDFF7\uFE0F ' + (isEn ? 'up to' : isKg ? 'чейин' : 'до') + ' -' + c._maxDiscount + '%</span>' : '';
+            var discountBadge = c._maxDiscount ? '<span class="ct-discount-overlay">\uD83C\uDFF7\uFE0F ' + (KSLT_YAZYK.выбрать('up to', 'чейин', 'до')) + ' -' + c._maxDiscount + '%</span>' : '';
 
             html += '<a href="' + detailBase + '?id=' + c.id + '" class="ct-card ct-fade-in' + (c._promoted ? ' kslt-promoted-card' : '') + '">' +
                 '<div class="ct-card-img-wrap">' +
@@ -1027,7 +1023,7 @@
 
         var optionsHtml = '';
         services.forEach(function(svc, i) {
-            var svcName = isEn ? (svc.service_name_en || svc.service_name) : (isKg ? (svc.service_name_kg || svc.service_name) : svc.service_name);
+            var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
             optionsHtml += '<div class="ct-picker-option' + (i === 0 ? ' selected' : '') + '" data-service-id="' + svc.id + '">' +
                 '<div class="ct-picker-radio"></div>' +
                 '<span class="ct-picker-label">' + esc(svcName) + '</span>' +
@@ -1166,7 +1162,7 @@
         if (!court) {
             // Will be retried after Supabase loads
             var container = document.getElementById('courtDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted);">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted);">' + (KSLT_YAZYK.выбрать('Loading...', 'Жүктөлүүдө...', 'Загрузка...')) + '</div>';
             return;
         }
 
@@ -1182,13 +1178,10 @@
         var hero = document.getElementById('courtDetailHero');
         if (hero) hero.innerHTML = '';
         if (!container) return;
-        var заголовок = isEn ? 'Court is not published yet'
-            : (isKg ? 'Корт азырынча жарыяланган жок' : 'Корт ещё не открыт');
-        var текст = isEn ? 'It may be in preparation or removed from the site.'
-            : (isKg ? 'Ал даярдалууда же сайттан алынган болушу мүмкүн.'
-                    : 'Возможно, он готовится или снят с сайта.');
-        var кнопка = isEn ? 'All courts' : (isKg ? 'Бардык корттор' : 'Все корты');
-        var адрес = isEn ? 'courts-en.html' : (isKg ? 'courts-kg.html' : 'courts.html');
+        var заголовок = KSLT_YAZYK.выбрать('Court is not published yet', 'Корт азырынча жарыяланган жок', 'Корт ещё не открыт');
+        var текст = KSLT_YAZYK.выбрать('It may be in preparation or removed from the site.', 'Ал даярдалууда же сайттан алынган болушу мүмкүн.', 'Возможно, он готовится или снят с сайта.');
+        var кнопка = KSLT_YAZYK.выбрать('All courts', 'Бардык корттор', 'Все корты');
+        var адрес = KSLT_YAZYK.выбрать('courts-en.html', 'courts-kg.html', 'courts.html');
         document.title = 'KSLT \u2014 ' + заголовок;
         container.innerHTML =
             '<div class="ct-empty">' +
@@ -1218,18 +1211,18 @@
         var container = document.getElementById('courtDetail');
         if (!container) return;
 
-        var courtsLink = isEn ? 'courts-en.html' : (isKg ? 'courts-kg.html' : 'courts.html');
-        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var courtsLink = KSLT_YAZYK.выбрать('courts-en.html', 'courts-kg.html', 'courts.html');
+        var authLink = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
         var typeLabel = court._typeDesc || (court.type === 'indoor' ? L_labels.filterIndoor : L_labels.filterOutdoor);
 
         // Breadcrumb — render before container so it's outside .ct-container
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var servicesLink = KSLT_YAZYK.выбрать('services-en.html', 'services-kg.html', 'services.html');
         var breadcrumb = document.createElement('div');
         // Тот же плавающий возврат, что на странице игрока: один вид на
         // всех карточках, и он не уезжает вместе с баннером
         breadcrumb.className = 'kslt-back-wrap kslt-back-float';
         breadcrumb.innerHTML =
-            '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (KSLT_YAZYK.выбрать('Services', 'Кызматтар', 'Услуги')) + '</a>' +
             '<span class="kslt-back-sep">/</span>' +
             '<a href="' + courtsLink + '" class="kslt-back">' + L_labels.backBtn + '</a>';
         container.parentNode.insertBefore(breadcrumb, container);
@@ -1278,7 +1271,7 @@
             if (sLabel && !surfaceSeen[sLabel]) { surfaceSeen[sLabel] = true; allSurfaces.push(sLabel); }
         });
         var surfacesText = allSurfaces.join(', ') || court.surface;
-        var priceFromText = court.price ? ((isEn ? 'from ' : isKg ? 'дан ' : 'от ') + court.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '';
+        var priceFromText = court.price ? ((KSLT_YAZYK.выбрать('from ', 'дан ', 'от ')) + court.price + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '';
 
         // Показываем только то, что известно. Раньше строка собиралась жёстко,
         // и у корта без данных выходило «0 кортов ·» — ноль и висячая точка
@@ -1298,7 +1291,7 @@
 
         // Court Types table
         if (court._courtTypes && court._courtTypes.length > 0) {
-            var TYPE_LABELS = { indoor: (isEn ? 'Indoor' : isKg ? 'Жабык' : 'Крытый'), outdoor: (isEn ? 'Outdoor' : isKg ? 'Ачык' : 'Открытый') };
+            var TYPE_LABELS = { indoor: (KSLT_YAZYK.выбрать('Indoor', 'Жабык', 'Крытый')), outdoor: (KSLT_YAZYK.выбрать('Outdoor', 'Ачык', 'Открытый')) };
             html += '<div class="ct-section ct-fade-in">' +
                 '<h2 class="ct-section-title">' + (L_labels.courtTypesTitle || 'Типы кортов') + '</h2>' +
                 '<div class="ct-types-table">' +
@@ -1311,7 +1304,7 @@
             court._courtTypes.forEach(function(ct) {
                 var typeLabel = TYPE_LABELS[ct.type] || ct.type || '';
                 var surfaceLabel = ПОКРЫТИЯ[ct.surface] || ct.surface;
-                var priceText = ct.price ? (ct.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '—';
+                var priceText = ct.price ? (ct.price + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '—';
                 if (ct.partner && ct.discount) {
                     priceText += ' <span class="ct-svc-discount">KSLT -' + ct.discount + '%</span>';
                 } else if (ct.partner) {
@@ -1337,8 +1330,8 @@
                         '<span>' + (L_labels.thServicePrice || 'Цена') + '</span>' +
                     '</div>';
             court._additionalServices.forEach(function(svc) {
-                var svcName = isEn ? (svc.name_en || svc.name) : isKg ? (svc.name_kg || svc.name) : svc.name;
-                var priceText = svc.price ? (svc.price + ' ' + (isEn ? 'som/hr' : isKg ? 'сом/саат' : 'сом/час')) : '—';
+                var svcName = KSLT_YAZYK.выбрать(svc.name_en || svc.name, svc.name_kg || svc.name, svc.name);
+                var priceText = svc.price ? (svc.price + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '—';
                 if (svc.partner && svc.discount) {
                     priceText += ' <span class="ct-svc-discount">KSLT -' + svc.discount + '%</span>';
                 } else if (svc.partner) {
@@ -1391,7 +1384,7 @@
             html += '<div class="ct-section ct-fade-in ct-discount-section">' +
                 '<h2 class="ct-section-title">' + L_labels.discountTitle + '</h2>' +
                 '<div class="ct-discount-list" id="ctDiscountList">' +
-                    '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</p>' +
+                    '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (KSLT_YAZYK.выбрать('Loading...', 'Жүктөлүүдө...', 'Загрузка...')) + '</p>' +
                 '</div>' +
             '</div>';
         }
@@ -1510,13 +1503,13 @@
 
             var services = result.data || [];
             if (!services.length) {
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (isEn ? 'No discounts available' : (isKg ? 'Арзандатуу жок' : 'Скидок пока нет')) + '</p>';
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (KSLT_YAZYK.выбрать('No discounts available', 'Арзандатуу жок', 'Скидок пока нет')) + '</p>';
                 return;
             }
 
             var html = '';
             services.forEach(function(svc) {
-                var svcName = isEn ? (svc.service_name_en || svc.service_name) : (isKg ? (svc.service_name_kg || svc.service_name) : svc.service_name);
+                var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
                 html += '<div class="ct-discount-item">' +
                     '<div class="ct-discount-info">' +
                         '<span class="ct-discount-name">' + esc(svcName) + '</span>' +
@@ -1574,7 +1567,7 @@
             // Build service name map
             var svcMap = {};
             services.forEach(function(s) {
-                var nm = isEn ? (s.service_name_en || s.service_name) : (isKg ? (s.service_name_kg || s.service_name) : s.service_name);
+                var nm = KSLT_YAZYK.выбрать(s.service_name_en || s.service_name, s.service_name_kg || s.service_name, s.service_name);
                 svcMap[s.id] = nm;
             });
 
@@ -1649,12 +1642,12 @@
 
             if (result.error) {
                 console.error('Voucher RPC error:', result.error);
-                showToast(result.error.message || (isEn ? 'Error getting discount' : (isKg ? 'Арзандатуу алууда ката' : 'Ошибка получения скидки')), 'error');
+                showToast(result.error.message || (KSLT_YAZYK.выбрать('Error getting discount', 'Арзандатуу алууда ката', 'Ошибка получения скидки')), 'error');
                 return;
             }
             var data = result.data;
             if (!data) {
-                showToast(isEn ? 'Error getting discount' : (isKg ? 'Арзандатуу алууда ката' : 'Ошибка получения скидки'), 'error');
+                showToast(KSLT_YAZYK.выбрать('Error getting discount', 'Арзандатуу алууда ката', 'Ошибка получения скидки'), 'error');
                 return;
             }
             if (data.error) {
@@ -1667,10 +1660,10 @@
                     return;
                 }
                 var msgs = {
-                    not_authenticated: isEn ? 'Please log in' : (isKg ? 'Кириңиз' : 'Войдите в систему'),
-                    not_member: isEn ? 'Membership required' : (isKg ? 'Мүчөлүк керек' : 'Требуется членство'),
-                    service_not_found: isEn ? 'Service not found' : (isKg ? 'Кызмат табылган жок' : 'Услуга не найдена'),
-                    entity_not_partner: isEn ? 'Not a partner' : (isKg ? 'Өнөктөш эмес' : 'Не партнёр')
+                    not_authenticated: KSLT_YAZYK.выбрать('Please log in', 'Кириңиз', 'Войдите в систему'),
+                    not_member: KSLT_YAZYK.выбрать('Membership required', 'Мүчөлүк керек', 'Требуется членство'),
+                    service_not_found: KSLT_YAZYK.выбрать('Service not found', 'Кызмат табылган жок', 'Услуга не найдена'),
+                    entity_not_partner: KSLT_YAZYK.выбрать('Not a partner', 'Өнөктөш эмес', 'Не партнёр')
                 };
                 showToast(msgs[data.error] || data.error, 'error');
                 return;
@@ -1693,7 +1686,7 @@
            существуют и верны, но до сегодня все три генератора QR строили
            только русский адрес: обе переведённые страницы были недостижимы.
            Язык здесь уже известен — им подписан сам QR. */
-        var verifySuffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var verifySuffix = KSLT_YAZYK.суффикс;
         var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
         var expiresDate = new Date(voucher.expires_at);
         var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -1755,7 +1748,7 @@
                     услуга: voucher.service_name,
                     заведение: voucher.entity_name,
                     срок: expiresStr,
-                    язык: isEn ? 'en' : (isKg ? 'kg' : 'ru')
+                    язык: KSLT_YAZYK.выбрать('en', 'kg', 'ru')
                 });
                 window.KSLT_VAUCHER.скачать(карточка,
                     'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png');
@@ -1771,11 +1764,11 @@
 
         var title, desc;
         if (reason === 'daily') {
-            title = isEn ? 'Daily limit reached' : (isKg ? 'Күнүмдүк лимит' : 'Дневной лимит');
-            desc = isEn ? 'You can get a new discount for this service tomorrow' : (isKg ? 'Бул кызмат үчүн жаңы арзандатууну эртең ала аласыз' : 'Новую скидку на эту услугу можно получить завтра');
+            title = KSLT_YAZYK.выбрать('Daily limit reached', 'Күнүмдүк лимит', 'Дневной лимит');
+            desc = KSLT_YAZYK.выбрать('You can get a new discount for this service tomorrow', 'Бул кызмат үчүн жаңы арзандатууну эртең ала аласыз', 'Новую скидку на эту услугу можно получить завтра');
         } else {
             title = L_labels.voucherLimit;
-            desc = isEn ? 'Use or wait for your current discount to expire' : (isKg ? 'Учурдагы арзандатууңузду колдонуңуз же мөөнөтү бүткөнчө күтүңүз' : 'Используйте текущую скидку или дождитесь её истечения');
+            desc = KSLT_YAZYK.выбрать('Use or wait for your current discount to expire', 'Учурдагы арзандатууңузду колдонуңуз же мөөнөтү бүткөнчө күтүңүз', 'Используйте текущую скидку или дождитесь её истечения');
         }
 
         var modal = document.createElement('div');

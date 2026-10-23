@@ -8,7 +8,7 @@
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         loading: 'Loading...',
         notFound: 'Battle not found',
         notFoundDesc: 'This battle does not exist or has not been published yet.',
@@ -55,7 +55,7 @@
         set: 'Set',
         cancelled: 'Battle cancelled',
         cancelledDesc: 'This battle has been cancelled.'
-    } : isKg ? {
+    }, {
         loading: 'Жүктөлүүдө...',
         notFound: 'Баттл табылган жок',
         notFoundDesc: 'Бул баттл жок же азырынча жарыяланган эмес.',
@@ -102,7 +102,7 @@
         set: 'Сет',
         cancelled: 'Баттл жокко чыгарылды',
         cancelledDesc: 'Бул баттл жокко чыгарылды.'
-    } : {
+    }, {
         loading: 'Загрузка...',
         notFound: 'Баттл не найден',
         notFoundDesc: 'Этот баттл не существует или ещё не опубликован.',
@@ -149,7 +149,7 @@
         set: 'Сет',
         cancelled: 'Баттл отменён',
         cancelledDesc: 'Этот баттл был отменён.'
-    };
+    });
 
     var CAT_LABELS = {
         'men-tour': 'Tour', 'men-futures': 'Futures', 'men-challenger': 'Challenger',
@@ -204,11 +204,11 @@
         var params = new URLSearchParams(window.location.search);
         var from = params.get('from') || 'home';
 
-        var suffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var suffix = KSLT_YAZYK.суффикс;
 
-        var homeLabel = isEn ? 'Home' : (isKg ? 'Башкы бет' : 'Главная');
-        var tourLabel = isEn ? 'Tournaments' : (isKg ? 'Турнирлер' : 'Турниры');
-        var battleLabel = isEn ? 'Battles' : (isKg ? 'Баттлдар' : 'Баттлы');
+        var homeLabel = KSLT_YAZYK.выбрать('Home', 'Башкы бет', 'Главная');
+        var tourLabel = KSLT_YAZYK.выбрать('Tournaments', 'Турнирлер', 'Турниры');
+        var battleLabel = KSLT_YAZYK.выбрать('Battles', 'Баттлдар', 'Баттлы');
 
         var html = '';
 
@@ -219,7 +219,7 @@
             html += '<span class="kslt-back-sep">/</span>';
             html += '<span class="kslt-back kslt-back-here">' + battleLabel + '</span>';
         } else {
-            var homeHref = isEn ? '../index-en.html' : (isKg ? '../index-kg.html' : '../index.html');
+            var homeHref = KSLT_YAZYK.выбрать('../index-en.html', '../index-kg.html', '../index.html');
             html += '<a href="' + homeHref + '" class="kslt-back">\u2190 ' + homeLabel + '</a>';
             html += '<span class="kslt-back-sep">/</span>';
             html += '<span class="kslt-back kslt-back-here">' + battleLabel + '</span>';
@@ -445,8 +445,7 @@
      */
     function sideLabel(b, side) {
         var pre = side === 1 ? 'challenger' : 'opponent';
-        var main = isEn ? (b[pre + '_name_en'] || b[pre + '_name'])
-                 : (isKg ? (b[pre + '_name_kg'] || b[pre + '_name']) : b[pre + '_name']);
+        var main = KSLT_YAZYK.выбрать(b[pre + '_name_en'] || b[pre + '_name'], b[pre + '_name_kg'] || b[pre + '_name'], b[pre + '_name']);
         var mate = b[pre + '_partner_display'];
         if (!mate) return main;
         var BF = window.KSLT_BATTLE_FORMAT;
@@ -539,8 +538,7 @@
             dblW  = b[pre + '_partner_dbl_wins'];  dblL = b[pre + '_partner_dbl_losses'];
             mixW  = b[pre + '_partner_mix_wins'];  mixL = b[pre + '_partner_mix_losses'];
         } else {
-            name  = isEn ? (b[pre + '_name_en'] || b[pre + '_name'])
-                  : (isKg ? (b[pre + '_name_kg'] || b[pre + '_name']) : b[pre + '_name']);
+            name  = KSLT_YAZYK.выбрать(b[pre + '_name_en'] || b[pre + '_name'], b[pre + '_name_kg'] || b[pre + '_name'], b[pre + '_name']);
             cat   = CAT_LABELS[b[pre + '_category'] || b[pre + '_cat']] ||
                     b[pre + '_category'] || b[pre + '_cat'] || '';
             ntrp  = b[pre + '_ntrp'] || b[pre + '_player_ntrp'];
@@ -668,7 +666,7 @@
                     : (matchDate && matchTime
                         ? '<div class="ch-voting-until">' + L.votingUntil + ' ' + matchDate + ' ' + matchTime + '</div>'
                         : '')) +
-                (!_userId && !closed ? '<div class="ch-voting-login"><a href="' + (isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html')) + '">' + L.loginToVote + '</a></div>' : '') +
+                (!_userId && !closed ? '<div class="ch-voting-login"><a href="' + (KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html')) + '">' + L.loginToVote + '</a></div>' : '') +
                 '<div id="voteStatus">' + votedBadgeHtml + '</div>' +
             '</div>';
 
@@ -933,7 +931,7 @@
         }
         section.style.display = '';
 
-        var duelLabel = isEn ? '(Duel)' : (isKg ? '(Чакыруу)' : '(Вызов)');
+        var duelLabel = KSLT_YAZYK.выбрать('(Duel)', '(Чакыруу)', '(Вызов)');
 
         function rowHtml(m, hidden) {
             var с = сторонаПобедителя(m);

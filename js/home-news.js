@@ -18,16 +18,12 @@
     var isEn = /-en\.html$/.test(путь);
     var isKg = /-kg\.html$/.test(путь);
 
-    var L = isEn
-        ? { title: 'News', all: 'All news', empty: 'No news yet',
-            cats: { results: 'Results', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' } }
-        : (isKg
-            ? { title: 'Жаңылыктар', all: 'Бардык жаңылыктар', empty: 'Жаңылыктар али жок',
-                cats: { results: 'Жыйынтыктар', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' } }
-            : { title: 'Новости', all: 'Все новости', empty: 'Новостей пока нет',
+    var L = KSLT_YAZYK.выбрать({ title: 'News', all: 'All news', empty: 'No news yet',
+            cats: { results: 'Results', interview: 'Interview', announcement: 'Announcement', world: 'World Tennis' } }, { title: 'Жаңылыктар', all: 'Бардык жаңылыктар', empty: 'Жаңылыктар али жок',
+                cats: { results: 'Жыйынтыктар', interview: 'Интервью', announcement: 'Жарыялоо', world: 'Дүйнөлүк теннис' } }, { title: 'Новости', all: 'Все новости', empty: 'Новостей пока нет',
                 cats: { results: 'Результаты', interview: 'Интервью', announcement: 'Анонс', world: 'Мировой теннис' } });
 
-    var страницаНовостей = isEn ? 'pages/news-en.html' : (isKg ? 'pages/news-kg.html' : 'pages/news.html');
+    var страницаНовостей = KSLT_YAZYK.выбрать('pages/news-en.html', 'pages/news-kg.html', 'pages/news.html');
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
@@ -44,7 +40,7 @@
         if (!iso) return '';
         var d = new Date(iso);
         if (isNaN(d.getTime())) return '';
-        return d.toLocaleDateString(isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU'),
+        return d.toLocaleDateString(KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU'),
             { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
@@ -116,12 +112,10 @@
         /* Последней плиткой — «Все новости». Видна только в ленте на телефоне
            боком: у полосы должен быть конец, иначе непонятно, докуда листать.
            В сетке её прячет css — там ту же роль исполняет ссылка в шапке. */
-        var путь = window.location.pathname;
-        var все = путь.indexOf('-en') !== -1
-            ? { href: 'pages/news-en.html', текст: 'All news' }
-            : путь.indexOf('-kg') !== -1
-                ? { href: 'pages/news-kg.html', текст: 'Бардык жаңылыктар' }
-                : { href: 'pages/news.html', текст: 'Все новости' };
+        var все = KSLT_YAZYK.выбрать(
+            { href: 'pages/news-en.html', текст: 'All news' },
+            { href: 'pages/news-kg.html', текст: 'Бардык жаңылыктар' },
+            { href: 'pages/news.html', текст: 'Все новости' });
         место.innerHTML = новости.map(карточка).join('')
             + '<a class="hn-more" href="' + все.href + '">'
             + '<span>' + все.текст + '</span><span aria-hidden="true">→</span></a>';

@@ -626,18 +626,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (await isLoggedIn()) return;
 
-        var isEn = KSLT_YAZYK.en;
-        var isKg = KSLT_YAZYK.kg;
-        var authUrl = isEn ? 'pages/auth-en.html' : (isKg ? 'pages/auth-kg.html' : 'pages/auth.html');
-        var ctaBtn = isEn ? 'Sign In / Register' : (isKg ? 'Кирүү / Каттоо' : 'Войти / Регистрация');
+        var authUrl = KSLT_YAZYK.выбрать('pages/auth-en.html', 'pages/auth-kg.html', 'pages/auth.html');
+        var ctaBtn = KSLT_YAZYK.выбрать('Sign In / Register', 'Кирүү / Каттоо', 'Войти / Регистрация');
 
         // --- Rankings: show top 3, blur rest ---
         if (rankingsSection) {
             // Строки размывает js/home-rankings.js: он рисует их после ответа
             // базы, а этот код отрабатывает раньше — размывать было нечего
 
-            var rankTitle = isEn ? 'Full rankings are visible after signing in'
-                : (isKg ? 'Толук рейтинг киргенден кийин көрүнөт' : 'Весь рейтинг виден после входа');
+            var rankTitle = KSLT_YAZYK.выбрать('Full rankings are visible after signing in', 'Толук рейтинг киргенден кийин көрүнөт', 'Весь рейтинг виден после входа');
             var rankCta = document.createElement('div');
             rankCta.className = 'guest-section-cta';
             rankCta.innerHTML =
@@ -662,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cards[i].style.userSelect = 'none';
             }
 
-            var playersTitle = isEn ? 'Register to find a player' : (isKg ? 'Оюнчу издөө үчүн катталыңыз' : 'Зарегистрируйтесь для поиска игрока');
+            var playersTitle = KSLT_YAZYK.выбрать('Register to find a player', 'Оюнчу издөө үчүн катталыңыз', 'Зарегистрируйтесь для поиска игрока');
             var playersCta = document.createElement('div');
             playersCta.className = 'guest-section-cta guest-section-cta-players';
             playersCta.innerHTML =

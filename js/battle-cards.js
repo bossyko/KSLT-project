@@ -11,7 +11,7 @@
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         battle: 'BATTLE',
         vs: 'VS',
         votes: 'votes',
@@ -24,7 +24,7 @@
         voteRecorded: 'Vote recorded!',
         moreDetails: 'More details',
         allBattles: 'All battles'
-    } : (isKg ? {
+    }, {
         battle: 'БАТТЛ',
         vs: 'VS',
         votes: 'добуш',
@@ -37,7 +37,7 @@
         voteRecorded: 'Добуш кабыл алынды!',
         moreDetails: 'Толугураак',
         allBattles: 'Бардык баттлдар'
-    } : {
+    }, {
         battle: 'БАТТЛ',
         vs: 'VS',
         votes: 'голосов',
@@ -78,7 +78,7 @@
     function detailUrl(id) {
         var inPages = window.location.pathname.indexOf('/pages/') !== -1;
         var prefix = inPages ? '' : 'pages/';
-        var suffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var suffix = KSLT_YAZYK.суффикс;
         var from = inPages ? 'tournaments' : 'home';
         return prefix + 'challenge' + suffix + '.html?id=' + id + '&from=' + from;
     }
@@ -483,7 +483,7 @@
         // "All battles" link — compute URL based on location
         var inPages = window.location.pathname.indexOf('/pages/') !== -1;
         var prefix = inPages ? '' : 'pages/';
-        var suffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var suffix = KSLT_YAZYK.суффикс;
         var allBattlesUrl = prefix + 'battles-overview' + suffix + '.html';
 
         container.innerHTML =

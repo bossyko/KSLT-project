@@ -19,19 +19,19 @@
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         details: 'Details', register: 'Register', format: 'Format',
         participants: 'Players', pairs: 'Pairs', prize: 'Prize',
         reg: 'Reg', noRating: 'Unranked',
         fee: 'Fee', feeMember: 'KSLT members', feeGuest: 'non-members',
         perPair: 'per player', som: 'som'
-    } : (isKg ? {
+    }, {
         details: 'Толугураак', register: 'Каттоо', format: 'Формат',
         participants: 'Катышуучулар', pairs: 'Жуптар', prize: 'Сыйлык',
         reg: 'Кат', noRating: 'Рейтингсиз',
         fee: 'Взнос', feeMember: 'КСЛТ мүчөлөрүнө', feeGuest: 'калгандарга',
         perPair: 'оюнчудан', som: 'сом'
-    } : {
+    }, {
         details: 'Подробнее', register: 'Регистрация', format: 'Формат',
         participants: 'Участники', pairs: 'Пар', prize: 'Призовой',
         reg: 'Рег', noRating: 'Без рейтинга',
@@ -39,13 +39,9 @@
         perPair: 'с участника', som: 'сом'
     });
 
-    var CL = isEn
-        ? { days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }
-        : (isKg
-            ? { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }
-            : { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
+    var CL = KSLT_YAZYK.выбрать({ days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }, { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }, { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
 
-    var detailPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+    var detailPage = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
 
     var pinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
@@ -356,7 +352,7 @@
 
             var wasLabel = btn.textContent;
             btn.disabled = true;
-            btn.textContent = isEn ? 'Sending...' : (isKg ? 'Жөнөтүлүүдө...' : 'Отправка...');
+            btn.textContent = KSLT_YAZYK.выбрать('Sending...', 'Жөнөтүлүүдө...', 'Отправка...');
 
             window.KSLT_REG.submit(client, btn.dataset.tid, { isEn: isEn, isKg: isKg }).then(function(info) {
                 if (info && info.created) {

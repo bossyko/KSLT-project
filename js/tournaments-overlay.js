@@ -10,7 +10,7 @@
     var client = window.supabaseClient;
 
     // Detail page URL base
-    var detailPage = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+    var detailPage = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
 
     if (!client) return;
 
@@ -59,8 +59,7 @@
             // «Friendly Weekend» — название самого разряда, как в админке и на
             // карточках. «Турниры Дружеские» звучало переводом с чужого языка
             заголовок.textContent = category === 'friendly' ? имя
-                : (isEn ? (имя + ' Tournaments')
-                    : (isKg ? (имя + ' турнирлери') : ('Турниры ' + имя)));
+                : (KSLT_YAZYK.выбрать(имя + ' Tournaments', имя + ' турнирлери', 'Турниры ' + имя));
         }
 
         var фон = document.getElementById('heroBg');
@@ -91,15 +90,15 @@
        (решение Кости 30.09), а призового фонда у них не бывает.
        Так у всех шести категорий обложка несёт три живых числа, и ни одна
        не выглядит пустой. */
-    var friendlyLabels = isEn ? {
+    var friendlyLabels = KSLT_YAZYK.выбрать({
         total: 'tournaments this season',
         players: 'players',
         completed: 'completed'
-    } : (isKg ? {
+    }, {
         total: 'мезгилдеги мелдештер',
         players: 'оюнчу',
         completed: 'аяктаган'
-    } : {
+    }, {
         total: 'турниров в сезоне',
         players: 'игроков',
         completed: 'завершённых'
@@ -300,21 +299,18 @@
                 ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
                 : ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
-            var formatLabels = isEn
-                ? { singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }
-                : (isKg ? { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }
-                : { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
+            var formatLabels = KSLT_YAZYK.выбрать({ singles: 'Singles', doubles: 'Doubles', mixed_doubles: 'Mixed Doubles' }, { singles: 'Жалгыз', doubles: 'Жуптук', mixed_doubles: 'Аралаш жуптук' }, { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' });
 
             /* Подписи статусов живут в js/tournament-status.js — одно определение на одно понятие */
-            var statusLabels = window.KSLT_STATUS.подписи(isEn ? 'en' : (isKg ? 'kg' : 'ru'));
+            var statusLabels = window.KSLT_STATUS.подписи(KSLT_YAZYK.выбрать('en', 'kg', 'ru'));
 
-            var L = isEn ? {
+            var L = KSLT_YAZYK.выбрать({
                 format: 'Format', participants: 'Players', prizeFund: 'Prize',
                 gender: 'Gender', details: 'Details', register: 'Register', calendar: 'Add to calendar'
-            } : (isKg ? {
+            }, {
                 format: 'Формат', participants: 'Катышуучулар', prizeFund: 'Сыйлык',
                 gender: 'Жынысы', details: 'Толугураак', register: 'Каттоо', calendar: 'Календарга'
-            } : {
+            }, {
                 format: 'Формат', participants: 'Участники', prizeFund: 'Призовой',
                 gender: 'Пол', details: 'Подробнее', register: 'Регистрация', calendar: 'В календарь'
             });
@@ -348,9 +344,9 @@
                 var gender = t.gender || '';
                 var genderLabel = (t.format !== 'mixed_doubles' && category !== 'friendly' && (gender === 'men' || gender === 'women'))
                     ? (gender === 'women'
-                        ? (isEn ? 'Women' : (isKg ? 'Аялдар' : 'Женский'))
-                        : (isEn ? 'Men' : (isKg ? 'Эркектер' : 'Мужской')))
-                    : (gender === 'mixed' ? (isEn ? 'Mixed' : (isKg ? 'Аралаш' : 'Смешанный')) : '');
+                        ? (KSLT_YAZYK.выбрать('Women', 'Аялдар', 'Женский'))
+                        : (KSLT_YAZYK.выбрать('Men', 'Эркектер', 'Мужской')))
+                    : (gender === 'mixed' ? (KSLT_YAZYK.выбрать('Mixed', 'Аралаш', 'Смешанный')) : '');
 
                 // Registration dates line (show only if reg_end >= today)
                 var regLine = '';
@@ -365,10 +361,10 @@
 
                 return {
                     id: t.id,
-                    name: isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title),
+                    name: KSLT_YAZYK.выбрать(t.title_en || t.title, t.title_kg || t.title, t.title),
                     date: { day: day, month: month },
                     _dateSort: t.date_start,
-                    location: isEn ? (t.location_en || t.location) : (isKg ? (t.location_kg || t.location || '') : (t.location || '')),
+                    location: KSLT_YAZYK.выбрать(t.location_en || t.location, t.location_kg || t.location || '', t.location || ''),
                     time: '',
                     format: formatLabels[t.format] || t.format || '',
                     participants: t.max_participants ? (regCounts[t.id] || 0) + '/' + t.max_participants : '',
@@ -443,7 +439,7 @@
             var pastGrid = document.getElementById('pastTournamentsGrid');
             var pastSection = document.getElementById('past');
 
-            var showMoreLabel = isEn ? 'Show more' : (isKg ? 'Дагы көрсөтүү' : 'Показать ещё');
+            var showMoreLabel = KSLT_YAZYK.выбрать('Show more', 'Дагы көрсөтүү', 'Показать ещё');
             var showMoreArrow = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
 
             /** Кнопка «показать ещё» под блоком — одна на блок, перерисовывается вместе с ним */
@@ -555,19 +551,19 @@
     }
 
     /* Тексты пустого архива */
-    var EMPTY = isEn ? {
+    var EMPTY = KSLT_YAZYK.выбрать({
         pastTitle: 'No tournaments played here yet',
         pastText: 'The first one will also be the first line in the archive.'
-    } : (isKg ? {
+    }, {
         pastTitle: 'Бул категорияда азырынча оюн болгон эмес',
         pastText: 'Биринчи мелдеш архивдин биринчи сабы болот.'
-    } : {
+    }, {
         pastTitle: 'В этой категории ещё не играли',
         pastText: 'Первый турнир станет и первой строкой в архиве.'
     });
 
     /* Подписи под заголовками блоков */
-    var SUB = isEn ? {
+    var SUB = KSLT_YAZYK.выбрать({
         liveOne: 'tournament in play — the score updates live',
         liveMany: 'tournaments in play — the score updates live',
         upcomingOne: 'tournament ahead',
@@ -575,7 +571,7 @@
         nearest: 'nearest',
         pastOne: 'tournament in the archive',
         pastMany: 'tournaments in the archive'
-    } : (isKg ? {
+    }, {
         liveOne: 'мелдеш жүрүп жатат — эсеби түз эфирде',
         liveMany: 'мелдеш жүрүп жатат — эсеби түз эфирде',
         upcomingOne: 'мелдеш алдыда',
@@ -583,7 +579,7 @@
         nearest: 'эң жакыны',
         pastOne: 'мелдеш архивде',
         pastMany: 'мелдеш архивде'
-    } : {
+    }, {
         liveOne: 'турнир в игре — счёт обновляется вживую',
         liveMany: 'турнира в игре — счёт обновляется вживую',
         upcomingOne: 'турнир впереди',
@@ -604,11 +600,7 @@
 
     function humanDate(iso) {
         if (!iso) return '';
-        var months = isEn
-            ? ['January','February','March','April','May','June','July','August','September','October','November','December']
-            : (isKg
-                ? ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь']
-                : ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
+        var months = KSLT_YAZYK.выбрать(['January','February','March','April','May','June','July','August','September','October','November','December'], ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'], ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']);
         var d = new Date(iso + 'T00:00:00');
         return isEn ? (months[d.getMonth()] + ' ' + d.getDate())
                     : (d.getDate() + ' ' + months[d.getMonth()]);

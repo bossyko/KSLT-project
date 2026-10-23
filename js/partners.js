@@ -4,11 +4,9 @@
 // ========================================
 
 (function() {
-    var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
     var client = window.supabaseClient;
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         heroTagline: 'KSLT Partners',
         heroTitle: 'Player search',
         heroDesc: 'Who to play with today: players of your level nearby',
@@ -51,7 +49,7 @@
         modalRegText: 'Get a KSLT membership to send game invitations to other players',
         modalRegBtn: 'Pay for membership',
         modalRegDisclaimer: 'By paying, you agree to the <a href="rules-en.html" target="_blank">rules</a> and <a href="pricing-en.html" target="_blank">pricing</a> of KSLT'
-    } : isKg ? {
+    }, {
         heroTagline: 'KSLT Өнөктөштөр',
         heroTitle: 'Оюнчу издөө',
         heroDesc: 'Бүгүн ким менен ойноо: жаныңыздагы деңгээлиңиздеги оюнчулар',
@@ -94,7 +92,7 @@
         modalRegText: 'Башка оюнчуларга оюнга чакыруу жөнөтүү үчүн КСЛТ мүчөлүгүн алыңыз',
         modalRegBtn: 'Мүчөлүктү төлөө',
         modalRegDisclaimer: 'Баскычты басуу менен, <a href="rules-kg.html" target="_blank">эрежелер</a> жана <a href="pricing-kg.html" target="_blank">баалар</a> менен тааныштыгыңызды тастыктайсыз'
-    } : {
+    }, {
         heroTagline: 'КСЛТ Сообщество',
         heroTitle: 'Поиск игрока',
         heroDesc: 'С кем сыграть сегодня: игроки твоего уровня рядом',
@@ -137,10 +135,10 @@
         modalRegText: 'Оформите членство КСЛТ, чтобы отправлять приглашения на игру другим игрокам',
         modalRegBtn: 'Оплатить членство',
         modalRegDisclaimer: 'Нажимая кнопку, вы подтверждаете, что ознакомлены с <a href="rules.html" target="_blank">правилами</a> и <a href="pricing.html" target="_blank">тарифами</a> КСЛТ'
-    };
+    });
 
-    var authPage = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
-    var pricingPage = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+    var authPage = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
+    var pricingPage = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
     var _partners = [];
     var _currentFilter = 'all';
     var _ntrpFilter = null;
@@ -331,14 +329,14 @@
         var el = document.getElementById('ptFilters');
         if (!el) return;
 
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var servicesLink = KSLT_YAZYK.выбрать('services-en.html', 'services-kg.html', 'services.html');
 
         // Полоса та же, что на страницах категорий турниров, кортов и
         // тренеров: общий вид на весь сайт
         el.className = 'trn-filters';
         var html =
             '<div class="trn-filters-inner">' +
-            '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' + (KSLT_YAZYK.выбрать('Services', 'Кызматтар', 'Услуги')) + '</a>' +
             '<div class="trn-search-wrap">' +
             '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
             '<input type="search" class="trn-search-input" id="ptSearch" autocomplete="off" ' +
@@ -346,12 +344,12 @@
             '</div>';
 
         var ntrpRanges = [
-            { value: '', label: isEn ? 'All NTRP' : (isKg ? 'Баары NTRP' : 'Все NTRP') },
-            { value: '1-2.5', min: 1, max: 2.5, label: isEn ? 'Beginner (1.0\u20132.5)' : (isKg ? 'Башталгыч (1.0\u20132.5)' : 'Начинающий (1.0\u20132.5)') },
-            { value: '2.5-3.5', min: 2.5, max: 3.5, label: isEn ? 'Intermediate (2.5\u20133.5)' : (isKg ? 'Орточо (2.5\u20133.5)' : 'Средний (2.5\u20133.5)') },
-            { value: '3.5-4.5', min: 3.5, max: 4.5, label: isEn ? 'Advanced (3.5\u20134.5)' : (isKg ? '\u04e8\u043d\u04af\u043a\u043a\u04e9\u043d (3.5\u20134.5)' : 'Продвинутый (3.5\u20134.5)') },
-            { value: '4.5-5.5', min: 4.5, max: 5.5, label: isEn ? 'Strong (4.5\u20135.5)' : (isKg ? 'К\u04af\u0447\u0442\u04af\u04af (4.5\u20135.5)' : 'Сильный (4.5\u20135.5)') },
-            { value: '5.5-7', min: 5.5, max: 7, label: isEn ? 'Expert (5.5\u20137.0)' : (isKg ? 'Эксперт (5.5\u20137.0)' : 'Эксперт (5.5\u20137.0)') }
+            { value: '', label: KSLT_YAZYK.выбрать('All NTRP', 'Баары NTRP', 'Все NTRP') },
+            { value: '1-2.5', min: 1, max: 2.5, label: KSLT_YAZYK.выбрать('Beginner (1.0\u20132.5)', 'Башталгыч (1.0\u20132.5)', 'Начинающий (1.0\u20132.5)') },
+            { value: '2.5-3.5', min: 2.5, max: 3.5, label: KSLT_YAZYK.выбрать('Intermediate (2.5\u20133.5)', 'Орточо (2.5\u20133.5)', 'Средний (2.5\u20133.5)') },
+            { value: '3.5-4.5', min: 3.5, max: 4.5, label: KSLT_YAZYK.выбрать('Advanced (3.5\u20134.5)', '\u04e8\u043d\u04af\u043a\u043a\u04e9\u043d (3.5\u20134.5)', 'Продвинутый (3.5\u20134.5)') },
+            { value: '4.5-5.5', min: 4.5, max: 5.5, label: KSLT_YAZYK.выбрать('Strong (4.5\u20135.5)', 'К\u04af\u0447\u0442\u04af\u04af (4.5\u20135.5)', 'Сильный (4.5\u20135.5)') },
+            { value: '5.5-7', min: 5.5, max: 7, label: KSLT_YAZYK.выбрать('Expert (5.5\u20137.0)', 'Эксперт (5.5\u20137.0)', 'Эксперт (5.5\u20137.0)') }
         ];
         // Пол и NTRP — выпадающими списками в одну строку: чипы с системным
         // полем выбора занимали две, и поле выглядело чужим на тёмной теме
@@ -546,7 +544,7 @@
     function renderCard(p, extraClass) {
         var online = isOnline(p.last_seen);
         var name = escHtml(p.full_name);
-        var category = isEn ? (p.category_name_en || p.category_name) : (isKg ? (p.category_name_kg || p.category_name) : p.category_name);
+        var category = KSLT_YAZYK.выбрать(p.category_name_en || p.category_name, p.category_name_kg || p.category_name, p.category_name);
 
         // Play level fallback if no official category
         var levelMap = { beginner: L.levelBeginner, intermediate: L.levelIntermediate, advanced: L.levelAdvanced };
@@ -565,7 +563,7 @@
             ntrpHtml = '<div class="pt-ntrp-badge">NTRP ' + Number(p.ntrp_singles).toFixed(1) + '</div>';
         }
 
-        var playerPage = isEn ? 'player-en.html' : isKg ? 'player-kg.html' : 'player.html';
+        var playerPage = KSLT_YAZYK.выбрать('player-en.html', 'player-kg.html', 'player.html');
         var адрес = playerPage + '?id=' + escHtml(p.id);
 
         /* СЛОЙ-ССЫЛКА, А НЕ ОБРАБОТЧИК. Померено 13.10: девять карточек были

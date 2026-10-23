@@ -16,16 +16,10 @@
 (function () {
     'use strict';
 
-    var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
 
-    var L = isEn
-        ? { enter: 'Enter score', confirm: 'Confirm score', wait: 'waiting for opponent',
-            sent: 'waiting for confirmation', enterShort: 'score', confirmShort: 'confirm' }
-        : (isKg
-            ? { enter: 'Эсепти жазуу', confirm: 'Эсепти ырастоо', wait: 'каршылашты күтөбүз',
-                sent: 'ырастоону күтөбүз', enterShort: 'эсеп', confirmShort: 'ырастоо' }
-            : { enter: 'Вписать счёт', confirm: 'Подтвердить счёт', wait: 'ждём соперника',
+    var L = KSLT_YAZYK.выбрать({ enter: 'Enter score', confirm: 'Confirm score', wait: 'waiting for opponent',
+            sent: 'waiting for confirmation', enterShort: 'score', confirmShort: 'confirm' }, { enter: 'Эсепти жазуу', confirm: 'Эсепти ырастоо', wait: 'каршылашты күтөбүз',
+                sent: 'ырастоону күтөбүз', enterShort: 'эсеп', confirmShort: 'ырастоо' }, { enter: 'Вписать счёт', confirm: 'Подтвердить счёт', wait: 'ждём соперника',
                 sent: 'ждём подтверждения', enterShort: 'счёт', confirmShort: 'подтвердить' });
 
     var _мои = null;     // номер матча → его состояние

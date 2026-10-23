@@ -33,7 +33,7 @@
         if (!gm && !tg) return '';
 
         var html = '<div class="co-section co-fade-in">' +
-            '<h2 class="co-section-title">' + (isEn ? 'Location' : (isKg ? 'Жайгашкан жери' : 'Расположение')) + '</h2>' +
+            '<h2 class="co-section-title">' + (KSLT_YAZYK.выбрать('Location', 'Жайгашкан жери', 'Расположение')) + '</h2>' +
             '<div class="co-map-links-section">';
         if (tg) html += '<a href="' + esc(tg) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 2GIS</a>';
         if (gm) html += '<a href="' + esc(gm) + '" target="_blank" rel="noopener" class="co-map-link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps</a>';
@@ -50,7 +50,7 @@
        тренера, где место есть (`experienceFull`).
 
        Крючок `window.coachesLabels` снят: его не задавал никто. */
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         heroTitle: "Coaches",
         heroSubtitle: "Professional coaches for players of every level",
         filterAll: "All",
@@ -108,7 +108,7 @@
         pickService: "Choose a service",
         pickSubmit: "Get discount",
         noDiscountsConfigured: "No discounts set up yet"
-    } : (isKg ? {
+    }, {
         heroTitle: 'Машыктыруучулар',
         heroSubtitle: 'Бардык деңгээлдеги оюнчулар үчүн кесипкөй машыктыруучулар',
         filterAll: 'Баары',
@@ -166,7 +166,7 @@
         pickService: 'Кызматты тандаңыз',
         pickSubmit: 'Арзандатуу алуу',
         noDiscountsConfigured: 'Арзандатуу жок'
-    } : {
+    }, {
         heroTitle: "Тренеры",
         heroSubtitle: "Профессиональные тренеры для игроков всех уровней",
         filterAll: "Все",
@@ -293,11 +293,11 @@
             : isKg
             ? ((row.last_name_kg || row.last_name || '') + ' ' + (row.first_name_kg || row.first_name || '')).trim() || row.name_kg || row.name
             : ((row.last_name || '') + ' ' + (row.first_name || '')).trim() || row.name;
-        var spec = isEn ? (row.position_en || row.position || '') : isKg ? (row.position_kg || row.position || '') : (row.position || '');
-        var shortDesc = isEn ? (row.short_desc_en || row.short_desc || '') : isKg ? (row.short_desc_kg || row.short_desc || '') : (row.short_desc || '');
-        var bio = isEn ? (row.bio_en || row.bio || '') : isKg ? (row.bio_kg || row.bio || '') : (row.bio || '');
-        var court = isEn ? (row.court_en || row.court || '') : isKg ? (row.court_kg || row.court || '') : (row.court || '');
-        var achievements = isEn ? (row.achievements_en || row.achievements || []) : isKg ? (row.achievements_kg || row.achievements || []) : (row.achievements || []);
+        var spec = KSLT_YAZYK.выбрать(row.position_en || row.position || '', row.position_kg || row.position || '', row.position || '');
+        var shortDesc = KSLT_YAZYK.выбрать(row.short_desc_en || row.short_desc || '', row.short_desc_kg || row.short_desc || '', row.short_desc || '');
+        var bio = KSLT_YAZYK.выбрать(row.bio_en || row.bio || '', row.bio_kg || row.bio || '', row.bio || '');
+        var court = KSLT_YAZYK.выбрать(row.court_en || row.court || '', row.court_kg || row.court || '', row.court || '');
+        var achievements = KSLT_YAZYK.выбрать(row.achievements_en || row.achievements || [], row.achievements_kg || row.achievements || [], row.achievements || []);
         return {
             id: row.id,
             _isDb: true,
@@ -460,7 +460,7 @@
         var container = document.getElementById('coachesFilters');
         if (!container) return;
         var группы = ddГруппы();
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var servicesLink = KSLT_YAZYK.выбрать('services-en.html', 'services-kg.html', 'services.html');
 
         // Полоса та же, что на страницах категорий турниров и на кортах:
         // общий вид на весь сайт. Ссылка «назад» внутри полосы — снаружи
@@ -469,7 +469,7 @@
         var html =
             '<div class="trn-filters-inner">' +
                 '<a href="' + servicesLink + '" class="kslt-back trn-back">\u2190 ' +
-                    (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+                    (KSLT_YAZYK.выбрать('Services', 'Кызматтар', 'Услуги')) + '</a>' +
                 '<div class="trn-search-wrap">' +
                     '<svg class="trn-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
                     '<input type="text" class="trn-search-input" id="coachesSearch" placeholder="' + L.searchPlaceholder + '" autocomplete="off">' +
@@ -515,13 +515,11 @@
         if (filtered.length === 0) {
             var emptyText;
             if (loadFailed) {
-                emptyText = isEn ? 'Could not load the coaches. Please refresh the page.'
-                    : (isKg ? 'Машыктыруучулардын тизмеси жүктөлгөн жок. Баракты жаңылаңыз.'
-                    : 'Не удалось загрузить список тренеров. Обновите страницу.');
+                emptyText = KSLT_YAZYK.выбрать('Could not load the coaches. Please refresh the page.', 'Машыктыруучулардын тизмеси жүктөлгөн жок. Баракты жаңылаңыз.', 'Не удалось загрузить список тренеров. Обновите страницу.');
             } else if (_searchQuery || естьВыбранныйФильтр()) {
-                emptyText = isEn ? 'No coaches match your search' : (isKg ? 'Издөө боюнча машыктыруучу табылган жок' : 'По вашему запросу тренеров не нашлось');
+                emptyText = KSLT_YAZYK.выбрать('No coaches match your search', 'Издөө боюнча машыктыруучу табылган жок', 'По вашему запросу тренеров не нашлось');
             } else {
-                emptyText = isEn ? 'The list of coaches will appear soon' : (isKg ? 'Машыктыруучулардын тизмеси жакында пайда болот' : 'Список тренеров скоро появится');
+                emptyText = KSLT_YAZYK.выбрать('The list of coaches will appear soon', 'Машыктыруучулардын тизмеси жакында пайда болот', 'Список тренеров скоро появится');
             }
             container.innerHTML = '<div class="co-empty">' +
                 '<div class="co-empty-icon">' + (loadFailed ? '\u26A0\uFE0F' : '\uD83C\uDFBE') + '</div>' +
@@ -534,8 +532,8 @@
         var start = (_currentPage - 1) * PER_PAGE;
         var pageItems = filtered.slice(start, start + PER_PAGE);
 
-        var detailBase = isEn ? 'coach-en.html' : (isKg ? 'coach-kg.html' : 'coach.html');
-        var authLink = isEn ? 'auth-en.html?redirect=coaches' : (isKg ? 'auth-kg.html?redirect=coaches' : 'auth.html?redirect=coaches');
+        var detailBase = KSLT_YAZYK.выбрать('coach-en.html', 'coach-kg.html', 'coach.html');
+        var authLink = KSLT_YAZYK.выбрать('auth-en.html?redirect=coaches', 'auth-kg.html?redirect=coaches', 'auth.html?redirect=coaches');
         var html = '<div class="co-grid">';
         pageItems.forEach(function(c) {
             /* «Подробнее →» снято: карточка САМА ссылка на тренера, и
@@ -651,19 +649,19 @@
     // ---- SPONSORS — loaded via sponsors-loader.js ----
 
     function showMembershipModal(level) {
-        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
-        var pricingLink = isEn ? 'pricing-en.html' : (isKg ? 'pricing-kg.html' : 'pricing.html');
+        var authLink = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
+        var pricingLink = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');
         var isGuest = level === 'guest';
 
         var title = isGuest
-            ? (isEn ? 'Become a KSLT Member' : isKg ? 'KSLT мүчөсү болуңуз' : 'Станьте членом KSLT')
-            : (isEn ? 'Membership Required' : isKg ? 'Мүчөлүк керек' : 'Нужно членство');
+            ? (KSLT_YAZYK.выбрать('Become a KSLT Member', 'KSLT мүчөсү болуңуз', 'Станьте членом KSLT'))
+            : (KSLT_YAZYK.выбрать('Membership Required', 'Мүчөлүк керек', 'Нужно членство'));
         var text = isGuest
-            ? (isEn ? 'Register and become a KSLT member to get discounts at partner coaches' : isKg ? 'Катталыңыз жана KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз' : 'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров')
-            : (isEn ? 'Become a KSLT member to unlock discounts at partner coaches' : isKg ? 'KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз' : 'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров');
+            ? (KSLT_YAZYK.выбрать('Register and become a KSLT member to get discounts at partner coaches', 'Катталыңыз жана KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз', 'Зарегистрируйтесь и оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'))
+            : (KSLT_YAZYK.выбрать('Become a KSLT member to unlock discounts at partner coaches', 'KSLT мүчөсү болуп, машыктыруучулардан арзандатуу алыңыз', 'Оформите членство KSLT, чтобы получить скидки у партнёрских тренеров'));
         var btnText = isGuest
-            ? (isEn ? 'Sign Up' : isKg ? 'Каттоо' : 'Регистрация')
-            : (isEn ? 'View Plans' : isKg ? 'Тарифтар' : 'Тарифы');
+            ? (KSLT_YAZYK.выбрать('Sign Up', 'Каттоо', 'Регистрация'))
+            : (KSLT_YAZYK.выбрать('View Plans', 'Тарифтар', 'Тарифы'));
         var btnLink = isGuest ? authLink : pricingLink;
 
         var svgIcon = isGuest
@@ -755,7 +753,7 @@
 
         var optionsHtml = '';
         services.forEach(function(svc, i) {
-            var svcName = isEn ? (svc.service_name_en || svc.service_name) : (isKg ? (svc.service_name_kg || svc.service_name) : svc.service_name);
+            var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
             optionsHtml += '<div class="co-picker-option' + (i === 0 ? ' selected' : '') + '" data-service-id="' + svc.id + '">' +
                 '<div class="co-picker-radio"></div>' +
                 '<span class="co-picker-label">' + esc(svcName) + '</span>' +
@@ -869,7 +867,7 @@
         }
         if (!coach) {
             var container = document.getElementById('coachDetail');
-            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Coach not found</h2><a href="' + (isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html')) + '" class="kslt-back">\u2190 ' + L.backBtn + '</a></div>';
+            if (container) container.innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2>Coach not found</h2><a href="' + (KSLT_YAZYK.выбрать('coaches-en.html', 'coaches-kg.html', 'coaches.html')) + '" class="kslt-back">\u2190 ' + L.backBtn + '</a></div>';
             return;
         }
 
@@ -927,17 +925,17 @@
         var container = document.getElementById('coachDetail');
         if (!container) return;
 
-        var coachesLink = isEn ? 'coaches-en.html' : (isKg ? 'coaches-kg.html' : 'coaches.html');
-        var authLink = isEn ? 'auth-en.html' : (isKg ? 'auth-kg.html' : 'auth.html');
+        var coachesLink = KSLT_YAZYK.выбрать('coaches-en.html', 'coaches-kg.html', 'coaches.html');
+        var authLink = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
 
         // Breadcrumb — render before container so it's outside .co-container
-        var servicesLink = isEn ? 'services-en.html' : (isKg ? 'services-kg.html' : 'services.html');
+        var servicesLink = KSLT_YAZYK.выбрать('services-en.html', 'services-kg.html', 'services.html');
         var breadcrumb = document.createElement('div');
         // Тот же плавающий возврат, что на странице игрока: один вид на
         // всех карточках, и он не уезжает вместе с баннером
         breadcrumb.className = 'kslt-back-wrap kslt-back-float';
         breadcrumb.innerHTML =
-            '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (isEn ? 'Services' : (isKg ? 'Кызматтар' : 'Услуги')) + '</a>' +
+            '<a href="' + servicesLink + '" class="kslt-back">\u2190 ' + (KSLT_YAZYK.выбрать('Services', 'Кызматтар', 'Услуги')) + '</a>' +
             '<span class="kslt-back-sep">/</span>' +
             '<a href="' + coachesLink + '" class="kslt-back">' + L.backBtn + '</a>';
         container.parentNode.insertBefore(breadcrumb, container);
@@ -1048,7 +1046,7 @@
             html += '<div class="co-section co-fade-in co-discount-section">' +
                 '<h2 class="co-section-title">' + L.discountTitle + '</h2>' +
                 '<div class="co-discount-list" id="coDiscountList">' +
-                    '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (isEn ? 'Loading...' : (isKg ? 'Жүктөлүүдө...' : 'Загрузка...')) + '</p>' +
+                    '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (KSLT_YAZYK.выбрать('Loading...', 'Жүктөлүүдө...', 'Загрузка...')) + '</p>' +
                 '</div>' +
             '</div>';
         }
@@ -1103,13 +1101,13 @@
 
             var services = result.data || [];
             if (!services.length) {
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (isEn ? 'No discounts available' : (isKg ? 'Арзандатуу жок' : 'Скидок пока нет')) + '</p>';
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">' + (KSLT_YAZYK.выбрать('No discounts available', 'Арзандатуу жок', 'Скидок пока нет')) + '</p>';
                 return;
             }
 
             var html = '';
             services.forEach(function(svc) {
-                var svcName = isEn ? (svc.service_name_en || svc.service_name) : (isKg ? (svc.service_name_kg || svc.service_name) : svc.service_name);
+                var svcName = KSLT_YAZYK.выбрать(svc.service_name_en || svc.service_name, svc.service_name_kg || svc.service_name, svc.service_name);
                 html += '<div class="co-discount-item">' +
                     '<div class="co-discount-info">' +
                         '<span class="co-discount-name">' + esc(svcName) + '</span>' +
@@ -1166,7 +1164,7 @@
             // Build service name map
             var svcMap = {};
             services.forEach(function(s) {
-                var nm = isEn ? (s.service_name_en || s.service_name) : (isKg ? (s.service_name_kg || s.service_name) : s.service_name);
+                var nm = KSLT_YAZYK.выбрать(s.service_name_en || s.service_name, s.service_name_kg || s.service_name, s.service_name);
                 svcMap[s.id] = nm;
             });
 
@@ -1240,12 +1238,12 @@
 
             if (result.error) {
                 console.error('Voucher RPC error:', result.error);
-                showToast(result.error.message || (isEn ? 'Error getting discount' : (isKg ? 'Арзандатуу алууда ката' : 'Ошибка получения скидки')), 'error');
+                showToast(result.error.message || (KSLT_YAZYK.выбрать('Error getting discount', 'Арзандатуу алууда ката', 'Ошибка получения скидки')), 'error');
                 return;
             }
             var data = result.data;
             if (!data) {
-                showToast(isEn ? 'Error getting discount' : (isKg ? 'Арзандатуу алууда ката' : 'Ошибка получения скидки'), 'error');
+                showToast(KSLT_YAZYK.выбрать('Error getting discount', 'Арзандатуу алууда ката', 'Ошибка получения скидки'), 'error');
                 return;
             }
             if (data.error) {
@@ -1258,10 +1256,10 @@
                     return;
                 }
                 var msgs = {
-                    not_authenticated: isEn ? 'Please log in' : (isKg ? 'Кириңиз' : 'Войдите в систему'),
-                    not_member: isEn ? 'Membership required' : (isKg ? 'Мүчөлүк керек' : 'Требуется членство'),
-                    service_not_found: isEn ? 'Service not found' : (isKg ? 'Кызмат табылган жок' : 'Услуга не найдена'),
-                    entity_not_partner: isEn ? 'Not a partner' : (isKg ? 'Өнөктөш эмес' : 'Не партнёр')
+                    not_authenticated: KSLT_YAZYK.выбрать('Please log in', 'Кириңиз', 'Войдите в систему'),
+                    not_member: KSLT_YAZYK.выбрать('Membership required', 'Мүчөлүк керек', 'Требуется членство'),
+                    service_not_found: KSLT_YAZYK.выбрать('Service not found', 'Кызмат табылган жок', 'Услуга не найдена'),
+                    entity_not_partner: KSLT_YAZYK.выбрать('Not a partner', 'Өнөктөш эмес', 'Не партнёр')
                 };
                 showToast(msgs[data.error] || data.error, 'error');
                 return;
@@ -1283,7 +1281,7 @@
            существуют и верны, но до сегодня все три генератора QR строили
            только русский адрес: обе переведённые страницы были недостижимы.
            Язык здесь уже известен — им подписан сам QR. */
-        var verifySuffix = isEn ? '-en' : (isKg ? '-kg' : '');
+        var verifySuffix = KSLT_YAZYK.суффикс;
         var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;
         var expiresDate = new Date(voucher.expires_at);
         var expiresStr = expiresDate.toLocaleString(isEn ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -1338,7 +1336,7 @@
                     услуга: voucher.service_name,
                     заведение: voucher.entity_name,
                     срок: expiresStr,
-                    язык: isEn ? 'en' : (isKg ? 'kg' : 'ru')
+                    язык: KSLT_YAZYK.выбрать('en', 'kg', 'ru')
                 });
                 window.KSLT_VAUCHER.скачать(карточка,
                     'KSLT-voucher-' + voucher.qr_token.substring(0, 8) + '.png');
@@ -1354,11 +1352,11 @@
 
         var title, desc;
         if (reason === 'daily') {
-            title = isEn ? 'Daily limit reached' : (isKg ? 'Күнүмдүк лимит' : 'Дневной лимит');
-            desc = isEn ? 'You can get a new discount for this service tomorrow' : (isKg ? 'Бул кызмат үчүн жаңы арзандатууну эртең ала аласыз' : 'Новую скидку на эту услугу можно получить завтра');
+            title = KSLT_YAZYK.выбрать('Daily limit reached', 'Күнүмдүк лимит', 'Дневной лимит');
+            desc = KSLT_YAZYK.выбрать('You can get a new discount for this service tomorrow', 'Бул кызмат үчүн жаңы арзандатууну эртең ала аласыз', 'Новую скидку на эту услугу можно получить завтра');
         } else {
             title = L.voucherLimit;
-            desc = isEn ? 'Use or wait for your current discount to expire' : (isKg ? 'Учурдагы арзандатууңузду колдонуңуз же мөөнөтү бүткөнчө күтүңүз' : 'Используйте текущую скидку или дождитесь её истечения');
+            desc = KSLT_YAZYK.выбрать('Use or wait for your current discount to expire', 'Учурдагы арзандатууңузду колдонуңуз же мөөнөтү бүткөнчө күтүңүз', 'Используйте текущую скидку или дождитесь её истечения');
         }
 
         var modal = document.createElement('div');

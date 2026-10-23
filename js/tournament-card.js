@@ -20,30 +20,29 @@
     'use strict';
 
     var isEn = KSLT_YAZYK.en;
-    var isKg = KSLT_YAZYK.kg;
-    var LOCALE = isEn ? 'en-US' : (isKg ? 'ky-KG' : 'ru-RU');
+    var LOCALE = KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU');
 
-    var L = isEn ? {
+    var L = KSLT_YAZYK.выбрать({
         live: 'In progress', open: 'Registration open', soon: 'Upcoming',
         closed: 'Registration closed', done: 'Completed', cancelled: 'Cancelled',
         btnLive: 'View draw', btnOpen: 'Register', btnSoon: 'Details', btnDone: 'Results',
         participants: 'participants', cdPrefix: 'Starts in',
         d: 'd', h: 'h', m: 'm', s: 's'
-    } : isKg ? {
+    }, {
         live: 'Жүрүп жатат', open: 'Каттоо ачык', soon: 'Жакында',
         closed: 'Каттоо жабык', done: 'Аяктады', cancelled: 'Жокко чыгарылды',
         btnLive: 'Торду көрүү', btnOpen: 'Катталуу', btnSoon: 'Толугураак', btnDone: 'Жыйынтыктар',
         participants: 'катышуучу', cdPrefix: 'Башталат',
         d: 'к', h: 'с', m: 'м', s: 'сек'
-    } : {
+    }, {
         live: 'Идёт сейчас', open: 'Регистрация открыта', soon: 'Предстоящий',
         closed: 'Регистрация закрыта', done: 'Завершён', cancelled: 'Отменён',
         btnLive: 'Смотреть сетку', btnOpen: 'Регистрация', btnSoon: 'Подробнее', btnDone: 'Результаты',
         participants: 'участников', cdPrefix: 'Старт через',
         d: 'д', h: 'ч', m: 'м', s: 'с'
-    };
+    });
 
-    var PAGE = isEn ? 'tournament-en.html' : (isKg ? 'tournament-kg.html' : 'tournament.html');
+    var PAGE = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
     var BASE = window.location.pathname.indexOf('/pages/') !== -1 ? '' : 'pages/';
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
@@ -77,7 +76,7 @@
     function statusLabel(s) { return L[s] || L.soon; }
 
     function title(t) {
-        return isEn ? (t.title_en || t.title) : (isKg ? (t.title_kg || t.title) : t.title);
+        return KSLT_YAZYK.выбрать(t.title_en || t.title, t.title_kg || t.title, t.title);
     }
 
     /** Русская локаль дописывает « г.» после года — в карточке это мусор. */
@@ -183,8 +182,7 @@
                 '<h3 class="tc-title">' + esc(title(t)) + '</h3>';
 
         if (opts.featured && t.description) {
-            var d = isEn ? (t.description_en || t.description)
-                         : (isKg ? (t.description_kg || t.description) : t.description);
+            var d = KSLT_YAZYK.выбрать(t.description_en || t.description, t.description_kg || t.description, t.description);
             html += '<p class="tc-desc">' + esc(d) + '</p>';
         }
         if (meta.length) html += '<div class="tc-meta">' + meta.join('') + '</div>';
