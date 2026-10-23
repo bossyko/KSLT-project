@@ -18,8 +18,15 @@ fs.copyFileSync(path.join(КОРЕНЬ, 'tools', 'check-kyrgyzskiy-polnyy.js'),
 fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(ВРЕМ, 'node_modules', 'acorn'), { recursive: true });
 
+/* ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО: правило о шапке читает
+   страницы кабинета и образцы в `partials/`. */
+fs.cpSync(path.join(КОРЕНЬ, 'partials'), path.join(ВРЕМ, 'partials'), { recursive: true });
+fs.mkdirSync(path.join(ВРЕМ, 'pages'), { recursive: true });
+['dashboard.html', 'dashboard-en.html', 'dashboard-kg.html'].forEach(и =>
+  fs.copyFileSync(path.join(КОРЕНЬ, 'pages', и), path.join(ВРЕМ, 'pages', и)));
+
 const ST = 'js/stats.js', DB = 'js/dashboard.js', RL = 'js/kslt-rules.js',
-      CO = 'js/coaches.js', VF = 'js/verify.js';
+      CO = 'js/coaches.js', VF = 'js/verify.js', DKG = 'pages/dashboard-kg.html';
 
 const ОТКАТЫ = [
   ['сломать разбор одного файла', ST,
@@ -57,6 +64,11 @@ const ОТКАТЫ = [
    "        validBadge: 'ЖАРАКТУУ ВАУЧЕР',",
    "",
    'состав ключей словарей одинаков во всех трёх ветвях'],
+
+  ['вернуть русское слово в кыргызское меню кабинета', DKG,
+   "                        Кызматтар\n",
+   "                        Услуги\n",
+   'страницы вне сборщика шапки не несут чужих слов меню'],
 
   ['отнять у подписей NTRP кыргызский', RL,
    "lang === 'kg' ? 'жекече'",
