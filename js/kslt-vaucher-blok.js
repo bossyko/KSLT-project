@@ -39,6 +39,74 @@
     var Б = {};
 
     /**
+     * ИМЕНА КЛАССОВ — ОДИН НАБОР НА ПРОДУКТ (кусок 148, 23.10).
+     *
+     * До этого куска их передавал зовущий, и это было ВЕРНО ровно пока
+     * вид был у каждого раздела свой: приставки `co-` и `ct-` держали два
+     * описания одного вида. Замер показал, что описания побайтово равны
+     * (40 правил из 42 знак в знак, два расходились ТОЛЬКО именем
+     * анимации), а в кабинете тот же вид стоял третьим — инлайн-стилями.
+     *
+     * ПРИСТАВКА СНЯТА СОВСЕМ, А НЕ ПЕРЕНЕСЕНА: вид один, имя одно —
+     * `kslt-`, стили в `css/kslt-vaucher.css`. Имена стоят здесь ЦЕЛИКОМ,
+     * а не склеиваются: склеенный класс не находит ни сторож мёртвого
+     * кода, ни человек поиском (урок куска 144).
+     */
+    var КЛАССЫ = {
+        выбор: {
+            id: 'ksltPickerModal',
+            подложка: 'kslt-picker-overlay',
+            окно: 'kslt-picker-modal',
+            закрыть: 'kslt-picker-close',
+            заголовок: 'kslt-picker-title',
+            список: 'kslt-picker-options',
+            пункт: 'kslt-picker-option',
+            точка: 'kslt-picker-radio',
+            подпись: 'kslt-picker-label',
+            процент: 'kslt-picker-percent',
+            кнопка: 'kslt-picker-submit'
+        },
+        ваучер: {
+            id: 'ksltVoucherModal',
+            idЗакрыть: 'ksltVoucherClose',
+            idQR: 'ksltVoucherQR',
+            idСкачать: 'ksltVoucherDownload',
+            подложка: 'kslt-voucher-overlay',
+            окно: 'kslt-voucher-modal',
+            закрыть: 'kslt-voucher-close',
+            заголовок: 'kslt-voucher-title',
+            qr: 'kslt-voucher-qr',
+            детали: 'kslt-voucher-details',
+            строка: 'kslt-voucher-row',
+            процент: 'kslt-voucher-percent',
+            действия: 'kslt-voucher-actions',
+            скачать: 'kslt-voucher-download'
+        },
+        лимит: {
+            id: 'ksltLimitModal',
+            idЗакрыть: 'ksltLimitClose',
+            idOk: 'ksltLimitOk'
+        },
+        история: {
+            коробка: 'kslt-voucher-history',
+            пусто: 'kslt-vh-empty',
+            список: 'kslt-vh-list',
+            строка: 'kslt-vh-item',
+            дата: 'kslt-vh-date',
+            услуга: 'kslt-vh-service',
+            скидка: 'kslt-vh-discount',
+            состояние: 'kslt-vh-status',
+            состояния: {
+                active: 'kslt-vh-status-active',
+                used: 'kslt-vh-status-used',
+                expired: 'kslt-vh-status-expired'
+            },
+            кнопкаQR: 'kslt-vh-qr-btn'
+        }
+    };
+    Б.КЛАССЫ = КЛАССЫ;
+
+    /**
      * ДАТА И СРОК ВАУЧЕРА. Одно место на продукт.
      *
      * КЫРГЫЗСКОЙ ЛОКАЛИ В БРАУЗЕРЕ НЕТ — ЗАМЕРЕНО 23.10:
@@ -147,10 +215,10 @@
             }
             if (услуги.length === 1) {
                 Б.завести({ видСущности: о.видСущности, idСущности: о.idСущности,
-                            idУслуги: услуги[0].id, L: о.L, класс: о.класс });
+                            idУслуги: услуги[0].id, L: о.L });
             } else {
                 Б.выборУслуги({ видСущности: о.видСущности, idСущности: о.idСущности,
-                                услуги: услуги, L: о.L, класс: о.класс });
+                                услуги: услуги, L: о.L });
             }
         } catch (e) {
             showToast(e.message || 'Error', 'error');
@@ -162,7 +230,7 @@
 
     /** ВЫБОР УСЛУГИ. Первая выбрана заранее — чаще всего она и нужна. */
     Б.выборУслуги = function (о) {
-        var к = о.класс.выбор;
+        var к = КЛАССЫ.выбор;
         var было = document.getElementById(к.id);
         if (было) было.remove();
 
@@ -208,7 +276,7 @@
         подложка.querySelector('.' + к.кнопка).addEventListener('click', function () {
             подложка.remove();
             Б.завести({ видСущности: о.видСущности, idСущности: о.idСущности,
-                        idУслуги: выбрано, L: о.L, класс: о.класс });
+                        idУслуги: выбрано, L: о.L });
         });
         return подложка;
     };
@@ -238,11 +306,11 @@
             if (!данные) { showToast(ошибкаОбщая, 'error'); return; }
             if (данные.error) {
                 if (данные.error === 'active_voucher_exists') {
-                    Б.окноЛимита({ причина: 'active', L: о.L, класс: о.класс });
+                    Б.окноЛимита({ причина: 'active', L: о.L });
                     return;
                 }
                 if (данные.error === 'daily_limit') {
-                    Б.окноЛимита({ причина: 'daily', L: о.L, класс: о.класс });
+                    Б.окноЛимита({ причина: 'daily', L: о.L });
                     return;
                 }
                 var тексты = {
@@ -255,7 +323,7 @@
                 return;
             }
             if (данные.success && данные.voucher) {
-                Б.окноВаучера({ ваучер: данные.voucher, L: о.L, класс: о.класс });
+                Б.окноВаучера({ ваучер: данные.voucher, L: о.L });
                 if (typeof о.послеУспеха === 'function') о.послеУспеха();
             }
         } catch (e) {
@@ -265,7 +333,7 @@
 
     /** ОКНО ВАУЧЕРА С QR. */
     Б.окноВаучера = function (о) {
-        var к = о.класс.ваучер;
+        var к = КЛАССЫ.ваучер;
         var в = о.ваучер;
         var было = document.getElementById(к.id);
         if (было) было.remove();
@@ -311,8 +379,8 @@
 
     /** ОКНО ЛИМИТА. Классы те же, что у окна ваучера, свои только адреса. */
     Б.окноЛимита = function (о) {
-        var к = о.класс.ваучер;
-        var л = о.класс.лимит;
+        var к = КЛАССЫ.ваучер;
+        var л = КЛАССЫ.лимит;
         var было = document.getElementById(л.id);
         if (было) было.remove();
 
@@ -361,7 +429,7 @@
         if (о.уровень !== 'member') return;
         var client = window.supabaseClient;
         if (!client) return;
-        var к = о.класс.история;
+        var к = КЛАССЫ.история;
         try {
             var сессия = await client.auth.getSession();
             if (!сессия.data || !сессия.data.session) return;
@@ -435,7 +503,7 @@
                             entity_name: this.dataset.entity,
                             expires_at: this.dataset.expires
                         },
-                        L: о.L, класс: о.класс
+                        L: о.L
                     });
                 });
             });

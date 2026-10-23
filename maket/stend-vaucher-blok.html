@@ -19,14 +19,16 @@
     ?sost=otkaz         база отвечает `not_member`
     ?sost=istoriya      история: действующий, использованный, истёкший
     ?sost=net-qr        библиотека QR не загрузилась — надпись на языке
-    &pr=co|ct           приставка раздела (тренеры или корты)
+    &pr=co|ct           вид сущности: тренер или корт (данные, не вид:
+                        приставку классов кусок 148 снял совсем)
     &yaz=ru|en|kg       язык страницы
 -->
 <link rel="stylesheet" href="../css/tokens.css?v=75">
 <link rel="stylesheet" href="../css/style.css?v=461">
-<link rel="stylesheet" href="../css/coaches.css?v=78">
-<link rel="stylesheet" href="../css/courts.css?v=89">
+<link rel="stylesheet" href="../css/coaches.css?v=79">
+<link rel="stylesheet" href="../css/courts.css?v=90">
 <link rel="stylesheet" href="../css/kslt-toast.css?v=35">
+<link rel="stylesheet" href="../css/kslt-vaucher.css?v=1">
 <style>
   body { background: #0a0a0a; color: #ddd; font: 14px/1.6 system-ui, sans-serif; padding: 20px; }
   .st-knopki { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -164,7 +166,7 @@
      карточки упало бы с TypeError ровно в миг нажатия «Скачать». -->
 <script src="../js/kslt-kraska.js?v=5"></script>
 <script src="../js/kslt-vaucher-kartochka.js?v=1"></script>
-<script src="../js/kslt-vaucher-blok.js?v=3"></script>
+<script src="../js/kslt-vaucher-blok.js?v=4"></script>
 <script>
 (function () {
     var С = window.СТЕНД;
@@ -172,35 +174,14 @@
     if (С.сост === 'net-qr') { window.QRCode = undefined; }
 
     var пр = С.пр;
-    var КЛАССЫ = {
-        выбор: {
-            id: пр + 'PickerModal', подложка: пр + '-picker-overlay', окно: пр + '-picker-modal',
-            закрыть: пр + '-picker-close', заголовок: пр + '-picker-title', список: пр + '-picker-options',
-            пункт: пр + '-picker-option', точка: пр + '-picker-radio', подпись: пр + '-picker-label',
-            процент: пр + '-picker-percent', кнопка: пр + '-picker-submit'
-        },
-        ваучер: {
-            id: пр + 'VoucherModal', idЗакрыть: пр + 'VoucherClose', idQR: пр + 'VoucherQR',
-            idСкачать: пр + 'VoucherDownload', подложка: пр + '-voucher-overlay', окно: пр + '-voucher-modal',
-            закрыть: пр + '-voucher-close', заголовок: пр + '-voucher-title', qr: пр + '-voucher-qr',
-            детали: пр + '-voucher-details', строка: пр + '-voucher-row', процент: пр + '-voucher-percent',
-            действия: пр + '-voucher-actions', скачать: пр + '-voucher-download'
-        },
-        лимит: { id: пр + 'LimitModal', idЗакрыть: пр + 'LimitClose', idOk: пр + 'LimitOk' },
-        история: {
-            коробка: пр + '-voucher-history', пусто: пр + '-vh-empty', список: пр + '-vh-list',
-            строка: пр + '-vh-item', дата: пр + '-vh-date', услуга: пр + '-vh-service',
-            скидка: пр + '-vh-discount', состояние: пр + '-vh-status',
-            состояния: { active: пр + '-vh-status-active', used: пр + '-vh-status-used', expired: пр + '-vh-status-expired' },
-            кнопкаQR: пр + '-vh-qr-btn'
-        }
-    };
-    window.СТЕНД.КЛАССЫ = КЛАССЫ;
+    /* КАРТА КЛАССОВ ПЕРЕЕХАЛА В ДОМ — кусок 148: вид один на продукт,
+       имена `kslt-`, стили `css/kslt-vaucher.css`. Стенд больше не
+       подсовывает свои имена: он гоняет ТО ЖЕ, что увидит человек. */
 
     document.getElementById('stCta').addEventListener('click', function () {
         KSLT_VAUCHER_BLOK.услугиПоКнопке({
             кнопка: this, видСущности: пр === 'ct' ? 'court' : 'coach',
-            idСущности: 'stend-1', L: С.L, класс: КЛАССЫ
+            idСущности: 'stend-1', L: С.L
         });
     });
 
@@ -208,7 +189,7 @@
         KSLT_VAUCHER_BLOK.история({
             видСущности: пр === 'ct' ? 'court' : 'coach', idСущности: 'stend-1',
             услуги: С.услуги, уровень: 'member',
-            коробка: document.getElementById('stKarta'), L: С.L, класс: КЛАССЫ
+            коробка: document.getElementById('stKarta'), L: С.L
         });
     }
 })();

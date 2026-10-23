@@ -877,62 +877,11 @@
 
     // ---- SPONSORS — loaded via sponsors-loader.js ----
 
-    /* ИМЕНА КЛАССОВ И ОКОН — ЦЕЛИКОМ, А НЕ СКЛЕЙКОЙ (урок куска 144):
-       склеенный класс сторож мёртвого кода не находит, а человек не находит
-       поиском. Поведение живёт в доме `js/kslt-vaucher-blok.js`, здесь — своё
-       оформление. */
-    var ВАУЧЕР_КЛАССЫ = {
-        выбор: {
-            id: 'ctPickerModal',
-            подложка: 'ct-picker-overlay',
-            окно: 'ct-picker-modal',
-            закрыть: 'ct-picker-close',
-            заголовок: 'ct-picker-title',
-            список: 'ct-picker-options',
-            пункт: 'ct-picker-option',
-            точка: 'ct-picker-radio',
-            подпись: 'ct-picker-label',
-            процент: 'ct-picker-percent',
-            кнопка: 'ct-picker-submit'
-        },
-        ваучер: {
-            id: 'ctVoucherModal',
-            idЗакрыть: 'ctVoucherClose',
-            idQR: 'ctVoucherQR',
-            idСкачать: 'ctVoucherDownload',
-            подложка: 'ct-voucher-overlay',
-            окно: 'ct-voucher-modal',
-            закрыть: 'ct-voucher-close',
-            заголовок: 'ct-voucher-title',
-            qr: 'ct-voucher-qr',
-            детали: 'ct-voucher-details',
-            строка: 'ct-voucher-row',
-            процент: 'ct-voucher-percent',
-            действия: 'ct-voucher-actions',
-            скачать: 'ct-voucher-download'
-        },
-        лимит: {
-            id: 'ctLimitModal',
-            idЗакрыть: 'ctLimitClose',
-            idOk: 'ctLimitOk'
-        },
-        история: {
-            коробка: 'ct-voucher-history',
-            пусто: 'ct-vh-empty',
-            список: 'ct-vh-list',
-            строка: 'ct-vh-item',
-            дата: 'ct-vh-date',
-            услуга: 'ct-vh-service',
-            скидка: 'ct-vh-discount',
-            состояние: 'ct-vh-status',
-            состояния: {
-                active: 'ct-vh-status-active',
-                used: 'ct-vh-status-used',
-                expired: 'ct-vh-status-expired'
-            },
-            кнопкаQR: 'ct-vh-qr-btn'
-        }
-    };
+    /* ИМЕНА КЛАССОВ ВАУЧЕРА ПЕРЕЕХАЛИ В ДОМ — кусок 148. Здесь лежала
+       своя карта из 30 имён с приставкой раздела, и такая же — у
+       близнеца. Замер показал: вид описан дважды побайтово, а в кабинете
+       третий раз инлайном. Вид один, имя одно (`kslt-`), карта одна — в
+       `js/kslt-vaucher-blok.js`. */
 
     /* ВАУЧЕРНЫЙ БЛОК — ДОМ `js/kslt-vaucher-blok.js` (кусок 145). Эти шесть
        функций стояли здесь и у близнеца СЛОВО В СЛОВО, 271 строка на
@@ -941,37 +890,37 @@
     function ctaLoadServices(кнопка, видСущности, idСущности) {
         KSLT_VAUCHER_BLOK.услугиПоКнопке({
             кнопка: кнопка, видСущности: видСущности, idСущности: idСущности,
-            L: L_labels, класс: ВАУЧЕР_КЛАССЫ
+            L: L_labels
         });
     }
 
     function showServicePicker(видСущности, idСущности, услуги) {
         KSLT_VAUCHER_BLOK.выборУслуги({
             видСущности: видСущности, idСущности: idСущности, услуги: услуги,
-            L: L_labels, класс: ВАУЧЕР_КЛАССЫ
+            L: L_labels
         });
     }
 
     function loadVoucherHistory(видСущности, idСущности, услуги, уровень, коробка) {
         KSLT_VAUCHER_BLOK.история({
             видСущности: видСущности, idСущности: idСущности, услуги: услуги,
-            уровень: уровень, коробка: коробка, L: L_labels, класс: ВАУЧЕР_КЛАССЫ
+            уровень: уровень, коробка: коробка, L: L_labels
         });
     }
 
     function generateVoucher(видСущности, idСущности, idУслуги, послеУспеха) {
         KSLT_VAUCHER_BLOK.завести({
             видСущности: видСущности, idСущности: idСущности, idУслуги: idУслуги,
-            послеУспеха: послеУспеха, L: L_labels, класс: ВАУЧЕР_КЛАССЫ
+            послеУспеха: послеУспеха, L: L_labels
         });
     }
 
     function showVoucherModal(ваучер) {
-        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L_labels, класс: ВАУЧЕР_КЛАССЫ });
+        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L_labels });
     }
 
     function showLimitModal(причина) {
-        KSLT_VAUCHER_BLOK.окноЛимита({ причина: причина, L: L_labels, класс: ВАУЧЕР_КЛАССЫ });
+        KSLT_VAUCHER_BLOK.окноЛимита({ причина: причина, L: L_labels });
     }
 
     /* НАЖАТИЕ КНОПКИ КАРТОЧКИ — ДОМ ВИТРИНЫ (кусок 144). Здесь было два

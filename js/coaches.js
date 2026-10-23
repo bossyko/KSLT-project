@@ -615,62 +615,11 @@
         });
     }
 
-    /* ИМЕНА КЛАССОВ И ОКОН — ЦЕЛИКОМ, А НЕ СКЛЕЙКОЙ (урок куска 144):
-       склеенный класс сторож мёртвого кода не находит, а человек не находит
-       поиском. Поведение живёт в доме `js/kslt-vaucher-blok.js`, здесь — своё
-       оформление. */
-    var ВАУЧЕР_КЛАССЫ = {
-        выбор: {
-            id: 'coPickerModal',
-            подложка: 'co-picker-overlay',
-            окно: 'co-picker-modal',
-            закрыть: 'co-picker-close',
-            заголовок: 'co-picker-title',
-            список: 'co-picker-options',
-            пункт: 'co-picker-option',
-            точка: 'co-picker-radio',
-            подпись: 'co-picker-label',
-            процент: 'co-picker-percent',
-            кнопка: 'co-picker-submit'
-        },
-        ваучер: {
-            id: 'coVoucherModal',
-            idЗакрыть: 'coVoucherClose',
-            idQR: 'coVoucherQR',
-            idСкачать: 'coVoucherDownload',
-            подложка: 'co-voucher-overlay',
-            окно: 'co-voucher-modal',
-            закрыть: 'co-voucher-close',
-            заголовок: 'co-voucher-title',
-            qr: 'co-voucher-qr',
-            детали: 'co-voucher-details',
-            строка: 'co-voucher-row',
-            процент: 'co-voucher-percent',
-            действия: 'co-voucher-actions',
-            скачать: 'co-voucher-download'
-        },
-        лимит: {
-            id: 'coLimitModal',
-            idЗакрыть: 'coLimitClose',
-            idOk: 'coLimitOk'
-        },
-        история: {
-            коробка: 'co-voucher-history',
-            пусто: 'co-vh-empty',
-            список: 'co-vh-list',
-            строка: 'co-vh-item',
-            дата: 'co-vh-date',
-            услуга: 'co-vh-service',
-            скидка: 'co-vh-discount',
-            состояние: 'co-vh-status',
-            состояния: {
-                active: 'co-vh-status-active',
-                used: 'co-vh-status-used',
-                expired: 'co-vh-status-expired'
-            },
-            кнопкаQR: 'co-vh-qr-btn'
-        }
-    };
+    /* ИМЕНА КЛАССОВ ВАУЧЕРА ПЕРЕЕХАЛИ В ДОМ — кусок 148. Здесь лежала
+       своя карта из 30 имён с приставкой раздела, и такая же — у
+       близнеца. Замер показал: вид описан дважды побайтово, а в кабинете
+       третий раз инлайном. Вид один, имя одно (`kslt-`), карта одна — в
+       `js/kslt-vaucher-blok.js`. */
 
     /* ВАУЧЕРНЫЙ БЛОК — ДОМ `js/kslt-vaucher-blok.js` (кусок 145). Эти шесть
        функций стояли здесь и у близнеца СЛОВО В СЛОВО, 271 строка на
@@ -679,37 +628,37 @@
     function coCtaLoadServices(кнопка, видСущности, idСущности) {
         KSLT_VAUCHER_BLOK.услугиПоКнопке({
             кнопка: кнопка, видСущности: видСущности, idСущности: idСущности,
-            L: L, класс: ВАУЧЕР_КЛАССЫ
+            L: L
         });
     }
 
     function coShowServicePicker(видСущности, idСущности, услуги) {
         KSLT_VAUCHER_BLOK.выборУслуги({
             видСущности: видСущности, idСущности: idСущности, услуги: услуги,
-            L: L, класс: ВАУЧЕР_КЛАССЫ
+            L: L
         });
     }
 
     function coLoadVoucherHistory(видСущности, idСущности, услуги, уровень, коробка) {
         KSLT_VAUCHER_BLOK.история({
             видСущности: видСущности, idСущности: idСущности, услуги: услуги,
-            уровень: уровень, коробка: коробка, L: L, класс: ВАУЧЕР_КЛАССЫ
+            уровень: уровень, коробка: коробка, L: L
         });
     }
 
     function coGenerateVoucher(видСущности, idСущности, idУслуги, послеУспеха) {
         KSLT_VAUCHER_BLOK.завести({
             видСущности: видСущности, idСущности: idСущности, idУслуги: idУслуги,
-            послеУспеха: послеУспеха, L: L, класс: ВАУЧЕР_КЛАССЫ
+            послеУспеха: послеУспеха, L: L
         });
     }
 
     function coShowVoucherModal(ваучер) {
-        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L, класс: ВАУЧЕР_КЛАССЫ });
+        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L });
     }
 
     function coShowLimitModal(причина) {
-        KSLT_VAUCHER_BLOK.окноЛимита({ причина: причина, L: L, класс: ВАУЧЕР_КЛАССЫ });
+        KSLT_VAUCHER_BLOK.окноЛимита({ причина: причина, L: L });
     }
 
     /* НАЖАТИЕ КНОПКИ КАРТОЧКИ — ДОМ ВИТРИНЫ (кусок 144). У кортов то же

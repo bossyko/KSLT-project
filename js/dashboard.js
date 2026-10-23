@@ -265,6 +265,11 @@
         voucherNoVouchersText: 'Get a discount from a partner court or coach page',
         voucherSaved: 'Saved',
         voucherShowQR: 'Show QR',
+        /* ДОБАВЛЕНО КУСКОМ 148: окно ваучера стало общим, и ему нужны
+           эти две подписи. Слова взяты У ВИТРИН (`js/coaches.js`), а не
+           сочинены здесь: одно понятие — одно слово. */
+        voucherReady: "Your discount is ready!",
+        voucherDownload: 'Download QR',
         voucherService: 'Service',
         voucherDiscount: 'Discount',
         voucherExpires: 'Expires',
@@ -572,6 +577,8 @@
         voucherNoVouchersText: 'Өнөктөш корт же машыктыруучу бетинен арзандатуу алыңыз',
         voucherSaved: 'Үнөмдөлдү',
         voucherShowQR: 'QR көрсөтүү',
+        voucherReady: 'Арзандатууңуз даяр!',
+        voucherDownload: 'QR жүктөө',
         voucherService: 'Кызмат',
         voucherDiscount: 'Арзандатуу',
         voucherExpires: 'Мөөнөтү',
@@ -876,6 +883,8 @@
         voucherNoVouchersText: 'Получите скидку на странице партнёрского корта или тренера',
         voucherSaved: 'Сэкономлено',
         voucherShowQR: 'Показать QR',
+        voucherReady: 'Ваша скидка готова!',
+        voucherDownload: 'Скачать QR',
         voucherService: 'Услуга',
         voucherDiscount: 'Скидка',
         voucherExpires: 'Действует до',
@@ -5705,50 +5714,24 @@
         }
     }
 
+    /* ОКНО ВАУЧЕРА — ОДНО НА ПРОДУКТ (кусок 148, 23.10). СЛОВО КОСТИ:
+       «своди, мы же сводили QR профиль игрока».
+
+       ЗДЕСЬ ЛЕЖАЛО ТРЕТЬЕ ОПИСАНИЕ ТОГО ЖЕ ОКНА, и оно было самым
+       неудобным: вся разметка на ИНЛАЙН-СТИЛЯХ, своя пара `@keyframes`,
+       вписанная в разметку через `<style>`, своя ширина 340 и свой состав
+       (крупный процент сверху, без строк деталей). Вид витрин при этом
+       описан дважды в css и побайтово совпадал.
+       ТЕПЕРЬ ВИД ОДИН: `css/kslt-vaucher.css`, разметку собирает дом.
+       ЧТО ИЗМЕНИЛОСЬ НА ЭКРАНЕ КАБИНЕТА, СКАЗАНО ВСЛУХ И ЗАМЕРЕНО В
+       БРАУЗЕРЕ: окно стало шире — `max-width` **400** против прежних 340
+       (число снято с живого окна, а не из css на глаз); появились строки
+       деталей с подписями («Услуга», «Скидка», «Действует до»); процент
+       встал в свою строку, а не крупным числом сверху; подложка та же —
+       `rgba(0,0,0,0.6)` и `blur(8px)`. Это и есть сведение, за которым
+       пришли. */
     function showDashboardVoucherQR(voucher) {
-        var existing = document.getElementById('dbVoucherQRModal');
-        if (existing) existing.remove();
-
-        var token = voucher.qr_token;
-        /* АДРЕС ПРОВЕРКИ И СРОК — ДОМ ВАУЧЕРНОГО БЛОКА (кусок 146). Оба
-           были здесь третьей копией: адрес с языком, срок с локалью,
-           которой в браузере нет. ВИД ОКНА ОСТАЁТСЯ СВОИМ — он у кабинета
-           ДРУГОЙ (узкое окно с размытием, крупный процент сверху, без
-           строк деталей), и сведение вида — правка на глаз, не правка
-           копии. */
-        var verifyUrl = KSLT_VAUCHER_BLOK.адресПроверки(token);
-        var expiresStr = KSLT_VAUCHER_BLOK.дата(voucher.expires_at, true);
-
-        var modal = document.createElement('div');
-        modal.id = 'dbVoucherQRModal';
-        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;opacity:0;animation:dbModalFadeIn 0.25s ease forwards;';
-        modal.innerHTML =
-            '<style>@keyframes dbModalFadeIn{to{opacity:1}}@keyframes dbModalSlideIn{to{transform:translateY(0) scale(1)}}</style>' +
-            '<div style="background:rgba(26,26,30,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;max-width:340px;width:100%;text-align:center;position:relative;transform:translateY(20px) scale(0.95);animation:dbModalSlideIn 0.25s ease forwards;">' +
-                '<button id="dbVQRClose" style="position:absolute;top:12px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer;">&times;</button>' +
-                (voucher.discount_percent ? '<div style="color:var(--accent);font-size:1.8rem;font-weight:700;margin-bottom:4px;">-' + voucher.discount_percent + '%</div>' : '') +
-                (voucher.service_name ? '<div style="color:#fff;font-weight:600;font-size:0.95rem;margin-bottom:2px;">' + dbEsc(voucher.service_name) + '</div>' : '') +
-                (voucher.entity_name ? '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:12px;">' + dbEsc(voucher.entity_name) + '</div>' : '') +
-                '<div id="dbVQRCode" style="display:flex;justify-content:center;background:#fff;border-radius:12px;padding:16px;width:fit-content;margin:0 auto 16px;"></div>' +
-                (expiresStr ? '<div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:12px;">' + expiresStr + '</div>' : '') +
-                '<button id="dbVQRDownload" style="background:var(--accent);color:var(--accent-on);border:none;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">' + (KSLT_YAZYK.выбрать('Download QR', 'QR жүктөө', 'Скачать QR')) + '</button>' +
-            '</div>';
-
-        document.body.appendChild(modal);
-
-        var qrContainer = document.getElementById('dbVQRCode');
-        /* РИСОВАНИЕ QR — ДОМ (кусок 146). Здесь не было ветви «библиотеки
-           нет»: коробка оставалась пустой МОЛЧА. Теперь надпись есть. */
-        KSLT_VAUCHER_BLOK.нарисоватьQR(qrContainer, verifyUrl);
-
-        document.getElementById('dbVQRClose').addEventListener('click', function() { modal.remove(); });
-        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
-
-        /* СКАЧИВАНИЕ — ДОМ (кусок 146): повод и поля были третьей копией
-           знак в знак. Саму картинку рисует `js/kslt-vaucher-kartochka.js`
-           с 19.10 — это другое понятие и другой дом. */
-        KSLT_VAUCHER_BLOK.повеситьСкачивание(
-            document.getElementById('dbVQRDownload'), qrContainer, voucher, expiresStr);
+        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: voucher, L: L });
     }
 
     // ---- Notification Preferences ----
