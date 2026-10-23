@@ -299,25 +299,10 @@
     // ========================================
 
     async function detectAccess() {
-        var client = window.supabaseClient;
-        if (!client) { _accessLevel = 'guest'; return; }
-
-        var loggedIn = false;
-        try {
-            var res = await client.auth.getSession();
-            if (res.data && res.data.session) loggedIn = true;
-        } catch(e) {}
-
-        if (!loggedIn) { _accessLevel = 'guest'; return; }
-
-        _accessLevel = 'registered';
-
-        if (typeof window.checkMembership === 'function') {
-            try {
-                var mem = await window.checkMembership();
-                if (mem && mem.active) _accessLevel = 'member';
-            } catch(e) {}
-        }
+        /* УРОВЕНЬ ДОСТУПА — У ДОМА (js/kslt-dostup.js). Здесь стояла своя
+           копия: пять копий одного понятия разошлись, и эта не считала
+           админа членом клуба. */
+        _accessLevel = await KSLT_DOSTUP.уровень();
     }
 
     // ========================================

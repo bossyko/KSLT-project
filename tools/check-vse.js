@@ -151,7 +151,8 @@ const КУСКИ = [
     ['фразы в словаре', 'check-frazy-v-slovare.js', 'check-frazy-v-slovare-otkat.js'],
     ['выбор языка одним зовом', 'check-vybor-yazyka.js', 'check-vybor-yazyka-otkat.js'],
     ['кыргызский вслух', 'check-kyrgyzskiy-polnyy.js', 'check-kyrgyzskiy-polnyy-otkat.js'],
-    ['три пункта долга', 'check-tri-dolga.js', 'check-tri-dolga-otkat.js']
+    ['три пункта долга', 'check-tri-dolga.js', 'check-tri-dolga-otkat.js'],
+    ['близнецы и дома', 'check-vitrina.js', 'check-vitrina-otkat.js']
 ];
 
 function прогнать(файл) {

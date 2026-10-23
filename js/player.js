@@ -574,29 +574,9 @@
     var _myPlayerId = null;
 
     async function detectAccess() {
-        if (!client) { _accessLevel = 'guest'; return; }
-        try {
-            var res = await client.auth.getSession();
-            if (!res.data || !res.data.session) { _accessLevel = 'guest'; return; }
-            // Set ksltUser for membership.js (not set on public pages without auth-guard)
-            if (!window.ksltUser) window.ksltUser = res.data.session.user;
-
-            // Своя же карточка: кнопку вызова на ней показывать незачем.
-            // База такой вызов и так отклоняет, но ловить себя на запрете —
-            // плохой способ узнать правило
-            var prof = await client.from('profiles').select('player_id')
-                .eq('id', res.data.session.user.id).single();
-            _myPlayerId = (prof.data && prof.data.player_id) || null;
-        } catch(e) { _accessLevel = 'guest'; return; }
-
-        _accessLevel = 'registered';
-
-        if (typeof window.checkMembership === 'function') {
-            try {
-                var mem = await window.checkMembership();
-                if (mem && mem.active) _accessLevel = 'member';
-            } catch(e) {}
-        }
+        /* УРОВЕНЬ ДОСТУПА И СВОЯ КАРТОЧКА — У ДОМА (js/kslt-dostup.js). */
+        _accessLevel = await KSLT_DOSTUP.уровень();
+        _myPlayerId = KSLT_DOSTUP.мойИгрок();
     }
 
     // ---- Guest block ----

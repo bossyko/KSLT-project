@@ -177,56 +177,14 @@
     // ---- Detect access level ----
     // Считает общий модуль приглашений: раньше то же самое было написано
     // здесь ещё раз, и два счёта могли разойтись
+        /* УРОВЕНЬ ДОСТУПА — У ДОМА (js/kslt-dostup.js). Здесь было ДВЕ
+       записи одного понятия: зов общего модуля и своя копия на случай,
+       если модуля нет. Запасная копия и есть вторая правда — её ответ
+       отличался от дома (админ не считался членом). Дом один, запасной
+       нет: нет дома — страница и так не работает.  */
     async function detectAccess() {
-        if (window.KSLT_INVITE) {
-            _accessLevel = await window.KSLT_INVITE.access();
-            _myPlayerId = window.KSLT_INVITE.myPlayerId();
-            return;
-        }
-        await detectAccessСвоими();
-    }
-
-    async function detectAccessСвоими() {
-        // Check real Supabase session (not just localStorage)
-        var loggedIn = false;
-        if (client) {
-            try {
-                var res = await client.auth.getSession();
-                if (res.data && res.data.session) {
-                    loggedIn = true;
-                }
-            } catch(e) {}
-        }
-
-        if (!loggedIn) {
-            _accessLevel = 'guest';
-            return;
-        }
-
-        // User is logged in — check admin or membership
-        _accessLevel = 'registered';
-
-        // Check role from profile
-        try {
-            var uid = (await client.auth.getUser()).data.user.id;
-            var profileRes = await client.from('profiles').select('role, player_id').eq('id', uid).single();
-            // Свою карточку из поиска убираем: искать партнёра среди себя
-            // незачем, а нажатие давало непонятную ошибку от сервера
-            if (profileRes.data) _myPlayerId = profileRes.data.player_id || null;
-            if (profileRes.data && (profileRes.data.role === 'admin' || profileRes.data.role === 'manager')) {
-                _accessLevel = 'member';
-                return;
-            }
-        } catch(e) {}
-
-        if (typeof window.checkMembership === 'function') {
-            try {
-                var mem = await window.checkMembership();
-                if (mem && mem.active) {
-                    _accessLevel = 'member';
-                }
-            } catch(e) {}
-        }
+        _accessLevel = await KSLT_DOSTUP.уровень();
+        _myPlayerId = KSLT_DOSTUP.мойИгрок();
     }
 
     function isOnline(lastSeen) {
@@ -603,14 +561,10 @@
     /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
        считается из живой сетки, а не из ширины окна. */
     function пересчитатьШаг() {
-        var grid = document.querySelector('.pt-grid');
-        if (!grid) return false;
-        var cs = window.getComputedStyle(grid);
-        var колонок = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
-        var рядов = parseInt(cs.getPropertyValue('--pt-ryadov'), 10);
-        if (!колонок || !рядов) return false;
-        var шаг = колонок * рядов;
-        if (шаг === PER_PAGE) return false;
+        /* ШАГ СЧИТАЕТ ДОМ (js/kslt-vitrina.js). Здесь остаётся только своё
+           имя сетки и свой PER_PAGE: число живёт у зовущего. */
+        var шаг = KSLT_VITRINA.шаг('.pt-grid', '--pt-ryadov');
+        if (!шаг || шаг === PER_PAGE) return false;
         PER_PAGE = шаг;
         return true;
     }
@@ -618,11 +572,9 @@
     /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
        поворота, и от появления полосы прокрутки. */
     function следитьЗаШагом() {
-        var коробка = document.getElementById('ptGrid');
-        if (!коробка || !window.ResizeObserver) return;
-        new ResizeObserver(function () {
+        KSLT_VITRINA.следитьЗаШириной(document.getElementById('ptGrid'), function () {
             if (пересчитатьШаг()) renderGrid();
-        }).observe(коробка);
+        });
     }
 
     // ---- PAGINATION ----
@@ -638,20 +590,10 @@
     }
 
     function initPaginationClicks() {
-        document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.pl-page-btn');
-            if (!btn || btn.disabled) return;
-
-            if (btn.classList.contains('pl-page-prev')) {
-                _currentPage = Math.max(1, _currentPage - 1);
-            } else if (btn.classList.contains('pl-page-next')) {
-                _currentPage++;
-            } else if (btn.dataset.page) {
-                _currentPage = parseInt(btn.dataset.page);
-            }
-            renderGrid();
-            window.KSLT_прокрутитьКСписку(document.getElementById('ptGrid'));
-        });
+        KSLT_VITRINA.нажатияПолосы(document.getElementById('ptGrid'),
+            function () { return _currentPage; },
+            function (n) { _currentPage = n; },
+            renderGrid);
     }
 
     // ---- SPONSORS — loaded via sponsors-loader.js ----

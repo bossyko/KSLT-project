@@ -86,8 +86,6 @@
         inviteSelf: 'Нельзя пригласить самого себя'
     });
 
-    var _accessLevel = null;   // 'guest' | 'registered' | 'member'
-    var _myPlayerId = null;
     var _sendingInvite = false;
     var _toastTimer = null;
 
@@ -96,39 +94,15 @@
      * на каждое нажатие ни к чему.
      */
     INV.access = async function () {
-        if (_accessLevel) return _accessLevel;
-        var client = window.supabaseClient;
-        var loggedIn = false;
-        if (client) {
-            try {
-                var res = await client.auth.getSession();
-                if (res.data && res.data.session) loggedIn = true;
-            } catch (e) {}
-        }
-        if (!loggedIn) { _accessLevel = 'guest'; return _accessLevel; }
-
-        _accessLevel = 'registered';
-        try {
-            var uid = (await client.auth.getUser()).data.user.id;
-            var pr = await client.from('profiles').select('role, player_id').eq('id', uid).single();
-            if (pr.data) _myPlayerId = pr.data.player_id || null;
-            if (pr.data && (pr.data.role === 'admin' || pr.data.role === 'manager')) {
-                _accessLevel = 'member';
-                return _accessLevel;
-            }
-        } catch (e) {}
-
-        if (typeof window.checkMembership === 'function') {
-            try {
-                var mem = await window.checkMembership();
-                if (mem && mem.active) _accessLevel = 'member';
-            } catch (e) {}
-        }
-        return _accessLevel;
+        /* ДОМ ДОСТУПА ПЕРЕЕХАЛ В `js/kslt-dostup.js`. Это поведение жило
+           здесь и было самым полным из пяти копий по сайту; теперь оно
+           одно на продукт, а здесь остался зов — чтобы прежние вызовы
+           `KSLT_INVITE.access()` продолжали работать как есть. */
+        return await KSLT_DOSTUP.уровень();
     };
 
     /** Своя карточка игрока — чтобы не приглашать самого себя. */
-    INV.myPlayerId = function () { return _myPlayerId; };
+    INV.myPlayerId = function () { return KSLT_DOSTUP.мойИгрок(); };
 
     /* Окно «нужна регистрация» для гостя — то же, что на кнопке приглашения.
        Зовётся при нажатии на карточку игрока: гостя незачем уводить на
@@ -140,18 +114,22 @@
 
     /** Нажали «Пригласить». Дальше всё решает уровень доступа. */
     INV.click = async function (playerId) {
-        await INV.access();
-        handleInviteClick(playerId);
+        /* УРОВЕНЬ ПЕРЕДАЁТСЯ ДОВОДОМ, А НЕ ЧИТАЕТСЯ ИЗ ПЕРЕМЕННОЙ РЯДОМ.
+           Своя `_accessLevel` жила здесь и заполнялась прежней копией
+           дома; после переезда дома она осталась бы пустой НАВСЕГДА, и
+           член клуба получил бы окно гостя. Такую беду не видно: она
+           выглядит как «решили показать окно». */
+        handleInviteClick(playerId, await INV.access());
     };
 
     // ---- Handle invite click by access level ----
-    function handleInviteClick(playerId) {
-        if (_accessLevel === 'guest') {
+    function handleInviteClick(playerId, уровень) {
+        if (уровень === 'guest') {
             showModal(L.modalGuestTitle, L.modalGuestText, L.modalGuestBtn, путь(authFile));
             return;
         }
 
-        if (_accessLevel === 'registered') {
+        if (уровень === 'registered') {
             showPaymentModal();
             return;
         }

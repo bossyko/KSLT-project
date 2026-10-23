@@ -261,20 +261,10 @@
     var _searchQuery = '';
 
     async function detectAccess() {
-        var client = window.supabaseClient;
-        if (!client) return;
-        try {
-            var res = await client.auth.getSession();
-            if (!res.data || !res.data.session) return;
-            if (!window.ksltUser) window.ksltUser = res.data.session.user;
-        } catch(e) { return; }
-        _accessLevel = 'registered';
-        if (typeof window.checkMembership === 'function') {
-            try {
-                var mem = await window.checkMembership();
-                if (mem && mem.active) _accessLevel = 'member';
-            } catch(e) {}
-        }
+        /* УРОВЕНЬ ДОСТУПА — У ДОМА (js/kslt-dostup.js). Здесь стояла своя
+           копия: пять копий одного понятия разошлись, и эта не считала
+           админа членом клуба. */
+        _accessLevel = await KSLT_DOSTUP.уровень();
     }
 
     /* ОДНО УВЕДОМЛЕНИЕ НА САЙТ — компонент Toast 30:59 требует этого
@@ -326,23 +316,7 @@
 
     // Promoted first (fixed), rest shuffled
     function sortPromotedFirst(arr) {
-        var promoted = [];
-        var rest = [];
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i]._promoted) {
-                promoted.push(arr[i]);
-            } else {
-                rest.push(arr[i]);
-            }
-        }
-        // Fisher-Yates shuffle rest
-        for (var i = rest.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = rest[i];
-            rest[i] = rest[j];
-            rest[j] = tmp;
-        }
-        return promoted.concat(rest);
+        return KSLT_VITRINA.продвинутыеПервыми(arr);
     }
 
     // Load from Supabase then init
@@ -595,14 +569,10 @@
     /* Колонки известны только ПОСЛЕ раскладки, поэтому шаг страницы
        считается из живой сетки, а не из ширины окна. */
     function пересчитатьШаг() {
-        var grid = document.querySelector('.co-grid');
-        if (!grid) return false;
-        var cs = window.getComputedStyle(grid);
-        var колонок = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
-        var рядов = parseInt(cs.getPropertyValue('--co-ryadov'), 10);
-        if (!колонок || !рядов) return false;
-        var шаг = колонок * рядов;
-        if (шаг === PER_PAGE) return false;
+        /* ШАГ СЧИТАЕТ ДОМ (js/kslt-vitrina.js). Здесь остаётся только своё
+           имя сетки и свой PER_PAGE: число живёт у зовущего. */
+        var шаг = KSLT_VITRINA.шаг('.co-grid', '--co-ryadov');
+        if (!шаг || шаг === PER_PAGE) return false;
         PER_PAGE = шаг;
         return true;
     }
@@ -610,11 +580,9 @@
     /* ResizeObserver, а не resize окна: коробка витрины меняет ширину и от
        поворота, и от появления полосы прокрутки. */
     function следитьЗаШагом() {
-        var коробка = document.getElementById('coachesGrid');
-        if (!коробка || !window.ResizeObserver) return;
-        new ResizeObserver(function () {
+        KSLT_VITRINA.следитьЗаШириной(document.getElementById('coachesGrid'), function () {
             if (пересчитатьШаг()) renderGrid();
-        }).observe(коробка);
+        });
     }
 
     // ---- PAGINATION ----
@@ -630,20 +598,10 @@
     }
 
     function initPaginationClicks() {
-        document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.pl-page-btn');
-            if (!btn || btn.disabled) return;
-
-            if (btn.classList.contains('pl-page-prev')) {
-                _currentPage = Math.max(1, _currentPage - 1);
-            } else if (btn.classList.contains('pl-page-next')) {
-                _currentPage++;
-            } else if (btn.dataset.page) {
-                _currentPage = parseInt(btn.dataset.page);
-            }
-            renderGrid();
-            window.KSLT_прокрутитьКСписку(document.getElementById('coachesGrid'));
-        });
+        KSLT_VITRINA.нажатияПолосы(document.getElementById('coachesGrid'),
+            function () { return _currentPage; },
+            function (n) { _currentPage = n; },
+            renderGrid);
     }
 
     // ---- SPONSORS — loaded via sponsors-loader.js ----
