@@ -166,17 +166,17 @@
             '<div class="ad-card" style="max-width:720px;">' +
                 '<h3 style="margin-bottom:8px;">' + L.setChlenskieVznosy + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
-                    ('Суммы, которые видно на странице «Цены». Пустая сумма — не ошибка: страница пишет «уточняется», а кнопка оплаты выключена.') +
+                    L.setSummyKotoryeVidno +
                 '</p>' +
                 строки +
                 '<button class="ad-btn ad-btn-primary" id="ppSave">' + L.setSaveSummy + '</button>' +
             '</div>' +
             '<div class="ad-card" style="max-width:720px;margin-top:24px;">' +
-                '<h3 style="margin-bottom:8px;">' + ('Плашка бесплатного периода') + '</h3>' +
+                '<h3 style="margin-bottom:8px;">' + L.setPlashkaBesplatnogoPeri + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">' +
-                    ('Видна на странице «Цены», пока не прошла дата бесплатного доступа. Пустой текст оставит только строку с датой; стёртая дата во вкладке «Доступ» убирает блок целиком.') +
+                    L.setVidnaNaStranice +
                 '</p>' +
-                поле('pricing_free_title', ('Заголовок'), false) +
+                поле('pricing_free_title', L.setZagolovok, false) +
                 поле('pricing_free_text', L.setTekst, true) +
                 '<button class="ad-btn ad-btn-primary" id="scSave">' + L.setSaveTekst + '</button>' +
             '</div>';
@@ -190,7 +190,7 @@
                 var сырое = document.getElementById('pp-' + kind).value.trim();
                 var сумма = сырое === '' ? null : Number(сырое);
                 if (сумма !== null && !(сумма >= 0)) {
-                    беды.push(('Неверная сумма: ') + сырое);
+                    беды.push(L.setNevernayaSumma + сырое);
                     continue;
                 }
                 var res = await A.client.from('pricing_plans')
@@ -252,9 +252,9 @@
         panel.innerHTML =
             '<div class="ad-card" style="max-width:520px;">' +
                 '<h3 style="margin-bottom:8px;">' +
-                    ('Бесплатный доступ для всех') + '</h3>' +
+                    L.setBesplatnyyDostupDlya + '</h3>' +
                 '<p style="color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">' +
-                    ('До этой даты полный доступ есть у каждого, кто вошёл, — членство КСЛТ не спрашивается. Пустая дата возвращает обычный порядок.') +
+                    L.setDoEtoyDaty +
                 '</p>' +
                 '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
                     '<div>' +
@@ -268,13 +268,13 @@
                 '</div>' +
                 '<p style="margin-top:14px;color:' + (идёт ? 'var(--accent)' : 'var(--text-secondary)') + ';">' +
                     (идёт
-                        ? ('Бесплатный доступ идёт до ') + дата
+                        ? L.setBesplatnyyDostupIdet + дата
                         : (дата
-                            ? ('Дата прошла — доступ по членству')
-                            : ('Доступ по членству'))) +
+                            ? L.setDataProshlaDostup
+                            : L.setDostupPoChlenstvu)) +
                 '</p>' +
                 (когда ? '<p class="ad-podpis">' +
-                    ('Менялось: ') + когда + '</p>' : '') +
+                    L.setMenyalos + когда + '</p>' : '') +
             '</div>';
 
         async function сохранить(значение) {
@@ -1141,7 +1141,7 @@
         });
 
         // Build eligible list
-        var eligibleHtml = '<h3 class="ad-rat-cat-title">' + ('Доступны для промоушена') + '</h3>';
+        var eligibleHtml = '<h3 class="ad-rat-cat-title">' + L.setDostupnyDlyaPromoushen + '</h3>';
         var hasEligible = false;
 
         var genders = Object.keys(catsByGender);
@@ -1149,7 +1149,7 @@
             if (_promoGenderFilter && genders[gi] !== _promoGenderFilter) continue;
 
             var genderCats = catsByGender[genders[gi]];
-            var genderLabel = genders[gi] === 'men' ? ('Мужчины') : ('Женщины');
+            var genderLabel = genders[gi] === 'men' ? L.setMen : L.setWomen;
 
             for (var ci = 0; ci < genderCats.length - 1; ci++) {
                 var cat = genderCats[ci];
@@ -1193,7 +1193,7 @@
         }
 
         // Existing promotions history
-        var historyHtml = '<h3 class="ad-rat-cat-title">' + ('История промоушенов') + '</h3>';
+        var historyHtml = '<h3 class="ad-rat-cat-title">' + L.setIstoriyaPromoushenov + '</h3>';
 
         var filteredPromotions = promotions;
         if (_promoGenderFilter || _promoCatFilter) {

@@ -507,7 +507,7 @@
                     var today = new Date(); today.setHours(0,0,0,0);
                     var exp = new Date(membership.expires_at); exp.setHours(0,0,0,0);
                     var diff = Math.ceil((exp - today) / 86400000);
-                    daysLeft = diff > 0 ? ' (' + diff + ' ' + ('дн.') + ')' : '';
+                    daysLeft = diff > 0 ? ' (' + diff + ' ' + L.usrDn + ')' : '';
                 }
                 memHtml =
                     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
@@ -707,8 +707,8 @@
                         var isBlocked = b.blocked_until && new Date(b.blocked_until) > new Date() && !b.admin_unblocked;
                         var escalLabels = ['15 мин', '1 час', '24 часа'];
                         var statusText = isBlocked
-                            ? ('OTP заблокирован') + ' (' + escalLabels[b.escalation || 0] + ')'
-                            : ('OTP: нет блокировки');
+                            ? L.usrZablokirovan + ' (' + escalLabels[b.escalation || 0] + ')'
+                            : L.usrNetBlokirovki;
                         var statusColor = isBlocked ? 'var(--danger)' : 'var(--success)';
 
                         el.innerHTML =
@@ -725,8 +725,8 @@
                                 this.textContent = '...';
                                 try {
                                     await A.adminAction('unblock_otp', { user_id: user.id });
-                                    A.showToast('OTP разблокирован');
-                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:var(--success);">' + ('OTP: разблокирован') + '</div>';
+                                    A.showToastL.usrMsgRazblokirovan;
+                                    el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:var(--success);">' + L.usrErrRazblokirovan + '</div>';
                                 } catch (e) {
                                     A.showToast('Ошибка', 'error');
                                     this.disabled = false;
@@ -907,7 +907,7 @@
             var now = new Date();
             var timeStr = (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
             var dateStr = (now.getDate() < 10 ? '0' : '') + now.getDate() + '.' + (now.getMonth() + 1 < 10 ? '0' : '') + (now.getMonth() + 1) + '.' + now.getFullYear();
-            _lastPaymentInfo = '✓ ' + ('Оплата проведена') + ' — ' + dateStr + ' ' + timeStr + ', ' + amount + ' KGS';
+            _lastPaymentInfo = '✓ ' + L.usrOplataProvedena + ' — ' + dateStr + ' ' + timeStr + ', ' + amount + ' KGS';
 
             // Reload form (will show confirmation via _lastPaymentInfo)
             loadAndEditUser(user.id);

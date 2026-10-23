@@ -304,8 +304,8 @@
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.newsFirstMoreDesc + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.newsFirstLessAsc + '</div>';
         } else {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.newsAYa + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.newsYaA + '</div>';
         }
 
         dd.innerHTML = html;
@@ -845,7 +845,7 @@
                     var mo = String(d.getMonth() + 1).padStart(2, '0');
                     var hh = String(d.getHours()).padStart(2, '0');
                     var mm = String(d.getMinutes()).padStart(2, '0');
-                    return '\u2713 ' + ('Сохранено') + ' ' + dd + '.' + mo + ' ' + hh + ':' + mm;
+                    return '\u2713 ' + L.newsSaved + ' ' + dd + '.' + mo + ' ' + hh + ':' + mm;
                 })() + '</span>' +
             '</div>';
 
@@ -1180,7 +1180,7 @@
             var urlBtn = e.target.closest('.ad-preview-insert-url-btn');
             if (urlBtn) {
                 var afterPar = parseInt(urlBtn.dataset.afterParagraph, 10) || 1;
-                var url = prompt('Вставьте URL изображения:');
+                var url = promptL.newsAskVstavteIzobrazheniya;
                 if (url && url.trim()) {
                     newsContentImages.push({ url: url.trim(), after_paragraph: afterPar });
                     newsContentImageFiles.push(null);
@@ -1510,7 +1510,7 @@
 
         if (!text) {
             container.innerHTML = '<div style="color:var(--text-secondary);font-size:var(--fs-sm);padding:20px 0;text-align:center">' +
-                ('Начните вводить текст для предпросмотра') + '</div>';
+                L.newsNachniteVvoditTekst + '</div>';
             return;
         }
 

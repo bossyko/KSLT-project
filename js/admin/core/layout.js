@@ -574,7 +574,7 @@
         fillDashTable('adDashRecentNews', results[16], function(n) {
             var isPublished = !!n.published_at;
             var statusCls = isPublished ? 'ad-status-published' : 'ad-status-draft';
-            var statusLabel = isPublished ? ('Опубликована') : ('Черновик');
+            var statusLabel = isPublished ? L.navTipPublished : L.navTipDraft;
             var title = n.title || L.noData;
             if (title.length > 50) title = title.substring(0, 47) + '...';
             return '<tr>' +

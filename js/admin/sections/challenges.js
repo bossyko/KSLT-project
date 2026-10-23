@@ -693,7 +693,7 @@
                     // Address
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalAddress + '</label>' +
-                        '<input type="text" class="ad-field-input" id="cbAddress" placeholder="' + ('Автозаполнение из корта или введите вручную') + '">' +
+                        '<input type="text" class="ad-field-input" id="cbAddress" placeholder="' + L.chalHintAvtozapolnenieIzKorta + '">' +
                     '</div>' +
                     // Banner
                     '<div class="ad-field-group">' +
@@ -1472,7 +1472,7 @@
                 var g2 = (document.getElementById('chS' + s + 'P2') || {}).value || '';
                 if (!g1 || !g2) { A.showToast('Заполните все сеты', 'error'); return; }
                 if (!isValidSet(g1, g2, _setFormat)) {
-                    A.showToast(('Некорректный счёт сета ') + s, 'error');
+                    A.showToast(L.chalErrNekorrektnyyScoreSeta + s, 'error');
                     return;
                 }
                 var v1 = parseInt(g1), v2 = parseInt(g2);
@@ -1621,7 +1621,7 @@
                     : !dbg.has_group_id ? 'TELEGRAM_GROUP_CHAT_ID not set'
                     : 'TG API error (group: ' + (dbg.group_id || '?') + ')';
                 console.error('TG send failed:', result.debug);
-                A.showToast(('TG ошибка: ') + reason, 'error');
+                A.showToast(L.chalErrText + reason, 'error');
             }
             loadData();
 
@@ -1748,7 +1748,7 @@
                     // Address
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.chalAddress + '</label>' +
-                        '<input type="text" class="ad-field-input" id="ebAddress" value="' + A.esc(existingAddress) + '" placeholder="' + ('Автозаполнение из корта или введите вручную') + '">' +
+                        '<input type="text" class="ad-field-input" id="ebAddress" value="' + A.esc(existingAddress) + '" placeholder="' + L.chalHintAvtozapolnenieIzKorta + '">' +
                     '</div>' +
                     // Banner
                     '<div class="ad-field-group">' +

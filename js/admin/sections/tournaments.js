@@ -518,8 +518,8 @@
                                         : L.trnNewsPublish) + '">' +
                         // Коротко: «Снять с публикации» распирало колонку, и таблица
                         // уезжала вбок. Полная подпись осталась подсказкой
-                        (t.published_at ? ('Снять')
-                                        : ('Опубликовать')) + '</button>' +
+                        (t.published_at ? L.trnSnyat
+                                        : L.trnOpublikovat) + '</button>' +
                     '</td>' +
                 '</tr>';
         });
@@ -557,8 +557,8 @@
                     A.showToast(r.error.message, 'error');
                     return;
                 }
-                A.showToast(открыт ? ('Убран с сайта')
-                                   : ('Опубликован'), 'success');
+                A.showToast(открыт ? L.trnOkUbranSSayta
+                                   : L.trnOpublikovan, 'success');
                 loadTournamentsList();
                 return;
             }
@@ -603,7 +603,7 @@
                 if (!игроки || !игроки.length) return;
                 var пересчёт = await A.client.rpc('recalc_player_categories', { p_ids: игроки });
                 if (пересчёт.error) {
-                    A.showToast(('Очки не пересчитались: ') +
+                    A.showToast(L.trnErrPointsNePereschitalis +
                                 пересчёт.error.message, 'error');
                 }
             }
@@ -671,8 +671,8 @@
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.trnFirstNewestDesc + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.trnFirstOldestAsc + '</div>';
         } else {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.trnAYa + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.trnYaA + '</div>';
         }
 
         dd.innerHTML = html;
@@ -800,16 +800,14 @@
         var число = function(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
         var есть = п.заявок || п.матчей || п.результатов || п.начислений;
         if (!есть) {
-            return '<p class="ad-udalenie-pusto">' + ('Кроме самого турнира не уйдёт ничего: заявок, матчей, результатов и начислений у него нет.') + '</p>';
+            return '<p class="ad-udalenie-pusto">' + L.trnKromeSamogoTurnira + '</p>';
         }
         var строки =
             строка('заявок', число(п.заявок)) +
             строка('матчей', число(п.матчей)) +
             строка('результатов', число(п.результатов)) +
             строка('начислений',
-                   число(п.начислений) + ' · ' +
-                   число(п.игроков) + (' игроков') + ' · ' +
-                   число(п.очков) + (' очков'));
+                   A.фраза(L.trnNachisleniyPlayersPlay, { начислений: число(п.начислений), игроков: число(п.игроков), очков: число(п.очков) }));
         if (турниров > 1) {
             строки += строка('из них с начислениями',
                              число(п.сНачислениями) + ' / ' + число(турниров));
@@ -1498,7 +1496,7 @@ function обновитьРасклад() {
                 var размеры = KSLT_RULES.размерыГрупп(участников, групп).join('/');
                 строки.push(беда === 'мало_участников'
                     ? ('Участников мало: ' + участников + ' на ' + групп + ' групп')
-                    : ('Проверьте настройку') +
+                    : L.trnProverteNastroyku +
                       (размеры ? ': ' + размеры : ''));
                 показать(строки);
                 return;
@@ -1758,23 +1756,23 @@ function обновитьРасклад() {
         var полеГруппСчёт = document.getElementById('adTrnGroupCount');
         var полеВГруппеСчёт = document.getElementById('adTrnPerGroup');
         if (полеГруппСчёт) полеГруппСчёт.addEventListener('input', function() {
-            пересчитатьГруппы('групп'); обновитьРасклад();
+            пересчитатьГруппыL.trnGrupp; обновитьРасклад();
         });
         if (полеВГруппеСчёт) {
             полеВГруппеСчёт.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
-                пересчитатьГруппы('вГруппе'); обновитьРасклад();
+                пересчитатьГруппыL.trnVgruppe; обновитьРасклад();
             });
             полеВГруппеСчёт.addEventListener('wheel', function(e) { e.preventDefault(); });
         }
         // Изменили вместимость турнира — счёт в группе меняется вместе с ней
         var полеМестСчёт = document.getElementById('adTrnMaxPart');
         if (полеМестСчёт) полеМестСчёт.addEventListener('input', function() {
-            пересчитатьГруппы('групп'); обновитьРасклад();
+            пересчитатьГруппыL.trnGrupp; обновитьРасклад();
         });
 
         toggleBracketFields();
-        пересчитатьГруппы('групп');
+        пересчитатьГруппыL.trnGrupp;
         обновитьРасклад();
 
         // Toggle combined NTRP max based on format (doubles/mixed only)
@@ -2839,8 +2837,8 @@ function обновитьРасклад() {
 
         /* Ошибку показываем и НЕ закрываем окно: набранное не должно
            пропадать из-за незаполненного поля */
-        if (!имя) { A.showToast(L.trnVenueNeedName, 'error'); throw new Error('нет названия'); }
-        if (!улица) { A.showToast(L.trnVenueNeedAddr, 'error'); throw new Error('нет адреса'); }
+        if (!имя) { A.showToast(L.trnVenueNeedName, 'error'); throw new ErrorL.trnErrNetNazvaniya; }
+        if (!улица) { A.showToast(L.trnVenueNeedAddr, 'error'); throw new ErrorL.trnErrNetAdresa; }
 
         var поля = {
             name: имя,

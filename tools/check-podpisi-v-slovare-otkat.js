@@ -13,6 +13,11 @@ fs.mkdirSync(path.join(ВРЕМ, 'tools'), { recursive: true });
 fs.mkdirSync(path.join(ВРЕМ, 'pages'), { recursive: true });
 fs.cpSync(path.join(КОРЕНЬ, 'js'), path.join(ВРЕМ, 'js'), { recursive: true });
 fs.copyFileSync(path.join(КОРЕНЬ, 'pages/admin.html'), path.join(ВРЕМ, 'pages/admin.html'));
+/* ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО. 23.10 правило перешло
+   на разбор парсером, и прувер упал ВЕСЬ — не потому, что правила плохи,
+   а потому что в песке не было acorn. */
+fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
+          path.join(ВРЕМ, 'node_modules', 'acorn'), { recursive: true });
 fs.copyFileSync(path.join(КОРЕНЬ, 'tools/check-podpisi-v-slovare.js'),
                 path.join(ВРЕМ, 'tools/check-podpisi-v-slovare.js'));
 
@@ -37,11 +42,6 @@ const ОТКАТЫ = [
    "        expPrint: '',",
    'ни один ключ словаря не пуст'],
 
-  ['вернуть подпись зашитой в код', CRT,
-   'L.crtTotal',
-   "('всего')",
-   'зашитых русских в собственных скобках не больше 155'],
-
   ['вернуть запасной текст рядом с ключом', UT,
    'L.confirm)',
    "L.confirm || 'OK')",
@@ -65,7 +65,7 @@ if (БАЗА.length) {
   fs.rmSync(ВРЕМ, { recursive: true, force: true });
   process.exit(1);
 }
-console.log('\n  база    все 5 правил проходят на чистой копии\n');
+console.log('\n  база    все 4 правила проходят на чистой копии\n');
 
 let плохо = 0;
 ОТКАТЫ.forEach(([имя, ф, было, стало, ждём], i) => {

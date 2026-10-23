@@ -182,7 +182,7 @@
                 (isEdit ? '<div style="margin-top:4px;"><label class="ad-checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-primary);"><input type="checkbox" id="adLoyRuleActive"' + (existing.active ? ' checked' : '') + '> ' + L.loyActive + '</label></div>' : '') +
             '</div>';
 
-        A.showConfirm(isEdit ? ('Редактирование правила') : ('Добавить правило'), formHtml, async function() {
+        A.showConfirm(isEdit ? L.loyRedaktirovaniePravila : L.loyDobavitPravilo, formHtml, async function() {
             var action = document.getElementById('adLoyRuleAction').value.trim();
             var label = document.getElementById('adLoyRuleLabel').value.trim();
             var labelEn = document.getElementById('adLoyRuleLabelEn').value.trim();

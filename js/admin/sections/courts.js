@@ -70,8 +70,8 @@
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.crtFirstMoreDesc + '</div>';
             html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.crtFirstLessAsc + '</div>';
         } else {
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + ('↑ А → Я') + '</div>';
-            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + ('↓ Я → А') + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="asc">' + L.crtAYa + '</div>';
+            html += '<div class="ad-col-dd-item ad-col-dd-sort" data-sort-dir="desc">' + L.crtYaA + '</div>';
         }
 
         dd.innerHTML = html;
@@ -749,9 +749,9 @@
         if (hadJunk) {
             phoneWarn(input, 'Только цифры');
         } else if (tooLong) {
-            phoneWarn(input, ('В номере больше ') + country.len + (' цифр'));
+            phoneWarn(input, A.фраза(L.crtVNomereBolshe, { len: country.len }));
         } else if (parsed.switched) {
-            phoneWarn(input, ('Страна определена по номеру'));
+            phoneWarn(input, L.crtStranaOpredelenaPo);
         } else {
             phoneWarn(input, '');
         }
@@ -764,7 +764,7 @@
         var country = KSLT_PHONE.byIso(iso);
         var n = input.value.replace(/[^0-9]/g, '').length;
         if (n && n < country.len) {
-            phoneWarn(input, ('Номер короткий: нужно ') + country.len + (' цифр'));
+            phoneWarn(input, A.фраза(L.crtNomerKorotkiyNuzhno, { len: country.len }));
         } else {
             phoneWarn(input, '');
         }
@@ -1626,7 +1626,7 @@
             if (!phonesEl) return;
             var html = '';
             crtPhones.forEach(function(ph, idx) {
-                var label = idx === 0 ? ('Телефон') : ('Доп. телефон');
+                var label = idx === 0 ? L.crtTelefon : L.crtDopTelefon;
                 var parts = window.KSLT_PHONE
                     ? KSLT_PHONE.split(ph)
                     : { iso: 'KG', rest: String(ph || '').replace(/\D/g, '') };
@@ -2056,7 +2056,7 @@
             var n = input.value.replace(/[^0-9]/g, '').length;
             var need = KSLT_PHONE.byIso(iso).len;
             if (n && n !== need) {
-                phoneWarn(input, ('Неполный номер: нужно ') + need + (' цифр'), true);
+                phoneWarn(input, A.фраза(L.crtNepolnyyNomerNuzhno, { need: need }), true);
                 if (!bad) bad = input;
             }
         });
@@ -2068,7 +2068,7 @@
             var waN = wa.value.replace(/[^0-9]/g, '').length;
             var waNeed = KSLT_PHONE.byIso(waIso).len;
             if (waN && waN !== waNeed) {
-                phoneWarn(wa, ('Неполный номер: нужно ') + waNeed + (' цифр'), true);
+                phoneWarn(wa, A.фраза(L.crtNepolnyyNomerNuzhno2, { waNeed: waNeed }), true);
                 if (!bad) bad = wa;
             }
         }

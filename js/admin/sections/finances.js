@@ -459,7 +459,7 @@
             // From (club only)
             '<div class="ad-form-card" id="adFinClubFromBlock"' + (isClub ? '' : ' style="display:none;"') + '>' +
                 '<div class="ad-form-card-title">' + L.payFrom + '</div>' +
-                '<input type="text" class="ad-field-input" id="adFinClubFrom" placeholder="' + ('Спонсор / Название организации') + '" value="' + A.esc(item && isClub ? item.entity_name : '') + '">' +
+                '<input type="text" class="ad-field-input" id="adFinClubFrom" placeholder="' + L.finHintSponsorNazvanieOrganiz + '" value="' + A.esc(item && isClub ? item.entity_name : '') + '">' +
             '</div>' +
 
             // Profile search (membership only)
@@ -802,7 +802,7 @@
                 status: 'active',
                 starts_at: memberStart + 'T00:00:00.000Z',
                 expires_at: memberEnd + 'T23:59:59.000Z',
-                note: note || ('Админ: через финансы')
+                note: note || L.finAdminCherezFinansy
             }).select('id').single();
 
             if (memResult.error) {

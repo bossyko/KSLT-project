@@ -509,7 +509,7 @@
                     // приходит сюда. Правка здесь вернётся к прежнему, как
                     // только он сохранит профиль, — предупреждаем заранее.
                     (plrEditingId ? '<div class="ad-field-hint" style="margin-bottom:10px;">' +
-                        ('Имя задаёт сам игрок в своём кабинете. Правка здесь пропадёт, когда он сохранит профиль.') +
+                        L.plrImyaZadaetSam +
                     '</div>' : '') +
                     '<div class="ad-lang-tabs">' +
                         '<button class="ad-lang-tab active" data-lang="ru">RU</button>' +
@@ -591,7 +591,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ad-field-hint" style="margin-top:4px;">' + ('Из профиля пользователя (только чтение)') + '</div>' +
+                '<div class="ad-field-hint" style="margin-top:4px;">' + L.plrIzProfilyaPolzovatelya + '</div>' +
             '</div>'
             ) : '') +
 
@@ -604,7 +604,7 @@
                 '</div>' +
                 '<div class="ad-lang-panel active" data-lang-panel="ru">' +
                     '<div class="ad-field">' +
-                        '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + ('напр. Никогда не сдавайся!') + '" value="' + A.esc(item ? item.bio : '') + '">' +
+                        '<input type="text" class="ad-field-input" id="adPlrMotto" maxlength="100" placeholder="' + L.plrHintNaprNikogdaNe + '" value="' + A.esc(item ? item.bio : '') + '">' +
                         '<div class="ad-field-hint" style="text-align:right;margin-top:2px;"><span id="adPlrMottoCount">' + ((item && item.bio) ? item.bio.length : 0) + '</span>/100</div>' +
                     '</div>' +
                 '</div>' +
@@ -1758,7 +1758,7 @@
 
         var html = '<div class="ad-field-label" style="margin-bottom:8px;">' + title + '</div>';
         html += '<div class="ad-field-hint" style="margin-bottom:10px;">' +
-            ('Игрок выступает не более чем в двух категориях. Закрытая перестаёт принимать заявки — очки, матчи и история рейтинга остаются.') +
+            L.plrPlayerVystupaetNe +
         '</div>';
 
         rows.forEach(function(r) {
@@ -1784,7 +1784,7 @@
                     (A.currentRole === 'admin' || A.currentRole === 'manager'
                         ? '<button class="ad-btn ad-btn-sm ' + (closed ? 'ad-btn-secondary' : 'ad-btn-danger') +
                           ' ad-cat-toggle" data-cat="' + A.esc(r.category_id) + '" data-closed="' + (closed ? '1' : '0') + '"' +
-                          (closed && !canOpen ? ' disabled title="' + ('Уже открыты две категории') + '"' : '') + '>' +
+                          (closed && !canOpen ? ' disabled title="' + L.plrTipUzheOpenDve + '"' : '') + '>' +
                           (closed ? openBtn : closeBtn) + '</button>'
                         : '') +
                 '</div>' +
@@ -1842,17 +1842,17 @@
                     (res.data && res.data.error);
                 if (err) {
                     A.showToast(err === 'too_many_open'
-                        ? ('Уже открыты две категории')
+                        ? L.plrTipUzheOpenDve
                         : err === 'forbidden'
-                            ? ('Недостаточно прав')
+                            ? L.plrNoRightsNoRights
                             : err, 'error');
                     btn.disabled = false;
                     return;
                 }
 
                 A.showToast(closing
-                    ? ('Категория закрыта')
-                    : ('Категория открыта'), 'success');
+                    ? L.plrCategoryZakryta
+                    : L.plrCategoryOtkryta, 'success');
                 renderPlayerForm(item);
             });
         });
@@ -2149,7 +2149,7 @@
                 var byRule = def.condition_type && def.condition_type !== 'manual';
                 if (A.currentRole === 'admin') {
                     html += '<td>' + (byRule
-                        ? '<span title="' + ('Начисляется автоматически') +
+                        ? '<span title="' + L.plrTipNachislyaetsyaAvtomati +
                           '" style="color:var(--text-muted);font-size:var(--fs-sm);">\u2699</span>'
                         : '<button class="ad-btn-icon ad-badge-del" data-pb-id="' + pb.id + '" title="' + L.badgeRemove + '" aria-label="' + L.badgeRemove + '">&times;</button>') +
                     '</td>';
@@ -2212,7 +2212,7 @@
             html += '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrBadgeCheck">' + L.badgeCheckBtn + '</button>';
             html += '</div>';
             html += '<div class="ad-field-hint" style="margin-top:8px;">' +
-                ('Руками выдаются только значки без условия. Остальные начисляет расчёт по матчам, турнирам и очкам.') +
+                L.plrRukamiVydayutsyaTolko +
             '</div>';
         }
 
@@ -2264,7 +2264,7 @@
                     var res = await A.client.rpc('check_and_award_badges', { p_player_id: playerId });
                     var newBadges = res.data || [];
                     if (newBadges.length > 0) {
-                        A.showToast(('Новые бейджи: ') + newBadges.length, 'success');
+                        A.showToast(L.plrOkNovyeBeydzhi + newBadges.length, 'success');
                     } else {
                         A.showToast('Новых бейджей нет', 'info');
                     }
@@ -2714,7 +2714,7 @@
 
         var levelHtml = levelName
             ? '<div class="ad-rat-level-badge">' + L.ratTournamentLevel + ': <strong>' + A.esc(levelName) + '</strong></div>'
-            : '<div class="ad-rat-level-badge" style="color:var(--danger);">' + L.ratTournamentLevel + ': ' + ('Не задан! Отредактируйте турнир для назначения уровня.') + '</div>';
+            : '<div class="ad-rat-level-badge" style="color:var(--danger);">' + L.ratTournamentLevel + ': ' + L.plrNeZadanOtredaktiruyte + '</div>';
 
         var plrOpts = '<option value="">' + L.ratSelectPlayer + '</option>';
         allPlayers.forEach(function(p) {
@@ -2956,7 +2956,7 @@
 
         var isSeptember = new Date().getMonth() === 8;
         if (!isSeptember) {
-            warn = ('Сейчас не сентябрь, смена сезона ещё не наступила. ') + warn;
+            warn = L.plrSeychasNeSentyabr + warn;
         }
 
         A.showConfirm('Смена сезона', warn, async function() {
@@ -2978,16 +2978,14 @@
                 if (!res.ok) throw new Error(result.error || 'HTTP ' + res.status);
 
                 A.showToast(
-                    ('Сезон ') + result.season + ': ' +
-                    ('изменилось у ') + result.changed + ', ' +
-                    ('уведомлено ') + result.notified,
+                    A.фраза(L.plrSeasonIzmenilosU, { season: result.season, changed: result.changed, notified: result.notified }),
                     'success'
                 );
                 loadRatRankings();
             } catch (e) {
                 A.showToast(e.message || 'Error', 'error');
             }
-            if (btn) { btn.disabled = false; btn.textContent = '🗓 ' + ('Смена сезона'); }
+            if (btn) { btn.disabled = false; btn.textContent = '🗓 ' + L.plrSmenaSezona2; }
         }, 'Провести');
     }
 
@@ -3013,7 +3011,7 @@
         } catch (err) {
             A.showToast(err.message, 'error');
         } finally {
-            if (btn) { btn.disabled = false; btn.innerHTML = '🔄 ' + ('Пересчитать все'); }
+            if (btn) { btn.disabled = false; btn.innerHTML = '🔄 ' + L.plrPereschitatVse2; }
         }
     }
 
@@ -3064,7 +3062,7 @@
                         '<div class="ad-import-dropzone" id="adImportDropzone">' +
                             '<div class="ad-import-dropzone-icon">\ud83d\udcc2</div>' +
                             '<div class="ad-import-dropzone-text">' + L.plrImportFile + '</div>' +
-                            '<div class="ad-import-dropzone-hint">' + ('или перетащите файл сюда') + '</div>' +
+                            '<div class="ad-import-dropzone-hint">' + L.plrIliPeretaschiteFayl + '</div>' +
                             '<input type="file" id="adImportFileInput" accept=".xlsx,.xls,.csv" class="ad-import-dropzone-file">' +
                         '</div>' +
                         '<div class="ad-skryt" id="adImportFileInfo"></div>' +
@@ -3251,7 +3249,7 @@
                     if (s.dataset.field === 'name' && v >= 0) nameSet = true;
                 });
                 if (!nameSet) {
-                    A.showToast(L.plrImportColName + ' — ' + ('обязательно'), 'error');
+                    A.showToast(L.plrImportColName + ' — ' + L.plrErrObyazatelno, 'error');
                     return;
                 }
                 showPreviewStep();

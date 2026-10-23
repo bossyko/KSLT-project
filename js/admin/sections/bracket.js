@@ -346,8 +346,7 @@
                всякой записи (`:1379`). Сюда попадают только грязные данные —
                один человек в двух живых заявках. */
             if (м.player1_id === новый || м.player2_id === новый) {
-                return ('Новый игрок уже стоит в матче ') + м.id +
-                    ('. Сетка не переписана — сперва разберите заявки.');
+                return A.фраза(L.brkNewPlayerUzhe, { id: м.id });
             }
 
             var поле = null;
@@ -1755,9 +1754,9 @@
                 // Заявка знает обе стороны пары: совпадение с любой — норма
                 if (r.player_id === игралId || r.partner_id === игралId) return;
                 расхождения.push(чейМатч(m) + ', ' +
-                    ('матч ') + (m.match_order || '?') + ': ' +
-                    ('играл ') + имя(игралId) + ', ' +
-                    ('в заявке ') + имя(r.player_id));
+                    L.brkMatch2 + (m.match_order || '?') + ': ' +
+                    L.brkIgral + имя(игралId) + ', ' +
+                    L.brkVZayavke + имя(r.player_id));
             });
         });
         return расхождения;
@@ -2863,7 +2862,7 @@
                 html += renderBracketPanel(tournament, matches, playersMap, allCompleted, isTournamentCompleted, anyCompleted, isDbl, regsMap);
             }
         } else {
-            html += A.пустоеСостояние({ всего: 0, пусто: ('Сетка ещё не сгенерирована. Одобрите заявки и сгенерируйте жеребьёвку.') });
+            html += A.пустоеСостояние({ всего: 0, пусто: L.brkDrawEscheNe });
         }
         html += '</div>';
 
@@ -3392,7 +3391,7 @@
                     }
                     renderBracketManagement(tournamentId, 'results');
                 } catch (err) {
-                    A.showToast(('Ошибка: ') + err.message, 'error');
+                    A.showToast(L.brkErrText + err.message, 'error');
                     var btn = document.getElementById('adBrkRecalcPoints');
                     if (btn) { btn.disabled = false; btn.textContent = 'Пересчитать очки'; }
                 }
@@ -3413,7 +3412,7 @@
             if (allChecked.length > 0) {
                 floatingBar.style.display = '';
                 floatingBar.querySelector('.ad-reg-floating-count').textContent =
-                    ('Выбрано: ') + allChecked.length;
+                    L.brkSelected + allChecked.length;
                 floatingBar.querySelector('.ad-reg-floating-remove').textContent =
                     L.regRemoveSelected + ' (' + allChecked.length + ')';
             } else {
@@ -3879,7 +3878,7 @@
                                 добавлено++;
                                 addedAny = true;
                                 if (вСетку) {
-                                    A.showToast('Игрок добавлен');
+                                    A.showToastL.brkMsgPlayerAdded;
                                 } else {
                                     // Лист ожидания — новость не мимолётная,
                                     // показываем окном, а не всплывашкой. Окно
@@ -4609,7 +4608,7 @@
             if (mainDraw.length > maxPart) {
                 html += '<div class="ad-alert ad-alert-warning ad-reg-note">' +
                     L.brkWarning + mainDraw.length + ' ' + L.regCount + ', ' +
-                    ('но макс. участников — ') + maxPart +
+                    L.brkNoMaksMembers + maxPart +
                 '</div>';
             }
 
@@ -4707,7 +4706,7 @@
             var reservedSpots = tournament.reserved_spots || 0;
             var badgeText = mainDraw.length + '/' + maxPart;
             if (reservedSpots > 0) {
-                badgeText += ' (' + reservedSpots + ' ' + ('резерв') + ')';
+                badgeText += ' (' + reservedSpots + ' ' + L.brkReserve + ')';
             }
             html += '<h3 class="ad-reg-section-title">' + L.regMainDraw + ' <span class="ad-badge">' + badgeText + '</span></h3>';
             if (mainDraw.length > 0) {
@@ -4870,7 +4869,7 @@
         var player = isExternal ? null : (reg.players || playersMap[reg.player_id] || {});
         var pmEntry = isExternal ? {} : (playersMap[reg.player_id] || {});
         var pName = isExternal
-            ? (reg.external_name || ('Гость'))
+            ? (reg.external_name || L.brkGuest)
             : ((player.name || reg.player_id));
         // Значок посева рядом с именем нужен только там, где нет своей колонки:
         // в рейтинговых турнирах посев ставит рейтинг, и показать его больше
@@ -4916,7 +4915,7 @@
            Challenger читается как восемнадцатое место в Challenger. */
         var rankVal = isExternal ? '—' : (pmEntry.rank
             ? (pmEntry.rankOwn ? String(pmEntry.rank)
-                : '<span title="' + A.esc('Место в своей категории') +
+                : '<span title="' + A.escL.brkTipPlaceVSvoey +
                   '" style="color:var(--text-secondary);">' + pmEntry.rank + '</span>')
             : '—');
         // Время подачи — коротко: день, месяц и часы с минутами. Год и секунды
@@ -5377,7 +5376,7 @@
         if (ждут.length) {
             html += '<div class="ad-sq-title">' +
                 L.brkAwaitingConfirm + ' (' + ждут.length + ')</div>' +
-                '<div class="ad-sq-hint">' + ('Соперник ещё не ответил. Откройте счёт и сохраните — это закроет матч и двинет сетку.') + '</div>' +
+                '<div class="ad-sq-hint">' + L.brkSopernikEscheNe + '</div>' +
                 строки(ждут, 'wait');
         }
         return html + '</div>';
@@ -5619,7 +5618,7 @@
                     (добран ? ' <span class="ad-badge ad-reg-mark-seed ad-badge-sm" title="' +
                         L.qualAddedHint + '">' + L.qualAdded + '</span>' : '') +
                     (номерДопа ? ' <span class="ad-badge ad-badge-ig" title="' +
-                        ('Играет дополнительный матч за место в сетке') + '">' +
+                        L.brkIgraetDopolnitelnyyMat + '">' +
                         L.brkExtraMatch + номерДопа + '</span>' : '') +
                     /* КТО НЕ БЕРЁТСЯ В ЗАЧЁТ — НАПИСАНО СЛОВАМИ, А НЕ ВЫВЕДЕНО
                        ИЗ ПУСТЫХ ЦИФР. Дал неявку и не доиграл группу — все его
@@ -5665,7 +5664,7 @@
                             html += '<td class="ad-grp-score ad-grp-pending ad-grp-cell-click" ' +
                                 'data-match-new="' + st.playerId + '|' + opponentId + '|' + g + '" ' +
                                 'data-row-player="' + st.playerId + '" ' +
-                                'title="' + ('Матча ещё нет — заведётся вместе со счётом') + '">—</td>';
+                                'title="' + L.brkTipMatchEscheNet + '">—</td>';
                         }
                     }
                 }
@@ -6255,7 +6254,7 @@
                         html += '<button class="ad-brk-edit ad-brk-clear' +
                             (лечитПометку ? ' ad-brk-clear-hot' : '') +
                             '" data-match-clear="' + match.id + '">' +
-                            ('Снять') + '</button>';
+                            L.brkSnyat + '</button>';
                         html += '</div>';
                     }
                 }
@@ -7364,7 +7363,7 @@
             renderBracketManagement(tournamentId);
         } catch (err) {
             console.error('Regenerate draw error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         } finally {
             жеребимСейчас = false;
         }
@@ -7485,7 +7484,7 @@
             var paired = approved.filter(function(r) { return r.partner_id || r.partner_external_name; });
             var unpairedCount = approved.length - paired.length;
             if (unpairedCount > 0) {
-                A.showToast(('Исключено ') + unpairedCount + (' незапаренных заявок'), 'warning');
+                A.showToast(A.фраза(L.brkWarnExcludedUnpairedEntrie, { unpairedCount: unpairedCount }), 'warning');
             }
             approved = paired;
         }
@@ -7952,13 +7951,11 @@
 
             for (var к in счёт) {
                 if (счёт[к] > 1) {
-                    return ('Жеребьёвка отменена: в группе ') +
-                        буква + (' пара встречается дважды');
+                    return A.фраза(L.brkDrawCancelledV, { буква: буква });
                 }
             }
             if (Object.keys(счёт).length !== надо) {
-                return ('Жеребьёвка отменена: в группе ') + буква +
-                    (' не хватает встречи');
+                return A.фраза(L.brkDrawCancelledV2, { буква: буква });
             }
 
             // Сквозная сверка: один человек — одна группа
@@ -8045,24 +8042,19 @@
             });
 
             чужие.forEach(function(id) {
-                беды.push(('Группа ') + буква + ': ' +
-                    A.esc(имя(id)) + (' — по заявке не из этой группы'));
+                беды.push(A.фраза(L.brkGroupBukvaPo, { буква: буква, id: A.esc(имя(id)) }));
             });
 
             // Пропавшие: заявка в группе есть, а во встречах человека нет
             вГруппе.forEach(function(r) {
                 if (r.player_id && !встретились[r.player_id]) {
-                    беды.push(('Группа ') + буква + ': ' +
-                        A.esc(имя(r.player_id)) +
-                        (' — встреч не осталось'));
+                    беды.push(A.фраза(L.brkGroupBukvaMeetings, { буква: буква, player_id: A.esc(имя(r.player_id)) }));
                 }
             });
 
             var надо = вГруппе.length * (вГруппе.length - 1) / 2;
             if (мг.length !== надо) {
-                беды.push(('Группа ') + буква + ': ' +
-                    ('встреч ') + мг.length +
-                    (' вместо ') + надо);
+                беды.push(A.фраза(L.brkGroupBukvaMeetings2, { буква: буква, мг: мг.length, надо: надо }));
             }
 
             // Одна и та же пара дважды: счёт вписывают в обе встречи, и
@@ -8076,9 +8068,7 @@
             Object.keys(счёт).forEach(function(к) {
                 if (счёт[к] < 2) return;
                 var двое = к.split('|');
-                беды.push(('Группа ') + буква + ': ' +
-                    A.esc(имя(двое[0])) + ' — ' + A.esc(имя(двое[1])) +
-                    (' встречаются дважды'));
+                беды.push(A.фраза(L.brkGroupBukvaDvoe, { буква: буква, двое: A.esc(имя(двое[0])), двое2: A.esc(имя(двое[1])) }));
             });
         }
 
@@ -8143,10 +8133,7 @@
 
             var кто1 = m.player1_id ? имя(m.player1_id) : (m.slot1_label || '—');
             var кто2 = m.player2_id ? имя(m.player2_id) : (m.slot2_label || '—');
-            беды.push(('Плей-офф, матч ') + (m.match_order || '?') + ': ' +
-                A.esc(кто1) + ' — ' + A.esc(кто2) +
-                (' — оба из группы ') +
-                (KSLT_RULES.букваГруппы(г1) || г1));
+            беды.push(A.фраза(L.brkPlayoffOffMatch, { match_order: m.match_order || '?', кто1: A.esc(кто1), кто2: A.esc(кто2), г1: KSLT_RULES.букваГруппы(г1) || г1 }));
         });
 
         // Один человек в двух клетках сетки: после пересборки и добора
@@ -8171,7 +8158,7 @@
             });
             if (дважды) {
                 беды.push(A.esc(имя(id)) +
-                    (' стоит дважды в одном круге'));
+                    L.brkStoitDvazhdyV);
             }
         });
 
@@ -9723,7 +9710,7 @@
 
             summaryEl.textContent = L.candidateAutoCount + ': ' + autoC +
                 ' | ' + L.candidateIGCount + ': ' + igMatches +
-                ' (' + igC + ' ' + ('игроков') + ')' +
+                ' (' + igC + ' ' + L.brkPlayers + ')' +
                 ' | ' + L.candidateOutCount + ': ' + outC;
 
             // Validate
@@ -10143,7 +10130,7 @@
             A.showToast(msg, 'success');
         } catch (err) {
             console.error('Generate IG matches error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -10502,7 +10489,7 @@
             A.showToast('Сетка плей-офф сформирована', 'success');
         } catch (err) {
             console.error('Generate playoff draw error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -11207,7 +11194,7 @@
                     '<div class="ad-modal-header"><h3>' + A.esc(заголовок) + '</h3></div>' +
                     '<div class="ad-modal-body">' +
                         '<p style="margin-bottom:12px;">' +
-                        ('У этих матчей снимется счёт, а игрок из этого матча заменится. Соперники, пришедшие из других матчей, останутся на местах.') +
+                        L.brkUEtihMatchey +
                         '</p>' +
                         (список.length
                             ? '<table class="ad-table"><thead><tr>' +
@@ -11216,7 +11203,7 @@
                               '<th>' + L.brkScore + '</th>' +
                               '<th>' + L.brkPobeditel + '</th>' +
                               '</tr></thead><tbody>' + строки + '</tbody></table>'
-                            : '<p>' + ('От этого матча ничего не зависит.') + '</p>') +
+                            : '<p>' + L.brkOtEtogoMatch + '</p>') +
                     '</div>' +
                     '<div class="ad-modal-footer">' +
                         '<button class="ad-btn" data-нет>' + L.cancel + '</button>' +
@@ -11335,7 +11322,7 @@
                         '<div style="color:var(--text-secondary);font-size:var(--fs-xs);margin:4px 0;">' + L.vsLabel + '</div>' +
                         '<div style="font-weight:600;">' + A.esc(p2Name) + (displaySeed2 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + displaySeed2 + ']</span>' : '') + '</div>' +
                         '<div style="color:var(--text-secondary);font-size:var(--fs-2xs);margin-top:8px;">' +
-                            ('Счёт пиши со стороны победителя') + '</div>' +
+                            L.brkScorePishiSo + '</div>' +
                     '</div>' +
                     '<div id="adSetsContainer">' +
                         setRowHtml(1, sv[0]) +
@@ -11449,8 +11436,8 @@
 
         function нарисоватьСупер() {
             var подпись = document.getElementById('adSetLabel3');
-            if (подпись) подпись.textContent = _суперТБ ? ('Супер ТБ')
-                                                        : ('Сет 3');
+            if (подпись) подпись.textContent = _суперТБ ? L.brkSuperTbTb
+                                                        : L.brkSet2;
             var кн = document.getElementById('adSuperTb');
             if (кн) кн.classList.toggle('active', _суперТБ);
             var обёртка = document.getElementById('adS3TB1Wrap');
@@ -11544,7 +11531,7 @@
                 winnerDisplay.innerHTML = '';
             } else {
                 winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' +
-                    ('Нажми на имя победителя') + '</span>';
+                    L.brkNazhmiNaImya + '</span>';
             }
         }
 
@@ -11654,7 +11641,7 @@
                     if (v1 !== '' && v2 !== '') { hasAnySet = true; break; }
                 }
                 if (!hasAnySet) {
-                    A.showToast(('Заполните хотя бы один сет'), 'error');
+                    A.showToast(L.brkErrFillInHotyaBy, 'error');
                     return;
                 }
                 var retiredId = document.getElementById('adRetiredPlayer').value;
@@ -11668,7 +11655,7 @@
                     var v1 = document.getElementById('adS' + s + 'P1').value;
                     var v2 = document.getElementById('adS' + s + 'P2').value;
                     if (v1 === '' || v2 === '') {
-                        A.showToast(('Заполните сет ') + s, 'error');
+                        A.showToast(L.brkErrFillInSet + s, 'error');
                         return;
                     }
                     var этоСупер = (s === 3 && _суперТБ);
@@ -11679,7 +11666,7 @@
                             return;
                         }
                     } else if (!isValidSet(v1, v2, _setFormat)) {
-                        A.showToast(('Некорректный счёт сета ') + s, 'error');
+                        A.showToast(L.brkErrNekorrektnyyScoreSeta + s, 'error');
                         return;
                     }
                 }
@@ -12363,7 +12350,7 @@
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
             console.error('Finalize tournament error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -12517,7 +12504,7 @@
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
             console.error('Finalize FIC tournament error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -12775,7 +12762,7 @@
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
             console.error('Finalize group tournament error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -12978,7 +12965,7 @@
             A.showToast('Сетки лиг сформированы', 'success');
         } catch (err) {
             console.error('Generate league playoffs error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -13373,7 +13360,7 @@
                             html += '<td class="ad-grp-score ad-grp-pending ad-grp-cell-click" ' +
                                 'data-match-new="' + st.playerId + '|' + opponentId + '|' + g + '" ' +
                                 'data-row-player="' + st.playerId + '" ' +
-                                'title="' + ('Матча ещё нет — заведётся вместе со счётом') + '">—</td>';
+                                'title="' + L.brkTipMatchEscheNet + '">—</td>';
                         }
                     }
                 }
@@ -13777,7 +13764,7 @@
             A.showToast(L.tournamentFinalized, 'success');
         } catch (err) {
             console.error('Finalize group league tournament error:', err);
-            A.showToast(('Ошибка: ') + err.message, 'error');
+            A.showToast(L.brkErrText + err.message, 'error');
         }
     }
 
@@ -13870,7 +13857,7 @@
             : (registrations || []).filter(function(r) { return r.status === 'draw' || r.status === 'approved'; }).length;
 
         var participantWord = isDbl
-            ? ('пар')
+            ? L.brkPairs
             : ((participantCount === 1 ? 'игрок' : (participantCount < 5 ? 'игрока' : 'игроков')));
 
         var participantWordEn = isDbl ? 'pairs' : 'players';
@@ -14068,7 +14055,7 @@
             var d = new Date(iso);
             var p = function(n) { return String(n).padStart(2, '0'); };
             return p(d.getDate()) + '.' + p(d.getMonth() + 1) +
-                (' в ') + p(d.getHours()) + ':' + p(d.getMinutes());
+                L.brkV + p(d.getHours()) + ':' + p(d.getMinutes());
         }
 
         A.renderNewsForm(статья, {
@@ -14129,7 +14116,7 @@
                        уведомление второй раз */
                     var вопрос = отправлено
                         ? L.trnNewsResendConfirm.replace('{date}', когдаОтправили(отправлено))
-                        : ('Отправить результаты в TG группу?');
+                        : L.brkOtpravitRezultatyV;
                     A.showConfirm('Telegram', вопрос, async function() {
                         кнТГ.disabled = true;
                         кнТГ.textContent = '\uD83D\uDCE2 ...';

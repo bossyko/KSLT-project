@@ -319,7 +319,7 @@
                 var err = (res.error && res.error.message) || (res.data && res.data.error);
                 if (err) {
                     A.showToast(err === 'forbidden'
-                        ? ('Недостаточно прав') : err, 'error');
+                        ? L.ntfNoRightsNoRights : err, 'error');
                     btn.disabled = false;
                     return;
                 }
@@ -332,7 +332,7 @@
                 } else if (removed === 0) {
                     A.showToast('Помечено отозванной, но у получателей ничего не убралось', 'error');
                 } else {
-                    A.showToast(('Отозвано, убрано: ') + removed, 'success');
+                    A.showToast(L.ntfOkOtozvanoUbrano + removed, 'success');
                 }
                 loadHistory();
             });
@@ -355,7 +355,7 @@
                 var recErr = (rec.error && rec.error.message) || (rec.data && rec.data.error);
                 if (recErr) {
                     A.showToast(recErr === 'forbidden'
-                        ? ('Недостаточно прав') : recErr, 'error');
+                        ? L.ntfNoRightsNoRights : recErr, 'error');
                     btn.disabled = false;
                     return;
                 }
@@ -369,7 +369,7 @@
 
                 var removed = (rec.data && rec.data.removed) || 0;
                 A.showToast(
-                    ('Удалено, убрано у получателей: ') + removed,
+                    L.ntfDeletedUbranoU + removed,
                     (removed === 0 && !btn.dataset.recalled) ? 'error' : 'success');
                 loadHistory();
             });
