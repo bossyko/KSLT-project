@@ -1573,25 +1573,23 @@
         // при закрытии фокус возвращается туда, откуда окно позвали
         var фокусДоОкна = document.activeElement;
         closeBtn.focus();
-        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10). Здесь стоял БЕДНЫЙ
-           список — только кнопки, ссылки и `tabindex`, без полей. Полей в
-           этом окне сегодня нет, но держалось это на СОДЕРЖИМОМ окна, а не
-           на правиле. */
-        var ловушка = window.KSLT_FOKUS.ловушка(overlay);
-        overlay.addEventListener('keydown', ловушка);
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (152, 23.10). Ловушка висела НА ПОДЛОЖКЕ,
+           и ветвь «фокус оказался под окном» была мёртвой: нажатие под окном
+           до подложки не всплывает. И ОКНО ТЕКЛО: слушатель Escape снимался
+           ТОЛЬКО на пути Escape, а при закрытии кнопкой или фоном оставался
+           на `document` навсегда. Снятие теперь одно и висит на собственном
+           событии окна — его дают все три пути закрытия, ровно затем оно и
+           заведено. */
+        var снять = window.KSLT_FOKUS.запереть(overlay, {
+            поEsc: function() { closeH2H(overlay); }
+        });
         overlay.addEventListener('h2h-closed', function() {
+            снять();
             if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         });
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) closeH2H(overlay);
         });
-        var escHandler = function(e) {
-            if (e.key === 'Escape') {
-                closeH2H(overlay);
-                document.removeEventListener('keydown', escHandler);
-            }
-        };
-        document.addEventListener('keydown', escHandler);
 
         if (!client) {
             renderH2HEmpty(overlay);

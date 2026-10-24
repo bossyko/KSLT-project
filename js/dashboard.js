@@ -1616,19 +1616,17 @@
 
         function закрытьQR() {
             overlay.remove();
-            document.removeEventListener('keydown', поКлавишеQR);
-            overlay.removeEventListener('keydown', ловушкаQR);
+            снятьQR();
             if (фокусДоQR && фокусДоQR.focus) фокусДоQR.focus();
         }
-        function поКлавишеQR(e) { if (e.key === 'Escape') закрытьQR(); }
-        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
-           фокусируемого, возврат фокуса из-под окна, пустое окно. */
-        var ловушкаQR = window.KSLT_FOKUS.ловушка(overlay);
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (152, 23.10). Ловушка висела НА ПОДЛОЖКЕ —
+           и ветвь «фокус оказался под окном» была мёртвой: нажатие под окном
+           до подложки не всплывает. Теперь слушатель один, на `document`, и
+           снимается одним признаком на всех путях закрытия. */
+        var снятьQR = window.KSLT_FOKUS.запереть(overlay, { поEsc: закрытьQR });
 
         кнопкаЗакрытьQR.addEventListener('click', закрытьQR);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) закрытьQR(); });
-        overlay.addEventListener('keydown', ловушкаQR);
-        document.addEventListener('keydown', поКлавишеQR);
         кнопкаЗакрытьQR.focus();
 
         // Copy link
@@ -3724,21 +3722,21 @@
         var фокусДоОкна = document.activeElement;
         var closeOverlay = function() {
             overlay.classList.remove('visible');
-            overlay.removeEventListener('keydown', ловушка);
+            снять();
             setTimeout(function() { overlay.remove(); }, 300);
             if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         };
-        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
-           фокусируемого, возврат фокуса из-под окна, пустое окно. */
-        var ловушка = window.KSLT_FOKUS.ловушка(overlay);
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (152, 23.10). ЭТО ОКНО ТЕКЛО: слушатель
+           Escape снимался ТОЛЬКО на пути Escape, а при закрытии кнопкой или
+           фоном оставался на `document` навсегда и перехватывал Escape у
+           того окна, что откроется следом. Снятие теперь одно, на всех
+           путях; ловушка переехала с подложки на `document`, иначе ветвь
+           «фокус оказался под окном» мертва. */
+        var снять = window.KSLT_FOKUS.запереть(overlay, { поEsc: closeOverlay });
         var кнопкаЗакрыть = overlay.querySelector('.h2h-close');
         кнопкаЗакрыть.addEventListener('click', closeOverlay);
         кнопкаЗакрыть.focus();
-        overlay.addEventListener('keydown', ловушка);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) closeOverlay(); });
-        document.addEventListener('keydown', function handler(e) {
-            if (e.key === 'Escape') { closeOverlay(); document.removeEventListener('keydown', handler); }
-        });
 
         if (!client) { renderDashH2HEmpty(overlay); return; }
 
@@ -4500,19 +4498,15 @@
         function close() {
             back.remove();
             document.body.style.overflow = '';
-            document.removeEventListener('keydown', onKey);
-            back.removeEventListener('keydown', ловушка);
+            снять();
             if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
         }
-        function onKey(e) { if (e.key === 'Escape') close(); }
-        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
-           фокусируемого, возврат фокуса из-под окна, пустое окно. */
-        var ловушка = window.KSLT_FOKUS.ловушка(back);
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (152, 23.10): слушатель на `document`, а не
+           на подложке, иначе ветвь «фокус оказался под окном» мертва. */
+        var снять = window.KSLT_FOKUS.запереть(back, { поEsc: close });
 
         кнопкаЗакрыть.addEventListener('click', close);
         back.addEventListener('click', function(e) { if (e.target === back) close(); });
-        back.addEventListener('keydown', ловушка);
-        document.addEventListener('keydown', onKey);
         кнопкаЗакрыть.focus();
 
         (opts.actions || []).forEach(function(a, i) {
@@ -6075,21 +6069,17 @@
 
         function закрытьОбмен() {
             overlay.remove();
-            document.removeEventListener('keydown', поКлавишеОбмена);
-            overlay.removeEventListener('keydown', ловушкаОбмена);
+            снятьОбмен();
             if (фокусДоОбмена && фокусДоОбмена.focus) фокусДоОбмена.focus();
         }
-        function поКлавишеОбмена(e) { if (e.key === 'Escape') закрытьОбмен(); }
-        /* ЛОВУШКА ФОКУСА БЕРЁТСЯ ДОМОМ (21.10): полный список
-           фокусируемого, возврат фокуса из-под окна, пустое окно. */
-        var ловушкаОбмена = window.KSLT_FOKUS.ловушка(overlay);
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (152, 23.10): слушатель на `document`, а не
+           на подложке, иначе ветвь «фокус оказался под окном» мертва. */
+        var снятьОбмен = window.KSLT_FOKUS.запереть(overlay, { поEsc: закрытьОбмен });
 
         кнопкаЗакрытьОбмен.addEventListener('click', закрытьОбмен);
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) закрытьОбмен();
         });
-        overlay.addEventListener('keydown', ловушкаОбмена);
-        document.addEventListener('keydown', поКлавишеОбмена);
         кнопкаЗакрытьОбмен.focus();
 
         // Redeem buttons
