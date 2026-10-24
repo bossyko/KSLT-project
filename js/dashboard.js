@@ -1087,7 +1087,13 @@
                 '<div class="db-onboarding-modal">' +
                     '<button class="db-onboarding-close" aria-label="Close">&times;</button>' +
                     '<div class="db-onboarding-emoji">' + s.emoji + '</div>' +
-                    '<h3 class="db-onboarding-title">' + s.title + '</h3>' +
+                    /* НЕ ЭКРАНИРУЕТСЯ НАМЕРЕННО (157): `s` — шаг из массива,
+               объявленного ВЫШЕ В ЭТОМ ЖЕ ФАЙЛЕ, и его `title`/`text` берутся
+               из словаря (`L.obStep1Title`). Данных базы здесь нет. Прибор
+               157 помечает это как подстановку поля — он не знает, что объект
+               свой; причина названа здесь, чтобы следующий заход не искал
+               заново. */
+            '<h3 class="db-onboarding-title">' + s.title + '</h3>' +
                     '<p class="db-onboarding-text">' + s.text + '</p>' +
                     s.extra +
                     '<div class="db-onboarding-dots">' + dots + '</div>' +
@@ -1373,7 +1379,8 @@
         container.innerHTML =
             '<div class="db-sidebar-user">' +
                 avatarHtml +
-                '<div class="db-sidebar-name">' + (profile.full_name || 'User') + '</div>' +
+                /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): имя человек вписывает себе сам. */
+                '<div class="db-sidebar-name">' + KSLT_экранировать(profile.full_name || 'User') + '</div>' +
                 roleHtml +
                 '<div class="db-sidebar-ratings" id="dbSidebarRatings"></div>' +
                 qrBtnHtml +
@@ -4205,7 +4212,10 @@
                     // спрашиваем у базы и гасим кнопки, если отвечать нечего
                     var isChal = n.action_type === 'challenge' && n.action_id;
                     var modal = dbModal({
-                        title: KSLT_экранировать(n.title || ''),
+                        /* РУЧНОЕ ЭКРАНИРОВАНИЕ СНЯТО: теперь его делает дом
+                           окна. ДВАЖДЫ ЭКРАНИРОВАННЫЙ ТЕКСТ — ТОЖЕ БЕДА:
+                           человек увидел бы `&amp;` вместо `&`. */
+                        title: n.title || '',
                         body: '<p style="line-height:1.5;white-space:pre-wrap;">' + KSLT_экранировать(n.message || '') + '</p>' +
                               '<p style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">' +
                               dbFormatDate(n.created_at) + '</p>',
@@ -4484,7 +4494,16 @@
         back.innerHTML =
             '<div class="db-modal" role="dialog" aria-modal="true" aria-labelledby="' + идЗаголовка + '">' +
                 '<div class="db-modal-head">' +
-                    '<h3 class="db-modal-title" id="' + идЗаголовка + '">' + opts.title + '</h3>' +
+                    /* ЗАГОЛОВОК ОКНА — ТЕКСТ, И ДОМ ЭКРАНИРУЕТ ЕГО САМ
+                       (кусок 157). Тринадцать зовущих передают строку из
+                       словаря, и только один — данные из базы; тот
+                       экранировал их РУКАМИ, то есть знал про опасность, а
+                       остальные двенадцать держались на том, что данных у них
+                       нет. ЭКРАНИРОВАНИЕ ПО УМОЛЧАНИЮ, А НЕ ПО ЖЕЛАНИЮ.
+                       `body` остаётся разметкой по замыслу: его собирают
+                       зовущие целыми абзацами и таблицами. */
+                    '<h3 class="db-modal-title" id="' + идЗаголовка + '">' +
+                        (opts.title == null ? '' : KSLT_экранировать(String(opts.title))) + '</h3>' +
                     '<button type="button" class="db-modal-close" aria-label="' + L.close + '">&times;</button>' +
                 '</div>' +
                 opts.body +

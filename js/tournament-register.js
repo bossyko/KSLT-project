@@ -284,6 +284,38 @@
         setTimeout(function () { overlay.remove(); }, СНЯТИЕ_МС);
     }
 
+    /**
+     * ЭКРАНИРОВАНИЕ ПО УМОЛЧАНИЮ, А НЕ ПО ЖЕЛАНИЮ ЗОВУЩЕГО (кусок 157).
+     *
+     * ЧТО БЫЛО. Окна этого файла вставляли `info.title`, `info.text`,
+     * `info.note`, `opts.title` и `opts.text` в разметку КАК ЕСТЬ. Проверено
+     * НАЖАТИЕМ на живой странице турнира: `<b>весна</b>` в названии стало
+     * ТЕГОМ, `<i>` в тексте — тегом, а узел `<img>` создался. С обработчиком
+     * это было бы внедрением на ПУБЛИЧНОЙ странице.
+     *
+     * ПОЧЕМУ ДОМ, А НЕ ТРИДЦАТЬ ПРАВОК. Прибор 157 нашёл 30 мест, где в
+     * разметку идёт то, что пишет человек. Экранировать их по одному значит
+     * разъехаться на тридцать первом — так уже разъезжались четыре копии
+     * ловушки и семь записей правила счёта.
+     *
+     * РОД ЗНАЧЕНИЯ ВИДЕН В ИМЕНИ ДОВОДА — приём FAANG (в React опасный путь
+     * зовётся `dangerouslySetInnerHTML`, и имя кричит):
+     *   `title`, `text`, `note`   — ТЕКСТ, дом экранирует сам;
+     *   `textHtml`                — разметка ПО ЗАМЫСЛУ, и зовущий отвечает
+     *                               за экранирование данных ВНУТРИ неё.
+     *
+     * ЭТО НЕ СЛОМАЛО ПРОДУКТ, И ЭТО ПОСЧИТАНО ДО ПРАВКИ: из трёх зовов окон
+     * разметку передавал ОДИН — `<b>` вокруг названия турнира при снятии
+     * заявки. Он переведён на `textHtml` и экранирует название явно.
+     *
+     * ЗНАЧОК НЕ ЭКРАНИРУЕТСЯ НАМЕРЕННО: его задаёт КОД (эмодзи или `<svg>`),
+     * а не человек, и ни один зов не берёт его из базы — проверено по всем
+     * зовам `notice`, `confirm` и `showModal`.
+     */
+    function текстом(значение) {
+        return значение == null ? '' : window.KSLT_экранировать(String(значение));
+    }
+
     function showModal(info, isEn, isKg) {
         injectStyles();
 
@@ -296,9 +328,10 @@
             '<div class="trn-register-modal">' +
                 '<button class="trn-register-modal-close">&times;</button>' +
                 '<div class="trn-register-modal-icon">' + info.icon + '</div>' +
-                '<h3 class="trn-register-modal-title">' + info.title + '</h3>' +
-                '<p class="trn-register-modal-text">' + info.text + '</p>' +
-                (info.note ? '<div class="trn-register-modal-note">' + info.note + '</div>' : '') +
+                '<h3 class="trn-register-modal-title">' + текстом(info.title) + '</h3>' +
+                '<p class="trn-register-modal-text">' +
+                    (info.textHtml != null ? info.textHtml : текстом(info.text)) + '</p>' +
+                (info.note ? '<div class="trn-register-modal-note">' + текстом(info.note) + '</div>' : '') +
                 '<button class="trn-register-modal-btn' + (info.tone === 'error' ? ' is-error' : '') + '">' +
                     (KSLT_YAZYK.выбрать('Got it', 'Түшүндүм', 'Понятно')) +
                 '</button>' +
@@ -523,11 +556,13 @@
                 '<div class="trn-register-modal">' +
                     '<button class="trn-register-modal-close">&times;</button>' +
                     (opts.icon ? '<div class="trn-register-modal-icon">' + opts.icon + '</div>' : '') +
-                    '<h3 class="trn-register-modal-title">' + opts.title + '</h3>' +
-                    (opts.text ? '<p class="trn-register-modal-text">' + opts.text + '</p>' : '') +
+                    '<h3 class="trn-register-modal-title">' + текстом(opts.title) + '</h3>' +
+                    (opts.textHtml != null
+                        ? '<p class="trn-register-modal-text">' + opts.textHtml + '</p>'
+                        : (opts.text ? '<p class="trn-register-modal-text">' + текстом(opts.text) + '</p>' : '')) +
                     '<div class="trn-register-modal-actions">' +
-                        '<button class="trn-register-modal-btn is-ghost" data-no>' + opts.cancelText + '</button>' +
-                        '<button class="trn-register-modal-btn' + (opts.tone === 'error' ? ' is-error' : '') + '" data-yes>' + opts.okText + '</button>' +
+                        '<button class="trn-register-modal-btn is-ghost" data-no>' + текстом(opts.cancelText) + '</button>' +
+                        '<button class="trn-register-modal-btn' + (opts.tone === 'error' ? ' is-error' : '') + '" data-yes>' + текстом(opts.okText) + '</button>' +
                     '</div>' +
                 '</div>';
 
@@ -554,14 +589,28 @@
     }
 
     /** Короткое сообщение в том же оформлении — вместо alert() */
+    /**
+     * ПЕРЕХОДНИК НЕ ПЕРЕСОБИРАЕТ ОБЪЕКТ ПОЛЕ ЗА ПОЛЕМ (кусок 157).
+     *
+     * Он перечислял пять полей руками — и терял КАЖДОЕ новое. Поймала это
+     * ПРОБА, а не сторож: сторож проверял `showModal`, а путь шёл через этот
+     * переходник, и довод `textHtml` до окна не доезжал. Окно открывалось с
+     * пустым текстом, и ни одна красная строка этого не показывала.
+     * Заодно выяснилось, что `note: ''` затирал заметку ВСЕГДА: ни один
+     * зовущий её не передавал, и потому потери никто не замечал.
+     *
+     * Теперь поля переносятся целиком, а умолчания ставятся поверх: новый
+     * довод дома работает у всех зовущих сразу.
+     */
     function noticeModal(opts, isEn, isKg) {
-        showModal({
-            icon: opts.icon || '',
-            title: opts.title,
-            text: opts.text || '',
-            note: '',
-            tone: opts.tone || ''
-        }, isEn, isKg);
+        var о = {};
+        for (var к in opts) {
+            if (Object.prototype.hasOwnProperty.call(opts, к)) о[к] = opts[к];
+        }
+        о.icon = opts.icon || '';
+        о.text = opts.text != null ? opts.text : '';
+        о.tone = opts.tone || '';
+        showModal(о, isEn, isKg);
     }
 
     /**
