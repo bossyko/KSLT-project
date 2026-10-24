@@ -285,9 +285,12 @@
                 var t0 = types[0];
                 html +=
                     '<tr data-crt-id="' + c.id + '">' +
-                        '<td class="ad-bulk-cell" rowspan="' + rowCount + '" style="width:36px;text-align:center;vertical-align:middle;">' +
-                            '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + c.id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">' +
-                        '</td>' +
+                        /* ЯЧЕЙКА ВЫБОРА — У ДОМА (кусок 151). Здесь она
+                           собиралась своим кодом с инлайном, потому что
+                           ей нужен `rowspan`: у корта несколько видов
+                           покрытия под одной строкой-шапкой. Дом теперь
+                           принимает `rowspan` доводом. */
+                        A.bulkCheckboxTd(c.id, { rowspan: rowCount }) +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + editBtnHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + имяЯчейка + '</td>' +
                         '<td><span class="ad-type-badge ad-type-' + (t0.type || 'indoor') + '">' + (A.COURT_TYPES[t0.type] || t0.type || '') + '</span></td>' +

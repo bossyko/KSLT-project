@@ -422,12 +422,20 @@
             var rows = tbody.querySelectorAll('tr');
             rows.forEach(function(tr, idx) {
                 if (items[idx]) {
+                    /* ВВОД — У ДОМА (кусок 151). Ячейка здесь строится
+                       через DOM, потому что дописывается к УЖЕ
+                       отрисованной строке, и готовая строка `<td>` не
+                       годится; поэтому берём у дома САМ ВВОД, а ячейку
+                       оставляем свою. Инлайн снят: все три свойства уже
+                       объявлены в css теми же значениями, а
+                       `accent-color` красит нативный чекбокс, которого
+                       нет (`appearance: none`). */
                     var td = document.createElement('td');
                     td.className = 'ad-bulk-cell';
-                td.style.width = '36px';
-                td.style.textAlign = 'center';
-                td.innerHTML = '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + items[idx].id + '" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">';
-                tr.insertBefore(td, tr.firstChild);
+                    td.style.width = '36px';
+                    td.style.textAlign = 'center';
+                    td.innerHTML = A.bulkCheckbox(items[idx].id);
+                    tr.insertBefore(td, tr.firstChild);
             }
         });
         } // end if (isAdm)

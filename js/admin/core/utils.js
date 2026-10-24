@@ -151,10 +151,45 @@
      * @param {string} id - Row identifier
      * @returns {string} HTML string
      */
-    function bulkCheckboxTd(id) {
-        return '<td class="ad-bulk-cell" style="width:36px;text-align:center;">' +
-            /* ИНЛАЙН СНЯТ 22.10, КУСОК 119 — см. `.ad-bulk-all` выше. */
-            '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + id + '">' +
+    /**
+     * ЧЕКБОКС МАССОВОГО ВЫБОРА — ОДНО ОБЪЯВЛЕНИЕ НА ПРОДУКТ (кусок 151).
+     *
+     * ЧТО БЫЛО. Дом существовал и его ОБХОДИЛИ два раздела из восьми:
+     * `courts.js` и `users.js` собирали чекбокс сами и несли при нём
+     * инлайн `width:18px;height:18px;accent-color:var(--accent);
+     * cursor:pointer`. ДОМ, КОТОРЫЙ ЕСТЬ И КОТОРЫЙ ОБХОДЯТ, ХУЖЕ
+     * ОТСУТСТВИЯ ДОМА: копия выглядит законной.
+     *
+     * ПОЧЕМУ ОНИ ЕГО ОБХОДИЛИ — ПРИЧИНА БЫЛА НАСТОЯЩАЯ, И ОНА УЧТЕНА:
+     * у кортов ячейка идёт с `rowspan` (у корта несколько видов покрытия
+     * одной строкой-шапкой), а «Пользователи» дописывают ячейку к УЖЕ
+     * отрисованной строке через DOM, и готовая строка `<td>` им не
+     * годится. Поэтому дом отдаёт ДВА понятия: сам ввод и ячейку вокруг
+     * него, а ячейка принимает `rowspan`.
+     *
+     * ИНЛАЙН СНЯТ, И ВОТ ЗАМЕР, А НЕ ВЕРА. Все три свойства уже объявлены
+     * в `css/admin.css` для `.ad-bulk-item, .ad-bulk-all`: `width: 18px`
+     * и `height: 18px` ТЕМИ ЖЕ числами, `cursor: pointer` тем же
+     * значением, а `accent-color` красит НАТИВНЫЙ чекбокс, которого нет
+     * вовсе — там `appearance: none`, и галочка рисуется своим `::after`.
+     * Важности, которые перебивали инлайн, снял кусок 119, поэтому
+     * сегодня инлайн ПЕРЕБИВАЛ БЫ css — и ровно потому он опасен: правка
+     * размера в css прошла бы молча мимо двух разделов из восьми.
+     */
+    function bulkCheckbox(id) {
+        return '<input type="checkbox" class="ad-bulk-item" data-bulk-id="' + id + '">';
+    }
+
+    function bulkCheckboxTd(id, о) {
+        о = о || {};
+        var rowspan = о.rowspan ? ' rowspan="' + о.rowspan + '"' : '';
+        /* ВЫРАВНИВАНИЕ ПО СЕРЕДИНЕ — ТОЛЬКО У ЯЧЕЙКИ С `rowspan`: без него
+           чекбокс прижат к верху высокой ячейки. Так это и стояло у
+           кортов, перенесено замеренным, а не придуманным. */
+        var поСередине = о.rowspan ? 'vertical-align:middle;' : '';
+        return '<td class="ad-bulk-cell"' + rowspan +
+               ' style="width:36px;text-align:center;' + поСередине + '">' +
+            bulkCheckbox(id) +
         '</td>';
     }
 
@@ -1520,6 +1555,7 @@
     A.пустоеСостояние = пустоеСостояние;
     A.наТелоТаблицы = наТелоТаблицы;
     A.setupBulkDelete = setupBulkDelete;
+    A.bulkCheckbox = bulkCheckbox;
     A.bulkCheckboxTd = bulkCheckboxTd;
     A.uploadImage = uploadImage;
     A.compressImage = compressImage;
