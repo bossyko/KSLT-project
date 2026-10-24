@@ -157,7 +157,8 @@ const КУСКИ = [
     ['карточка не заводится сотруднику', 'check-karta-ne-sotrudniku.js', 'check-karta-ne-sotrudniku-otkat.js'],
     ['остаток близнецов', 'check-bliznetsy-ostatok.js', 'check-bliznetsy-ostatok-otkat.js'],
     ['ваучерный блок', 'check-vaucher-blok.js', 'check-vaucher-blok-otkat.js'],
-    ['по языкам, а не вперемешку', 'check-yazyk-bez-peremeshki.js', 'check-yazyk-bez-peremeshki-otkat.js']
+    ['по языкам, а не вперемешку', 'check-yazyk-bez-peremeshki.js', 'check-yazyk-bez-peremeshki-otkat.js'],
+    ['нажатия полосы страниц', 'check-polosa-nazhatiya.js', 'check-polosa-nazhatiya-otkat.js']
 ];
 
 function прогнать(файл) {
