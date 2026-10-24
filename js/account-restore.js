@@ -72,6 +72,16 @@
             '</div>';
         document.body.appendChild(overlay);
 
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156), И ОСНАЩАЕТСЯ `.ar-box`, А НЕ
+           ПОДЛОЖКА: роль `dialog` с `aria-modal` объявлена здесь в разметке
+           именно на блоке, и дом её не перезаписывает. Оснастить подложку
+           значило бы завести ВТОРОЙ `dialog` на одно окно — одно понятие,
+           два объявления.
+           ESCAPE ЗДЕСЬ НЕ ДАЁТСЯ НАМЕРЕННО: оба выхода из этого окна пишут
+           в базу (вернуть учётную запись или довести удаление), и
+           «закрыть ничего не решив» у него нет — окно показывают
+           ОДИН раз при входе в учётную запись, помеченную на удаление. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay.querySelector('.ar-box'));
         overlay.querySelector('#arKeep').addEventListener('click', function () { onKeep(overlay); });
         overlay.querySelector('#arLeave').addEventListener('click', function () { onLeave(overlay); });
         return overlay;
@@ -106,6 +116,8 @@
             // Передумал возвращаться — просто выходим. Метка остаётся, срок
             // идёт своим чередом, удаление доведёт до конца ежедневная уборка
             async function leave(overlay) {
+                var box = overlay.querySelector('.ar-box');
+                if (box && box.__ksltСнять) { box.__ksltСнять(); box.__ksltСнять = null; }
                 overlay.remove();
                 await client.auth.signOut();
                 window.location.reload();

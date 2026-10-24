@@ -361,6 +361,10 @@
                         requestAnimationFrame(function() { overlay.classList.add('active'); });
 
                         function close() {
+                            /* ОСНАСТКА СНИМАЕТСЯ ПЕРВОЙ (кусок 156): она
+                               возвращает фокус на колокольчик, откуда окно
+                               открыли. */
+                            if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
                             overlay.classList.remove('active');
                             setTimeout(function() { overlay.remove(); }, 200);
                             document.removeEventListener('keydown', onKey);
@@ -397,6 +401,12 @@
                             });
                         }
 
+                        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). САМОЕ ШИРОКОЕ
+                           МЕСТО ПРОДУКТА: файл стоит на 80 страницах, а в
+                           окне — кнопки «Принять» и «Отклонить» вызова, то
+                           есть оно ПИШЕТ В БАЗУ. Слепой обход по странице
+                           из такого окна — нажатие вслепую. */
+                        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: close });
                         overlay.querySelector('.site-notif-close').addEventListener('click', close);
                         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
                         document.addEventListener('keydown', onKey);

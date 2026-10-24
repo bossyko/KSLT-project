@@ -1273,14 +1273,16 @@
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) closeModal(overlay);
         });
-        document.addEventListener('keydown', function handler(e) {
-            if (e.key === 'Escape') {
-                closeModal(overlay);
-                document.removeEventListener('keydown', handler);
-            }
+        /* СВОЙ СЛУШАТЕЛЬ ESCAPE СНЯТ (кусок 156): Escape теперь приходит от
+           дома, вместе с запиранием Tab. Два слушателя на одно нажатие — две
+           правды, и своя снималась только ПОСЛЕ срабатывания: открыли окно
+           дважды — на `document` висело два обработчика. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+            поEsc: function () { closeModal(overlay); }
         });
 
         function closeModal(el) {
+            if (el.__ksltСнять) { el.__ksltСнять(); el.__ksltСнять = null; }
             el.classList.remove('visible');
             setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
         }

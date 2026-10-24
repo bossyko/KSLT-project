@@ -161,6 +161,11 @@
             overlay.classList.add('visible');
         });
 
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). Escape = «отмена»: приглашение
+           отправляется только нажатием, отказ обратим. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+            поEsc: function () { closeModal(overlay); }
+        });
         overlay.querySelector('.pt-confirm-send').addEventListener('click', function() {
             closeModal(overlay);
             sendInvite(playerId);
@@ -252,6 +257,14 @@
         requestAnimationFrame(function() { overlay.classList.add('visible'); });
         setTimeout(function() { overlay.classList.add('visible'); }, 60);
 
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). ЭТО ОКНО ОТКРЫВАЕТСЯ САМО, без
+           нажатия: гостю на публичной странице игрока. Возврат фокуса ему
+           некуда — его и не было, — но роль диктору и запирание Tab нужны
+           тем более: под ним лежит вся страница. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+            поEsc: function () { closeModal(overlay); }
+        });
+
         // Close handlers
         overlay.querySelector('.pt-modal-close').addEventListener('click', function() {
             closeModal(overlay);
@@ -262,6 +275,10 @@
     }
 
     function closeModal(overlay) {
+        if (!overlay) return;
+        /* СНЯТИЕ ОСНАСТКИ ЖИВЁТ НА УЗЛЕ: закрытие одно на три окна файла
+           (кусок 156). */
+        if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
         overlay.classList.remove('visible');
         setTimeout(function() { overlay.remove(); }, 250);
     }
@@ -327,6 +344,12 @@
 
         requestAnimationFrame(function() {
             overlay.classList.add('visible');
+        });
+
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). Окно оплаты: под ним кнопки,
+           меняющие данные, и слепой обход по ним из окна — нажатие вслепую. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+            поEsc: function () { closeModal(overlay); }
         });
 
         overlay.querySelector('.pt-modal-close').addEventListener('click', function() {

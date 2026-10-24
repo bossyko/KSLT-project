@@ -329,12 +329,21 @@
             '</div>';
         document.body.appendChild(overlay);
 
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). Окно счёта пишет результат
+           матча: обход по странице под ним — нажатие вслепую. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+            поEsc: function () { close(overlay); }
+        });
         overlay.querySelector('.ms-close').addEventListener('click', function () { close(overlay); });
         overlay.addEventListener('click', function (e) { if (e.target === overlay) close(overlay); });
         return overlay;
     }
 
-    function close(overlay) { if (overlay) overlay.remove(); }
+    function close(overlay) {
+        if (!overlay) return;
+        if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
+        overlay.remove();
+    }
 
     /** Уведомление — то же, что у приглашений: одно на весь сайт. */
     /* ОДНО УВЕДОМЛЕНИЕ НА САЙТ — компонент Toast 30:59 требует этого

@@ -141,11 +141,17 @@
         document.body.appendChild(overlay);
         requestAnimationFrame(function () { overlay.classList.add('active'); });
 
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). В окне ЕСТЬ ПОЛЕ поиска
+           напарника: копия ловушки, забывшая поля, отпускала бы Tab наружу
+           молча — это и было третьим расхождением копий на куске 152. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: закрыть });
+
         var поиск = overlay.querySelector('.de-search');
         var список = overlay.querySelector('.de-results');
         var скрытое = overlay.querySelector('.de-partner-id');
 
         function закрыть() {
+            if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
             overlay.classList.remove('active');
             setTimeout(function () { overlay.remove(); }, 180);
         }

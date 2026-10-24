@@ -276,6 +276,10 @@
 
     function закрытьОкно(overlay) {
         if (!overlay) return;
+        /* СНЯТИЕ ОСНАСТКИ ЖИВЁТ НА САМОМ УЗЛЕ, а не в замыкании: закрытие у
+           этого файла одно на три окна, и иначе ему пришлось бы знать, какое
+           из трёх закрывают. Образец — `player.js`, кусок 153. */
+        if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
         overlay.classList.remove('active');
         setTimeout(function () { overlay.remove(); }, СНЯТИЕ_МС);
     }
@@ -304,6 +308,9 @@
         requestAnimationFrame(function() { overlay.classList.add('active'); });
 
         function close() { закрытьОкно(overlay); }
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156): роль диктору, фокус внутрь,
+           запирание Tab, Escape и возврат фокуса. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: close });
         overlay.querySelector('.trn-register-modal-close').addEventListener('click', close);
         overlay.querySelector('.trn-register-modal-btn').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
@@ -345,6 +352,8 @@
         requestAnimationFrame(function() { overlay.classList.add('active'); });
 
         function close() { закрытьОкно(overlay); }
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: close });
         overlay.querySelector('.trn-register-modal-close').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
         overlay.querySelector('.trn-register-modal-btn').addEventListener('click', function() {
@@ -526,6 +535,11 @@
             requestAnimationFrame(function() { overlay.classList.add('active'); });
 
             var answered = false;
+            /* ОСНАСТКА ОКНА — ДОМ (кусок 156). Escape отвечает «нет»: отказ —
+               обратимое решение, согласие — нет. */
+            overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+                поEsc: function () { close(false); }
+            });
             function close(answer) {
                 if (answered) return;      /* два нажатия — один ответ */
                 answered = true;

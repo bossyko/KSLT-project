@@ -451,11 +451,23 @@
             '</div>';
         document.body.appendChild(overlay);
 
+        /* ЗАКРЫТИЕ ОДНО НА ВСЕ ПУТИ (кусок 156): подложка, «Отмена» и уход
+           по ссылке карты. Снятие оснастки обязано случиться на КАЖДОМ, и
+           до 156 путей было три с тремя разными телами. */
+        function закрыть(задержка) {
+            if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
+            if (задержка) setTimeout(function() { overlay.remove(); }, задержка);
+            else overlay.remove();
+        }
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+            поEsc: function () { закрыть(0); }
+        });
         overlay.addEventListener('click', function(e) {
-            if (e.target === overlay || e.target.id === 'bcMapCancel') overlay.remove();
+            if (e.target === overlay || e.target.id === 'bcMapCancel') закрыть(0);
         });
         overlay.querySelectorAll('a').forEach(function(a) {
-            a.addEventListener('click', function() { setTimeout(function() { overlay.remove(); }, 200); });
+            a.addEventListener('click', function() { закрыть(200); });
         });
     }
 

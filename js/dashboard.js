@@ -1115,6 +1115,7 @@
 
         function closeOnboarding() {
             localStorage.setItem('kslt_onboarding_done', '1');
+            if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
             overlay.classList.remove('visible');
             setTimeout(function() { overlay.remove(); }, 300);
         }
@@ -1127,6 +1128,11 @@
         document.body.appendChild(overlay);
         renderStep();
         requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). ОСНАЩАЕТСЯ ПОСЛЕ `renderStep()`:
+           до него внутри нет ни заголовка, ни кнопки, и дом поставил бы
+           фокус на саму подложку как пустому окну. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: closeOnboarding });
     }
 
     // ---- Auth Ready Callback ----
@@ -4788,10 +4794,14 @@
 
         // Close / Cancel
         function closeModal() {
+            if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
             cropper.destroy();
             overlay.remove();
         }
 
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). Окно обрезки афиши: в нём
+           ползунок и кнопка сохранения, а под ним — вся страница кабинета. */
+        overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: closeModal });
         document.getElementById('cropClose').addEventListener('click', closeModal);
         document.getElementById('cropCancel').addEventListener('click', closeModal);
         overlay.addEventListener('click', function(ev) {

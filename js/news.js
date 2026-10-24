@@ -1073,15 +1073,18 @@ function showGuestModal() {
 
     requestAnimationFrame(function() { overlay.classList.add('visible'); });
 
-    overlay.querySelector('.news-guest-modal-close').addEventListener('click', function() {
+    /* ЗАКРЫТИЕ ОДНО НА ДВА ПУТИ (кусок 156): до него тело стояло дважды,
+       знак в знак, и снятие оснастки пришлось бы ставить тоже дважды. */
+    function закрыть() {
+        if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
         overlay.classList.remove('visible');
         setTimeout(function() { overlay.remove(); }, 250);
-    });
+    }
+    /* ОСНАСТКА ОКНА — ДОМ (кусок 156). */
+    overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: закрыть });
+    overlay.querySelector('.news-guest-modal-close').addEventListener('click', закрыть);
     overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) {
-            overlay.classList.remove('visible');
-            setTimeout(function() { overlay.remove(); }, 250);
-        }
+        if (e.target === overlay) закрыть();
     });
 }
 

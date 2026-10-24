@@ -73,7 +73,13 @@
     }
 
     function next() {
-        if (!queue.length) { overlay.classList.remove('show'); return; }
+        if (!queue.length) {
+            /* ПОСЛЕДНЕЕ ПОЗДРАВЛЕНИЕ ЗАКРЫВАЕТ ОКНО — здесь и снимается
+               оснастка (кусок 156). */
+            if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
+            overlay.classList.remove('show');
+            return;
+        }
 
         var b = queue.shift().badge;
         var left = queue.length;
@@ -99,6 +105,21 @@
         overlay.classList.remove('show');
         void overlay.offsetWidth;   // перезапуск анимации
         overlay.classList.add('show');
+
+        /* ОСНАСТКА ОКНА — ДОМ (кусок 156). ОДИН РАЗ НА ОЧЕРЕДЬ, А НЕ НА
+           КАЖДЫЙ БЕЙДЖ: окно одно, меняется только его содержимое, и
+           запирание идемпотентно по корню — но возврат фокуса иначе
+           запомнил бы кнопку «Дальше» самого окна вместо того места, откуда
+           человек пришёл. */
+        if (!overlay.__ksltСнять) {
+            overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, {
+                поEsc: function () {
+                    /* Поздравление — не спрос: Escape закрывает всю очередь. */
+                    queue.length = 0;
+                    next();
+                }
+            });
+        }
     }
 
     /** Падающие теннисные мячи — вместо конфетти. */
