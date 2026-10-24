@@ -97,14 +97,17 @@ const ОТКАТЫ = [
    '            if (первый) { /* фокус не уводим */ }',
    'фокус уходит внутрь окна и возвращается тому, кто открыл'],
 
+  /* ДВА ОТКАТА ПЕРЕВЯЗАНЫ КУСКОМ 153: свой разбор Escape и своя ловушка Tab
+     у окна спонсора ушли в дом. Отнимаем довод `поEsc` — и отдельно само
+     запирание. */
   ['js/sponsors-loader.js',
-   "            if (e.key === 'Escape') { closeSponsorModal(overlay); }",
-   "            if (e.key === 'Enter') { closeSponsorModal(overlay); }",
-   'Escape закрывает окно, и слушатель снимается при закрытии'],
+   "            поEsc: function() { closeSponsorModal(overlay); }",
+   "            поEsc: null",
+   'Escape закрывает окно, и запирание снимается при закрытии'],
 
   ['js/sponsors-loader.js',
-   "            if (e.key !== 'Tab') return;",
-   "            if (e.key !== 'Escape') return;",
+   "        overlay._снятьЗапирание = window.KSLT_FOKUS.запереть(overlay, {",
+   "        overlay._снятьЗапирание = (function (overlay, о) { return function () {}; })(overlay, {",
    'табуляция не выходит за пределы открытого окна'],
 
   /* ЯКОРЬ НА ЧИСЛО, КОТОРОЕ РАСТЁТ, — ТАКОЙ ЖЕ ЯКОРЬ НА СОСЕДА. */
