@@ -136,24 +136,28 @@ const ОТКАТЫ = [
         "'<div class=\"db-modal\" role=\"dialog\" aria-modal=\"true\">' +",
    'окно называет себя своим заголовком'],
 
-  [JSФ, "        back.addEventListener('keydown', ловушка);",
-        "        back.addEventListener('keyup', ловушка);",
-   'оба окна кабинета держат Tab внутри себя'],
+  /* ОТКАТ ПЕРЕВЯЗАН КУСКОМ 152: ловушка переехала с подложки в дом. */
+  [JSФ, "        var снять = window.KSLT_FOKUS.запереть(back, { поEsc: close });",
+        "        var снять = window.KSLT_FOKUS.запереть(back, { поEsc: null });",
+   'оба окна кабинета запирают фокус домом'],
 
   [JSФ, '        var фокусДоОкна = document.activeElement;\n        var кнопкаЗакрыть = back.querySelector',
         '        var фокусДоОкна = null;\n        var кнопкаЗакрыть = back.querySelector',
    'оба окна кабинета возвращают фокус туда, откуда их позвали'],
 
-  [JSФ, "        overlay.addEventListener('keydown', ловушка);",
-        "        overlay.addEventListener('keyup', ловушка);",
-   'оба окна кабинета держат Tab внутри себя'],
+  [JSФ, "        var снять = window.KSLT_FOKUS.запереть(overlay, { поEsc: closeOverlay });",
+        "        var снять = window.KSLT_FOKUS.запереть(overlay, { поEsc: undefined });",
+   'оба окна кабинета запирают фокус домом'],
 
   [JSФ, '        var фокусДоОкна = document.activeElement;\n        var closeOverlay',
         '        var фокусДоОкна = null;\n        var closeOverlay',
    'оба окна кабинета возвращают фокус туда, откуда их позвали'],
 
-  [JSФ, "        document.addEventListener('keydown', onKey);\n        кнопкаЗакрыть.focus();",
-        "        document.addEventListener('keydown', onKey);",
+  /* ЯКОРЬ ПЕРЕВЯЗАН КУСКОМ 152: прежний держался за СОСЕДСТВО с
+     `document.addEventListener('keydown', onKey)`, а этой строки больше
+     нет — слушателя держит дом. Держимся за само нажатие фокуса. */
+  [JSФ, "        back.addEventListener('click', function(e) { if (e.target === back) close(); });\n        кнопкаЗакрыть.focus();",
+        "        back.addEventListener('click', function(e) { if (e.target === back) close(); });",
    'оба окна кабинета открываются с фокусом на себе'],
 
   /* ── один уровень — одно объявление ── */

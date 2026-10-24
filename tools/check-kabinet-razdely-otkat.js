@@ -117,13 +117,15 @@ const ОТКАТЫ = [
         "            '<div class=\"db-qr-modal\">' +",
    'окно QR называет себя окном и несёт имя'],
 
-  [JSФ, "        function поКлавишеQR(e) { if (e.key === 'Escape') закрытьQR(); }",
-        "        function поКлавишеQR(e) { if (e.key === 'EscapeНЕТ') закрытьQR(); }",
-   'окно QR выходит по Escape и возвращает фокус'],
+  /* ОТКАТ ПЕРЕВЯЗАН КУСКОМ 152: своего слушателя Escape у окна больше нет,
+     клавиша приходит доводом `поEsc`. */
+  [JSФ, "        var снятьQR = window.KSLT_FOKUS.запереть(overlay, { поEsc: закрытьQR });",
+        "        var снятьQR = window.KSLT_FOKUS.запереть(overlay, { поEsc: null });",
+   'окно QR выходит по Escape доводом дому и возвращает фокус'],
 
-  [JSФ, "        overlay.addEventListener('keydown', ловушкаQR);",
-        "        overlay.addEventListener('keydownНЕТ', ловушкаQR);",
-   'окно QR держит Tab внутри себя'],
+  [JSФ, "            снятьQR();",
+        "            /* снятие не зовём */",
+   'окно QR запирает фокус домом и снимает запирание'],
 
   [CSS, '    max-width: 340px;\n    width: 90%;', '    width: 90%;',
    'размеры окна QR живут в классах, а не в ветке по ширине окна'],
