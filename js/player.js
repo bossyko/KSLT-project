@@ -2334,6 +2334,26 @@
         }
     }
 
+    /**
+     * Закрытие и ЗАПИРАНИЕ двух окон вызова — окна-сообщения и окна с полем.
+     *
+     * КУСОК 153, 24.10, СЛОВО КОСТИ: «и 5 тоже да». У обоих окон ловушки
+     * фокуса не было ВОВСЕ: Tab из открытого окна уходил на страницу под
+     * ним, а в окне вызова есть ПОЛЕ — ровно тот случай, про который запись
+     * 21.10 говорила «первое же поле в нём, и Tab уходит под окно молча».
+     * Слушатель Escape к тому же снимался ТОЛЬКО на пути Escape: закрытые
+     * кнопкой или фоном, окна оставляли его на `document` навсегда.
+     *
+     * ФОКУС ПЕРЕВОДИТСЯ ВНУТРЬ ОКНА ПРИ ОТКРЫТИИ — раньше он оставался на
+     * кнопке «Вызвать» ПОД окном. Берётся ПЕРВЫЙ фокусируемый у дома: это
+     * закрывашка, а не поле и не «Отправить», — правило оболочки окна
+     * админки, где первой стоит «Отмена», потому что за ней бывают
+     * необратимые действия.
+     *
+     * И ВОЗВРАТ ФОКУСА ПОСЛЕ ЗАКРЫТИЯ — ЭТО ЦЕНА ПЕРЕВОДА, А НЕ ПОДАРОК:
+     * как только фокус уехал в окно, после закрытия ему некуда вернуться,
+     * и он упал бы на `body`, то есть в начало страницы.
+     */
     function attachChalClose(overlay) {
         var closeBtn = overlay.querySelector('.pp-chal-close');
         if (closeBtn) {
@@ -2342,17 +2362,21 @@
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) closeChalModal(overlay);
         });
-        var escHandler = function(e) {
-            if (e.key === 'Escape') {
-                closeChalModal(overlay);
-                document.removeEventListener('keydown', escHandler);
-            }
-        };
-        document.addEventListener('keydown', escHandler);
+        overlay.__ksltФокусДо = document.activeElement;
+        overlay.__ksltСнять = window.KSLT_FOKUS.запереть(overlay, {
+            поEsc: function() { closeChalModal(overlay); }
+        });
+        var первый = window.KSLT_FOKUS.фокусируемые(overlay)[0];
+        if (первый) { try { первый.focus(); } catch (e) {} }
     }
 
     function closeChalModal(overlay) {
+        if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
         overlay.classList.remove('visible');
+        var фокусДо = overlay.__ksltФокусДо;
+        if (фокусДо && фокусДо.focus && document.body.contains(фокусДо)) {
+            try { фокусДо.focus(); } catch (e) {}
+        }
         setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
     }
 

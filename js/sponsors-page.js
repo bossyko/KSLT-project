@@ -77,22 +77,29 @@
            сюда без нового разбора. */
         var ктоОткрыл = null;
 
-        function фокусируемые() {
-            return [].slice.call(modal.querySelectorAll(
-                'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
-            )).filter(function(э) { return э.offsetParent !== null; });
-        }
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (153, 24.10). Свой список здесь был
+           ПОЛНЕЕ остальных трёх копий — с полями, — и видимость он
+           проверял; но `offsetParent` врёт на `position: fixed`, ветви
+           «фокус под окном» не было, а пустое окно отпускало Tab. */
+        var снять = null;
 
         function открыть(кнопка) {
             ктоОткрыл = кнопка || null;
             modal.hidden = false;
-            var поля = фокусируемые();
+            /* ЗАПИРАТЬ ПОСЛЕ ПОКАЗА, А НЕ ДО: пока окно спрятано атрибутом,
+               фокусируемого в нём НОЛЬ и высота НОЛЬ — дом такую запись
+               снимает сам (замер 24.10). */
+            снять = window.KSLT_FOKUS.запереть(modal, { поEsc: закрыть });
+            var поля = window.KSLT_FOKUS.фокусируемые(modal);
             if (поля.length) фокус(поля[0]);
         }
 
         function фокус(э) { try { э.focus(); } catch (e) {} }
 
         function закрыть() {
+            /* СНЯТИЕ ДО ПРЯТАНЬЯ: окно прячется АТРИБУТОМ, узел остаётся в
+               документе, и признак «узел ушёл» дом не выручит. */
+            if (снять) { снять(); снять = null; }
             modal.hidden = true;
             /* ВОЗВРАТ ФОКУСА ТУДА, ОТКУДА ОТКРЫЛИ: иначе человек с
                клавиатуры оказывается в начале страницы */
@@ -105,20 +112,8 @@
         });
         document.getElementById('snModalClose').addEventListener('click', закрыть);
         modal.addEventListener('click', function(e) { if (e.target === modal) закрыть(); });
-        document.addEventListener('keydown', function(e) {
-            if (modal.hidden) return;
-            if (e.key === 'Escape') { закрыть(); return; }
-            /* ЛОВУШКА TAB: по кругу внутри окна, а не на страницу под ним */
-            if (e.key !== 'Tab') return;
-            var поля = фокусируемые();
-            if (!поля.length) return;
-            var первый = поля[0], последний = поля[поля.length - 1];
-            if (e.shiftKey && document.activeElement === первый) {
-                e.preventDefault(); фокус(последний);
-            } else if (!e.shiftKey && document.activeElement === последний) {
-                e.preventDefault(); фокус(первый);
-            }
-        });
+        /* Escape И Tab УШЛИ В ДОМ вместе с запиранием: своего слушателя на
+           `document` у окна больше нет. */
 
         if (!bar) return;
 

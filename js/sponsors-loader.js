@@ -236,25 +236,14 @@
             if (первый) первый.focus();
         });
 
-        // ESCAPE ЗАКРЫВАЕТ. Обработчика не было вовсе: на доске 285:9 у меня
-        // записано «Escape закрывает, проверено настоящим нажатием» — я
-        // проверял боковой лист, а не это окно. Нашёл Playwright 24.09.
-        // Слушатель висит на документе, потому что фокус может уйти на
-        // действие внутри окна, а закрывать надо в любом случае.
-        var поEscape = function(e) {
-            if (e.key === 'Escape') { closeSponsorModal(overlay); }
-        };
-        document.addEventListener('keydown', поEscape);
-        overlay._снятьEscape = function() { document.removeEventListener('keydown', поEscape); };
-
-        // Табуляция не выходит за пределы окна, пока оно открыто
-        overlay.addEventListener('keydown', function(e) {
-            if (e.key !== 'Tab') return;
-            var поля = overlay.querySelectorAll('a[href], button');
-            if (!поля.length) return;
-            var первое = поля[0], последнее = поля[поля.length - 1];
-            if (e.shiftKey && document.activeElement === первое) { e.preventDefault(); последнее.focus(); }
-            else if (!e.shiftKey && document.activeElement === последнее) { e.preventDefault(); первое.focus(); }
+        // ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (153, 24.10). Escape здесь был заведён
+        // 24.09 — обработчика не было вовсе, нашёл Playwright. Ловушка Tab
+        // стояла НА ПОДЛОЖКЕ и знала только `a[href], button`: ветвь «фокус
+        // оказался под окном» была мертва, пустое окно отпускало Tab, а
+        // видимость не проверялась вовсе. Теперь всё это держит дом, а окно
+        // отдаёт ему своё закрытие и получает снятие.
+        overlay._снятьЗапирание = window.KSLT_FOKUS.запереть(overlay, {
+            поEsc: function() { closeSponsorModal(overlay); }
         });
 
         // Close handlers
@@ -270,7 +259,7 @@
     }
 
     function closeSponsorModal(overlay) {
-        if (overlay._снятьEscape) { overlay._снятьEscape(); overlay._снятьEscape = null; }
+        if (overlay._снятьЗапирание) { overlay._снятьЗапирание(); overlay._снятьЗапирание = null; }
         overlay.classList.remove('visible');
         document.body.style.overflow = overlay._былОтступ || '';
         // Фокус возвращается тому, кто открыл: иначе после закрытия человек

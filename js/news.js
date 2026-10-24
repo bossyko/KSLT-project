@@ -857,32 +857,25 @@ function openPhotoViewer(urls, index) {
         function close() {
             overlay.remove();
             document.body.style.overflow = '';
+            снять();
             document.removeEventListener('keydown', onKey);
             /* ФОКУС ВОЗВРАЩАЕТСЯ ТОМУ, КТО ОТКРЫЛ ОКНО. Иначе он уезжает в
                начало страницы, и читатель на клавиатуре теряет место. */
             if (ктоОткрыл && typeof ктоОткрыл.focus === 'function') ктоОткрыл.focus();
         }
-        /** Кнопки окна в порядке обхода. Пересчитывается: стрелки прячутся. */
-        function кнопки() {
-            return Array.prototype.filter.call(
-                overlay.querySelectorAll('button'),
-                function (b) { return b.offsetParent !== null; });
-        }
+        /* ЗАПИРАНИЕ И Escape БЕРЁТСЯ ДОМОМ (153, 24.10). Здесь стояла своя
+           ловушка, и она ХОДИЛА КОЛЬЦОМ по видимым КНОПКАМ: гасила Tab
+           всегда и шагала по индексу. Для окна, где кроме кнопок ничего
+           нет, это давало тот же обход — но список знал только `button`, и
+           первая же ссылка внутри окна выпала бы из ловушки молча. Дом
+           берёт всё фокусируемое и считает скрытое по ВЫСОТЕ, а не по
+           `offsetParent`, который врёт на `position: fixed`.
+           СТРЕЛКИ ОСТАЮТСЯ ЗДЕСЬ: листание — не фокус, и дому оно не
+           принадлежит. */
+        var снять = window.KSLT_FOKUS.запереть(overlay, { поEsc: close });
         function onKey(e) {
-            if (e.key === 'Escape') { close(); return; }
             if (e.key === 'ArrowRight') { show(index + 1); return; }
             if (e.key === 'ArrowLeft') { show(index - 1); return; }
-            /* ЛОВУШКА TAB: пока окно открыто, обход идёт по его кнопкам и не
-               выходит на страницу под накладкой. */
-            if (e.key !== 'Tab') return;
-            var свои = кнопки();
-            if (!свои.length) return;
-            var i = свои.indexOf(document.activeElement);
-            e.preventDefault();
-            var шаг = e.shiftKey ? -1 : 1;
-            var след = (i === -1 ? (e.shiftKey ? свои.length - 1 : 0)
-                                 : (i + шаг + свои.length) % свои.length);
-            свои[след].focus();
         }
 
         overlay.querySelector('.news-viewer-close').addEventListener('click', close);

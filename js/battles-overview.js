@@ -854,33 +854,19 @@
             '</div>';
         document.body.appendChild(overlay);
 
-        function поля() {
-            return [].slice.call(overlay.querySelectorAll('a[href], button'))
-                .filter(function(э) { return э.offsetParent !== null; });
-        }
         function закрыть() {
-            document.removeEventListener('keydown', поКлавише, true);
+            снять();
             overlay.remove();
             /* Фокус возвращается тому, кто окно открыл: иначе он падает в
                начало страницы, и человек теряет место. */
             if (ктоОткрыл && ктоОткрыл.focus) { try { ктоОткрыл.focus(); } catch (e) {} }
         }
-        function поКлавише(e) {
-            if (e.key === 'Escape') { e.preventDefault(); закрыть(); return; }
-            if (e.key !== 'Tab') return;
-            /* ЛОВУШКА TAB: с последнего поля фокус идёт на первое, а не на
-               страницу под окном. */
-            var п = поля();
-            if (!п.length) return;
-            var первый = п[0], последний = п[п.length - 1];
-            if (e.shiftKey && document.activeElement === первый) {
-                e.preventDefault(); последний.focus();
-            } else if (!e.shiftKey && document.activeElement === последний) {
-                e.preventDefault(); первый.focus();
-            }
-        }
-
-        document.addEventListener('keydown', поКлавише, true);
+        /* ЗАПИРАНИЕ БЕРЁТСЯ ДОМОМ (153, 24.10). Свой слушатель стоял в фазе
+           ПЕРЕХВАТА — замер показал, что перехват здесь не нужен: ни один
+           `keydown` в этом файле не глушится, глушатся только нажатия
+           мышью. Список знал `a[href], button` и проверял видимость через
+           `offsetParent`, который врёт на `position: fixed`. */
+        var снять = window.KSLT_FOKUS.запереть(overlay, { поEsc: закрыть });
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay || e.target.id === 'boMapCancel') закрыть();
         });
@@ -888,7 +874,7 @@
             a.addEventListener('click', function() { setTimeout(закрыть, 200); });
         });
 
-        var первое = поля()[0];
+        var первое = window.KSLT_FOKUS.фокусируемые(overlay)[0];
         if (первое) { try { первое.focus(); } catch (e) {} }
     }
 
