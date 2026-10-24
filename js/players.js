@@ -1109,26 +1109,21 @@
         initScrollAnimations();
     }
 
+    /* НАЖАТИЯ ПОЛОСЫ — У ДОМА ПОЛОСЫ (кусок 149). Своё тело было ШЕСТЫМ
+       определением одного понятия при ОДНОМ рисовании полосы.
+       ПОДЖАТИЕ СВЕРХУ НЕ ПОТЕРЯЛОСЬ, А ОКАЗАЛОСЬ ЛИШНИМ: прежнее тело
+       считало `totalPages` и поджимало «далее» к последней странице, но
+       рисование само ставит `disabled` на последней — до поджатия дело не
+       доходило ни разу. Дом поджимает только снизу, к первой. */
     function initCatPagination() {
-        document.addEventListener('click', function(e) {
-            if (!isCategoryMode) return;
-
-            var pageBtn = e.target.closest('.pl-page-btn');
-            if (pageBtn && !pageBtn.disabled) {
-                var cat = getCategory(currentTab);
-                var totalPages = Math.max(1, Math.ceil((cat.players || []).length / CAT_PER_PAGE));
-
-                if (pageBtn.classList.contains('pl-page-prev')) {
-                    catCurrentPage = Math.max(1, catCurrentPage - 1);
-                } else if (pageBtn.classList.contains('pl-page-next')) {
-                    catCurrentPage = Math.min(totalPages, catCurrentPage + 1);
-                } else if (pageBtn.dataset.page) {
-                    catCurrentPage = parseInt(pageBtn.dataset.page);
-                }
-
-                renderCatTable(currentTab, catCurrentPage);
-                window.KSLT_прокрутитьКСписку(document.getElementById('playersTable'));
-            }
+        window.KSLT_полосаСтраниц.нажатия({
+            ключ: 'игроки:категория',
+            область: document,
+            активно: function () { return isCategoryMode; },
+            взять: function () { return catCurrentPage; },
+            поставить: function (н) { catCurrentPage = н; },
+            перерисовать: function () { renderCatTable(currentTab, catCurrentPage); },
+            кСписку: function () { return document.getElementById('playersTable'); }
         });
     }
 
@@ -1166,18 +1161,18 @@
                 return;
             }
 
-            var pageBtn = e.target.closest('.pl-page-btn');
-            if (pageBtn && !pageBtn.disabled) {
-                if (pageBtn.classList.contains('pl-page-prev')) {
-                    currentPage = Math.max(1, currentPage - 1);
-                } else if (pageBtn.classList.contains('pl-page-next')) {
-                    currentPage++;
-                } else if (pageBtn.dataset.page) {
-                    currentPage = parseInt(pageBtn.dataset.page);
-                }
-                renderTable(currentTab, currentPage);
-                window.KSLT_прокрутитьКСписку(document.getElementById('playersTable'));
-            }
+            /* ВЕТВЬ ПОЛОСЫ СТРАНИЦ УШЛА В ДОМ (кусок 149) — она была
+               СЕДЬМЫМ определением одного понятия. Здесь остались вкладки
+               и пол: это про выбор категории, а не про страницы. */
+        });
+
+        window.KSLT_полосаСтраниц.нажатия({
+            ключ: 'игроки:обзор',
+            область: document,
+            взять: function () { return currentPage; },
+            поставить: function (н) { currentPage = н; },
+            перерисовать: function () { renderTable(currentTab, currentPage); },
+            кСписку: function () { return document.getElementById('playersTable'); }
         });
     }
 

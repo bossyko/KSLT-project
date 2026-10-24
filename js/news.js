@@ -1689,20 +1689,15 @@ function renderNewsList() {
         document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
     });
 
-    // Pagination
-    document.getElementById('newsPagination').addEventListener('click', function(e) {
-        var btn = e.target.closest('.pl-page-btn');
-        if (!btn || btn.disabled) return;
-
-        if (btn.classList.contains('pl-page-prev')) {
-            currentPage = Math.max(1, currentPage - 1);
-        } else if (btn.classList.contains('pl-page-next')) {
-            currentPage++;
-        } else if (btn.dataset.page) {
-            currentPage = parseInt(btn.dataset.page);
-        }
-        renderGrid();
-        window.KSLT_прокрутитьКСписку(document.getElementById('newsBento'));
+    /* НАЖАТИЯ ПОЛОСЫ — У ДОМА ПОЛОСЫ (кусок 149), там же, где полоса
+       рисуется. Своё тело было одним из семи определений одного понятия. */
+    window.KSLT_полосаСтраниц.нажатия({
+        ключ: 'новости',
+        область: document.getElementById('newsPagination'),
+        взять: function () { return currentPage; },
+        поставить: function (н) { currentPage = н; },
+        перерисовать: renderGrid,
+        кСписку: function () { return document.getElementById('newsBento'); }
     });
 }
 

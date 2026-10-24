@@ -2871,15 +2871,32 @@
             window.KSLT_полосаСтраниц(полоса, items.length, page + 1, GAMES_PAGE, L);
         }
 
-        container.querySelectorAll('.pl-page-btn').forEach(function(btn) {
-            if (btn.disabled) return;
-            btn.addEventListener('click', function() {
-                var к = page;
-                if (btn.classList.contains('pl-page-prev')) к = page - 1;
-                else if (btn.classList.contains('pl-page-next')) к = page + 1;
-                else if (btn.dataset.page) к = parseInt(btn.dataset.page, 10) - 1;
-                renderPaged(container, items, renderRows, к, afterRender);
-            });
+        /* НАЖАТИЯ — У ДОМА ПОЛОСЫ (кусок 149). Здесь страницы считаются
+           С НУЛЯ, и это сказано доводом `сНуля`, а не подогнано.
+
+           СЛУШАТЕЛЬ СТАВИТСЯ ОДИН РАЗ НА КОРОБКУ, ПОЭТОМУ ДОВОДЫ ОН БЕРЁТ
+           ИЗ ХРАНИЛКИ, А НЕ ИЗ ЗАМЫКАНИЯ. `renderPaged` зовут ПЯТЬ разных
+           списков кабинета, каждый со своей коробкой, и у каждого данные
+           перезагружаются: замкни их на первой отрисовке — и после
+           обновления данных полоса перерисовывала бы СТАРЫЙ список молча.
+           Хранилка живёт на самой коробке и обновляется каждой отрисовкой;
+           `page` в неё кладётся уже ПРИВЕДЁННЫМ (выше он поджимается к
+           числу страниц). */
+        var состояние = container.__ksltСтраницы || (container.__ksltСтраницы = {});
+        состояние.items = items;
+        состояние.renderRows = renderRows;
+        состояние.afterRender = afterRender;
+        состояние.page = page;
+        window.KSLT_полосаСтраниц.нажатия({
+            ключ: 'кабинет:игры',
+            область: container,
+            сНуля: true,
+            взять: function () { return состояние.page; },
+            поставить: function (н) { состояние.page = н; },
+            перерисовать: function () {
+                renderPaged(container, состояние.items, состояние.renderRows,
+                    состояние.page, состояние.afterRender);
+            }
         });
     }
 
@@ -5998,14 +6015,13 @@
             window.KSLT_полосаСтраниц(полосаБаллов, total, loyPage, LOY_PER_PAGE, L);
         }
 
-        wrap.querySelectorAll('.pl-page-btn').forEach(function(btn) {
-            if (btn.disabled) return;
-            btn.addEventListener('click', function() {
-                if (btn.classList.contains('pl-page-prev')) loyPage = loyPage - 1;
-                else if (btn.classList.contains('pl-page-next')) loyPage = loyPage + 1;
-                else if (btn.dataset.page) loyPage = parseInt(btn.dataset.page, 10);
-                renderLoyaltyHistory();
-            });
+        /* НАЖАТИЯ — У ДОМА ПОЛОСЫ (кусок 149). */
+        window.KSLT_полосаСтраниц.нажатия({
+            ключ: 'кабинет:баллы',
+            область: wrap,
+            взять: function () { return loyPage; },
+            поставить: function (н) { loyPage = н; },
+            перерисовать: renderLoyaltyHistory
         });
     }
 
@@ -6237,14 +6253,13 @@
                 window.KSLT_полосаСтраниц(полосаПлатежей, total, payPage, PAY_PER_PAGE, L);
             }
 
-            container.querySelectorAll('.pl-page-btn').forEach(function(btn) {
-                if (btn.disabled) return;
-                btn.addEventListener('click', function() {
-                    if (btn.classList.contains('pl-page-prev')) payPage = payPage - 1;
-                    else if (btn.classList.contains('pl-page-next')) payPage = payPage + 1;
-                    else if (btn.dataset.page) payPage = parseInt(btn.dataset.page, 10);
-                    renderPayTable();
-                });
+            /* НАЖАТИЯ — У ДОМА ПОЛОСЫ (кусок 149). */
+            window.KSLT_полосаСтраниц.нажатия({
+                ключ: 'кабинет:платежи',
+                область: container,
+                взять: function () { return payPage; },
+                поставить: function (н) { payPage = н; },
+                перерисовать: renderPayTable
             });
         }
 
