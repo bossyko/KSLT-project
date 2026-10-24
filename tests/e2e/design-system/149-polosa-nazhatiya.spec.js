@@ -35,13 +35,26 @@ async function домНаМесте(page) {
 /* МЕРКА ЕДЕТ ИСХОДНИКОМ И РАЗВОРАЧИВАЕТСЯ В СТРАНИЦЕ (урок куска 148:
    строка в `evaluate` — это выражение, а не зов). */
 const СНЯТЬ = `() => {
+    /* НОМЕР НА ЭКРАНЕ ЧИТАЕТСЯ ИЗ ЛЮБОЙ ФОРМЫ ПОЛОСЫ. Ниже 640 номеров
+       нет вовсе: полоса сжата до «N из M» между стрелками (решение куска
+       100, замерено на его стенде). Первая запись пробы читала только
+       «.pl-page-btn.active» — и на телефоне получала null, то есть мерила
+       форму, которой там не бывает. ПРИБОР, ЗНАЮЩИЙ ОДНУ ФОРМУ, ВИДИТ
+       ЧАСТЬ ВИДОВ. */
+    const номерНаЭкране = (п) => {
+        const акт = п.querySelector('.pl-page-btn.active');
+        if (акт) return Number(акт.textContent);
+        const сжато = п.querySelector('.pl-page-now');
+        if (!сжато) return null;
+        const м = сжато.textContent.match(/\\d+/);
+        return м ? Number(м[0]) : null;
+    };
     const снять = (и) => {
         const п = document.getElementById('stPolosa' + и);
-        const акт = п.querySelector('.pl-page-btn.active');
         return {
             страница: Number(document.getElementById('stStr' + и).textContent),
             перерисовок: Number(document.getElementById('stZovov' + и).textContent),
-            активная: акт ? Number(акт.textContent) : null,
+            активная: номерНаЭкране(п),
             счётчик: (п.querySelector('.pl-page-count') || {}).textContent || '',
             перваяСтрока: (document.querySelector('#stSpisok' + и + ' li') || {}).textContent || ''
         };
@@ -162,11 +175,16 @@ test.describe('полоса «Новостей» на живом экране', 
                 null, { timeout: 15000 });
             await page.waitForSelector('#newsPagination .pl-page-btn', { timeout: 20000 });
 
+            /* ТА ЖЕ МЕРКА НОМЕРА: на телефоне полоса сжата, номеров нет. */
             const снять = () => page.evaluate(() => {
                 const п = document.getElementById('newsPagination');
                 const акт = п.querySelector('.pl-page-btn.active');
+                const сжато = п.querySelector('.pl-page-now');
+                const номер = акт ? Number(акт.textContent)
+                    : (сжато && сжато.textContent.match(/\d+/)
+                        ? Number(сжато.textContent.match(/\d+/)[0]) : null);
                 return {
-                    активная: акт ? акт.textContent : null,
+                    активная: номер,
                     счётчик: (п.querySelector('.pl-page-count') || {}).textContent || '',
                     первая: (document.querySelector('#newsBento h2, #newsBento h3, #newsBento .nw-title') || {}).textContent || '',
                     прокрутка: Math.round(window.scrollY)
@@ -174,13 +192,16 @@ test.describe('полоса «Новостей» на живом экране', 
             });
 
             const было = await снять();
-            expect(было.активная, 'полоса открылась не на первой странице').toBe('1');
+            expect(было.активная, 'полоса открылась не на первой странице').toBe(1);
 
             await page.click('#newsPagination .pl-page-next');
             await page.waitForFunction(
                 () => {
-                    const акт = document.querySelector('#newsPagination .pl-page-btn.active');
-                    return акт && акт.textContent === '2';
+                    const п = document.getElementById('newsPagination');
+                    const акт = п.querySelector('.pl-page-btn.active');
+                    if (акт) return акт.textContent === '2';
+                    const сжато = п.querySelector('.pl-page-now');
+                    return !!сжато && /\b2\b/.test(сжато.textContent);
                 }, null, { timeout: 15000 });
             const стало = await снять();
 
@@ -195,11 +216,14 @@ test.describe('полоса «Новостей» на живом экране', 
             await page.click('#newsPagination .pl-page-next');
             await page.waitForFunction(
                 () => {
-                    const акт = document.querySelector('#newsPagination .pl-page-btn.active');
-                    return акт && акт.textContent !== '2';
+                    const п = document.getElementById('newsPagination');
+                    const акт = п.querySelector('.pl-page-btn.active');
+                    if (акт) return акт.textContent === '3';
+                    const сжато = п.querySelector('.pl-page-now');
+                    return !!сжато && /\b3\b/.test(сжато.textContent);
                 }, null, { timeout: 15000 });
             const третья = await снять();
-            expect(третья.активная, 'одно нажатие дало не один шаг').toBe('3');
+            expect(третья.активная, 'одно нажатие дало не один шаг').toBe(3);
         });
     }
 });
