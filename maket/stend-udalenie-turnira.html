@@ -44,6 +44,11 @@
   <button class="ad-btn ad-btn-danger" data-sluchay="krayniy">А · крайний: длинное имя, 8 игроков</button>
   <button class="ad-btn ad-btn-danger" data-sluchay="massovoe">Б · массовое, 23 турнира</button>
   <button class="ad-btn ad-btn-danger" data-sluchay="pusto">В · пустой турнир</button>
+  <!-- СПРОС ПУБЛИКАЦИИ И СНЯТИЯ, кусок 154. Окно то же самое — оболочка
+       админки; новое здесь только ТЕКСТ, и он берётся из НАСТОЯЩЕГО
+       словаря, а не копируется сюда. -->
+  <button class="ad-btn ad-btn-primary" data-spros="opublikovat">Г · спрос публикации, имя с кавычкой</button>
+  <button class="ad-btn ad-btn-warning" data-spros="snyat">Д · спрос снятия, очень длинное имя</button>
 </div>
 <div id="ad-content" data-stend="окно удаления турнира"></div>
 
@@ -51,20 +56,20 @@
      только их — запасных списков в нём больше нет (сведено 16.10) -->
 <script src="../js/tournament-generator.js?v=4"></script>
 <script src="../js/tournament-status.js?v=12"></script>
-<script src="../js/admin/core/constants.js?v=165"></script>
+<script src="../js/admin/core/constants.js?v=166"></script>
 <script src="../js/kslt-toast.js?v=3"></script>
 <script src="../js/kslt-vremya.js?v=2"></script>
 <script src="../js/kslt-fokus.js?v=3"></script>
-<script src="../js/admin/core/kslt-ekranirovanie.js?v=1"></script>
+<script src="../js/kslt-ekranirovanie.js?v=1"></script>
 <script src="../js/admin/core/utils.js?v=63"></script>
 <script src="../js/admin/core/cover-crop.js?v=4"></script>
 <script src="../js/admin/core/editor.js?v=11"></script>
 <script src="../js/admin/core/layout.js?v=24"></script>
-<script src="../js/admin/sections/kslt-yazyk.js?v=3"></script>
+<script src="../js/kslt-yazyk.js?v=3"></script>
 <script src="../js/admin/sections/news.js?v=58"></script>
 <script src="../js/kslt-rules.js?v=34"></script>
 <script src="../js/admin/sections/bracket.js?v=309"></script>
-<script src="../js/admin/sections/tournaments.js?v=79"></script>
+<script src="../js/admin/sections/tournaments.js?v=80"></script>
 <script>
 (function() {
     'use strict';
@@ -109,10 +114,45 @@
         b.addEventListener('click', function() { показать(b.dataset.sluchay); });
     });
 
+    /* КРАЙНИЕ СЛУЧАИ СПРОСА — ИМЕНА, А НЕ ЧИСЛА. У публикации проверяется
+       ОБРАТНЫЙ ПУТЬ ЭКРАНИРОВАНИЯ: кавычка и амперсанд в названии турнира
+       обязаны вернуться знак в знак, а не разорвать атрибут и не приехать
+       как `&amp;`. У снятия — длина: текст с длинным названием не должен
+       распирать окно. */
+    var ИМЕНА = {
+        opublikovat: 'Кубок «Ала-Тоо» & Co. <b>весна</b> 2026',
+        snyat: 'МЕЖДУНАРОДНЫЙ РЕЙТИНГОВЫЙ ТУРНИР ABDYSH-ATA SPRING CUP 2026 — ЖЕНСКИЙ ПАРНЫЙ РАЗРЯД FUTURES, ВТОРОЙ ЭТАП'
+    };
+    var L = A.L;
+
+    function показатьСпрос(вид) {
+        var снимаем = вид === 'snyat';
+        /* ТЕКСТ БЕРЁТСЯ У СЛОВАРЯ И СОБИРАЕТСЯ ДОМОМ `A.фраза` — тем же
+           путём, которым его собирает раздел турниров. Копия текста здесь
+           показывала бы стенд, а не продукт. */
+        return A.showConfirmAsync(
+            снимаем ? L.trnSprosSnyat : L.trnSprosOpublikovat,
+            /* ТЕМ ЖЕ ПУТЁМ, ЧТО В ПРОДУКТЕ: тело окна — разметка, поэтому
+               данные экранируются ПЕРЕД подстановкой. Именно этот путь
+               стенд и проверяет: имя с кавычкой, амперсандом и тегом
+               обязано вернуться знак в знак, а не стать разметкой. */
+            A.фраза(снимаем ? L.trnSprosSnyatTekst : L.trnSprosOpublikovatTekst,
+                    { турнир: A.esc(ИМЕНА[вид]) }),
+            снимаем ? L.trnSnyatSPublikacii : L.trnOpublikovat);
+    }
+
+    document.querySelectorAll('[data-spros]').forEach(function(b) {
+        b.addEventListener('click', function() { показатьСпрос(b.dataset.spros); });
+    });
+
     /* Признак готовности для прогона: стенд собран и живой код на месте */
     window.СТЕНД_ГОТОВ = typeof A.текстПотерьТурнира === 'function' &&
-                         typeof A.showConfirm === 'function';
+                         typeof A.showConfirm === 'function' &&
+                         typeof A.showConfirmAsync === 'function' &&
+                         typeof A.фраза === 'function';
     window.показатьСлучай = показать;
+    window.показатьСпрос = показатьСпрос;
+    window.ИМЕНА_СПРОСА = ИМЕНА;
     document.body.dataset.stendGotov = window.СТЕНД_ГОТОВ ? '1' : '0';
 })();
 </script>
