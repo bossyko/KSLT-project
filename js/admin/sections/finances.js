@@ -1012,62 +1012,26 @@
 
         var reportDate = A.formatPayDate(KSLT_VREMYA.сегодня());
 
-        var win = window.open('', '_blank');
-        if (!win) return;
-
-        var htmlContent =
-            '<!DOCTYPE html><html><head>' +
-            '<meta charset="UTF-8">' +
-            '<title>' + L.payPdfTitle + '</title>' +
-            '<style>' +
-                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
-                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
-                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
-                '.report-header .period { font-size: 13px; color: #666; }' +
-                '.stats-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }' +
-                '.stat-box { flex: 1; min-width: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
-                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
-                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
-                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
-                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
-                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
-                'tr:nth-child(even) { background: #fafafa; }' +
-                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
-                '@media print { body { padding: 15px; } }' +
-            '</style>' +
-            '</head><body>' +
-            '<div class="report-header">' +
-                '<h1>' + escH(L.payPdfTitle) + '</h1>' +
-                '<div class="period">' + L.payPeriod + ': ' + escH(periodLabel) + '</div>' +
-            '</div>' +
-            '<div class="stats-grid">' +
-                '<div class="stat-box"><div class="val">' + filtered.length + '</div><div class="lbl">' + L.payTotalCount + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + totalAmount.toLocaleString() + ' KGS</div><div class="lbl">' + L.payTotalAmount + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + active + '</div><div class="lbl">' + L.payStatActive + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + expired + '</div><div class="lbl">' + L.payStatExpired + '</div></div>' +
-            '</div>' +
-            '<table>' +
-                '<thead><tr>' +
-                    '<th>№</th>' +
-                    '<th>' + L.payEntity + '</th>' +
-                    '<th>' + L.finTip + '</th>' +
-                    '<th>' + L.payAmount + '</th>' +
-                    '<th>' + L.crtViewActiveUntil + '</th>' +
-                    '<th>' + L.thStatus + '</th>' +
-                    '<th>' + L.payCreatedAt + '</th>' +
-                '</tr></thead>' +
-                '<tbody>' + tableRows + '</tbody>' +
-            '</table>' +
-            '<div class="report-footer">' +
-                '<span>' + L.payTotalCount + ': ' + filtered.length + ' ' + L.payPdfPayments + '</span>' +
-                '<span>' + L.payPdfDate + ': ' + reportDate + '</span>' +
-            '</div>' +
-            '<script>window.onload=function(){window.print();}<\/script>' +
-            '</body></html>';
-
-        win.document.write(htmlContent);
-        win.document.close();
+        /* ЛИСТ СОБИРАЕТ ДОМ (кусок 150): `js/admin/core/export.js`,
+           `A.печатныйЛист`. Здесь стояла третья копия листа — скелет, 15
+           правил css, шапка, плашки, таблица, подвал и зов печати; с
+           ваучерами она совпадала телом на 0.99. */
+        A.печатныйЛист({
+            заголовок: L.payPdfTitle,
+            периодПодпись: L.payPeriod,
+            период: periodLabel,
+            плашки: [
+                { значение: filtered.length, подпись: L.payTotalCount },
+                { значение: totalAmount.toLocaleString() + ' KGS', подпись: L.payTotalAmount },
+                { значение: active, подпись: L.payStatActive },
+                { значение: expired, подпись: L.payStatExpired }
+            ],
+            колонки: ['\u2116', L.payEntity, L.finTip, L.payAmount,
+                      L.crtViewActiveUntil, L.thStatus, L.payCreatedAt],
+            строки: tableRows,
+            подвалСлева: L.payTotalCount + ': ' + filtered.length + ' ' + L.payPdfPayments,
+            подвалСправа: L.payPdfDate + ': ' + reportDate
+        });
     }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная

@@ -1651,72 +1651,36 @@
 
         var reportDate = fmtUsrDate(KSLT_VREMYA.деньПоБишкеку(now));
 
-        var win = window.open('', '_blank');
-        if (!win) return;
-
-        var htmlContent =
-            '<!DOCTYPE html><html><head>' +
-            '<meta charset="UTF-8">' +
-            '<title>' + L.usrPdfTitle + '</title>' +
-            '<style>' +
-                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
-                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
-                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
-                '.report-header .period { font-size: 13px; color: #666; }' +
-                '.stats-grid { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }' +
-                '.stat-box { flex: 1; min-width: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
-                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
-                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
-                '.breakdown { display: flex; gap: 20px; margin-bottom: 24px; font-size:var(--fs-xs); color: #555; flex-wrap: wrap; }' +
-                '.breakdown span { font-weight: 600; color: #1a1a1a; }' +
-                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
-                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
-                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
-                'tr:nth-child(even) { background: #fafafa; }' +
-                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
-                '@media print { body { padding: 15px; } }' +
-            '</style>' +
-            '</head><body>' +
-            '<div class="report-header">' +
-                '<h1>' + escUsrHtml(L.usrPdfTitle) + '</h1>' +
-                '<div class="period">' + L.usrPeriod + ': ' + escUsrHtml(periodLabel) + '</div>' +
-            '</div>' +
-            '<div class="stats-grid">' +
-                '<div class="stat-box"><div class="val">' + total + '</div><div class="lbl">' + L.usrStatTotal + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + activeMembers + '</div><div class="lbl">' + L.usrStatMembers + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + linkedPlayers + '</div><div class="lbl">' + L.usrStatPlayers + '</div></div>' +
-            '</div>' +
-            '<div class="breakdown">' +
-                '🛡️ <span>' + admins + '</span> ' + L.usrStatAdmins +
-                ' · <span>' + managers2 + '</span> ' + L.usrStatManagers +
-                ' · <span>' + users2 + '</span> ' + L.usrStatRegular +
-                ' &nbsp;|&nbsp; 📱 <span>' + tgCount + '</span> Telegram' +
-                ' &nbsp;|&nbsp; 🚫 <span>' + bannedCount + '</span> ' + L.usrStatBanned +
-                ' &nbsp;|&nbsp; 🗑️ <span>' + usrDeletedPeriodCount + '</span> ' + L.usrStatDeleted +
-            '</div>' +
-            '<table>' +
-                '<thead><tr>' +
-                    '<th>№</th>' +
-                    '<th>' + L.thUser + '</th>' +
-                    '<th>' + L.thEmail + '</th>' +
-                    '<th>' + L.thRole + '</th>' +
-                    '<th>' + L.usrThMembership + '</th>' +
-                    '<th>🎾</th>' +
-                    '<th>TG</th>' +
-                    '<th>' + L.thDate + '</th>' +
-                '</tr></thead>' +
-                '<tbody>' + tableRows + '</tbody>' +
-            '</table>' +
-            '<div class="report-footer">' +
-                '<span>' + L.usrTotalCount + ': ' + total + ' ' + L.usrPdfUsers + '</span>' +
-                '<span>' + L.usrPdfDate + ': ' + reportDate + '</span>' +
-            '</div>' +
-            '<script>window.onload=function(){window.print();}<\/script>' +
-            '</body></html>';
-
-        win.document.write(htmlContent);
-        win.document.close();
+        /* ЛИСТ СОБИРАЕТ ДОМ (кусок 150). Было: `window.open`, скелет,
+           17 правил css, шапка, плашки, таблица, подвал и зов печати —
+           всё это стояло здесь и ещё в двух разделах знак в знак.
+           ПЛОТНЫЙ ЛИСТ — СВОЙСТВО ЭТОГО ОТЧЁТА, А НЕ ДОМА: у него плашки
+           уже (100 вместо 120) и полоса плашек ниже (16 вместо 24).
+           РАЗБИВКА ПО РОЛЯМ ПРИХОДИТ ГОТОВОЙ РАЗМЕТКОЙ: её собирает
+           раздел, он же и гасит данные внутри. */
+        A.печатныйЛист({
+            заголовок: L.usrPdfTitle,
+            периодПодпись: L.usrPeriod,
+            период: periodLabel,
+            плотный: true,
+            плашки: [
+                { значение: total, подпись: L.usrStatTotal },
+                { значение: activeMembers, подпись: L.usrStatMembers },
+                { значение: linkedPlayers, подпись: L.usrStatPlayers }
+            ],
+            разбивка:
+                '\u{1F6E1}\uFE0F <span>' + escUsrHtml(String(admins)) + '</span> ' + escUsrHtml(L.usrStatAdmins) +
+                ' \u00b7 <span>' + escUsrHtml(String(managers2)) + '</span> ' + escUsrHtml(L.usrStatManagers) +
+                ' \u00b7 <span>' + escUsrHtml(String(users2)) + '</span> ' + escUsrHtml(L.usrStatRegular) +
+                ' &nbsp;|&nbsp; \u{1F4F1} <span>' + escUsrHtml(String(tgCount)) + '</span> Telegram' +
+                ' &nbsp;|&nbsp; \u{1F6AB} <span>' + escUsrHtml(String(bannedCount)) + '</span> ' + escUsrHtml(L.usrStatBanned) +
+                ' &nbsp;|&nbsp; \u{1F5D1}\uFE0F <span>' + escUsrHtml(String(usrDeletedPeriodCount)) + '</span> ' + escUsrHtml(L.usrStatDeleted),
+            колонки: ['\u2116', L.thUser, L.thEmail, L.thRole, L.usrThMembership,
+                      '\u{1F3BE}', 'TG', L.thDate],
+            строки: tableRows,
+            подвалСлева: L.usrTotalCount + ': ' + total + ' ' + L.usrPdfUsers,
+            подвалСправа: L.usrPdfDate + ': ' + reportDate
+        });
     }
 
     function fmtUsrDate(dateStr) {

@@ -561,8 +561,9 @@
         else if (vchPeriodMode === 'custom' && vchDateFrom) periodLabel = formatVchDate(vchDateFrom + 'T00:00:00') + ' – ' + (vchDateTo ? formatVchDate(vchDateTo + 'T00:00:00') : '...');
         else periodLabel = L.vchAllTime;
 
-        var win = window.open('', '_blank');
-        if (!win) return;
+        /* ОКНО ОТКРЫВАЕТ ДОМ ЛИСТА (кусок 150): раньше оно открывалось
+           ЗДЕСЬ, до сборки строк, и при пустом отчёте оставалась пустая
+           вкладка. Теперь окно появляется вместе с листом. */
 
         var tableRows = '';
         data.forEach(function(v, i) {
@@ -583,65 +584,27 @@
         var now = new Date();
         var reportDate = formatVchDate(now.toISOString());
 
-        var htmlContent =
-            '<!DOCTYPE html><html><head>' +
-            '<meta charset="UTF-8">' +
-            '<title>' + L.vchReportTitle + '</title>' +
-            '<style>' +
-                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
-                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
-                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
-                '.report-header .period { font-size: 13px; color: #666; }' +
-                '.stats-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }' +
-                '.stat-box { flex: 1; min-width: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
-                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
-                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
-                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
-                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
-                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
-                'tr:nth-child(even) { background: #fafafa; }' +
-                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
-                '@media print { body { padding: 15px; } .no-print { display: none; } }' +
-            '</style>' +
-            '</head><body>' +
-
-            '<div class="report-header">' +
-                '<h1>' + A.esc(L.vchReportTitle) + '</h1>' +
-                '<div class="period">' + L.vchPeriod + ': ' + A.esc(periodLabel) + '</div>' +
-            '</div>' +
-
-            '<div class="stats-grid">' +
-                '<div class="stat-box"><div class="val">' + stats.total + '</div><div class="lbl">' + L.vchTotal + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + stats.totalDiscount.toLocaleString() + ' ' + L.vchCurrency + '</div><div class="lbl">' + L.vchTotalDiscount + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + stats.used + ' (' + stats.convPct + '%)</div><div class="lbl">' + L.vchUsed + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + stats.active + '</div><div class="lbl">' + L.vchActive + '</div></div>' +
-                '<div class="stat-box"><div class="val">' + stats.expired + '</div><div class="lbl">' + L.vchExpired + '</div></div>' +
-            '</div>' +
-
-            '<table>' +
-                '<thead><tr>' +
-                    '<th>№</th>' +
-                    '<th>' + L.vchPlayer + '</th>' +
-                    '<th>' + L.vchEntity + '</th>' +
-                    '<th>' + L.vchService + '</th>' +
-                    '<th>' + L.vchDiscount + '</th>' +
-                    '<th>' + L.vchDate + '</th>' +
-                    '<th>' + L.thStatus + '</th>' +
-                '</tr></thead>' +
-                '<tbody>' + tableRows + '</tbody>' +
-            '</table>' +
-
-            '<div class="report-footer">' +
-                '<span>' + L.vchTotal2 + ': ' + stats.total + ' ' + L.vchVouchers + '</span>' +
-                '<span>' + L.vchReportDate + ': ' + reportDate + '</span>' +
-            '</div>' +
-
-            '<script>window.onload=function(){window.print();}<\/script>' +
-            '</body></html>';
-
-        win.document.write(htmlContent);
-        win.document.close();
+        /* ЛИСТ СОБИРАЕТ ДОМ (кусок 150). Правило `.no-print` сюда НЕ
+           перенесено, и это замер, а не пропуск: класс `no-print` не носит
+           ни один элемент продукта. Живое понятие — `ad-no-print`, его
+           ставит и снимает печать панели в `core/export.js`. */
+        A.печатныйЛист({
+            заголовок: L.vchReportTitle,
+            периодПодпись: L.vchPeriod,
+            период: periodLabel,
+            плашки: [
+                { значение: stats.total, подпись: L.vchTotal },
+                { значение: stats.totalDiscount.toLocaleString() + ' ' + L.vchCurrency, подпись: L.vchTotalDiscount },
+                { значение: stats.used + ' (' + stats.convPct + '%)', подпись: L.vchUsed },
+                { значение: stats.active, подпись: L.vchActive },
+                { значение: stats.expired, подпись: L.vchExpired }
+            ],
+            колонки: ['\u2116', L.vchPlayer, L.vchEntity, L.vchService,
+                      L.vchDiscount, L.vchDate, L.thStatus],
+            строки: tableRows,
+            подвалСлева: L.vchTotal2 + ': ' + stats.total + ' ' + L.vchVouchers,
+            подвалСправа: L.vchReportDate + ': ' + reportDate
+        });
     }
 
     function computeStats(data) {

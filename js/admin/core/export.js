@@ -397,8 +397,117 @@
         });
     }
 
+    /**
+     * ПЕЧАТНЫЙ ЛИСТ ОТЧЁТА — ОДНО ОПРЕДЕЛЕНИЕ НА ПРОДУКТ (кусок 150, 23.10).
+     *
+     * ЧТО БЫЛО. Лист печатного отчёта существовал ТРИЖДЫ — у
+     * «Пользователей», «Ваучеров» и «Финансов», — и копией был не только
+     * css, а весь лист целиком: `window.open`, скелет документа, шапка с
+     * заголовком и периодом, полоса плашек, таблица, подвал и зов
+     * `window.print()` из `onload`. Замер по правилам: 13 из 17 правил
+     * совпадали ЗНАК В ЗНАК, сходство тел `vouchers`/`finances` 0.99,
+     * `users`/`finances` 0.94.
+     *
+     * РАСХОДИЛОСЬ ЧЕТЫРЕ ПРАВИЛА, И ТОЛЬКО ТРИ ИЗ НИХ ЗАКОННЫ:
+     * · `.breakdown` — только у «Пользователей», и в их разметке он ЕСТЬ
+     *   (строка разбивки по ролям). Законно, пришло доводом.
+     * · `.stat-box` min-width 100 против 120 и `.stats-grid`
+     *   margin-bottom 16 против 24 — у «Пользователей» лист плотнее.
+     *   ВИД РАБОТЫ НЕ МЕНЯЮ (правило 22.10): пришло доводом `плотный`.
+     * · `.no-print { display: none }` у ваучеров — МЁРТВОЕ ПРАВИЛО, и это
+     *   замерено: класс `no-print` не носит ни один элемент продукта.
+     *   Живое понятие зовётся `ad-no-print`, его правило стоит в
+     *   `css/admin.css` под `body.ad-printing`, а ставит и снимает его
+     *   `напечатать` выше в этом файле. Правило не перенесено.
+     *
+     * ГРАНИЦА ЭКРАНИРОВАНИЯ НАЗВАНА ВСЛУХ, ЭТО ШОВ БЕЗОПАСНОСТИ:
+     * `заголовок`, `период`, подписи плашек и колонок дом принимает КАК
+     * ТЕКСТ и гасит сам. `строки` и `разбивка` приходят ГОТОВОЙ разметкой
+     * — их собирает раздел, и экранирование данных внутри остаётся на нём.
+     *
+     * ТРИ ОБЪЯВЛЕНИЯ Я СПЕРВА ПЕРЕНАБРАЛ НЕВЕРНО, И ПОЙМАЛ ЭТО СВЕРКОЙ, А
+     * НЕ ГЛАЗАМИ: `body` терял `font-size:var(--fs-xs)`, у `th` граница
+     * стала `#333` вместо `#ddd`, у подвала краска `#666` вместо `#888`.
+     * Причина одна: я набирал их из ВЫВОДА ПРИБОРА, обрезанного по ширине.
+     * СОДЕРЖИМОЕ ФАЙЛА НЕ ПЕРЕНАБИРАЕТСЯ ИЗ ВЫВОДА — оно сверяется с
+     * файлом правило к правилу, и сверка стоит отдельным прибором
+     * `tools/razovye/150-list-sverka.js`.
+     *
+     * ЧИСЛА ЛИСТА ОСТАЛИСЬ КАК БЫЛИ, И ЭТО НАМЕРЕНО. Печатный лист живёт
+     * не в экранной шкале: 30px поля листа, 15px при печати, 6px padding
+     * ячейки — это сантиметры бумаги, а не ступени экрана. Перевод листа
+     * на свою шкалу — отдельный кусок, и он виден только на бумаге.
+     */
+    function печатныйЛист(о) {
+        var окно = window.open('', '_blank');
+        if (!окно) return null;
+
+        var гасить = A.esc;
+        var плашки = (о.плашки || []).map(function (п) {
+            return '<div class="stat-box"><div class="val">' + гасить(String(п.значение)) +
+                   '</div><div class="lbl">' + гасить(п.подпись) + '</div></div>';
+        }).join('');
+        var колонки = (о.колонки || []).map(function (к) {
+            return '<th>' + гасить(к) + '</th>';
+        }).join('');
+
+        var лист =
+            '<!DOCTYPE html><html><head>' +
+            '<meta charset="UTF-8">' +
+            '<title>' + гасить(о.заголовок) + '</title>' +
+            '<style>' +
+                '* { margin: 0; padding: 0; box-sizing: border-box; }' +
+                'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1a1a1a; font-size:var(--fs-xs); }' +
+                '.report-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }' +
+                '.report-header h1 { font-size: 20px; margin-bottom: 4px; }' +
+                '.report-header .period { font-size: 13px; color: #666; }' +
+                '.stats-grid { display: flex; gap: 16px; margin-bottom: ' + (о.плотный ? '16px' : '24px') + '; flex-wrap: wrap; }' +
+                '.stat-box { flex: 1; min-width: ' + (о.плотный ? '100px' : '120px') + '; padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }' +
+                '.stat-box .val { font-size: 20px; font-weight: 700; }' +
+                '.stat-box .lbl { font-size:var(--fs-2xs); color: #666; margin-top: 2px; }' +
+                /* ПРАВИЛА РАЗБИВКИ — ТОЛЬКО КОГДА ОНА ЕСТЬ. Иначе у двух
+                   отчётов из трёх они лежали бы мёртвыми, а мёртвый css
+                   запрещён не на словах: он стоит в заморозке. */
+                (о.разбивка
+                    ? '.breakdown { display: flex; gap: 20px; margin-bottom: 24px; font-size:var(--fs-xs); color: #555; flex-wrap: wrap; }' +
+                      '.breakdown span { font-weight: 600; color: #1a1a1a; }'
+                    : '') +
+                'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
+                'th { background: #f5f5f5; padding: 8px 6px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; font-size:var(--fs-2xs); }' +
+                'td { padding: 6px; border-bottom: 1px solid #eee; font-size:var(--fs-2xs); }' +
+                'tr:nth-child(even) { background: #fafafa; }' +
+                '.report-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size:var(--fs-2xs); color: #888; }' +
+                '@media print { body { padding: 15px; } }' +
+            '</style>' +
+            '</head><body>' +
+            '<div class="report-header">' +
+                '<h1>' + гасить(о.заголовок) + '</h1>' +
+                '<div class="period">' + гасить(о.периодПодпись) + ': ' + гасить(о.период) + '</div>' +
+            '</div>' +
+            '<div class="stats-grid">' + плашки + '</div>' +
+            (о.разбивка ? '<div class="breakdown">' + о.разбивка + '</div>' : '') +
+            '<table>' +
+                '<thead><tr>' + колонки + '</tr></thead>' +
+                '<tbody>' + (о.строки || '') + '</tbody>' +
+            '</table>' +
+            '<div class="report-footer">' +
+                '<span>' + гасить(о.подвалСлева) + '</span>' +
+                '<span>' + гасить(о.подвалСправа) + '</span>' +
+            '</div>' +
+            /* ПЕЧАТЬ ЗОВЁТСЯ ИЗ `onload` НОВОГО ОКНА, А НЕ ОТСЮДА: лист
+               печатается, когда он нарисован, иначе на бумагу уходит пустая
+               страница. Так было во всех трёх копиях — перенесено как есть. */
+            '<script>window.onload=function(){window.print();}<\/script>' +
+            '</body></html>';
+
+        окно.document.write(лист);
+        окно.document.close();
+        return окно;
+    }
+
     // Подписи протокола кладёт сюда раздел турнира: модуль выгрузки не
     // ходит в базу сам, он работает с тем, что уже на экране
+    A.печатныйЛист = печатныйЛист;
     A.экспорт = { вФайл: вФайл, напечатать: напечатать, кнопки: кнопки, оживить: оживить,
                   L: L, подписи: null };
 
