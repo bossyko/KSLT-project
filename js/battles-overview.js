@@ -143,12 +143,10 @@
        атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
        или в адресе логотипа закрывает атрибут. Эталон взят дословно у
        `js/kslt-lenta.js`. */
-    function getPlayerName(p) {
-        if (!p) return '?';
-        if (isEn) return p.name_en || p.name || '?';
-        if (isKg) return p.name_kg || p.name || '?';
-        return p.name || '?';
-    }
+    /* ИМЯ НА ЯЗЫКЕ СТРАНИЦЫ — ДОМ ЛИЦА (кусок 155). Ярлык остаётся:
+       функция уезжает доводом в `BF.side(...)`, и зовущим нужна именно
+       функция, а не зов. */
+    function getPlayerName(p) { return window.KSLT_LICO.имяНаЯзыке(p); }
 
     function formatDate(dateStr) {
         if (!dateStr) return '';
@@ -370,13 +368,9 @@
         }
     }
 
-    /** «1 баттл / 2 баттла / 5 баттлов» — без склонения строка режет глаз */
+    /** «1 баттл / 2 баттла / 5 баттлов» — ДОМ ЯЗЫКА (кусок 155). */
     function plural(n, one, few, many) {
-        if (isEn || isKg) return n === 1 ? one : few;
-        var n10 = n % 10, n100 = n % 100;
-        if (n10 === 1 && n100 !== 11) return one;
-        if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return few;
-        return many;
+        return window.KSLT_YAZYK.счёт(n, one, few, many);
     }
 
     /** Подпись под заголовком блока «Идут сейчас» */

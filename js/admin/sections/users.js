@@ -320,7 +320,9 @@
 
         }
 
-        var now = Date.now();
+        /* `var now` СНЯТ ВМЕСТЕ С ПЕРЕЕЗДОМ «в сети» в дом лица: это был
+           его единственный зов — проверено поиском по всей функции, а не
+           по виду. МЁРТВЫМ КОД НАЗЫВАЕТСЯ ПОСЛЕ ПРОВЕРКИ. */
         tbody.innerHTML = '';
 
         items.forEach(function(u) {
@@ -375,7 +377,11 @@
             }
 
             // Online indicator
-            var isOnline = u.last_seen && (now - new Date(u.last_seen).getTime()) < 5 * 60 * 1000;
+            /* «В СЕТИ» — ДОМ ЛИЦА (кусок 155). Здесь понятие было
+               вписано в строку отрисовки со своим числом порога, и
+               прибор копий его не видел: копию он узнаёт только целой
+               функцией. Четвёртое объявление одного и того же. */
+            var isOnline = window.KSLT_LICO.вСети(u.last_seen);
             var onlineDot = isOnline ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--success);margin-left:6px;" title="' + L.usrOnline + '"></span>' : '';
 
             var regDate = u.created_at ? u.created_at.split('T')[0] : '—';

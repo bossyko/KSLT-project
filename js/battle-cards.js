@@ -77,12 +77,8 @@
         return prefix + 'challenge' + suffix + '.html?id=' + id + '&from=' + from;
     }
 
-    function getPlayerName(p) {
-        if (!p) return '?';
-        if (isEn) return p.name_en || p.name || '?';
-        if (isKg) return p.name_kg || p.name || '?';
-        return p.name || '?';
-    }
+    /* ИМЯ НА ЯЗЫКЕ СТРАНИЦЫ — ДОМ ЛИЦА (кусок 155). */
+    function getPlayerName(p) { return window.KSLT_LICO.имяНаЯзыке(p); }
 
     // ---- Auth ----
     function checkAuth() {
