@@ -537,16 +537,10 @@
     function plural(n, kind) {
         var forms = KSLT_YAZYK.выбрать(kind === 'wins' ? ['win', 'wins', 'wins'] : ['loss', 'losses', 'losses'], kind === 'wins' ? ['жеңиш', 'жеңиш', 'жеңиш'] : ['жеңилүү', 'жеңилүү', 'жеңилүү'], kind === 'wins' ? ['победа', 'победы', 'побед'] : ['поражение', 'поражения', 'поражений']);
 
-        var word;
-        if (!isEn && !isKg) {
-            var a = Math.abs(n) % 100, b = a % 10;
-            word = (a > 10 && a < 20) ? forms[2]
-                 : (b > 1 && b < 5) ? forms[1]
-                 : (b === 1) ? forms[0] : forms[2];
-        } else {
-            word = n === 1 ? forms[0] : forms[1];
-        }
-        return n + ' ' + word;
+        /* ПРАВИЛО ВЫБОРА ФОРМЫ — ДОМ ЯЗЫКА (кусок 155). Оно стояло ЗДЕСЬ
+           и ещё в четырёх местах; прибор копий видел две из семи, потому
+           что у остальных своя обвязка вокруг того же правила. */
+        return n + ' ' + KSLT_YAZYK.счёт(n, forms[0], forms[1], forms[2]);
     }
 
     // ---- Render Hero ----

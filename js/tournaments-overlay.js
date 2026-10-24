@@ -587,13 +587,9 @@
         pastMany: 'турниров в архиве'
     });
 
-    /** «1 турнир / 2 турнира / 5 турниров» — без склонения строка режет глаз */
+    /** «1 турнир / 2 турнира / 5 турниров» — ДОМ ЯЗЫКА (кусок 155). */
     function plural(n, one, few, many) {
-        if (isEn || isKg) return n === 1 ? one : few;
-        var n10 = n % 10, n100 = n % 100;
-        if (n10 === 1 && n100 !== 11) return one;
-        if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return few;
-        return many;
+        return window.KSLT_YAZYK.счёт(n, one, few, many);
     }
 
     function humanDate(iso) {
