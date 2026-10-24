@@ -536,7 +536,10 @@
                 '<tr data-news-id="' + a.id + '">' +
                     A.bulkCheckboxTd(a.id) +
                     '<td>' + thumbHtml + '</td>' +
-                    '<td class="ad-nazvanie" style="font-weight:500;color:var(--text-primary);" title="' + A.esc(a.title || L.noData) + '">' + (a.title || L.noData) + '</td>' +
+                    /* ОДИН ТЕКСТ ШЁЛ ДВУМЯ ПУТЯМИ, И ЭКРАНИРОВАН БЫЛ ОДИН
+                       (157): в подсказке `title=` стоял `A.esc`, а в самой
+                       ячейке — нет. БЕДА РОДИЛАСЬ БЫ РОВНО НА ШВЕ. */
+                    '<td class="ad-nazvanie" style="font-weight:500;color:var(--text-primary);" title="' + A.esc(a.title || L.noData) + '">' + A.esc(a.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td class="ad-vtoroy">' + A.esc(a.executor || '\u2014') + '</td>' +
                     '<td>' + statusHtml + '</td>' +

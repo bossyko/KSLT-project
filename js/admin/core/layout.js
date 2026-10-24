@@ -65,8 +65,10 @@
         container.innerHTML =
             '<div class="ad-sidebar-user">' +
                 avatarHtml +
-                '<div class="ad-sidebar-name">' + (profile.full_name || 'Admin') + '</div>' +
-                '<div class="ad-sidebar-email">' + (profile.email || '') + '</div>' +
+                /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): имя и почту вписывает человек, а
+                   шапка админки висит на ВСЕХ её страницах. */
+                '<div class="ad-sidebar-name">' + A.esc(profile.full_name || 'Admin') + '</div>' +
+                '<div class="ad-sidebar-email">' + A.esc(profile.email || '') + '</div>' +
                 '<div class="kslt-role kslt-role-' + (profile.role || 'user') + ' ad-sidebar-role">' + roleLabel + '</div>' +
             '</div>' +
             '<ul class="ad-sidebar-nav">' + navHtml + '</ul>';

@@ -340,7 +340,9 @@
                 '<tr data-plr-id="' + p.id + '"' + (isAdm ? ' style="cursor:pointer;"' : '') + '>' +
                     (isAdm ? A.bulkCheckboxTd(p.id) : '') +
                     '<td>' + thumbHtml + '</td>' +
-                    '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + (p.name || L.noData) +
+                    /* ЭКРАНИРУЮТСЯ ДАННЫЕ, А НЕ ШАБЛОН (157): имя пишет сам игрок. Флаг —
+                       разметка продукта, он собран кодом и не экранируется. */
+                    '<td style="font-weight:500;color:var(--text-primary);">' + plrFlag + ' ' + A.esc(p.name || L.noData) +
                         (p.banned_until && new Date(p.banned_until) > new Date() ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + L.plrBanned + '</span>' : '') +
                         // Гость виден сразу в списке: у него нет карточки на сайте
                         (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + L.regGuest + '</span>' : '') +

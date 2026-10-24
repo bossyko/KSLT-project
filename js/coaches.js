@@ -798,7 +798,8 @@
         hero.innerHTML =
             '<div class="co-hero-bg" style="background-image: url(\'../images/heroes/coaches.jpg\')"></div>' +
             '<div class="co-hero-content">' +
-                '<h1 class="co-hero-title">' + coach.name + '</h1>' +
+                /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): имя тренера на ПУБЛИЧНОЙ странице. */
+                '<h1 class="co-hero-title">' + KSLT_экранировать(coach.name) + '</h1>' +
                 '<p class="co-hero-subtitle">' + coach.specialization + '</p>' +
             '</div>';
     }

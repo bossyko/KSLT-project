@@ -515,9 +515,17 @@ function renderHero(article, readTime) {
                 : '') +
         '</div>' +
         '<div class="news-hero-content">' +
-            '<span class="news-category-badge news-category-' + article.category + '">' + article.categoryLabel + '</span>' +
-            '<h1>' + article.title + '</h1>' +
-            '<p class="news-subtitle">' + article.subtitle + '</p>' +
+            /* ЭКРАНИРУЕТСЯ И ПОДПИСЬ, И САМО ЗНАЧЕНИЕ В КЛАССЕ (157):
+               `categoryLabel` — это `catLabels[row.category] || row.category`,
+               то есть ЗАПАСНОЙ ХОД ОТДАЁТ СЫРОЕ ЗНАЧЕНИЕ БАЗЫ; а `category`
+               уходит в имя класса, где кавычка закрывает атрибут. */
+            '<span class="news-category-badge news-category-' + KSLT_экранировать(article.category) + '">' +
+                KSLT_экранировать(article.categoryLabel) + '</span>' +
+            /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): заголовок новости на ПУБЛИЧНОЙ странице. */
+            '<h1>' + KSLT_экранировать(article.title) + '</h1>' +
+            /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): подзаголовок пишет редактор. Эту
+               дыру прибор не показал, а СТОРОЖ нашёл — он строже. */
+            '<p class="news-subtitle">' + KSLT_экранировать(article.subtitle || '') + '</p>' +
             '<div class="news-hero-meta">' +
                 '<span class="news-meta-item">' +
                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' +
@@ -1305,7 +1313,10 @@ function renderRelated(article) {
                 (rel.ownCover ? '<img class="news-znak" src="../images/kslt-logo.svg" alt="" aria-hidden="true">' : '') +
             '</div>' +
             '<div class="news-related-info">' +
-                '<span class="news-related-category news-category-' + rel.category + '">' + rel.categoryLabel + '</span>' +
+                /* ЭКРАНИРУЕТСЯ И ПОДПИСЬ, И ЗНАЧЕНИЕ В КЛАССЕ (157) — то же,
+                   что в шапке статьи: один и тот же запасной ход. */
+                '<span class="news-related-category news-category-' + KSLT_экранировать(rel.category) + '">' +
+                    KSLT_экранировать(rel.categoryLabel) + '</span>' +
                 '<h3>' + rel.title + '</h3>' +
                 '<span class="news-related-date">' + rel.date + '</span>' +
             '</div>' +

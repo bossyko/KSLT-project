@@ -1074,7 +1074,8 @@
         hero.innerHTML =
             '<div class="ct-hero-bg" style="background-image: url(\'' + KSLT_экранировать(heroBg) + '\')"></div>' +
             '<div class="ct-hero-content">' +
-                '<h1 class="ct-hero-title">' + court.name + '</h1>' +
+                /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): название корта на ПУБЛИЧНОЙ странице. */
+                '<h1 class="ct-hero-title">' + KSLT_экранировать(court.name) + '</h1>' +
                 '<p class="ct-hero-subtitle">' + subtitle + '</p>' +
             '</div>';
     }

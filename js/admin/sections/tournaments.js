@@ -488,7 +488,8 @@
             tbody.innerHTML +=
                 '<tr data-trn-id="' + t.id + '">' +
                     A.bulkCheckboxTd(t.id) +
-                    '<td style="font-weight:500;color:var(--text-primary);">' + (t.title || L.noData) + '</td>' +
+                    /* ЭКРАНИРУЮТСЯ ДАННЫЕ, А НЕ ШАБЛОН (157): название пишет менеджер. */
+                    '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(t.title || L.noData) + '</td>' +
                     '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
                     '<td class="ad-centr"><span class="ad-status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
                     '<td class="ad-centr">' + dateStartStr + '</td>' +
