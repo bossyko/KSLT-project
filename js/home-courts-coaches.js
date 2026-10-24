@@ -128,21 +128,17 @@
     /**
      * Кто попадёт в ряд: сначала партнёры, потом остальные на свободные
      * места. И те, и другие — в случайном порядке.
+     *
+     * СВЕДЕНО КУСКОМ 155 в дом `js/kslt-tasovka.js`. Это поведение —
+     * перемешивать ОБЕ группы — было здесь с самого начала и записано
+     * строкой выше; витрина и «Услуги» делали иначе, и расхождение
+     * снято в пользу этого места.
+     *
+     * ПОТОЛОК РЕЖЕТ ОСТАЛЬНЫХ, А НЕ ПАРТНЁРОВ — так же, как было:
+     * `partners.concat(rest).slice(0, SLOTS)` отрезал с конца.
      */
     function pick(rows) {
-        if (!rows || !rows.length) return [];
-        var partners = shuffle(rows.filter(function(r) { return !!r.partner; }));
-        var rest = shuffle(rows.filter(function(r) { return !r.partner; }));
-        return partners.concat(rest).slice(0, SLOTS);
-    }
-
-    function shuffle(arr) {
-        var a = arr.slice();
-        for (var i = a.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var t = a[i]; a[i] = a[j]; a[j] = t;
-        }
-        return a;
+        return window.KSLT_TASOVKA.продвинутыеПервыми(rows, 'partner', SLOTS);
     }
 
     function badge(row) {

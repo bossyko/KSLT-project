@@ -90,7 +90,7 @@
             var withPhoto = list.filter(function(p) { return !!p.avatar_url; });
             var pool = withPhoto.length >= SHOW ? withPhoto : list;
 
-            var picked = shuffle(pool).slice(0, SHOW);
+            var picked = window.KSLT_TASOVKA.перемешать(pool).slice(0, SHOW);
 
             grid.innerHTML = picked.map(function(p, i) { return card(p, i, guest); }).join('');
             приглашениеПоМесту();
@@ -175,19 +175,12 @@
         } catch (e) { return true; }
     }
 
-    function shuffle(arr) {
-        var a = arr.slice();
-        for (var i = a.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var t = a[i]; a[i] = a[j]; a[j] = t;
-        }
-        return a;
-    }
-
-    function online(p) {
-        if (!p.last_seen) return false;
-        return Date.now() - new Date(p.last_seen).getTime() < 5 * 60 * 1000;
-    }
+    /* СЛУЧАЙНЫЙ ПОРЯДОК И «В СЕТИ» — ДОМА (кусок 155):
+       `js/kslt-tasovka.js` и `js/kslt-lico.js`. «В сети» здесь принимало
+       ИГРОКА, а три других копии — дату, и зовущему надо было помнить,
+       какая у него под рукой. Порог пяти минут стоял числом внутри
+       выражения — третье объявление одного и того же. */
+    function online(p) { return window.KSLT_LICO.вСети(p.last_seen); }
 
     function shortName(name) {
         var parts = String(name || '').trim().split(/\s+/);

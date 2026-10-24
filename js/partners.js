@@ -145,7 +145,6 @@
     var _searchQuery = '';
     var _sendingInvite = false;
 
-    var ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
     var GUEST_VISIBLE = 8;
     var GUEST_BLURRED = 4;
     /* ШАГ СТРАНИЦЫ — КОЛОНОК × РЯДОВ, А НЕ ЧИСЛО. То же решение, что на
@@ -187,22 +186,9 @@
         _myPlayerId = KSLT_DOSTUP.мойИгрок();
     }
 
-    function isOnline(lastSeen) {
-        if (!lastSeen) return false;
-        return (new Date() - new Date(lastSeen)) < ONLINE_THRESHOLD;
-    }
-
-    // Fisher-Yates shuffle
-    function shuffle(arr) {
-        var a = arr.slice();
-        for (var i = a.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = a[i];
-            a[i] = a[j];
-            a[j] = tmp;
-        }
-        return a;
-    }
+    /* «В СЕТИ» И СЛУЧАЙНЫЙ ПОРЯДОК — ДОМА (кусок 155): `js/kslt-lico.js`
+       и `js/kslt-tasovka.js`. Порог пяти минут стоял здесь своим числом —
+       четвёртым объявлением одного и того же. */
 
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
     function getInitials(name) { return window.KSLT_LICO.инициалы(name); }
@@ -384,11 +370,11 @@
                 result.data.forEach(function(p) { p.ntrp_singles = ntrpMap[p.id] || null; });
 
                 var visible = result.data.filter(function(p) { return p.id !== _myPlayerId; });
-                var shuffled = shuffle(visible);
+                var shuffled = window.KSLT_TASOVKA.перемешать(visible);
                 var onlineArr = [];
                 var offlineArr = [];
                 for (var i = 0; i < shuffled.length; i++) {
-                    if (isOnline(shuffled[i].last_seen)) {
+                    if (window.KSLT_LICO.вСети(shuffled[i].last_seen)) {
                         onlineArr.push(shuffled[i]);
                     } else {
                         offlineArr.push(shuffled[i]);
@@ -494,7 +480,7 @@
 
     // ---- Render single card ----
     function renderCard(p, extraClass) {
-        var online = isOnline(p.last_seen);
+        var online = window.KSLT_LICO.вСети(p.last_seen);
         var name = KSLT_экранировать(p.full_name);
         var category = KSLT_YAZYK.выбрать(p.category_name_en || p.category_name, p.category_name_kg || p.category_name, p.category_name);
 

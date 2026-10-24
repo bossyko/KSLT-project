@@ -116,17 +116,13 @@
     /** Сколько игроков показываем в ленте на «Услугах» */
     var PARTNERS_IN_STRIP = 10;
 
-    /** Тасуем список, не трогая исходный массив */
-    function shuffle(list) {
-        var out = list.slice();
-        for (var i = out.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var t = out[i]; out[i] = out[j]; out[j] = t;
-        }
-        return out;
-    }
-
-    var ONLINE_THRESHOLD = 5 * 60 * 1000;
+    /* ЗДЕСЬ СТОЯЛА МЁРТВАЯ `shuffle` — ВОСЕМЬ СТРОК, КОТОРЫЕ НЕ
+       ИСПОЛНЯЛИСЬ НИКОГДА. Имя объявлялось в этом файле ДВА РАЗА в одной
+       области, разными телами; объявления поднимаются, и побеждало
+       второе. Проверено запуском, а не рассуждением. Нашёл парсер
+       (`tools/razovye/155-odno-imya-dva-tela.js`), и на весь продукт
+       такое место было одно. Порог «в сети» тоже стоял здесь своим
+       числом — теперь он один, в доме лица. */
 
     // SVG icons
     var pinSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
@@ -142,17 +138,8 @@
         loadData();
     }
 
-    // Fisher-Yates shuffle
-    function shuffle(arr) {
-        var a = arr.slice();
-        for (var i = a.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var tmp = a[i];
-            a[i] = a[j];
-            a[j] = tmp;
-        }
-        return a;
-    }
+    /* СЛУЧАЙНЫЙ ПОРЯДОК — ДОМ `js/kslt-tasovka.js` (кусок 155). */
+    function shuffle(arr) { return window.KSLT_TASOVKA.перемешать(arr); }
 
     function renderHero() {
         var el = document.getElementById('svHero');
@@ -169,19 +156,17 @@
             '</div>';
     }
 
-    // Promoted always included, rest random, limit total to cap
+    /**
+     * Продвинутые первыми, остальные вперемешку, итог не выше потолка.
+     *
+     * СВЕДЕНО КУСКОМ 155 — это была ТРЕТЬЯ форма одного понятия: витрина
+     * знала признак `_promoted`, главная `partner`, здесь `promoted`.
+     * Признак приходит доводом: сводится рамка, а не середина.
+     * ПОВЕДЕНИЕ ИЗМЕНИЛОСЬ (слово Кости 24.10): продвинутые теперь
+     * перемешиваются между собой, а не идут в порядке базы.
+     */
     function selectForDisplay(data, cap) {
-        var promoted = [];
-        var rest = [];
-        for (var i = 0; i < data.length; i++) {
-            if (data[i].promoted) {
-                promoted.push(data[i]);
-            } else {
-                rest.push(data[i]);
-            }
-        }
-        var remaining = Math.max(0, cap - promoted.length);
-        return promoted.concat(shuffle(rest).slice(0, remaining));
+        return window.KSLT_TASOVKA.продвинутыеПервыми(data, 'promoted', cap);
     }
 
     async function loadData() {
@@ -578,10 +563,8 @@
     }
 
     // --- Partner helpers ---
-    function isOnline(lastSeen) {
-        if (!lastSeen) return false;
-        return (new Date() - new Date(lastSeen)) < ONLINE_THRESHOLD;
-    }
+    /* «В СЕТИ» — ДОМ ЛИЦА (кусок 155): одно понятие, один порог. */
+    function isOnline(lastSeen) { return window.KSLT_LICO.вСети(lastSeen); }
 
     function getPartnerName(p) {
         return p.full_name || '';
@@ -686,7 +669,7 @@
     function lastSeenLabel(lastSeen) {
         if (!lastSeen) return L.seenLong;
         var diff = Date.now() - new Date(lastSeen).getTime();
-        if (diff < ONLINE_THRESHOLD) return L.seenNow;
+        if (diff < window.KSLT_LICO.ПОРОГ_В_СЕТИ) return L.seenNow;
         var days = Math.floor(diff / (1000 * 60 * 60 * 24));
         if (days < 1) return L.seenToday;
         if (days === 1) return L.seenYesterday;
