@@ -161,7 +161,8 @@ const КУСКИ = [
     ['нажатия полосы страниц', 'check-polosa-nazhatiya.js', 'check-polosa-nazhatiya-otkat.js'],
     ['печатный лист отчёта', 'check-pechatnyy-list.js', 'check-pechatnyy-list-otkat.js'],
     ['чекбокс массового выбора', 'check-chekboks-vybora.js', 'check-chekboks-vybora-otkat.js'],
-    ['запирание фокуса в окне', 'check-lovushka-zapiranie.js', 'check-lovushka-zapiranie-otkat.js']
+    ['запирание фокуса в окне', 'check-lovushka-zapiranie.js', 'check-lovushka-zapiranie-otkat.js'],
+    ['публикация турнира', 'check-publikaciya-turnira.js', 'check-publikaciya-turnira-otkat.js']
 ];
 
 function прогнать(файл) {
