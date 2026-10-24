@@ -37,6 +37,23 @@
     <div class="подпись">строка таблицы — `.ad-bulk-item`</div>
     <table class="ad-table"><tbody><tr id="строка"></tr></tbody></table>
 </div>
+<!-- ТРИ ПУТИ ОДНОГО ЧЕКБОКСА, кусок 151. Дом обходили два раздела из
+     восьми, и у обоих была НАСТОЯЩАЯ причина: у кортов ячейка идёт с
+     `rowspan`, а «Пользователи» дописывают её к уже отрисованной строке
+     через DOM. Теперь оба зовут дом, и стенд держит все три пути рядом:
+     если они разойдутся вычисленным видом, это видно замером, а не на
+     глаз. -->
+<div class="ряд">
+    <div class="подпись">ячейка с `rowspan` — путь кортов</div>
+    <table class="ad-table"><tbody>
+        <tr id="строкаРовспан"></tr>
+        <tr><td>вторая строка того же корта</td><td>чтобы `rowspan` было что перекрывать</td></tr>
+    </tbody></table>
+</div>
+<div class="ряд">
+    <div class="подпись">ввод в своей ячейке через DOM — путь «Пользователей»</div>
+    <table class="ad-table"><tbody><tr id="строкаDOM"><td>готовая строка</td></tr></tbody></table>
+</div>
 
 <!-- ЗАВИСИМОСТИ БЕРУТСЯ ТАК ЖЕ, КАК У setka-zamer: `constants.js` зовёт
      `window.KSLT_STATUS.подписи(...)` на загрузке, и без источника статусов
@@ -47,7 +64,7 @@
 <script src="../js/kslt-vremya.js?v=2"></script>
 <script src="../js/kslt-fokus.js?v=1"></script>
 <script src="../js/admin/core/kslt-ekranirovanie.js?v=1"></script>
-<script src="../js/admin/core/utils.js?v=61"></script>
+<script src="../js/admin/core/utils.js?v=62"></script>
 <script>
 (function () {
     var A = window.KSLT_ADMIN;
@@ -58,6 +75,21 @@
     document.getElementById('шапка').appendChild(th);
     /* строка — НАСТОЯЩЕЙ функцией продукта */
     document.getElementById('строка').innerHTML = A.bulkCheckboxTd('proba-1');
+
+    /* ПУТЬ КОРТОВ: та же функция, но с `rowspan` доводом */
+    document.getElementById('строкаРовспан').innerHTML =
+        A.bulkCheckboxTd('proba-2', { rowspan: 2 }) + '<td>вид покрытия</td>';
+
+    /* ПУТЬ «ПОЛЬЗОВАТЕЛЕЙ»: ячейка своя, ВВОД — у дома */
+    (function () {
+        var tr = document.getElementById('строкаDOM');
+        var td = document.createElement('td');
+        td.className = 'ad-bulk-cell';
+        td.style.width = '36px';
+        td.style.textAlign = 'center';
+        td.innerHTML = A.bulkCheckbox('proba-3');
+        tr.insertBefore(td, tr.firstChild);
+    })();
     window.ОТМЕТИТЬ = function () {
         document.querySelectorAll('.ad-bulk-all, .ad-bulk-item')
             .forEach(function (э) { э.checked = true; });
