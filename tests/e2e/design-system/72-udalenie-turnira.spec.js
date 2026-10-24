@@ -147,10 +147,17 @@ test.describe('Окно удаления турнира', () => {
                      подпись: снять('.ad-udalenie-spisok li span'),
                      значение: снять('.ad-udalenie-spisok li b') };
         });
+        /* ЧИСЛА ПОПРАВЛЕНЫ 24.10, И ПОПРАВИЛО ИХ РЕШЕНИЕ 19.10, А НЕ Я.
+           Кусок «заголовок окна: одно определение, пара на ступень» перевёл
+           `.ad-confirm-text` с `--fs-sm` на `--fs-base`: тело окна стало 16.
+           Проба написана 13.10 и с тех пор не звалась — НЕПРОГНАННАЯ ПРОБА
+           НЕ ЗНАЕТ, ЧТО РЕШЕНИЕ ИЗМЕНИЛОСЬ, и держала прежние 14.
+           Оба кегля стоят на шкале (14 · 16 · 18), пара «заголовок + тело»
+           отстоит на ступень, и дальше проба держит ОТНОШЕНИЕ, а не числа. */
         expect(л.заголовок.к).toBe(18);
-        expect(л.шапка.к).toBe(14);
-        expect(л.подпись.к).toBe(14);
-        expect(л.значение.к).toBe(14);
+        expect(л.шапка.к).toBe(16);
+        expect(л.подпись.к).toBe(16);
+        expect(л.значение.к).toBe(16);
         // заголовок СТРОГО крупнее тела на каждом виде — замораживаем отношение
         expect(л.заголовок.к).toBeGreaterThan(л.подпись.к);
         // подпись легче значения: вес несёт число, а не слово
@@ -158,5 +165,87 @@ test.describe('Окно удаления турнира', () => {
         // межстрочные со шкалы: 1.3 у заголовка, 1.5 у текста
         expect(л.заголовок.м / л.заголовок.к).toBeCloseTo(1.3, 2);
         expect(л.подпись.м / л.подпись.к).toBeCloseTo(1.5, 2);
+    });
+
+    /* ═══ СПРОС ПЕРЕД ПУБЛИКАЦИЕЙ И СНЯТИЕМ — КУСОК 154, 24.10 ═══
+       Окно то же, его держат проверки выше. Новое здесь только ТЕКСТ, и он
+       берётся из НАСТОЯЩЕГО словаря через НАСТОЯЩУЮ `A.фраза`: копия текста
+       в стенде показывала бы стенд, а не продукт.
+       До куска 154 «Опубликовать» и «Снять» писали в базу С ОДНОГО
+       НАЖАТИЯ — в строке, где рядом стоит безобидная «Сетка». */
+
+    async function спрос(page, вид) {
+        await page.evaluate((в) => {
+            const о = document.querySelector('.ad-confirm-overlay');
+            if (о) о.remove();
+            window.показатьСпрос(в);
+        }, вид);
+        await page.waitForSelector('.ad-confirm-modal', { timeout: 10000 });
+    }
+
+    test('спрос публикации называет последствие и несёт название турнира', async ({ page }) => {
+        await спрос(page, 'opublikovat');
+        const заголовок = await page.locator('.ad-confirm-title').innerText();
+        const тело = await page.locator('.ad-confirm-text').innerText();
+        expect(заголовок).toBe('Опубликовать турнир?');
+        /* ПОСЛЕДСТВИЕ, А НЕ ПОВТОР КНОПКИ: эталон взят у отзыва рассылки. */
+        expect(тело).toContain('появится на сайте');
+        expect(тело).toContain('смогут записаться');
+        /* ОБРАТНЫЙ ПУТЬ ЭКРАНИРОВАНИЯ: кавычка, амперсанд и угловые скобки в
+           названии возвращаются ЗНАК В ЗНАК, а не приезжают как `&amp;` и не
+           превращаются в разметку. Урок куска 145. */
+        const имя = await page.evaluate(() => window.ИМЕНА_СПРОСА.opublikovat);
+        expect(тело).toContain(имя);
+        expect(await page.locator('.ad-confirm-text b').count()).toBe(0);
+    });
+
+    test('спрос снятия называет и потерю, и обратимость', async ({ page }) => {
+        await спрос(page, 'snyat');
+        expect(await page.locator('.ad-confirm-title').innerText()).toBe('Снять с публикации?');
+        const тело = await page.locator('.ad-confirm-text').innerText();
+        expect(тело).toContain('исчезнет с сайта');
+        /* СНЯТИЕ НИЧЕГО НЕ УДАЛЯЕТ, И ОБ ЭТОМ СКАЗАНО В ТЕКСТЕ: без этой
+           строки менеджер читает снятие как потерю заявок и сетки. */
+        expect(тело).toContain('останутся');
+        expect(тело).toMatch(/вернуть можно/i);
+    });
+
+    test('подпись согласия — полная, а не короткая подпись кнопки строки', async ({ page }) => {
+        await спрос(page, 'snyat');
+        /* НА КНОПКЕ СТРОКИ СТОИТ «Снять» — иначе колонка распирает таблицу.
+           В окне места хватает, и человек читает, ЧТО подтверждает. */
+        expect(await page.locator('#adConfirmOk').innerText()).toBe('Снять с публикации');
+        await спрос(page, 'opublikovat');
+        expect(await page.locator('#adConfirmOk').innerText()).toBe('Опубликовать');
+    });
+
+    test('длинное название не распирает окно спроса и не уводит его за край', async ({ page }) => {
+        await спрос(page, 'snyat');
+        const м = await page.evaluate(() => {
+            const окно = document.querySelector('.ad-confirm-modal');
+            const к = окно.getBoundingClientRect();
+            return { ширина: Math.round(к.width), слева: Math.round(к.left),
+                     справа: Math.round(к.right), экран: window.innerWidth,
+                     перелив: окно.scrollWidth - окно.clientWidth };
+        });
+        /* ОКНО СПРОСА — ступень `sm` 400 по компоненту `Modal 26:143`: поле
+           здесь одно, текст. Шире — значит название распёрло окно. */
+        expect(м.ширина).toBeLessThanOrEqual(400);
+        expect(м.слева).toBeGreaterThanOrEqual(0);
+        expect(м.справа).toBeLessThanOrEqual(м.экран);
+        expect(м.перелив).toBe(0);
+    });
+
+    test('Escape закрывает спрос, и отказ приходит ответом', async ({ page }) => {
+        /* ОТКАЗ — ПОЛНОПРАВНЫЙ ИСХОД: `showConfirmAsync` отдаёт `false`, и
+           раздел не трогает базу. В стенде у клиента нет ни `update`, ни
+           `insert` вовсе — писать было бы нечем, и это сказано вслух.
+           ОКНО ОТКРЫВАЕТСЯ ОДНО: второе снесло бы первое своей же
+           оболочкой, и ответ пришёл бы от снесённого. */
+        const обещание = page.evaluate(() => window.показатьСпрос('snyat'));
+        await page.waitForSelector('.ad-confirm-modal', { timeout: 10000 });
+        await page.keyboard.press('Escape');
+        expect(await обещание).toBe(false);
+        expect(await page.locator('.ad-confirm-modal').count()).toBe(0);
     });
 });
