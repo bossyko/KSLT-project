@@ -98,13 +98,10 @@ function isRatingTournament(t) {
     return true;
 }
 
+/* КАРТА ЗАЯВОК — ДОМ СВОБОДНЫХ МЕСТ (кусок 155). Имя оставлено своё:
+   его зовут из двух мест этого файла, а понятие теперь одно. */
 function buildPublicRegsMap(registrations) {
-    var map = {};
-    registrations.forEach(function(r) {
-        var key = r.player_id || ('ext_' + r.id);
-        map[key] = r;
-    });
-    return map;
+    return window.KSLT_SLOTS.картаЗаявок(registrations);
 }
 
 function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {

@@ -94,13 +94,30 @@
      * Build regsMap: player_id → registration (for doubles lookup).
      * Also handles external registrations (player_id = null) using a synthetic key.
      */
+    /* КАРТА ЗАЯВОК — ДОМ СВОБОДНЫХ МЕСТ (кусок 155). */
     function buildRegsMap(registrations) {
-        var map = {};
-        registrations.forEach(function(r) {
-            var key = r.player_id || ('ext_' + r.id);
-            map[key] = r;
-        });
-        return map;
+        return window.KSLT_SLOTS.картаЗаявок(registrations);
+    }
+
+    /**
+     * ИМЯ ИГРОКА ПО НОМЕРУ — ОДНО ОПРЕДЕЛЕНИЕ НА ФАЙЛ (кусок 155).
+     *
+     * Стояло ЧЕТЫРЬМЯ замыканиями, и прибор копий видел два: у двух
+     * других было своё тело. И они УЖЕ РАЗОШЛИСЬ ТРОЯКО:
+     *   · одно падало, если карты игроков нет вовсе (`playersMap[id]`
+     *     без проверки самой карты);
+     *   · то же отдавало СЫРОЙ НОМЕР вместо прочерка, когда имени нет —
+     *     менеджер видел `8f3c-…` в тексте беды;
+     *   · два отдавали `p.name` не глядя, то есть `undefined` у записи
+     *     без имени.
+     * Взята лучшая — та, что проверяет и карту, и запись, и пустое имя.
+     * КАРТА ПРИХОДИТ ДОВОДОМ: все четыре держали её замыканием своей
+     * функции, и тело не переехало бы вместе с замыканием.
+     */
+    function имяИгрока(карта, id) {
+        var и = карта && карта[id];
+        if (!и) return '—';
+        return и.name || '—';
     }
 
     /**
@@ -1732,11 +1749,8 @@
         var поId = {};
         registrations.forEach(function(r) { поId[r.id] = r; });
 
-        var имя = function(id) {
-            if (!id) return '—';
-            var p = playersMap[id] || {};
-            return p.name || id;
-        };
+        /* СВЕДЕНО (155): отдавало сырой номер вместо прочерка. */
+        var имя = function(id) { return имяИгрока(playersMap, id); };
         var чейМатч = function(m) {
             if (m.group_number) return (L.groupLabel) + ' ' + m.group_number;
             if (m.round === 'IG') return L.igStageTitle;
@@ -8010,10 +8024,8 @@
         if (!regsMap) return беды;
 
         var заявки = Object.keys(regsMap).map(function(к) { return regsMap[к]; });
-        var имя = function(id) {
-            var p = playersMap ? playersMap[id] : null;
-            return p ? (p.name) : '—';
-        };
+        /* СВЕДЕНО (155): отдавало `undefined` у записи без имени. */
+        var имя = function(id) { return имяИгрока(playersMap, id); };
 
         for (var g = 1; g <= groupCount; g++) {
             var вГруппе = заявки.filter(function(r) { return r.group_number === g; });
@@ -8094,10 +8106,8 @@
         var беды = [];
         if (!regsMap) return беды;
 
-        var имя = function(id) {
-            var p = playersMap ? playersMap[id] : null;
-            return p ? (p.name) : '—';
-        };
+        /* СВЕДЕНО (155): отдавало `undefined` у записи без имени. */
+        var имя = function(id) { return имяИгрока(playersMap, id); };
 
         // Заявка по любому из пары: в матче стоит капитан, но замена могла
         // поднять напарника на его место
@@ -9313,11 +9323,8 @@
      */
     function пометкиКлеток(tournament, matches, playersMap) {
         var пометки = {};
-        var имя = function(id) {
-            var и = playersMap && playersMap[id];
-            if (!и) return '—';
-            return (и.name || '—');
-        };
+        /* СВЕДЕНО (155): это тело и стало общим — оно было лучшим. */
+        var имя = function(id) { return имяИгрока(playersMap, id); };
         var подпись = function(m) {
             return (m.round || '') + ' №' + (m.match_order || '');
         };

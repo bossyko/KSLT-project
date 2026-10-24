@@ -255,6 +255,31 @@
     }
 
     /** Показывает модалку с результатом подачи заявки. */
+    /**
+     * ЗАКРЫТЬ ОКНО — ОДНО ОПРЕДЕЛЕНИЕ НА ФАЙЛ (кусок 155).
+     *
+     * Файл строит ТРИ окна, и каждое гасило себя своей копией: два знак
+     * в знак, третье с тем же телом плюс сторож ответа и `resolve`.
+     * Прибор копий видел два — у третьего в подписи есть довод, и для
+     * него это уже не копия.
+     *
+     * СНЯТИЕ ЖДЁТ СТОЛЬКО ЖЕ, СКОЛЬКО ИДЁТ ПЕРЕХОД В CSS: `.2s ease`
+     * объявлен выше в этом же файле, а 200 стояло числом в трёх местах.
+     * Теперь число одно, и шов между css и js виден.
+     *
+     * СЮДА ЖЕ ЛЯЖЕТ СНЯТИЕ ЗАПИРАНИЯ ФОКУСА: обход 24.10 показал, что ни
+     * одно из трёх окон этого файла Tab не запирает, Escape не слушает и
+     * диктору окном не называется. Это своя запись и свой кусок — место
+     * под неё готово.
+     */
+    var СНЯТИЕ_МС = 200;
+
+    function закрытьОкно(overlay) {
+        if (!overlay) return;
+        overlay.classList.remove('active');
+        setTimeout(function () { overlay.remove(); }, СНЯТИЕ_МС);
+    }
+
     function showModal(info, isEn, isKg) {
         injectStyles();
 
@@ -278,10 +303,7 @@
         document.body.appendChild(overlay);
         requestAnimationFrame(function() { overlay.classList.add('active'); });
 
-        function close() {
-            overlay.classList.remove('active');
-            setTimeout(function() { overlay.remove(); }, 200);
-        }
+        function close() { закрытьОкно(overlay); }
         overlay.querySelector('.trn-register-modal-close').addEventListener('click', close);
         overlay.querySelector('.trn-register-modal-btn').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
@@ -322,10 +344,7 @@
         document.body.appendChild(overlay);
         requestAnimationFrame(function() { overlay.classList.add('active'); });
 
-        function close() {
-            overlay.classList.remove('active');
-            setTimeout(function() { overlay.remove(); }, 200);
-        }
+        function close() { закрытьОкно(overlay); }
         overlay.querySelector('.trn-register-modal-close').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
         overlay.querySelector('.trn-register-modal-btn').addEventListener('click', function() {
@@ -508,10 +527,9 @@
 
             var answered = false;
             function close(answer) {
-                if (answered) return;
+                if (answered) return;      /* два нажатия — один ответ */
                 answered = true;
-                overlay.classList.remove('active');
-                setTimeout(function() { overlay.remove(); }, 200);
+                закрытьОкно(overlay);
                 resolve(answer);
             }
             overlay.querySelector('.trn-register-modal-close').addEventListener('click', function() { close(false); });

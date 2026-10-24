@@ -156,9 +156,8 @@
         if (old) old.remove();
     }
 
-    function человечно(счёт) {
-        return String(счёт || '').replace(/\//g, ':').replace(/ /g, ', ');
-    }
+    /* СЧЁТ ПО-ЧЕЛОВЕЧЕСКИ — ДОМ ОКНА СЧЁТА (кусок 155). */
+    function человечно(счёт) { return window.KSLT_MATCH_SCORE.человечно(счёт); }
 
     function датой(когда) {
         if (!когда) return '—';
