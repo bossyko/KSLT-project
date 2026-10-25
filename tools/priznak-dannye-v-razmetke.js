@@ -34,7 +34,13 @@ const БАЗОВЫЕ_ЭКРАНЫ = ['KSLT_экранировать', 'esc', 'es
 const ДОМА = ['KSLT_LICO', 'KSLT_SLOY', 'KSLT_VAUCHER', 'KSLT_MESTA', 'KSLT_STATUS',
               'KSLT_TBLOCK', 'KSLT_SLOTS', 'KSLT_LENTA', 'KSLT_VIDEO', 'KSLT_KARTA',
               'KSLT_OTSECHKA', 'KSLT_CONTACT_ICONS', 'KSLT_YAZYK', 'KSLT_RULES',
-              'KSLT_TFEATURED', 'KSLT_PHONE', 'KSLT_POINTS', 'A'];
+              'KSLT_TFEATURED', 'KSLT_PHONE', 'KSLT_POINTS', 'A',
+              /* КУСОК 167: дом роли. Прочитан целиком — `уровень()` отдаёт
+                 одно из трёх слов, `мойИгрок()` ссылку, `подписьРоли()`
+                 слово своего словаря, `значокРоли()` экранирует и роль, и
+                 подпись. ДОМ ПОПАДАЕТ В СПИСОК ПОСЛЕ ЧТЕНИЯ ВСЕХ ЕГО
+                 ОТДАЧ, а не по имени. */
+              'KSLT_DOSTUP'];
 const РАЗМЕТКА = /<\/?[a-z][a-z0-9-]*[\s>\/]/i;
 const ФУНК = ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'];
 const В_АТРИБУТЕ = /=\s*["']$/;
@@ -190,6 +196,12 @@ function словариФайла(д) {
         else if (и.type === 'ConditionalExpression' &&
                  и.consequent.type === 'ArrayExpression' && и.alternate.type === 'ArrayExpression')
             свои_перечисления.add(у.id.name);
+        /* `var L = A.L` — СЛОВАРЬ, ВЗЯТЫЙ У ДОМА, ОСТАЁТСЯ СЛОВАРЁМ. Админка
+           держит свои подписи в `A.L`, и каждый её файл берёт их этой
+           строкой; признак же видел здесь «иное» и считал `L[key]` полем
+           человека (кусок 167). Доверие идёт от ДОМА, а не от имени `L`. */
+        else if (и.type === 'MemberExpression' && !и.computed &&
+                 ДОМА.indexOf(корень2(и)) !== -1) н.add(у.id.name);
         else if (и.type === 'CallExpression') {
             const зов = имяЗова(и) || '';
             if (зов.indexOf('выбрать') !== -1 || /^get[A-Z]|[Ll]abels$/.test(зов)) н.add(у.id.name);

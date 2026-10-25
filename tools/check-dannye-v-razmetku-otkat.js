@@ -32,7 +32,9 @@ const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js'
                 'js/player.js', 'js/admin/sections/live.js', 'js/live-match.js',
                 'tools/priznak-dannye-v-razmetke.js',
                 /* кусок 166: значок награды и словарь по ключу-полю */
-                'js/players.js', 'js/admin/sections/notifications.js'];
+                'js/players.js', 'js/admin/sections/notifications.js',
+                /* кусок 167: дом роли */
+                'js/kslt-dostup.js', 'js/admin/core/layout.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -209,8 +211,8 @@ const ОТКАТЫ = [
        раньше, с этого куска заперт и названных мест больше не имеет.
        ЯКОРЬ ПЕРЕЕЗЖАЕТ ВМЕСТЕ С СОДЕРЖИМЫМ. */
     ['запереть файл, у которого есть названное место', 'tools/check-dannye-v-razmetku.js',
-     "    'js/admin/sections/tournaments.js', 'js/badge-celebration.js', 'js/umpire.js'\n];",
-     "    'js/admin/sections/tournaments.js', 'js/badge-celebration.js', 'js/umpire.js',\n    'js/live-match.js'\n];",
+     "    'js/admin/sections/finances.js', 'js/admin/sections/live.js',",
+     "    'js/admin/sections/finances.js', 'js/admin/sections/live.js', 'js/live-match.js',",
      'запертые файлы не отпираются'],
 
     /* ── КУСОК 166: значок награды и значение словаря по ключу ── */
@@ -235,6 +237,24 @@ const ОТКАТЫ = [
     ['завести дыру в файле, запертом куском 166', 'js/admin/sections/notifications.js',
      "    'use strict';",
      "    'use strict';\n    function дыра166(о) { document.body.innerHTML = '<p>' + o.audience + '</p>'; }\n    window.__дыра166 = дыра166;",
+     'запертые файлы не отпираются'],
+
+    /* ── КУСОК 167: дом роли и словарь, взятый у дома ── */
+
+    /* ДОМ РОЛИ ЭКРАНИРУЕТ И РОЛЬ, И ПОДПИСЬ. Откат отнимает экранирование у
+       имени класса — роль там текстовый столбец базы, и кавычка закрывает
+       атрибут. Правило запертых падает, потому что `admin/core/layout.js`
+       заперт этим же куском и зовёт дом. */
+    ['отнять у дома роли экранирование', 'js/kslt-dostup.js',
+     "return '<' + тег + ' class=\"kslt-role kslt-role-' + экр(роль || 'user') + своё + '\">' +",
+     "return '<' + тег + ' class=\"kslt-role kslt-role-' + (роль || 'user') + своё + '\">' +",
+     'дом роли экранирует и роль, и подпись'],
+
+    /* СЛОВАРЬ, ВЗЯТЫЙ У ДОМА, ОСТАЁТСЯ СЛОВАРЁМ. Откат отнимает у признака
+       это знание, и `L[key]` в запертом файле снова становится дырой. */
+    ['отнять у признака словарь, взятый у дома', 'tools/priznak-dannye-v-razmetke.js',
+     "        else if (и.type === 'MemberExpression' && !и.computed &&\n                 ДОМА.indexOf(корень2(и)) !== -1) н.add(у.id.name);",
+     "        else if (false) { /* знание отнято откатом */ }",
      'запертые файлы не отпираются'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',

@@ -23,8 +23,11 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-badzh-'));
 
 const ST = 'css/style.css', AD = 'css/admin.css', DB = 'css/dashboard.css',
       LY = 'js/admin/core/layout.js', US = 'js/admin/sections/users.js',
-      DJ = 'js/dashboard.js';
-const ФАЙЛЫ = [ST, AD, DB, LY, US, DJ];
+      DJ = 'js/dashboard.js',
+      /* КУСОК 167: значок роли отдаёт ДОМ, и якоря трёх откатов переехали
+         туда вместе с содержимым. */
+      ДР = 'js/kslt-dostup.js';
+const ФАЙЛЫ = [ST, AD, DB, LY, US, DJ, ДР];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -91,7 +94,7 @@ const ОТКАТЫ = [
 
     /* 9. вернуть инлайн в users.js */
     ['вернуть инлайн бейджа роли в users.js', US,
-     "var roleBadge = '<span class=\"kslt-role kslt-role-' + (u.role || 'user') + '\">' + roleLabel + '</span>';",
+     "var roleBadge = KSLT_DOSTUP.значокРоли(u.role);",
      "var roleColor = u.role === 'admin' ? 'var(--danger)' : 'var(--text-secondary)';\n            var roleBadge = '<span style=\"font-size:var(--fs-xs);color:' + roleColor + ';\">' + roleLabel + '</span>';",
      'роль в разметке зовётся классом, а не инлайном'],
 
@@ -99,14 +102,14 @@ const ОТКАТЫ = [
        ЯКОРЬ НА СОДЕРЖИМОМ: подстановка роли, а не класс положения —
        класс .ad-sidebar-role остаётся на месте и в откате. */
     ['вернуть боковой панели админки лайм для любой роли', LY,
-     "'<div class=\"kslt-role kslt-role-' + (profile.role || 'user') + ' ad-sidebar-role\">'",
-     "'<div class=\"kslt-role kslt-role-admin ad-sidebar-role\">'",
+     "KSLT_DOSTUP.значокРоли(profile.role, { тег: 'div', класс: 'ad-sidebar-role' })",
+     "'<div class=\"kslt-role kslt-role-admin ad-sidebar-role\"></div>'",
      'боковые панели подставляют роль, а не красят любую лаймом'],
 
     /* 11. то же в кабинете */
     ['вернуть боковой панели кабинета лайм для любой роли', DJ,
-     "'<div class=\"kslt-role kslt-role-' + profile.role + ' db-sidebar-role\">'",
-     "'<div class=\"kslt-role kslt-role-admin db-sidebar-role\">'",
+     "KSLT_DOSTUP.значокРоли(profile.role, { тег: 'div', класс: 'db-sidebar-role' })",
+     "'<div class=\"kslt-role kslt-role-admin db-sidebar-role\"></div>'",
      'боковые панели подставляют роль, а не красят любую лаймом']
 ];
 
