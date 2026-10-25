@@ -6215,7 +6215,7 @@
                 html += '<div class="' + matchClass + '">';
                 if (match.scheduled_time) {
                     var schedInfo = match.scheduled_time.slice(0, 5);
-                    if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
+                    if (match.court) schedInfo += ' · ' + L.brkCourt + A.esc(match.court);
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
                 // Player 1 with group label (always render placeholders for alignment)
@@ -6505,7 +6505,7 @@
                 // Schedule info
                 if (match.scheduled_time) {
                     var schedInfo = match.scheduled_time.slice(0, 5);
-                    if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
+                    if (match.court) schedInfo += ' · ' + L.brkCourt + A.esc(match.court);
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
 
@@ -6691,7 +6691,7 @@
 
         if (match.scheduled_time) {
             var schedInfo = match.scheduled_time.slice(0, 5);
-            if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
+            if (match.court) schedInfo += ' · ' + L.brkCourt + A.esc(match.court);
             html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
         }
 
@@ -13503,7 +13503,7 @@
                 html += '<div class="' + matchClass + '">';
                 if (match.scheduled_time) {
                     var schedInfo = match.scheduled_time.slice(0, 5);
-                    if (match.court) schedInfo += ' · ' + L.brkCourt + match.court;
+                    if (match.court) schedInfo += ' · ' + L.brkCourt + A.esc(match.court);
                     html += '<div class="ad-brk-schedule">' + schedInfo + '</div>';
                 }
                 var p1SeedHtml = '<span class="ad-brk-seed">' + (match.seed1 ? '[' + match.seed1 + ']' : '') + '</span>';

@@ -1079,7 +1079,7 @@
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
             var name = c.name;
-            catOpts += '<option value="' + c.id + '">' + name + '</option>';
+            catOpts += '<option value="' + c.id + '">' + A.esc(name) + '</option>';
         });
 
         panel.innerHTML =
@@ -1097,7 +1097,7 @@
             A.cachedCategories.forEach(function(c) {
                 if (_promoGenderFilter && c.gender !== _promoGenderFilter) return;
                 var name = c.name;
-                newCatOpts += '<option value="' + c.id + '">' + name + '</option>';
+                newCatOpts += '<option value="' + c.id + '">' + A.esc(name) + '</option>';
             });
             catSelect.innerHTML = newCatOpts;
             _promoCatFilter = '';
@@ -1166,7 +1166,7 @@
                 if (top5.length > 0) {
                     hasEligible = true;
                     eligibleHtml += '<div class="ad-table-card" style="margin-bottom:12px;">' +
-                        '<div class="ad-table-card-title">' + genderLabel + ': ' + catName + ' → ' + nextCatName + '</div>' +
+                        '<div class="ad-table-card-title">' + genderLabel + ': ' + A.esc(catName) + ' → ' + A.esc(nextCatName) + '</div>' +
                         '<div class="ad-table-wrap"><table class="ad-table ad-promo-table"><thead><tr>' +
                         '<th style="width:40px">#</th><th>' + L.ratPlayer + '</th><th style="width:80px">' + L.ratPoints + '</th><th style="width:140px">' + L.ratActions + '</th>' +
                         '</tr></thead><tbody>';

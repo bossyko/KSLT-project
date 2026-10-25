@@ -1857,7 +1857,7 @@
             '</tr></thead><tbody>' + строки.map(function(z) {
                 var ч = профили[z.profile_id] || {};
                 var к = карточки[z.player_id] || {};
-                var п = подпись[z.status] || { текст: z.status, цвет: 'var(--text-secondary)' };
+                var п = подпись[z.status] || { текст: A.esc(z.status), цвет: 'var(--text-secondary)' };
                 var когда = z.decided_at || z.created_at;
                 return '<tr>' +
                     '<td>' + A.esc(ч.full_name || '—') +

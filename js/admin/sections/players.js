@@ -219,7 +219,7 @@
         A.cachedCategories.forEach(function(c) {
             var catName = c.name;
             var selected = plrFilterCategory === c.id ? ' selected' : '';
-            catFilterHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
+            catFilterHtml += '<option value="' + c.id + '"' + selected + '>' + A.esc(catName) + '</option>';
         });
 
         var isAdm = A.currentRole === 'admin';
@@ -347,7 +347,7 @@
                         // Гость виден сразу в списке: у него нет карточки на сайте
                         (p.is_guest ? ' <span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);font-weight:600;background:rgba(255,255,255,0.08);color:var(--text-muted);margin-left:4px;">' + L.regGuest + '</span>' : '') +
                     '</td>' +
-                    '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
+                    '<td><span class="ad-cat-badge">' + A.esc(catLabel) + '</span></td>' +
                     '<td style="font-weight:600;color:var(--accent);">' + (p.points || 0) + '</td>' +
                     '<td>' + (p.wins || 0) + '/' + (p.losses || 0) + '</td>' +
                     '<td style="text-align:center;color:var(--text-muted);">' + ((p.view_count || 0) > 0 ? p.view_count : '\u2014') + '</td>' +
@@ -468,7 +468,7 @@
         A.cachedCategories.forEach(function(c) {
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
             var catName = c.name;
-            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
+            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + A.esc(catName) + '</option>';
         });
 
         // Badges section is now loaded dynamically from player_badges table
@@ -488,7 +488,7 @@
                 '</div>' +
                 '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adPlrImgInput">' +
                 '<div class="ad-image-url-row">' +
-                    '<input type="text" class="ad-field-input" id="adPlrImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (plrImageUrl || '') + '">' +
+                    '<input type="text" class="ad-field-input" id="adPlrImgUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(plrImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adPlrImgUrlBtn">' + L.applyUrl + '</button>' +
                 '</div>' +
             '</div>' +
@@ -2295,7 +2295,7 @@
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
             var name = c.name;
-            catOpts += '<option value="' + c.id + '">' + name + '</option>';
+            catOpts += '<option value="' + c.id + '">' + A.esc(name) + '</option>';
         });
 
         panel.innerHTML =
@@ -2597,7 +2597,7 @@
         var catOpts = '<option value="">' + L.ratAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
             var name = c.name;
-            catOpts += '<option value="' + c.id + '">' + name + '</option>';
+            catOpts += '<option value="' + c.id + '">' + A.esc(name) + '</option>';
         });
 
         panel.innerHTML =

@@ -1652,8 +1652,8 @@
         var p2Ntrp = challenge.opponent_ntrp || ntrpДляБаттла(p2, парныйБаттл) || null;
         var p1Cat = challenge.challenger_category || p1.category_id || '';
         var p2Cat = challenge.opponent_category || p2.category_id || '';
-        var p1Country = challenge.challenger_country || p1.country || '';
-        var p2Country = challenge.opponent_country || p2.country || '';
+        var p1Country = A.esc(challenge.challenger_country || p1.country || '');
+        var p2Country = A.esc(challenge.opponent_country || p2.country || '');
 
         // Снимок просим только у того, кого нет в базе клуба: у своих
         // аватарка берётся из карточки

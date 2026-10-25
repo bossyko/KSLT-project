@@ -978,7 +978,7 @@
                 '</div>' +
                 '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adCrtImgInput">' +
                 '<div class="ad-image-url-row">' +
-                    '<input type="text" class="ad-field-input" id="adCrtImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (crtImageUrl || '') + '">' +
+                    '<input type="text" class="ad-field-input" id="adCrtImgUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(crtImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adCrtImgUrlBtn">' + L.applyUrl + '</button>' +
                 '</div>' +
             '</div>' +

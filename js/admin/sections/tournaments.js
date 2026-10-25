@@ -72,7 +72,7 @@
         var catFilterHtml = '<option value="">' + L.trnAllCategories + '</option>';
         A.cachedCategories.forEach(function(c) {
             var catName = c.name;
-            catFilterHtml += '<option value="' + c.id + '">' + catName + '</option>';
+            catFilterHtml += '<option value="' + c.id + '">' + A.esc(catName) + '</option>';
         });
 
         // Status filter options
@@ -490,7 +490,7 @@
                     A.bulkCheckboxTd(t.id) +
                     /* ЭКРАНИРУЮТСЯ ДАННЫЕ, А НЕ ШАБЛОН (157): название пишет менеджер. */
                     '<td style="font-weight:500;color:var(--text-primary);">' + A.esc(t.title || L.noData) + '</td>' +
-                    '<td><span class="ad-cat-badge">' + catLabel + '</span></td>' +
+                    '<td><span class="ad-cat-badge">' + A.esc(catLabel) + '</span></td>' +
                     '<td class="ad-centr"><span class="ad-status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
                     '<td class="ad-centr">' + dateStartStr + '</td>' +
                     '<td class="ad-centr">' + dateEndStr + '</td>' +
@@ -914,7 +914,7 @@
         A.cachedCategories.forEach(function(c) {
             var selected = (item && item.category_id === c.id) ? ' selected' : '';
             var catName = c.name;
-            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + catName + '</option>';
+            catOptionsHtml += '<option value="' + c.id + '"' + selected + '>' + A.esc(catName) + '</option>';
         });
 
         // Status badge (read-only, auto-computed)
@@ -925,7 +925,7 @@
             trnStatusBadgeLabel = L.trnDraft;
             trnStatusBadgeClass = 'ad-status-draft';
         } else if (item && (item.status === 'cancelled' || item.status === 'registration_closed' || item.status === 'completed')) {
-            trnStatusBadgeLabel = A.TOURNAMENT_STATUSES[item.status] || item.status;
+            trnStatusBadgeLabel = A.TOURNAMENT_STATUSES[item.status] || A.esc(item.status);
             trnStatusBadgeClass = 'ad-status-' + (item.status || '').replace(/_/g, '-');
         } else {
             var autoStatus = A.computeTournamentStatus(
@@ -943,7 +943,7 @@
         A.cachedLevels.forEach(function(lv) {
             var selected = (item && item.level_id === lv.id) ? ' selected' : '';
             var name = lv.name;
-            trnLevelOptionsHtml += '<option value="' + lv.id + '"' + selected + '>' + name + '</option>';
+            trnLevelOptionsHtml += '<option value="' + lv.id + '"' + selected + '>' + A.esc(name) + '</option>';
         });
 
         var isExisting = !!trnEditingId && !trnIsDraft;

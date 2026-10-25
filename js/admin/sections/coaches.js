@@ -561,7 +561,7 @@
                 '</div>' +
                 '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adCchImgInput">' +
                 '<div style="display:flex;gap:8px;margin-top:8px;">' +
-                    '<input type="text" class="ad-field-input" id="adCchImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (cchImageUrl || '') + '">' +
+                    '<input type="text" class="ad-field-input" id="adCchImgUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(cchImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adCchImgUrlBtn">' + L.applyUrl + '</button>' +
                 '</div>' +
             '</div>' +

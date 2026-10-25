@@ -517,7 +517,7 @@
                 ? '<img src="' + A.esc(a.image) + '" class="ad-table-thumb" alt="">'
                 : '<div class="ad-table-thumb" style="background:var(--bg-elevated);"></div>';
 
-            var catLabel = A.CATEGORIES[a.category] || a.category || L.noData;
+            var catLabel = A.CATEGORIES[a.category] || A.esc(a.category) || L.noData;
             var isPublished = !!a.published_at;
             var statusHtml = isPublished
                 ? '<span class="ad-status-badge ad-status-published">' + L.newsPublished + '</span>'
@@ -641,7 +641,7 @@
                 '</div>' +
                 '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adNewsImgInput">' +
                 '<div class="ad-image-url-row">' +
-                    '<input type="text" class="ad-field-input" id="adNewsImgUrl" placeholder="' + L.orPasteUrl + '" value="' + (newsImageUrl || '') + '">' +
+                    '<input type="text" class="ad-field-input" id="adNewsImgUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(newsImageUrl || '') + '">' +
                     '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsImgUrlBtn">' + L.applyUrl + '</button>' +
                 '</div>' +
             '</div>' +
