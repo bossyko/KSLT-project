@@ -482,7 +482,7 @@
                 '<div class="ad-form-card-title">' + L.payAmount + '</div>' +
                 '<div style="display:flex;gap:10px;">' +
                     '<input type="text" inputmode="numeric" class="ad-field-input" id="adFinAmount" placeholder="0" value="' + (item ? item.amount : '') + '" style="max-width:180px;">' +
-                    '<input type="text" class="ad-field-input" id="adFinCurrency" value="' + (item ? item.currency : 'KGS') + '" style="width:70px;text-align:center;">' +
+                    '<input type="text" class="ad-field-input" id="adFinCurrency" value="' + A.esc(item ? item.currency : 'KGS') + '" style="width:70px;text-align:center;">' +
                 '</div>' +
             '</div>' +
 

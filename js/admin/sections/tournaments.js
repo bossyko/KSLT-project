@@ -335,7 +335,7 @@
                 if (row.count > 0) {
                     var pct = cardTotal > 0 ? Math.round(row.count / cardTotal * 100) : 0;
                     html += '<div class="ad-crt-stat-row">' +
-                        '<span class="ad-crt-stat-surface">' + row.name + '</span>' +
+                        '<span class="ad-crt-stat-surface">' + A.esc(row.name) + '</span>' +
                         '<div class="ad-crt-stat-bar-wrap"><div class="ad-crt-stat-bar" style="width:' + pct + '%;"></div></div>' +
                         '<span class="ad-crt-stat-count">' + row.count + '</span>' +
                     '</div>';

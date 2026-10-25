@@ -547,7 +547,7 @@
                    и все три обязаны стоять в одном окне. Решение Кости. */
                 добавочные.map(function(д, и) {
                     return '<button class="ad-btn ' + (д.опасная ? 'ad-btn-danger' : 'ad-btn-secondary') +
-                           '" data-dop="' + и + '">' + д.label + '</button>';
+                           '" data-dop="' + и + '">' + esc(д.label) + '</button>';
                 }).join('') +
                 '<button class="ad-btn ' + btnClass + '" id="adConfirmOk">' + btnLabel + '</button>',
             приЗакрытии: onCancel
@@ -633,13 +633,13 @@
             }
             var окноГот = оболочкаОкна({
                 заголовок: opts.title || '',
-                тело: (opts.text ? '<div class="ad-confirm-text">' + opts.text + '</div>' : '') +
+                тело: (opts.text ? '<div class="ad-confirm-text">' + esc(opts.text) + '</div>' : '') +
                       '<input type="text" class="ad-field-input" id="adPromptInput" ' +
-                          'placeholder="' + (opts.placeholder || '') + '" ' +
-                          'value="' + (opts.value || '') + '">',
+                          'placeholder="' + esc(opts.placeholder || '') + '" ' +
+                          'value="' + esc(opts.value || '') + '">',
                 кнопки:
                     '<button class="ad-btn ad-btn-secondary" id="adPromptCancel">' + L.cancel + '</button>' +
-                    '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + (opts.okLabel || L.confirm) + '</button>',
+                    '<button class="ad-btn ad-btn-primary" id="adPromptOk">' + esc(opts.okLabel || L.confirm) + '</button>',
                 приЗакрытии: function() { if (!готово) { готово = true; resolve(null); } }
             });
 

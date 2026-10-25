@@ -1047,7 +1047,7 @@
         A.cachedCategories.forEach(function(c) {
             if (filterGender && c.gender && c.gender !== filterGender) return;
             var sel = (selectedId && c.id === selectedId) ? ' selected' : '';
-            opts += '<option value="' + c.id + '"' + sel + '>' + (c.name) + '</option>';
+            opts += '<option value="' + c.id + '"' + sel + '>' + A.esc(c.name) + '</option>';
         });
         return opts;
     }

@@ -293,7 +293,7 @@
                         A.bulkCheckboxTd(c.id, { rowspan: rowCount }) +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + editBtnHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="font-weight:500;color:var(--text-primary);vertical-align:middle;">' + имяЯчейка + '</td>' +
-                        '<td><span class="ad-type-badge ad-type-' + (t0.type || 'indoor') + '">' + (A.COURT_TYPES[t0.type] || t0.type || '') + '</span></td>' +
+                        '<td><span class="ad-type-badge ad-type-' + A.esc(t0.type || 'indoor') + '">' + (A.COURT_TYPES[t0.type] || A.esc(t0.type || '')) + '</span></td>' +
                         '<td class="ad-centr">' + (A.COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
                         '<td class="ad-centr">' + (t0.count || 1) + '</td>' +
                         '<td style="font-weight:600;color:var(--accent);">' + (t0.price || 0) + '</td>' +
@@ -308,7 +308,7 @@
                     var ti = types[i];
                     html +=
                         '<tr class="ad-crt-subrow" data-crt-id="' + c.id + '">' +
-                            '<td><span class="ad-type-badge ad-type-' + (ti.type || 'indoor') + '">' + (A.COURT_TYPES[ti.type] || ti.type || '') + '</span></td>' +
+                            '<td><span class="ad-type-badge ad-type-' + A.esc(ti.type || 'indoor') + '">' + (A.COURT_TYPES[ti.type] || A.esc(ti.type || '')) + '</span></td>' +
                             '<td class="ad-centr">' + (A.COURT_SURFACES[ti.surface] || ti.surface || '') + '</td>' +
                             '<td class="ad-centr">' + (ti.count || 1) + '</td>' +
                             '<td style="font-weight:600;color:var(--accent);">' + (ti.price || 0) + '</td>' +
@@ -586,8 +586,8 @@
         var typesHtml = '';
         (item.court_types || []).forEach(function(t) {
             typesHtml +=
-                '<span class="ad-type-badge ad-type-' + (t.type || 'indoor') + '" style="margin-right:6px;">' +
-                    (A.COURT_TYPES[t.type] || t.type || '') +
+                '<span class="ad-type-badge ad-type-' + A.esc(t.type || 'indoor') + '" style="margin-right:6px;">' +
+                    (A.COURT_TYPES[t.type] || A.esc(t.type || '')) +
                 '</span>' +
                 '<span style="color:var(--text-secondary);margin-right:12px;">' +
                     (A.COURT_SURFACES[t.surface] || t.surface || '') + ' × ' + (t.count || 1) +
@@ -635,9 +635,9 @@
                 paymentsHtml +=
                     '<tr>' +
                         '<td>' + purposeBadge + '</td>' +
-                        '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + A.esc(p.currency || 'KGS') + '</td>' +
                         '<td style="font-size:var(--fs-sm);">' + A.formatPayDate(p.period_end) + '</td>' +
-                        '<td>' + (A.PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                        '<td>' + (A.PAYMENT_METHODS[p.payment_method] || A.esc(p.payment_method)) + '</td>' +
                         '<td>' + statusBadge + '</td>' +
                     '</tr>';
             });

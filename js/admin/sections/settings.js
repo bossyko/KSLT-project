@@ -141,7 +141,7 @@
                 '</div>' +
                 '<div style="width:120px;">' +
                     '<label class="ad-field-label">' + L.payCurrency + '</label>' +
-                    '<input type="text" class="ad-field-input" id="pc-' + в.kind + '" value="' + (p.currency || 'сом') + '">' +
+                    '<input type="text" class="ad-field-input" id="pc-' + в.kind + '" value="' + A.esc(p.currency || 'сом') + '">' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -1242,7 +1242,7 @@
                     '<td>' + A.esc(name) + '</td>' +
                     '<td>' + A.esc(fromCat) + '</td>' +
                     '<td>' + A.esc(toCat) + '</td>' +
-                    '<td>' + pr.season + '</td>' +
+                    '<td>' + A.esc(pr.season) + '</td>' +
                     '<td><span class="' + statusClass + '">' + statusLabel + '</span></td>' +
                     '<td>' + actionsHtml + '</td>' +
                 '</tr>';

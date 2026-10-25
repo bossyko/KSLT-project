@@ -351,9 +351,9 @@
                 paymentsHtml +=
                     '<tr>' +
                         '<td>' + purposeBadge + '</td>' +
-                        '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + (p.currency || 'KGS') + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + p.amount + ' ' + A.esc(p.currency || 'KGS') + '</td>' +
                         '<td style="font-size:var(--fs-sm);">' + A.formatPayDate(p.period_end) + '</td>' +
-                        '<td>' + (A.PAYMENT_METHODS[p.payment_method] || p.payment_method) + '</td>' +
+                        '<td>' + (A.PAYMENT_METHODS[p.payment_method] || A.esc(p.payment_method)) + '</td>' +
                         '<td>' + statusBadge + '</td>' +
                     '</tr>';
             });
@@ -381,7 +381,7 @@
                     '<span class="ad-tiho">' + L.cchCourt + '</span>' +
                     '<span class="ad-vtoroy">' + A.esc(item.court || '—') + '</span>' +
                     '<span class="ad-tiho">' + L.cchExperience + '</span>' +
-                    '<span class="ad-vtoroy">' + (item.experience || '—') + '</span>' +
+                    '<span class="ad-vtoroy">' + A.esc(item.experience || '—') + '</span>' +
                     '<span class="ad-tiho">' + L.cchPrice + '</span>' +
                     '<span style="color:var(--text-secondary);font-weight:600;">' + (item.price || '—') + '</span>' +
                     '<span class="ad-tiho">' + L.cchTags + '</span>' +
@@ -625,11 +625,11 @@
                 '<div class="ad-form-row">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.cchExperience + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adCchExp" value="' + (item ? item.experience || '' : '') + '">' +
+                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adCchExp" value="' + A.esc(item ? item.experience || '' : '') + '">' +
                     '</div>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.cchPrice + '</label>' +
-                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adCchPrice" value="' + (item ? item.price || '' : '') + '">' +
+                        '<input type="text" inputmode="numeric" class="ad-field-input" id="adCchPrice" value="' + A.esc(item ? item.price || '' : '') + '">' +
                     '</div>' +
                 '</div>' +
             '</div>' +

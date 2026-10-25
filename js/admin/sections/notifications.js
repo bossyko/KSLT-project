@@ -298,8 +298,8 @@
                 '<td style="font-weight:500;">' + A.esc(r.title || '') +
                     (recalled ? ' <span style="font-size:var(--fs-2xs);color:var(--text-muted);">\u00b7 ' + recalledLabel + '</span>' : '') +
                 '</td>' +
-                '<td>' + (audienceLabels[r.audience] || r.audience || '—') + '</td>' +
-                '<td>' + (typeLabels[r.type] || r.type || '—') + '</td>' +
+                '<td>' + (audienceLabels[r.audience] || A.esc(r.audience || '—')) + '</td>' +
+                '<td>' + (typeLabels[r.type] || A.esc(r.type || '—')) + '</td>' +
                 '<td class="ad-centr">' + (r.recipients_count || 0) + '</td>' +
                 '<td class="ad-centr">' + (r.fcm_sent || 0) + '</td>' +
                 '<td style="text-align:right;"><div class="ad-icon-row">' + actions + '</div></td>' +
