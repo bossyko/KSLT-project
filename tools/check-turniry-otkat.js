@@ -310,21 +310,32 @@ const ОТКАТЫ = [
             `        return String(т);`,
    'имя турнира экранируется перед подстановкой в атрибут'],
 
-  [БЛОКФ, `            ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +`,
-          `            ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +\n            ' data-href="' + detailPage + '?id=' + t.id + '"' +`,
+  /* ── КУСОК 162: полоса живёт ОДНИМ телом в доме, и откаты переехали
+       вместе с содержимым. Правила не отменены — их стало больше. ── */
+
+  [КРУПФ, `            (о.атрибуты || '') + афиша + '>' +`,
+          `            (о.атрибуты || '') + афиша + ' data-href="' + (о.href || '') + '">' +`,
    'полоса общего модуля не носит data-href'],
 
-  [БЛОКФ, `            window.KSLT_TFEATURED.слойСсылки(detailPage + '?id=' + t.id, t.name) +`,
+  [КРУПФ, `            слойСсылки(о.href || '#', t.name) +`,
           `            '' +`,
-   'полоса общего модуля зовёт ОБЩИЙ слой входа'],
+   'полоса зовёт ОБЩИЙ слой входа'],
 
-  [JSФ, `            '" data-cat="' + catKey + '" data-idx="' + idx + '"' +`,
-        `            '" data-cat="' + catKey + '" data-idx="' + idx + '" data-href="' + compactHref + '"' +`,
-   'полоса обзорной не носит data-href'],
+  /* ВТОРОГО ТЕЛА БОЛЬШЕ НЕТ — и это отдельное правило: откат возвращает
+     зовущему свою разметку вместо зова дома. */
+  [БЛОКФ, `        return window.KSLT_TFEATURED.полоса(t, {`,
+          `        return '<div class="to-compact to-compact-thumb"' +\n            ' data-status="' + t.status + '">' + '</div>' + String({`,
+   'полоса существует ОДНИМ телом, и оба зовущих идут в дом'],
 
-  [JSФ, `            window.KSLT_TFEATURED.слойСсылки(compactHref, t.name) +`,
-        `            '' +`,
-   'полоса обзорной зовёт ТОТ ЖЕ слой входа'],
+  [JSФ, `            слоты: true`,
+        `            слоты: false`,
+   '«мест осталось» приходит ДОВОДОМ, а не вторым телом'],
+
+  /* АФИША СЛЕВА У ВСЕХ — решение Кости 28.09, до куска 162 применённое к
+     одной копии из двух. */
+  [КРУПФ, `            ? ' style="--poster:url(' + window.KSLT_SLOY.экр(постер) + ')"'`,
+          `            ? ' style="background-image:url(' + window.KSLT_SLOY.экр(постер) + ')"'`,
+   'афиша слева у всех, независимо от статуса'],
 
   [CSS, `.to-compact > .to-compact-cover {\n    position: absolute;\n    inset: 0;`,
         `.to-compact > .to-compact-cover {\n    position: static;`,

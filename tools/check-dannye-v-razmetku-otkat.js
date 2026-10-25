@@ -22,7 +22,8 @@ fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
 const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js',
                 'js/tournament-detail.js', 'js/kslt-vremya.js', 'js/partners.js',
                 'js/courts.js', 'js/tournaments-overview.js', 'supabase/schema.sql',
-                'tools/check-dannye-v-razmetku.js', 'js/scoreboard.js'];
+                'tools/check-dannye-v-razmetku.js', 'js/scoreboard.js',
+                'js/tournament-featured.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -129,12 +130,13 @@ const ОТКАТЫ = [
      "    'use strict';\n    function через159(о) { var имя = o.full_name; document.body.innerHTML = '<p>' + имя + '</p>'; }\n    window.__через159 = через159;",
      'столбец, который пишет человек, не идёт в разметку мимо экранирования'],
 
-    /* БЛИЗНЕЦ ТОЙ ЖЕ БЕДЫ: адрес афиши в style="…url(…)" живёт в двух
-       файлах, и кусок 158 починил только один. ПОЧИНИЛ ОДИН — ПРОВЕРЬ
-       БЛИЗНЕЦА. */
-    ['отнять экранирование у афиши турнира в style', 'js/tournaments-overview.js',
-     "постер ? ' style=\"--poster:url(' + KSLT_экранировать(постер) + ')\"' : ''",
-     "постер ? ' style=\"--poster:url(' + постер + ')\"' : ''",
+    /* БЛИЗНЕЦ ТОЙ ЖЕ БЕДЫ ЖИЛ В ДВУХ ФАЙЛАХ, и кусок 158 починил только
+       один. Кусок 162 свёл полосу в ОДНО тело, и близнеца больше нет —
+       откат переехал вместе с содержимым, в дом. ЯКОРЬ ПЕРЕЕЗЖАЕТ ВМЕСТЕ С
+       СОДЕРЖИМЫМ, а правило остаётся то же. */
+    ['отнять экранирование у афиши турнира в style', 'js/tournament-featured.js',
+     "? ' style=\"--poster:url(' + window.KSLT_SLOY.экр(постер) + ')\"'",
+     "? ' style=\"--poster:url(' + постер + ')\"'",
      'подстановка в атрибуте экранирована — кавычка там даёт обработчик'],
 
     /* ── КУСОК 160: признак идёт из довода к зовущему ── */
