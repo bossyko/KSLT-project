@@ -346,7 +346,8 @@
                 var statusBadge = isActive
                     ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
                     : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
-                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (A.PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+                /* То же место, что в кортах: назначение платежа — в класс. */
+                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + A.esc(p.purpose) + '">' + (A.PAYMENT_PURPOSES[p.purpose] || A.esc(p.purpose)) + '</span>';
 
                 paymentsHtml +=
                     '<tr>' +
@@ -383,7 +384,7 @@
                     '<span class="ad-tiho">' + L.cchExperience + '</span>' +
                     '<span class="ad-vtoroy">' + A.esc(item.experience || '—') + '</span>' +
                     '<span class="ad-tiho">' + L.cchPrice + '</span>' +
-                    '<span style="color:var(--text-secondary);font-weight:600;">' + (item.price || '—') + '</span>' +
+                    '<span style="color:var(--text-secondary);font-weight:600;">' + A.esc(item.price || '—') + '</span>' +
                     '<span class="ad-tiho">' + L.cchTags + '</span>' +
                     '<span>' + tagsHtml + '</span>' +
                     '<span class="ad-tiho">' + L.cchPromoted + '</span>' +

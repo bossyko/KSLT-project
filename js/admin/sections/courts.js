@@ -296,7 +296,7 @@
                         '<td><span class="ad-type-badge ad-type-' + A.esc(t0.type || 'indoor') + '">' + (A.COURT_TYPES[t0.type] || A.esc(t0.type || '')) + '</span></td>' +
                         '<td class="ad-centr">' + (A.COURT_SURFACES[t0.surface] || t0.surface || '') + '</td>' +
                         '<td class="ad-centr">' + (t0.count || 1) + '</td>' +
-                        '<td style="font-weight:600;color:var(--accent);">' + (t0.price || 0) + '</td>' +
+                        '<td style="font-weight:600;color:var(--accent);">' + A.esc(t0.price || 0) + '</td>' +
                         '<td rowspan="' + rowCount + '" style="vertical-align:middle;">' + cityText + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + partnerHtml + '</td>' +
                         '<td rowspan="' + rowCount + '" style="text-align:center;vertical-align:middle;">' + promotedHtml + '</td>' +
@@ -311,7 +311,7 @@
                             '<td><span class="ad-type-badge ad-type-' + A.esc(ti.type || 'indoor') + '">' + (A.COURT_TYPES[ti.type] || A.esc(ti.type || '')) + '</span></td>' +
                             '<td class="ad-centr">' + (A.COURT_SURFACES[ti.surface] || ti.surface || '') + '</td>' +
                             '<td class="ad-centr">' + (ti.count || 1) + '</td>' +
-                            '<td style="font-weight:600;color:var(--accent);">' + (ti.price || 0) + '</td>' +
+                            '<td style="font-weight:600;color:var(--accent);">' + A.esc(ti.price || 0) + '</td>' +
                         '</tr>';
                 }
             }
@@ -591,7 +591,7 @@
                 '</span>' +
                 '<span style="color:var(--text-secondary);margin-right:12px;">' +
                     (A.COURT_SURFACES[t.surface] || t.surface || '') + ' × ' + (t.count || 1) +
-                    ' — ' + (t.price || 0) + ' ' + L.vchCurrency +
+                    ' — ' + A.esc(t.price || 0) + ' ' + L.vchCurrency +
                 '</span>';
         });
         if (!typesHtml) typesHtml = '<span class="ad-tiho">' + L.noData + '</span>';
@@ -630,7 +630,9 @@
                 var statusBadge = isActive
                     ? '<span class="ad-pay-badge ad-pay-active">' + L.payActive + '</span>'
                     : '<span class="ad-pay-badge ad-pay-expired">' + L.payExpired + '</span>';
-                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + p.purpose + '">' + (A.PAYMENT_PURPOSES[p.purpose] || p.purpose) + '</span>';
+                /* НАЗНАЧЕНИЕ ПЛАТЕЖА ИДЁТ В ИМЯ КЛАССА: `payments.purpose` —
+                   текстовый столбец, и кавычка там закрывает атрибут. */
+                var purposeBadge = '<span class="ad-pay-badge ad-pay-purpose-' + A.esc(p.purpose) + '">' + (A.PAYMENT_PURPOSES[p.purpose] || A.esc(p.purpose)) + '</span>';
 
                 paymentsHtml +=
                     '<tr>' +

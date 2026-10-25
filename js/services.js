@@ -490,7 +490,7 @@
         var photo = ch.photo || COACH_PHOTO;
         var href = coachPage + '?id=' + ch.id;
         var exp = ch.experience ? ch.experience + ' ' + L.years : '';
-        var price = ch.price ? ch.price + ' сом/ч' : '';
+        var price = ch.price ? KSLT_экранировать(ch.price) + ' сом/ч' : '';
         var discountHtml = ch._maxDiscount ? '<span class="sv-discount-overlay">\uD83C\uDFF7\uFE0F ' + (KSLT_YAZYK.выбрать('up to', 'чейин', 'до')) + ' -' + ch._maxDiscount + '%</span>' : '';
 
         return '<a class="sv-featured" href="' + href + '">' +
@@ -544,7 +544,7 @@
     function renderCompactCoach(ch, idx) {
         var name = getCoachName(ch);
         var spec = getCoachSpec(ch);
-        var price = ch.price ? ch.price + ' сом/ч' : '';
+        var price = ch.price ? KSLT_экранировать(ch.price) + ' сом/ч' : '';
         var photo = ch.photo || COACH_PHOTO;
         var discountSm = ch._maxDiscount ? '<span class="sv-discount-overlay-sm">-' + ch._maxDiscount + '%</span>' : '';
 

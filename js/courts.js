@@ -802,7 +802,7 @@
                         '<div class="ct-card-stat"><div class="ct-card-stat-num">' + c.courtsCount + '</div><div class="ct-card-stat-label">' + L_labels.courts + '</div></div>' +
                         (c.rating ? '<div class="ct-card-stat"><div class="ct-card-stat-num">\u2605 ' + c.rating + '</div><div class="ct-card-stat-label">' + L_labels.rating + '</div></div>' : '') +
                     '</div>' +
-                    (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + c.price + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
+                    (c.price ? '<div class="ct-card-price">' + L_labels.priceFrom + ' <strong>' + KSLT_экранировать(c.price) + '</strong> ' + L_labels.priceCurrency + '</div>' : '') +
                     /* «Подробнее →» снято: карточка САМА ссылка на корт, и
                        кнопка была нажимаемым внутри нажимаемого — с
                        клавиатуры до неё не добраться, а ведёт она туда же.
@@ -1177,7 +1177,8 @@
             court._courtTypes.forEach(function(ct) {
                 var typeLabel = TYPE_LABELS[ct.type] || ct.type || '';
                 var surfaceLabel = ПОКРЫТИЯ[ct.surface] || ct.surface;
-                var priceText = ct.price ? (ct.price + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '—';
+                /* ЦЕНА — ТЕКСТОВЫЙ СТОЛБЕЦ, ЕЁ ПИШЕТ АДМИНИСТРАТОР. */
+                var priceText = ct.price ? (KSLT_экранировать(ct.price) + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '—';
                 if (ct.partner && ct.discount) {
                     priceText += ' <span class="ct-svc-discount">KSLT -' + ct.discount + '%</span>';
                 } else if (ct.partner) {
@@ -1204,7 +1205,7 @@
                     '</div>';
             court._additionalServices.forEach(function(svc) {
                 var svcName = KSLT_YAZYK.выбрать(svc.name_en || svc.name, svc.name_kg || svc.name, svc.name);
-                var priceText = svc.price ? (svc.price + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '—';
+                var priceText = svc.price ? (KSLT_экранировать(svc.price) + ' ' + (KSLT_YAZYK.выбрать('som/hr', 'сом/саат', 'сом/час'))) : '—';
                 if (svc.partner && svc.discount) {
                     priceText += ' <span class="ct-svc-discount">KSLT -' + svc.discount + '%</span>';
                 } else if (svc.partner) {

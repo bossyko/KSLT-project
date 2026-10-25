@@ -532,7 +532,7 @@
                     (c.specialization ? '<div class="co-card-spec">' + KSLT_экранировать(c.specialization) + '</div>' : '') +
                     (c.shortDesc ? '<div class="co-card-desc">' + c.shortDesc + '</div>' : '') +
                     (statsHtml ? '<div class="co-card-stats">' + statsHtml + '</div>' : '') +
-                    (c.price ? '<div class="co-card-price">' + L.priceFrom + ' <strong>' + c.price + '</strong> ' + L.priceCurrency + '</div>' : '') +
+                    (c.price ? '<div class="co-card-price">' + L.priceFrom + ' <strong>' + KSLT_экранировать(c.price) + '</strong> ' + L.priceCurrency + '</div>' : '') +
                     contactHtml +
                 '</div>' +
             '</a>';
@@ -843,7 +843,7 @@
         if (coach.experience) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + KSLT_экранировать(coach.experience) + '</div><div class="co-detail-stat-label">' + L.experienceFull + '</div></div>';
         if (coach.students) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.students + '+</div><div class="co-detail-stat-label">' + L.students + '</div></div>';
         if (coach.rating) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.rating + '</div><div class="co-detail-stat-label">' + L.rating + '</div></div>';
-        if (coach.price) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.price + '</div><div class="co-detail-stat-label">' + L.priceCurrency + '</div></div>';
+        if (coach.price) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + KSLT_экранировать(coach.price) + '</div><div class="co-detail-stat-label">' + L.priceCurrency + '</div></div>';
         if (statsHtml) {
             html += '<div class="co-detail-stats co-fade-in">' + statsHtml + '</div>';
         }
