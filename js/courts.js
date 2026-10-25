@@ -1244,9 +1244,12 @@
                 '<div class="ct-schedule">';
             var keys = Object.keys(court.schedule);
             keys.forEach(function(key) {
+                /* РАСПИСАНИЕ ЭКРАНИРУЕТСЯ: `courts.schedule` — jsonb, который
+                   заполняет администратор, то есть и день, и время здесь
+                   пишет ЧЕЛОВЕК. Нашёл кусок 164 широким источником схемы. */
                 html += '<div class="ct-schedule-row">' +
-                    '<span class="ct-schedule-day">' + key + '</span>' +
-                    '<span class="ct-schedule-time">' + court.schedule[key] + '</span>' +
+                    '<span class="ct-schedule-day">' + KSLT_экранировать(key) + '</span>' +
+                    '<span class="ct-schedule-time">' + KSLT_экранировать(court.schedule[key]) + '</span>' +
                 '</div>';
             });
             html += '</div></div>';

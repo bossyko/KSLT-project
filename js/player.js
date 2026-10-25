@@ -725,7 +725,14 @@
             _earnedBadges.forEach(function (pb) {
                 var b = pb.badge;
                 if (b) {
-                    hero += '<span class="pp-badge" title="' + KSLT_экранировать(getBadgeName(b)) + '"><span class="pp-badge-icon">' + b.icon + '</span></span>';
+                    /* ЗНАЧОК ЭКРАНИРУЕТСЯ, ХОТЯ ПРИЗНАК ЭТОГО МЕСТА НЕ ВИДИТ.
+                       `badge_definitions.icon` — текстовый столбец
+                       (`sql/архив/badges-migration.sql:33`), то есть его пишет
+                       человек. Признак его пропускает: объект положили в
+                       переменную (`var b = pb.badge`), и имя поля для него
+                       потерялось. Нашло ЧТЕНИЕ, а не прибор; слепота записана
+                       находкой в трекер. */
+                    hero += '<span class="pp-badge" title="' + KSLT_экранировать(getBadgeName(b)) + '"><span class="pp-badge-icon">' + KSLT_экранировать(b.icon) + '</span></span>';
                 }
             });
             hero += '</div>';
