@@ -4900,7 +4900,7 @@
             ? ' <span class="ad-reg-mark ad-reg-mark-dolg">' + L.regDebt + '</span>'
             : '';
         var externalBadge = isExternal
-            ? ' <span class="ad-reg-mark ad-reg-mark-ext">' + (reg.external_country || 'EXT') + '</span>'
+            ? ' <span class="ad-reg-mark ad-reg-mark-ext">' + A.esc(reg.external_country || 'EXT') + '</span>'
             : '';
         // NTRP for main player
         var playerNtrp = isExternal ? (reg.external_ntrp || null)
@@ -6333,7 +6333,7 @@
                 (thirdMatch.status === 'cancelled' ? ' ad-brk-cancelled' : '') + '">';
             if (thirdMatch.scheduled_time) {
                 html += '<div class="ad-brk-schedule">' + thirdMatch.scheduled_time.slice(0, 5) +
-                    (thirdMatch.court ? ' · ' + L.brkCourt + thirdMatch.court : '') + '</div>';
+                    (thirdMatch.court ? ' · ' + L.brkCourt + A.esc(thirdMatch.court) : '') + '</div>';
             }
             html += '<div class="ad-brk-player' + (tp1Win ? ' winner' : (tp2Win ? ' loser' : '')) + '">' +
                 '<span class="ad-brk-name">' + tp1Name + '</span><span class="ad-brk-sets">';
@@ -6589,7 +6589,7 @@
             html += '<div class="' + tMatchClass + '">';
             if (thirdMatch.scheduled_time) {
                 html += '<div class="ad-brk-schedule">' + thirdMatch.scheduled_time.slice(0, 5) +
-                    (thirdMatch.court ? ' · ' + L.brkCourt + thirdMatch.court : '') + '</div>';
+                    (thirdMatch.court ? ' · ' + L.brkCourt + A.esc(thirdMatch.court) : '') + '</div>';
             }
             html += '<div class="ad-brk-player' + (tp1Win ? ' winner' : (tp2Win ? ' loser' : '')) + '">' +
                 (thirdMatch.seed1 ? '<span class="ad-brk-seed">[' + thirdMatch.seed1 + ']</span>' : '') +

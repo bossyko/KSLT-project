@@ -486,7 +486,7 @@
                             if (c.instagram) rows.push([ICON.instagram, '@' + String(c.instagram).replace('@', ''), 'https://instagram.com/' + String(c.instagram).replace('@', ''), 'ig']);
                             var inner = rows.length
                                 ? rows.map(function(r) {
-                                    return '<a class="site-notif-contact site-notif-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
+                                    return '<a class="site-notif-contact site-notif-contact--' + r[3] + '" href="' + KSLT_экранировать(r[2]) + '" target="_blank" rel="noopener">' +
                                            '<span class="site-notif-contact-icon">' + (r[0] || '') + '</span>' +
                                            '<span class="site-notif-contact-val">' + KSLT_экранировать(r[1]) + '</span></a>';
                                   }).join('')

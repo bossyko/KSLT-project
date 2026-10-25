@@ -793,10 +793,10 @@
                 '</div>' +
                 '<div class="ct-card-body">' +
                     '<div class="ct-card-top">' +
-                        '<div class="ct-card-name">' + c.name + '</div>' +
+                        '<div class="ct-card-name">' + KSLT_экранировать(c.name) + '</div>' +
                         (c.partner ? '<span class="ct-card-partner">' + L_labels.partnerBadge + '</span>' : '') +
                     '</div>' +
-                    '<div class="ct-card-type">' + typeLabel + (c.surface ? ' \u00b7 ' + c.surface : '') + '</div>' +
+                    '<div class="ct-card-type">' + typeLabel + (c.surface ? ' \u00b7 ' + KSLT_экранировать(c.surface) : '') + '</div>' +
                     '<div class="ct-card-desc">' + (c.shortDesc || '') + '</div>' +
                     '<div class="ct-card-stats">' +
                         '<div class="ct-card-stat"><div class="ct-card-stat-num">' + c.courtsCount + '</div><div class="ct-card-stat-label">' + L_labels.courts + '</div></div>' +
@@ -1110,14 +1110,14 @@
                    первого уровня — здесь был ещё один, с тем же текстом: диктор читал
                    заголовок дважды. Слово Кости: «имя оставляем на H1, на обложке».
                    Вид не изменился, правило переехало на класс `.ct-detail-name`. */
-                '<div class="ct-detail-title-row"><div class="ct-detail-name">' + court.name + '</div>' +
+                '<div class="ct-detail-title-row"><div class="ct-detail-name">' + KSLT_экранировать(court.name) + '</div>' +
                 (court._promoted ? '<span class="kslt-recommended-detail">' + L_labels.recommendedBadge + '</span>' : '') +
                 '</div>' +
-                '<div class="ct-detail-type">' + typeLabel + (court.surface ? ' \u00b7 ' + court.surface : '') +
+                '<div class="ct-detail-type">' + typeLabel + (court.surface ? ' \u00b7 ' + KSLT_экранировать(court.surface) : '') +
                     (court.partner ? ' \u00b7 <span class="ct-partner-badge">' + L_labels.partnerBadge + '</span>' : '') +
                 '</div>' +
-                (court.address ? '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + court.address + '</div>' : '') +
-                (court.phone ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + court.phone.split(',')[0].replace(/\s/g, '') + '">' + KSLT_экранировать(prettyPhone(court.phone)) + '</a></div>' : '') +
+                (court.address ? '<div class="ct-detail-address"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + KSLT_экранировать(court.address) + '</div>' : '') +
+                (court.phone ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> <a href="tel:' + KSLT_экранировать(court.phone.split(',')[0].replace(/\s/g, '')) + '">' + KSLT_экранировать(prettyPhone(court.phone)) + '</a></div>' : '') +
                 (court.whatsapp ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> <a href="https://wa.me/' + KSLT_экранировать(court.whatsapp.replace(/\D/g, '')) + '" target="_blank" rel="noopener">' + KSLT_экранировать(prettyPhone(court.whatsapp)) + '</a></div>' : '') +
                 (court.instagram ? '<div class="ct-detail-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> <a href="https://instagram.com/' + KSLT_экранировать(court.instagram.replace(/^@/, '')) + '" target="_blank" rel="noopener">' + KSLT_экранировать(court.instagram) + '</a></div>' : '') +
             '</div>' +
@@ -1222,7 +1222,7 @@
         if (court.description) {
             html += '<div class="ct-section ct-fade-in">' +
                 '<h2 class="ct-section-title">' + L_labels.aboutTitle + '</h2>' +
-                '<p class="ct-about-text">' + court.description + '</p>' +
+                '<p class="ct-about-text">' + KSLT_экранировать(court.description) + '</p>' +
             '</div>';
         }
 
@@ -1291,8 +1291,8 @@
                 html += '<div class="ct-map-embed"><iframe src="' + KSLT_экранировать(mapEmbedUrl) + '" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
             }
             html += '<div class="ct-map-links">';
-            if (court.google_maps_url) html += '<a href="' + court.google_maps_url + '" target="_blank" rel="noopener" class="ct-map-link">Google Maps \u2197</a>';
-            if (court.twogis_url) html += '<a href="' + court.twogis_url + '" target="_blank" rel="noopener" class="ct-map-link">2GIS \u2197</a>';
+            if (court.google_maps_url) html += '<a href="' + KSLT_экранировать(court.google_maps_url) + '" target="_blank" rel="noopener" class="ct-map-link">Google Maps \u2197</a>';
+            if (court.twogis_url) html += '<a href="' + KSLT_экранировать(court.twogis_url) + '" target="_blank" rel="noopener" class="ct-map-link">2GIS \u2197</a>';
             html += '</div></div>';
         }
 

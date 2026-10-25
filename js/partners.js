@@ -491,9 +491,9 @@
 
         var avatarHtml;
         if (p.avatar_url) {
-            avatarHtml = '<img class="pt-avatar" src="' + p.avatar_url + '" alt="" loading="lazy">';
+            avatarHtml = '<img class="pt-avatar" src="' + KSLT_экранировать(p.avatar_url) + '" alt="" loading="lazy">';
         } else {
-            avatarHtml = '<div class="pt-avatar-placeholder">' + getInitials(p.full_name) + '</div>';
+            avatarHtml = '<div class="pt-avatar-placeholder">' + KSLT_экранировать(getInitials(p.full_name)) + '</div>';
         }
 
         var ntrpHtml = '';

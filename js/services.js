@@ -596,9 +596,9 @@
 
         var avatarHtml;
         if (p.avatar_url) {
-            avatarHtml = '<img class="sv-player-ava" src="' + p.avatar_url + '" alt="" loading="lazy">';
+            avatarHtml = '<img class="sv-player-ava" src="' + KSLT_экранировать(p.avatar_url) + '" alt="" loading="lazy">';
         } else {
-            avatarHtml = '<div class="sv-player-ava sv-player-initials">' + getInitials(name) + '</div>';
+            avatarHtml = '<div class="sv-player-ava sv-player-initials">' + KSLT_экранировать(getInitials(name)) + '</div>';
         }
 
         // Пол, уровень игры и когда человек последний раз заходил — то, по
