@@ -157,7 +157,6 @@
        посредник, который ничего не добавлял, но плодил понятие. */
 
     // SVG icons
-    var pinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
     var arrowSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
     var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 
@@ -165,26 +164,6 @@
     var _countdownInterval = null;
     var CL = KSLT_YAZYK.выбрать({ days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }, { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }, { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
 
-    function getCountdownHtml(dateSort, startTime) {
-        if (!dateSort) return '';
-        var timeStr = startTime || '00:00';
-        var target = new Date(dateSort + 'T' + timeStr + ':00');
-        var now = new Date();
-        var diff = target.getTime() - now.getTime();
-        if (diff <= 0) return '<span class="to-cd to-cd-live"><span class="to-cd-dot"></span>' + CL.live + '</span>';
-        if (diff > 48 * 60 * 60 * 1000) return '';
-        var d = Math.floor(diff / (1000*60*60*24));
-        var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-        var m = Math.floor((diff % (1000*60*60)) / (1000*60));
-        var s = Math.floor((diff % (1000*60)) / 1000);
-        var urgent = diff < 60 * 60 * 1000 ? ' to-cd-urgent' : '';
-        var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
-        if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
-        parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
-        parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
-        parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
-        return '<span class="to-cd' + urgent + '" data-cd-date="' + dateSort + '" data-cd-time="' + timeStr + '">' + parts + '</span>';
-    }
 
     function updateCountdowns() {
         document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
@@ -854,75 +833,18 @@
     }
 
 
-    /** Парный или микст: заявку с двумя людьми собирают на странице турнира. */
-    function парный(t) {
-        return t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles';
-    }
 
+    /**
+     * ПОЛОСА — ОДНО ТЕЛО, И ОНО В ДОМЕ `KSLT_TFEATURED` (кусок 162).
+     * Здесь было 65 строк, повторённых в `tournament-blocks.compact`.
+     * «Мест осталось» показывает только эта страница — довод `слоты`.
+     */
     function renderCompact(t, catKey, idx) {
-        var compactHref = tournamentPage + '?id=' + t.id;
-
-        // АФИША СЛЕВА У ВСЕХ, НЕЗАВИСИМО ОТ СТАТУСА — решение Кости 28.09:
-        // «может, тоже просто ставить афишу слева, чем прятать её в
-        // подложку». Раньше завершённым афиша давалась ФОНОМ и глушилась:
-        // под текстом оставались цветные пятна, а контраст на такой
-        // подложке непредсказуем — среднее значение врёт о картинке.
-        // Довод «у архива останется настроение» дешевле, чем читаемость,
-        // и вид карточки не должен зависеть от статуса: одно понятие —
-        // одно определение.
-        var прошёл = t.status === 'past';
-        /* Миниатюра показывает целую афишу, если она заведена: короб
-           3:4 вписывает её через background-size: contain. Старые турниры
-           целой не имеют — им остаётся обрезанная, как было */
-        var постер = t.imageFull || t.image;
-        var афиша = постер ? ' style="--poster:url(' + KSLT_экранировать(постер) + ')"' : '';
-
-        return '<div class="to-compact to-compact-thumb' + (прошёл ? ' to-compact-past' : '') +
-            '" data-cat="' + catKey + '" data-idx="' + idx + '"' +
-            афиша + '>' +
-            /* ВХОД — НАСТОЯЩАЯ ССЫЛКА. Полосу рисуют ДВА места: здесь и
-               js/tournament-blocks.js:208, и содержимое у копий разное —
-               места показывает только эта. Слой входа у обеих ОДИН, из
-               KSLT_TFEATURED, чтобы на шве не разошлось ещё и это */
-            window.KSLT_TFEATURED.слойСсылки(compactHref, t.name) +
-            '<div class="to-compact-left">' +
-                // СТАТУС НАД ДАТОЙ, И НЕ ПОВЕРХ АФИШИ — решение Кости 28.09:
-                // «на афишу не залезай, до границы афиш». Плашка ушла из
-                // блока справа в колонку сведений и стоит первой: сверху
-                // «что с турниром», под ней «когда». Поверх афиши она лежала
-                // absolute — не принадлежала ни одной колонке и закрывала
-                // картинку, за которую эта колонка и отведена.
-                '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
-                '<div class="to-compact-date">' +
-                    '<span class="to-day">' + t.date.day + '</span>' +
-                    '<span class="to-month">' + t.date.month + '</span>' +
-                '</div>' +
-                (t.genderLabel ? '<span class="to-compact-gender-badge">' + t.genderLabel + '</span>' : '') +
-                (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRating + '</span>' : '') +
-            '</div>' +
-            '<div class="to-compact-info">' +
-                '<h4>' + KSLT_экранировать(t.name) + '</h4>' +
-                '<div class="to-compact-sub">' +
-                    '<span>' + pinSvg + ' ' + KSLT_экранировать(t.location) + '</span>' +
-                    (t.regLine ? '<span class="to-compact-reg">' + (KSLT_YAZYK.выбрать('Reg: ', 'Кат: ', 'Рег: ')) + t.regLine + '</span>' : '') +
-                    (t.slots ? '<span class="to-compact-slots' + (t.slots.tight ? ' to-slots-tight' : '') + '">' + t.slots.text + '</span>' : '') +
-                '</div>' +
-            '</div>' +
-            '<div class="to-compact-right">' +
-                // Запись прямо отсюда: раньше в боковой карточке был только
-                // статус «регистрация открыта», а записаться было негде —
-                // приходилось открывать турнир ради одной кнопки
-                (t._rawStatus === 'registration_open'
-                    ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
-                        // В парном нужен напарник — заявку собирают на странице
-                        // турнира, отсюда только ведём туда
-                        (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
-                    : '') +
-                // Отсчёт у завершённого турнира показывал «ИДЁТ СЕЙЧАС»:
-                // дата в прошлом, а функция считает прошлое началом матча
-                (t.status === 'past' ? '' : getCountdownHtml(t._dateSort, t._startTime)) +
-            '</div>' +
-        '</div>';
+        return window.KSLT_TFEATURED.полоса(t, {
+            href: tournamentPage + '?id=' + t.id,
+            атрибуты: ' data-cat="' + catKey + '" data-idx="' + idx + '"',
+            слоты: true
+        });
     }
 
     function attachEvents() {

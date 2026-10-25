@@ -28,13 +28,35 @@
     /* Язык — у дома (js/kslt-yazyk.js). */
 
     var L = KSLT_YAZYK.выбрать({ details: 'Details', register: 'Register', noRating: 'No rating',
-            live: 'IN PROGRESS', prefix: 'Starts in', days: 'd', hours: 'h', min: 'm', sec: 's' }, { details: 'Толугураак', register: 'Катталуу', noRating: 'Рейтингсиз',
-                live: 'АЗЫР ЖҮРҮҮДӨ', prefix: 'Башталууга', days: 'к', hours: 'с', min: 'м', sec: 'сек' }, { details: 'Подробнее', register: 'Регистрация', noRating: 'Без рейтинга',
-                live: 'ИДЁТ СЕЙЧАС', prefix: 'Старт через', days: 'д', hours: 'ч', min: 'м', sec: 'с' });
+            live: 'IN PROGRESS', prefix: 'Starts in', days: 'd', hours: 'h', min: 'm', sec: 's',
+            reg: 'Reg', noRatingРяд: 'Unranked' }, { details: 'Толугураак', register: 'Катталуу', noRating: 'Рейтингсиз',
+                live: 'АЗЫР ЖҮРҮҮДӨ', prefix: 'Башталууга', days: 'к', hours: 'с', min: 'м', sec: 'сек',
+                reg: 'Кат', noRatingРяд: 'Рейтингсиз' }, { details: 'Подробнее', register: 'Регистрация', noRating: 'Без рейтинга',
+                live: 'ИДЁТ СЕЙЧАС', prefix: 'Старт через', days: 'д', hours: 'ч', min: 'м', sec: 'с',
+                reg: 'Рег', noRatingРяд: 'Без рейтинга' });
 
-    var pinSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-        'stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>' +
-        '<circle cx="12" cy="10" r="3"/></svg>';
+    /* ДВА АНГЛИЙСКИХ СЛОВА НА ОДНО ПОНЯТИЕ, И ЭТО ЗАМЕРЕНО, А НЕ УГАДАНО:
+       крупная карточка говорит `No rating`, а ПОЛОСА на обеих страницах —
+       `Unranked`. Свести их значит поменять видимый текст, и это решение
+       Кости, а не моё: пока оба слова живут здесь, рядом, под разными
+       именами, и расхождение записано находкой. */
+
+    /* ОДНО ОПРЕДЕЛЕНИЕ, РАЗМЕР — ДОВОДОМ. Булавка жила тремя копиями: 12 в
+       этом доме, 14 в `tournament-blocks.js` и 14 в `tournaments-overview.js`.
+       Размер не свожу — он разный по делу: на карточке значок мельче. */
+    function булавка(размер) {
+        return '<svg width="' + размер + '" height="' + размер + '" viewBox="0 0 24 24" ' +
+            'fill="none" stroke="currentColor" stroke-width="2">' +
+            '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>' +
+            '<circle cx="12" cy="10" r="3"/></svg>';
+    }
+    var pinSvg = булавка(12);
+
+    /* Парный разряд — одно определение: оно стояло в обеих копиях полосы
+       слово в слово. */
+    function парный(t) {
+        return t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles';
+    }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
@@ -189,9 +211,80 @@
         return window.KSLT_SLOY.слой('to-compact-cover', href, имя);
     }
 
+    /**
+     * ПОЛОСА ТУРНИРА — ОДНО ТЕЛО НА ДВЕ СТРАНИЦЫ (кусок 162).
+     *
+     * Полосу рисовали ДВА места: `tournament-blocks.compact` (61 строка) и
+     * `tournaments-overview.renderCompact` (65 строк). Общих блоков разметки
+     * было 13 из 14, css — один (84 правила в `tournaments-overview.css`),
+     * то есть ВИД БЫЛ ОДИН, А ТЕЛА ДВА. Беда с адресом афиши в куске 158
+     * родилась ровно на этом шве: починил одну копию, вторая осталась.
+     *
+     * ДОМ ВЫБРАН ЦЕНОЙ ТЕГОВ, А НЕ УДОБСТВОМ: `tournament-blocks.js` на
+     * обзорной не подключён, а этот файл стоит на всех шести страницах
+     * турниров — цена сведения НОЛЬ тегов вместо трёх.
+     *
+     * АФИША СЛЕВА У ВСЕХ, НЕЗАВИСИМО ОТ СТАТУСА — решение Кости 28.09, до
+     * этого куска применённое к ОДНОЙ копии из двух: полоса показывала
+     * архивному турниру афишу фоном во всю строку под затемнением. Слово
+     * Кости 25.10: «да».
+     *
+     * @param {object} t — турнир
+     * @param {object} о — различия доводами:
+     *        `атрибуты` — свои `data-*` зовущего;
+     *        `слоты` — показывать «мест осталось» (только обзорная);
+     *        `href` — куда ведёт строка.
+     */
+    function полоса(t, о) {
+        о = о || {};
+        var прошёл = t.status === 'past';
+        var постер = t.imageFull || t.image;
+        var афиша = постер
+            ? ' style="--poster:url(' + window.KSLT_SLOY.экр(постер) + ')"'
+            : '';
+
+        return '<div class="to-compact to-compact-thumb' + (прошёл ? ' to-compact-past' : '') + '"' +
+            (о.атрибуты || '') + афиша + '>' +
+            слойСсылки(о.href || '#', t.name) +
+            '<div class="to-compact-left">' +
+                '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
+                '<div class="to-compact-date">' +
+                    '<span class="to-day">' + t.date.day + '</span>' +
+                    '<span class="to-month">' + t.date.month + '</span>' +
+                '</div>' +
+                (t.genderLabel ? '<span class="to-compact-gender-badge">' + t.genderLabel + '</span>' : '') +
+                (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRatingРяд + '</span>' : '') +
+            '</div>' +
+            '<div class="to-compact-info">' +
+                '<h4>' + window.KSLT_SLOY.экр(t.name) + '</h4>' +
+                '<div class="to-compact-sub">' +
+                    /* ПУСТОЕ ПОЛЕ НЕ РИСУЕТСЯ ВОВСЕ: обзорная рисовала
+                       булавку без места — значок, указывающий в пустоту. */
+                    (t.location ? '<span>' + булавка(14) + ' ' +
+                        window.KSLT_SLOY.экр(t.location) + '</span>' : '') +
+                    (t.regLine ? '<span class="to-compact-reg">' + L.reg + ': ' + t.regLine + '</span>' : '') +
+                    (о.слоты && t.slots
+                        ? '<span class="to-compact-slots' + (t.slots.tight ? ' to-slots-tight' : '') + '">' +
+                            window.KSLT_SLOY.экр(t.slots.text) + '</span>'
+                        : '') +
+                '</div>' +
+            '</div>' +
+            '<div class="to-compact-right">' +
+                (t._rawStatus === 'registration_open'
+                    ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
+                        (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
+                    : '') +
+                отсчёт(t._dateSort, t._startTime, t.status) +
+            '</div>' +
+        '</div>';
+    }
+
     window.KSLT_TFEATURED = {
         отсчёт: отсчёт,
         карточка: карточка,
+        полоса: полоса,
+        булавка: булавка,
+        парный: парный,
         слойСсылки: слойСсылки,
         /* экранирование отдаётся домом, своего здесь больше нет */
         экр: function (т) { return window.KSLT_SLOY.экр(т); }

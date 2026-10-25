@@ -43,7 +43,6 @@
 
     var detailPage = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
 
-    var pinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
     // ---- Обратный отсчёт ----------------------------------------------
 
@@ -62,24 +61,6 @@
         return out;
     }
 
-    /**
-     * Отсчёт до старта. Показываем только за двое суток до матча —
-     * раньше он не помогает, а место занимает.
-     *
-     * Завершённым турнирам отсчёт не рисуем совсем: у них дата в прошлом,
-     * и «осталось меньше нуля» превращалось в «ИДЁТ СЕЙЧАС» рядом с
-     * плашкой «Завершён».
-     */
-    function countdown(t) {
-        if (!t || t.status === 'past' || !t._dateSort) return '';
-        var timeStr = t._startTime || '00:00';
-        var diff = new Date(t._dateSort + 'T' + timeStr + ':00').getTime() - Date.now();
-        if (diff <= 0) return '<span class="to-cd to-cd-live"><span class="to-cd-dot"></span>' + CL.live + '</span>';
-        if (diff > 48 * 60 * 60 * 1000) return '';
-        var urgent = diff < 60 * 60 * 1000 ? ' to-cd-urgent' : '';
-        return '<span class="to-cd' + urgent + '" data-cd-date="' + t._dateSort + '" data-cd-time="' + timeStr + '">' +
-            countdownParts(diff) + '</span>';
-    }
 
     function tick() {
         document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
@@ -144,10 +125,6 @@
     }
 
 
-    /** Парный или микст: заявку с двумя людьми собирают на странице турнира. */
-    function парный(t) {
-        return t._rawFormat === 'doubles' || t._rawFormat === 'mixed_doubles';
-    }
 
     /** Крупная карточка: ближайший турнир блока */
     function featured(t, bgImage) {
@@ -188,66 +165,23 @@
     }
 
     /** Полоса: всё, что не первое в блоке, и весь архив */
+    /**
+     * ПОЛОСА — ОДНО ТЕЛО, И ОНО В ДОМЕ `KSLT_TFEATURED` (кусок 162).
+     *
+     * Здесь было 61 строка разметки, слово в слово повторённая в
+     * `tournaments-overview.renderCompact` (65 строк). Общих блоков 13 из 14,
+     * css один — ВИД БЫЛ ОДИН, А ТЕЛА ДВА, и беда с адресом афиши в куске
+     * 158 родилась ровно на этом шве. Различия ушли ДОВОДАМИ.
+     *
+     * ДОМ ВЫБРАН ЦЕНОЙ ТЕГОВ: `tournament-featured.js` стоит на всех шести
+     * страницах турниров, этот файл — только на трёх. Ноль новых тегов.
+     */
     function compact(t, extraAttrs) {
-        // Афиша живого турнира — миниатюрой слева, у архивного остаётся фоном
-        // под сильным затемнением: там важнее компактность строки
-        var прошёл = t.status === 'past';
-        /* Миниатюра живого турнира — целая афиша, если она заведена.
-           У архивного афиша идёт фоном во всю строку: туда только
-           обрезанная, целую там нечем вписать */
-        var постер = прошёл ? t.image : (t.imageFull || t.image);
-        /* АДРЕС АФИШИ ЭКРАНИРУЕТСЯ: `)` и кавычка в нём закрывают и `url(`,
-           и сам атрибут. Признак сторожа это место не видел — поле положили
-           в ПЕРЕМЕННУЮ, а переменные он не отслеживает (их 397, число под
-           храповиком). Нашлось чтением при сборке пробы. */
-        var афиша = постер
-            ? (прошёл ? ' style="background-image:url(' + KSLT_экранировать(постер) + ')"'
-                      : ' style="--poster:url(' + KSLT_экранировать(постер) + ')"')
-            : '';
-
-        return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') + '"' +
-            (extraAttrs || '') +
-            ' data-status="' + t.status + '" data-gender="' + (t._gender || 'all') + '"' +
-            афиша + '>' +
-            /* ВХОД — НАСТОЯЩАЯ ССЫЛКА, А НЕ ОБРАБОТЧИК. Было
-               data-href плюс слушатель: ни новой вкладки, ни клавиатуры,
-               ни «ссылка» у диктора */
-            window.KSLT_TFEATURED.слойСсылки(detailPage + '?id=' + t.id, t.name) +
-            '<div class="to-compact-left">' +
-                /* СТАТУС НАД ДАТОЙ, в той же колонке, что и на странице
-                   турниров (js/tournaments-overview.js) — решение Кости
-                   28.09: «статусы у нас в одном месте должны быть».
-                   Здесь плашка стояла в блоке справа, снизу под кнопкой:
-                   одна и та же карточка в двух местах сайта показывала
-                   статус в двух разных углах */
-                '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
-                '<div class="to-compact-date">' +
-                    '<span class="to-day">' + t.date.day + '</span>' +
-                    '<span class="to-month">' + t.date.month + '</span>' +
-                '</div>' +
-                (t.genderLabel ? '<span class="to-compact-gender-badge">' + t.genderLabel + '</span>' : '') +
-                (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRating + '</span>' : '') +
-            '</div>' +
-            '<div class="to-compact-info">' +
-                '<h4>' + KSLT_экранировать(t.name) + '</h4>' +
-                '<div class="to-compact-sub">' +
-                    (t.location ? '<span>' + pinSvg + ' ' + KSLT_экранировать(t.location) + '</span>' : '') +
-                    (t.regLine ? '<span class="to-compact-reg">' + L.reg + ': ' + t.regLine + '</span>' : '') +
-                '</div>' +
-            '</div>' +
-            '<div class="to-compact-right">' +
-                // Запись прямо отсюда: раньше в боковой карточке был только
-                // статус «регистрация открыта», а записаться было негде —
-                // приходилось открывать турнир ради одной кнопки
-                (t._rawStatus === 'registration_open'
-                    ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
-                        // В парном нужен напарник — заявку собирают на странице
-                        // турнира, отсюда только ведём туда
-                        (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
-                    : '') +
-                countdown(t) +
-            '</div>' +
-        '</div>';
+        return window.KSLT_TFEATURED.полоса(t, {
+            href: detailPage + '?id=' + t.id,
+            атрибуты: ' data-status="' + t.status + '" data-gender="' +
+                (t._gender || 'all') + '"' + (extraAttrs || '')
+        });
     }
 
     /**
@@ -373,7 +307,6 @@
         featured: featured,
         compact: compact,
         grid: grid,
-        countdown: countdown,
         startTimer: startTimer,
         ячейка: ячейка,
         bindLinks: bindLinks,
