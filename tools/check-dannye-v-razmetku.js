@@ -156,7 +156,14 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/tournament-register.js', 'info.icon', 'значок окна, литерал зовущего'],
     ['js/tournament-register.js', 'opts.icon', 'значок окна, литерал зовущего'],
     ['js/dashboard.js', 's.title', 'шаги онбординга, свой объект (названо в 157)'],
-    /* ОДИННАДЦАТЬ ИМЁН СНЯТЫ КУСКОМ 167: десять держались на том, что роль
+    /* ЧЕТЫРНАДЦАТЬ ИМЁН СНЯТЫ КУСКОМ 168, И ВСЕ — ПОТОМУ ЧТО МЕСТО ПОЧИНЕНО,
+       А НЕ ПОТОМУ ЧТО ПРИЗНАК ПОУМНЕЛ. Цена и назначение платежа шли в
+       разметку сырыми в пятнадцати местах шести файлов; имена говорили «цена
+       — число» и «перечисление», а в схеме и `price`, и `purpose` —
+       ТЕКСТОВЫЕ столбцы: их пишет администратор. ИМЯ, ОБЪЯСНЯЮЩЕЕ ДЫРУ
+       РОДОМ ДАННЫХ, КОТОРОГО У НИХ НЕТ, — ЛОЖНОЕ ИМЯ.
+
+       ОДИННАДЦАТЬ ИМЁН СНЯТЫ КУСКОМ 167: десять держались на том, что роль
        шла в разметку из четырёх мест (теперь её отдаёт дом роли), одно — на
        том, что признак не узнавал словарь, взятый у дома (`var L = A.L`).
 
@@ -189,20 +196,12 @@ const НАЗВАННЫЕ_МЕСТА = [
 
     /* перечисление: код пишет туда только свой набор значений */
     ['js/admin/sections/bracket.js', 'reg.partner_gender', 'пол — перечисление'],
-    ['js/admin/sections/coaches.js', 'p.purpose', 'назначение платежа — перечисление'],
-    ['js/admin/sections/courts.js', 'p.purpose', 'назначение платежа — перечисление'],
     ['js/tournament-detail.js', 'match.status', 'состояние матча — перечисление'],
     ['js/tournament-featured.js', 't.status', 'состояние турнира — перечисление'],
     ['js/tournament-detail.js', 't.format', 'вид турнира — перечисление'],
     ['js/admin/sections/challenges.js', 'opts.country', 'код страны в свой список вариантов'],
 
     /* число */
-    ['js/coaches.js', 'c.price', 'цена — число'],
-    ['js/coaches.js', 'coach.price', 'цена — число'],
-    ['js/admin/sections/coaches.js', 'item.price', 'цена — число'],
-    ['js/admin/sections/courts.js', 't.price', 'цена — число'],
-    ['js/admin/sections/courts.js', 't0.price', 'цена — число'],
-    ['js/admin/sections/courts.js', 'ti.price', 'цена — число'],
     ['js/admin/sections/news.js', 'row.score', 'оценка — число'],
     ['js/home-partners.js', 'p.form', 'форма — массив из W и L, подпись экранирована внутри'],
 
@@ -221,8 +220,6 @@ const НАЗВАННЫЕ_МЕСТА = [
        разметку. Все прочитаны по местам. */
 
     /* перечисление: код пишет в столбец только свой набор значений */
-    ['js/admin/sections/coaches.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
-    ['js/admin/sections/courts.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
     ['js/admin/sections/settings.js', "statusClass [pr.status]", 'состояние сезона — перечисление в имени класса'],
     ['js/kslt-vaucher-blok.js', "состояние [в.status]", 'состояние ваучера — перечисление'],
     ['js/tournament-detail.js', "statusText [t.status]", 'состояние турнира — значение из словаря'],
@@ -257,10 +254,6 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/partners.js', "подпись [g.title]", 'название группы фильтра, литерал файла'],
 
     /* число */
-    ['js/coaches.js', "statsHtml [coach.price]", 'цена — число'],
-    ['js/courts.js', "priceText [ct.price]", 'цена — число'],
-    ['js/courts.js', "priceText [svc.price]", 'цена — число'],
-    ['js/services.js', "price [ch.price]", 'цена — число'],
     ['js/admin/sections/vouchers.js', "discountAmount [entity.price]", 'цена — число'],
 
     /* картинка новости: предпросмотр собран ЭКРАНИРОВАННЫМ адресом рядом,
@@ -350,7 +343,11 @@ const ЗАПЕРТЫЕ = [
     'js/admin/sections/tournaments.js', 'js/badge-celebration.js', 'js/umpire.js',
     /* ЗАПЕРТ КУСКОМ 167: роль уехала в дом, и словарь `var L = A.L` признак
        теперь узнаёт. 20 склеек. */
-    'js/admin/core/layout.js'
+    'js/admin/core/layout.js',
+    /* ЗАПЕРТЫ КУСКОМ 168: цена и назначение платежа экранированы в пятнадцати
+       местах шести файлов, и в этих двух не осталось ни дыр, ни имён.
+       116 склеек. */
+    'js/admin/sections/courts.js', 'js/courts.js'
 ];
 /* ЗАПИСЬ КУСКА 164 «три файла из шести запереть не удалось» ЗАКРЫТА куском
    165: правило 1 снято вместе со своим прибором, и файлы заперлись без

@@ -34,7 +34,9 @@ const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js'
                 /* кусок 166: значок награды и словарь по ключу-полю */
                 'js/players.js', 'js/admin/sections/notifications.js',
                 /* кусок 167: дом роли */
-                'js/kslt-dostup.js', 'js/admin/core/layout.js'];
+                'js/kslt-dostup.js', 'js/admin/core/layout.js',
+                /* кусок 168: цена и назначение платежа */
+                'js/admin/sections/coaches.js', 'js/coaches.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -256,6 +258,22 @@ const ОТКАТЫ = [
      "        else if (и.type === 'MemberExpression' && !и.computed &&\n                 ДОМА.indexOf(корень2(и)) !== -1) н.add(у.id.name);",
      "        else if (false) { /* знание отнято откатом */ }",
      'запертые файлы не отпираются'],
+
+    /* ── КУСОК 168: цена и назначение платежа ── */
+
+    /* ЦЕНА — ТЕКСТОВЫЙ СТОЛБЕЦ, И ЕЁ ЭКРАНИРОВАНИЕ ДЕРЖИТСЯ ПРАВИЛОМ.
+       Откат берёт НЕзапертый файл: в запертом упало бы правило запертых, а
+       не то, что отвечает за столбец. */
+    ['вернуть сырую цену тренера в разметку', 'js/coaches.js',
+     "' <strong>' + KSLT_экранировать(c.price) + '</strong> '",
+     "' <strong>' + c.price + '</strong> '",
+     'столбец, который пишет человек, не идёт в разметку мимо экранирования'],
+
+    /* НАЗНАЧЕНИЕ ПЛАТЕЖА ИДЁТ В ИМЯ КЛАССА, и кавычка там закрывает атрибут. */
+    ['вернуть сырое назначение платежа в имя класса', 'js/admin/sections/coaches.js',
+     "'<span class=\"ad-pay-badge ad-pay-purpose-' + A.esc(p.purpose) + '\">'",
+     "'<span class=\"ad-pay-badge ad-pay-purpose-' + p.purpose + '\">'",
+     'подстановка в атрибуте экранирована — кавычка там даёт обработчик'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',
      "    'use strict';",
