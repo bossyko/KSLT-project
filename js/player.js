@@ -675,7 +675,7 @@
         hero += '<div class="pp-info">';
         // ИМЯ ИГРОКА — ЗАГОЛОВОК ПЕРВОГО УРОВНЯ. Замер 09.10: h1 на странице
         // ноль, иерархия начиналась с h2, и диктор не находил названия экрана
-        hero += '<h1 class="pp-name">' + player.name + '</h1>';
+        hero += '<h1 class="pp-name">' + KSLT_экранировать(player.name) + '</h1>';
         // Карточка остаётся и после ухода человека: результаты и очки
         // принадлежат турнирам, где он играл. Но связи с учётной записью
         // больше нет — об этом и говорит метка
@@ -684,7 +684,8 @@
             hero += '<div class="pp-account-gone">' + goneText + '</div>';
         }
         hero += '<div class="pp-meta">';
-        if (player.country) hero += '<span class="pp-meta-country">' + CU.renderCountry(CU.normalizeCountry(player.country), lang, true) + '</span>';
+        if (player.country) hero += '<span class="pp-meta-country">' +
+            KSLT_экранировать(CU.renderCountry(CU.normalizeCountry(player.country), lang, true)) + '</span>';
         if (player.online) {
             hero += '<span class="pp-meta-online">' + L.online + '</span>';
         }
@@ -704,7 +705,7 @@
                 '</div>';
             });
         } else {
-            hero += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + cat.name + (rank ? ' \u00b7 #' + rank : '') + '</span></div>';
+            hero += '<div class="pp-rating-row"><span class="pp-rating-label">KSLT</span><span class="pp-rating-value">' + KSLT_экранировать(cat.name) + (rank ? ' \u00b7 #' + rank : '') + '</span></div>';
         }
         // NTRP теперь двумя числами: одиночный разряд и парные турниры.
         // Строку с подписями собирает общий свод правил — тот же, что в

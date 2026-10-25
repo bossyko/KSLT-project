@@ -196,9 +196,13 @@
            У архивного афиша идёт фоном во всю строку: туда только
            обрезанная, целую там нечем вписать */
         var постер = прошёл ? t.image : (t.imageFull || t.image);
+        /* АДРЕС АФИШИ ЭКРАНИРУЕТСЯ: `)` и кавычка в нём закрывают и `url(`,
+           и сам атрибут. Признак сторожа это место не видел — поле положили
+           в ПЕРЕМЕННУЮ, а переменные он не отслеживает (их 397, число под
+           храповиком). Нашлось чтением при сборке пробы. */
         var афиша = постер
-            ? (прошёл ? ' style="background-image:url(' + постер + ')"'
-                      : ' style="--poster:url(' + постер + ')"')
+            ? (прошёл ? ' style="background-image:url(' + KSLT_экранировать(постер) + ')"'
+                      : ' style="--poster:url(' + KSLT_экранировать(постер) + ')"')
             : '';
 
         return '<div class="to-compact ' + (прошёл ? 'to-compact-past' : 'to-compact-thumb') + '"' +
@@ -225,9 +229,9 @@
                 (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRating + '</span>' : '') +
             '</div>' +
             '<div class="to-compact-info">' +
-                '<h4>' + t.name + '</h4>' +
+                '<h4>' + KSLT_экранировать(t.name) + '</h4>' +
                 '<div class="to-compact-sub">' +
-                    (t.location ? '<span>' + pinSvg + ' ' + t.location + '</span>' : '') +
+                    (t.location ? '<span>' + pinSvg + ' ' + KSLT_экранировать(t.location) + '</span>' : '') +
                     (t.regLine ? '<span class="to-compact-reg">' + L.reg + ': ' + t.regLine + '</span>' : '') +
                 '</div>' +
             '</div>' +

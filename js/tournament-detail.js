@@ -600,7 +600,7 @@ function renderMatch(tournament, match, predOpts) {
     html += '<div class="td-match-player ' + p1Class + '">' +
         (p1.seed ? '<span class="td-seed">[' + p1.seed + ']</span>' : '<span class="td-seed"></span>') +
         (p1Grp ? '<span class="td-grp-label">' + p1Grp + '</span>' : '') +
-        '<span class="td-player-name">' + p1.name + '</span>';
+        '<span class="td-player-name">' + KSLT_экранировать(p1.name) + '</span>';
 
     if (match.status === 'live' && scores.length > 0) {
         // Live: show current score
@@ -618,7 +618,7 @@ function renderMatch(tournament, match, predOpts) {
     html += '<div class="td-match-player ' + p2Class + '">' +
         (p2.seed ? '<span class="td-seed">[' + p2.seed + ']</span>' : '<span class="td-seed"></span>') +
         (p2Grp ? '<span class="td-grp-label">' + p2Grp + '</span>' : '') +
-        '<span class="td-player-name">' + p2.name + '</span>';
+        '<span class="td-player-name">' + KSLT_экранировать(p2.name) + '</span>';
 
     if (match.status !== 'live') {
         scores.forEach(function(s) {
@@ -1217,7 +1217,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // Призовой фонд без суммы раньше показывался прочерком —
                     // будто данные потерялись. Нет суммы — нет и блока
                     (t.prize_fund ? '<div class="hero-stat">' +
-                        '<span class="hero-stat-value">' + t.prize_fund + '</span>' +
+                        '<span class="hero-stat-value">' + KSLT_экранировать(t.prize_fund) + '</span>' +
                         '<span class="hero-stat-label">' + L.prizeFund + '</span>' +
                     '</div>' : '') +
                     feeStat(t) +
@@ -3103,7 +3103,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     }
                     if (isRefused && alreadyRegistered.block_reason) {
                         btnHtml += '<div class="td-zapis-note">' +
-                            alreadyRegistered.block_reason + '</div>';
+                            KSLT_экранировать(alreadyRegistered.block_reason) + '</div>';
                     }
                     // Снять заявку — пока не проведена жеребьёвка. После неё игрок
                     // уже в сетке, снимает организатор. Правило «за 3 часа» и штраф — #29
@@ -3161,7 +3161,7 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         : new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.локаль);
                     var banReasonText = plRes.data.ban_reason
                         ? '<div class="td-zapis-note-pod">' +
-                            (KSLT_YAZYK.выбрать('Reason: ', 'Себеби: ', 'Причина: ')) + plRes.data.ban_reason + '</div>'
+                            (KSLT_YAZYK.выбрать('Reason: ', 'Себеби: ', 'Причина: ')) + KSLT_экранировать(plRes.data.ban_reason) + '</div>'
                         : '';
                     btnHtml += '<div class="td-zapis-plashka td-zapis-plashka-otkaz">' +
                         '<div class="td-zapis-plashka-title">' +

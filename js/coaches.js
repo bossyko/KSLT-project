@@ -508,7 +508,7 @@
             // Stats
             var statsHtml = '';
             if (c.experience) {
-                statsHtml += '<div class="co-card-stat"><div class="co-card-stat-num">' + c.experience + '</div><div class="co-card-stat-label">' + L.experience + '</div></div>';
+                statsHtml += '<div class="co-card-stat"><div class="co-card-stat-num">' + KSLT_экранировать(c.experience) + '</div><div class="co-card-stat-label">' + L.experience + '</div></div>';
             }
             if (c.students) {
                 statsHtml += '<div class="co-card-stat"><div class="co-card-stat-num">' + c.students + '+</div><div class="co-card-stat-label">' + L.students + '</div></div>';
@@ -529,7 +529,7 @@
                    своих полях, и ритм задаёт один `gap`. */
                 '<div class="co-card-body">' +
                     '<div class="co-card-name">' + KSLT_экранировать(c.name) + '</div>' +
-                    (c.specialization ? '<div class="co-card-spec">' + c.specialization + '</div>' : '') +
+                    (c.specialization ? '<div class="co-card-spec">' + KSLT_экранировать(c.specialization) + '</div>' : '') +
                     (c.shortDesc ? '<div class="co-card-desc">' + c.shortDesc + '</div>' : '') +
                     (statsHtml ? '<div class="co-card-stats">' + statsHtml + '</div>' : '') +
                     (c.price ? '<div class="co-card-price">' + L.priceFrom + ' <strong>' + c.price + '</strong> ' + L.priceCurrency + '</div>' : '') +
@@ -800,7 +800,7 @@
             '<div class="co-hero-content">' +
                 /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): имя тренера на ПУБЛИЧНОЙ странице. */
                 '<h1 class="co-hero-title">' + KSLT_экранировать(coach.name) + '</h1>' +
-                '<p class="co-hero-subtitle">' + coach.specialization + '</p>' +
+                '<p class="co-hero-subtitle">' + KSLT_экранировать(coach.specialization) + '</p>' +
             '</div>';
     }
 
@@ -830,17 +830,17 @@
             '<img src="' + KSLT_экранировать(coach.photo) + '" alt="' + KSLT_экранировать(coach.name) + '" class="co-detail-photo">' +
             '<div class="co-detail-info">' +
                 /* ВТОРОЙ `h1` СНЯТ 13.10 — та же правка, что на странице корта. */
-                '<div class="co-detail-title-row"><div class="co-detail-name">' + coach.name + '</div>' +
+                '<div class="co-detail-title-row"><div class="co-detail-name">' + KSLT_экранировать(coach.name) + '</div>' +
                 (coach._promoted ? '<span class="kslt-recommended-detail">' + L.recommendedBadge + '</span>' : '') +
                 '</div>' +
-                (coach.specialization ? '<div class="co-detail-spec">' + coach.specialization + '</div>' : '') +
-                (coach.court ? '<div class="co-detail-court"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + coach.court + coachMapLinks(coach) + '</div>' : '') +
+                (coach.specialization ? '<div class="co-detail-spec">' + KSLT_экранировать(coach.specialization) + '</div>' : '') +
+                (coach.court ? '<div class="co-detail-court"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + KSLT_экранировать(coach.court) + coachMapLinks(coach) + '</div>' : '') +
             '</div>' +
         '</div>';
 
         // Stats
         var statsHtml = '';
-        if (coach.experience) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.experience + '</div><div class="co-detail-stat-label">' + L.experienceFull + '</div></div>';
+        if (coach.experience) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + KSLT_экранировать(coach.experience) + '</div><div class="co-detail-stat-label">' + L.experienceFull + '</div></div>';
         if (coach.students) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.students + '+</div><div class="co-detail-stat-label">' + L.students + '</div></div>';
         if (coach.rating) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.rating + '</div><div class="co-detail-stat-label">' + L.rating + '</div></div>';
         if (coach.price) statsHtml += '<div class="co-detail-stat"><div class="co-detail-stat-num">' + coach.price + '</div><div class="co-detail-stat-label">' + L.priceCurrency + '</div></div>';
@@ -873,7 +873,7 @@
         if (coach.bio) {
             html += '<div class="co-section co-fade-in">' +
                 '<h2 class="co-section-title">' + L.bioTitle + '</h2>' +
-                '<p class="co-bio-text">' + coach.bio + '</p>' +
+                '<p class="co-bio-text">' + KSLT_экранировать(coach.bio) + '</p>' +
             '</div>';
         }
 
@@ -917,8 +917,8 @@
                 for (var ss = 0; ss < r.rating; ss++) stars += '★';
                 html += '<div class="co-review-card">' +
                     '<div class="co-review-stars">' + stars + '</div>' +
-                    '<div class="co-review-text">"' + r.text + '"</div>' +
-                    '<div class="co-review-author">— ' + r.author + '</div>' +
+                    '<div class="co-review-text">"' + KSLT_экранировать(r.text) + '"</div>' +
+                    '<div class="co-review-author">— ' + KSLT_экранировать(r.author) + '</div>' +
                 '</div>';
             });
             html += '</div></div>';

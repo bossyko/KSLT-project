@@ -100,7 +100,7 @@
         var diff = target.getTime() - Date.now();
         if (diff <= 0 || diff > 48 * 3600 * 1000) return '';
         return '<span class="tc-countdown" data-cd="' + t.date_start + 'T' +
-               (t.start_time || '00:00') + '">' + countdownText(diff) + '</span>';
+               KSLT_экранировать(t.start_time || '00:00') + '">' + countdownText(diff) + '</span>';
     }
 
     function countdownText(diff) {

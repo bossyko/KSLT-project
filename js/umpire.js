@@ -639,7 +639,7 @@
         var winnerHtml = '';
         if (isCompleted) {
             var winnerName = state.winner_player === 1 ? p1Name : p2Name;
-            winnerHtml = '<div class="um-winner">' + KSLT_экранировать(winnerName) + ' побеждает! ' + state.final_score + '</div>';
+            winnerHtml = '<div class="um-winner">' + KSLT_экранировать(winnerName) + ' побеждает! ' + KSLT_экранировать(state.final_score) + '</div>';
         }
 
         app.innerHTML =

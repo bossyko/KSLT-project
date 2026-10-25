@@ -533,7 +533,7 @@ function renderHero(article, readTime) {
                 '</span>' +
                 '<span class="news-meta-item">' +
                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' +
-                    article.author +
+                    KSLT_экранировать(article.author) +
                 '</span>' +
                 '<span class="news-meta-item">' +
                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' +
@@ -908,7 +908,7 @@ function renderBlock(block, index) {
             return '<div class="news-html">' + block.html + '</div>';
 
         case 'paragraph':
-            return '<p class="news-paragraph news-animate" style="' + style + '">' + block.text + '</p>';
+            return '<p class="news-paragraph news-animate" style="' + style + '">' + KSLT_экранировать(block.text) + '</p>';
 
         case 'heading':
             var tag = block.level === 3 ? 'h3' : 'h2';
@@ -924,11 +924,12 @@ function renderBlock(block, index) {
             return '<blockquote class="news-quote news-animate" style="' + style + '">' +
                 '<div class="news-quote-body">' +
                     '<svg class="news-quote-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>' +
-                    '<p>' + block.text + '</p>' +
+                    '<p>' + KSLT_экранировать(block.text) + '</p>' +
                 '</div>' +
                 '<div class="news-quote-author">' +
                     (block.photo ? '<img src="' + KSLT_экранировать(block.photo) + '" alt="' + KSLT_экранировать(block.author) + '">' : '') +
-                    '<span>' + block.author + (block.country ? ' ' + block.country : '') + '</span>' +
+                    '<span>' + KSLT_экранировать(block.author) +
+                    (block.country ? ' ' + KSLT_экранировать(block.country) : '') + '</span>' +
                 '</div>' +
             '</blockquote>';
 
@@ -936,8 +937,8 @@ function renderBlock(block, index) {
             var statsHtml = '<div class="news-stats news-animate" style="' + style + '">';
             block.items.forEach(function(item) {
                 statsHtml += '<div class="news-stat-item">' +
-                    '<span class="news-stat-value">' + item.value + '</span>' +
-                    '<span class="news-stat-label">' + item.label + '</span>' +
+                    '<span class="news-stat-value">' + KSLT_экранировать(item.value) + '</span>' +
+                    '<span class="news-stat-label">' + KSLT_экранировать(item.label) + '</span>' +
                 '</div>';
             });
             statsHtml += '</div>';
@@ -952,8 +953,8 @@ function renderBlock(block, index) {
             return listHtml;
 
         case 'poll':
-            return '<div class="news-poll news-animate" id="newsPoll" data-question="' + block.question + '" style="' + style + '">' +
-                '<div class="news-poll-question">' + block.question + '</div>' +
+            return '<div class="news-poll news-animate" id="newsPoll" data-question="' + KSLT_экранировать(block.question) + '" style="' + style + '">' +
+                '<div class="news-poll-question">' + KSLT_экранировать(block.question) + '</div>' +
                 '<div class="news-poll-options" id="pollOptions">' +
                     block.options.map(function(opt, i) {
                         return '<button class="news-poll-option" data-index="' + i + '">' + opt + '</button>';
@@ -986,7 +987,7 @@ function renderTags(article) {
     var labels = getLabels();
     var html = '<h3 class="news-section-title">' + labels.tagsTitle + '</h3><div class="news-tags-list">';
     article.tags.forEach(function(tag) {
-        html += '<a href="#" class="news-tag">' + tag.label + '</a>';
+        html += '<a href="#" class="news-tag">' + KSLT_экранировать(tag.label) + '</a>';
     });
     html += '</div>';
     container.innerHTML = html;
@@ -1317,7 +1318,7 @@ function renderRelated(article) {
                    что в шапке статьи: один и тот же запасной ход. */
                 '<span class="news-related-category news-category-' + KSLT_экранировать(rel.category) + '">' +
                     KSLT_экранировать(rel.categoryLabel) + '</span>' +
-                '<h3>' + rel.title + '</h3>' +
+                '<h3>' + KSLT_экранировать(rel.title) + '</h3>' +
                 '<span class="news-related-date">' + rel.date + '</span>' +
             '</div>' +
         '</a>';
@@ -1462,7 +1463,7 @@ function renderNewsList() {
         var пункты = '';
         всеКатегории.forEach(function(c) {
             пункты += '<button class="f-dd-item news-filter-btn' + (c.key === currentFilter ? ' active' : '') +
-                '" data-cat="' + c.key + '" data-dd-value="' + c.key + '">' + c.label + '</button>';
+                '" data-cat="' + c.key + '" data-dd-value="' + c.key + '">' + KSLT_экранировать(c.label) + '</button>';
         });
 
         return '<div class="f-dd" data-dd="category">' +

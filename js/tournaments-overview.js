@@ -655,7 +655,7 @@
 
             html += '<div class="to-category-block" data-cat="' + cat.key + '">';
             html += '<div class="to-category-header">';
-            html += '<h2 class="to-category-title">' + cat.name + '</h2>';
+            html += '<h2 class="to-category-title">' + KSLT_экранировать(cat.name) + '</h2>';
             html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
             html += '</div>';
 
@@ -901,9 +901,9 @@
                 (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRating + '</span>' : '') +
             '</div>' +
             '<div class="to-compact-info">' +
-                '<h4>' + t.name + '</h4>' +
+                '<h4>' + KSLT_экранировать(t.name) + '</h4>' +
                 '<div class="to-compact-sub">' +
-                    '<span>' + pinSvg + ' ' + t.location + '</span>' +
+                    '<span>' + pinSvg + ' ' + KSLT_экранировать(t.location) + '</span>' +
                     (t.regLine ? '<span class="to-compact-reg">' + (KSLT_YAZYK.выбрать('Reg: ', 'Кат: ', 'Рег: ')) + t.regLine + '</span>' : '') +
                     (t.slots ? '<span class="to-compact-slots' + (t.slots.tight ? ' to-slots-tight' : '') + '">' + t.slots.text + '</span>' : '') +
                 '</div>' +
@@ -988,7 +988,7 @@
 
             html += '<div class="to-category-block" data-cat="' + cat.key + '">';
             html += '<div class="to-category-header">';
-            html += '<h2 class="to-category-title">' + cat.name + '</h2>';
+            html += '<h2 class="to-category-title">' + KSLT_экранировать(cat.name) + '</h2>';
             html += '<a href="' + tournamentsPage + '?category=' + cat.key + '" class="to-view-all">' + L.viewAll + ' ' + arrowSvg + '</a>';
             html += '</div>';
 

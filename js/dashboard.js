@@ -2275,7 +2275,7 @@
         return '<div class="db-inv-contacts">' +
             (cn.full_name ? '<div class="db-inv-contacts-name">' + KSLT_экранировать(cn.full_name) + '</div>' : '') +
             rows.map(function(r) {
-                return '<a class="db-inv-contact db-inv-contact--' + r[3] + '" href="' + r[2] + '" target="_blank" rel="noopener">' +
+                return '<a class="db-inv-contact db-inv-contact--' + r[3] + '" href="' + KSLT_экранировать(r[2]) + '" target="_blank" rel="noopener">' +
                     '<span class="db-inv-contact-label">' + r[0] + '</span>' +
                     '<span>' + r[1] + '</span></a>';
             }).join('') +
@@ -4484,7 +4484,7 @@
         var actions = (opts.actions || []).map(function(a, i) {
             var cls = a.danger ? 'db-btn-danger' : (a.primary ? 'db-btn-primary' : 'db-btn-outline');
             return '<button type="button" class="db-btn ' + cls +
-                   '" data-act="' + i + '">' + a.label + '</button>';
+                   '" data-act="' + i + '">' + KSLT_экранировать(a.label) + '</button>';
         }).join('');
 
         // ОКНО НАЗЫВАЕТ СЕБЯ ЗАГОЛОВКОМ. Замер 11.10: role и aria-modal
@@ -6074,7 +6074,7 @@
                     '<div class="db-redeem-item-title">' + dbEsc(title) + '</div>' +
                     '<div class="db-redeem-item-cost">' + rw.cost + ' ' + L.loyPoints + '</div>' +
                 '</div>' +
-                '<button class="db-loy-redeem-item' + (canRedeem ? '' : ' is-off') + '" data-rwid="' + rw.id + '" data-rwcost="' + rw.cost + '" data-rwcode="' + rw.code + '"' +
+                '<button class="db-loy-redeem-item' + (canRedeem ? '' : ' is-off') + '" data-rwid="' + rw.id + '" data-rwcost="' + rw.cost + '" data-rwcode="' + KSLT_экранировать(rw.code) + '"' +
                     (!canRedeem ? ' disabled' : '') + '>' + L.loyRedeemBtn + '</button>' +
             '</div>';
         });

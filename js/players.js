@@ -464,7 +464,7 @@
                    ложилось в две строки. Теперь имя и очки лежат ВНУТРИ
                    тумбы, а лесенку держит её верхнее поле. */
                 '<div class="pl-podium-base">' +
-                    '<div class="pl-podium-name">' + p.name + '</div>' +
+                    '<div class="pl-podium-name">' + KSLT_экранировать(p.name) + '</div>' +
                     '<div class="pl-podium-points">' + p.points.toLocaleString() + ' ' + подписьОчков() + '</div>' +
                     (badgesHtml ? '<div class="pl-podium-badges">' + badgesHtml + '</div>' : '') +
                 '</div>' +
@@ -521,7 +521,7 @@
         html += '<div class="pl-category-pills" id="categoryPills">';
         var cats = currentGender === 'men' ? menCats : womenCats;
         for (var i = 0; i < cats.length; i++) {
-            html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '" aria-pressed="' + (cats[i].key === currentTab) + '">' + cats[i].name + '</button>';
+            html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '" aria-pressed="' + (cats[i].key === currentTab) + '">' + KSLT_экранировать(cats[i].name) + '</button>';
         }
         html += '</div>';
         var playersPage = isEnPage() ? 'players-en.html' : (isKgPage() ? 'players-kg.html' : 'players.html');
@@ -631,7 +631,7 @@
 
             var badgesHtml = getPlayerBadgesHtml(p.id, 3);
 
-            var catLabel = isSearchMode ? '<span class="pl-player-category">' + item.categoryName + '</span>' : '';
+            var catLabel = isSearchMode ? '<span class="pl-player-category">' + KSLT_экранировать(item.categoryName) + '</span>' : '';
 
             var pForm = p.form || [];
             var formHtml = '';
@@ -667,8 +667,8 @@
                     '<div class="pl-player-info">' +
                         '<div class="pl-player-name-row">' +
                             (isGuest
-                                ? '<a href="#" class="pl-player-name" data-guest-profile="1">' + p.name + '</a>'
-                                : '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + p.name + '</a>') +
+                                ? '<a href="#" class="pl-player-name" data-guest-profile="1">' + KSLT_экранировать(p.name) + '</a>'
+                                : '<a href="' + (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id + '" class="pl-player-name">' + KSLT_экранировать(p.name) + '</a>') +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
                             (isBg ? '<span class="pl-guest-mark" title="' +
                                 (isEnPage() ? 'In the club database, membership not paid' : (isKgPage() ? 'Клубдун базасында бар, мүчөлүк төлөнгөн эмес' : 'Есть в базе клуба, членство не оплачено')) + '">' +
@@ -678,7 +678,7 @@
                         catLabel +
                     '</div>' +
                 '</div>' +
-                '<span class="pl-col-country">' + p.country + '</span>' +
+                '<span class="pl-col-country">' + KSLT_экранировать(p.country) + '</span>' +
                 '<span class="pl-col-ntrp">' + ntrpЯчейка(p) + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
@@ -1047,7 +1047,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<span class="pl-col-country">' + (p.country || '') + '</span>' +
+                '<span class="pl-col-country">' + KSLT_экранировать(p.country || '') + '</span>' +
                 '<span class="pl-col-ntrp">' + ntrpЯчейка(p) + '</span>' +
                 '<span class="pl-col-points">' + p.points.toLocaleString() + '</span>' +
                 '<span class="pl-col-record">' + p.wins + '/' + p.losses + '</span>' +
