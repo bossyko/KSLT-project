@@ -1227,7 +1227,7 @@
                 html += '<span class="pp-match-opponent-name">' + KSLT_экранировать(opp.name) + '</span>';
             }
             html += '</div>';
-            html += '<div class="pp-match-score">' + displayScore + '</div>';
+            html += '<div class="pp-match-score">' + KSLT_экранировать(displayScore) + '</div>';
             html += '<div class="pp-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</div>';
             if (!pairGame) html += '<button class="pp-match-h2h" title="Head to Head">H2H</button>';
             html += '</div>';
@@ -1703,7 +1703,7 @@
             html += '<span class="h2h-match-date">' + formatMatchDate(m.played_at) + '</span>';
             html += '<span class="h2h-match-tournament"><span class="h2h-tname">' + KSLT_экранировать(tName) +
                 '</span>' + matchKindTag(m) + '</span>';
-            html += '<span class="h2h-match-score">' + displayScore + '</span>';
+            html += '<span class="h2h-match-score">' + KSLT_экранировать(displayScore) + '</span>';
             html += '<span class="h2h-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + (result === 'W' ? L.win : L.loss) + '</span>';
             html += '</div>';
         });

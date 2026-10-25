@@ -127,8 +127,8 @@
                 pt1 = m.points_p1 || '0';
                 pt2 = m.points_p2 || '0';
             }
-            setsP1Html += '<div class="sb-pts-val">' + pt1 + '</div>';
-            setsP2Html += '<div class="sb-pts-val">' + pt2 + '</div>';
+            setsP1Html += '<div class="sb-pts-val">' + KSLT_экранировать(pt1) + '</div>';
+            setsP2Html += '<div class="sb-pts-val">' + KSLT_экранировать(pt2) + '</div>';
         }
 
         /* ТОЧКА, А НЕ ЭМОДЗИ: встроенный браузер OBS рисует `🎾` своим

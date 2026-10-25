@@ -875,7 +875,7 @@
            3:4 вписывает её через background-size: contain. Старые турниры
            целой не имеют — им остаётся обрезанная, как было */
         var постер = t.imageFull || t.image;
-        var афиша = постер ? ' style="--poster:url(' + постер + ')"' : '';
+        var афиша = постер ? ' style="--poster:url(' + KSLT_экранировать(постер) + ')"' : '';
 
         return '<div class="to-compact to-compact-thumb' + (прошёл ? ' to-compact-past' : '') +
             '" data-cat="' + catKey + '" data-idx="' + idx + '"' +

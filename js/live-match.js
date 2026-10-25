@@ -265,8 +265,8 @@
             var pt1, pt2;
             if (m.is_tiebreak) { pt1 = m.tiebreak_p1 || 0; pt2 = m.tiebreak_p2 || 0; }
             else               { pt1 = m.points_p1 || '0'; pt2 = m.points_p2 || '0'; }
-            p1SetsHtml += '<div class="lm-points-score">' + pt1 + '</div>';
-            p2SetsHtml += '<div class="lm-points-score">' + pt2 + '</div>';
+            p1SetsHtml += '<div class="lm-points-score">' + KSLT_экранировать(pt1) + '</div>';
+            p2SetsHtml += '<div class="lm-points-score">' + KSLT_экранировать(pt2) + '</div>';
         }
 
         var servingName = m.serving_player === 1 ? p1Name : m.serving_player === 2 ? p2Name : null;

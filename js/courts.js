@@ -1076,7 +1076,7 @@
             '<div class="ct-hero-content">' +
                 /* ЭКРАНИРУЮТСЯ ДАННЫЕ (157): название корта на ПУБЛИЧНОЙ странице. */
                 '<h1 class="ct-hero-title">' + KSLT_экранировать(court.name) + '</h1>' +
-                '<p class="ct-hero-subtitle">' + subtitle + '</p>' +
+                '<p class="ct-hero-subtitle">' + KSLT_экранировать(subtitle) + '</p>' +
             '</div>';
     }
 

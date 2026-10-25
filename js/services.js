@@ -465,7 +465,7 @@
 
         return '<a class="sv-featured" href="' + href + '">' +
             (photo
-                ? '<div class="sv-featured-bg"><img src="' + photo + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>'
+                ? '<div class="sv-featured-bg"><img src="' + KSLT_экранировать(photo) + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>'
                 : '<div class="sv-featured-overlay" style="background:var(--bg-card)"></div>') +
             discountHtml +
             '<div class="sv-featured-content">' +
@@ -495,17 +495,17 @@
 
         return '<a class="sv-featured" href="' + href + '">' +
             (photo
-                ? '<div class="sv-featured-bg"><img src="' + photo + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>'
+                ? '<div class="sv-featured-bg"><img src="' + KSLT_экранировать(photo) + '" alt="" loading="lazy"></div><div class="sv-featured-overlay"></div>'
                 : '<div class="sv-featured-overlay" style="background:var(--bg-card)"></div>') +
             discountHtml +
             '<div class="sv-featured-content">' +
-                (photo ? '<img class="sv-coach-avatar" src="' + photo + '" alt="" loading="lazy">' : '') +
+                (photo ? '<img class="sv-coach-avatar" src="' + KSLT_экранировать(photo) + '" alt="" loading="lazy">' : '') +
                 '<h3>' + name + '</h3>' +
                 '<div class="sv-featured-meta">' +
                     (spec ? '<span>' + spec + '</span>' : '') +
                 '</div>' +
                 '<div class="sv-featured-details">' +
-                    (exp ? '<div class="sv-featured-detail"><span class="sv-label">' + L.experience + '</span><span class="sv-value">' + exp + '</span></div>' : '') +
+                    (exp ? '<div class="sv-featured-detail"><span class="sv-label">' + L.experience + '</span><span class="sv-value">' + KSLT_экранировать(exp) + '</span></div>' : '') +
                     (level ? '<div class="sv-featured-detail"><span class="sv-label">' + L.level + '</span><span class="sv-value">' + level + '</span></div>' : '') +
                     (price ? '<div class="sv-featured-detail"><span class="sv-label">' + L.price + '</span><span class="sv-value accent">' + price + '</span></div>' : '') +
                 '</div>' +
@@ -552,7 +552,7 @@
             ' data-type="coaches" data-idx="' + idx + '">' +
             '<div class="sv-compact-img-wrap">' +
                 (photo
-                    ? '<img class="sv-compact-avatar" src="' + photo + '" alt="" loading="lazy">'
+                    ? '<img class="sv-compact-avatar" src="' + KSLT_экранировать(photo) + '" alt="" loading="lazy">'
                     : '<div class="sv-compact-icon">' + courtSvg + '</div>') +
                 discountSm +
             '</div>' +

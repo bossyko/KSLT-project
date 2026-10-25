@@ -5176,7 +5176,7 @@
             (catsHtml ||
                 '<div class="db-card db-card-line">' +
                     '<span class="db-card-line-label">' + L.category + '</span>' +
-                    '<span class="db-card-line-value">' + catName + '</span>' +
+                    '<span class="db-card-line-value">' + KSLT_экранировать(catName) + '</span>' +
                 '</div>') +
             pairBlocksHtml(p) +
             '<div id="dbRatingChartWrap" style="display:none;">' +

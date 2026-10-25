@@ -664,7 +664,7 @@
                 (closed
                     ? '<div class="ch-voting-closed-badge">' + L.votingClosed + '</div>'
                     : (matchDate && matchTime
-                        ? '<div class="ch-voting-until">' + L.votingUntil + ' ' + matchDate + ' ' + matchTime + '</div>'
+                        ? '<div class="ch-voting-until">' + L.votingUntil + ' ' + matchDate + ' ' + KSLT_экранировать(matchTime) + '</div>'
                         : '')) +
                 (!_userId && !closed ? '<div class="ch-voting-login"><a href="' + (KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html')) + '">' + L.loginToVote + '</a></div>' : '') +
                 '<div id="voteStatus">' + votedBadgeHtml + '</div>' +
