@@ -90,7 +90,8 @@
             '<div class="ach-fx balls">' + balls(26) + '</div>' +
             '<div class="ach-halo"></div>' +
             '<div class="ach-kicker">' + L.kicker + '</div>' +
-            '<div class="ach-emoji">' + (b.icon || '🏅') + '</div>' +
+            /* Значок — текстовый столбец базы, экранируется как имя рядом. */
+            '<div class="ach-emoji">' + window.KSLT_экранировать(b.icon || '🏅') + '</div>' +
             '<div class="ach-name"></div>' +
             '<div class="ach-desc"></div>' +
             '<button class="ach-btn" type="button">' + (left ? L.next : L.done) + '</button>' +

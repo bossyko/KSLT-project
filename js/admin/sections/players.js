@@ -2143,7 +2143,8 @@
                 var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString() : '';
 
                 html += '<tr>';
-                html += '<td style="font-size:var(--fs-lg);text-align:center;width:40px;">' + def.icon + '</td>';
+                /* Имя рядом экранировано с самого начала, значок — нет. */
+                html += '<td style="font-size:var(--fs-lg);text-align:center;width:40px;">' + A.esc(def.icon) + '</td>';
                 html += '<td style="font-weight:500;">' + A.esc(name) + '</td>';
                 html += '<td style="color:var(--text-muted);font-size:var(--fs-sm);">' + dateStr + '</td>';
                 // Вычисляемые значки ведёт расчёт: снимать их вручную
@@ -2190,7 +2191,7 @@
                 manualDefs.forEach(function(d) {
                     var has = !!earnedMap[d.id];
                     optionsHtml += '<option value="' + d.id + '"' + (has ? ' disabled' : '') + '>' +
-                        d.icon + ' ' + A.esc(badgeName(d)) + (has ? ' \u00b7 ' + haveLabel : '') + '</option>';
+                        A.esc(d.icon) + ' ' + A.esc(badgeName(d)) + (has ? ' \u00b7 ' + haveLabel : '') + '</option>';
                 });
                 optionsHtml += '</optgroup>';
             }
@@ -2200,7 +2201,7 @@
                 autoDefs.forEach(function(d) {
                     var has = !!earnedMap[d.id];
                     optionsHtml += '<option value="' + d.id + '" disabled>' +
-                        d.icon + ' ' + A.esc(badgeName(d)) + (has ? ' \u00b7 ' + haveLabel : '') + '</option>';
+                        A.esc(d.icon) + ' ' + A.esc(badgeName(d)) + (has ? ' \u00b7 ' + haveLabel : '') + '</option>';
                 });
                 optionsHtml += '</optgroup>';
             }

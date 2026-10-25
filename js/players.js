@@ -199,7 +199,11 @@
         var show = badges.slice(0, maxCount || 5);
         for (var i = 0; i < show.length; i++) {
             var b = show[i];
-            html += '<span class="pl-badge" title="' + KSLT_экранировать(getBadgeTooltip(b.badge_id)) + '">' + (b.icon || '') + '</span>';
+            /* ЗНАЧОК ЭКРАНИРУЕТСЯ НАРАВНЕ С ПОДПИСЬЮ. Подпись здесь
+               экранировали с самого начала, а значок — нет, хотя
+               `badge_definitions.icon` такой же текстовый столбец, который
+               пишет человек. ЭКРАНИРОВАНИЕ ПО УМОЛЧАНИЮ, А НЕ ПО ЖЕЛАНИЮ. */
+            html += '<span class="pl-badge" title="' + KSLT_экранировать(getBadgeTooltip(b.badge_id)) + '">' + KSLT_экранировать(b.icon || '') + '</span>';
         }
         return html;
     }
