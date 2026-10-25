@@ -165,7 +165,8 @@ const КУСКИ = [
     ['публикация турнира', 'check-publikaciya-turnira.js', 'check-publikaciya-turnira-otkat.js'],
     ['случайный порядок и дома', 'check-sluchaynyy-poryadok.js', 'check-sluchaynyy-poryadok-otkat.js'],
     ['оснастка окон', 'check-osnastka-okon.js', 'check-osnastka-okon-otkat.js'],
-    ['данные в разметке', 'check-dannye-v-razmetku.js', 'check-dannye-v-razmetku-otkat.js']
+    ['данные в разметке', 'check-dannye-v-razmetku.js', 'check-dannye-v-razmetku-otkat.js'],
+    ['отсчёт до начала', 'check-otschet.js', 'check-otschet-otkat.js']
 ];
 
 function прогнать(файл) {
