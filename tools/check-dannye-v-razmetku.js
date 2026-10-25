@@ -354,7 +354,63 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/kslt-video.js', 'а.src', 'адрес собран из литерала и группы [\\w-]'],
 
     /* свой признак устройства, не поле */
-    ['js/dashboard.js', 'у.user_agent', 'значокУстройства отдаёт один из трёх знаков']
+    ['js/dashboard.js', 'у.user_agent', 'значокУстройства отдаёт один из трёх знаков'],
+
+    /* ── КУСОК 159: места, которые признак увидел, РАЗВЕРНУВ ПЕРЕМЕННЫЕ ──
+       Запись места — «имя [что в нём лежит]», и место названо ПО ПОДСТАНОВКЕ,
+       а не по присваиванию: править надо там, где переменная входит в
+       разметку. Все прочитаны по местам. */
+
+    /* перечисление: код пишет в столбец только свой набор значений */
+    ['js/admin/core/layout.js', "roleLabel [profile.role]", 'роль — перечисление, значение из словаря L'],
+    ['js/admin/core/layout.js', "roleClass [u.role]", 'роль — перечисление, идёт в имя класса'],
+    ['js/admin/core/layout.js', "roleLabel [u.role]", 'роль — перечисление, значение из словаря L'],
+    ['js/admin/sections/users.js', "roleLabel [u.role]", 'роль — перечисление, значение из словаря L'],
+    ['js/admin/sections/users.js', "roleBadge [u.role]", 'роль — перечисление, идёт в имя класса'],
+    ['js/admin/sections/coaches.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
+    ['js/admin/sections/courts.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
+    ['js/admin/sections/settings.js', "statusClass [pr.status]", 'состояние сезона — перечисление в имени класса'],
+    ['js/admin/sections/tournaments.js', "trnStatusBadgeLabel [item.status]", 'состояние турнира — запасной ход экранирован'],
+    ['js/admin/sections/users.js', "п [z.status]", 'состояние заявки — запасной ход экранирован'],
+    ['js/dashboard.js', "roleHtml [profile.role]", 'роль — перечисление'],
+    ['js/kslt-vaucher-blok.js', "состояние [в.status]", 'состояние ваучера — перечисление'],
+    ['js/tournament-detail.js', "statusClass [t.status]", 'состояние турнира — перечисление в имени класса'],
+    ['js/tournament-detail.js', "statusText [t.status]", 'состояние турнира — значение из словаря'],
+    ['js/tournament-detail.js', "подписьСтатуса [alreadyRegistered.status]", 'состояние заявки — значение из словаря'],
+    ['js/admin/sections/news.js', "catLabel [a.category]", 'раздел новости — запасной ход экранирован'],
+    ['js/admin/sections/news.js', "info [row.reaction_type]", 'вид реакции — ключ в свой словарь EMOJI_MAP'],
+
+    /* ЧИСТИТСЯ ПО ДОРОГЕ, и каждая чистка прочитана по телу:
+       parseSets/extractOutcome берут исход ТОЛЬКО из MATCH_OUTCOMES, а счёт —
+       из групп `(\d+)`; extractYoutubeId — из группы `[a-zA-Z0-9_-]{11}`;
+       getPointDisplay отдаёт 0/15/30/40/AD; levelLabel — значение словаря;
+       userGenderToCategory — men, women или null. */
+    ['js/admin/sections/bracket.js', "setData [match.score]", 'исход только из MATCH_OUTCOMES, счёт из групп цифр'],
+    ['js/admin/sections/bracket.js', "tSetData [thirdMatch.score]", 'исход только из MATCH_OUTCOMES, счёт из групп цифр'],
+    ['js/admin/sections/challenges.js', "sv [challenge.score_draft]", 'счёт разбирается в числа через parseInt'],
+    ['js/live-match.js', "ytId [m.youtube_url]", 'извлечено группой [a-zA-Z0-9_-]{11}'],
+    ['js/live-match.js', "videoHtml [m.youtube_url]", 'извлечено группой [a-zA-Z0-9_-]{11}'],
+    ['js/live-match.js', "leftHtml [m.youtube_url]", 'извлечено группой [a-zA-Z0-9_-]{11}'],
+    ['js/umpire.js', "pts [state.points_p1]", 'getPointDisplay отдаёт 0/15/30/40/AD'],
+    ['js/umpire.js', "pts [state.points_p2]", 'getPointDisplay отдаёт 0/15/30/40/AD'],
+    ['js/services.js', "playLevel [p.play_level]", 'levelLabel отдаёт значение своего словаря'],
+    ['js/admin/sections/users.js', "catOpts [user.gender]", 'userGenderToCategory отдаёт men, women или null'],
+    ['js/admin/sections/users.js', "playerCatHtml [user.gender]", 'userGenderToCategory отдаёт men, women или null'],
+
+    /* словарь или своё перечисление */
+    ['js/coaches.js', "подпись [g.title]", 'название группы фильтра, литерал файла'],
+    ['js/partners.js', "подпись [g.title]", 'название группы фильтра, литерал файла'],
+
+    /* число */
+    ['js/coaches.js', "statsHtml [coach.price]", 'цена — число'],
+    ['js/courts.js', "priceText [ct.price]", 'цена — число'],
+    ['js/courts.js', "priceText [svc.price]", 'цена — число'],
+    ['js/services.js', "price [ch.price]", 'цена — число'],
+    ['js/admin/sections/vouchers.js', "discountAmount [entity.price]", 'цена — число'],
+
+    /* картинка новости: предпросмотр собран ЭКРАНИРОВАННЫМ адресом рядом,
+       прочитано по месту — в разметку идёт значение из той же строки */
+    ['js/admin/sections/news.js', "imagePreviewHtml [article.image]", 'предпросмотр собран экранированным адресом']
 ];
 function названо(метка) {
     const файл = метка.split(':')[0];
@@ -409,15 +465,15 @@ const вАтрибуте158 = П.вАтрибуте.filter(м => !названо
     '«безопасно», потому что `h` — переменная.');
 правило(
     'зовов своих функций внутри склеек с разметкой не больше замеренного',
-    П.зовы <= 377,
-    'Таких зовов ' + П.зовы + ', замерено не больше 377.\n' +
+    П.зовы <= 376,
+    'Таких зовов ' + П.зовы + ', замерено не больше 376.\n' +
     'ЗОВ СВОЕЙ ФУНКЦИИ — НЕ ПОДСТАНОВКА, ПОКА НЕ ПРОЧИТАНО ЕЁ ТЕЛО:\n' +
     'шесть переходников экранируют своё внутри, и признак это выводит\n' +
     'по ДОВОДАМ. Остальные под этим числом.');
 правило(
     'голых переменных в склейках с разметкой не больше замеренного',
-    П.переменных <= 1554,
-    'Голых переменных ' + П.переменных + ', замерено не больше 1554.\n' +
+    П.переменных <= 1527,
+    'Голых переменных ' + П.переменных + ', замерено не больше 1527.\n' +
     'ПЕРЕМЕННАЯ, В КОТОРУЮ ПОЛОЖИЛИ ПОЛЕ, ДЛЯ ПРИЗНАКА НЕВИДИМА: так адрес\n' +
     'афиши турнира попал в `style="…url(` мимо экранирования — поле положили\n' +
     'в `постер`, и признак увидел переменную, а не столбец. Нашлось чтением\n' +

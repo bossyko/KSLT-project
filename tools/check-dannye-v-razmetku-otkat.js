@@ -21,7 +21,7 @@ fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
 
 const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js',
                 'js/tournament-detail.js', 'js/kslt-vremya.js', 'js/partners.js',
-                'js/courts.js', 'supabase/schema.sql'];
+                'js/courts.js', 'js/tournaments-overview.js', 'supabase/schema.sql'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -120,6 +120,21 @@ const ОТКАТЫ = [
      "    'use strict';",
      "    'use strict';\n    function копит158() { var h = ''; h += '<u>' + 1; return h.length; }\n    window.__копит158 = копит158;",
      'функций, копящих разметку через +=, не больше замеренного'],
+
+    /* ── КУСОК 159: признак разворачивает переменные ── */
+
+    ['положить поле в переменную и подставить её в разметку', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function через159(о) { var имя = o.full_name; document.body.innerHTML = '<p>' + имя + '</p>'; }\n    window.__через159 = через159;",
+     'столбец, который пишет человек, не идёт в разметку мимо экранирования'],
+
+    /* БЛИЗНЕЦ ТОЙ ЖЕ БЕДЫ: адрес афиши в style="…url(…)" живёт в двух
+       файлах, и кусок 158 починил только один. ПОЧИНИЛ ОДИН — ПРОВЕРЬ
+       БЛИЗНЕЦА. */
+    ['отнять экранирование у афиши турнира в style', 'js/tournaments-overview.js',
+     "постер ? ' style=\"--poster:url(' + KSLT_экранировать(постер) + ')\"' : ''",
+     "постер ? ' style=\"--poster:url(' + постер + ')\"' : ''",
+     'подстановка в атрибуте экранирована — кавычка там даёт обработчик'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',
      "    'use strict';",
