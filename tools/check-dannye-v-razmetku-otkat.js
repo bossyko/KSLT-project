@@ -14,8 +14,12 @@ const { execFileSync } = require('child_process');
 const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-razmetka-'));
 /* СХЕМА БАЗЫ ТОЖЕ ЕДЕТ В ПЕСОК: признак куска 158 читает из неё, какие
-   столбцы пишет человек, и без неё сторож в песке не поднимется. */
-['js', 'tools', 'supabase'].forEach(д => fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
+   столбцы пишет человек, и без неё сторож в песке не поднимется.
+   `sql` ЕДЕТ С КУСКА 164: источников схемы четыре, а не два, и без них в
+   песке столбцов 190 вместо 258 — восемь названных мест становятся мёртвыми
+   именами, и база прувера падает на ЧИСТОЙ копии. ПЕСОК ОБЯЗАН НЕСТИ ВСЁ,
+   ЧТО ЧИТАЕТ ПРИЗНАК. */
+['js', 'tools', 'supabase', 'sql'].forEach(д => fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
@@ -23,7 +27,10 @@ const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js'
                 'js/tournament-detail.js', 'js/kslt-vremya.js', 'js/partners.js',
                 'js/courts.js', 'js/tournaments-overview.js', 'supabase/schema.sql',
                 'tools/check-dannye-v-razmetku.js', 'js/scoreboard.js',
-                'js/tournament-featured.js'];
+                'js/tournament-featured.js',
+                /* кусок 164: запертые этим куском и широкий источник схемы */
+                'js/player.js', 'js/admin/sections/live.js', 'js/live-match.js',
+                'tools/priznak-dannye-v-razmetke.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -167,6 +174,32 @@ const ОТКАТЫ = [
     ['отпереть запертый файл названным местом', 'tools/check-dannye-v-razmetku.js',
      "const НАЗВАННЫЕ_МЕСТА = [",
      "const НАЗВАННЫЕ_МЕСТА = [\n    ['js/scoreboard.js', 'pt1 [m.points_p1]', 'проба прувера'],",
+     'запертые файлы не отпираются'],
+
+    /* ── КУСОК 164: широкий источник схемы и шесть новых запертых ── */
+
+    /* `js/admin/sections/live.js` ЗАПЕРТ куском 164. Дыра здесь роняет
+       правило запертых — значит новые строки списка ЖИВЫЕ, а не украшение. */
+    ['завести дыру в файле, запертом куском 164', 'js/admin/sections/live.js',
+     "    'use strict';",
+     "    'use strict';\n    function дыра164(о) { document.body.innerHTML = '<p>' + o.pause_reason + '</p>'; }\n    window.__дыра164 = дыра164;",
+     'запертые файлы не отпираются'],
+
+    /* ИСТОЧНИК СХЕМЫ — ЧАСТЬ ПРИЗНАКА, И ЕГО СУЖЕНИЕ ДОЛЖНО ПАДАТЬ. Пока
+       признак читал два каталога из четырёх, столбцов было 190 вместо 258, и
+       восемь мест не находились вовсе. Откат возвращает узкий источник. */
+    ['сузить источник схемы до двух каталогов', 'tools/priznak-dannye-v-razmetke.js',
+     "    for (const д of [path.join(КОРЕНЬ, 'sql', 'схема'), path.join(КОРЕНЬ, 'sql', 'архив')]) {",
+     "    for (const д of []) {",
+     'мёртвых имён в списке названных мест нет'],
+
+    /* ЭКРАНИРОВАНИЕ, ПОСТАВЛЕННОЕ ПО ЧТЕНИЮ, ТОЖЕ ДОЛЖНО ДЕРЖАТЬСЯ ПРАВИЛОМ.
+       Признак этого места не видит (объект положили в переменную), поэтому
+       его сторожит правило запертых файлов: `player.js` заперт, и снятое
+       экранирование делает его названным. */
+    ['снять экранирование со значка награды', 'tools/check-dannye-v-razmetku.js',
+     "    'js/kslt-video.js'\n];",
+     "    'js/kslt-video.js', 'js/umpire.js'\n];",
      'запертые файлы не отпираются'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',
