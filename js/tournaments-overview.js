@@ -161,42 +161,13 @@
     var emptySvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 
     // Countdown helpers
-    var _countdownInterval = null;
+    /* ТИКЕР ОТСЧЁТА — ОДИН, В ДОМЕ (кусок 163). Здесь было два тела:
+       `updateCountdowns` 23 строки и `startCountdownTimer` 6. */
+    function startCountdownTimer() { window.KSLT_TFEATURED.пустить(); }
     var CL = KSLT_YAZYK.выбрать({ days: 'd', hours: 'h', min: 'm', sec: 's', live: 'LIVE NOW', prefix: 'STARTS IN' }, { days: 'к', hours: 'с', min: 'м', sec: 'с', live: 'ТҮЗ ЭФИР', prefix: 'БАШТАЛАТ' }, { days: 'д', hours: 'ч', min: 'м', sec: 'с', live: 'ИДЁТ СЕЙЧАС', prefix: 'СТАРТ ЧЕРЕЗ' });
 
 
-    function updateCountdowns() {
-        document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
-            var dateSort = el.dataset.cdDate;
-            var timeStr = el.dataset.cdTime || '00:00';
-            var target = new Date(dateSort + 'T' + timeStr + ':00');
-            var now = new Date();
-            var diff = target.getTime() - now.getTime();
-            if (diff <= 0) {
-                el.className = 'to-cd to-cd-live';
-                el.innerHTML = '<span class="to-cd-dot"></span>' + CL.live;
-                return;
-            }
-            var d = Math.floor(diff / (1000*60*60*24));
-            var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-            var m = Math.floor((diff % (1000*60*60)) / (1000*60));
-            var s = Math.floor((diff % (1000*60)) / 1000);
-            if (diff < 60 * 60 * 1000) el.classList.add('to-cd-urgent'); else el.classList.remove('to-cd-urgent');
-            var parts = '<span class="to-cd-label">' + CL.prefix + '</span>';
-            if (d > 0) parts += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
-            parts += '<span class="to-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
-            parts += '<span class="to-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
-            parts += '<span class="to-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
-            el.innerHTML = parts;
-        });
-    }
 
-    function startCountdownTimer() {
-        if (_countdownInterval) clearInterval(_countdownInterval);
-        if (document.querySelectorAll('.to-cd[data-cd-date]').length > 0) {
-            _countdownInterval = setInterval(updateCountdowns, 1000);
-        }
-    }
 
     document.addEventListener('DOMContentLoaded', init);
 

@@ -27,20 +27,17 @@
         live: 'In progress', open: 'Registration open', soon: 'Upcoming',
         closed: 'Registration closed', done: 'Completed', cancelled: 'Cancelled',
         btnLive: 'View draw', btnOpen: 'Register', btnSoon: 'Details', btnDone: 'Results',
-        participants: 'participants', cdPrefix: 'Starts in',
-        d: 'd', h: 'h', m: 'm', s: 's'
+        participants: 'participants'
     }, {
         live: 'Жүрүп жатат', open: 'Каттоо ачык', soon: 'Жакында',
         closed: 'Каттоо жабык', done: 'Аяктады', cancelled: 'Жокко чыгарылды',
         btnLive: 'Торду көрүү', btnOpen: 'Катталуу', btnSoon: 'Толугураак', btnDone: 'Жыйынтыктар',
-        participants: 'катышуучу', cdPrefix: 'Башталат',
-        d: 'к', h: 'с', m: 'м', s: 'сек'
+        participants: 'катышуучу'
     }, {
         live: 'Идёт сейчас', open: 'Регистрация открыта', soon: 'Предстоящий',
         closed: 'Регистрация закрыта', done: 'Завершён', cancelled: 'Отменён',
         btnLive: 'Смотреть сетку', btnOpen: 'Регистрация', btnSoon: 'Подробнее', btnDone: 'Результаты',
-        participants: 'участников', cdPrefix: 'Старт через',
-        d: 'д', h: 'ч', m: 'м', s: 'с'
+        participants: 'участников'
     });
 
     var PAGE = KSLT_YAZYK.выбрать('tournament-en.html', 'tournament-kg.html', 'tournament.html');
@@ -93,44 +90,35 @@
                ' – ' + trimYear(b.toLocaleDateString(LOCALE, opts));
     }
 
-    /** Счётчик показываем только когда он что-то значит — за двое суток до старта. */
+    /** ОТСЧЁТ И ТИКЕР — В ДОМЕ (кусок 163).
+     *
+     * Здесь было три тела: `countdown`, `countdownText` 12 строк и свой
+     * тикер. Записанное число говорило «тикеров три» — ЭТОТ в записи не
+     * числился, его назвал прибор.
+     *
+     * СВОЯ СЕМЬЯ КЛАССОВ (`tc-countdown` / `tc-cd-*`) и своё поведение по
+     * истечении (узел снимается) уходят ДОВОДОМ, поэтому css не правится.
+     *
+     * СВОИХ СЛОВ У КАРТОЧКИ БОЛЬШЕ НЕТ. Довод `слова` я заводил ради пяти
+     * её ключей, и замер показал: различалось ОДНО слово — кыргызская
+     * приставка, «Башталат» против «Башталууга». Довод при этом терялся на
+     * первом же тике: тикер один, слова зовущего ему негде взять, и надпись
+     * меняла написание через секунду. Два перевода одного понятия — беда, а
+     * не разница назначения, поэтому словарь отсчёта теперь ОДИН, в доме, а
+     * приставка на этой странице стала «Башталууга», как на трёх остальных.
+     * ВИДИМЫЙ ТЕКСТ ИЗМЕНИЛСЯ — это ПРЕДПОЛОЖЕНИЕ, вынесено Косте снимком.
+     *
+     * СТРУКТУРА ЕДИНИЦ СВЕДЕНА К `<span class="tc-cd-unit">` вместо `<b>` —
+     * слово Кости 25.10. Вид при этом НЕ меняется: css не стилизует `b`
+     * отдельно, жирность приходит от `.tc-countdown`, а правил `.tc-cd-unit`
+     * нет вовсе — прочитано в `css/style.css:5957-5990`, а не угадано.
+     */
     function countdown(t) {
         if (!t.date_start) return '';
-        var target = new Date(t.date_start + 'T' + (t.start_time || '00:00') + ':00');
-        var diff = target.getTime() - Date.now();
-        if (diff <= 0 || diff > 48 * 3600 * 1000) return '';
-        return '<span class="tc-countdown" data-cd="' + t.date_start + 'T' +
-               KSLT_экранировать(t.start_time || '00:00') + '">' + countdownText(diff) + '</span>';
+        return window.KSLT_TFEATURED.отсчёт(t.date_start, t.start_time, null, { семья: 'tc' });
     }
 
-    function countdownText(diff) {
-        var d = Math.floor(diff / 86400000);
-        var h = Math.floor((diff % 86400000) / 3600000);
-        var m = Math.floor((diff % 3600000) / 60000);
-        var s = Math.floor((diff % 60000) / 1000);
-        var out = '<span class="tc-cd-label">' + L.cdPrefix + '</span>';
-        if (d > 0) out += '<b>' + d + '<small>' + L.d + '</small></b>';
-        out += '<b>' + String(h).padStart(2, '0') + '<small>' + L.h + '</small></b>';
-        out += '<b>' + String(m).padStart(2, '0') + '<small>' + L.m + '</small></b>';
-        out += '<b>' + String(s).padStart(2, '0') + '<small>' + L.s + '</small></b>';
-        return out;
-    }
-
-    var _ticker = null;
-
-    function startTicker() {
-        if (_ticker) clearInterval(_ticker);
-        _ticker = setInterval(function() {
-            var nodes = document.querySelectorAll('.tc-countdown[data-cd]');
-            if (!nodes.length) { clearInterval(_ticker); _ticker = null; return; }
-            nodes.forEach(function(el) {
-                var diff = new Date(el.getAttribute('data-cd') + ':00').getTime() - Date.now();
-                if (diff <= 0) { el.remove(); return; }
-                el.innerHTML = countdownText(diff);
-                el.classList.toggle('tc-cd-urgent', diff < 3600000);
-            });
-        }, 1000);
-    }
+    function startTicker() { window.KSLT_TFEATURED.пустить(); }
 
     function buttonFor(s) {
         if (s === 'live') return L.btnLive;

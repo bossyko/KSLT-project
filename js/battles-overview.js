@@ -135,7 +135,14 @@
     var _players = {};
     var _votesData = {};
     var _searchTimer = null;
-    var _countdownInterval = null;
+    /* ОТСЧЁТ И ТИКЕР — В ДОМЕ (кусок 163). Здесь было три тела: разметка 19
+       строк, обновление 22 и пуск 6. Своя семья классов (`bo-cd`) и своё
+       поведение по истечении (узел снимается) уходят ДОВОДОМ, поэтому css
+       баттлов не правится ни строкой. */
+    function getCountdownHtml(dateStr, t) {
+        return window.KSLT_TFEATURED.отсчёт(dateStr, t, null, { семья: 'bo' });
+    }
+    function startCountdownTimer() { window.KSLT_TFEATURED.пустить(); }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА. Прежде здесь
        стоял способ через `textContent`: он безопасен в текстовом узле, но
@@ -159,58 +166,8 @@
         return challengePage + '?id=' + id + '&from=battles';
     }
 
-    // Countdown helpers
-    function getCountdownHtml(dateStr, timeStr) {
-        if (!dateStr) return '';
-        var t = timeStr || '00:00';
-        var target = new Date(dateStr + 'T' + t + ':00');
-        var now = new Date();
-        var diff = target.getTime() - now.getTime();
-        if (diff <= 0 || diff > 48 * 60 * 60 * 1000) return '';
-        var dd = Math.floor(diff / (1000*60*60*24));
-        var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-        var m = Math.floor((diff % (1000*60*60)) / (1000*60));
-        var s = Math.floor((diff % (1000*60)) / 1000);
-        var urgent = diff < 60 * 60 * 1000 ? ' bo-cd-urgent' : '';
-        var parts = '<span class="bo-cd-label">' + CL.prefix + '</span>';
-        if (dd > 0) parts += '<span class="bo-cd-unit">' + dd + '<small>' + CL.days + '</small></span>';
-        parts += '<span class="bo-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
-        parts += '<span class="bo-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
-        parts += '<span class="bo-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
-        return '<span class="bo-cd' + urgent + '" data-cd-date="' + dateStr + '" data-cd-time="' + t + '">' + parts + '</span>';
-    }
 
-    function updateCountdowns() {
-        document.querySelectorAll('.bo-cd[data-cd-date]').forEach(function(el) {
-            var dateStr = el.dataset.cdDate;
-            var t = el.dataset.cdTime || '00:00';
-            var target = new Date(dateStr + 'T' + t + ':00');
-            var now = new Date();
-            var diff = target.getTime() - now.getTime();
-            if (diff <= 0) {
-                el.remove();
-                return;
-            }
-            var dd = Math.floor(diff / (1000*60*60*24));
-            var h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-            var m = Math.floor((diff % (1000*60*60)) / (1000*60));
-            var s = Math.floor((diff % (1000*60)) / 1000);
-            if (diff < 60 * 60 * 1000) el.classList.add('bo-cd-urgent'); else el.classList.remove('bo-cd-urgent');
-            var parts = '<span class="bo-cd-label">' + CL.prefix + '</span>';
-            if (dd > 0) parts += '<span class="bo-cd-unit">' + dd + '<small>' + CL.days + '</small></span>';
-            parts += '<span class="bo-cd-unit">' + String(h).padStart(2,'0') + '<small>' + CL.hours + '</small></span>';
-            parts += '<span class="bo-cd-unit">' + String(m).padStart(2,'0') + '<small>' + CL.min + '</small></span>';
-            parts += '<span class="bo-cd-unit">' + String(s).padStart(2,'0') + '<small>' + CL.sec + '</small></span>';
-            el.innerHTML = parts;
-        });
-    }
 
-    function startCountdownTimer() {
-        if (_countdownInterval) clearInterval(_countdownInterval);
-        if (document.querySelectorAll('.bo-cd[data-cd-date]').length > 0) {
-            _countdownInterval = setInterval(updateCountdowns, 1000);
-        }
-    }
 
     document.addEventListener('DOMContentLoaded', init);
 

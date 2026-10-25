@@ -48,40 +48,9 @@
 
     var _timer = null;
 
-    function countdownParts(diff) {
-        var d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        var h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        var m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        var s = Math.floor((diff % (1000 * 60)) / 1000);
-        var out = '<span class="to-cd-label">' + CL.prefix + '</span>';
-        if (d > 0) out += '<span class="to-cd-unit">' + d + '<small>' + CL.days + '</small></span>';
-        out += '<span class="to-cd-unit">' + String(h).padStart(2, '0') + '<small>' + CL.hours + '</small></span>';
-        out += '<span class="to-cd-unit">' + String(m).padStart(2, '0') + '<small>' + CL.min + '</small></span>';
-        out += '<span class="to-cd-unit">' + String(s).padStart(2, '0') + '<small>' + CL.sec + '</small></span>';
-        return out;
-    }
 
 
-    function tick() {
-        document.querySelectorAll('.to-cd[data-cd-date]').forEach(function(el) {
-            var target = new Date(el.dataset.cdDate + 'T' + (el.dataset.cdTime || '00:00') + ':00');
-            var diff = target.getTime() - Date.now();
-            if (diff <= 0) {
-                el.className = 'to-cd to-cd-live';
-                el.innerHTML = '<span class="to-cd-dot"></span>' + CL.live;
-                return;
-            }
-            el.classList.toggle('to-cd-urgent', diff < 60 * 60 * 1000);
-            el.innerHTML = countdownParts(diff);
-        });
-    }
 
-    function startTimer() {
-        if (_timer) clearInterval(_timer);
-        if (document.querySelectorAll('.to-cd[data-cd-date]').length) {
-            _timer = setInterval(tick, 1000);
-        }
-    }
 
     // ---- Разметка ------------------------------------------------------
 
@@ -302,6 +271,12 @@
             });
         }, true);
     }
+
+    /* ТИКЕР ОТСЧЁТА — ОДИН, В ДОМЕ (кусок 163). Здесь было три тела:
+       `countdownParts` 12 строк, `tick` 13 и `startTimer` 6. Зовущий
+       (`tournaments-overlay.js`) по-прежнему зовёт `TB.startTimer()` —
+       имя оставлено, чтобы не трогать его без нужды. */
+    function startTimer() { window.KSLT_TFEATURED.пустить(); }
 
     window.KSLT_TBLOCK = {
         featured: featured,
