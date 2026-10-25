@@ -22,7 +22,7 @@ fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
 const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js',
                 'js/tournament-detail.js', 'js/kslt-vremya.js', 'js/partners.js',
                 'js/courts.js', 'js/tournaments-overview.js', 'supabase/schema.sql',
-                'tools/check-dannye-v-razmetku.js'];
+                'tools/check-dannye-v-razmetku.js', 'js/scoreboard.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -150,6 +150,22 @@ const ОТКАТЫ = [
      "const НАЗВАННЫЕ_МЕСТА = [",
      "const НАЗВАННЫЕ_МЕСТА = [\n    ['js/kslt-vremya.js', 'нет.такого.места', 'проба прувера'],",
      'мёртвых имён в списке названных мест нет'],
+
+    /* ── КУСОК 161: запертые файлы ── */
+
+    /* `js/scoreboard.js` ЗАПЕРТ: в нём нет ни дыр, ни названных мест. Дыра
+       здесь роняет правило запертых, а не правило «столбца». */
+    ['завести дыру в ЗАПЕРТОМ файле', 'js/scoreboard.js',
+     "    'use strict';",
+     "    'use strict';\n    function дыра161(о) { document.body.innerHTML = '<p>' + o.full_name + '</p>'; }\n    window.__дыра161 = дыра161;",
+     'запертые файлы не отпираются'],
+
+    /* ЗАПЕРТЫЙ ФАЙЛ НЕ ОТПИРАЕТСЯ ИМЕНЕМ: правка делается так, чтобы файл
+       остался запертым, а не так, чтобы в список имён добавилась строка. */
+    ['отпереть запертый файл названным местом', 'tools/check-dannye-v-razmetku.js',
+     "const НАЗВАННЫЕ_МЕСТА = [",
+     "const НАЗВАННЫЕ_МЕСТА = [\n    ['js/scoreboard.js', 'pt1 [m.points_p1]', 'проба прувера'],",
+     'запертые файлы не отпираются'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',
      "    'use strict';",
