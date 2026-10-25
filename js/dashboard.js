@@ -998,7 +998,8 @@
         var label = KSLT_YAZYK.выбрать('New badge', 'Жаңы бейдж', 'Новый бейдж');
         var el = document.createElement('div');
         el.className = 'db-badge-toast';
-        el.innerHTML = '<span class="db-badge-toast-icon">' + icon + '</span> ' + label + ': ' + name;
+        el.innerHTML = '<span class="db-badge-toast-icon">' + KSLT_экранировать(icon) +
+            '</span> ' + label + ': ' + KSLT_экранировать(name);
         document.body.appendChild(el);
         requestAnimationFrame(function() { el.classList.add('visible'); });
         setTimeout(function() {
