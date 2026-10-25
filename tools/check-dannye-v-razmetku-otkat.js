@@ -13,12 +13,15 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-razmetka-'));
-['js', 'tools'].forEach(д => fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
+/* СХЕМА БАЗЫ ТОЖЕ ЕДЕТ В ПЕСОК: признак куска 158 читает из неё, какие
+   столбцы пишет человек, и без неё сторож в песке не поднимется. */
+['js', 'tools', 'supabase'].forEach(д => fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
 const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js',
-                'js/tournament-detail.js', 'js/kslt-vremya.js'];
+                'js/tournament-detail.js', 'js/kslt-vremya.js', 'js/partners.js',
+                'js/courts.js', 'supabase/schema.sql'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -75,7 +78,58 @@ const ОТКАТЫ = [
     ['завести ещё зовов функций, отдающих разметку', 'js/kslt-vremya.js',
      "    'use strict';",
      "    'use strict';\n    function р1() { return ''; }\n    function много(э) {\n        э.innerHTML = р1() + р1() + р1() + р1();\n    }\n    window.__много = много;",
-     'зовов функций, отдающих разметку, не больше замеренного']
+     'зовов функций, отдающих разметку, не больше замеренного'],
+
+    /* ── КУСОК 158 ── */
+
+    /* Столбец `full_name` объявлен текстом в схеме, CHECK у него нет, и это не
+       идентификатор — значит его пишет человек. Признак 157 про него не знал. */
+    ['вернуть сырое поле из схемы базы в разметку', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function дыра158(о) { document.body.innerHTML = '<p>' + o.full_name + '</p>'; }\n    window.__дыра158 = дыра158;",
+     'столбец, который пишет человек, не идёт в разметку мимо экранирования'],
+
+    ['отнять экранирование у ссылки на лицо в атрибуте', 'js/partners.js',
+     "'<img class=\"pt-avatar\" src=\"' + KSLT_экранировать(p.avatar_url) + '\" alt=\"\" loading=\"lazy\">'",
+     "'<img class=\"pt-avatar\" src=\"' + p.avatar_url + '\" alt=\"\" loading=\"lazy\">'",
+     'подстановка в атрибуте экранирована — кавычка там даёт обработчик'],
+
+    ['отнять экранирование у телефона корта в ссылке tel:', 'js/courts.js',
+     "<a href=\"tel:' + KSLT_экранировать(court.phone.split(',')[0].replace(/\\s/g, '')) + '\">",
+     "<a href=\"tel:' + court.phone.split(',')[0].replace(/\\s/g, '') + '\">",
+     'подстановка в атрибуте экранирована — кавычка там даёт обработчик'],
+
+    /* СТОРОЖ СТОРОЖИТ И ТО, НА ЧЁМ СТОИТ САМ: поле с подчерка признак считает
+       нашим вычисленным. Появился такой столбец в базе — соглашение сломано. */
+    /* Якорь — заголовок файла, он здесь один. `CREATE TABLE` встречается
+       десять раз, и прувер это поймал: ЯКОРЬ ДЕРЖИТСЯ НА ТОМ, ЧТО
+       ВСТРЕЧАЕТСЯ ОДИН РАЗ, иначе откат подменяет не то, что думал. */
+    ['завести в схеме столбец с подчерка', 'supabase/schema.sql',
+     '-- KSLT Database Schema',
+     '-- KSLT Database Schema\nCREATE TABLE _проба (\n    "_tajnoe" "text"\n);',
+     'ни один столбец базы не начинается с подчерка'],
+
+    ['завести ещё функцию, отдающую разметку', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function отдаёт158() { return '<b>1</b>'; }\n    window.__отдаёт158 = отдаёт158;",
+     'функций, отдающих разметку, не больше замеренного'],
+
+    /* Этот откат роняет ЗАОДНО храповик склеек: любая новая склейка растит и
+       его. Так и есть — склеек стало больше, и это правда про меру. */
+    ['завести ещё функцию, копящую разметку через +=', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function копит158() { var h = ''; h += '<u>' + 1; return h.length; }\n    window.__копит158 = копит158;",
+     'функций, копящих разметку через +=, не больше замеренного'],
+
+    ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function перем158(x) { var п = x.full_name; document.title = '<i>' + п + '</i>'; }\n    window.__перем158 = перем158;",
+     'голых переменных в склейках с разметкой не больше замеренного'],
+
+    ['завести ещё склейку, несущую разметку', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function склейка158(x) { document.title = '<i>' + x.length + '</i>'; }\n    window.__склейка158 = склейка158;",
+     'склеек, несущих разметку, не больше замеренного']
 ];
 
 const база = прогон(null);
