@@ -140,10 +140,19 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/tournament-register.js', 'info.icon', 'значок окна, литерал зовущего'],
     ['js/tournament-register.js', 'opts.icon', 'значок окна, литерал зовущего'],
     ['js/dashboard.js', 's.title', 'шаги онбординга, свой объект (названо в 157)'],
-    ['js/badge-celebration.js', 'b.icon', 'значок награды, литерал файла'],
-    ['js/players.js', 'b.icon', 'значок награды, литерал файла'],
-    ['js/admin/sections/players.js', 'd.icon', 'значок награды, литерал файла'],
-    ['js/admin/sections/players.js', 'def.icon', 'значок награды, литерал файла'],
+    /* ДВЕНАДЦАТЬ ИМЁН СНЯТЫ КУСКОМ 166 КАК МЁРТВЫЕ: все они говорили
+       «перечисление, запасной ход экранирован» — то есть прикрывали КЛЮЧ
+       словаря, а не подстановку. Признак научился видеть, что в разметку
+       идёт ЗНАЧЕНИЕ словаря, и имена разом перестали на что-либо указывать.
+       КОГДА ПРИЗНАК СТАНОВИТСЯ ТОЧНЕЕ, ИМЕНА СНИМАЮТСЯ ВМЕСТЕ С ЕГО
+       СЛЕПОТОЙ — ровно как в куске 160.
+
+       ЧЕТЫРЕ ИМЕНИ СНЯТЫ КУСКОМ 166, И СНЯТЫ НЕ КАК МЁРТВЫЕ, А КАК ЛОЖНЫЕ.
+       Они говорили «значок награды, литерал файла» — а значок приходит из
+       `badge_definitions.icon`, текстового столбца базы. Имя с НЕВЕРНОЙ
+       причиной не просто бесполезно: оно ПРИКРЫВАЕТ НАСТОЯЩУЮ ДЫРУ, и
+       прикрывало её с куска 157 по 165. Все шесть мест экранированы.
+       ИМЯ ЧИТАЕТСЯ ЗАНОВО, КОГДА ПРИЗНАК СТАНОВИТСЯ ТОЧНЕЕ. */
     ['js/auth.js', 'c.code', 'код страны из своего файла стран'],
     ['js/phone.js', 'c.code', 'код страны из своего файла стран'],
     ['js/phone.js', 'current.code', 'код страны из своего файла стран'],
@@ -165,13 +174,6 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/admin/sections/bracket.js', 'reg.partner_gender', 'пол — перечисление'],
     ['js/admin/sections/coaches.js', 'p.purpose', 'назначение платежа — перечисление'],
     ['js/admin/sections/courts.js', 'p.purpose', 'назначение платежа — перечисление'],
-    ['js/admin/sections/coaches.js', 'p.payment_method', 'способ оплаты — перечисление, запасной ход экранирован'],
-    ['js/admin/sections/courts.js', 'p.payment_method', 'способ оплаты — перечисление, запасной ход экранирован'],
-    ['js/admin/sections/notifications.js', 'r.audience', 'кому — перечисление, запасной ход экранирован'],
-    ['js/admin/sections/notifications.js', 'r.type', 'вид рассылки — перечисление, запасной ход экранирован'],
-    ['js/admin/sections/courts.js', 't.type', 'вид корта — перечисление, запасной ход экранирован'],
-    ['js/admin/sections/courts.js', 't0.type', 'вид корта — перечисление, запасной ход экранирован'],
-    ['js/admin/sections/courts.js', 'ti.type', 'вид корта — перечисление, запасной ход экранирован'],
     ['js/tournament-detail.js', 'match.status', 'состояние матча — перечисление'],
     ['js/tournament-featured.js', 't.status', 'состояние турнира — перечисление'],
     ['js/tournament-detail.js', 't.format', 'вид турнира — перечисление'],
@@ -210,13 +212,9 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/admin/sections/coaches.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
     ['js/admin/sections/courts.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
     ['js/admin/sections/settings.js', "statusClass [pr.status]", 'состояние сезона — перечисление в имени класса'],
-    ['js/admin/sections/tournaments.js', "trnStatusBadgeLabel [item.status]", 'состояние турнира — запасной ход экранирован'],
     ['js/dashboard.js', "roleHtml [profile.role]", 'роль — перечисление'],
     ['js/kslt-vaucher-blok.js', "состояние [в.status]", 'состояние ваучера — перечисление'],
-    ['js/tournament-detail.js', "statusClass [t.status]", 'состояние турнира — перечисление в имени класса'],
     ['js/tournament-detail.js', "statusText [t.status]", 'состояние турнира — значение из словаря'],
-    ['js/tournament-detail.js', "подписьСтатуса [alreadyRegistered.status]", 'состояние заявки — значение из словаря'],
-    ['js/admin/sections/news.js', "catLabel [a.category]", 'раздел новости — запасной ход экранирован'],
 
     /* ВОСЕМЬ МЕСТ, НАЙДЕННЫХ ШИРОКИМ ИСТОЧНИКОМ СХЕМЫ (кусок 164). Признак
        читал два каталога из четырёх: `sql/схема` (162 файла) и `sql/архив` он
@@ -225,7 +223,6 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/live-match.js', "badgeText [m.break_kind]", 'род перерыва — перечисление по CHECK, значение из словаря'],
     ['js/live-match.js', "scorePanelHtml [m.pause_reason]", 'та же причина паузы, вторая подстановка одной переменной'],
     ['js/live-match.js', "scorePanelHtml [m.break_kind]", 'тот же род перерыва, вторая подстановка одной переменной'],
-    ['js/umpire.js', "statusLabel [state.pause_reason]", 'причина паузы — ИМЯ_ПРИЧИНЫ[...] отдаёт свой литерал'],
     ['js/admin/sections/challenges.js', "p1Photo [challenge.challenger_photo]", 'адрес снимка экранирован внутри extrasRow (A.esc и photoPreviewHtml)'],
     ['js/admin/sections/challenges.js', "p2Photo [challenge.opponent_photo]", 'адрес снимка экранирован внутри extrasRow (A.esc и photoPreviewHtml)'],
     ['js/dashboard.js', 'opts.body', 'тело окна — РАЗМЕТКА ПО ЗАМЫСЛУ, собрана зовущими (названо в 157, совпало с именем столбца body)'],
@@ -332,7 +329,15 @@ const ЗАПЕРТЫЕ = [
        СТАРЫЙ ПРИБОР правила 1 — он требовал их в списке названных ФАЙЛОВ,
        потому что не видел зова экранирования внутри `map`. Прибор снят,
        список снят, файлы заперлись сами. 126 склеек из 2155. */
-    'js/doubles-entry.js', 'js/kslt-lenta.js', 'js/player.js'
+    'js/doubles-entry.js', 'js/kslt-lenta.js', 'js/player.js',
+    /* ЗАПЕРТЫ КУСКОМ 166. Два — после правок: `admin/sections/players.js` и
+       `badge-celebration.js` рисовали значок награды сырым. Три — после того
+       как признак научился видеть ЗНАЧЕНИЕ словаря по ключу-полю:
+       `admin/sections/notifications.js`, `admin/sections/tournaments.js`,
+       `umpire.js` держались только именами, прикрывавшими ключ. 205 склеек
+       из 2155. */
+    'js/admin/sections/notifications.js', 'js/admin/sections/players.js',
+    'js/admin/sections/tournaments.js', 'js/badge-celebration.js', 'js/umpire.js'
 ];
 /* ЗАПИСЬ КУСКА 164 «три файла из шести запереть не удалось» ЗАКРЫТА куском
    165: правило 1 снято вместе со своим прибором, и файлы заперлись без
