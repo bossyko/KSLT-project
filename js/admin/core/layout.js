@@ -20,8 +20,6 @@
             ? '<img src="' + A.esc(profile.avatar_url) + '" class="ad-sidebar-avatar" alt="">'
             : '<div class="ad-sidebar-avatar-placeholder">' + initials + '</div>';
 
-        var roleLabel = L['role' + profile.role.charAt(0).toUpperCase() + profile.role.slice(1)] || profile.role;
-
         var sections = A.ROLE_SECTIONS[A.currentRole] || A.ROLE_SECTIONS.manager;
 
         var allItems = [
@@ -69,7 +67,8 @@
                    шапка админки висит на ВСЕХ её страницах. */
                 '<div class="ad-sidebar-name">' + A.esc(profile.full_name || 'Admin') + '</div>' +
                 '<div class="ad-sidebar-email">' + A.esc(profile.email || '') + '</div>' +
-                '<div class="kslt-role kslt-role-' + (profile.role || 'user') + ' ad-sidebar-role">' + roleLabel + '</div>' +
+                /* КУСОК 167: значок роли отдаёт дом; свой класс — доводом. */
+                KSLT_DOSTUP.значокРоли(profile.role, { тег: 'div', класс: 'ad-sidebar-role' }) +
             '</div>' +
             '<ul class="ad-sidebar-nav">' + navHtml + '</ul>';
     }
@@ -564,14 +563,13 @@
             var avatarHtml = u.avatar_url
                 ? '<img src="' + A.esc(u.avatar_url) + '" class="ad-table-avatar" alt="">'
                 : '<div class="ad-table-avatar-placeholder">' + initials + '</div>';
-            var roleClass = 'kslt-role-' + (u.role || 'user');
-            var roleLabel = L['role' + (u.role || 'user').charAt(0).toUpperCase() + (u.role || 'user').slice(1)] || u.role;
+
             return '<tr>' +
                 '<td><div class="ad-table-user-cell">' + avatarHtml +
                     '<div><div class="ad-table-user-name">' + A.esc(u.full_name || L.noData) + '</div></div>' +
                 '</div></td>' +
                 '<td>' + A.esc(u.email || L.noData) + '</td>' +
-                '<td><span class="kslt-role ' + roleClass + '">' + roleLabel + '</span></td>' +
+                '<td>' + KSLT_DOSTUP.значокРоли(u.role) + '</td>' +
                 '<td>' + A.fmtDate(u.created_at) + '</td>' +
             '</tr>';
         }, L.noRecentUsers);

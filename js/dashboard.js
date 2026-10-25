@@ -128,7 +128,6 @@
         pwRuleDigit: 'One digit',
         pwRuleSpecial: 'One special character',
         showPassword: 'Show password',
-        role_user: 'User', role_player: 'Player', role_admin: 'Admin', role_manager: 'Manager',
         category: 'Category', points: 'Points',
         regWithdraw: 'Withdraw',
         regAgain: 'Enter again',
@@ -437,7 +436,6 @@
         pwRuleDigit: 'Бир сан',
         pwRuleSpecial: 'Бир атайын белги',
         showPassword: 'Сыр сөздү көрсөтүү',
-        role_user: 'Колдонуучу', role_player: 'Оюнчу', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Упайлар',
         regWithdraw: 'Арызды алуу',
         regAgain: 'Кайра катталуу',
@@ -746,7 +744,6 @@
         pwRuleDigit: 'Одна цифра',
         pwRuleSpecial: 'Один спецсимвол',
         showPassword: 'Показать пароль',
-        role_user: 'Пользователь', role_player: 'Игрок', role_admin: 'Администратор', role_manager: 'Менеджер',
         category: 'Категория', points: 'Очки',
         regWithdraw: 'Снять заявку',
         regAgain: 'Записаться снова',
@@ -1370,7 +1367,9 @@
         // Role badge for admin/manager only
         var roleHtml = '';
         if (KSLT_DOSTUP.сотрудникПоРоли(profile.role)) {
-            roleHtml = '<div class="kslt-role kslt-role-' + profile.role + ' db-sidebar-role">' + (L['role_' + profile.role] || profile.role) + '</div>';
+            /* КУСОК 167: тот же дом, что в админке. Русские слова совпадали
+               знак в знак, английские и кыргызские взяты отсюда же. */
+            roleHtml = KSLT_DOSTUP.значокРоли(profile.role, { тег: 'div', класс: 'db-sidebar-role' });
         }
 
         var qrBtnHtml = profile.player_id

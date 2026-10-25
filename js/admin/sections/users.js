@@ -26,9 +26,11 @@
         if (!container) return;
 
         var roleFilterHtml = '<option value="">' + L.usrAllRoles + '</option>' +
-            '<option value="admin"' + (usrFilterRole === 'admin' ? ' selected' : '') + '>' + L.roleAdmin + '</option>' +
-            '<option value="manager"' + (usrFilterRole === 'manager' ? ' selected' : '') + '>' + L.roleManager + '</option>' +
-            '<option value="user"' + (usrFilterRole === 'user' ? ' selected' : '') + '>' + L.roleUser + '</option>';
+            /* КУСОК 167: подписи ролей — из дома роли, а не из своего
+               словаря. Слова те же: русские совпадали знак в знак. */
+            '<option value="admin"' + (usrFilterRole === 'admin' ? ' selected' : '') + '>' + KSLT_DOSTUP.подписьРоли('admin') + '</option>' +
+            '<option value="manager"' + (usrFilterRole === 'manager' ? ' selected' : '') + '>' + KSLT_DOSTUP.подписьРоли('manager') + '</option>' +
+            '<option value="user"' + (usrFilterRole === 'user' ? ' selected' : '') + '>' + KSLT_DOSTUP.подписьРоли('user') + '</option>';
 
         var isAdm = A.currentRole === 'admin';
 
@@ -334,15 +336,16 @@
                 ? '<img src="' + A.esc(u.avatar_url) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
                 : '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:var(--fs-xs);font-weight:600;">' + initials + '</div>';
 
-            // Role badge
-            var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
             // ОДНО ОПРЕДЕЛЕНИЕ: класс `.kslt-role` в style.css (96в, 19.10).
             // Здесь стоял свой инлайн — 12/600, радиус 4px, без капса и без
             // обводки, высота 18 против эталонных 24. И он не знал роли
             // «игрок» вовсе: красил её как «прочие», хотя в layout.js она
             // синяя. Админ тут был КРАСНЫМ, а там лаймовым — слово Кости
             // 19.10: лайм. Красный остаётся роли ошибки и отказа.
-            var roleBadge = '<span class="kslt-role kslt-role-' + (u.role || 'user') + '">' + roleLabel + '</span>';
+            // КУСОК 167: и класс, и подпись отдаёт ДОМ РОЛИ. Роль —
+            // текстовый столбец базы, и в имя класса она шла сырой.
+            var roleLabel = KSLT_DOSTUP.подписьРоли(u.role);
+            var roleBadge = KSLT_DOSTUP.значокРоли(u.role);
 
             // Membership badge with expiry date
             var mem = memMap[u.id];
@@ -1643,7 +1646,7 @@
         // Table rows
         var tableRows = '';
         items.forEach(function(u, i) {
-            var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
+            var roleLabel = KSLT_DOSTUP.подписьРоли(u.role);
             var mem = memMap[u.id];
             var memLabel = (mem && mem.status === 'active') ? L.usrActive : (mem && mem.status === 'expired') ? L.usrExpired : L.usrNone;
             var playerBadge = u.player_id ? '✓' : '—';
@@ -1722,7 +1725,7 @@
 
         var headers = ['№', L.thUser, L.thEmail, L.thRole, 'Членство', 'Игрок', 'Telegram', L.thDate];
         var rows = items.map(function(u, i) {
-            var roleLabel = L['role' + u.role.charAt(0).toUpperCase() + u.role.slice(1)] || u.role;
+            var roleLabel = KSLT_DOSTUP.подписьРоли(u.role);
             var mem = memMap[u.id];
             var memLabel = (mem && mem.status === 'active') ? L.usrActive : (mem && mem.status === 'expired') ? L.usrExpired : L.usrNone;
             var playerBadge = u.player_id ? '✓' : '—';
