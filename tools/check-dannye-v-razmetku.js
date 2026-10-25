@@ -282,13 +282,10 @@ const НАЗВАННЫЕ_МЕСТА = [
     /* словарь или своё перечисление: имя поля совпало с именем столбца */
     ['js/account-restore.js', 'L.title', 'словарь языка'],
     ['js/admin/sections/news.js', 'L.content', 'словарь языка'],
-    ['js/player.js', 'L.message', 'словарь языка'],
     ['js/admin/sections/news.js', 'info.label', 'карта значков новости, литерал файла'],
     ['js/coaches.js', 'o.label', 'пункты фильтра, литерал файла'],
     ['js/partners.js', 'o.label', 'пункты фильтра, литерал файла'],
-    ['js/dashboard.js', 'st.label', 'словарь состояний вызова'],
     ['js/tournament-detail.js', 'st.label', 'словарь показателей'],
-    ['js/tournament-detail.js', 'predOpts.label', 'подпись прогноза, KSLT_YAZYK.выбрать'],
     ['js/info-overview.js', 'c.title', 'карточки раздела, литерал файла'],
     ['js/info-overview.js', 'd.title', 'документы раздела, литерал файла'],
     ['js/info-overview.js', 'c.icon', 'значок карточки, литерал файла'],
@@ -296,7 +293,6 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/tournament-register.js', 'info.icon', 'значок окна, литерал зовущего'],
     ['js/tournament-register.js', 'opts.icon', 'значок окна, литерал зовущего'],
     ['js/dashboard.js', 's.title', 'шаги онбординга, свой объект (названо в 157)'],
-    ['js/dashboard.js', 'd.icon', 'значок достижения, литерал файла'],
     ['js/badge-celebration.js', 'b.icon', 'значок награды, литерал файла'],
     ['js/players.js', 'b.icon', 'значок награды, литерал файла'],
     ['js/admin/sections/players.js', 'd.icon', 'значок награды, литерал файла'],
@@ -371,28 +367,21 @@ const НАЗВАННЫЕ_МЕСТА = [
     ['js/admin/sections/courts.js', "purposeBadge [p.purpose]", 'назначение платежа — перечисление'],
     ['js/admin/sections/settings.js', "statusClass [pr.status]", 'состояние сезона — перечисление в имени класса'],
     ['js/admin/sections/tournaments.js', "trnStatusBadgeLabel [item.status]", 'состояние турнира — запасной ход экранирован'],
-    ['js/admin/sections/users.js', "п [z.status]", 'состояние заявки — запасной ход экранирован'],
     ['js/dashboard.js', "roleHtml [profile.role]", 'роль — перечисление'],
     ['js/kslt-vaucher-blok.js', "состояние [в.status]", 'состояние ваучера — перечисление'],
     ['js/tournament-detail.js', "statusClass [t.status]", 'состояние турнира — перечисление в имени класса'],
     ['js/tournament-detail.js', "statusText [t.status]", 'состояние турнира — значение из словаря'],
     ['js/tournament-detail.js', "подписьСтатуса [alreadyRegistered.status]", 'состояние заявки — значение из словаря'],
     ['js/admin/sections/news.js', "catLabel [a.category]", 'раздел новости — запасной ход экранирован'],
-    ['js/admin/sections/news.js', "info [row.reaction_type]", 'вид реакции — ключ в свой словарь EMOJI_MAP'],
 
     /* ЧИСТИТСЯ ПО ДОРОГЕ, и каждая чистка прочитана по телу:
        parseSets/extractOutcome берут исход ТОЛЬКО из MATCH_OUTCOMES, а счёт —
        из групп `(\d+)`; extractYoutubeId — из группы `[a-zA-Z0-9_-]{11}`;
        getPointDisplay отдаёт 0/15/30/40/AD; levelLabel — значение словаря;
        userGenderToCategory — men, women или null. */
-    ['js/admin/sections/bracket.js', "setData [match.score]", 'исход только из MATCH_OUTCOMES, счёт из групп цифр'],
-    ['js/admin/sections/bracket.js', "tSetData [thirdMatch.score]", 'исход только из MATCH_OUTCOMES, счёт из групп цифр'],
-    ['js/admin/sections/challenges.js', "sv [challenge.score_draft]", 'счёт разбирается в числа через parseInt'],
     ['js/live-match.js', "ytId [m.youtube_url]", 'извлечено группой [a-zA-Z0-9_-]{11}'],
     ['js/live-match.js', "videoHtml [m.youtube_url]", 'извлечено группой [a-zA-Z0-9_-]{11}'],
     ['js/live-match.js', "leftHtml [m.youtube_url]", 'извлечено группой [a-zA-Z0-9_-]{11}'],
-    ['js/umpire.js', "pts [state.points_p1]", 'getPointDisplay отдаёт 0/15/30/40/AD'],
-    ['js/umpire.js', "pts [state.points_p2]", 'getPointDisplay отдаёт 0/15/30/40/AD'],
     ['js/services.js', "playLevel [p.play_level]", 'levelLabel отдаёт значение своего словаря'],
     ['js/admin/sections/users.js', "catOpts [user.gender]", 'userGenderToCategory отдаёт men, women или null'],
     ['js/admin/sections/users.js', "playerCatHtml [user.gender]", 'userGenderToCategory отдаёт men, women или null'],
@@ -441,6 +430,24 @@ const вАтрибуте158 = П.вАтрибуте.filter(м => !названо
     '`onerror`. Так нашлась ссылка `tel:` в `courts.js`, где `replace(/\\s/g)`\n' +
     'убирал пробелы и не убирал кавычку.');
 
+/* ── СТОРОЖ СТОРОЖИТ СВОЙ СПИСОК ИМЁН (кусок 160) ── */
+const живые = new Set([...П.дыры, ...П.вАтрибуте].map(м => {
+    const ф = м.split(':')[0];
+    const в = м.split('  ').slice(1).join('  ').trim();
+    return ф + '||' + в;
+}));
+const мёртвыеИмена = НАЗВАННЫЕ_МЕСТА.filter(н => !живые.has(н[0] + '||' + н[1]));
+правило(
+    'мёртвых имён в списке названных мест нет',
+    мёртвыеИмена.length === 0,
+    'Мёртвых имён: ' + мёртвыеИмена.length + '\n' +
+    мёртвыеИмена.map(н => '  ' + н[0] + '  ' + н[1] + '  (' + н[2] + ')').join('\n') + '\n' +
+    'ИМЯ ДЛЯ МЕСТА, КОТОРОГО ПРИЗНАК БОЛЬШЕ НЕ ВИДИТ, — МЁРТВОЕ ИМЯ: оно\n' +
+    'ничего не разрешает, зато прикроет будущую дыру, если та встанет на то\n' +
+    'же выражение. Когда признак становится точнее, имена снимаются вместе с\n' +
+    'его слепотой: кусок 160 убрал одиннадцать — они держались только на том,\n' +
+    'что признак шёл в объект, у которого читают одно поле.');
+
 правило(
     'ни один столбец базы не начинается с подчерка',
     П.сПодчерком.length === 0,
@@ -472,13 +479,22 @@ const вАтрибуте158 = П.вАтрибуте.filter(м => !названо
     'по ДОВОДАМ. Остальные под этим числом.');
 правило(
     'голых переменных в склейках с разметкой не больше замеренного',
-    П.переменных <= 1527,
-    'Голых переменных ' + П.переменных + ', замерено не больше 1527.\n' +
+    П.переменных <= 1525,
+    'Голых переменных ' + П.переменных + ', замерено не больше 1525.\n' +
     'ПЕРЕМЕННАЯ, В КОТОРУЮ ПОЛОЖИЛИ ПОЛЕ, ДЛЯ ПРИЗНАКА НЕВИДИМА: так адрес\n' +
     'афиши турнира попал в `style="…url(` мимо экранирования — поле положили\n' +
     'в `постер`, и признак увидел переменную, а не столбец. Нашлось чтением\n' +
     'при сборке пробы, а не прибором. Это число — мера слепоты, и следующий\n' +
     'заход её уменьшает.');
+правило(
+    'доводов, у которых зовущего нет в файле, не больше замеренного',
+    П.безЗовов <= 39,
+    'Таких доводов ' + П.безЗовов + ', замерено не больше 39.\n' +
+    'ЗА ДОВОД ОТВЕЧАЕТ ЗОВУЩИЙ, и признак идёт к нему — но только внутри\n' +
+    'ОДНОГО ФАЙЛА: зов из другого файла ему не виден, там другая область и\n' +
+    'другие имена. Это число — мера той границы: столько доводов попадают в\n' +
+    'разметку у функций, которых в своём файле никто не зовёт.');
+
 правило(
     'склеек, несущих разметку, не больше замеренного',
     П.склеек <= 2200,

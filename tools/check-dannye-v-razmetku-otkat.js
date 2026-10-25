@@ -21,7 +21,8 @@ fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
 
 const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js',
                 'js/tournament-detail.js', 'js/kslt-vremya.js', 'js/partners.js',
-                'js/courts.js', 'js/tournaments-overview.js', 'supabase/schema.sql'];
+                'js/courts.js', 'js/tournaments-overview.js', 'supabase/schema.sql',
+                'tools/check-dannye-v-razmetku.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -135,6 +136,20 @@ const ОТКАТЫ = [
      "постер ? ' style=\"--poster:url(' + KSLT_экранировать(постер) + ')\"' : ''",
      "постер ? ' style=\"--poster:url(' + постер + ')\"' : ''",
      'подстановка в атрибуте экранирована — кавычка там даёт обработчик'],
+
+    /* ── КУСОК 160: признак идёт из довода к зовущему ── */
+
+    ['передать поле доводом в функцию, которая его подставляет', 'js/kslt-vremya.js',
+     "    'use strict';",
+     "    'use strict';\n    function рисует160(что) { return '<p>' + что + '</p>'; }\n    function зовёт160(о) { document.body.innerHTML = рисует160(o.full_name); }\n    window.__зовёт160 = зовёт160;",
+     'столбец, который пишет человек, не идёт в разметку мимо экранирования'],
+
+    /* СТОРОЖ СТОРОЖИТ СВОЙ СПИСОК ИМЁН: имя для места, которого признак
+       больше не видит, ничего не разрешает, зато прикроет будущую дыру. */
+    ['завести мёртвое имя в списке названных мест', 'tools/check-dannye-v-razmetku.js',
+     "const НАЗВАННЫЕ_МЕСТА = [",
+     "const НАЗВАННЫЕ_МЕСТА = [\n    ['js/kslt-vremya.js', 'нет.такого.места', 'проба прувера'],",
+     'мёртвых имён в списке названных мест нет'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',
      "    'use strict';",
