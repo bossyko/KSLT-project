@@ -35,7 +35,15 @@ const СОВПАДАЮТ = [
     'images/news-covers/10.jpg',
     'js/contact-icons.js', 'js/country-utils.js', 'js/group-standings.js',
     'js/kslt-rules.js', 'js/match-score-texts.js', 'js/news-covers.js',
-    'js/site-content.js', 'js/tournament-slots.js'
+    'js/site-content.js', 'js/tournament-slots.js',
+    /* СВЕДЕНО 26.10, КУСОК 177 — три долга из девяти. Каждый прочитан, а не
+       скопирован: у `tokens.css` своих токенов не было ВОВСЕ (0 из 207), и
+       все восемь расходившихся значений в приложении либо не зовутся, либо
+       перебиты в `app.css`; у `phone.js` страны и функции те же, сайтовый
+       богаче (длина номера и группировка); в `bracket-draw.js` приложения
+       жила БЕДА, которую сайт уже починил — `if (S < 1)` вместо `if (S < 2)`
+       отдавал на последнем круге номера клеток 1.5, 2.5, 3.5. */
+    'css/tokens.css', 'js/phone.js', 'js/bracket-draw.js'
 ];
 
 /**
@@ -45,15 +53,12 @@ const СОВПАДАЮТ = [
 const РАЗОШЛИСЬ = {
     'index.html':                'своя оболочка приложения — законно',
     'js/supabase-config.js':     'свой адрес базы — законно',
-    'css/tokens.css':            'ДОЛГ: приложение на другой шкале кеглей и отступов',
     'js/auth.js':                'ДОЛГ: вход написан дважды',
     'js/rating-chart.js':        'ДОЛГ: отстала от сайта',
     'js/match-score.js':         'ДОЛГ: отстала от сайта',
     'js/tournament-register.js': 'ДОЛГ: отстала от сайта',
-    'js/phone.js':               'ДОЛГ: отстала от сайта',
     'js/account-restore.js':     'ДОЛГ: отстала от сайта',
-    'js/badge-celebration.js':   'ДОЛГ: отстала от сайта',
-    'js/bracket-draw.js':        'ДОЛГ: отстала от сайта'
+    'js/badge-celebration.js':   'ДОЛГ: отстала от сайта'
 };
 
 const ошибки = [];
