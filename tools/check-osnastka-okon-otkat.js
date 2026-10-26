@@ -87,7 +87,7 @@ const ОТКАТЫ = [
     ['завести новое окно без оснастки', 'js/kslt-vremya.js',
      "    'use strict';",
      "    'use strict';\n    function новоеОкно() {\n        var overlay = document.createElement('div');\n        overlay.className = 'vr-modal-overlay';\n        document.body.appendChild(overlay);\n    }\n    window.__новоеОкно = новоеОкно;",
-     'незапертых окон замеренные 17: 14 админских и 3 под вопросом, публичных ноль'],
+     'незапертых окон замеренные 15: 14 админских, одно названное, публичных ноль'],
 
     ['снять дом со страницы турнира', 'pages/tournament.html',
      'js/kslt-fokus.js?v=4',
