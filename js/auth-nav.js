@@ -367,7 +367,6 @@
                             if (overlay.__ksltСнять) { overlay.__ksltСнять(); overlay.__ksltСнять = null; }
                             overlay.classList.remove('active');
                             setTimeout(function() { overlay.remove(); }, 200);
-                            document.removeEventListener('keydown', onKey);
 
                             if (n.is_read) { if (onDone) onDone(); return; }
 
@@ -385,7 +384,6 @@
                                 if (onDone) onDone();
                             }).catch(function(e) { console.warn('[KSLT] notifications:', e); });
                         }
-                        function onKey(e) { if (e.key === 'Escape') close(); }
 
                         var кнопкаСчёта = overlay.querySelector('.site-notif-score');
                         if (кнопкаСчёта) {
@@ -406,10 +404,15 @@
                            окне — кнопки «Принять» и «Отклонить» вызова, то
                            есть оно ПИШЕТ В БАЗУ. Слепой обход по странице
                            из такого окна — нажатие вслепую. */
+                        /* ESCAPE ОТДАН ДОМУ, И СВОЙ СЛУШАТЕЛЬ СНЯТ (26.10, кусок 184).
+                           Здесь жили ДВА обработчика Escape сразу: свой `onKey` на
+                           `document` (навешивался при открытии, снимался при закрытии) и
+                           дом строкой ниже. ОДНО ПОНЯТИЕ, ДВА ОПРЕДЕЛЕНИЯ: нажатие
+                           закрывало окно дважды, и беда родилась бы ровно на шве — стоило
+                           одному из двух начать делать что-то ещё. */
                         overlay.__ksltСнять = window.KSLT_FOKUS.оснастить(overlay, { поEsc: close });
                         overlay.querySelector('.site-notif-close').addEventListener('click', close);
                         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
-                        document.addEventListener('keydown', onKey);
 
                         /**
                          * Ответ на вызов прямо из уведомления.
