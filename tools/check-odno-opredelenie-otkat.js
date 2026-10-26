@@ -20,6 +20,8 @@ const ФАЙЛЫ = [
     'css/pricing.css', 'css/sponsors.css', 'css/player.css',
     'js/kslt-mesta.js', 'js/rating-points.js', 'js/player.js',
     'js/kslt-toast.js', 'js/courts.js',
+    /* ДОБАВЛЕНЫ 26.10: на них стоят два правила про окна спроса. */
+    'js/admin/core/utils.js', 'js/tournament-register.js',
     /* ДОБАВЛЕН 26.10: на него переехали два отката про уведомление —
        `courts.js` выпал из списка потребителей куском 145. */
     'js/invite-player.js',
@@ -193,6 +195,29 @@ const ОТКАТЫ = [
 
 /* ЯКОРЬ ПЕРЕВЯЗАН 22.10: прежний вставлял копию перед `function showToast`,
    а её в кортах нет с 19.10. Вставляем перед первой живой функцией файла. */
+/* ЧЕТЫРЕ ОТКАТА НА ДВА ОКНА СПРОСА (26.10). Правила читают ОБА файла, и
+   откат ломает каждый по одному: иначе доказано было бы только одно из двух
+   мест, а разойтись может любое. */
+['админское окно спроса перестало отвечать «нет» при закрытии', 'js/admin/core/utils.js',
+ 'приЗакрытии: onCancel',
+ 'приЗакрытии: null',
+ 'оба окна спроса отвечают «нет», когда их закрывают'],
+
+['публичное окно спроса перестало отвечать «нет» по Escape', 'js/tournament-register.js',
+ 'поEsc: function () { close(false); }',
+ 'поEsc: function () { close(true); }',
+ 'оба окна спроса отвечают «нет», когда их закрывают'],
+
+['админское окно спроса снова отвечает дважды', 'js/admin/core/utils.js',
+ 'if (this.disabled) return;',
+ 'if (false) return;',
+ 'оба окна спроса дают один ответ на два нажатия'],
+
+['публичное окно спроса снова отвечает дважды', 'js/tournament-register.js',
+ 'if (answered) return;',
+ 'if (false) return;',
+ 'оба окна спроса дают один ответ на два нажатия'],
+
 ['вернуть своё окно уведомления в приглашение', 'js/invite-player.js',
  '    function showModal(title, text, btnLabel, btnHref, disclaimer) {',
  "    function showToastСвой(message) {\n        var toast = document.createElement('div');\n        toast.className = 'toast';\n        document.body.appendChild(toast);\n    }\n    function showModal(title, text, btnLabel, btnHref, disclaimer) {",
