@@ -649,7 +649,13 @@
         if (player && player.photo) {
             return '<img class="lm-avatar" src="' + KSLT_экранировать(player.photo) + '" alt="' + KSLT_экранировать(name) + '">';
         }
-        var initial = name ? name.charAt(0).toUpperCase() : '?';
+        /* ИНИЦИАЛ — ТОЖЕ ПОЛЕ ЧЕЛОВЕКА, ХОТЬ И ОДИН ЗНАК. `live_matches.player1_name`
+           пишет судья, и первым знаком может стоять `<` или `&`. ОДИН ЗНАК НЕ
+           ДЕЛАЕТ ЗНАЧЕНИЕ БЕЗОПАСНЫМ. Нашлось куском 169, когда признак
+           научился разворачивать местные переменные внутри функции: до этого
+           `initial` был для него непрозрачным, и вся функция считалась
+           экраном. */
+        var initial = name ? KSLT_экранировать(name.charAt(0).toUpperCase()) : '?';
         return '<div class="lm-avatar-placeholder" aria-hidden="true">' + initial + '</div>';
     }
 
