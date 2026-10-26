@@ -263,15 +263,15 @@
         var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal">' +
                 '<div class="ad-confirm-title">' + L.dblNtrpNeedTitle + '</div>' +
-                '<div class="ad-confirm-text" style="text-align:left;margin-bottom:14px;color:var(--text-secondary);">' +
+                '<div class="ad-confirm-text ad-vlevo ad-vtoroy ad-abzac-snizu">' +
                     A.esc(playerName) +
                     (singles ? ' \u00b7 ' + L.plrNtrpSingles + ' ' + A.esc(singles) : '') +
                 '</div>' +
-                '<div class="ad-field" style="text-align:left;">' +
+                '<div class="ad-field ad-vlevo">' +
                     '<label class="ad-field-label">' + L.plrNtrpDoubles + '</label>' +
                     '<select class="ad-field-input" id="adDblNtrpValue">' + A.ntrpOptions(null) + '</select>' +
                 '</div>' +
-                '<div class="ad-confirm-actions" style="gap:8px;margin-top:16px;">' +
+                '<div class="ad-confirm-actions ad-conf-actions-gap">' +
                     '<button class="ad-btn ad-btn-primary" id="adDblNtrpSave">' + L.save + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adDblNtrpCancel">' + L.cancel + '</button>' +
                 '</div>' +
@@ -443,7 +443,7 @@
         // Сначала выбор, кого добавляем: игрока с карточкой или гостя. Раньше
         // оба способа стояли на экране разом, и было непонятно, что заполнять
         var modalHtml =
-            '<div style="display:flex;flex-direction:column;gap:12px;min-width:320px;">' +
+            '<div class="ad-okno-stolb ad-okno-stolb-320">' +
                 '<div class="ad-mode-switch" id="adPartnerMode">' +
                     '<button type="button" class="on" data-mode="db">' + L.regAddFromDb.replace('+ ', '') + '</button>' +
                     '<button type="button" data-mode="guest">' + L.regGuest + '</button>' +
@@ -452,17 +452,17 @@
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.doublesPartnerSearch + '</label>' +
                         '<input type="text" class="ad-field-input" id="adPartnerSearch" placeholder="' + L.brkEnterName + '" autocomplete="off">' +
-                        '<div id="adPartnerResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
+                        '<div id="adPartnerResults" class="ad-poisk-spisok ad-poisk-spisok-180"></div>' +
                         '<input type="hidden" id="adPartnerSelectedId" value="">' +
                     '</div>' +
-                    '<div id="adPartnerCard" style="display:none;margin-top:8px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:8px;font-size:var(--fs-sm);color:var(--text-secondary);"></div>' +
+                    '<div id="adPartnerCard" class="ad-partner-card ad-skryt"></div>' +
                 '</div>' +
                 '<div class="ad-skryt" id="adPartnerGuestBlock">' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.doublesExtPartnerName + '</label>' +
                         '<input type="text" class="ad-field-input" id="adPartnerExtName" placeholder="' + L.doublesExtPartnerName + '">' +
                     '</div>' +
-                    '<div style="display:flex;gap:12px;margin-top:10px;">' +
+                    '<div class="ad-ryad-sverhu">' +
                         '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adPartnerExtNtrp" min="1.0" max="7.0" step="0.5" placeholder="3.0">' +
@@ -599,13 +599,13 @@
                             x.classList.toggle('on', x === кн);
                         });
                         var гость = кн.dataset.mode === 'guest';
-                        document.getElementById('adPartnerDbBlock').style.display = гость ? 'none' : '';
-                        document.getElementById('adPartnerGuestBlock').style.display = гость ? '' : 'none';
+                        document.getElementById('adPartnerDbBlock').classList.toggle('ad-skryt', гость);
+                        document.getElementById('adPartnerGuestBlock').classList.toggle('ad-skryt', !гость);
                         if (гость) {
                             hiddenInput.value = '';
                             searchInput.value = '';
                             resultsDiv.innerHTML = '';
-                            document.getElementById('adPartnerCard').style.display = 'none';
+                            document.getElementById('adPartnerCard').classList.add('ad-skryt');
                         } else {
                             document.getElementById('adPartnerExtName').value = '';
                             document.getElementById('adPartnerExtNtrp').value = '';
@@ -635,7 +635,7 @@
                         var рейтинг = ntrpПары(выбран) ? 'NTRP ' + ntrpПары(выбран) : L.dblNtrpNeedTitle;
                         карточка.innerHTML = A.esc(выбран.name) +
                             ' \u00B7 ' + пол + ' \u00B7 ' + рейтинг;
-                        карточка.style.display = '';
+                        карточка.classList.remove('ad-skryt');
                     }
                 }
             });
@@ -703,7 +703,7 @@
                     .limit(10);
                 var найдены = (res.data || []).filter(function(p) { return !(занятые && занятые[p.id]); });
                 if (!найдены.length) {
-                    список.innerHTML = '<div style="padding:8px;color:var(--text-muted);font-size:var(--fs-sm);">' +
+                    список.innerHTML = '<div class="ad-spisok-pusto ad-tiho">' +
                         L.brkPlayersNeNotFound + '</div>';
                     return;
                 }
@@ -715,11 +715,10 @@
                         : (ntrpПары(p) ? 'NTRP ' + ntrpПары(p) : '');
                     html += '<div class="ad-partner-search-item" data-player-id="' + p.id + '" ' +
                         'data-player-name="' + A.esc(имя) + '" ' +
-                        'style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:var(--fs-sm);' +
-                        'display:flex;justify-content:space-between;align-items:center;">' +
+                        '>' +
                         '<span>' + A.esc(имя) +
                             (вОчереди && вОчереди[p.id]
-                                ? ' <span style="color:var(--warning);font-size:var(--fs-xs);">' + L.regInQueue + '</span>'
+                                ? ' <span class="ad-poisk-meta ad-poisk-meta-chuzhoy">' + L.regInQueue + '</span>'
                                 : '') +
                         '</span>' +
                         (мета ? '<span class="ad-podpis">' + A.esc(мета) + '</span>' : '') +
@@ -930,14 +929,14 @@
                 '<label class="ad-field-label">' + подпись + '</label>' +
                 '<input type="text" class="ad-field-input" id="' + id + 'Search" placeholder="' +
                     L.brkEnterName + '" autocomplete="off">' +
-                '<div id="' + id + 'Results" style="max-height:150px;overflow-y:auto;margin-top:4px;"></div>' +
+                '<div id="' + id + 'Results" class="ad-poisk-spisok ad-poisk-spisok-150"></div>' +
                 '<input type="hidden" id="' + id + 'Id" value="">' +
             '</div>';
         };
 
         var html =
-            '<div style="display:flex;flex-direction:column;gap:14px;min-width:340px;">' +
-                '<div style="color:var(--text-secondary);font-size:var(--fs-sm);">' +
+            '<div class="ad-okno-stolb ad-okno-stolb-340">' +
+                '<div class="ad-vtoroy ad-podpis-sm">' +
                     L.regReplacePairHint + '</div>' +
                 поле(L.regReplaceMain, 'adPairFirst') +
                 поле(L.regReplacePartner, 'adPairSecond') +
@@ -1088,20 +1087,20 @@
         };
 
         var html =
-            '<div style="display:flex;flex-direction:column;gap:12px;min-width:340px;text-align:left;">' +
+            '<div class="ad-okno-stolb ad-okno-stolb-340 ad-vlevo">' +
                 /* В ОДИНОЧНОМ НАПАРНИКА НЕТ, И ПРОЧЕРКА ТОЖЕ.
                    Заголовок читался «Чынгыз Исматов — —»: второй прочерк
                    стоял на месте напарника, которого в одиночном турнире
                    не бывает. Замер 30.09 */
-                '<div style="font-size:var(--fs-sm);color:var(--text-primary);">' +
+                '<div class="ad-poisk-imya ad-podpis-sm">' +
                     A.esc(кто) + (напарник && напарник !== '\u2014'
                         ? ' \u2014 ' + A.esc(напарник) : '') +
                 '</div>' +
-                '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.5;">' +
+                '<ul class="ad-spisok-prichin">' +
                     причиныHtml +
                 '</ul>' +
                 (гость
-                    ? '<div style="display:flex;gap:12px;">' +
+                    ? '<div class="ad-ryad">' +
                         '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerNtrp + ' *</label>' +
                             '<input type="number" class="ad-field-input" id="adReviewNtrp" min="1.0" max="7.0" step="0.5" value="' +
@@ -1261,7 +1260,7 @@
         // гость. Место в сетке при замене остаётся за заявкой — меняется
         // только тот, кто выйдет на корт
         var modalHtml =
-            '<div style="display:flex;flex-direction:column;gap:12px;min-width:340px;">' +
+            '<div class="ad-okno-stolb ad-okno-stolb-340">' +
                 '<div class="ad-mode-switch" id="adReplaceMode">' +
                     '<button type="button"' + (естьОчередь ? ' class="on"' : '') + ' data-mode="queue">' +
                         L.regFromQueue + '</button>' +
@@ -1269,7 +1268,7 @@
                         L.regAddFromDb.replace('+ ', '') + '</button>' +
                     '<button type="button" data-mode="guest">' + L.regGuest + '</button>' +
                 '</div>' +
-                '<div id="adReplaceQueueBlock"' + (естьОчередь ? '' : ' style="display:none;"') + '>' +
+                '<div id="adReplaceQueueBlock"' + (естьОчередь ? '' : ' class="ad-skryt"') + '>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.regFromQueue + '</label>' +
                         (естьОчередь
@@ -1278,11 +1277,11 @@
                         '<input type="hidden" id="adReplaceQueueReg" value="">' +
                     '</div>' +
                 '</div>' +
-                '<div id="adReplaceDbBlock"' + (естьОчередь ? ' style="display:none;"' : '') + '>' +
+                '<div id="adReplaceDbBlock"' + (естьОчередь ? ' class="ad-skryt"' : '') + '>' +
                     '<div class="ad-field">' +
                         '<label class="ad-field-label">' + L.regFromDb + '</label>' +
                         '<input type="text" class="ad-field-input" id="adReplaceSearch" placeholder="' + L.regSearchPlayer + '" autocomplete="off">' +
-                        '<div id="adReplaceResults" style="max-height:180px;overflow-y:auto;margin-top:4px;"></div>' +
+                        '<div id="adReplaceResults" class="ad-poisk-spisok ad-poisk-spisok-180"></div>' +
                         '<input type="hidden" id="adReplaceSelectedId" value="">' +
                     '</div>' +
                 '</div>' +
@@ -1294,7 +1293,7 @@
                     // Страна, NTRP и пол — одним рядом и одного размера.
                     // Страна стояла отдельной широкой полосой с крошечным
                     // флагом посередине и была выше соседнего поля
-                    '<div style="display:flex;gap:12px;margin-top:10px;">' +
+                    '<div class="ad-ryad-sverhu">' +
                         '<div class="ad-field ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
                             полеСтраны('adReplaceExtCountry') +
@@ -1557,7 +1556,7 @@
                         var выбран = кн.dataset.mode;
                         Object.keys(блокиИсточника).forEach(function(имя) {
                             var б = блокиИсточника[имя];
-                            if (б) б.style.display = (имя === выбран) ? '' : 'none';
+                            if (б) б.classList.toggle('ad-skryt', имя !== выбран);
                         });
                         очиститьИсточники(выбран);
                     });
@@ -2835,7 +2834,7 @@
         }
 
         // Registrations panel
-        html += '<div class="ad-brk-panel" id="adBrkRegPanel" style="padding-top:8px;' + (activeTab !== 'registrations' ? 'display:none;' : '') + '">';
+        html += '<div class="ad-brk-panel' + (activeTab !== 'registrations' ? ' ad-skryt' : '') + '" id="adBrkRegPanel">';
         // Сетка сформирована — состав больше не трогаем: заявка это и есть
         // место в сетке, и убрать её значит оставить в матчах игрока, которого
         // в заявках уже нет
@@ -2856,7 +2855,7 @@
            «Пересчитать очки». Класс ставится ОДИН раз на панель, и клетки
            тише становятся краской, а не семнадцатью правками. */
         html += '<div class="ad-brk-panel' + (isTournamentCompleted ? ' ad-brk-zavershyon' : '') +
-            '" id="adBrkBracketPanel" style="padding-top:8px;' + (activeTab !== 'bracket' ? 'display:none;' : '') + '">';
+            (activeTab !== 'bracket' ? ' ad-skryt' : '') + '" id="adBrkBracketPanel">';
         if (isTournamentCompleted && hasMatches) {
             html += '<div class="ad-sched-note ad-sched-note-top">' + L.doneEditWarn + '</div>';
         }
@@ -2882,7 +2881,7 @@
 
         // Schedule panel
         if (hasMatches) {
-            html += '<div class="ad-brk-panel" id="adBrkSchedulePanel" style="' + (activeTab !== 'schedule' ? 'display:none;' : '') + '">';
+            html += '<div class="ad-brk-panel' + (activeTab !== 'schedule' ? ' ad-skryt' : '') + '" id="adBrkSchedulePanel">';
             // Кнопки выгрузки рисуем здесь, а ставим ниже — в одну строку с
             // «Сессиями»: две полосы кнопок одна над другой занимали место,
             // а примечание о времени запусков оказывалось между ними
@@ -2893,7 +2892,7 @@
 
         // Results panel (only for completed tournaments)
         if (isTournamentCompleted) {
-            html += '<div class="ad-brk-panel" id="adBrkResultsPanel" style="' + (activeTab !== 'results' ? 'display:none;' : '') + '">';
+            html += '<div class="ad-brk-panel' + (activeTab !== 'results' ? ' ad-skryt' : '') + '" id="adBrkResultsPanel">';
             html += renderResultsPanel(tournament, tournamentResults, playersMap, matches, registrations, isDbl);
             html += '<div class="ad-res-podval">' +
                 '<button class="ad-btn ad-btn-primary" id="adBrkRecalcPoints">' +
@@ -2901,8 +2900,8 @@
             html += '</div>';
 
             // News panel
-            html += '<div class="ad-brk-panel" id="adBrkNewsPanel" style="padding-top:8px;' + (activeTab !== 'news' ? 'display:none;' : '') + '">';
-            html += '<div id="adBrkNewsContent"><div style="text-align:center;padding:40px;color:var(--text-secondary);">⏳ ' + L.brkLoading + '</div></div>';
+            html += '<div class="ad-brk-panel' + (activeTab !== 'news' ? ' ad-skryt' : '') + '" id="adBrkNewsPanel">';
+            html += '<div id="adBrkNewsContent"><div class="ad-zagruzka">⏳ ' + L.brkLoading + '</div></div>';
             html += '</div>';
         }
 
@@ -2945,10 +2944,18 @@
                 container.querySelectorAll('[data-trn-nav]').forEach(function(t) { t.classList.remove('active'); });
                 tab.classList.add('active');
                 // Hide floating bar when switching away from registrations
-                if (panelTab !== 'registrations' && floatingBar) floatingBar.style.display = 'none';
-                // Toggle panels
-                document.getElementById('adBrkRegPanel').style.display = panelTab === 'registrations' ? '' : 'none';
-                document.getElementById('adBrkBracketPanel').style.display = panelTab === 'bracket' ? '' : 'none';
+                if (panelTab !== 'registrations' && floatingBar) floatingBar.classList.add('ad-skryt');
+                /* ОДНА КАРТА ВМЕСТО ПЯТИ СТРОК ПО ID (кусок 175): панель
+                   знает свой ключ, и состояние ставится классом, а не
+                   инлайном. Раньше здесь было пять записей `style.display`,
+                   и две из них не проверяли, существует ли панель. */
+                var ПАНЕЛИ = { registrations: 'adBrkRegPanel', bracket: 'adBrkBracketPanel',
+                               schedule: 'adBrkSchedulePanel', results: 'adBrkResultsPanel',
+                               news: 'adBrkNewsPanel' };
+                Object.keys(ПАНЕЛИ).forEach(function (ключ) {
+                    var панель = document.getElementById(ПАНЕЛИ[ключ]);
+                    if (панель) панель.classList.toggle('ad-skryt', ключ !== panelTab);
+                });
                 // У завершённого турнира админка открывается на «Результатах»,
                 // и сетка в этот момент спрятана: у скрытого блока все размеры
                 // нулевые, и матчи за места вставали слева. Считаем сдвиг
@@ -2958,13 +2965,8 @@
                         выровнятьМатчиЗаМеста(container);
                     });
                 }
-                var schedPanel = document.getElementById('adBrkSchedulePanel');
-                if (schedPanel) schedPanel.style.display = panelTab === 'schedule' ? '' : 'none';
-                var resPanel = document.getElementById('adBrkResultsPanel');
-                if (resPanel) resPanel.style.display = panelTab === 'results' ? '' : 'none';
                 var newsPanel = document.getElementById('adBrkNewsPanel');
                 if (newsPanel) {
-                    newsPanel.style.display = panelTab === 'news' ? '' : 'none';
                     // Lazy-load news panel on first open
                     if (panelTab === 'news' && !newsPanel.dataset.loaded) {
                         newsPanel.dataset.loaded = '1';
@@ -3036,12 +3038,12 @@
                         var r = String(a.dataset.roundKey).localeCompare(String(b.dataset.roundKey), 'ru');
                         return вниз ? -r : r;
                     });
-                    строки.forEach(function(с) { таблица.appendChild(с); с.style.display = ''; });
+                    строки.forEach(function(с) { таблица.appendChild(с); с.classList.remove('ad-skryt'); });
                     return;
                 }
 
                 строки.forEach(function(с) {
-                    с.style.display = (!выбор || с.dataset.roundKey === выбор) ? '' : 'none';
+                    с.classList.toggle('ad-skryt', !(!выбор || с.dataset.roundKey === выбор));
                 });
             });
         }
@@ -3316,7 +3318,7 @@
                     return;
                 }
                 var уже = notifySchedBtn.dataset.sent
-                    ? '<p style="margin:0 0 8px;">' + L.schedNotifiedAt + ' ' +
+                    ? '<p class="ad-abzac-snizu">' + L.schedNotifiedAt + ' ' +
                       A.esc(notifySchedBtn.dataset.sent) + '</p>' : '';
                 A.showConfirm(L.schedNotifyConfirm, уже, async function() {
                     notifySchedBtn.disabled = true;
@@ -3414,8 +3416,7 @@
 
         // ---- Floating action bar for registration removal ----
         var floatingBar = document.createElement('div');
-        floatingBar.className = 'ad-reg-floating-bar';
-        floatingBar.style.display = 'none';
+        floatingBar.className = 'ad-reg-floating-bar ad-skryt';
         floatingBar.innerHTML =
             '<span class="ad-reg-floating-count"></span>' +
             '<button class="ad-btn ad-btn-sm ad-btn-danger ad-reg-floating-remove">' + L.regRemoveSelected + '</button>';
@@ -3424,13 +3425,13 @@
         function updateFloatingBar() {
             var allChecked = container.querySelectorAll('.ad-reg-check:checked');
             if (allChecked.length > 0) {
-                floatingBar.style.display = '';
+                floatingBar.classList.remove('ad-skryt');
                 floatingBar.querySelector('.ad-reg-floating-count').textContent =
                     L.brkSelected + allChecked.length;
                 floatingBar.querySelector('.ad-reg-floating-remove').textContent =
                     L.regRemoveSelected + ' (' + allChecked.length + ')';
             } else {
-                floatingBar.style.display = 'none';
+                floatingBar.classList.add('ad-skryt');
             }
         }
 
@@ -3477,7 +3478,7 @@
                 // рядом, и промахнуться легко, а отказ уводит человека с
                 // турнира и отдаёт место очереди
                 A.showConfirm(L.regAskTitle,
-                    '<p style="margin:0;">' + L.regAskReject.replace('{кто}',
+                    '<p class="ad-bez-polya">' + L.regAskReject.replace('{кто}',
                         A.esc(ктоВЗаявке(regId, registrations, playersMap))) + '</p>',
                     async function() {
                         btn.disabled = true;
@@ -3500,7 +3501,7 @@
             btn.addEventListener('click', function() {
                 var regId = btn.dataset.regId;
                 A.showConfirm(L.regAskTitle,
-                    '<p style="margin:0;">' + L.regAskWaitlist.replace('{кто}',
+                    '<p class="ad-bez-polya">' + L.regAskWaitlist.replace('{кто}',
                         A.esc(ктоВЗаявке(regId, registrations, playersMap))) + '</p>',
                     async function() {
                         btn.disabled = true;
@@ -3555,13 +3556,13 @@
         if (extBtn) {
             extBtn.addEventListener('click', function() {
                 var modalHtml =
-                    '<div style="display:flex;flex-direction:column;gap:12px;min-width:300px;">' +
+                    '<div class="ad-okno-stolb ad-okno-stolb-300">' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.regExternalName + ' *</label>' +
                             '<input type="text" class="ad-field-input" id="adExtName" placeholder="' + L.brkIvanovIvan + '">' +
                         '</div>' +
                         // Страна, NTRP и пол — одним рядом и одного размера
-                        '<div style="display:flex;gap:12px;">' +
+                        '<div class="ad-ryad">' +
                             '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
                                 полеСтраны('adExtCountry') +
@@ -3580,12 +3581,12 @@
                             '</div>' +
                         '</div>' +
                         (isDbl ? (
-                        '<hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:4px 0;">' +
+                        '<hr class="ad-menu-razdel">' +
                         '<div class="ad-field">' +
                             '<label class="ad-field-label">' + L.doublesExtPartnerName + '</label>' +
                             '<input type="text" class="ad-field-input" id="adExtPartnerName" placeholder="' + L.doublesExtPartnerName + '">' +
                         '</div>' +
-                        '<div style="display:flex;gap:12px;">' +
+                        '<div class="ad-ryad">' +
                             '<div class="ad-field ad-rastyanut">' +
                                 '<label class="ad-field-label">' + L.regExternalCountry + '</label>' +
                                 полеСтраны('adExtPartnerCountry') +
@@ -3719,7 +3720,7 @@
                         A.showToast(L.regExternalAdded);
                     } else {
                         A.showNotice(L.regWaitlistTitle,
-                            '<p style="margin:0;">' + A.esc(extName) + ' \u2014 ' + L.regAddedToWaitlist + '</p>');
+                            '<p class="ad-bez-polya">' + A.esc(extName) + ' \u2014 ' + L.regAddedToWaitlist + '</p>');
                     }
                     renderBracketManagement(tournamentId, 'registrations');
                 }, 'Добавить');
@@ -3752,11 +3753,11 @@
                 /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
                    ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
                 var окноГот = A.оболочкаОкна({ сырое:
-                    '<div class="ad-confirm-modal" style="min-width:380px;">' +
+                    '<div class="ad-confirm-modal ad-okno-stolb-380">' +
                         '<div class="ad-confirm-title">' + L.regAddFromDb + '</div>' +
-                        '<div class="ad-confirm-text" style="text-align:left;">' +
+                        '<div class="ad-confirm-text ad-vlevo">' +
                             '<input type="text" class="ad-field-input" id="adDbSearchInput" placeholder="' + L.regSearchPlayer + '">' +
-                            '<div id="adDbSearchResults" style="max-height:300px;overflow-y:auto;margin-top:12px;"></div>' +
+                            '<div id="adDbSearchResults" class="ad-poisk-spisok ad-poisk-spisok-300 ad-abzac-sverhu"></div>' +
                         '</div>' +
                         '<div class="ad-confirm-actions">' +
                             '<button class="ad-btn ad-btn-secondary" id="adDbClose">' + L.cancel + '</button>' +
@@ -3802,7 +3803,7 @@
                             .limit(10);
                         var players = res.data || [];
                         if (players.length === 0) {
-                            resultsDiv.innerHTML = '<div style="color:var(--text-secondary);padding:12px;text-align:center;">' +
+                            resultsDiv.innerHTML = '<div class="ad-spisok-pusto">' +
                                 L.brkPlayersNeNotFound + '</div>';
                             return;
                         }
@@ -3817,17 +3818,17 @@
                                 : (p.gender === 'men' ? L.genderMen : '');
                             var чужой = полТурнира && p.gender && p.gender !== полТурнира;
                             var photoHtml = p.photo
-                                ? '<img src="' + A.esc(p.photo) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
-                                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:var(--fs-sm);">—</div>';
+                                ? '<img src="' + A.esc(p.photo) + '" class="ad-poisk-foto">'
+                                : '<div class="ad-poisk-bukva">—</div>';
                             var nameDisplay = p.name;
-                            html += '<div data-player-id="' + p.id + '" data-gender="' + (p.gender || '') + '" data-player-name="' + A.esc(nameDisplay) + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:' + (alreadyIn ? 'default' : 'pointer') + ';opacity:' + (alreadyIn ? '0.5' : '1') + ';" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
+                            html += '<div data-player-id="' + p.id + '" data-gender="' + (p.gender || '') + '" data-player-name="' + A.esc(nameDisplay) + '" class="ad-poisk-stroka' + (alreadyIn ? ' ad-poisk-stroka-zanyat' : '') + '" ' + (alreadyIn ? '' : 'data-can-add="1"') + '>' +
                                 photoHtml +
                                 '<div class="ad-rastyanut">' +
-                                    '<div style="font-weight:500;color:var(--text-primary);">' + A.esc(nameDisplay) + '</div>' +
-                                    '<div style="font-size:var(--fs-xs);color:' + (чужой ? 'var(--warning)' : 'var(--text-secondary)') + ';">' +
+                                    '<div class="ad-poisk-imya">' + A.esc(nameDisplay) + '</div>' +
+                                    '<div class="ad-poisk-meta' + (чужой ? ' ad-poisk-meta-chuzhoy' : '') + '">' +
                                         (полLabel ? полLabel + ' · ' : '') + catLabel + (ntrpLabel ? ' · ' + ntrpLabel : '') + '</div>' +
                                 '</div>' +
-                                (alreadyIn ? '<span style="font-size:var(--fs-xs);color:var(--accent);">' + L.regAlreadyRegistered + '</span>' : '') +
+                                (alreadyIn ? '<span class="ad-uzhe-zapisan">' + L.regAlreadyRegistered + '</span>' : '') +
                             '</div>';
                         });
                         resultsDiv.innerHTML = html;
@@ -3847,7 +3848,7 @@
                                 if (полТурнира && пол && пол !== полТурнира) {
                                     var имя = row.dataset.playerName || '';
                                     A.showConfirm(L.regGenderWarnTitle,
-                                        '<p style="margin:0;">' + A.esc(имя) + ' — ' +
+                                        '<p class="ad-bez-polya">' + A.esc(имя) + ' — ' +
                                         (пол === 'women' ? L.genderWomen : L.genderMen) + '. ' +
                                         L.regGenderWarn + '</p>',
                                         function() { добавить(); }, L.regGenderWarnOk);
@@ -3892,7 +3893,7 @@
                                 добавлено++;
                                 addedAny = true;
                                 if (вСетку) {
-                                    A.showToastL.brkMsgPlayerAdded;
+                                    A.showToast(L.brkMsgPlayerAdded);
                                 } else {
                                     // Лист ожидания — новость не мимолётная,
                                     // показываем окном, а не всплывашкой. Окно
@@ -3900,7 +3901,7 @@
                                     // живут, и второе снесло бы первое рывком
                                     overlay.remove();
                                     A.showNotice(L.regWaitlistTitle,
-                                        '<p style="margin:0;">' + A.esc(row.dataset.playerName || '') +
+                                        '<p class="ad-bez-polya">' + A.esc(row.dataset.playerName || '') +
                                         ' \u2014 ' + L.regAddedToWaitlist + '</p>');
                                 }
                                 // Список под окном перерисовываем сразу: раньше
@@ -3908,7 +3909,7 @@
                                 renderBracketManagement(tournamentId, 'registrations');
                                 row.removeAttribute('data-can-add');
                                 row.querySelector('[style*="flex:1"]').insertAdjacentHTML('afterend',
-                                    '<span style="font-size:var(--fs-xs);color:var(--accent);">' + L.regAlreadyRegistered + '</span>');
+                                    '<span class="ad-uzhe-zapisan">' + L.regAlreadyRegistered + '</span>');
                             }
                         });
                     }, 300);
@@ -3965,7 +3966,7 @@
             });
 
             var namesList = names.map(function(n) { return '• ' + n; }).join('<br>');
-            var confirmText = '<div style="text-align:left;margin-top:8px;max-height:200px;overflow-y:auto;font-size:var(--fs-sm);line-height:1.6;">' + namesList + '</div>';
+            var confirmText = '<div class="ad-spisok-imyon">' + namesList + '</div>';
 
             A.showConfirm(L.regRemoveConfirm, confirmText, async function() {
                 await removeRegistrations(ids, tournamentId);
@@ -4384,9 +4385,8 @@
                 var разошлись = составыРазошлись(matches, registrations, playersMap);
                 if (разошлись.length) {
                     A.showNotice(L.finalizeMismatchTitle,
-                        '<p style="margin:0 0 10px;">' + L.finalizeMismatchText + '</p>' +
-                        '<ul style="margin:0;padding-left:18px;color:var(--text-secondary);' +
-                            'font-size:var(--fs-sm);line-height:1.6;">' +
+                        '<p class="ad-abzac-snizu">' + L.finalizeMismatchText + '</p>' +
+                        '<ul class="ad-spisok-prichin ad-spisok-prichin-prostorno">' +
                             разошлись.map(function(с) { return '<li>' + A.esc(с) + '</li>'; }).join('') +
                         '</ul>', null, 'warn');
                     return;
@@ -4480,22 +4480,22 @@
         var html = '<h3 class="ad-reg-section-title ad-reg-blok-title">' + L.regChangesTitle +
             ' <span class="ad-badge">' + строки.length + '</span></h3>' +
             '<div class="ad-table-card ad-table-scroll"><table class="ad-table"><thead><tr>' +
-                '<th style="width:150px;">' + L.regChangesWhen + '</th>' +
-                '<th style="width:120px;">' + L.regChangesSide + '</th>' +
+                '<th class="ad-chg-when">' + L.regChangesWhen + '</th>' +
+                '<th class="ad-chg-side">' + L.regChangesSide + '</th>' +
                 '<th>' + L.regChangesWho + '</th>' +
-                '<th style="width:180px;">' + L.regChangesBy + '</th>' +
+                '<th class="ad-chg-by">' + L.regChangesBy + '</th>' +
             '</tr></thead><tbody>';
 
         строки.forEach(function(r) {
             var было = кто[r.old_player_id] || r.old_name || '\u2014';
             var стало = кто[r.new_player_id] || r.new_name || '\u2014';
             html += '<tr>' +
-                '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
+                '<td class="ad-chg-cell-tihiy ad-chg-nowrap">' +
                     датаВремя(r.created_at) + '</td>' +
-                '<td style="font-size:var(--fs-xs);">' + (подписьСтороны[r.side] || r.side) + '</td>' +
+                '<td class="ad-chg-cell">' + (подписьСтороны[r.side] || r.side) + '</td>' +
                 '<td>' + A.esc(было) + ' <span class="ad-reg-cell-muted">\u2192</span> ' +
-                    '<span style="color:var(--accent);">' + A.esc(стало) + '</span></td>' +
-                '<td style="font-size:var(--fs-xs);color:var(--text-secondary);">' +
+                    '<span class="ad-accent">' + A.esc(стало) + '</span></td>' +
+                '<td class="ad-chg-cell-tihiy">' +
                     A.esc(авторы[r.changed_by] || '\u2014') + '</td>' +
             '</tr>';
         });
@@ -4929,8 +4929,8 @@
            Challenger читается как восемнадцатое место в Challenger. */
         var rankVal = isExternal ? '—' : (pmEntry.rank
             ? (pmEntry.rankOwn ? String(pmEntry.rank)
-                : '<span title="' + A.escL.brkTipPlaceVSvoey +
-                  '" style="color:var(--text-secondary);">' + pmEntry.rank + '</span>')
+                : '<span title="' + A.esc(L.brkTipPlaceVSvoey) +
+                  '" class="ad-vtoroy">' + pmEntry.rank + '</span>')
             : '—');
         // Время подачи — коротко: день, месяц и часы с минутами. Год и секунды
         // занимали полстолбца, а с четырьмя кнопками действий строка
@@ -5043,7 +5043,7 @@
                 partnerDisplay = A.esc(reg.partner_external_name) +
                     ' <span class="ad-reg-mark ad-reg-mark-ext">EXT</span>';
             } else {
-                partnerDisplay = '<span style="color:var(--text-muted);font-style:italic;">' + L.doublesNoPartner + '</span>' +
+                partnerDisplay = '<span class="ad-tiho ad-kursiv">' + L.doublesNoPartner + '</span>' +
                     '<br><button class="ad-btn-add-partner" data-reg-id="' + reg.id + '"' + (заморожено ? ' disabled' : '') + '>+ ' + L.doublesAddPartner + '</button>';
             }
             partnerTd = '<td class="ad-col-partner ad-reg-partner">' + partnerDisplay + '</td>';
@@ -5053,7 +5053,7 @@
             // 8.75, а округление до десятых превращало её в 8.8 — и пара
             // выглядела как не проходящая по допуску
             var combinedNtrp = (playerNtrp || 0) + (partnerNtrp || 0);
-            combinedNtrpTd = '<td class="ad-reg-ntrp ad-col-sum" style="color:var(--accent);">' +
+            combinedNtrpTd = '<td class="ad-reg-ntrp ad-col-sum ad-accent">' +
                 дробь(combinedNtrp) + '</td>';
         }
 
@@ -7457,8 +7457,8 @@
         var ждутРешения = approved.filter(ждётРешения);
         if (ждутРешения.length) {
             A.showNotice(L.regGenderReview,
-                '<p style="margin:0;">' + L.regGenderReviewHint + '</p>' +
-                '<p style="margin:8px 0 0;">' + L.regGenderReview + ': ' + ждутРешения.length + '</p>',
+                '<p class="ad-bez-polya">' + L.regGenderReviewHint + '</p>' +
+                '<p class="ad-abzac-sverhu">' + L.regGenderReview + ': ' + ждутРешения.length + '</p>',
                 null, 'warn');
             return;
         }
@@ -7486,8 +7486,8 @@
                 return r.external_name || r.id;
             }).join(', ');
             A.showNotice(L.drawNoCardTitle,
-                '<p style="margin:0;">' + L.drawNoCardHint + '</p>' +
-                '<p style="margin:8px 0 0;">' + A.esc(имена) +
+                '<p class="ad-bez-polya">' + L.drawNoCardHint + '</p>' +
+                '<p class="ad-abzac-sverhu">' + A.esc(имена) +
                 (безКарточки.length > 8 ? ' … +' + (безКарточки.length - 8) : '') + '</p>',
                 null, 'warn');
             return;
@@ -8393,8 +8393,8 @@
         var метка = 'IG' + (матч.match_order || 1);
 
         A.showConfirm(L.igCancelTitle,
-            '<p style="margin:0 0 10px;">' + L.igCancelText + '</p>' +
-            '<p style="margin:0;color:var(--text-secondary);font-size:var(--fs-sm);">' +
+            '<p class="ad-abzac-snizu">' + L.igCancelText + '</p>' +
+            '<p class="ad-bez-polya ad-vtoroy ad-podpis-sm">' +
                 L.igCancelWho + ' ' + A.esc(кто) + '</p>',
             async function() {
                 // 1. Клетка, ждавшая победителя, больше никого не ждёт: метку
@@ -9512,10 +9512,10 @@
         var hasCandidates = has3PlayerGroups && candidateCount > 0;
 
 
-        var infoHtml = '<p style="margin-bottom:8px;">' + L.igDirectQualifiers + ': <b>' + directCount + '</b></p>';
+        var infoHtml = '<p>' + L.igDirectQualifiers + ': <b>' + directCount + '</b></p>';
         if (hasCandidates) {
-            infoHtml += '<p style="margin-bottom:8px;">' + L.igCandidates + ': <b>' + candidateCount + '</b></p>';
-            infoHtml += '<p style="margin-bottom:8px;">' + L.candidateFreeSlots + ': <b>' + freeSlots + '</b></p>';
+            infoHtml += '<p>' + L.igCandidates + ': <b>' + candidateCount + '</b></p>';
+            infoHtml += '<p>' + L.candidateFreeSlots + ': <b>' + freeSlots + '</b></p>';
         }
 
         /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
@@ -9523,13 +9523,13 @@
         var окноГот = A.оболочкаОкна({ сырое:
             '<div class="ad-confirm-modal">' +
                 '<div class="ad-confirm-title">' + L.playoffFormatTitle + '</div>' +
-                '<div class="ad-confirm-text" style="text-align:left;margin-bottom:16px;color:var(--text-secondary);">' + infoHtml + '</div>' +
-                '<div class="ad-confirm-actions" style="flex-direction:column;gap:8px;">' +
+                '<div class="ad-confirm-text ad-conf-info">' + infoHtml + '</div>' +
+                '<div class="ad-confirm-actions ad-conf-actions-col">' +
                     (hasCandidates
-                        ? '<button class="ad-btn ad-btn-primary" id="adFormatIG" style="width:100%;">' + L.playoffWithIG + '</button>'
+                        ? '<button type="button" class="ad-btn ad-btn-primary ad-btn-vsya-shirina" id="adFormatIG">' + L.playoffWithIG + '</button>'
                         : '') +
-                    '<button class="ad-btn ' + (hasCandidates ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adFormatDirect" style="width:100%;">' + L.playoffDirect + '</button>' +
-                    '<button class="ad-btn ad-btn-secondary" id="adFormatCancel" style="width:100%;">' + L.cancel + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-vsya-shirina ' + (hasCandidates ? 'ad-btn-secondary' : 'ad-btn-primary') + '" id="adFormatDirect">' + L.playoffDirect + '</button>' +
+                    '<button type="button" class="ad-btn ad-btn-secondary ad-btn-vsya-shirina" id="adFormatCancel">' + L.cancel + '</button>' +
                 '</div>' +
             '</div>' });
         var overlay = окноГот.overlay;
@@ -9656,12 +9656,12 @@
                 : 'ID:' + c.playerId;
             var groupLetter = String.fromCharCode(65 + c.groupIdx);
             rowsHtml +=
-                '<tr style="border-bottom:1px solid var(--border-subtle, #222);">' +
-                    '<td style="padding:8px 10px;color:var(--text-primary, #fff);">' + pName + '</td>' +
-                    '<td style="padding:8px 10px;text-align:center;color:var(--accent);font-weight:600;">' + groupLetter + '</td>' +
-                    '<td style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);">' + c.wins + '-' + (c.losses || 0) + '</td>' +
-                    '<td style="padding:8px 10px;">' +
-                        '<select data-candidate-idx="' + ci + '" style="padding:5px 10px;font-size:var(--fs-sm);background:var(--bg-primary, #111);color:var(--text-primary, #fff);border:1px solid var(--border-subtle, #333);border-radius:var(--radius-sm);cursor:pointer;outline:none;">' +
+                '<tr>' +
+                    '<td>' + pName + '</td>' +
+                    '<td class="ad-cand-group">' + groupLetter + '</td>' +
+                    '<td class="ad-cand-wl">' + c.wins + '-' + (c.losses || 0) + '</td>' +
+                    '<td>' +
+                        '<select class="ad-cand-select" data-candidate-idx="' + ci + '">' +
                             '<option value="auto"' + (defaultActions[ci] === 'auto' ? ' selected' : '') + '>' + L.candidateActionAuto + '</option>' +
                             '<option value="ig"' + (defaultActions[ci] === 'ig' ? ' selected' : '') + '>' + L.candidateActionIG + '</option>' +
                             '<option value="out">' + L.candidateActionOut + '</option>' +
@@ -9673,23 +9673,25 @@
         /* ОБОЛОЧКА ОДНА НА АДМИНКУ: role, подпись диктору, фокус,
            ловушка Tab, возврат фокуса, Esc и клик мимо — её работа. */
         var окноГот = A.оболочкаОкна({ сырое:
-            '<div class="ad-confirm-modal" style="max-width:540px;text-align:left;">' +
-                '<div class="ad-confirm-title" style="text-align:center;font-size:var(--fs-md);margin-bottom:12px;">' + L.candidateSelectionTitle + '</div>' +
-                '<p style="text-align:center;color:var(--text-secondary, #aaa);margin-bottom:16px;font-size:var(--fs-sm);">' +
-                    L.candidateFreeSlots + ': <b style="color:var(--accent);">' + freeSlots + '</b>' +
+            '<div class="ad-confirm-modal ad-cand-modal">' +
+                '<div class="ad-confirm-title ad-cand-title">' + L.candidateSelectionTitle + '</div>' +
+                '<p class="ad-cand-lead">' +
+                    L.candidateFreeSlots + ': <b class="ad-cand-slots">' + freeSlots + '</b>' +
                 '</p>' +
-                '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">' +
-                    '<thead><tr style="border-bottom:2px solid var(--border-subtle, #333);">' +
-                        '<th style="padding:8px 10px;text-align:left;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.brkPlayer + '</th>' +
-                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateGroup + '</th>' +
-                        '<th style="padding:8px 10px;text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.candidateWL + '</th>' +
-                        '<th style="padding:8px 10px;color:var(--text-secondary, #aaa);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.5px;">' + L.loyAction + '</th>' +
+                /* ТАБЛИЦА СИСТЕМНАЯ: `.ad-table` держит шапку, отступы и
+                   краски для всей админки — одно определение на понятие. */
+                '<table class="ad-table ad-cand-table">' +
+                    '<thead><tr>' +
+                        '<th>' + L.brkPlayer + '</th>' +
+                        '<th class="ad-cand-group">' + L.candidateGroup + '</th>' +
+                        '<th class="ad-cand-wl">' + L.candidateWL + '</th>' +
+                        '<th>' + L.loyAction + '</th>' +
                     '</tr></thead>' +
                     '<tbody>' + rowsHtml + '</tbody>' +
                 '</table>' +
-                '<div id="adCandidateSummary" style="text-align:center;color:var(--text-secondary, #aaa);font-size:var(--fs-sm);margin-bottom:8px;padding:8px;background:var(--bg-primary, #111);border-radius:var(--radius-sm);"></div>' +
-                '<div id="adCandidateError" style="text-align:center;color:var(--danger, var(--danger));font-size:var(--fs-sm);margin-bottom:8px;display:none;"></div>' +
-                '<div class="ad-confirm-actions" style="margin-top:16px;">' +
+                '<div id="adCandidateSummary" class="ad-cand-summary"></div>' +
+                '<div id="adCandidateError" class="ad-cand-error"></div>' +
+                '<div class="ad-confirm-actions ad-score-block">' +
                     '<button class="ad-btn ad-btn-primary" id="adCandidateConfirm">' + L.candidateConfirm + '</button>' +
                     '<button class="ad-btn ad-btn-secondary" id="adCandidateCancel">' + L.cancel + '</button>' +
                 '</div>' +
@@ -9728,7 +9730,7 @@
                 err = L.candidateOverflowError;
             }
             errorEl.textContent = err;
-            errorEl.style.display = err ? 'block' : 'none';
+            errorEl.classList.toggle('ad-vidno', !!err);
             document.getElementById('adCandidateConfirm').disabled = !!err;
         }
         updateSummary();
@@ -10720,7 +10722,7 @@
         var старт1 = tournament.start_time ? tournament.start_time.slice(0, 5) : '09:00';
 
         var html =
-            '<div style="display:flex;gap:16px;margin-bottom:14px;">' +
+            '<div class="ad-sess-ryad">' +
                 '<div class="ad-field ad-rastyanut">' +
                     '<label class="ad-field-label">' + L.sessFirst + '</label>' +
                     '<input type="text" class="ad-field-input" id="adSess1" value="' + старт1 + '" maxlength="5" placeholder="09:00">' +
@@ -10741,7 +10743,7 @@
                     '</label>';
                 }).join('') +
             '</div>' +
-            '<div class="ad-qual-note" id="adSessHint" style="margin-top:12px;"></div>';
+            '<div class="ad-qual-note ad-abzac-sverhu" id="adSessHint"></div>';
 
         A.showConfirm(L.sessTitle, html, async function() {
             var поле1 = document.getElementById('adSess1');
@@ -11197,10 +11199,10 @@
                чтением собственного diff до прогона. Второе семейство
                сводится с первым ОТДЕЛЬНЫМ куском, не этим. */
             overlay.innerHTML =
-                '<div class="ad-modal" style="max-width:640px;">' +
+                '<div class="ad-modal ad-modal-640">' +
                     '<div class="ad-modal-header"><h3>' + A.esc(заголовок) + '</h3></div>' +
                     '<div class="ad-modal-body">' +
-                        '<p style="margin-bottom:12px;">' +
+                        '<p class="ad-abzac-snizu">' +
                         L.brkUEtihMatchey +
                         '</p>' +
                         (список.length
@@ -11299,15 +11301,15 @@
             var idTB1 = 'adS' + setNum + 'TB1';
             var idTB2 = 'adS' + setNum + 'TB2';
             return '<div class="ad-score-set-row" data-set="' + setNum + '" id="adSetRow' + setNum + '">' +
-                '<label class="ad-field-label" style="min-width:52px;text-align:right;" id="adSetLabel' + setNum + '">' +
+                '<label class="ad-field-label ad-score-set-label" id="adSetLabel' + setNum + '">' +
                     L.brkSet + setNum + '</label>' +
                 '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id1 + '" value="' + vals[0] + '">' +
-                '<span style="font-weight:600;">:</span>' +
+                '<span class="ad-score-colon">:</span>' +
                 '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-set-game" id="' + id2 + '" value="' + vals[1] + '">' +
-                '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap" style="display:none;">' +
-                    '<span style="font-size:var(--fs-2xs);color:var(--text-secondary);margin-left:8px;">TB</span>' +
+                '<span class="ad-tb-wrap" id="' + idTB1 + 'Wrap">' +
+                    '<span class="ad-score-tb-label">TB</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB1 + '" value="' + vals[2] + '">' +
-                    '<span style="font-weight:600;font-size:var(--fs-2xs);">:</span>' +
+                    '<span class="ad-score-tb-colon">:</span>' +
                     '<input type="text" inputmode="numeric" maxlength="2" class="ad-field-input ad-score-input ad-tb-input" id="' + idTB2 + '" value="' + vals[3] + '">' +
                 '</span>' +
             '</div>';
@@ -11318,17 +11320,17 @@
         overlay.innerHTML =
             // Окно чуть шире: в парном турнире в заголовке два имени через
             // косую черту, и в 400 точек они не помещались
-            '<div class="ad-modal" style="max-width:460px;">' +
+            '<div class="ad-modal ad-modal-score">' +
                 '<div class="ad-modal-header">' +
                     '<h3>' + L.enterScore + '</h3>' +
                     '<button class="ad-modal-close" id="adScoreClose" aria-label="' + L.modalClose + '">&times;</button>' +
                 '</div>' +
                 '<div class="ad-modal-body">' +
-                    '<div style="text-align:center;margin-bottom:16px;">' +
-                        '<div style="font-weight:600;">' + A.esc(p1Name) + (displaySeed1 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + displaySeed1 + ']</span>' : '') + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:var(--fs-xs);margin:4px 0;">' + L.vsLabel + '</div>' +
-                        '<div style="font-weight:600;">' + A.esc(p2Name) + (displaySeed2 ? ' <span style="color:var(--accent);font-size:var(--fs-2xs);">[' + displaySeed2 + ']</span>' : '') + '</div>' +
-                        '<div style="color:var(--text-secondary);font-size:var(--fs-2xs);margin-top:8px;">' +
+                    '<div class="ad-score-head">' +
+                        '<div class="ad-score-player">' + A.esc(p1Name) + (displaySeed1 ? ' <span class="ad-score-seed">[' + displaySeed1 + ']</span>' : '') + '</div>' +
+                        '<div class="ad-score-vs">' + L.vsLabel + '</div>' +
+                        '<div class="ad-score-player">' + A.esc(p2Name) + (displaySeed2 ? ' <span class="ad-score-seed">[' + displaySeed2 + ']</span>' : '') + '</div>' +
+                        '<div class="ad-score-hint">' +
                             L.brkScorePishiSo + '</div>' +
                     '</div>' +
                     '<div id="adSetsContainer">' +
@@ -11336,15 +11338,15 @@
                         setRowHtml(2, sv[1]) +
                         setRowHtml(3, sv[2]) +
                     '</div>' +
-                    '<div id="adSetButtons" style="display:flex;gap:8px;justify-content:center;margin-top:8px;">' +
-                        '<button class="ad-btn ad-btn-secondary" id="adAddSet" style="font-size:var(--fs-xs);padding:4px 12px;">' + L.addSet + '</button>' +
-                        '<button class="ad-btn ad-btn-secondary" id="adRemoveSet" style="font-size:var(--fs-xs);padding:4px 12px;">' + L.removeSet + '</button>' +
-                        '<button class="ad-btn ad-btn-secondary" id="adSuperTb" style="font-size:var(--fs-xs);padding:4px 12px;">' +
+                    '<div id="adSetButtons" class="ad-score-setbtns">' +
+                        '<button type="button" class="ad-btn ad-btn-secondary ad-score-minibtn" id="adAddSet">' + L.addSet + '</button>' +
+                        '<button type="button" class="ad-btn ad-btn-secondary ad-score-minibtn" id="adRemoveSet">' + L.removeSet + '</button>' +
+                        '<button type="button" class="ad-btn ad-btn-secondary ad-score-minibtn" id="adSuperTb">' +
                             L.brkSuperTb + '</button>' +
                     '</div>' +
-                    '<div style="margin-top:16px;">' +
-                        '<label class="ad-field-label" style="text-align:center;display:block;margin-bottom:6px;">' + L.matchOutcome + '</label>' +
-                        '<div id="adOutcomeChips" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">' +
+                    '<div class="ad-score-block">' +
+                        '<label class="ad-field-label ad-score-label-center">' + L.matchOutcome + '</label>' +
+                        '<div id="adOutcomeChips" class="ad-score-chips">' +
                             '<button type="button" class="ad-outcome-chip' + (!existingOutcome ? ' active' : '') + '" aria-pressed="' + (!existingOutcome ? 'true' : 'false') + '" data-outcome="">' + L.outcomeNormal + '</button>' +
                             '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'RET' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'RET' ? 'true' : 'false') + '" data-outcome="RET">' + L.outcomeRET + '</button>' +
                             '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'W/O' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'W/O' ? 'true' : 'false') + '" data-outcome="W/O">' + L.outcomeWO + '</button>' +
@@ -11352,23 +11354,23 @@
                             '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'NA' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'NA' ? 'true' : 'false') + '" data-outcome="NA">N/A</button>' +
                         '</div>' +
                     '</div>' +
-                    '<div id="adRetiredBlock" style="margin-top:12px;text-align:center;display:' + (existingOutcome ? 'block' : 'none') + ';">' +
+                    '<div id="adRetiredBlock" class="ad-score-retired' + (existingOutcome ? ' ad-vidno' : '') + '">' +
                         '<label class="ad-field-label">' + L.whoRetired + '</label>' +
-                        '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">' +
-                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP1Id ? ' active' : '') + '" data-retired="' + displayP1Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
-                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP2Id ? ' active' : '') + '" data-retired="' + displayP2Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
+                        '<div class="ad-score-btn-col">' +
+                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP1Id ? ' active' : '') + '" data-retired="' + displayP1Id + '">' + A.esc(p1Name) + '</button>' +
+                            '<button class="ad-btn ad-btn-secondary ad-retired-btn' + (existingRetiredId === displayP2Id ? ' active' : '') + '" data-retired="' + displayP2Id + '">' + A.esc(p2Name) + '</button>' +
                         '</div>' +
                         '<input type="hidden" id="adRetiredPlayer" value="' + (existingRetiredId || '') + '">' +
                     '</div>' +
-                    '<div style="margin-top:12px;text-align:center;">' +
+                    '<div class="ad-score-winner">' +
                         '<label class="ad-field-label">' + L.matchWinner + '</label>' +
                         // В столбик и во всю ширину: имена пары в строку не
                         // помещались и вылезали за края окна
-                        '<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">' +
-                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p1Name) + '</button>' +
-                            '<button class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '" style="font-size:var(--fs-sm);padding:8px 14px;white-space:normal;line-height:1.3;">' + A.esc(p2Name) + '</button>' +
+                        '<div class="ad-score-btn-col">' +
+                            '<button type="button" class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP1Id + '">' + A.esc(p1Name) + '</button>' +
+                            '<button type="button" class="ad-btn ad-btn-secondary ad-winner-btn" data-winner="' + displayP2Id + '">' + A.esc(p2Name) + '</button>' +
                         '</div>' +
-                        '<div id="adWinnerDisplay" style="padding:6px 0 0;font-size:var(--fs-base);"></div>' +
+                        '<div id="adWinnerDisplay" class="ad-score-winner-display"></div>' +
                         '<input type="hidden" id="adScoreWinner" value="' + (match.winner_id || '') + '">' +
                         '<input type="hidden" id="adSelectedOutcome" value="' + (existingOutcome || '') + '">' +
                     '</div>' +
@@ -11389,10 +11391,10 @@
         function updateSetsVisibility() {
             for (var s = 1; s <= 3; s++) {
                 var row = document.getElementById('adSetRow' + s);
-                if (row) row.style.display = s <= currentSets ? '' : 'none';
+                if (row) row.classList.toggle('ad-skryt', s > currentSets);
             }
-            document.getElementById('adAddSet').style.display = currentSets < 3 ? '' : 'none';
-            document.getElementById('adRemoveSet').style.display = currentSets > 1 ? '' : 'none';
+            document.getElementById('adAddSet').classList.toggle('ad-skryt', currentSets >= 3);
+            document.getElementById('adRemoveSet').classList.toggle('ad-skryt', currentSets <= 1);
             // Clear hidden sets
             for (var s = currentSets + 1; s <= 3; s++) {
                 var p1Input = document.getElementById('adS' + s + 'P1');
@@ -11448,7 +11450,7 @@
             var кн = document.getElementById('adSuperTb');
             if (кн) кн.classList.toggle('active', _суперТБ);
             var обёртка = document.getElementById('adS3TB1Wrap');
-            if (обёртка && _суперТБ) обёртка.style.display = 'none';
+            if (обёртка && _суперТБ) обёртка.classList.remove('ad-vidno');
         }
 
         document.getElementById('adSuperTb').addEventListener('click', function() {
@@ -11475,12 +11477,13 @@
                 var v1 = parseInt(p1El.value) || 0;
                 var v2 = parseInt(p2El.value) || 0;
                 var tbWrap = document.getElementById('adS' + s + 'TB1Wrap');
-                if (tbWrap && s === 3 && _суперТБ) { tbWrap.style.display = 'none'; continue; }
+                if (tbWrap && s === 3 && _суперТБ) { tbWrap.classList.remove('ad-vidno'); continue; }
                 if (tbWrap) {
                     var isTb = _setFormat === 'short'
                         ? ((v1 === 6 && v2 === 5) || (v1 === 5 && v2 === 6))
                         : ((v1 === 7 && v2 === 6) || (v1 === 6 && v2 === 7));
-                    tbWrap.style.display = isTb ? 'inline-flex' : 'none';
+                    /* СОСТОЯНИЕ — КЛАСС, А НЕ ИНЛАЙН (кусок 175). */
+                    tbWrap.classList.toggle('ad-vidno', isTb);
                 }
             }
         }
@@ -11537,7 +11540,7 @@
             if (кто) {
                 winnerDisplay.innerHTML = '';
             } else {
-                winnerDisplay.innerHTML = '<span style="color:var(--text-secondary);font-size:var(--fs-sm);">' +
+                winnerDisplay.innerHTML = '<span class="ad-score-winner-hint">' +
                     L.brkNazhmiNaImya + '</span>';
             }
         }
@@ -11606,9 +11609,9 @@
                 document.getElementById('adSelectedOutcome').value = selectedOutcome;
                 var retiredBlock = document.getElementById('adRetiredBlock');
                 if (selectedOutcome) {
-                    retiredBlock.style.display = 'block';
+                    retiredBlock.classList.add('ad-vidno');
                 } else {
-                    retiredBlock.style.display = 'none';
+                    retiredBlock.classList.remove('ad-vidno');
                     document.getElementById('adRetiredPlayer').value = '';
                     overlay.querySelectorAll('.ad-retired-btn').forEach(function(b) { b.classList.remove('active'); });
                 }
@@ -12035,9 +12038,9 @@
         plData.forEach(function(p) { plMap[p.id] = p; });
 
         // Build UI
-        var html = '<div class="ad-xslot-section" style="margin-top:24px;padding:16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);">';
-        html += '<div class="ad-grp-section-title" style="margin-bottom:8px;">' + L.xSlotAssign + '</div>';
-        html += '<p style="color:var(--text-secondary);font-size:var(--fs-sm);margin-bottom:16px;">' + L.xSlotExplanation + '</p>';
+        var html = '<div class="ad-xslot-section">';
+        html += '<div class="ad-grp-section-title ad-abzac-snizu">' + L.xSlotAssign + '</div>';
+        html += '<p class="ad-xslot-lead">' + L.xSlotExplanation + '</p>';
 
         xSlots.forEach(function(xs, idx) {
             var opponentGroup = xs.opponentId ? (playerGroup[xs.opponentId] || 0) : 0;
@@ -12053,12 +12056,16 @@
                 }
             }
 
-            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
-            html += '<span style="min-width:80px;color:var(--text-muted);font-size:var(--fs-sm);">' +
+            html += '<div class="ad-xslot-ryad">';
+            html += '<span class="ad-xslot-podpis">' +
                 L.brkMatch + xs.matchOrder +
                 (opponentName ? ' vs ' + A.esc(opponentName) : '') +
                 '</span>';
-            html += '<select class="ad-input" data-xslot-idx="' + idx + '" data-match-id="' + xs.matchId + '" data-field="' + xs.field + '" data-opponent-group="' + opponentGroup + '" style="flex:1;max-width:300px;">';
+            /* `ad-input` БЫЛ МЁРТВЫМ ИМЕНЕМ: правила под него нет ни в одном css,
+                   и этот select рисовался браузерным — белый фон, чёрный текст,
+                   13.33px на тёмной админке. Замерено 26.10 вставкой образца.
+                   Системное поле админки — `.ad-field-input`. */
+                html += '<select class="ad-field-input ad-xslot-select" data-xslot-idx="' + idx + '" data-match-id="' + xs.matchId + '" data-field="' + xs.field + '" data-opponent-group="' + opponentGroup + '">';
             html += '<option value="">' + L.xSlotSelectPlayer + '</option>';
             unassignedPlayers.forEach(function(ap) {
                 var pInfo = plMap[ap.playerId] || {};

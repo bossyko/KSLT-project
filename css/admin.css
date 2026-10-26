@@ -4697,6 +4697,245 @@ select.ad-field-input {
     }
 }
 
+/* ── ОКНО ВВОДА СЧЁТА: ОФОРМЛЕНИЕ ИМЕНЕМ, А НЕ СТРОКОЙ (кусок 175) ─────
+   Тридцать инлайнов этого окна переехали сюда. Числа, стоявшие мимо шкалы,
+   встали на ступени, и каждое такое место названо: отступ 6 → 8 (три
+   места), padding кнопки игрока 8/14 → 8/12 (четыре кнопки), подпись
+   победителя 6 → 8 сверху. Остальное перенесено значение в значение. */
+.ad-modal-score {
+    max-width: 460px;
+}
+
+.ad-score-head {
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.ad-score-player {
+    font-weight: var(--fw-semibold);
+}
+
+.ad-score-seed {
+    color: var(--accent);
+    font-size: var(--fs-2xs);
+}
+
+.ad-score-vs {
+    margin: var(--space-1) 0;
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+}
+
+.ad-score-hint {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+    font-size: var(--fs-2xs);
+}
+
+.ad-score-set-label {
+    min-width: var(--btn-h-lg);
+    text-align: right;
+}
+
+.ad-score-colon {
+    font-weight: var(--fw-semibold);
+}
+
+.ad-score-tb-label {
+    margin-left: var(--space-2);
+    color: var(--text-secondary);
+    font-size: var(--fs-2xs);
+}
+
+.ad-score-tb-colon {
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-2xs);
+}
+
+.ad-score-setbtns {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+    margin-top: var(--space-2);
+}
+
+/* Помощник внутри формы: переставляет то, что уже на экране. */
+.ad-score-minibtn {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--fs-xs);
+}
+
+.ad-score-block {
+    margin-top: var(--space-4);
+}
+
+.ad-score-label-center {
+    display: block;
+    margin-bottom: var(--space-2);
+    text-align: center;
+}
+
+.ad-score-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: center;
+}
+
+.ad-score-retired {
+    margin-top: var(--space-3);
+    text-align: center;
+}
+
+.ad-score-retired:not(.ad-vidno) {
+    display: none;
+}
+
+.ad-score-winner {
+    margin-top: var(--space-3);
+    text-align: center;
+}
+
+.ad-score-btn-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+
+/* Кнопка с именем игрока: имя длинное, поэтому переносится, а не режется. */
+.ad-btn.ad-retired-btn,
+.ad-btn.ad-winner-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--fs-sm);
+    line-height: 1.3;
+    white-space: normal;
+}
+
+.ad-score-winner-display {
+    padding: var(--space-2) 0 0;
+    font-size: var(--fs-base);
+}
+
+.ad-score-winner-hint {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+/* ── ОКНО ВЫБОРА ФОРМАТА ПЛЕЙ-ОФФ И ОКНО КАНДИДАТОВ (кусок 175) ────────
+   Двадцать семь инлайнов на два окна. Таблица кандидатов рисовала своё
+   оформление строками, хотя в админке есть системная `.ad-table`: th
+   padding 12, кегль 11, uppercase, --text-muted; td padding 8/12. Теперь
+   таблица системная, и это МЕНЯЕТ ВИД, названо числами: th padding 8/10 →
+   12, кегль 12 → 11, цвет 0.72 → 0.50; td padding 8/10 → 8/12.
+   Запасные значения токенов (`var(--text-primary, #fff)`,
+   `var(--bg-primary, #111)`, `var(--danger, var(--danger))`) сняты: число
+   рядом с токеном живёт своей жизнью и в системе не стоит. */
+.ad-btn-vsya-shirina {
+    width: 100%;
+}
+
+.ad-conf-actions-col {
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.ad-conf-info {
+    margin-bottom: var(--space-4);
+    color: var(--text-secondary);
+    text-align: left;
+}
+
+.ad-conf-info p {
+    margin-bottom: var(--space-2);
+}
+
+.ad-cand-modal {
+    max-width: 540px;
+    text-align: left;
+}
+
+.ad-cand-title {
+    margin-bottom: var(--space-3);
+    font-size: var(--fs-md);
+    text-align: center;
+}
+
+.ad-cand-lead {
+    margin-bottom: var(--space-4);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    text-align: center;
+}
+
+.ad-cand-slots {
+    color: var(--accent);
+}
+
+.ad-cand-table {
+    margin-bottom: var(--space-4);
+}
+
+.ad-cand-group {
+    color: var(--accent);
+    font-weight: var(--fw-semibold);
+    text-align: center;
+}
+
+.ad-cand-wl {
+    text-align: center;
+}
+
+/* Выбор места кандидата: то же поле, что в формах админки. */
+.ad-cand-select {
+    padding: var(--space-1) var(--space-2);
+    background: var(--bg-card);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+}
+
+.ad-cand-summary {
+    margin-bottom: var(--space-2);
+    padding: var(--space-2);
+    border-radius: var(--radius-xs);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    text-align: center;
+}
+
+.ad-cand-error {
+    margin-bottom: var(--space-2);
+    color: var(--danger);
+    font-size: var(--fs-sm);
+    text-align: center;
+}
+
+.ad-cand-error:not(.ad-vidno) {
+    display: none;
+}
+
+/* СОСТОЯНИЕ «СКРЫТО» живёт в утилите `.ad-skryt` — она заведена кругом
+   17.10 ниже в этом файле, с удвоенным именем вместо !important. Кусок 175
+   перевёл на неё двадцать мест `bracket.js`, где скрытие писалось инлайном
+   (`элемент.style.display = условие ? '' : 'none'`): состояние жило в
+   разметке, и каждое переключение оставляло инлайн, которого не видел ни
+   сторож (он читает исходник, а не живой узел), ни глаз.
+   СВОЕГО ПРАВИЛА ЗДЕСЬ НЕТ НАМЕРЕННО: второе определение понятия — беда
+   на шве, и я его чуть не завёл. */
+
+/* ── ПАНЕЛЬ ВКЛАДКИ ТУРНИРА (кусок 175) ───────────────────────────────
+   Верхний отступ панели стоял ИНЛАЙНОМ у трёх панелей из пяти, а у
+   расписания и результатов его не было вовсе: одно понятие держало два
+   значения, и замер на стенде это показал (8px у заявок и сетки, 0 у
+   расписания). ПОСЧИТАНО: панель расписания и результатов опустилась на
+   8 px — это названная цена сведения. */
+.ad-brk-panel {
+    padding-top: var(--space-2);
+}
+
 /* Import modal */
 .ad-import-modal {
     max-width: 640px;
@@ -4884,6 +5123,15 @@ select.ad-field-input {
     align-items: center;
     gap: var(--space-1);
     margin-left: var(--space-1);
+}
+
+/* СОСТОЯНИЕ — КЛАСС, А НЕ ИНЛАЙН (кусок 175): тай-брейк показывается при
+   счёте 7:6, и до сих пор это писалось `style.display` в четырёх местах.
+   Правило стоит ОТДЕЛЬНЫМ селектором, а не вторым определением класса:
+   раскладка выше остаётся единственной — я сам чуть не завёл дубль, и
+   поймал его замером, когда скрытие перестало работать. */
+.ad-tb-wrap:not(.ad-vidno) {
+    display: none;
 }
 
 .ad-tb-input {
@@ -8529,4 +8777,258 @@ select.ad-field-input {
     color: var(--text-muted);
     padding: var(--space-10);
     text-align: center;
+}
+
+/* ── ЕЩЁ ПЯТЬ УТИЛИТ ТЕМ ЖЕ ПРИЁМОМ (кусок 175) ────────────────────────
+   Круг 17.10 назвал восемь утилит и честно сказал: «всё остальное ждёт
+   своего круга». Это он. Числа взяты у прибора по `bracket.js`:
+   `margin:0` стоял 7 раз, `text-align:left` — 2, `color:var(--accent)` — 2,
+   `display:flex;gap:12px` — 3. Отступ 10 в двух местах встал на ступень
+   12 — ПОСЧИТАНО, и это единственное, что изменилось в их виде. */
+.ad-bez-polya.ad-bez-polya { margin: 0; }
+.ad-vlevo.ad-vlevo { text-align: left; }
+.ad-accent.ad-accent { color: var(--accent); }
+
+.ad-ryad.ad-ryad {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.ad-ryad-sverhu.ad-ryad-sverhu {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.ad-podpis-sm.ad-podpis-sm { font-size: var(--fs-sm); }
+.ad-kursiv.ad-kursiv { font-style: italic; }
+
+/* Абзац окна: без полей, либо с полем снизу или сверху — замерено по
+   `bracket.js`: `margin:0` 7 раз, `margin:0 0 10px` 2, `margin:8px 0 0` 2.
+   Отступ 10 встал на ступень 12. */
+.ad-abzac-snizu.ad-abzac-snizu { margin: 0 0 var(--space-3); }
+.ad-abzac-sverhu.ad-abzac-sverhu { margin: var(--space-2) 0 0; }
+
+/* Пометка «уже записан» рядом с именем в списке поиска. */
+.ad-uzhe-zapisan.ad-uzhe-zapisan {
+    color: var(--accent);
+    font-size: var(--fs-xs);
+}
+
+/* ── СПИСОК ПОИСКА ИГРОКОВ (кусок 175) ────────────────────────────────
+   Три окна раздела искали игроков и рисовали строку результата инлайном:
+   кружок 32, имя, мета. Кружок остаётся здесь, а не идёт в дом `кружок` —
+   у дома своя запись в трекере, и это другой кусок. */
+.ad-poisk-stroka {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.ad-poisk-stroka-zanyat {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.ad-poisk-foto {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+}
+
+.ad-poisk-bukva {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+}
+
+.ad-poisk-imya {
+    color: var(--text-primary);
+    font-weight: var(--fw-medium);
+}
+
+.ad-poisk-meta {
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+}
+
+/* Пол не тот, что у турнира: менеджер решает сам, но предупреждён. */
+.ad-poisk-meta-chuzhoy {
+    color: var(--warning);
+}
+
+.ad-spisok-pusto {
+    padding: var(--space-3);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    text-align: center;
+}
+
+/* Список причин и пояснений внутри окна. */
+.ad-spisok-prichin {
+    margin: 0;
+    padding-left: var(--space-4);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+}
+
+/* Тот же список, но в окне предупреждения — строки стоят просторнее.
+   Межстрочный 1.6 стоял мимо лестницы 1 · 1.1 · 1.3 · 1.5 · 1.65 и встал
+   на 1.65 — ПОСЧИТАНО. */
+.ad-spisok-prichin-prostorno {
+    line-height: 1.65;
+}
+
+/* Строка выбора партнёра в поиске: тот же смысл, что `.ad-poisk-stroka`,
+   но имя и подпись разведены по краям. Отступ 6/10 встал на 8/12. */
+.ad-partner-search-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+}
+
+/* Загрузка панели: ждём данные, место под них уже отведено. */
+.ad-zagruzka {
+    padding: var(--space-10);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Таблица истории замен: ширины колонок заданы, чтобы дата и автор не
+   прыгали от длины имени. */
+.ad-chg-when { width: 150px; }
+.ad-chg-side { width: 120px; }
+.ad-chg-by { width: 180px; }
+
+.ad-chg-cell {
+    font-size: var(--fs-xs);
+}
+
+.ad-chg-cell-tihiy {
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+}
+
+.ad-chg-nowrap {
+    white-space: nowrap;
+}
+
+/* Окно с таблицей разрядов шире обычного. */
+.ad-modal-640 {
+    max-width: 640px;
+}
+
+/* Разделитель в выпадающем меню раунда. */
+.ad-menu-razdel {
+    margin: var(--space-1) 0;
+    border: 0;
+    border-top: var(--bw-hair) solid var(--alpha-white-12);
+}
+
+/* Блок перестановки крестовых слотов под таблицей групп. */
+.ad-xslot-section {
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+}
+
+.ad-xslot-lead {
+    margin-bottom: var(--space-4);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+.ad-xslot-ryad {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.ad-xslot-podpis {
+    min-width: 80px;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+}
+
+.ad-xslot-select {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* Окно сессий: два поля в ряд. */
+.ad-sess-ryad {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+/* Длинный список имён в подтверждении: прокручивается внутри окна. */
+.ad-spisok-imyon {
+    margin-top: var(--space-2);
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+    text-align: left;
+}
+
+.ad-conf-actions-gap.ad-conf-actions-gap {
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+/* ── ОКНА РАЗДЕЛА СЕТКИ: СТОЛБЕЦ ПОЛЕЙ И СПИСОК ПОИСКА (кусок 175) ────
+   Пять окон (напарник, замена, замена пары, решение, сессии) собирали одну
+   и ту же раскладку инлайном: столбец с полями, список найденных игроков,
+   ряд кнопок. Минимальные ширины у них разные и НАМЕРЕННО разные — у
+   окна с одним полем и у окна с таблицей разный смысл, — поэтому ширина
+   осталась модификатором, а не усреднена. */
+.ad-okno-stolb {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.ad-okno-stolb-300 { min-width: 300px; }
+.ad-okno-stolb-320 { min-width: 320px; }
+.ad-okno-stolb-340 { min-width: 340px; }
+.ad-okno-stolb-380 { min-width: 380px; }
+
+/* Список найденных: своя высота у каждого окна — сколько строк влезает
+   без того, чтобы окно поехало за край. */
+.ad-poisk-spisok {
+    margin-top: var(--space-1);
+    overflow-y: auto;
+}
+
+.ad-poisk-spisok-150 { max-height: 150px; }
+.ad-poisk-spisok-180 { max-height: 180px; }
+.ad-poisk-spisok-300 { max-height: 300px; }
+
+/* Карточка выбранного напарника под полем поиска. */
+.ad-partner-card {
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
 }
