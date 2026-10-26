@@ -304,57 +304,13 @@
         стили();
     }
 
-    /** Оформление окна. Держим здесь же: модуль подключается на разные страницы. */
-    function стили() {
-        if (document.getElementById('de-styles')) return;
-        var css = document.createElement('style');
-        css.id = 'de-styles';
-        css.textContent = [
-            '.de-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2000;display:flex;',
-            'align-items:center;justify-content:center;opacity:0;transition:opacity .18s}',
-            '.de-overlay.active{opacity:1}',
-            '.de-modal{position:relative;width:min(420px,92vw);max-height:88vh;overflow-y:auto;',
-            'background:var(--bg-card,#111);border:1px solid var(--border-subtle,#262626);',
-            'border-radius:16px;padding:24px}',
-            '.de-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim,#888);',
-            'font-size:24px;line-height:1;cursor:pointer}',
-            '.de-title{margin:0 0 4px;font-size:1.15rem;color:var(--text-primary,#fff)}',
-            '.de-trn{margin:0 0 16px;font-size:.85rem;color:var(--text-secondary,#aaa)}',
-            '.de-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}',
-            '.de-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim,#888)}',
-            '.de-label-block{display:block;margin:14px 0 8px}',
-            '.de-me{font-weight:600;color:var(--text-primary,#fff)}',
-            '.de-limit{padding:8px 12px;border-radius:8px;font-size:.82rem;color:var(--accent);',
-            'background:var(--alpha-lime-06);border:1px solid var(--alpha-lime-20)}',
-            '.de-switch{display:flex;border:1px solid var(--border-subtle,#262626);border-radius:10px;overflow:hidden;margin-bottom:12px}',
-            '.de-switch button{flex:1;padding:10px 6px;background:transparent;border:none;color:var(--text-secondary,#aaa);',
-            'font-weight:600;font-size:.82rem;white-space:nowrap;cursor:pointer}',
-            '.de-switch button+button{border-left:1px solid var(--border-subtle,#262626)}',
-            '.de-switch button.on{background:var(--accent);color:var(--accent-on)}',
-            '.de-input{width:100%;padding:10px 12px;border-radius:8px;box-sizing:border-box;',
-            'background:var(--bg-elevated,#1a1a1a);border:1px solid var(--border-subtle,#262626);color:var(--text-primary,#fff)}',
-            '.de-input+.de-input{margin-top:8px}',
-            '.de-input:focus{outline:none;border-color:var(--accent);',
-            'box-shadow:0 0 0 2px var(--accent-subtle)}',
-            '.de-two{display:flex;gap:8px;margin-top:8px}',
-            '.de-two .de-input{margin-top:0}',
-            '.de-results{max-height:190px;overflow-y:auto;margin-top:6px}',
-            '.de-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;',
-            'border-radius:8px;cursor:pointer;color:var(--text-primary,#fff);font-size:.9rem}',
-            '.de-item:hover{background:rgba(255,255,255,.06)}',
-            '.de-ntrp{color:var(--text-dim,#888);font-size:.75rem}',
-            '.de-empty{padding:10px;color:var(--text-dim,#888);font-size:.85rem}',
-            '.de-note{margin:10px 0 0;font-size:.8rem;color:var(--text-secondary,#aaa);line-height:1.45}',
-            '.de-actions{display:flex;gap:10px;margin-top:20px}',
-            '.de-btn{flex:1;padding:11px;border-radius:10px;border:none;font-weight:600;cursor:pointer}',
-            '.de-cancel{background:transparent;border:1px solid var(--border-subtle,#262626);color:var(--text-secondary,#aaa)}',
-            '.de-send{background:var(--accent);color:var(--accent-on)}',
-            '.de-send:disabled{opacity:.6;cursor:default}',
-            '.de-input.de-bad{border-color:var(--danger);box-shadow:0 0 0 2px var(--danger-subtle)}',
-            '.de-bad-note{margin:6px 0 0;font-size:.78rem;color:var(--danger)}'
-        ].join('');
-        document.head.appendChild(css);
-    }
+    /** ВИД ОКНА ЖИВЁТ В CSS (кусок 174, 26.10). Здесь стояла функция
+        `стили`: тридцать три правила строкой, вписывались в <head> при
+        первом открытии. Внутри жили 21 краска мимо системы, 11 кеглей в
+        rem, 15 отступов и 6 радиусов числом — и ни один сторож их не
+        читал. Правила переехали в `css/style.css`.
+        Зов оставлен пустым телом: он стоит в начале `открыть`. */
+    function стили() {}
 
     window.KSLT_DOUBLES = { открыть: открыть };
 })();

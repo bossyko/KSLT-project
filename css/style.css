@@ -8418,11 +8418,29 @@ body.nav-open {
     margin-bottom: 16px;
 }
 
-.auth-modal-title {
+/* ЗАГОЛОВОК ОКНА САЙТА — ОДНО ОПРЕДЕЛЕНИЕ НА ПОНЯТИЕ (кусок 174).
+   Переезд двух окон из строк js дал бы четвёртое и пятое написание
+   заголовка; чужой сторож `check-lestnica-okna` поймал четвёртое и был
+   прав. Селекторы присоединены здесь. ПОСЧИТАНО: заголовок окна записи
+   был 21/600 — стал 21/700; заголовок парного окна был 18.4/700 (вес от
+   h3) — стал 21/700. */
+.auth-modal-title,
+.trn-register-modal-title,
+.de-title {
     font-size: var(--fs-lg);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 8px;
+}
+
+/* Отступы у заголовков двух переехавших окон свои: окно записи центровано
+   и дышит, парное — плотное. Один шаг лестницы вниз, а не своё число. */
+.trn-register-modal-title {
+    margin: 0 0 var(--space-3);
+}
+
+.de-title {
+    margin: 0 0 var(--space-1);
 }
 
 .auth-modal-text {
@@ -11803,4 +11821,445 @@ main > section:first-child:not(.hero) {
     background: var(--alpha-white-04);
     color: var(--text-muted);
     box-shadow: inset 0 0 0 var(--bw-hair) var(--border-subtle);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ДВА ПУБЛИЧНЫХ ОКНА, ПЕРЕЕХАВШИЕ ИЗ СТРОК JS (кусок 174, 26.10)
+
+   До 26.10 вид этих окон жил СТРОКАМИ внутри `js/tournament-register.js`
+   (17 правил) и `js/doubles-entry.js` (33 правила) и вписывался в <head>
+   при первом открытии. Причина, названная автором в коде, честная:
+   «держим здесь же — модуль подключается на разные страницы». Цена
+   оказалась выше: правило в строке js не читает НИ ОДИН сторож — сторож
+   инлайнов смотрит style="…" и cssText, сторожа красок, прозрачностей и
+   шкал читают css. Поэтому в этих пятидесяти правилах жили 33 краски мимо
+   системы, 16 кеглей мимо шкалы (в rem!), 19 отступов и 9 радиусов числом.
+
+   Оба окна подключены на 16 страницах сайта, и `style.css` есть на всех
+   шестнадцати — поэтому правила здесь, а не в новом файле, который пришлось
+   бы подключать в шестнадцати местах и забыть в семнадцатом.
+
+   ЧТО ИЗМЕНИЛОСЬ В ВИДЕ, ПОСЧИТАНО: кегли встали на ступени (20.8→21,
+   15.2→16, 13.6→14, 13.12→12, 11.52→11, 18.4→18, не заданные 13.33→14,
+   иконка 38.4→40); поля ввода 38→44 (--input-h, и кегль 16: ниже 16 Safari
+   на iOS зумит страницу при фокусе); кнопки 40→44; крестики 32×32 и 16×24
+   → 44×44, потому что цель нажатия, МЕРЕНАЯ ПОПАДАНИЕМ, давала 2 из 6 и
+   0 из 6 точек; радиус переключателя 10→12. Краски — те же токены, что
+   были, но без запасных чисел вида `var(--text-dim,#888)`: запасное число
+   жило своей жизнью и в системе не стояло. Подложка обоих окон встала на
+   понятие `--overlay-modal` (0.60): было 0.70 у окна записи и 0.72 у
+   парного — ОДНО ПОНЯТИЕ ДЕРЖАЛОСЬ ТРЁХ ЗНАЧЕНИЙ, считая админское 0.60.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── ОКНО «ВОЙДИТЕ, ЧТОБЫ ЗАПИСАТЬСЯ» и его братья (js/tournament-register.js)
+   В Фигме это Gate modal (51:60): иконка, заголовок, одна строка, одно
+   действие и крестик — других выходов нет. */
+.trn-register-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay-modal);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+
+.trn-register-modal-overlay.active {
+    opacity: 1;
+}
+
+.trn-register-modal {
+    position: relative;
+    width: 90%;
+    max-width: 420px;
+    padding: var(--space-10) var(--space-8);
+    text-align: center;
+    background: var(--bg-card);
+    border: var(--bw-hair) solid var(--border);
+    border-radius: var(--radius-lg);
+    transform: scale(.95);
+    transition: transform .2s ease;
+}
+
+.trn-register-modal-overlay.active .trn-register-modal {
+    transform: scale(1);
+}
+
+/* Крестик — ступень 44: единственный выход, кроме действия. */
+.trn-register-modal-close {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--btn-h-md);
+    height: var(--btn-h-md);
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    font-size: var(--fs-xl);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.trn-register-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.trn-register-modal-close:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: 2px;
+}
+
+.trn-register-modal-icon {
+    margin-bottom: var(--space-4);
+    font-size: var(--fs-3xl);
+    line-height: 1;
+}
+
+.trn-register-modal-text {
+    max-width: 340px;
+    margin: 0 auto;
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.trn-register-modal-note {
+    max-width: 340px;
+    margin: var(--space-4) auto 0;
+    padding: var(--space-3) var(--space-4);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
+    border-radius: var(--radius-sm);
+    background: var(--alpha-lime-06);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+}
+
+.trn-register-modal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--btn-h-md);
+    margin-top: var(--space-6);
+    padding: 0 var(--space-8);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--accent);
+    color: var(--accent-on);
+    font-size: var(--btn-fs-md);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    transition: opacity .2s;
+}
+
+.trn-register-modal-btn:hover {
+    opacity: .9;
+}
+
+.trn-register-modal-btn:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: 2px;
+}
+
+.trn-register-modal-btn.is-error {
+    background: var(--danger);
+    color: var(--danger-on);
+}
+
+.trn-register-modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.trn-register-modal-actions .trn-register-modal-btn {
+    margin-top: var(--space-6);
+}
+
+.trn-register-modal-btn.is-ghost {
+    background: transparent;
+    border: var(--bw-hair) solid var(--border);
+    color: var(--text-muted);
+}
+
+.trn-register-modal-btn.is-ghost:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+    opacity: 1;
+}
+
+/* ── ОКНО ЗАЯВКИ В ПАРНЫЙ ТУРНИР (js/doubles-entry.js) ──────────────── */
+.de-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay-modal);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .18s;
+}
+
+.de-overlay.active {
+    opacity: 1;
+}
+
+.de-modal {
+    position: relative;
+    width: min(420px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: var(--space-6);
+    background: var(--bg-card);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+.de-close {
+    position: absolute;
+    top: var(--space-1);
+    right: var(--space-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--btn-h-md);
+    height: var(--btn-h-md);
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    font-size: var(--fs-xl);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.de-close:hover {
+    color: var(--text-primary);
+}
+
+.de-close:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: 2px;
+}
+
+.de-trn {
+    margin: 0 0 var(--space-4);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.de-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.de-label {
+    font-size: var(--fs-2xs);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-muted);
+}
+
+.de-label-block {
+    display: block;
+    margin: var(--space-4) 0 var(--space-2);
+}
+
+.de-me {
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+}
+
+.de-limit {
+    padding: var(--space-2) var(--space-3);
+    border: var(--bw-hair) solid var(--alpha-lime-20);
+    border-radius: var(--radius-sm);
+    background: var(--alpha-lime-06);
+    color: var(--accent);
+    font-size: var(--fs-xs);
+}
+
+/* Переключатель «из базы · гость · пока без» — выбор, меняющий форму ниже. */
+.de-switch {
+    display: flex;
+    margin-bottom: var(--space-3);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.de-switch button {
+    flex: 1;
+    min-height: var(--btn-h-sm);
+    padding: var(--space-2) var(--space-1);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.de-switch button + button {
+    border-left: var(--bw-hair) solid var(--border-subtle);
+}
+
+.de-switch button.on {
+    background: var(--accent);
+    color: var(--accent-on);
+}
+
+.de-switch button:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: -2px;
+}
+
+/* Поле — ступень 44 и кегль 16: ниже 16 Safari на iOS зумит страницу. */
+.de-input {
+    width: 100%;
+    min-height: var(--input-h);
+    padding: 0 var(--space-3);
+    box-sizing: border-box;
+    background: var(--bg-elevated);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--input-fs);
+}
+
+.de-input + .de-input {
+    margin-top: var(--space-2);
+}
+
+.de-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 var(--bw-thick) var(--accent-subtle);
+}
+
+.de-two {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.de-two .de-input {
+    margin-top: 0;
+}
+
+.de-results {
+    max-height: 190px;
+    overflow-y: auto;
+    margin-top: var(--space-2);
+}
+
+.de-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--btn-h-md);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+}
+
+.de-item:hover {
+    background: var(--surface-glass-hover);
+}
+
+.de-item:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: -2px;
+}
+
+.de-ntrp {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+}
+
+.de-empty {
+    padding: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+}
+
+.de-note {
+    margin: var(--space-3) 0 0;
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.de-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+}
+
+.de-btn {
+    flex: 1;
+    min-height: var(--btn-h-md);
+    padding: 0 var(--space-3);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--btn-fs-md);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+}
+
+.de-btn:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: 2px;
+}
+
+.de-cancel {
+    background: transparent;
+    border: var(--bw-hair) solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.de-send {
+    background: var(--accent);
+    color: var(--accent-on);
+}
+
+.de-send:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.de-input.de-bad {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 var(--bw-thick) var(--danger-subtle);
+}
+
+.de-bad-note {
+    margin: var(--space-2) 0 0;
+    font-size: var(--fs-xs);
+    color: var(--danger);
+}
+
+/* Цель нажатия на узком виде: переключатель становится ступенью 44.
+   МЕРЕНО ПОПАДАНИЕМ: на 36 из шести точек вокруг центра ловились четыре. */
+@media (max-width: 640px) {
+    .de-switch button {
+        min-height: var(--btn-h-md);
+    }
 }

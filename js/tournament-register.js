@@ -9,31 +9,16 @@
 (function() {
     'use strict';
 
-    // ---- Стили модалки (те же классы, что у остальных модалок сайта) ----
-    function injectStyles() {
-        if (document.getElementById('kslt-reg-modal-styles')) return;
-        var style = document.createElement('style');
-        style.id = 'kslt-reg-modal-styles';
-        style.textContent =
-            '.trn-register-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease}' +
-            '.trn-register-modal-overlay.active{opacity:1}' +
-            '.trn-register-modal{background:var(--bg-card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:16px;padding:40px 32px;max-width:420px;width:90%;text-align:center;position:relative;transform:scale(0.95);transition:transform .2s ease}' +
-            '.trn-register-modal-overlay.active .trn-register-modal{transform:scale(1)}' +
-            '.trn-register-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text-muted,#888);font-size:1.5rem;cursor:pointer;padding:4px 8px;line-height:1}' +
-            '.trn-register-modal-close:hover{color:var(--text-primary,#fff)}' +
-            '.trn-register-modal-icon{margin-bottom:16px;font-size:2.4rem;line-height:1}' +
-            '.trn-register-modal-title{font-size:1.3rem;font-weight:600;color:var(--text-primary,#fff);margin:0 0 12px}' +
-            '.trn-register-modal-text{font-size:0.95rem;color:var(--text-muted,#888);max-width:340px;margin:0 auto;line-height:1.5}' +
-            '.trn-register-modal-note{margin:18px auto 0;max-width:340px;padding:10px 14px;border-radius:8px;background:var(--alpha-lime-06);border:1px solid var(--alpha-lime-20);color:var(--text-secondary,#aaa);font-size:0.85rem;line-height:1.45}' +
-            '.trn-register-modal-btn{display:inline-block;margin-top:24px;padding:12px 32px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--accent);color:var(--accent-on);transition:opacity .2s}' +
-            '.trn-register-modal-btn:hover{opacity:0.9}' +
-            '.trn-register-modal-btn.is-error{background:var(--danger);color:var(--danger-on)}' +
-            '.trn-register-modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}' +
-            '.trn-register-modal-actions .trn-register-modal-btn{margin-top:24px}' +
-            '.trn-register-modal-btn.is-ghost{background:transparent;border:1px solid var(--border,#2a2a2a);color:var(--text-muted,#888)}' +
-            '.trn-register-modal-btn.is-ghost:hover{color:var(--text-primary,#fff);border-color:var(--text-muted,#888);opacity:1}';
-        document.head.appendChild(style);
-    }
+    /* ВИД ОКНА ЖИВЁТ В CSS (кусок 174, 26.10). Здесь стояла функция
+       injectStyles: семнадцать правил строкой, вписывались в <head> при
+       первом открытии. Пояснение автора было верным — модуль подключается
+       на разные страницы, — но правило в строке js не читает ни один
+       сторож, и внутри жили 12 красок мимо системы, 5 кеглей в rem и 7
+       отступов числом. Правила переехали в `css/style.css`, который
+       подключён на всех шестнадцати страницах с этим окном.
+       Зов оставлен пустым телом: он стоит в трёх местах файла, и это
+       ОДИН шов вместо трёх правок. */
+    function injectStyles() {}
 
     /**
      * Отправляет заявку на турнир.
