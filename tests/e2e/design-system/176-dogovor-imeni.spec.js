@@ -33,7 +33,9 @@ const СТРАНИЦЫ = {
     en: '/pages/tournament-en.html',
     kg: '/pages/tournament-kg.html'
 };
-const ПАРНЫЙ = 'test-doubles';
+/* `test-doubles` НЕ ГОДИТСЯ для боевой проверки: сетка у него не
+   строится (см. поправку ниже). Имя не заводим, чтобы в файле не висело
+   мёртвое значение. */
 const СЛОТЫ = 'test-sloty';
 
 async function стенд(page) {
@@ -147,19 +149,39 @@ test.describe('Один договор на имя участника', () => {
         expect(ошибки, 'сетка полезла в базу или упала').toEqual([]);
     });
 
+    /* ПОПРАВКА ПОСЛЕ ПЕРВОГО ПРОГОНА (15 падений из 65, 26.10). Боевая
+       проверка стояла на турнире `test-doubles`, и он для неё НЕ ГОДИТСЯ:
+       в тестовой базе у него один матч второго круга при `draw_size` 4, и
+       публичная страница честно пишет «Сетка ещё не сформирована». Проба
+       падала по таймауту на отсутствующем селекторе — то есть мерила не
+       код, а свои же данные.
+       ПАРНЫЙ ПУТЬ ОСТАЁТСЯ НА СТЕНДЕ, где он проверен на крайних
+       значениях; боевые страницы проверяются на `test-sloty` — турнире, у
+       которого сетка ЕСТЬ. Досеивать парный турнир с сеткой значит трогать
+       данные, а это только по слову Кости.
+       И ПРОБА ТЕПЕРЬ НАЗЫВАЕТ ПРИЧИНУ, А НЕ ПАДАЕТ ПО ТАЙМАУТУ: иначе в
+       следе лежит снимок страницы без сетки, и причина не названа ничем —
+       урок пробы 48. */
     Object.entries(СТРАНИЦЫ).forEach(([язык, адрес]) => {
-        test('боевая страница ' + язык + ': парная сетка без разметки текстом', async ({ page }) => {
-            await page.goto(adres(адрес, ПАРНЫЙ));
-            await page.waitForSelector('.td-player-name', { timeout: 20000 });
+        test('боевая страница ' + язык + ': в клетке имя, а не разметка', async ({ page }) => {
+            await page.goto(adres(адрес, СЛОТЫ));
+            const есть = await page.waitForSelector('.td-player-name', { timeout: 20000 })
+                .then(() => true).catch(() => false);
+            if (!есть) {
+                const что = await page.evaluate(() => {
+                    const з = document.querySelector('.td-bracket, .td-bracket-scroll');
+                    const п = [...document.querySelectorAll('p')].map(э => э.textContent.trim())
+                        .filter(с => /сетк|bracket|тор/i.test(с));
+                    return 'сетки на странице нет. Короб сетки: ' + (з ? 'есть' : 'НЕТ') +
+                        '. Что написано вместо неё: ' + (п.join(' | ') || '—') +
+                        '. Прогоните node tests/seed.js, если турнира нет вовсе.';
+                });
+                throw new Error('на странице ' + язык + ' турнира ' + СЛОТЫ + ': ' + что);
+            }
             const тексты = await page.$$eval('.td-player-name', эл => эл.map(э => э.textContent.trim()));
             expect(тексты.length).toBeGreaterThan(0);
             expect(тексты.filter(т => /<span|class="td-/.test(т)), 'разметка текстом на ' + язык).toEqual([]);
             expect(тексты.filter(т => /&(amp|lt|gt|quot|#39);/.test(т)), 'двойное экранирование на ' + язык).toEqual([]);
-        });
-
-        test('боевая страница ' + язык + ': метки слотов на месте', async ({ page }) => {
-            await page.goto(adres(адрес, СЛОТЫ));
-            await page.waitForSelector('.td-player-name', { timeout: 20000 });
             const метки = await page.$$eval('.td-slot-wait', эл => эл.map(э => э.textContent.trim()));
             expect(метки.length, 'метки слотов исчезли из клеток').toBeGreaterThan(0);
             expect(метки.filter(м => /</.test(м)), 'метка показана тегом').toEqual([]);
