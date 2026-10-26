@@ -167,7 +167,8 @@ const КУСКИ = [
     ['оснастка окон', 'check-osnastka-okon.js', 'check-osnastka-okon-otkat.js'],
     ['данные в разметке', 'check-dannye-v-razmetku.js', 'check-dannye-v-razmetku-otkat.js'],
     ['отсчёт до начала', 'check-otschet.js', 'check-otschet-otkat.js'],
-    ['css в строках js', 'check-css-v-js.js', 'check-css-v-js-otkat.js']
+    ['css в строках js', 'check-css-v-js.js', 'check-css-v-js-otkat.js'],
+    ['оформление именем', 'check-oformlenie-imenem.js', 'check-oformlenie-imenem-otkat.js']
 ];
 
 function прогнать(файл) {
