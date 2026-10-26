@@ -336,7 +336,7 @@
             (о.атрибуты || '') + афиша + '>' +
             слойСсылки(о.href || '#', t.name) +
             '<div class="to-compact-left">' +
-                '<span class="to-compact-status ' + t.status + '">' + t.statusText + '</span>' +
+                '<span class="to-compact-status ' + KSLT_экранировать(t.status) + '">' + t.statusText + '</span>' +
                 '<div class="to-compact-date">' +
                     '<span class="to-day">' + t.date.day + '</span>' +
                     '<span class="to-month">' + t.date.month + '</span>' +

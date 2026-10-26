@@ -557,7 +557,10 @@ function renderMatch(tournament, match, predOpts) {
     var p2Class = match.winnerId === match.player2Id ? 'winner' : (match.winnerId ? 'loser' : '');
 
     // Номер матча нужен кнопке «вписать счёт»: по нему открывается окно
-    var html = '<div class="td-match ' + match.status + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '"' +
+    /* СОСТОЯНИЕ МАТЧА ИДЁТ В ИМЯ КЛАССА: `matches.status` признак читает как
+       текстовый столбец (в схеме он объявлен и с CHECK, и без него — записано
+       находкой), а кавычка в имени класса закрывает атрибут. */
+    var html = '<div class="td-match ' + KSLT_экранировать(match.status) + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '"' +
         (match.matchId ? ' data-match-id="' + match.matchId + '"' : '') + '>';
 
     /* МЕТКА ГРУППЫ — ПОСЛЕ ПОСЕВА, ПЕРЕД ИМЕНЕМ, как в админке. Пустая
@@ -1222,7 +1225,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     '</div>' : '') +
                     feeStat(t) +
                     '<div class="hero-stat">' +
-                        '<span class="hero-stat-value">' + (formatLabels[t.format] || t.format || '—') + '</span>' +
+                        '<span class="hero-stat-value">' + (formatLabels[t.format] || KSLT_экранировать(t.format) || '—') + '</span>' +
                         '<span class="hero-stat-label">' + L.format + '</span>' +
                     '</div>' +
                 '</div>' +
