@@ -1792,23 +1792,23 @@ function обновитьРасклад() {
         var полеГруппСчёт = document.getElementById('adTrnGroupCount');
         var полеВГруппеСчёт = document.getElementById('adTrnPerGroup');
         if (полеГруппСчёт) полеГруппСчёт.addEventListener('input', function() {
-            пересчитатьГруппыL.trnGrupp; обновитьРасклад();
+            пересчитатьГруппы('групп'); обновитьРасклад();
         });
         if (полеВГруппеСчёт) {
             полеВГруппеСчёт.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
-                пересчитатьГруппыL.trnVgruppe; обновитьРасклад();
+                пересчитатьГруппы('вГруппе'); обновитьРасклад();
             });
             полеВГруппеСчёт.addEventListener('wheel', function(e) { e.preventDefault(); });
         }
         // Изменили вместимость турнира — счёт в группе меняется вместе с ней
         var полеМестСчёт = document.getElementById('adTrnMaxPart');
         if (полеМестСчёт) полеМестСчёт.addEventListener('input', function() {
-            пересчитатьГруппыL.trnGrupp; обновитьРасклад();
+            пересчитатьГруппы('групп'); обновитьРасклад();
         });
 
         toggleBracketFields();
-        пересчитатьГруппыL.trnGrupp;
+        пересчитатьГруппы('групп');
         обновитьРасклад();
 
         // Toggle combined NTRP max based on format (doubles/mixed only)
@@ -2873,8 +2873,8 @@ function обновитьРасклад() {
 
         /* Ошибку показываем и НЕ закрываем окно: набранное не должно
            пропадать из-за незаполненного поля */
-        if (!имя) { A.showToast(L.trnVenueNeedName, 'error'); throw new ErrorL.trnErrNetNazvaniya; }
-        if (!улица) { A.showToast(L.trnVenueNeedAddr, 'error'); throw new ErrorL.trnErrNetAdresa; }
+        if (!имя) { A.showToast(L.trnVenueNeedName, 'error'); throw new Error(L.trnErrNetNazvaniya); }
+        if (!улица) { A.showToast(L.trnVenueNeedAddr, 'error'); throw new Error(L.trnErrNetAdresa); }
 
         var поля = {
             name: имя,

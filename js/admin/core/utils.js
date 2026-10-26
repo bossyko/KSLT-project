@@ -762,7 +762,7 @@
         if (targets.length === 0) {
             // Всё заполнено и исходник с тех пор не менялся — спрашиваем,
             // а не отказываем: у человека может быть своя причина
-            var again = confirmL.utAskTranslateUzheZapolneny;
+            var again = confirm(L.utAskTranslateUzheZapolneny);
             if (!again) return;
             if (enEl && srcLang !== 'en') targets.push({ el: enEl, lang: 'en' });
             if (kgEl && srcLang !== 'kg') targets.push({ el: kgEl, lang: 'kg' });

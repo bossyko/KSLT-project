@@ -742,7 +742,7 @@
                                 this.textContent = '...';
                                 try {
                                     await A.adminAction('unblock_otp', { user_id: user.id });
-                                    A.showToastL.usrMsgRazblokirovan;
+                                    A.showToast(L.usrMsgRazblokirovan);
                                     el.innerHTML = '<div style="margin-top:12px;font-size:var(--fs-sm);color:var(--success);">' + L.usrErrRazblokirovan + '</div>';
                                 } catch (e) {
                                     A.showToast('Ошибка', 'error');

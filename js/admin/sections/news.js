@@ -1183,7 +1183,7 @@
             var urlBtn = e.target.closest('.ad-preview-insert-url-btn');
             if (urlBtn) {
                 var afterPar = parseInt(urlBtn.dataset.afterParagraph, 10) || 1;
-                var url = promptL.newsAskVstavteIzobrazheniya;
+                var url = prompt(L.newsAskVstavteIzobrazheniya);
                 if (url && url.trim()) {
                     newsContentImages.push({ url: url.trim(), after_paragraph: afterPar });
                     newsContentImageFiles.push(null);

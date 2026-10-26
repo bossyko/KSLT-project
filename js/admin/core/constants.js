@@ -1939,8 +1939,6 @@
            звучала как «Снять» без турнира. */
         trnAriaOpublikovat: 'Опубликовать турнир {турнир}',
         trnAriaSnyat: 'Снять с публикации турнир {турнир}',
-        trnGrupp: 'групп',
-        trnVgruppe: 'вГруппе',
         trnErrNetNazvaniya: 'нет названия',
         trnErrNetAdresa: 'нет адреса',
         usrDn: 'дн.',
