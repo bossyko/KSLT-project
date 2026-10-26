@@ -37,6 +37,10 @@ var supabaseClient = {
     from: function (таблица) { throw new Error('сетка полезла в базу: ' + таблица); }
 };
 </script>
+<!-- ДОМ КАРТЫ — ЕГО ТРЕБУЕТ ЧУЖОЙ СТОРОЖ, И ОН ПРАВ: `kslt-rules.js`
+     зовёт карту, и страница без дома упала бы на этом зове. Сторож
+     куска 104 поймал стенд в тот же день, когда стенд завёлся. -->
+<script src="../js/kslt-karta.js?v=1"></script>
 <script src="../js/kslt-rules.js?v=34"></script>
 <script src="../js/tournament-status.js?v=12"></script>
 <script src="../js/kslt-yazyk.js?v=4"></script>

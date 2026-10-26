@@ -15,6 +15,9 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-adres-'));
 
 const ФАЙЛЫ = ['js/supabase-config.js', 'js/dashboard.js', 'js/courts.js',
                 'js/coaches.js', 'js/kslt-vaucher-kartochka.js',
+                /* ДОБАВЛЕН 26.10: сюда переехала ссылка проверки ваучера —
+                   её унёс кусок 145, а откат остался на `courts.js`. */
+                'js/kslt-vaucher-blok.js',
                 'supabase/functions/send-email/index.ts'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
@@ -41,10 +44,17 @@ const ОТКАТЫ = [
      "var baseUrl = 'https://kslt.netlify.app';",
      'адрес сайта нигде не зашит строкой'],
 
-    ['вернуть зашитый адрес в QR корта', K,
-     "var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify'",
-     "var verifyUrl = 'https://kslt.netlify.app/pages/verify'",
-     'ссылка QR в `courts.js` берёт адрес из дома'],
+    /* ЯКОРЬ ПЕРЕЕХАЛ 26.10, И ЭТО ДОЛГ СТАРШЕ МОЕЙ ПРАВКИ. Откат стоял на
+       `js/courts.js` со строкой `var verifyUrl = …`, но ссылку QR унёс
+       КУСОК 145 («ваучерный блок один на продукт»): `KSLT_SAYT` в
+       `courts.js` не осталось вовсе, и откат одиннадцать дней копировал
+       текст, которого в файле нет, — «якорь встречается 0 раз». Переведён
+       туда, где ссылка живёт теперь. ЯКОРЬ, ПОТЕРЯВШИЙ СОДЕРЖИМОЕ, НЕ
+       ПАДАЕТ КРАСНЫМ САМ — ОН ПРОСТО ПЕРЕСТАЁТ ПРОВЕРЯТЬ. */
+    ['вернуть зашитый адрес в ссылку проверки ваучера', 'js/kslt-vaucher-blok.js',
+     "return window.KSLT_SAYT.адрес + '/pages/verify'",
+     "return 'https://kslt.netlify.app/pages/verify'",
+     'адрес сайта нигде не зашит строкой'],
 
     /* ПОДПИСЬ ПЕРЕЕХАЛА В ДОМ КАРТОЧКИ (круг 18, 19.10): рисование сведено
        в одно место, и в трёх прежних её больше нет. Откат идёт туда, где
