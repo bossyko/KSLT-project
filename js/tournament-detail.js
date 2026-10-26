@@ -104,29 +104,47 @@ function buildPublicRegsMap(registrations) {
     return window.KSLT_SLOTS.картаЗаявок(registrations);
 }
 
-function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
+/* ИМЯ УЧАСТНИКА ДАННЫМИ — ОДНО ОПРЕДЕЛЕНИЕ НА ДВА ВЫХОДА (кусок 176).
+   Отдаёт ТЕКСТ, без разметки и без экранирования: «Капитан / Партнёр» для
+   пары, одно имя для одиночки, `TBD` или `BYE` там, где человека нет.
+   Признак `пара` говорит зовущему, что это двое, — чтобы оформить их он
+   решал сам, а не угадывал по косой черте в строке.
+   ЗАЧЕМ РАЗДЕЛЕНО: тот же самый текст нужен и для вставки в разметку
+   (`getPublicTeamName` ниже), и для сетки, которая экранирует и оформляет
+   сама. Было одно определение на оба случая — и сетка получала готовую
+   разметку, которую экранировала второй раз (беда куска 158, 14 из 14
+   клеток парного кругового показывали тег текстом). */
+function имяУчастникаТекстом(playerId, regsMap, playersMap) {
     var p = playersMap[playerId];
-    var captainName = p
-        ? KSLT_экранировать(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name))
+    var капитан = p
+        ? KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)
         : (playerId ? 'TBD' : 'BYE');
 
     var reg = regsMap ? regsMap[playerId] : null;
-    if (!reg) return captainName;
+    if (!reg) return { текст: капитан, пара: false };
 
-    var partnerName = '';
+    var партнёр = '';
     if (reg.partner_id) {
         var pp = playersMap[reg.partner_id];
-        partnerName = pp
-            ? KSLT_экранировать(KSLT_YAZYK.выбрать(pp.name_en || pp.name, pp.name_kg || pp.name, pp.name))
+        партнёр = pp
+            ? KSLT_YAZYK.выбрать(pp.name_en || pp.name, pp.name_kg || pp.name, pp.name)
             : '?';
     } else if (reg.partner_external_name) {
-        partnerName = KSLT_экранировать(reg.partner_external_name);
+        партнёр = reg.partner_external_name;
     }
 
-    if (partnerName) {
-        return '<span class="td-team-name">' + captainName + ' / ' + partnerName + '</span>';
-    }
-    return captainName;
+    if (партнёр) return { текст: капитан + ' / ' + партнёр, пара: true };
+    return { текст: капитан, пара: false };
+}
+
+/* ТО ЖЕ ИМЯ, ОФОРМЛЕННОЕ ДЛЯ ВСТАВКИ В РАЗМЕТКУ. Отдача совпадает с
+   прежней ЗНАК В ЗНАК: прежде экранировались части по отдельности, теперь
+   склейка целиком, а разделитель ` / ` особых знаков не несёт. Зовущих у
+   этой отдачи четыре, и все кладут её в `innerHTML`. */
+function getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg) {
+    var и = имяУчастникаТекстом(playerId, regsMap, playersMap);
+    var текст = KSLT_экранировать(и.текст);
+    return и.пара ? '<span class="td-team-name">' + текст + '</span>' : текст;
 }
 
 // ========================================
@@ -296,13 +314,18 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
         [m.player1_id, m.player2_id].forEach(function(pid) {
             if (pid && !plAddedIds[pid]) {
                 var p = playersMap[pid];
+                /* В парном турнире на корт выходят двое: страница передаёт,
+                   как назвать участника, и тогда в сетке видно обоих.
+                   ПРИХОДИТ ТЕКСТ, А НЕ РАЗМЕТКА (кусок 176): `{ name,
+                   оформление }`. Экранирует и оформляет клетка — здесь имя
+                   не трогаем ни тем, ни другим. */
+                var имя = имяУчастника ? имяУчастника(pid) : null;
                 plPlayersArr.push({
                     id: pid,
-                    // В парном турнире на корт выходят двое: страница передаёт,
-                    // как назвать участника, и тогда в сетке видно обоих
-                    name: имяУчастника
-                        ? имяУчастника(pid)
+                    name: имя
+                        ? имя.name
                         : (p ? (KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : 'TBD'),
+                    оформление: имя ? имя.оформление : '',
                     seed: null,
                     country: p ? tdCountryFlag(p.country) : ''
                 });
@@ -530,6 +553,31 @@ function краткоеИмя(имя) {
     return текст.split(' ').pop() || '';
 }
 
+/* ИМЯ В КЛЕТКУ СЕТКИ: ДАННЫЕ ЭКРАНИРУЕТ КЛЕТКА, РАЗМЕТКУ НАКРУЧИВАЕТ
+   ТОЖЕ ОНА (кусок 176).
+   Кусок 158 поставил `KSLT_экранировать` на МЕСТО ВСТАВКИ — и это верно
+   ровно для тех путей, которые кладут в `p.name` сырое имя (одиночный
+   плей-офф и `fic`). Лиговый путь кладёт имя, уже прошедшее через
+   `pName`, а в парном — ещё и обёрнутое в `.td-team-name`; метка слота
+   кладёт готовую разметку. Один и тот же зов одним путям помогал, другим
+   ломал вид: замер 26.10 на боевом `66f22aa4` — 14 клеток из 14 с тегом
+   вместо имён.
+   ДОГОВОР ОДИН: в `p.name` лежат ДАННЫЕ, а чем их оформить, говорит поле
+   `оформление`. Пустое — просто имя; так приходят `BYE`, `TBD` и все
+   одиночные пути, и для них отдача совпадает с прежней знак в знак. */
+function имяВКлетку(участник) {
+    /* ЭКРАНИРУЕТ КАЖДАЯ ВЕТКА, А НЕ ОДНА СТРОКА НАД НИМИ. Так было
+       сначала — `var текст = KSLT_экранировать(...)` и три ветки на нём.
+       Уронил чужой сторож «данные в разметке»: ПЕРЕМЕННАЯ В СКЛЕЙКЕ ДЛЯ
+       ЕГО ПРИЗНАКА НЕВИДИМА, и его храповик слепоты вырос с 1502 до 1503.
+       Сторож был прав: именно так адрес афиши уехал в `url(` мимо
+       экранирования. Зов на виду в каждой ветке — и прибор видит, что
+       экранирование есть. */
+    if (участник.оформление === 'метка') return '<span class="td-slot-wait">' + KSLT_экранировать(участник.name) + '</span>';
+    if (участник.оформление === 'пара') return '<span class="td-team-name">' + KSLT_экранировать(участник.name) + '</span>';
+    return KSLT_экранировать(участник.name);
+}
+
 function renderMatch(tournament, match, predOpts) {
     var p1 = getPlayer(tournament, match.player1Id);
     var p2 = getPlayer(tournament, match.player2Id);
@@ -587,14 +635,12 @@ function renderMatch(tournament, match, predOpts) {
            мест ровно два, и admin их тоже зовёт BYE. */
         if (!match.player1Id && p1.name === 'TBD') {
             p1 = слоты.s1
-                ? { name: '<span class="td-slot-wait">' + KSLT_экранировать(слоты.s1) + '</span>',
-                    seed: null, country: '' }
+                ? { name: слоты.s1, оформление: 'метка', seed: null, country: '' }
                 : { name: 'BYE', seed: null, country: '' };
         }
         if (!match.player2Id && p2.name === 'TBD') {
             p2 = слоты.s2
-                ? { name: '<span class="td-slot-wait">' + KSLT_экранировать(слоты.s2) + '</span>',
-                    seed: null, country: '' }
+                ? { name: слоты.s2, оформление: 'метка', seed: null, country: '' }
                 : { name: 'BYE', seed: null, country: '' };
         }
     }
@@ -603,7 +649,7 @@ function renderMatch(tournament, match, predOpts) {
     html += '<div class="td-match-player ' + p1Class + '">' +
         (p1.seed ? '<span class="td-seed">[' + p1.seed + ']</span>' : '<span class="td-seed"></span>') +
         (p1Grp ? '<span class="td-grp-label">' + p1Grp + '</span>' : '') +
-        '<span class="td-player-name">' + KSLT_экранировать(p1.name) + '</span>';
+        '<span class="td-player-name">' + имяВКлетку(p1) + '</span>';
 
     if (match.status === 'live' && scores.length > 0) {
         // Live: show current score
@@ -621,7 +667,7 @@ function renderMatch(tournament, match, predOpts) {
     html += '<div class="td-match-player ' + p2Class + '">' +
         (p2.seed ? '<span class="td-seed">[' + p2.seed + ']</span>' : '<span class="td-seed"></span>') +
         (p2Grp ? '<span class="td-grp-label">' + p2Grp + '</span>' : '') +
-        '<span class="td-player-name">' + KSLT_экранировать(p2.name) + '</span>';
+        '<span class="td-player-name">' + имяВКлетку(p2) + '</span>';
 
     if (match.status !== 'live') {
         scores.forEach(function(s) {
@@ -1052,6 +1098,17 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
         if (isDbl) return getPublicTeamName(playerId, regsMap, playersMap, isEn, isKg);
         var p = playersMap[playerId];
         return p ? KSLT_экранировать(KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : (playerId ? 'TBD' : 'BYE');
+    }
+
+    /* ТО ЖЕ ИМЯ, НО ДАННЫМИ — ДЛЯ СЕТКИ (кусок 176). `pName` отдаёт
+       готовую к вставке строку: экранированную, а в парном ещё и
+       обёрнутую в `.td-team-name`. Сетка экранирует и оформляет сама, и
+       второй заход по той же строке показывал тег текстом. Понятие одно,
+       дом один (`имяУчастникаТекстом`), выхода два — и имя второго прямо
+       говорит, что отдаётся текст. */
+    function pNameТекстом(playerId) {
+        var и = имяУчастникаТекстом(playerId, isDbl ? regsMap : null, playersMap);
+        return { name: и.текст, оформление: и.пара ? 'пара' : '' };
     }
 
     var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
@@ -1507,13 +1564,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     // Premier League
                     лиги += '<div class="td-league-bracket">';
                     лиги += '<h3 class="td-league-title td-league-title-premier">' + подписьЛиги('PL', isEn, isKg) + '</h3>';
-                    лиги += renderLeagueBracketPublic(glPLMatches, playersMap, 'PL', isEn, isKg, predOpts, pName);
+                    лиги += renderLeagueBracketPublic(glPLMatches, playersMap, 'PL', isEn, isKg, predOpts, pNameТекстом);
                     лиги += '</div>';
 
                     // Consolation League
                     лиги += '<div class="td-league-bracket">';
                     лиги += '<h3 class="td-league-title td-league-title-consolation">' + подписьЛиги('CL', isEn, isKg) + '</h3>';
-                    лиги += renderLeagueBracketPublic(glCLMatches, playersMap, 'CL', isEn, isKg, predOpts, pName);
+                    лиги += renderLeagueBracketPublic(glCLMatches, playersMap, 'CL', isEn, isKg, predOpts, pNameТекстом);
                     лиги += '</div>';
 
                     лиги += '</div>'; // /td-dual-league
@@ -1678,12 +1735,15 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         [m.player1_id, m.player2_id].forEach(function(pid) {
                             if (pid && !plAddedIds[pid]) {
                                 var p = playersMap[pid];
+                                /* В парном на корт выходят двое: берём имя пары,
+                                   а не одного капитана — иначе по сетке непонятно,
+                                   кто вообще играет. ТЕКСТОМ, а не разметкой:
+                                   экранирует и оформляет клетка (кусок 176). */
+                                var имя = pNameТекстом(pid);
                                 plPlayersArr.push({
                                     id: pid,
-                                    // В парном на корт выходят двое: берём имя пары,
-                                    // а не одного капитана — иначе по сетке непонятно,
-                                    // кто вообще играет
-                                    name: pName(pid),
+                                    name: имя.name,
+                                    оформление: имя.оформление,
                                     seed: null,
                                     country: p ? tdCountryFlag(p.country) : ''
                                 });
