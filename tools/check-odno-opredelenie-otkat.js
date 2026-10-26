@@ -20,6 +20,9 @@ const ФАЙЛЫ = [
     'css/pricing.css', 'css/sponsors.css', 'css/player.css',
     'js/kslt-mesta.js', 'js/rating-points.js', 'js/player.js',
     'js/kslt-toast.js', 'js/courts.js',
+    /* ДОБАВЛЕН 26.10: на него переехали два отката про уведомление —
+       `courts.js` выпал из списка потребителей куском 145. */
+    'js/invite-player.js',
     'js/tournament-generator.js', 'js/admin/sections/bracket.js',
     'pages/player.html', 'pages/courts.html'
 ];
@@ -173,16 +176,26 @@ const ОТКАТЫ = [
    сняты, ярлык живёт в доме, и потребитель зовёт его ОДНИМ СЛОВОМ.
    Прувер молчал об этом, потому что быстрый прогон пруверов не гоняет:
    ПРУВЕР, КОТОРОГО НЕ ГОНЯЮТ, НЕ СТОРОЖИТ НИЧЕГО. */
-['перестать звать модуль из кортов', CJ,
+/* ОБА ОТКАТА ПЕРЕЕХАЛИ 26.10, И ДОЛГ СТАРШЕ МОЕЙ ПРАВКИ. Они стояли на
+   `js/courts.js`, но КУСОК 145 унёс оттуда ваучерный блок, и courts.js
+   вообще ВЫПАЛ ИЗ СПИСКА ПОТРЕБИТЕЛЕЙ — правило его больше не смотрит.
+   Якоря `showToast(` и `function esc(str) {` в файле тоже не осталось:
+   экранирование ушло в дом ещё куском 141. Откаты честно печатали «якоря
+   нет», и это надо было услышать. Переведены на `js/invite-player.js` —
+   он в списке потребителей и зовёт уведомление четырьмя строками. */
+/* ЗАМЕНА ИДЁТ ПО ВСЕМ ВХОЖДЕНИЯМ, И ЭТО ВАЖНО: признак `зовётОбщее` ищет
+   ЛЮБОЙ зов, а их в файле четыре. Откат на одном зове правило не уронил —
+   три остальных его держали. ОТКАТ ОБЯЗАН СНИМАТЬ ПРИЗНАК ЦЕЛИКОМ. */
+['перестать звать модуль у приглашения', 'js/invite-player.js',
  'showToast(',
- 'консольЛогКортов(',
- 'все семь потребителей зовут общее определение, а не своё'],
+ 'консольЛогПриглашения(',
+ 'все шесть потребителей зовут общее определение, а не своё'],
 
 /* ЯКОРЬ ПЕРЕВЯЗАН 22.10: прежний вставлял копию перед `function showToast`,
    а её в кортах нет с 19.10. Вставляем перед первой живой функцией файла. */
-['вернуть своё окно уведомления в корты', CJ,
- '    function esc(str) {',
- "    function showToastСвой(message) {\n        var toast = document.createElement('div');\n        toast.className = 'toast';\n        document.body.appendChild(toast);\n    }\n    function esc(str) {",
+['вернуть своё окно уведомления в приглашение', 'js/invite-player.js',
+ '    function showModal(title, text, btnLabel, btnHref, disclaimer) {',
+ "    function showToastСвой(message) {\n        var toast = document.createElement('div');\n        toast.className = 'toast';\n        document.body.appendChild(toast);\n    }\n    function showModal(title, text, btnLabel, btnHref, disclaimer) {",
  'потребители не строят своего окна уведомления'],
 
 /* ── подключение ── */

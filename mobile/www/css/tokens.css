@@ -218,16 +218,10 @@
      смениться без правки разделов. */
   --cat-1:        var(--cyan-500);
   --cat-1-subtle: var(--alpha-cyan-15);
-  --cat-1-faint:  var(--alpha-cyan-06);
-  --cat-1-border: var(--alpha-cyan-30);
   --cat-2:        var(--sand-300);
   --cat-2-subtle: var(--alpha-sand-15);
-  --cat-2-faint:  var(--alpha-sand-06);
-  --cat-2-border: var(--alpha-sand-30);
   --cat-3:        var(--pink-400);
   --cat-3-subtle: var(--alpha-pink-15);
-  --cat-3-faint:  var(--alpha-pink-06);
-  --cat-3-border: var(--alpha-pink-30);
 
   /* ПОДСКАЗКА ГРАФИКА. Холст не понимает var(), краски ему подаёт дом
      красок (js/kslt-kraska.js) — поэтому имена тут, а не в правилах css.
@@ -236,9 +230,6 @@
      rgba(20,24,36,.95) в пользователях: одно понятие в трёх видах.
      Теперь одно имя. Фон = --neutral-850 при 95 %, ΔE к прежнему 2.8. */
   --chart-tip-bg:     rgba(20, 20, 20, 0.95);
-  --chart-tip-border: var(--border-light);
-  --chart-tip-title:  var(--text-primary);
-  --chart-tip-body:   var(--text-secondary);
 
   /* КАРТОЧКА ВАУЧЕРА — печатная картинка, не экран. Переход фона
      НАМЕРЕННЫЙ и фирменный: верх совпадает с уровнем продукта (ΔE 0.75
@@ -246,7 +237,6 @@
      ΔE 14.8 до ближайшего. Поэтому он назван именем и помечен намеренным,
      а не подогнан под ступень: подгонка убила бы фирменный переход.
      Холст var() не понимает — краски отсюда берёт дом. */
-  --vch-card-top:    var(--neutral-900);
   --vch-card-bottom: #1A1A2E;   /* НАМЕРЕНО: синева карточки */
 
   /* Тускло и граница — по лестнице роли (см. раздел альф). */
@@ -503,19 +493,9 @@
   --btn-h-md: 44px;  /* по умолчанию; 44 — минимальный тап-таргет по iOS HIG */
   --btn-h-lg: 52px;
 
-  --btn-px-xs: var(--space-3);  /* 12 */
-  --btn-px-sm: var(--space-4);  /* 16 */
-  --btn-px-md: var(--space-5);  /* 20 */
-  --btn-px-lg: var(--space-8);  /* 32 */
 
-  --btn-fs-xs: var(--fs-2xs);
-  --btn-fs-sm: var(--fs-xs);
   --btn-fs-md: var(--fs-sm);
-  --btn-fs-lg: var(--fs-base);
 
-  --btn-gap:    var(--space-2); /* между иконкой и текстом */
-  --btn-radius: var(--radius-full);
-  --btn-fw:     var(--fw-semibold);
 
   /* Поля ввода ходят в паре с кнопками — та же высота, иначе формы разъезжаются.
      Высоту задаёт height, а не вертикальный padding: у select line-height
@@ -544,12 +524,7 @@
   --modal-w-lg: 720px;  /* таблица, длинный контент */
   --modal-w-xl: 960px;  /* сетка, редактор */
 
-  --modal-radius:     var(--radius-lg);
   --modal-max-h:      90vh;
-  --modal-padding:    var(--space-5);  /* 20 — десктоп; замерено 20px у ad-modal, 24px у ad-confirm-modal */
-  --modal-padding-sm: var(--space-6);  /* 24 — мобильный */
-  --modal-gap:        var(--space-5);  /* между шапкой, телом и футером */
-  --modal-shadow:     var(--shadow-lg);
 
   /* Кнопки в подвале модалки.
      Сейчас 12 групп кнопок с gap 8, 10 и 12 и направлением то row,
@@ -560,11 +535,8 @@
        две кнопки    — в ряд, вторичная слева, основная справа
        уже 480px     — в колонку, основная сверху
        три и больше  — это не модалка, это форма; выносить на страницу  */
-  --modal-actions-gap: var(--space-3); /* 12 */
 
   /* Нижняя шторка (мобильное приложение) */
-  --sheet-radius:  var(--radius-xl);
-  --sheet-padding: var(--space-4);
   --sheet-max-h:   85vh;
 
 
@@ -693,7 +665,6 @@
   --text-sec:      var(--text-secondary);
   --border:        var(--border-subtle);
   --glass:         var(--surface-glass);
-  --shadow:        var(--shadow-md);
 
   --red:    var(--danger);
   --green:  var(--success);
@@ -751,6 +722,18 @@
 
 :root {
   --ad-accent:         var(--accent);
+  /* ВЕРНУЛИСЬ 26.10 ПО ТОЙ ЖЕ ПРИЧИНЕ, НО ЗОВ ДРУГОЙ: имена подсказки
+     графика читает ДОМ ИЗ JS через `getPropertyValue`, и `var(` в коде нет
+     вовсе. Сторож «краски холста» прямо говорит: без них подсказка
+     нарисуется ПРОЗРАЧНОЙ. */
+  --chart-tip-border: var(--border-light);
+  --chart-tip-title:  var(--text-primary);
+  --chart-tip-body:   var(--text-secondary);
+  --glass-bg:          var(--bg-elevated);
+  /* ВЕРНУЛИСЬ 26.10: прибор куска 179 назвал их мёртвыми, а чужой сторож
+     «каждая переменная в css где-то объявлена» показал, что их ЗОВУТ С
+     ЗАПАСНЫМ ЗНАЧЕНИЕМ (`var(--ad-border, …)` в admin.css:1907, 1917, 1921,
+     1932) — признак видел только `var(--имя)` с закрывающей скобкой. */
   --ad-border:         var(--border-light);
   --ad-text:           var(--text-primary);
   --ad-text-secondary: var(--text-secondary);
@@ -759,12 +742,9 @@
   --bg-sec:       var(--bg-surface);
   --bg-tertiary:  var(--bg-elevated);
   --card-bg:      var(--bg-card);
-  --glass-bg:     var(--bg-elevated);
-  --input-bg:     var(--surface-glass);
   --border-color: var(--border-light);
 
   --font:      var(--font-sans);
-  --space-xxl: var(--space-32);
 }
 
 /* ============================================================================
