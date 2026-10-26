@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — проба: один договор на имя участника</title>
+<link rel="stylesheet" href="../css/tokens.css?v=75">
+<link rel="stylesheet" href="../css/style.css?v=462">
+<link rel="stylesheet" href="../css/tournament-detail.css?v=157">
+<style>body{background:#0A0A0A;color:#fff;font-family:Inter,system-ui,sans-serif;margin:0;padding:24px;}
+.pr-h{font-size:14px;letter-spacing:.08em;color:#CCFF00;margin:0 0 12px;text-transform:uppercase;}
+.pr-box{margin-bottom:40px;}</style>
+</head>
+<body>
+
+<!-- ПРОБА, А НЕ СТЕНД. Зовутся НАСТОЯЩИЕ функции продукта из
+     js/tournament-detail.js — renderLeagueBracketPublic, renderMatch,
+     имяУчастникаТекстом, getPublicTeamName. Ни одной копии.
+
+     ЗАЧЕМ СТЕНД, А НЕ БОЕВАЯ СТРАНИЦА. Беду куска 158 показывал ТОЛЬКО
+     парный турнир с лиговой сеткой: в тестовой базе такого нет, а сеять
+     его — значит трогать данные. Стенд зовёт ту же функцию с теми же
+     данными и не трогает ни одной базы.
+
+     ЧТО ЗДЕСЬ КРАЙНЕЕ: имя с амперсандом и кавычкой, имя с тегом внутри,
+     пара с внешним напарником, пустой слот с меткой и пустой слот без
+     метки (BYE). -->
+
+<div class="pr-box"><p class="pr-h">А · парная лиговая сетка — имена пар</p><div id="пары"></div></div>
+<div class="pr-box"><p class="pr-h">Б · одиночная лиговая сетка — имена с особыми знаками</p><div id="одиночки"></div></div>
+<div class="pr-box"><p class="pr-h">В · метки слотов и BYE в пустых клетках</p><div id="метки"></div></div>
+
+<script>
+/* Заглушка базы: падает на любом обращении. Сетка в базу не ходит —
+   если пошла, это и есть находка. ЗАГЛУШКА ДОЛЖНА ПАДАТЬ, А НЕ УГАДЫВАТЬ. */
+var supabaseClient = {
+    from: function (таблица) { throw new Error('сетка полезла в базу: ' + таблица); }
+};
+</script>
+<script src="../js/kslt-rules.js?v=34"></script>
+<script src="../js/tournament-status.js?v=12"></script>
+<script src="../js/kslt-yazyk.js?v=4"></script>
+<script src="../js/kslt-ekranirovanie.js?v=1"></script>
+<script src="../js/tournament-generator.js?v=4"></script>
+<script src="../js/tournament-slots.js?v=6"></script>
+<script src="../js/tournament-detail.js?v=133"></script>
+<script>
+/* ── ДАННЫЕ. Крайние, а не удобные ──────────────────────────────────── */
+var ИГРОКИ = {
+    'cap1':  { id: 'cap1',  name: 'Эльдияр Боруев',   country: 'KG' },
+    'part1': { id: 'part1', name: 'Рустам Сулейманов', country: 'KG' },
+    'cap2':  { id: 'cap2',  name: 'Ким & Ли',          country: 'KR' },
+    'part2': { id: 'part2', name: 'О\'Коннор',         country: 'IE' },
+    'cap3':  { id: 'cap3',  name: '<b>Хакер</b>',      country: '' },
+    'cap4':  { id: 'cap4',  name: 'Он сказал "да"',    country: '' }
+};
+var ЗАЯВКИ = {
+    'cap1': { player_id: 'cap1', partner_id: 'part1' },
+    'cap2': { player_id: 'cap2', partner_id: 'part2' },
+    'cap3': { player_id: 'cap3', partner_external_name: 'Гость & Co' },
+    'cap4': { player_id: 'cap4' }
+};
+
+function матч(ид, п1, п2, счёт, кто, круг, порядок) {
+    return { id: ид, player1_id: п1, player2_id: п2, score: счёт, winner_id: кто,
+             round: 'PL-R' + круг, round_number: круг, match_order: порядок,
+             status: счёт ? 'completed' : 'upcoming' };
+}
+
+/* ── КОРМИЛЬЦЫ. Ровно те же два договора, что на боевой странице ─────── */
+function имяПарнымТекстом(ид) {
+    var и = имяУчастникаТекстом(ид, ЗАЯВКИ, ИГРОКИ);
+    return { name: и.текст, оформление: и.пара ? 'пара' : '' };
+}
+function имяОдиночнымТекстом(ид) {
+    var и = имяУчастникаТекстом(ид, null, ИГРОКИ);
+    return { name: и.текст, оформление: и.пара ? 'пара' : '' };
+}
+
+/* ── А · ПАРНАЯ ЛИГОВАЯ СЕТКА ──────────────────────────────────────── */
+tdИтоги = {}; tdМеткиГрупп = {}; tdМеткиСлотов = {};
+document.getElementById('пары').innerHTML = renderLeagueBracketPublic([
+    матч('m1', 'cap1', 'cap2', '6/2 6/4', 'cap1', 1, 1),
+    матч('m2', 'cap3', 'cap4', '7/6 6/3', 'cap3', 1, 2),
+    матч('m3', 'cap1', 'cap3', '', null, 2, 1)
+], ИГРОКИ, 'PL', false, false, null, имяПарнымТекстом);
+
+/* ── Б · ОДИНОЧНАЯ ЛИГОВАЯ СЕТКА ───────────────────────────────────── */
+document.getElementById('одиночки').innerHTML = renderLeagueBracketPublic([
+    матч('s1', 'cap2', 'cap3', '6/0 6/1', 'cap2', 1, 1),
+    матч('s2', 'cap4', 'part2', '6/4 6/4', 'cap4', 1, 2),
+    матч('s3', 'cap2', 'cap4', '', null, 2, 1)
+], ИГРОКИ, 'PL', false, false, null, имяОдиночнымТекстом);
+
+/* ── В · МЕТКИ СЛОТОВ И BYE. Пустая клетка говорит, кого ждёт ──────── */
+tdМеткиСлотов = { 'k1': { s1: 'A1', s2: 'IG1' }, 'k2': { s1: 'B1', s2: null } };
+tdИтоги = {};
+var объект = {
+    id: 'стенд', bracketType: 'single_elimination', drawSize: 4,
+    players: [], bracket: { rounds: [] }, status: 'upcoming'
+};
+document.getElementById('метки').innerHTML =
+    '<div class="td-bracket-scroll"><div class="td-bracket"><div class="td-bracket-round">' +
+    '<div class="td-bracket-matches">' +
+    renderMatch(объект, { matchId: 'k1', player1Id: null, player2Id: null, score: '', winnerId: null, status: 'upcoming' }, null) +
+    renderMatch(объект, { matchId: 'k2', player1Id: null, player2Id: null, score: '', winnerId: null, status: 'upcoming' }, null) +
+    '</div></div></div></div>';
+
+/* Признак готовности для пробы: ждём ПРИЗНАК, а не тишину сети. */
+document.body.setAttribute('data-проба-готова', '1');
+</script>
+</body>
+</html>
