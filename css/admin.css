@@ -5088,9 +5088,16 @@ select.ad-field-input {
 }
 
 /* Bracket button in tournament list */
-.ad-brk-btn {
-    font-size: var(--fs-xs) !important;
-    padding: var(--space-1) var(--space-2) !important;
+/* КНОПКА «СЕТКА» В СПИСКЕ ТУРНИРОВ — УДВОЕННЫМ ИМЕНЕМ, А НЕ ВАЖНОСТЬЮ
+   (26.10). Стояло два `!important`: они перебивали `.ad-btn-sm`, потому что
+   у кнопки набор `ad-btn ad-btn-sm ad-btn-secondary ad-brk-btn`
+   (`tournaments.js:498`) и один класс против одного решался порядком в
+   файле. Удвоенное имя даёт вес двух классов и ту же победу БЕЗ важности —
+   приём круга 17.10. Замер образцом на стенде ДО и ПОСЛЕ: 12 / 4px 8px /
+   600 / 36px высота — один в один. */
+.ad-brk-btn.ad-brk-btn {
+    font-size: var(--fs-xs);
+    padding: var(--space-1) var(--space-2);
 }
 
 /* Score input row */

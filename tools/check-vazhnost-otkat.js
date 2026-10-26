@@ -58,8 +58,11 @@ const ОТКАТЫ = [
     ['важность против инлайна — правило молчит',
      [[AD, '.ad-bulk-item,\n.ad-bulk-all {',
           '.proba-inlayna { color: #fff !important; }\n\n.ad-bulk-item,\n.ad-bulk-all {'],
-      [UT, 'function bulkCheckboxTd(id) {',
-          'function probaInlayna() {\n        return \'<span class="proba-inlayna" style="color:#000;">x</span>\';\n    }\n\n    function bulkCheckboxTd(id) {']],
+      /* ЯКОРЬ ПОПРАВЛЕН 26.10: у `bulkCheckboxTd` появился второй довод
+         (`id, о`), и якорь с одним доводом перестал находиться — откат
+         одиннадцать дней ничего не проверял. */
+      [UT, 'function bulkCheckboxTd(id, о) {',
+          'function probaInlayna() {\n        return \'<span class="proba-inlayna" style="color:#000;">x</span>\';\n    }\n\n    function bulkCheckboxTd(id, о) {']],
      null, null,
      '!ни одна важность «свой css» не стоит без конкурента'],
 
@@ -116,9 +119,16 @@ const ОТКАТЫ = [
        и `.ad-bulk-item` (149). Записано в находки.
        НЕДОКАЗАННАЯ ВЕТКА ПРАВИЛА — ЭТО ДОЛГ, А НЕ ЗЕЛЁНЫЙ СВЕТ. */
 
+    /* ЯКОРЬ ПЕРЕЕХАЛ 26.10. Он стоял на css-строке внутри `bracket.js`
+       (`'.ad-retired-btn.active{background:var(--accent) !important;`), но
+       КУСОК 174 вынес из этого файла ВСЕ 55 правил css в сами файлы css —
+       и якоря не стало. Откат перестал проверять, не упав красным: он
+       честно сказал «якорь встречается 0 раз», и это надо было услышать в
+       тот же день. Теперь порча вставляется на объявлении функции окна
+       счёта — оно живёт в файле постоянно. */
     ['прибавить важность в js', BR,
-     "'.ad-retired-btn.active{background:var(--accent) !important;",
-     "'.ad-retired-btn.active{background:var(--accent) !important;color:red !important;",
+     '    function openScoreModal(',
+     '    function probaVazhnosti() {\n        return \'<i style="color:red !important"></i>\';\n    }\n\n    function openScoreModal(',
      'важностей в js не больше замеренного']
 ];
 
