@@ -250,6 +250,71 @@ function словариФайла(д) {
         if (функцииСловари.has(зов)) { н.add(у.id.name); свои_перечисления.add(у.id.name); }
     });
 
+    /* ПЕРЕЧИСЛЕНИЕ, ПРИСВОЕННОЕ ПОЛЮ ДОМА, — ТОЖЕ СВОЁ (кусок 171).
+       `P.countries = [ {iso, code, flag, …}, … ]` — список стран, литерал от
+       первой до последней строки; признак искал только присваивания ПЕРЕМЕННОЙ
+       и этот список своим не считал. Ключом служит текст пути (`P.countries`):
+       по нему же узнаётся обход. */
+    const своиПути = new Set();
+    function путьУзла(у) {
+        if (!у) return null;
+        if (у.type === 'Identifier') return у.name;
+        if (у.type === 'MemberExpression' && !у.computed && у.property.type === 'Identifier') {
+            const л = путьУзла(у.object);
+            return л ? л + '.' + у.property.name : null;
+        }
+        return null;
+    }
+    обход(д, у => {
+        if (у.type !== 'AssignmentExpression' || у.operator !== '=' || !у.right) return;
+        if (у.right.type !== 'ArrayExpression' || !у.right.elements.length) return;
+        if (!у.right.elements.every(э => э && (э.type === 'ObjectExpression' || э.type === 'Literal'))) return;
+        const путь = путьУзла(у.left);
+        if (путь) своиПути.add(путь);
+    });
+    обход(д, у => {
+        if (у.type !== 'CallExpression' || !у.callee || у.callee.type !== 'MemberExpression') return;
+        const метод = у.callee.property && у.callee.property.type === 'Identifier' ? у.callee.property.name : '';
+        if (['forEach', 'map', 'filter', 'some', 'every', 'find'].indexOf(метод) === -1) return;
+        if (!своиПути.has(путьУзла(у.callee.object))) return;
+        const тело = у.arguments[0];
+        if (!тело || ФУНК.indexOf(тело.type) === -1) return;
+        тело.params.forEach(п => { if (п.type === 'Identifier') н.add(п.name); });
+    });
+
+    /* ЭЛЕМЕНТ СВОЕГО ПЕРЕЧИСЛЕНИЯ — ТОЖЕ СЛОВАРЬ: `var c = cards[i]` в обходе
+       через `for`. Обход через `for` признак не видел вовсе — только
+       `forEach`/`map`, — и четыре подписи обзорной страницы числились дырами. */
+    обход(д, у => {
+        if (у.type !== 'VariableDeclarator' || у.id.type !== 'Identifier' || !у.init) return;
+        const и = у.init;
+        if (и.type !== 'MemberExpression' || !и.computed) return;
+        const путь = путьУзла(и.object);
+        if (путь && (свои_перечисления.has(путь) || своиПути.has(путь))) н.add(у.id.name);
+    });
+
+    /* ФУНКЦИЯ, ОТДАЮЩАЯ ЭЛЕМЕНТ СВОЕГО ПЕРЕЧИСЛЕНИЯ, — ТОЖЕ СЛОВАРЬ:
+       `byIso` отдаёт `P.countries[i]`, и `current` — такой же литерал. */
+    const функцииЭлементы = new Set();
+    обход(д, у => {
+        if (ФУНК.indexOf(у.type) === -1 || !у.id || у.id.type !== 'Identifier') return;
+        const выдачи = [];
+        свои(у, н2 => { if (н2.type === 'ReturnStatement' && н2.argument) выдачи.push(н2.argument); });
+        if (!выдачи.length) return;
+        const элемент = в => в.type === 'MemberExpression' && в.computed &&
+            (своиПути.has(путьУзла(в.object)) || свои_перечисления.has(путьУзла(в.object)));
+        const пусто = в => в.type === 'Literal' && (в.value === null || в.value === undefined);
+        if (выдачи.some(элемент) && выдачи.every(в => элемент(в) || пусто(в) ||
+            (в.type === 'LogicalExpression' && [в.left, в.right].some(элемент))))
+            функцииЭлементы.add(у.id.name);
+    });
+    обход(д, у => {
+        if (у.type !== 'VariableDeclarator' || у.id.type !== 'Identifier' || !у.init) return;
+        const и = у.init;
+        const зов = в => в && в.type === 'CallExpression' && функцииЭлементы.has(имяЗова(в) || '');
+        if (зов(и) || (и.type === 'LogicalExpression' && [и.left, и.right].some(зов))) н.add(у.id.name);
+    });
+
     /* доводы обходчиков своих перечислений */
     обход(д, у => {
         if (у.type !== 'CallExpression' || !у.callee || у.callee.type !== 'MemberExpression') return;
