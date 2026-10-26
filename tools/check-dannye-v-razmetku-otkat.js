@@ -42,7 +42,9 @@ const ФАЙЛЫ = ['js/news.js', 'js/tournament-register.js', 'js/dashboard.js'
                 /* кусок 171: перечисление у дома и элемент перечисления */
                 'js/phone.js', 'js/info-overview.js',
                 /* кусок 172: обёртка вокруг дома, ключ разряда */
-                'js/players.js', 'js/account-restore.js'];
+                'js/players.js', 'js/account-restore.js',
+                /* кусок 173: доверие к дому через границу файла */
+                'js/auth.js', 'js/live-texts.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -220,7 +222,7 @@ const ОТКАТЫ = [
        ЯКОРЬ ПЕРЕЕЗЖАЕТ ВМЕСТЕ С СОДЕРЖИМЫМ. */
     ['запереть файл, у которого есть названное место', 'tools/check-dannye-v-razmetku.js',
      "    'js/admin/sections/finances.js', 'js/admin/sections/live.js',",
-     "    'js/admin/sections/finances.js', 'js/admin/sections/live.js', 'js/live-match.js',",
+     "    'js/admin/sections/finances.js', 'js/admin/sections/live.js', 'js/coaches.js',",
      'запертые файлы не отпираются'],
 
     /* ── КУСОК 166: значок награды и значение словаря по ключу ── */
@@ -260,9 +262,12 @@ const ОТКАТЫ = [
 
     /* СЛОВАРЬ, ВЗЯТЫЙ У ДОМА, ОСТАЁТСЯ СЛОВАРЁМ. Откат отнимает у признака
        это знание, и `L[key]` в запертом файле снова становится дырой. */
-    ['отнять у признака словарь, взятый у дома', 'tools/priznak-dannye-v-razmetke.js',
-     "        else if (и.type === 'MemberExpression' && !и.computed &&\n                 ДОМА.indexOf(корень2(и)) !== -1) н.add(у.id.name);",
-     "        else if (false) { /* знание отнято откатом */ }",
+    /* ЯКОРЬ ПЕРЕЕХАЛ ВМЕСТЕ С СОДЕРЖИМЫМ (кусок 173): узкое знание куска 167
+       снято как второе определение, и откат переведён на ШИРОКОЕ правило —
+       «переменная, в которую положили зов или поле дома, — тоже дом». */
+    ['отнять у признака переменную с домом', 'tools/priznak-dannye-v-razmetke.js',
+     "        if (домовый(и) || (и.type === 'LogicalExpression' && [и.left, и.right].some(домовый)) ||",
+     "        if (false || (и.type === 'LogicalExpression' && [и.left, и.right].some(домовый)) ||",
      'запертые файлы не отпираются'],
 
     /* ── КУСОК 168: цена и назначение платежа ── */
@@ -351,6 +356,22 @@ const ОТКАТЫ = [
     ['вернуть сырой ключ разряда в атрибут', 'js/players.js',
      "'\" data-tab=\"' + KSLT_экранировать(cats[i].key) + '\" aria-pressed=\"'",
      "'\" data-tab=\"' + cats[i].key + '\" aria-pressed=\"'",
+     'запертые файлы не отпираются'],
+
+    /* ── КУСОК 173: доверие к дому переходит границу файла ── */
+
+    /* ОБХОД ПОЛЯ ДОМА (`KSLT_PHONE.countries.map`). Откат отнимает знание —
+       отпирается `auth.js`. */
+    ['отнять у признака обход поля дома', 'tools/priznak-dannye-v-razmetke.js',
+     "        if (ДОМА.indexOf(корень2(об)) === -1) return;\n        const тело = у.arguments[0];",
+     "        if (true) return;\n        const тело = у.arguments[0];",
+     'запертые файлы не отпираются'],
+
+    /* ЗОВ СЛОВАРЯ (`Т.пауза(причина)`). Откат отнимает знание — отпирается
+       `live-match.js`. */
+    ['отнять у признака зов словаря', 'tools/priznak-dannye-v-razmetke.js',
+     "            const к = корень2(у.callee);\n            if (к && словарь.has(к)) return итог;",
+     "            if (false) return итог;",
      'запертые файлы не отпираются'],
 
     ['завести ещё голую переменную в склейке с разметкой', 'js/kslt-vremya.js',

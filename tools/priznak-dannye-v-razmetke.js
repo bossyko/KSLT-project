@@ -40,7 +40,15 @@ const ДОМА = ['KSLT_LICO', 'KSLT_SLOY', 'KSLT_VAUCHER', 'KSLT_MESTA', 'KSLT_
                  слово своего словаря, `значокРоли()` экранирует и роль, и
                  подпись. ДОМ ПОПАДАЕТ В СПИСОК ПОСЛЕ ЧТЕНИЯ ВСЕХ ЕГО
                  ОТДАЧ, а не по имени. */
-              'KSLT_DOSTUP'];
+              'KSLT_DOSTUP',
+              /* КУСОК 173: дом подписей трансляции. Прочитан целиком
+                 (`js/live-texts.js:44-57`): `слово(код)` отдаёт значение своего
+                 СЛОВАРЯ, а неизвестный код — ПУСТУЮ СТРОКУ, а не сам код
+                 («зритель не должен читать `set_break`»); `пауза` склеивает два
+                 таких слова; `остаток` отдаёт число. Довод до разметки не
+                 доходит ни в одной отдаче. ДОМ ПОПАДАЕТ В СПИСОК ПОСЛЕ ЧТЕНИЯ
+                 ВСЕХ ЕГО ОТДАЧ, а не по имени. */
+              'KSLTLiveTexts'];
 const РАЗМЕТКА = /<\/?[a-z][a-z0-9-]*[\s>\/]/i;
 const ФУНК = ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'];
 const В_АТРИБУТЕ = /=\s*["']$/;
@@ -202,12 +210,11 @@ function словариФайла(д) {
         else if (и.type === 'ConditionalExpression' &&
                  и.consequent.type === 'ArrayExpression' && и.alternate.type === 'ArrayExpression')
             свои_перечисления.add(у.id.name);
-        /* `var L = A.L` — СЛОВАРЬ, ВЗЯТЫЙ У ДОМА, ОСТАЁТСЯ СЛОВАРЁМ. Админка
-           держит свои подписи в `A.L`, и каждый её файл берёт их этой
-           строкой; признак же видел здесь «иное» и считал `L[key]` полем
-           человека (кусок 167). Доверие идёт от ДОМА, а не от имени `L`. */
-        else if (и.type === 'MemberExpression' && !и.computed &&
-                 ДОМА.indexOf(корень2(и)) !== -1) н.add(у.id.name);
+        /* ЗНАНИЕ КУСКА 167 («var L = A.L — словарь, взятый у дома») СНЯТО
+           КУСКОМ 173 КАК ВТОРОЕ ОПРЕДЕЛЕНИЕ ОДНОГО ПОНЯТИЯ: более широкое
+           правило «переменная, в которую положили зов или поле дома, — тоже
+           дом» покрывает его целиком. Проверено: дыр 8 с ним и 8 без него.
+           Откат куска 167 переведён на широкое правило. */
         else if (и.type === 'CallExpression') {
             const зов = имяЗова(и) || '';
             if (зов.indexOf('выбрать') !== -1 || /^get[A-Z]|[Ll]abels$/.test(зов)) н.add(у.id.name);
@@ -323,6 +330,34 @@ function словариФайла(д) {
         if (у.type !== 'VariableDeclarator' || у.id.type !== 'Identifier' || !у.init) return;
         if (у.init.type !== 'CallExpression') return;
         if (обёрткиДома.has(имяЗова(у.init) || '')) { н.add(у.id.name); свои_перечисления.add(у.id.name); }
+    });
+
+    /* ОБХОД ПОЛЯ ДОМА — ТАКОЙ ЖЕ ОБХОД (кусок 173). `KSLT_PHONE.countries` —
+       список стран, который живёт В ДРУГОМ ФАЙЛЕ, но принадлежит ДОМУ, а дом
+       признак и так считает надёжным. ГРАНИЦУ ФАЙЛА ПЕРЕХОДИТ НЕ ПРОСЛЕЖИВАНИЕ,
+       А ДОВЕРИЕ К ДОМУ — и это дешевле карты всего продукта. */
+    обход(д, у => {
+        if (у.type !== 'CallExpression' || !у.callee || у.callee.type !== 'MemberExpression') return;
+        const метод = у.callee.property && у.callee.property.type === 'Identifier' ? у.callee.property.name : '';
+        if (['forEach', 'map', 'filter', 'some', 'every', 'find'].indexOf(метод) === -1) return;
+        const об = у.callee.object;
+        if (!об || об.type !== 'MemberExpression' || об.computed) return;
+        if (ДОМА.indexOf(корень2(об)) === -1) return;
+        const тело = у.arguments[0];
+        if (!тело || ФУНК.indexOf(тело.type) === -1) return;
+        тело.params.forEach(п => { if (п.type === 'Identifier') н.add(п.name); });
+    });
+
+    /* ПЕРЕМЕННАЯ, В КОТОРУЮ ПОЛОЖИЛИ ЗОВ ДОМА, — ТОЖЕ ДОМ: `var st =
+       window.KSLT_SLOTS.stat(…)`. То же доверие, что у обёртки вокруг дома
+       (кусок 172), только без лишнего звена. */
+    обход(д, у => {
+        if (у.type !== 'VariableDeclarator' || у.id.type !== 'Identifier' || !у.init) return;
+        const и = у.init;
+        const домовый = в => !!в && ((в.type === 'CallExpression' || в.type === 'MemberExpression') &&
+            ДОМА.indexOf(корень2(в)) !== -1);
+        if (домовый(и) || (и.type === 'LogicalExpression' && [и.left, и.right].some(домовый)) ||
+            (и.type === 'ConditionalExpression' && [и.consequent, и.alternate].some(домовый))) н.add(у.id.name);
     });
 
     /* СЛОВО СЛОВАРЯ, ВЗЯТОЕ ПО КЛЮЧУ, — ТОЖЕ СЛОВАРЬ: `var L = TEXT[lang()]`
@@ -719,6 +754,15 @@ function находкиФайла(ф, т, д, ПИШЕТ) {
         /* проверка на пустоту — не подстановка */
         if (у.type === 'ConditionalExpression') { чужое(у.consequent, итог); чужое(у.alternate, итог); return итог; }
         if (у.type === 'LogicalExpression' && у.operator === '&&') { чужое(у.right, итог); return итог; }
+        /* ЗОВ СЛОВАРЯ — НЕ ПОДСТАНОВКА (кусок 173). `Т.пауза(m.pause_reason)`,
+           где `Т` — дом подписей трансляции, положенный в местную переменную:
+           отдаётся слово СЛОВАРЯ, а неизвестный код отдаёт пустую строку.
+           Условие узкое: зов на ПОЛЕ того, что уже узнано словарём или домом,
+           а не любой зов. */
+        if (у.type === 'CallExpression' && у.callee && у.callee.type === 'MemberExpression') {
+            const к = корень2(у.callee);
+            if (к && словарь.has(к)) return итог;
+        }
         if (у.type === 'CallExpression') {
             const зов = имяЗова(у) || '';
             const хвост = зов.indexOf('.') !== -1 ? зов.split('.')[1] : зов;
