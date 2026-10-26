@@ -11345,11 +11345,11 @@
                     '<div style="margin-top:16px;">' +
                         '<label class="ad-field-label" style="text-align:center;display:block;margin-bottom:6px;">' + L.matchOutcome + '</label>' +
                         '<div id="adOutcomeChips" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">' +
-                            '<button class="ad-outcome-chip' + (!existingOutcome ? ' active' : '') + '" data-outcome="">' + L.outcomeNormal + '</button>' +
-                            '<button class="ad-outcome-chip' + (existingOutcome === 'RET' ? ' active' : '') + '" data-outcome="RET">' + L.outcomeRET + '</button>' +
-                            '<button class="ad-outcome-chip' + (existingOutcome === 'W/O' ? ' active' : '') + '" data-outcome="W/O">' + L.outcomeWO + '</button>' +
-                            '<button class="ad-outcome-chip' + (existingOutcome === 'DEF' ? ' active' : '') + '" data-outcome="DEF">' + L.outcomeDEF + '</button>' +
-                            '<button class="ad-outcome-chip' + (existingOutcome === 'NA' ? ' active' : '') + '" data-outcome="NA">N/A</button>' +
+                            '<button type="button" class="ad-outcome-chip' + (!existingOutcome ? ' active' : '') + '" aria-pressed="' + (!existingOutcome ? 'true' : 'false') + '" data-outcome="">' + L.outcomeNormal + '</button>' +
+                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'RET' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'RET' ? 'true' : 'false') + '" data-outcome="RET">' + L.outcomeRET + '</button>' +
+                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'W/O' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'W/O' ? 'true' : 'false') + '" data-outcome="W/O">' + L.outcomeWO + '</button>' +
+                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'DEF' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'DEF' ? 'true' : 'false') + '" data-outcome="DEF">' + L.outcomeDEF + '</button>' +
+                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'NA' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'NA' ? 'true' : 'false') + '" data-outcome="NA">N/A</button>' +
                         '</div>' +
                     '</div>' +
                     '<div id="adRetiredBlock" style="margin-top:12px;text-align:center;display:' + (existingOutcome ? 'block' : 'none') + ';">' +
@@ -11582,24 +11582,26 @@
         bindInputEvents();
         updateSetsVisibility();
 
-        // Inject outcome chip styles
-        if (!document.getElementById('adOutcomeStyles')) {
-            var styleEl = document.createElement('style');
-            styleEl.id = 'adOutcomeStyles';
-            styleEl.textContent = '.ad-outcome-chip{padding:5px 12px;border-radius:var(--radius-full);border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-size:var(--fs-xs);transition:all .15s;}' +
-                '.ad-outcome-chip:hover{border-color:var(--accent);color:var(--text-primary);}' +
-                '.ad-outcome-chip.active{background:var(--accent);color:var(--accent-on);border-color:var(--accent);font-weight:600;}' +
-                '.ad-retired-btn.active{background:var(--accent) !important;color:var(--accent-on) !important;border-color:var(--accent) !important;font-weight:600;}' +
-                '.ad-brk-outcome{display:inline-block;font-size:var(--fs-2xs);font-weight:700;padding:1px 5px;border-radius:var(--radius-xs);background:var(--accent-subtle);color:var(--accent);margin-left:4px;vertical-align:middle;}';
-            document.head.appendChild(styleEl);
-        }
+        /* ВИД ЖИВЁТ В CSS, А НЕ В СТРОКЕ JS (кусок 174). Здесь стояла
+           вставка <style> с пятью правилами: чипы исхода, кнопка выбывшего
+           и пометка исхода в сетке. Два изъяна были не в опрятности:
+           пометка `.ad-brk-outcome` оказалась ВТОРЫМ определением правила,
+           которое уже стояло в `css/admin.css`, а приезжало оно только
+           ПОСЛЕ первого открытия этого окна — до него вид сетки был другим.
+           Правила переехали в `css/admin.css`, рядом с остальным окном. */
 
         // Outcome chips
         var selectedOutcome = existingOutcome || '';
         overlay.querySelectorAll('.ad-outcome-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
-                overlay.querySelectorAll('.ad-outcome-chip').forEach(function(c) { c.classList.remove('active'); });
+                /* СОСТОЯНИЕ ЧИТАЕТ И ДИКТОР, А НЕ ТОЛЬКО ГЛАЗ: класс
+                   красит, aria-pressed произносит (кусок 174). */
+                overlay.querySelectorAll('.ad-outcome-chip').forEach(function(c) {
+                    c.classList.remove('active');
+                    c.setAttribute('aria-pressed', 'false');
+                });
                 chip.classList.add('active');
+                chip.setAttribute('aria-pressed', 'true');
                 selectedOutcome = chip.dataset.outcome;
                 document.getElementById('adSelectedOutcome').value = selectedOutcome;
                 var retiredBlock = document.getElementById('adRetiredBlock');
