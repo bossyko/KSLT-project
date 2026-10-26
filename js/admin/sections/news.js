@@ -231,7 +231,7 @@
                         html += '<div class="ad-news-stat-top-item">' +
                             '<span class="ad-news-stat-top-medal">' + (medals[i] || '') + '</span>' +
                             '<span class="ad-news-stat-top-title">' + A.esc(row.title) + '</span>' +
-                            '<span class="ad-news-stat-top-score">(' + (row.score || 0) + ')</span>' +
+                            '<span class="ad-news-stat-top-score">(' + A.esc(row.score || 0) + ')</span>' +
                         '</div>';
                     });
                     topList.innerHTML = html;

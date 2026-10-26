@@ -525,7 +525,7 @@
         html += '<div class="pl-category-pills" id="categoryPills">';
         var cats = currentGender === 'men' ? menCats : womenCats;
         for (var i = 0; i < cats.length; i++) {
-            html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + cats[i].key + '" aria-pressed="' + (cats[i].key === currentTab) + '">' + KSLT_экранировать(cats[i].name) + '</button>';
+            html += '<button class="pl-category-pill' + (cats[i].key === currentTab ? ' active' : '') + '" data-tab="' + KSLT_экранировать(cats[i].key) + '" aria-pressed="' + (cats[i].key === currentTab) + '">' + KSLT_экранировать(cats[i].name) + '</button>';
         }
         html += '</div>';
         var playersPage = isEnPage() ? 'players-en.html' : (isKgPage() ? 'players-kg.html' : 'players.html');
