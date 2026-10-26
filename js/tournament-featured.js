@@ -358,28 +358,14 @@
                         : '') +
                 '</div>' +
             '</div>' +
-            правыйБлок(t) +
+            '<div class="to-compact-right">' +
+                (t._rawStatus === 'registration_open'
+                    ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
+                        (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
+                    : '') +
+                отсчёт(t._dateSort, t._startTime, t.status) +
+            '</div>' +
         '</div>';
-    }
-
-    /* ПУСТОЙ УЗЕЛ НЕ РИСУЕТСЯ (26.10, кусок 182). В правом блоке полосы живут
-       две вещи: кнопка записи — только при `registration_open` — и отсчёт.
-       У прошедшего турнира нет ни одной, и блок уезжал в разметку пустым:
-       замер на обзоре турниров — 13 полос из 13, у каждой пустой
-       `.to-compact-right` занимал ячейку грида во всю ширину (494px при
-       нулевой высоте). Запись 07.10 говорила «у шести» — их тринадцать.
-       ВИД НЕ МЕНЯЕТСЯ, И ЭТО ЗАМЕРЕНО ДО ПРАВКИ ФАЙЛА: блок снимался прямо
-       в DOM у всех тринадцати, высота полосы осталась 160px — вторую строку
-       грида съедает минимальная высота полосы. Значит это уборка лишнего
-       узла, а не починка вида. */
-    function правыйБлок(t) {
-        var кнопка = t._rawStatus === 'registration_open'
-            ? '<button class="btn-register to-register to-compact-regbtn" data-tid="' + t.id + '"' +
-                (парный(t) ? ' data-doubles="1"' : '') + '>' + L.register + '</button>'
-            : '';
-        var час = отсчёт(t._dateSort, t._startTime, t.status);
-        if (!кнопка && !час) return '';
-        return '<div class="to-compact-right">' + кнопка + час + '</div>';
     }
 
     window.KSLT_TFEATURED = {
