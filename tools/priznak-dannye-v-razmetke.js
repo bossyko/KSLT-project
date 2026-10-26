@@ -293,6 +293,65 @@ function словариФайла(д) {
         if (путь && (свои_перечисления.has(путь) || своиПути.has(путь))) н.add(у.id.name);
     });
 
+    /* ФУНКЦИЯ, ОТДАЮЩАЯ ЗОВ ДОМА, — ТАКОЙ ЖЕ ДОМ (кусок 172).
+       `getFicSections` отдаёт `window.KSLT_RULES.ficSections(…)` — тонкую
+       обёртку вокруг дома правил, и в её теле нет ничего своего. Признак же
+       видел местную функцию и терял доверие к дому: подписи блоков сетки
+       числились дырами в ДВУХ файлах. Условие строгое: каждая выдача — зов
+       дома или пусто. ОБЁРТКА ВОКРУГ ДОМА — НЕ ВТОРОЕ ОПРЕДЕЛЕНИЕ, А ОДНО
+       ЛИШНЕЕ ЗВЕНО, И ДОВЕРИЕ ПО НЕМУ ПРОХОДИТ. */
+    const обёрткиДома = new Set();
+    обход(д, у => {
+        if (ФУНК.indexOf(у.type) === -1 || !у.id || у.id.type !== 'Identifier') return;
+        const выдачи = [];
+        свои(у, н2 => { if (н2.type === 'ReturnStatement' && н2.argument) выдачи.push(н2.argument); });
+        if (!выдачи.length) return;
+        const домовый = в => !!в && ((в.type === 'CallExpression' && ДОМА.indexOf(корень2(в)) !== -1) ||
+            (в.type === 'MemberExpression' && ДОМА.indexOf(корень2(в)) !== -1));
+        const пусто2 = в => !!в && ((в.type === 'Literal' && (в.value === null || в.value === '')) ||
+            в.type === 'ArrayExpression' || в.type === 'ObjectExpression' ||
+            (в.type === 'Identifier' && в.name === 'undefined'));
+        const ветки = в => в.type === 'ConditionalExpression' ? [в.consequent, в.alternate]
+            : (в.type === 'LogicalExpression' ? [в.left, в.right] : [в]);
+        if (выдачи.some(в => ветки(в).some(домовый)) &&
+            выдачи.every(в => ветки(в).every(ч => домовый(ч) || пусто2(ч) ||
+                (ч.type === 'LogicalExpression' && [ч.left, ч.right].some(домовый)) ||
+                ч.type === 'Identifier' || ч.type === 'BinaryExpression')))
+            обёрткиДома.add(у.id.name);
+    });
+    обход(д, у => {
+        if (у.type !== 'VariableDeclarator' || у.id.type !== 'Identifier' || !у.init) return;
+        if (у.init.type !== 'CallExpression') return;
+        if (обёрткиДома.has(имяЗова(у.init) || '')) { н.add(у.id.name); свои_перечисления.add(у.id.name); }
+    });
+
+    /* СЛОВО СЛОВАРЯ, ВЗЯТОЕ ПО КЛЮЧУ, — ТОЖЕ СЛОВАРЬ: `var L = TEXT[lang()]`
+       в окне восстановления. Это не элемент перечисления (TEXT — объект, а не
+       массив), а ветка словаря по языку. */
+    обход(д, у => {
+        if (у.type !== 'VariableDeclarator' || у.id.type !== 'Identifier' || !у.init) return;
+        const и = у.init;
+        if (и.type !== 'MemberExpression' || !и.computed) return;
+        const путь = путьУзла(и.object);
+        if (путь && н.has(путь)) н.add(у.id.name);
+    });
+
+    /* ОБХОД ПОЛЯ СЛОВАРЯ — ТАКОЙ ЖЕ ОБХОД: `g.options.forEach(function (o) …)`,
+       где `g` — уже узнанный словарь. Подписи фильтров тренеров и партнёров
+       числились дырами из-за одного этого звена. */
+    обход(д, у => {
+        if (у.type !== 'CallExpression' || !у.callee || у.callee.type !== 'MemberExpression') return;
+        const метод = у.callee.property && у.callee.property.type === 'Identifier' ? у.callee.property.name : '';
+        if (['forEach', 'map', 'filter', 'some', 'every', 'find'].indexOf(метод) === -1) return;
+        const об = у.callee.object;
+        if (!об || об.type !== 'MemberExpression' || об.computed) return;
+        const корешок = путьУзла(об.object);
+        if (!корешок || !н.has(корешок)) return;
+        const тело = у.arguments[0];
+        if (!тело || ФУНК.indexOf(тело.type) === -1) return;
+        тело.params.forEach(п => { if (п.type === 'Identifier') н.add(п.name); });
+    });
+
     /* ФУНКЦИЯ, ОТДАЮЩАЯ ЭЛЕМЕНТ СВОЕГО ПЕРЕЧИСЛЕНИЯ, — ТОЖЕ СЛОВАРЬ:
        `byIso` отдаёт `P.countries[i]`, и `current` — такой же литерал. */
     const функцииЭлементы = new Set();
@@ -687,6 +746,12 @@ function находкиФайла(ф, т, д, ПИШЕТ) {
             const к = корень2(у.object);
             if (к && (словарь.has(к) || ДОМА.indexOf(к) !== -1)) return итог;
         }
+        /* АРИФМЕТИКА ОТДАЁТ ЧИСЛО (кусок 172, то же знание, что в выводе
+           экранов): `Math.round(цена * доля / 100)` — скидка ваучера. Кавычке
+           в числе взяться негде. */
+        if (у.type === 'BinaryExpression' && ['*', '/', '-', '%', '**'].indexOf(у.operator) !== -1) return итог;
+        if (у.type === 'CallExpression' && ['Math.round', 'Math.floor', 'Math.ceil', 'Math.abs',
+            'Math.min', 'Math.max', 'Number', 'parseInt', 'parseFloat'].indexOf(имяЗова(у) || '') !== -1) return итог;
         /* `item.bio.length` — это число, а не текст поля. ДЛИНА — НЕ ЗНАЧЕНИЕ. */
         if (у.type === 'MemberExpression' && у.property && у.property.type === 'Identifier' &&
             у.property.name === 'length') { чужое(у.object.object || {}, итог); return итог; }
