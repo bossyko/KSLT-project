@@ -191,7 +191,9 @@ const КУСКИ = [
     ['тосты админки без копий', 'check-tosty-bez-kopiy.js',
      'check-tosty-bez-kopiy-otkat.js'],
     ['удаление аккаунта', 'check-udalenie-akkaunta.js',
-     'check-udalenie-akkaunta-otkat.js']
+     'check-udalenie-akkaunta-otkat.js'],
+    ['спонсор на экране загрузки', 'check-sponsor-na-zagruzke.js',
+     'check-sponsor-na-zagruzke-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=29">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=2">
 </head>
 <body>
 
@@ -21,6 +21,16 @@
       <img src="img/kslt-logo.svg" alt="KSLT" class="splash-mark">
     </div>
     <div class="splash-tagline" data-i18n="brand.tagline">Кыргызстанское Сообщество Любителей Тенниса</div>
+
+    <!-- ГЕНЕРАЛЬНЫЙ СПОНСОР НА ЭКРАНЕ ЗАГРУЗКИ (кусок 205).
+         Блок пустой и скрытый, пока логотипа нет: первый запуск живёт
+         без спонсора — это честнее, чем держать человека перед пустым
+         экраном, пока ответит база. Дальше логотип берётся из памяти и
+         показывается сразу. -->
+    <div class="splash-sponsor" id="splashSponsor" hidden>
+      <div class="splash-sponsor-label" id="splashSponsorLabel"></div>
+      <img class="splash-sponsor-logo" id="splashSponsorLogo" src="" alt="">
+    </div>
   </div>
 </div>
 
@@ -656,6 +666,7 @@
 <script src="js/auth.js"></script>
 <script src="js/news-media.js"></script>
 <script src="js/screens/home.js"></script>
+<script src="js/kslt-sponsory.js?v=1"></script>
 <script src="js/screens/home-blocks.js"></script>
 <script src="js/tournament-register.js"></script>
 <script src="js/screens/tournaments.js"></script>

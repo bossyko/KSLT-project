@@ -212,10 +212,10 @@
 
     // Load from Supabase sponsors table if exists, otherwise static
     if (supabaseClient) {
-      supabaseClient.from('sponsors')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .then(function(r) {
+      /* ЧТЕНИЕ — У ДОМА (кусок 205). */
+      window.KSLT_SPONSORY.все()
+        .then(function(данные) {
+          var r = { data: данные };
           // Пусто или база не ответила — молчим. Раньше здесь показывался
           // вшитый «Nurzaman» из времён, когда базы ещё не было: он выдавал
           // за спонсора того, кого в списке давно нет

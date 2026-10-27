@@ -18,14 +18,16 @@
         var box = document.getElementById('snLogos');
         if (!box || !window.supabaseClient) return;
 
-        window.supabaseClient
-            .from('sponsors')
-            .select('name, logo, url, is_hero, sort_order')
-            .order('sort_order', { ascending: false })
-            .then(function(res) {
-                if (res.error || !res.data) return;
-                render(box, res.data);
-            });
+        /* ЧТЕНИЕ — У ДОМА (кусок 205, 27.10). Здесь стоял свой запрос, и
+           он сортировал `sort_order` ПО УБЫВАНИЮ, тогда как загрузчик —
+           по возрастанию: ОДИН СПИСОК БЫЛ ВЫСТРОЕН НАОБОРОТ В ДВУХ
+           МЕСТАХ. Сторож карусели от этого охраняет с 24.09, а здесь
+           беда жила дальше — потому что признак смотрел только в
+           загрузчик. */
+        window.KSLT_SPONSORY.все().then(function (data) {
+            if (!data || !data.length) return;
+            render(box, data);
+        });
     });
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная

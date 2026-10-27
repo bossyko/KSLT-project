@@ -497,6 +497,53 @@
   };
 
   // === Splash Screen ===
+
+  /**
+   * ГЕНЕРАЛЬНЫЙ СПОНСОР НА ЭКРАНЕ ЗАГРУЗКИ (кусок 205, 27.10).
+   *
+   * СНАЧАЛА ИЗ ПАМЯТИ, ПОТОМ ИЗ БАЗЫ. Экран загрузки показывается до
+   * того, как база ответит, и ждать её — значит держать человека перед
+   * пустым экраном неизвестное время. Поэтому последний известный
+   * логотип берётся из памяти и показывается сразу, а свежий приходит
+   * следом и запоминается на следующий запуск.
+   *
+   * ПЕРВЫЙ ЗАПУСК ЖИВЁТ БЕЗ СПОНСОРА — и экран тогда не задерживается:
+   * держать человека лишнюю секунду перед тем, чего он не увидит, незачем.
+   *
+   * ЧТЕНИЕ — ОДНО НА САЙТ И ПРИЛОЖЕНИЕ: `js/kslt-sponsory.js`. Свой
+   * запрос здесь стал бы вторым определением одного понятия.
+   *
+   * @returns {boolean} показан ли спонсор — от этого зависит, сколько
+   *                    держать экран загрузки
+   */
+  function показатьСпонсораНаЗагрузке() {
+    var блок = document.getElementById('splashSponsor');
+    var знак = document.getElementById('splashSponsorLogo');
+    var ярлык = document.getElementById('splashSponsorLabel');
+    var Д = window.KSLT_SPONSORY;
+    if (!блок || !знак || !ярлык || !Д) return false;
+
+    ярлык.textContent = Д.ярлык();
+
+    function поставить(с) {
+      if (!с || !с.logo) return false;
+      знак.src = с.logo;
+      знак.alt = с.name || '';
+      блок.hidden = false;
+      return true;
+    }
+
+    var показан = поставить(Д.изПамяти());
+
+    /* Свежий спонсор догоняет: если в базе он сменился, человек увидит
+       нового на этом же экране, а не со следующего запуска. */
+    Д.генеральный().then(function (с) {
+      if (с) поставить(с);
+    });
+
+    return показан;
+  }
+
   function hideSplash() {
     var splash = document.getElementById('splashOverlay');
     if (!splash) return;
@@ -703,11 +750,20 @@
 
     // Minimum splash display time (let animations play)
     var splashStart = Date.now();
+    /* ДВА СРОКА, А НЕ ОДИН (кусок 205). Без спонсора экран держится
+       прежние 1500 мс — столько идут анимации знака и слогана. Со
+       спонсором 3000: его ярлык и логотип — второй объект на экране, и
+       прочитать его за полсекунды нельзя. Держать 3000 там, где
+       спонсора нет, значило бы задерживать человека перед пустым
+       местом. */
     var SPLASH_MIN_MS = 1500;
+    var SPLASH_SO_SPONSOROM_MS = 3000;
+    var спонсорПоказан = показатьСпонсораНаЗагрузке();
 
     function finishInit() {
+      var нужно = спонсорПоказан ? SPLASH_SO_SPONSOROM_MS : SPLASH_MIN_MS;
       var elapsed = Date.now() - splashStart;
-      var remaining = Math.max(0, SPLASH_MIN_MS - elapsed);
+      var remaining = Math.max(0, нужно - elapsed);
       setTimeout(hideSplash, remaining);
     }
 

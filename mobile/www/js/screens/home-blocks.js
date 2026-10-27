@@ -253,11 +253,11 @@
     var el = document.getElementById('homeSponsors');
     if (!el || !supabaseClient) return;
 
-    supabaseClient.from('sponsors')
-      .select('id, name, logo, url, description, description_en, description_kg, phone, whatsapp, telegram, instagram, address')
-      .order('sort_order', { ascending: true })
-      .then(function (r) {
-        var list = r.data || [];
+    /* ЧТЕНИЕ — У ДОМА (кусок 205): `js/kslt-sponsory.js`, один на сайт и
+       приложение. Здесь стоял свой запрос со своим набором полей. */
+    window.KSLT_SPONSORY.все()
+      .then(function (data) {
+        var list = data || [];
         if (!list.length) { el.innerHTML = ''; return; }
 
         var html = '<div class="section-title"><h2>' + I18N.t('home.sponsorsTitle') + '</h2>' +
