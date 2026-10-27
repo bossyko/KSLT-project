@@ -43,11 +43,12 @@ const изГрадиента = s => (!s || s === 'none') ? []
 /** Все возможные подложки узла, сложенные снизу вверх по всей цепочке
     предков. null — узел не меряется: на пути фотография. */
 function подложки(эл) {
+    const вид = эл.ownerDocument.defaultView;
     const цепь = []; let у = эл;
     while (у) { цепь.unshift(у); у = у.parentElement; }
     let варианты = [[10,10,10]];
     for (const у of цепь) {
-        const c = getComputedStyle(у);
+        const c = вид.getComputedStyle(у);
         if (фотография(c.backgroundImage)) return null;
         const гр = изГрадиента(c.backgroundImage);
         if (гр.length) {
@@ -59,6 +60,18 @@ function подложки(эл) {
         if (кр && кр[3] > 0) варианты = варианты.map(в => поверх(кр, в));
     }
     return варианты;
+}
+/** Невидим ли узел из-за предка: прозрачность предка в свойствах самого
+    узла не отражается. */
+function спрятанПредком(эл) {
+    const вид = эл.ownerDocument.defaultView;
+    let у = эл.parentElement;
+    while (у) {
+        const c = вид.getComputedStyle(у);
+        if (+c.opacity === 0 || c.visibility === 'hidden' || c.display === 'none') return true;
+        у = у.parentElement;
+    }
+    return false;
 }
 function путь(эл) {
     const ч = []; let у = эл;
@@ -72,14 +85,65 @@ function путь(эл) {
     return ч.join(' > ');
 }
 
-export function замер(сколько) {
+/**
+ * САМОПРОВЕРКА СКЛАДЫВАНИЯ ГРАДИЕНТА — ПОРОГ, НЕ ЗАВИСЯЩИЙ ОТ ДАННЫХ.
+ *
+ * Первая попытка держала порог на страницах: «на главной 16 узлов на
+ * градиенте, на рейтинге 18 — значит складывание живо». Числа были сняты
+ * с БОЕВОЙ базы, а проба ходит в ТЕСТОВУЮ, где подиума нет вовсе: все
+ * градиентные узлы продукта приходят ИЗ ДАННЫХ (`.pl-podium-*`). Порог
+ * упал на всех пяти видах и доказал только то, что я опять померил не ту
+ * базу — второй раз за две недели.
+ *
+ * ПОРОГ, КОТОРЫЙ ЗАВИСИТ ОТ ДАННЫХ, НЕ ПОРОГ. Здесь складывание
+ * доказывается на своём же узле с заранее известным градиентом: белый
+ * текст на переходе от чёрного к белому обязан дать ДВА разных фона и
+ * провалить порог на светлом конце. Отвалится складывание — вернётся
+ * один фон, и это упадёт где угодно и на любой базе.
+ */
+export function самопроверка(док) {
+    док = док || document;
+    const д = док.createElement('div');
+    д.setAttribute('style', 'position:fixed;left:-9999px;top:0;width:200px;height:40px;' +
+        'background-image:linear-gradient(90deg, rgb(0,0,0), rgb(255,255,255));');
+    const т = док.createElement('span');
+    т.setAttribute('style', 'color:rgb(255,255,255);font-size:16px');
+    т.textContent = 'проба складывания';
+    д.appendChild(т);
+    док.body.appendChild(д);
+    try {
+        const фоны = подложки(т);
+        const белыйНаБелом = фоны && фоны.some(ф =>
+            контраст([255,255,255], ф) < 1.2);
+        const белыйНаЧёрном = фоны && фоны.some(ф =>
+            контраст([255,255,255], ф) > 15);
+        return {
+            фонов: фоны ? фоны.length : 0,
+            виденСветлыйКонец: !!белыйНаБелом,
+            виденТёмныйКонец: !!белыйНаЧёрном,
+            сложилось: !!(фоны && фоны.length > 1 && белыйНаБелом && белыйНаЧёрном)
+        };
+    } finally { д.remove(); }
+}
+
+/** `док` — чужой документ (например, кадра): прибор умеет мерить не
+    только свою страницу. Своя остаётся умолчанием. */
+export function замер(сколько, док) {
+    док = док || document;
+    const вид = док.defaultView;
     const итог = [], неМерено = [];
-    document.querySelectorAll('body *').forEach(эл => {
+    док.querySelectorAll('body *').forEach(эл => {
         if (!([...эл.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 1))) return;
-        const c = getComputedStyle(эл);
+        const c = вид.getComputedStyle(эл);
         if (c.visibility === 'hidden' || c.display === 'none' || +c.opacity === 0) return;
         const r = эл.getBoundingClientRect();
         if (!r.width || !r.height) return;
+        /* ПРОЗРАЧНОСТЬ ПРЕДКА НЕ ВИДНА В СВОЙСТВАХ УЗЛА. `opacity: 0` на
+           родителе оставляет узлу его собственную единицу и ненулевой
+           прямоугольник — узел невидим, а прибор его мерит. Поймано 26.10
+           на выпадашке языка: закрытое меню давало те же 39 узлов, что и
+           открытое, то есть прибор считал спрятанное меню всё время. */
+        if (спрятанПредком(эл)) return;
         /* WCAG 1.4.3: неактивное из порога исключено. */
         if (эл.disabled || эл.closest('[disabled]') || эл.getAttribute('aria-disabled') === 'true') return;
         const кр = раз(c.color); if (!кр) return;
@@ -102,7 +166,7 @@ export function замер(сколько) {
     const ниже = итог.filter(о => !о.прошёл).sort((a,b) => a.контраст - b.контраст);
     const красных = итог.filter(о => /rgb\(255,\s*71,\s*87\)/.test(о.цвет));
     return {
-        адрес: location.pathname + location.search, ширина: innerWidth,
+        адрес: док.location.pathname + док.location.search, ширина: вид.innerWidth,
         узлов: итог.length,
         наГрадиенте: итог.filter(о => о.градиент).length,
         наГрадиентеНиже: итог.filter(о => о.градиент && !о.прошёл).length,
