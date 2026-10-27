@@ -34,7 +34,14 @@ async function открыть(page, адрес) {
     await page.goto(адрес);
     await page.waitForLoadState('domcontentloaded');
     await page.evaluate(() => document.fonts && document.fonts.ready);
-    await page.waitForTimeout(400);
+    /* ЖДЁМ ПРИЗНАК, А НЕ ВРЕМЯ (кусок 196). Было `waitForTimeout(400)`, и
+       проба оказывалась flaky не по вёрстке, а по тому, кто успел: на
+       четырёх видах панели рейтинга к 400 мс ещё не построены, на пятом
+       построены — и падал один вид из пяти. Признак — модуль на месте и
+       отрисовка либо случилась, либо её на странице нет вовсе. */
+    await page.waitForFunction(() => !!window.KSLT_LICO, null, { timeout: 5000 });
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(1200);
     const где = new URL(page.url()).pathname;
     expect(где, 'ПОРОГ: страница увела на ' + где).toBe(адрес);
 }
@@ -72,10 +79,13 @@ test.describe('лицо · ' + адрес.split('/').pop(), () => {
         await открыть(page, адрес);
         const р = await page.evaluate(() => {
             const кружки = [...document.querySelectorAll('.avatar-initials')];
-            const видимые = кружки.filter(э => {
-                const с = getComputedStyle(э);
-                return с.display !== 'none' && с.visibility !== 'hidden';
-            });
+            /* ВИДИМОСТЬ СЧИТАЕТ ДОМ ФИКСТУРЫ (кусок 196). Здесь стояли
+               `display` и `visibility` САМОГО узла — а скрыт был РОДИТЕЛЬ:
+               неактивная панель рейтинга `div.rankings-panel`
+               (`display: none`). Шестнадцать кружков внутри неё числились
+               видимыми и схлопнутыми в 0x0, и проба падала на правильной
+               вёрстке. СВОЙСТВА УЗЛА НЕ ЗНАЮТ О ПРЕДКАХ. */
+            const видимые = кружки.filter(э => window.КСЛТ_виден(э));
             return {
                 всего: кружки.length,
                 видимых: видимые.length,
