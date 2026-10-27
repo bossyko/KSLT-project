@@ -104,7 +104,14 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization') || ''
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-  if (!serviceKey || !authHeader.includes(serviceKey)) {
+  /* РАВЕНСТВО, А НЕ ВХОЖДЕНИЕ, И ОТКАЗ НА ПУСТОМ КЛЮЧЕ.
+       Было `authHeader.includes(serviceKey)`. При пустом serviceKey
+       `includes('')` истинно для ЛЮБОГО заголовка — и в день, когда
+       служебный ключ удалят, функция пустила бы кого угодно.
+       Принимаются обе формы, которые реально шлют свои же функции:
+       `Bearer <ключ>` и голый ключ. */
+  if (!(serviceKey !== '' &&
+          (authHeader === 'Bearer ' + serviceKey || authHeader === serviceKey))) {
     return json({ error: 'Unauthorized — service role only' }, 401)
   }
 

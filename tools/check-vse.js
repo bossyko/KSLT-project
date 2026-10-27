@@ -165,6 +165,7 @@ const КУСКИ = [
     ['окно H2H в двух копиях', 'check-h2h-dvazhdy.js', 'check-h2h-dvazhdy-otkat.js'],
     ['счёт контраста один', 'check-odin-schyot-kontrasta.js', 'check-odin-schyot-kontrasta-otkat.js'],
     ['возраст один на продукт', 'check-vozrast-odin.js', 'check-vozrast-odin-otkat.js'],
+    ['сверка ключом', 'check-sverka-kluchom.js', 'check-sverka-kluchom-otkat.js'],
     ['публикация турнира', 'check-publikaciya-turnira.js', 'check-publikaciya-turnira-otkat.js'],
     ['случайный порядок и дома', 'check-sluchaynyy-poryadok.js', 'check-sluchaynyy-poryadok-otkat.js'],
     ['оснастка окон', 'check-osnastka-okon.js', 'check-osnastka-okon-otkat.js'],
