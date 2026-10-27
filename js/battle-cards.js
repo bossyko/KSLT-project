@@ -178,7 +178,6 @@
      */
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. Здесь не
        поднимался регистр и пустое имя давало ПУСТОЙ кружок. */
-    function инициалыИмени(имя) { return window.KSLT_LICO.инициалы(имя); }
 
     function sideHtml(side) {
         var ph = '<div class="bc-player-photos' + (side.names.length > 1 ? ' bc-pair' : '') + '">';
@@ -188,8 +187,8 @@
         side.photos.forEach(function(src, i) {
             ph += src
                 ? '<img src="' + KSLT_экранировать(src) + '" alt="">'
-                : '<span class="avatar-initials" aria-hidden="true">'
-                  + KSLT_экранировать(инициалыИмени((side.names || [])[i])) + '</span>';
+                /* Кружок рисует дом (кусок 194), а не этот файл. */
+                : window.KSLT_LICO.кружок((side.names || [])[i], '', 'span');
         });
         ph += '</div>';
 

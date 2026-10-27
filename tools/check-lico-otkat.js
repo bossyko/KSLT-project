@@ -10,12 +10,13 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['js/kslt-lico.js', 'js/players.js', 'js/battles-overview.js',
-               'pages/players.html'];
+               'js/player.js', 'pages/players.html'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
 const Л = 'js/kslt-lico.js', И = 'js/players.js',
-      Б = 'js/battles-overview.js', П = 'pages/players.html';
+      Б = 'js/battles-overview.js', П = 'pages/players.html',
+      Г = 'js/player.js';
 
 const ОТКАТЫ = [
 
@@ -24,10 +25,29 @@ const ОТКАТЫ = [
  '    window.KSLT_LICO = {};\n    window.KSLT_LICO = {',
  'модуль лица объявлен ровно один раз'],
 
-['вернуть свой подсчёт инициалов', И,
- 'function инициалы(имя) { return window.KSLT_LICO.инициалы(имя); }',
- "function инициалы(имя) { return (имя || '').trim().charAt(0); }",
+['вернуть свой подсчёт инициалов', Г,
+ 'function инициалыИмени(имя) { return window.KSLT_LICO.инициалы(имя); }',
+ "function инициалыИмени(имя) { return (имя || '').trim().charAt(0); }",
  'своих подсчётов инициалов не осталось'],
+
+/* КУСОК 194. Откат рисует разметку кружка на месте — но ДВЕРЬ дома в
+   файле оставляет, иначе упало бы заодно правило про свой подсчёт, и
+   откат доказывал бы не то, что обещает. */
+['вернуть свою разметку кружка в список', И,
+ "            : window.KSLT_LICO.кружок(p.name, класс, 'span');",
+ "            : '<span class=\"' + класс + ' avatar-initials\" aria-hidden=\"true\">'\n" +
+ "              + window.KSLT_LICO.инициалы(p.name) + '</span>';",
+ 'разметку кружка рисует только дом'],
+
+['зашить тег кружка вместо довода', Л,
+ "        var т = тег || 'div';",
+ "        var т = 'div';",
+ 'тег кружка называет зовущий, умолчание — div'],
+
+['вернуть ведущий пробел в пустом классе', Л,
+ "        var к = класс ? экр(класс) + ' ' : '';",
+ "        var к = экр(класс || '') + ' ';",
+ 'пустой класс не оставляет за собой пробела'],
 
 ['вернуть заглушку с чужого сайта', Б,
  "window.KSLT_LICO.лицо(src, (side.names || [])[i] || '', 'bo-player-img')",
@@ -40,8 +60,8 @@ const ОТКАТЫ = [
  'модуль подключают все страницы, которым он нужен'],
 
 ['оторвать заглушку от класса фотографии', Л,
- "return '<div class=\"' + экр(класс || '') + ' avatar-initials\" aria-hidden=\"true\">' +",
- "return '<div class=\"avatar-initials\" aria-hidden=\"true\">' +",
+ "return '<' + т + ' class=\"' + к + 'avatar-initials\" aria-hidden=\"true\">' +",
+ "return '<' + т + ' class=\"avatar-initials\" aria-hidden=\"true\">' +",
  'заглушка берёт класс фотографии и общий класс кружка'],
 
 ['отдать кружок диктору', Л,
