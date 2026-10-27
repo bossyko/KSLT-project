@@ -398,7 +398,7 @@
             });
 
             // Update all cards with this battle ID (homepage + overview might both exist)
-            document.querySelectorAll('.bc-card[data-battle="' + challengeId + '"]').forEach(function(card) {
+            document.querySelectorAll('.bc-card[data-battle="' + window.KSLT_селектор(challengeId) + '"]').forEach(function(card) {
                 var v1 = vm[1] || 0;
                 var v2 = vm[2] || 0;
                 var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;

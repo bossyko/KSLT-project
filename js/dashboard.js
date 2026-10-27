@@ -1896,7 +1896,7 @@
     function bindShowToggleLabels() {
         document.querySelectorAll('.db-show-toggle input').forEach(function(input) {
             input.addEventListener('change', function() {
-                var label = document.querySelector('.db-show-label[data-for="' + input.id + '"]');
+                var label = document.querySelector('.db-show-label[data-for="' + window.KSLT_селектор(input.id) + '"]');
                 if (label) label.textContent = input.checked ? L.visibleToClub : L.hiddenFromAll;
             });
         });
@@ -4370,7 +4370,7 @@
             var allBtn = document.getElementById('dbNotifAllRead');
             if (allBtn) allBtn.style.display = 'none';
         } else if (d.id) {
-            var one = container.querySelector('.db-notif-row[data-id="' + d.id + '"]');
+            var one = container.querySelector('.db-notif-row[data-id="' + window.KSLT_селектор(d.id) + '"]');
             if (one) one.classList.remove('unread');
             // Непрочитанных не осталось — кнопке «Отметить все» нечего делать
             if (!container.querySelector('.db-notif-row.unread')) {
@@ -4534,7 +4534,7 @@
         кнопкаЗакрыть.focus();
 
         (opts.actions || []).forEach(function(a, i) {
-            var btn = back.querySelector('[data-act="' + i + '"]');
+            var btn = back.querySelector('[data-act="' + window.KSLT_селектор(i) + '"]');
             if (btn) btn.addEventListener('click', function() {
                 if (a.onClick) a.onClick(close);
                 else close();
@@ -5598,7 +5598,10 @@
         // Размеры вынесены в классы: на телефоне карточка перестраивается,
         // а в разметке их было не достать
         var h = '<div class="db-invite-card db-voucher-item"' + (isHidden ? ' style="display:none;"' : '') +
-            (isHidden ? ' data-vg-hidden="' + hiddenType + '"' : '') + '>' +
+            /* ЗНАЧЕНИЕ ИЗ БАЗЫ В АТРИБУТ — ЧЕРЕЗ ДОМ (кусок 195).
+               `entity_type` под CHECK ('court','coach'), но атрибут
+               собирается строкой, и безопасность его — свойство кода. */
+            (isHidden ? ' data-vg-hidden="' + KSLT_экранировать(hiddenType) + '"' : '') + '>' +
             '<div class="db-voucher-row">' +
                 '<div class="db-voucher-main">' +
                     '<div class="db-voucher-name">' + dbEsc(v.entity_name) + '</div>' +
@@ -5708,7 +5711,7 @@
                 html += '</div>';
 
                 if (arr.length > VOUCHER_PREVIEW) {
-                    html += '<button class="db-voucher-show-all" data-vg-type="' + type + '" style="display:block;width:100%;margin-top:8px;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.2s;">' +
+                    html += '<button class="db-voucher-show-all" data-vg-type="' + KSLT_экранировать(type) + '" style="display:block;width:100%;margin-top:8px;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.2s;">' +
                         L.voucherShowAll + ' (' + (arr.length - VOUCHER_PREVIEW) + ')' +
                     '</button>';
                 }
@@ -5735,7 +5738,7 @@
             card.querySelectorAll('.db-voucher-show-all').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var type = this.dataset.vgType;
-                    document.querySelectorAll('[data-vg-hidden="' + type + '"]').forEach(function(el) {
+                    document.querySelectorAll('[data-vg-hidden="' + window.KSLT_селектор(type) + '"]').forEach(function(el) {
                         el.style.display = '';
                     });
                     this.remove();
@@ -6542,7 +6545,7 @@
         newPwInput.addEventListener('input', function() {
             var val = this.value;
             Object.keys(pwRules).forEach(function(key) {
-                var el = document.querySelector('.db-pw-rule[data-rule="' + key + '"]');
+                var el = document.querySelector('.db-pw-rule[data-rule="' + window.KSLT_селектор(key) + '"]');
                 if (el) el.classList.toggle('valid', pwRules[key](val));
             });
             checkPwReady();

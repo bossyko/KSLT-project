@@ -2193,7 +2193,7 @@
             var genderEl = document.getElementById(ntrpId.replace('Ntrp', 'Gender'));
             // Ставим, только если такое значение в списке есть: от чужого
             // выпадашка молча схлопывается в пустую, без надписи «Пол»
-            if (genderEl && genderEl.querySelector('option[value="' + player.gender + '"]')) {
+            if (genderEl && genderEl.querySelector('option[value="' + window.KSLT_селектор(player.gender) + '"]')) {
                 genderEl.value = player.gender;
                 selObj.gender = player.gender;
             }

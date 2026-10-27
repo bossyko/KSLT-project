@@ -2298,7 +2298,7 @@ function обновитьРасклад() {
         // Checkbox: select all
         block.querySelectorAll('.ad-reg-check-all').forEach(function(allCb) {
             allCb.addEventListener('change', function() {
-                block.querySelectorAll('.ad-reg-check[data-group="' + allCb.dataset.group + '"]').forEach(function(cb) { cb.checked = allCb.checked; });
+                block.querySelectorAll('.ad-reg-check[data-group="' + window.KSLT_селектор(allCb.dataset.group) + '"]').forEach(function(cb) { cb.checked = allCb.checked; });
                 updateTrnRegBtn(allCb.dataset.group);
             });
         });
@@ -2311,7 +2311,7 @@ function обновитьРасклад() {
         function updateTrnRegBtn(group) {
             var btn = document.getElementById(group === 'main' ? 'adTrnRegRemoveMain' : 'adTrnRegRemoveWait');
             if (!btn) return;
-            var cnt = block.querySelectorAll('.ad-reg-check[data-group="' + group + '"]:checked').length;
+            var cnt = block.querySelectorAll('.ad-reg-check[data-group="' + window.KSLT_селектор(group) + '"]:checked').length;
             btn.disabled = cnt === 0;
             btn.textContent = L.regRemoveSelected + (cnt > 0 ? ' (' + cnt + ')' : '');
         }
@@ -2323,7 +2323,7 @@ function обновитьРасклад() {
                 btn.addEventListener('click', function() {
                     var group = btnId === 'adTrnRegRemoveMain' ? 'main' : 'wait';
                     var ids = [];
-                    block.querySelectorAll('.ad-reg-check[data-group="' + group + '"]:checked').forEach(function(cb) { ids.push(cb.dataset.regId); });
+                    block.querySelectorAll('.ad-reg-check[data-group="' + window.KSLT_селектор(group) + '"]:checked').forEach(function(cb) { ids.push(cb.dataset.regId); });
                     if (ids.length === 0) return;
                     A.showConfirm(L.regRemoveConfirm, '', async function() {
                         await removeRegistrations(ids, tournamentId);

@@ -101,9 +101,11 @@ const ОТКАТЫ = [
    'border-radius: var(--radius-lg);\n    background: var(--surface-glass); border: var(--bw-hair) solid var(--alpha-lime-20);',
    'обе коробки согласны по радиусу и свечению'],
 
+  /* ЯКОРЬ ПЕРЕВЕШЕН 27.10, КУСКОМ 195: подстановка ушла под дом селектора,
+     и якорь на точной строке перестал находиться. Берётся начало зова. */
   ['js/stats.js',
-   "var els = document.querySelectorAll('#' + id + ', [data-stat=\"' + id + '\"]');",
-   'var els = [document.getElementById(id)].filter(Boolean);',
+   "var els = document.querySelectorAll('#'",
+   'var els = [document.getElementById(id)].filter(Boolean); var неТот = ([]).concat(',
    'число турниров считает ОДИН счётчик, а не два'],
 
   ['index.html',

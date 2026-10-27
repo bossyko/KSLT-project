@@ -3444,7 +3444,7 @@
         container.querySelectorAll('.ad-reg-check-all').forEach(function(allCb) {
             allCb.addEventListener('change', function() {
                 var group = allCb.dataset.group;
-                container.querySelectorAll('.ad-reg-check[data-group="' + group + '"]').forEach(function(cb) {
+                container.querySelectorAll('.ad-reg-check[data-group="' + window.KSLT_селектор(group) + '"]').forEach(function(cb) {
                     cb.checked = allCb.checked;
                 });
                 updateFloatingBar();
@@ -4295,7 +4295,7 @@
                 //
                 // Записываем всю раскладку равенства целиком: так в ней не
                 // остаётся ни дыр, ни повторов
-                var groupSelects = container.querySelectorAll('.ad-grp-place-select[data-group="' + groupNum + '"]');
+                var groupSelects = container.querySelectorAll('.ad-grp-place-select[data-group="' + window.KSLT_селектор(groupNum) + '"]');
                 var prevPlace = parseInt(sel.dataset.place, 10);
 
                 var раскладка = {};

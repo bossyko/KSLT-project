@@ -1516,7 +1516,7 @@
                 if (e.target.value === '__other__') {
                     crtCourtTypes[idx].surface = '';
                     renderCrtTypeRows();
-                    var newInput = document.querySelector('.ad-court-type-row[data-idx="' + idx + '"] .ad-ct-surface-custom');
+                    var newInput = document.querySelector('.ad-court-type-row[data-idx="' + window.KSLT_селектор(idx) + '"] .ad-ct-surface-custom');
                     if (newInput) newInput.focus();
                 } else {
                     crtCourtTypes[idx].surface = e.target.value;
@@ -1670,18 +1670,18 @@
         document.getElementById('adCrtPhones').addEventListener('input', function(e) {
             if (!e.target.classList.contains('ad-crt-phone')) return;
             var idx = parseInt(e.target.dataset.idx, 10);
-            reformatPhoneInput(e.target, phoneIso(idx), document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]'));
+            reformatPhoneInput(e.target, phoneIso(idx), document.querySelector('.ad-crt-phone-country[data-idx="' + window.KSLT_селектор(idx) + '"]'));
             storePhone(idx);
         });
 
         function phoneIso(idx) {
-            var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]');
+            var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + window.KSLT_селектор(idx) + '"]');
             return picker ? picker.dataset.iso : 'KG';
         }
 
         // Номер собираем вместе с кодом выбранной страны
         function storePhone(idx) {
-            var input = document.querySelector('.ad-crt-phone[data-idx="' + idx + '"]');
+            var input = document.querySelector('.ad-crt-phone[data-idx="' + window.KSLT_селектор(idx) + '"]');
             if (!input) return;
             crtPhones[idx] = window.KSLT_PHONE
                 ? (KSLT_PHONE.join(phoneIso(idx), input.value) || '')
@@ -1702,7 +1702,7 @@
                 }
                 if (!root.classList.contains('ad-crt-phone-country')) return;
                 var idx = parseInt(root.dataset.idx, 10);
-                var input = document.querySelector('.ad-crt-phone[data-idx="' + idx + '"]');
+                var input = document.querySelector('.ad-crt-phone[data-idx="' + window.KSLT_селектор(idx) + '"]');
                 if (input) {
                     input.placeholder = KSLT_PHONE.placeholder(iso);
                     reformatPhoneInput(input, iso);
@@ -2056,7 +2056,7 @@
 
         document.querySelectorAll('.ad-crt-phone').forEach(function(input) {
             var idx = parseInt(input.dataset.idx, 10);
-            var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]');
+            var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + window.KSLT_селектор(idx) + '"]');
             var iso = picker ? picker.dataset.iso : 'KG';
             var n = input.value.replace(/[^0-9]/g, '').length;
             var need = KSLT_PHONE.byIso(iso).len;
@@ -2084,7 +2084,7 @@
             var seen = {};
             document.querySelectorAll('.ad-crt-phone').forEach(function(input) {
                 var idx = parseInt(input.dataset.idx, 10);
-                var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + idx + '"]');
+                var picker = document.querySelector('.ad-crt-phone-country[data-idx="' + window.KSLT_селектор(idx) + '"]');
                 var full = KSLT_PHONE.join(picker ? picker.dataset.iso : 'KG', input.value);
                 if (!full) return;
                 if (seen[full]) {

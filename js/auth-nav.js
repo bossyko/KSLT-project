@@ -296,7 +296,7 @@
                             if (d.all) {
                                 dd.querySelectorAll('.site-notif-item').forEach(function(el) { el.remove(); });
                             } else if (d.id) {
-                                var one = dd.querySelector('.site-notif-item[data-id="' + d.id + '"]');
+                                var one = dd.querySelector('.site-notif-item[data-id="' + window.KSLT_селектор(d.id) + '"]');
                                 if (one) one.remove();
                             }
                         }

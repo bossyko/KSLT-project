@@ -1139,7 +1139,7 @@ async function initReactions(slug) {
         var userRes = await client.rpc('get_user_reactions', { p_news_id: newsId, p_user_id: user.id });
         if (userRes.data) {
             userRes.data.forEach(function(row) {
-                var btn = container.querySelector('[data-type="' + row.reaction_type + '"]');
+                var btn = container.querySelector('[data-type="' + window.KSLT_селектор(row.reaction_type) + '"]');
                 if (btn) {
                     btn.classList.add('active');
                     addReactionCheck(btn);

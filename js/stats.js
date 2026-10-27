@@ -62,7 +62,7 @@
         // Два разных механизма на одно понятие однажды разойдутся, поэтому
         // счётчик остаётся один, а мест у него столько, сколько нужно:
         // id — для первого, data-stat — для всех остальных.
-        var els = document.querySelectorAll('#' + id + ', [data-stat="' + id + '"]');
+        var els = document.querySelectorAll('#' + window.KSLT_селектор(id) + ', [data-stat="' + window.KSLT_селектор(id) + '"]');
         if (!els.length) return;
 
         if (err) {

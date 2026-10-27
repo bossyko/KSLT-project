@@ -740,7 +740,7 @@
             });
             _votesData[challengeId] = { challengeId: challengeId, votes: vm, total: total };
 
-            document.querySelectorAll('[data-battle="' + challengeId + '"]').forEach(function(card) {
+            document.querySelectorAll('[data-battle="' + window.KSLT_селектор(challengeId) + '"]').forEach(function(card) {
                 var v1 = vm[1] || 0;
                 var v2 = vm[2] || 0;
                 var pct1 = total > 0 ? Math.round(v1 / total * 100) : 50;

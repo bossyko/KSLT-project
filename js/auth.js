@@ -653,7 +653,7 @@
         resetPwInput.addEventListener('input', function() {
             var val = this.value;
             Object.keys(rules).forEach(function(key) {
-                var el = document.querySelector('.pw-rule-reset[data-rule="' + key + '"]');
+                var el = document.querySelector('.pw-rule-reset[data-rule="' + window.KSLT_селектор(key) + '"]');
                 if (el) {
                     if (rules[key](val)) {
                         el.classList.add('valid');
@@ -707,7 +707,7 @@
         pwInput.addEventListener('input', function() {
             var val = this.value;
             Object.keys(rules).forEach(function(key) {
-                var el = document.querySelector('.pw-rule[data-rule="' + key + '"]');
+                var el = document.querySelector('.pw-rule[data-rule="' + window.KSLT_селектор(key) + '"]');
                 if (!el) return;
                 if (rules[key](val)) {
                     el.classList.add('valid');
@@ -1326,7 +1326,7 @@
         if (экран === 'signinForm' || экран === 'signupForm') {
             var имяВкладки = экран === 'signupForm' ? 'signup' : 'signin';
             Array.prototype.forEach.call(tabs, function (т) { т.classList.remove('active'); });
-            var нужная = document.querySelector('.auth-tab[data-tab="' + имяВкладки + '"]');
+            var нужная = document.querySelector('.auth-tab[data-tab="' + window.KSLT_селектор(имяВкладки) + '"]');
             if (нужная) нужная.classList.add('active');
         }
 

@@ -650,7 +650,7 @@
                 /* СОСТОЯНИЕ ЕДЕТ ВМЕСТЕ С ВИДОМ. Класс active красит чип, а
                    диктору про выбор говорит только aria-checked: без него
                    человек с диктором слышал семь одинаковых кнопок. */
-                document.querySelectorAll('.trn-chip[data-filter="' + group + '"]').forEach(function(c) {
+                document.querySelectorAll('.trn-chip[data-filter="' + window.KSLT_селектор(group) + '"]').forEach(function(c) {
                     c.classList.remove('active');
                     c.setAttribute('aria-checked', 'false');
                 });

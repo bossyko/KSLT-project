@@ -512,10 +512,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (scrollY >= top && scrollY < top + height) {
                 // Try direct nav link first
-                let activeLink = document.querySelector('.nav-links > li > a[href="#' + id + '"]');
+                let activeLink = document.querySelector('.nav-links > li > a[href="#' + window.KSLT_селектор(id) + '"]');
                 // If not found, check dropdown items and highlight parent
                 if (!activeLink) {
-                    const dropdownItem = document.querySelector('.nav-dropdown-menu a[href="#' + id + '"]');
+                    const dropdownItem = document.querySelector('.nav-dropdown-menu a[href="#' + window.KSLT_селектор(id) + '"]');
                     if (dropdownItem) {
                         activeLink = dropdownItem.closest('.nav-dropdown').querySelector('.nav-item');
                     }
