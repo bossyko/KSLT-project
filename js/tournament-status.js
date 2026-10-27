@@ -54,7 +54,7 @@
      * у дат в этом формате порядок строк совпадает с порядком дней.
      */
     function вычислить(regStart, regEnd, dateStart, dateEnd) {
-        var сегодня = new Date().toISOString().substring(0, 10);
+        var сегодня = KSLT_VREMYA.сегодня();
         if (regStart && сегодня < regStart) return 'upcoming';
         if (regStart && regEnd && сегодня >= regStart && сегодня <= regEnd) return 'registration_open';
         if (dateEnd && сегодня > dateEnd) return 'completed';

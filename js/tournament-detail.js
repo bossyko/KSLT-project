@@ -1123,7 +1123,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     dateRange += ' ' + d1.getFullYear();
 
     // Registration dates line (show only if reg_end >= today)
-    var today = new Date().toISOString().substring(0, 10);
+    var today = KSLT_VREMYA.сегодня();
     var regDateRange = '';
     if (t.registration_start && t.registration_end && t.registration_end >= today) {
         var rs = new Date(t.registration_start + 'T00:00:00');

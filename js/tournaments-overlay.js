@@ -175,7 +175,7 @@
                 /* ЗАПАСНОГО СЧЁТА НЕТ. Было: нет опубликованных — показываем
                    ВСЕ строки, то есть черновики. Ноль — законный ответ. */
                 var allT = (result.data || []).filter(function(t) { return t.published_at !== null; });
-                var today = new Date().toISOString().substring(0, 10);
+                var today = KSLT_VREMYA.сегодня();
                 var completed = allT.filter(function(t) { return t.date_end && t.date_end < today; }).length;
 
                 /* ИГРОКИ ДРУЖЕСКИХ — РАЗНЫЕ ЛЮДИ, А НЕ ЧИСЛО ЗАЯВОК.
@@ -313,7 +313,7 @@
                 gender: 'Пол', details: 'Подробнее', register: 'Регистрация', calendar: 'В календарь'
             });
 
-            var today = new Date().toISOString().substring(0, 10);
+            var today = KSLT_VREMYA.сегодня();
 
             // Convert Supabase data to card format
             var supaItems = publishedData.map(function(t) {

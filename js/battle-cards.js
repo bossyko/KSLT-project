@@ -121,7 +121,7 @@
                 if (res.error || !res.data || !res.data.length) return null;
 
                 // Filter out battles where date has passed
-                var today = new Date().toISOString().substring(0, 10);
+                var today = KSLT_VREMYA.сегодня();
                 var battles = res.data.filter(function(b) {
                     var bd = b.proposed_date;
                     if (!bd) return true;

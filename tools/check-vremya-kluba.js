@@ -63,8 +63,12 @@ const ТЕКСТ_ДОМА = fs.readFileSync(path.join(КОРЕНЬ, ДОМ), 'ut
     'конкретной отметки для записей в базе.');
 
 /* ---- 2. ДЕНЬ НИГДЕ НЕ СЧИТАЕТСЯ ПО ГРИНВИЧУ ---- */
+/* ПРИЗНАК ЗНАЛ ДВЕ ФОРМЫ ИЗ ТРЁХ. 27.10: `substring(0, 10)` делает ровно
+   то же, что `slice(0, 10)`, и два места в `js/tournaments-overview.js`
+   жили с днём по Гринвичу, пока сторож показывал ноль.
+   ПРИЗНАК, ЗНАЮЩИЙ ОДНО НАПИСАНИЕ, НЕ СТОРОЖИТ ПОНЯТИЕ. */
 const ДЕНЬ_ПО_ГРИНВИЧУ =
-    /toISOString\(\)\s*\.\s*(?:slice\(\s*0\s*,\s*10\s*\)|split\(\s*'T'\s*\)\s*\[\s*0\s*\])|getUTCDate\(|getUTCFullYear\(|getUTCMonth\(/;
+    /toISOString\(\)\s*\.\s*(?:slice\(\s*0\s*,\s*10\s*\)|substring\(\s*0\s*,\s*10\s*\)|substr\(\s*0\s*,\s*10\s*\)|split\(\s*'T'\s*\)\s*\[\s*0\s*\])|getUTCDate\(|getUTCFullYear\(|getUTCMonth\(/;
 const места = [];
 файлы('js', ['.js']).filter(ф => ф !== ДОМ).forEach(ф => {
     безКом(fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8')).split('\n').forEach((с, i) => {
@@ -95,7 +99,17 @@ const зоны = [];
 const страницы = ['index.html', 'index-en.html', 'index-kg.html']
     .concat(файлы('pages', ['.html']))
     .concat(файлы('maket', ['.html']));
-const потребители = /src="[^"]*(?:player\.js|membership\.js|dashboard\.js|admin\/core\/utils\.js)\?/;
+/* СПИСОК ЗОВУЩИХ СЧИТАЕТСЯ ИЗ КОДА, А НЕ ВПИСАН РУКАМИ.
+   Было четыре имени, вписанных 17.10: player.js, membership.js,
+   dashboard.js, admin/core/utils.js. С тех пор дом стали звать ещё из
+   шести файлов, и 27.10 шесть страниц грузили их БЕЗ ДОМА, пока правило
+   показывало зелёное. ПРИЗНАК ПО СПИСКУ ИМЁН НЕ СТОРОЖИТ ПОНЯТИЕ: список
+   стареет молча, а код идёт дальше. */
+const зовущие = файлы('js', ['.js'])
+    .filter(ф => ф !== ДОМ && /\bKSLT_VREMYA\b/.test(безКом(fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'))))
+    .map(ф => ф.replace(/^js\//, '').replace(/\.js$/, ''));
+const потребители = new RegExp('src="[^"]*(?:' +
+    зовущие.map(и => и.replace(/[/.]/g, с => '\\' + с)).join('|') + ')\\.js\\?');
 const без = страницы.filter(ф => {
     const п = path.join(КОРЕНЬ, ф);
     if (!fs.existsSync(п)) return false;
@@ -119,16 +133,14 @@ const поздно = [];
     const m = т.match(potребительРе());
     if (m && m.index < дом) поздно.push(ф);
 });
-function potребительРе() {
-    return /src="[^"]*(?:player\.js|membership\.js|dashboard\.js|admin\/core\/utils\.js)\?/;
-}
+function potребительРе() { return потребители; }
 правило('дом подключён РАНЬШЕ тех, кто его зовёт',
     поздно.length === 0,
     'Поздно: ' + поздно.join(', ') + '\n' +
     'Скрипт, стоящий выше, выполняется раньше: читатель не найдёт дом.');
 
 if (!ошибки.length) {
-    console.log('\n  ок      время клуба: 5 правил');
+    console.log('\n  ок      время клуба: 5 правил, зовущих дом файлов ' + зовущие.length);
     console.log('          день считается по имени зоны Asia/Bishkek, дом один');
     console.log('          мест с днём по Гринвичу: 0');
     console.log('          страниц с домом: ' + страницы.filter(ф => {

@@ -379,7 +379,7 @@
     function groupByCategory(rows, fromSupabase, regCounts) {
         regCounts = regCounts || {};
         var map = {};
-        var today = new Date().toISOString().substring(0, 10);
+        var today = KSLT_VREMYA.сегодня();
         CATEGORIES.forEach(function(c) { map[c.key] = []; });
 
         rows.forEach(function(t) {
@@ -485,7 +485,7 @@
         // с прошлого сезона — «регистрация открыта» на мартовском турнире.
         // Если дата окончания прошла, турнир завершён, что бы ни стояло в поле
         function settleStatus(t, stored) {
-            var today = new Date().toISOString().substring(0, 10);
+            var today = KSLT_VREMYA.сегодня();
             var end = t.date_end || t.date_start;
             if (end && end < today && stored !== 'cancelled') return 'completed';
             return stored;
