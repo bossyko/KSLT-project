@@ -119,8 +119,20 @@
         language: 'Language',
         dangerZone: 'Danger Zone',
         deleteAccount: 'Delete Account',
-        deleteLoses: ['Your ranking position and points', 'Tournament and match history', 'Loyalty points and discounts', 'Your account on the site and in the app'],
+        /* СПИСОК ИСПРАВЛЕН ПО КОДУ (кусок 204, 27.10). Он обещал потерю
+           рейтинга и истории матчей — НЕПРАВДА: карточка игрока остаётся,
+           результаты принадлежат турнирам, и на карточке появляется метка
+           «Аккаунт удалён» (`js/player.js:682`, комментарий к
+           `players.account_deleted_at` в схеме). Окно пугало тем, чего не
+           происходит, и молчало о том, что остаётся. */
+        deleteLoses: ['Loyalty points and discounts', 'Notification settings',
+                      'Your account on the site and in the app',
+                      'Your player card with match results stays — it will be marked as a deleted account'],
         deleteConfirm: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.',
+        /* СТРАНИЦА УДАЛЕНИЯ — ПУБЛИЧНЫЙ АДРЕС (кусок 204). Google Play
+           требует URL в `Data safety → Data deletion`, и тот же адрес
+           нужен человеку, который хочет сперва прочитать, а не нажимать. */
+        deleteMore: 'What exactly is deleted and what stays',
         errPwMatch: 'Passwords do not match',
         errPwShort: 'Password must be at least 8 characters',
         pwRuleLength: 'At least 8 characters',
@@ -427,8 +439,11 @@
         language: 'Тил',
         dangerZone: 'Коркунучтуу аймак',
         deleteAccount: 'Аккаунтту жок кылуу',
-        deleteLoses: ['Рейтингдеги орун жана топтолгон упайлар', 'Мелдештердин жана матчтардын тарыхы', 'Топтолгон упайлар менен жеңилдиктер', 'Тиркеме менен сайттагы аккаунт'],
+        deleteLoses: ['Топтолгон упайлар менен жеңилдиктер', 'Эскертүү жөндөөлөрү',
+                      'Тиркеме менен сайттагы аккаунт',
+                      'Матчтардын натыйжалары менен оюнчунун картасы калат — ал «Аккаунт өчүрүлгөн» деп белгиленет'],
         deleteConfirm: 'Аккаунт дароо жашырылат. Ойлонууга 30 күнүңүз бар — жөн эле кириңиз, биз аны кайтарууну сунуштайбыз. Андан кийин биротоло өчөт.',
+        deleteMore: 'Эмне өчөт жана эмне калат — толук',
         errPwMatch: 'Сыр сөздөр дал келбейт',
         errPwShort: 'Сыр сөз кеминде 8 белгиден турушу керек',
         pwRuleLength: 'Кеминде 8 белги',
@@ -735,8 +750,11 @@
         language: 'Язык',
         dangerZone: 'Опасная зона',
         deleteAccount: 'Удалить аккаунт',
-        deleteLoses: ['Место в рейтинге и набранные очки', 'История турниров и матчей', 'Накопленные баллы и скидки', 'Аккаунт на сайте и в приложении'],
+        deleteLoses: ['Накопленные баллы и скидки', 'Настройки уведомлений',
+                      'Аккаунт на сайте и в приложении',
+                      'Карточка игрока с результатами матчей останется — её пометят как удалённый аккаунт'],
         deleteConfirm: 'Аккаунт скроется сразу. У вас будет 30 дней, чтобы передумать — просто войдите, и мы предложим его вернуть. Потом он удалится навсегда.',
+        deleteMore: 'Что именно удаляется и что остаётся',
         errPwMatch: 'Пароли не совпадают',
         errPwShort: 'Пароль должен быть не менее 8 символов',
         pwRuleLength: 'Минимум 8 символов',
@@ -6585,7 +6603,13 @@
                         '<p class="db-modal-text">' + L.deleteConfirm + '</p>' +
                         '<ul class="db-modal-steps">' +
                             L.deleteLoses.map(function(x) { return '<li>' + x + '</li>'; }).join('') +
-                        '</ul>',
+                        '</ul>' +
+                        /* Ссылка на публичную страницу: её адрес стоит в
+                           Play Console, и человек может прочитать всё до
+                           нажатия (кусок 204). */
+                        '<p class="db-modal-text"><a href="delete-account' +
+                            KSLT_YAZYK.суффикс + '.html">' +
+                            KSLT_экранировать(L.deleteMore) + '</a></p>',
                     actions: [
                         { label: L.cancel },
                         { label: L.deleteAccount, primary: true, onClick: function(close) {
