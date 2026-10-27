@@ -2326,7 +2326,9 @@ function обновитьРасклад() {
                     block.querySelectorAll('.ad-reg-check[data-group="' + window.KSLT_селектор(group) + '"]:checked').forEach(function(cb) { ids.push(cb.dataset.regId); });
                     if (ids.length === 0) return;
                     A.showConfirm(L.regRemoveConfirm, '', async function() {
-                        await removeRegistrations(ids, tournamentId);
+                        /* Через дом раздела, а не прямым именем: функция
+                           живёт в `sections/bracket.js` (кусок 200). */
+                        await A.removeRegistrations(ids, tournamentId);
                         loadTrnRegistrations(tournamentId);
                     }, L.regRemoveSelected);
                 });

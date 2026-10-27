@@ -183,7 +183,9 @@ const КУСКИ = [
        держались, и оба — из-за собственных признаков (опечатка `\\s` и
        граница 480, которой на шкале нет). Никто этого не видел, потому что
        его не гонял `check-vse`. СТОРОЖ, КОТОРОГО НЕ ГОНЯЮТ, НЕ СТОРОЖ. */
-    ['вход', 'check-auth.js', 'check-auth-otkat.js']
+    ['вход', 'check-auth.js', 'check-auth-otkat.js'],
+    ['фокус после перерисовки', 'check-fokus-posle-pererisovki.js',
+     'check-fokus-posle-pererisovki-otkat.js']
 ];
 
 function прогнать(файл) {
