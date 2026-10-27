@@ -10,7 +10,15 @@ CREATE TABLE IF NOT EXISTS tournament_registrations (
   player_id TEXT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
   seed_number INT,                -- номер посева (1-8), null = несеяный
   draw_position INT,              -- позиция в сетке (1-32), null = ещё не определена
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'withdrawn')),
+  -- СПИСОК ПОЛНЫЙ, А НЕ ИСТОРИЧЕСКИЙ (правка 27.10, кусок 197).
+  -- Здесь было четыре значения; `tournament-waitlist-migration.sql` добавил
+  -- `waitlist`, `registration-rules-migration.sql` — `blocked` и `draw`.
+  -- В базе семь (`schema-snapshot.sql:1276`). ЭТОТ ФАЙЛ СОЗДАЁТ ТАБЛИЦУ:
+  -- на чистой базе он отработает первым, и схема выйдет устаревшей —
+  -- а инструмента миграций у нас нет, SQL заливается вручную, то есть
+  -- порядок применения ничем не гарантирован.
+  status TEXT DEFAULT 'pending' CHECK (status IN
+    ('pending', 'approved', 'rejected', 'withdrawn', 'waitlist', 'blocked', 'draw')),
   registered_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(tournament_id, player_id)
 );

@@ -35,7 +35,14 @@ const МАКЕТ = чит('js/admin/core/layout.js');
 function страницы(дир, сп) {
     fs.readdirSync(path.join(КОРЕНЬ, дир), { withFileTypes: true }).forEach(э => {
         if (э.isDirectory()) {
-            if (/node_modules|reports|\.git/.test(э.name)) return;
+            /* АРТЕФАКТЫ ПРОГОНА — НЕ СТРАНИЦЫ ПРОДУКТА (27.10, кусок 197).
+               Правило держалось на «89 страниц с манифестом» и упало на 103
+               посреди прогона Playwright: в `test-results/` ложатся трейсы, а
+               в них СНИМКИ страниц — те же html с тем же манифестом.
+               Четырнадцать «страниц» появлялись и исчезали вместе с прогоном,
+               то есть сторож зеленел или краснел по тому, идёт ли прогон.
+               СТОРОЖ, ОБХОДЯЩИЙ ДЕРЕВО ОТ КОРНЯ, ОБЯЗАН НАЗВАТЬ, ЧТО НЕ ЕГО. */
+            if (/node_modules|reports|test-results|playwright-report|\.playwright|\.git/.test(э.name)) return;
             страницы(path.join(дир, э.name), сп);
         } else if (э.name.endsWith('.html')) сп.push(path.join(дир, э.name));
     });

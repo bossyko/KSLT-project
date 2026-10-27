@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 /**
  * Настройки линтера: ловим имена, которых нет в области видимости.
  *
@@ -8,6 +11,33 @@
  *
  * Гоняется вместе с остальными правилами: node tools/check-rules.js
  */
+/**
+ * ДОМА ПРОДУКТА СЧИТАЮТСЯ ИЗ КОДА, А НЕ ДЕРЖАТСЯ РУКАМИ (кусок 197, 27.10).
+ *
+ * Список `KSLT_*` перечислялся здесь вручную и отставал: куски 191 и 192
+ * завели `KSLT_VREMYA` и `KSLT_CHISLA`, а конфиг о них не узнал — линтер
+ * дал ДВЕНАДЦАТЬ `no-undef` на правильном коде. Узналось это только
+ * сегодня, потому что `check-rules.js` НЕ ВХОДИТ в `check-vse.js`, и его
+ * падения никто не видел.
+ *
+ * СПИСОК, КОТОРЫЙ ДЕРЖИТСЯ РУКАМИ, ОТСТАЁТ. Теперь имена берутся оттуда,
+ * где дома объявляются: `window.KSLT_ИМЯ =` в `js/`.
+ */
+const домаПродукта = (() => {
+    const имена = {};
+    const обойти = дир => {
+        for (const э of readdirSync(дир, { withFileTypes: true })) {
+            const п = join(дир, э.name);
+            if (э.isDirectory()) { обойти(п); continue; }
+            if (!э.name.endsWith('.js')) continue;
+            const т = readFileSync(п, 'utf8');
+            for (const м of т.matchAll(/window\.(KSLT_[A-Za-zА-Яа-яЁё_]+)\s*=/g)) имена[м[1]] = 'readonly';
+        }
+    };
+    обойти('js');
+    return имена;
+})();
+
 export default [
     {
         ignores: [
@@ -42,6 +72,13 @@ export default [
                 crypto: 'readonly', btoa: 'readonly', atob: 'readonly',
                 caches: 'readonly', self: 'readonly', module: 'writable',
                 globalThis: 'readonly', AbortController: 'readonly',
+                /* 27.10: `File` не был объявлен, и линтер давал три
+                   `no-undef` на `instanceof File` — это браузерный API, а
+                   не дом продукта. */
+                File: 'readonly', FileReader: 'readonly', Blob: 'readonly',
+
+                // ДОМА ПРОДУКТА — СЧИТАНЫ ИЗ КОДА (см. верх файла)
+                ...домаПродукта,
 
                 // Свои глобалы: подключаются отдельными файлами в HTML
                 supabaseClient: 'readonly', KSLT_PHONE: 'readonly',

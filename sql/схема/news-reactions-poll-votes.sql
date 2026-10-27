@@ -9,7 +9,15 @@ CREATE TABLE IF NOT EXISTS news_reactions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     news_id TEXT NOT NULL REFERENCES news(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    reaction_type TEXT NOT NULL CHECK (reaction_type IN ('tennis', 'fire', 'clap')),
+    -- СПИСОК РЕАКЦИЙ — ДЕСЯТЬ, А НЕ ТРИ (правка 27.10, кусок 197).
+    -- Здесь было три значения, а `news-reactions-config-migration.sql:18`
+    -- расширил список до десяти через DROP + ADD. На боевой базе победил
+    -- он — в снимке схемы (`schema-snapshot.sql:1124`) десять. НО ЭТОТ ФАЙЛ
+    -- СОЗДАЁТ ТАБЛИЦУ: на чистой базе (новый проект, тестовая с нуля) он
+    -- отработает ПЕРВЫМ, и семь кнопок реакций из десяти упадут на вставке.
+    -- Списки в двух файлах теперь сверяет сторож `check-shema-ne-dvoitsya.js`.
+    reaction_type TEXT NOT NULL CHECK (reaction_type IN
+        ('tennis', 'fire', 'clap', 'star', 'heart', 'like', 'trophy', 'muscle', 'target', 'wow')),
     created_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE(news_id, user_id, reaction_type)
 );

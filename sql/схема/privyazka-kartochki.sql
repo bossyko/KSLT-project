@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS public.player_link_requests (
     profile_id  uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     player_id   text NOT NULL REFERENCES public.players(id) ON DELETE CASCADE,
     status      text NOT NULL DEFAULT 'pending'
-                CHECK (status IN ('pending', 'approved', 'rejected')),
+                -- СПИСОК ПОЛНЫЙ (правка 27.10, кусок 197): `withdrawn`
+                -- добавлен `privyazka-smena-zayavki.sql`, в базе четыре
+                -- (`schema-snapshot.sql:1186`). Создатель не отстаёт.
+                CHECK (status IN ('pending', 'approved', 'rejected', 'withdrawn')),
     note        text,
     created_at  timestamptz NOT NULL DEFAULT now(),
     decided_at  timestamptz,

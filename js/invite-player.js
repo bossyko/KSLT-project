@@ -195,7 +195,7 @@
             var session = await window.supabaseClient.auth.getSession();
             var token = session.data.session ? session.data.session.access_token : null;
             if (!token) {
-                showToast(L.inviteError, 'error');
+                window.KSLT_TOAST.показать(L.inviteError, 'error');
                 return;
             }
 
@@ -212,7 +212,7 @@
             var data = await res.json();
 
             if (res.ok && data.success) {
-                showToast(L.inviteSent, 'success');
+                window.KSLT_TOAST.показать(L.inviteSent, 'success');
             } else {
                 var errMsg = L.inviteError;
                 if (data.error === 'daily_limit') errMsg = L.inviteLimit;
@@ -220,11 +220,11 @@
                 else if (data.error === 'no_account') errMsg = L.inviteNoAccount;
                 else if (data.error === 'receiver_no_contacts') errMsg = L.inviteNoContacts;
                 else if (data.error === 'self_invite') errMsg = L.inviteSelf;
-                showToast(errMsg, data.error === 'daily_limit' || data.error === 'already_pending' ? 'info' : 'error');
+                window.KSLT_TOAST.показать(errMsg, data.error === 'daily_limit' || data.error === 'already_pending' ? 'info' : 'error');
             }
         } catch(e) {
             console.error('Invite error:', e);
-            showToast(L.inviteError, 'error');
+            window.KSLT_TOAST.показать(L.inviteError, 'error');
         } finally {
             _sendingInvite = false;
         }

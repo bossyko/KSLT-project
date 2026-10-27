@@ -25,8 +25,18 @@ SELECT count(*) AS vsego_turnirov,
 FROM public.tournaments;
 
 -- 2. ПРАВКА
+-- ТИП — integer, А НЕ bigint (правка 27.10, кусок 197).
+-- Здесь стоял `bigint`, а в базе столбец `integer` — и файл об этом молчал:
+-- `IF NOT EXISTS` на боевой не отработал (столбец уже был), а на чистой базе
+-- дал бы bigint. ДВА ТИПА НА ОДНО ПОНЯТИЕ, и какой выйдет — зависит от
+-- порядка применения файлов.
+-- ЗАМЕР РЕШИЛ СПОР: зерно пишет `js/admin/sections/bracket.js:7412` в
+-- диапазоне 1..2147483000, а генератор `js/bracket-draw.js:61` берёт
+-- `% 2147483647`. Это ровно предел `integer`, и bigint тут ничего не даёт.
+-- Второй объявитель того же столбца — `sql/схема/tournament-draw-seed.sql:18`,
+-- там уже `integer`.
 ALTER TABLE public.tournaments
-    ADD COLUMN IF NOT EXISTS draw_seed bigint;
+    ADD COLUMN IF NOT EXISTS draw_seed integer;
 
 COMMENT ON COLUMN public.tournaments.draw_seed IS
   'Зерно жеребьёвки. То же зерно + тот же список заявок = тот же расклад. Пусто — жеребьёвки ещё не было';

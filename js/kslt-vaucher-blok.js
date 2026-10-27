@@ -210,7 +210,7 @@
                 .eq('is_active', true);
             var услуги = res.data || [];
             if (!услуги.length) {
-                showToast(о.L.noDiscountsConfigured, 'info');
+                window.KSLT_TOAST.показать(о.L.noDiscountsConfigured, 'info');
                 return;
             }
             if (услуги.length === 1) {
@@ -221,7 +221,7 @@
                                 услуги: услуги, L: о.L });
             }
         } catch (e) {
-            showToast(e.message || 'Error', 'error');
+            window.KSLT_TOAST.показать(e.message || 'Error', 'error');
         } finally {
             о.кнопка.textContent = былТекст;
             о.кнопка.style.pointerEvents = '';
@@ -299,11 +299,11 @@
                 'Арзандатуу алууда ката', 'Ошибка получения скидки');
             if (итог.error) {
                 console.error('Voucher RPC error:', итог.error);
-                showToast(итог.error.message || ошибкаОбщая, 'error');
+                window.KSLT_TOAST.показать(итог.error.message || ошибкаОбщая, 'error');
                 return;
             }
             var данные = итог.data;
-            if (!данные) { showToast(ошибкаОбщая, 'error'); return; }
+            if (!данные) { window.KSLT_TOAST.показать(ошибкаОбщая, 'error'); return; }
             if (данные.error) {
                 if (данные.error === 'active_voucher_exists') {
                     Б.окноЛимита({ причина: 'active', L: о.L });
@@ -319,7 +319,7 @@
                     service_not_found: KSLT_YAZYK.выбрать('Service not found', 'Кызмат табылган жок', 'Услуга не найдена'),
                     entity_not_partner: KSLT_YAZYK.выбрать('Not a partner', 'Өнөктөш эмес', 'Не партнёр')
                 };
-                showToast(тексты[данные.error] || данные.error, 'error');
+                window.KSLT_TOAST.показать(тексты[данные.error] || данные.error, 'error');
                 return;
             }
             if (данные.success && данные.voucher) {
@@ -327,7 +327,7 @@
                 if (typeof о.послеУспеха === 'function') о.послеУспеха();
             }
         } catch (e) {
-            showToast(e.message || 'Error', 'error');
+            window.KSLT_TOAST.показать(e.message || 'Error', 'error');
         }
     };
 

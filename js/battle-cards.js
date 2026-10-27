@@ -330,7 +330,7 @@
 
         // Already voted — block
         if (userVotes[challengeId]) {
-            showToast(L.alreadyVoted);
+            window.KSLT_TOAST.показать(L.alreadyVoted);
             return;
         }
 
@@ -356,7 +356,7 @@
             var result = res.data;
             if (result && result.ok === false) {
                 if (result.error === 'already_voted') {
-                    showToast(L.alreadyVoted);
+                    window.KSLT_TOAST.показать(L.alreadyVoted);
                 }
                 // Lock buttons — already voted
                 card.querySelectorAll('.bc-vote-btn').forEach(function(b) {
@@ -366,7 +366,7 @@
             }
             // Success
             userVotes[challengeId] = side;
-            showToast(L.voteRecorded);
+            window.KSLT_TOAST.показать(L.voteRecorded);
             // Lock buttons permanently
             card.querySelectorAll('.bc-vote-btn').forEach(function(b) {
                 b.classList.add('bc-vote-locked');

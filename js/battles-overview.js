@@ -683,7 +683,7 @@
         var side = parseInt(btn.dataset.side, 10);
 
         if (_userVotes[challengeId]) {
-            showToast(L.alreadyVoted);
+            window.KSLT_TOAST.показать(L.alreadyVoted);
             return;
         }
 
@@ -703,12 +703,12 @@
             }
             var result = res.data;
             if (result && result.ok === false) {
-                if (result.error === 'already_voted') showToast(L.alreadyVoted);
+                if (result.error === 'already_voted') window.KSLT_TOAST.показать(L.alreadyVoted);
                 card.querySelectorAll('.bo-vote-btn').forEach(function(b) { b.classList.add('bo-vote-locked'); });
                 return;
             }
             _userVotes[challengeId] = side;
-            showToast(L.voteRecorded);
+            window.KSLT_TOAST.показать(L.voteRecorded);
             card.querySelectorAll('.bo-vote-btn').forEach(function(b) { b.classList.add('bo-vote-locked'); });
 
             var statusEl = card.querySelector('.bo-vote-status');
