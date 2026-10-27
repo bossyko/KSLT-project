@@ -178,7 +178,12 @@ const КУСКИ = [
     ['селектор через дом', 'check-selektor-cherez-dom.js', 'check-selektor-cherez-dom-otkat.js'],
     ['видимость — один дом', 'check-vidimost-odin-dom.js', 'check-vidimost-odin-dom-otkat.js'],
     ['схема не двоится', 'check-shema-ne-dvoitsya.js', 'check-shema-ne-dvoitsya-otkat.js'],
-    ['телефон лёжа', 'check-vid-lezha.js', 'check-vid-lezha-otkat.js']
+    ['телефон лёжа', 'check-vid-lezha.js', 'check-vid-lezha-otkat.js'],
+    /* ВНЕСЁН 27.10, КУСКОМ 199. Сторож входа жил СБОКУ: два его правила не
+       держались, и оба — из-за собственных признаков (опечатка `\\s` и
+       граница 480, которой на шкале нет). Никто этого не видел, потому что
+       его не гонял `check-vse`. СТОРОЖ, КОТОРОГО НЕ ГОНЯЮТ, НЕ СТОРОЖ. */
+    ['вход', 'check-auth.js', 'check-auth-otkat.js']
 ];
 
 function прогнать(файл) {
