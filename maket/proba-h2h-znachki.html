@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кусок 185 — значки H2H до и после</title>
+<!-- НАСТОЯЩИЕ токены продукта: краски берутся из системы, а не набраны тут. -->
+<link rel="stylesheet" href="../css/tokens.css?v=76">
+<style>
+  body { background: var(--neutral-950); color: var(--text-primary);
+         font-family: var(--font-sans); margin: 0; padding: 24px; }
+  h1 { font-size: var(--fs-lg); margin: 0 0 4px; }
+  .пояс { color: var(--text-muted); font-size: var(--fs-xs); margin: 0 0 24px; }
+  .пара { display: flex; gap: 24px; flex-wrap: wrap; }
+  .окно { background: var(--neutral-800); border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-xl); padding: 20px; width: 300px; }
+  .окно h2 { font-size: var(--fs-sm); margin: 0 0 12px; color: var(--text-secondary); }
+  .ряд { display: flex; align-items: center; gap: 12px; padding: 8px 10px;
+         border-radius: var(--radius-sm); margin-bottom: 6px; }
+  .ряд.стр { background: var(--surface-glass); }
+  .ряд.каб { border-bottom: 1px solid var(--alpha-white-08); border-radius: 0; padding: 8px 0; }
+  .дата { color: var(--text-muted); font-size: var(--fs-xs); min-width: 52px; }
+  .счёт { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .зн { font-weight: 700; flex-shrink: 0; }
+  /* ПРЕЖНИЕ значения — набраны числами НАМЕРЕНО: это снимок «до». */
+  .стр-было.win  { padding: 3px 10px; border-radius: 100px; font-size: .6875rem;
+                   text-transform: uppercase; letter-spacing: .05em;
+                   background: rgba(34,197,94,.15); color: #22c55e; }
+  .стр-было.loss { padding: 3px 10px; border-radius: 100px; font-size: .6875rem;
+                   text-transform: uppercase; letter-spacing: .05em;
+                   background: rgba(255,71,87,.15); color: #FF4757; }
+  .каб-было.win  { padding: 2px 8px; border-radius: 3px; font-size: .75rem;
+                   background: rgba(52,199,89,.15); color: #34c759; }
+  .каб-было.loss { padding: 2px 8px; border-radius: 3px; font-size: .75rem;
+                   background: rgba(255,59,48,.15); color: #ff3b30; }
+  /* СТАЛО — только имена системы. */
+  .стр-стало.win  { padding: 3px 10px; border-radius: var(--radius-full); font-size: var(--fs-2xs);
+                    text-transform: uppercase; letter-spacing: .05em;
+                    background: var(--success-subtle); color: var(--success); }
+  .стр-стало.loss { padding: 3px 10px; border-radius: var(--radius-full); font-size: var(--fs-2xs);
+                    text-transform: uppercase; letter-spacing: .05em;
+                    background: var(--danger-subtle); color: var(--danger); }
+  .каб-стало.win  { padding: 2px 8px; border-radius: 3px; font-size: var(--fs-xs);
+                    background: var(--success-subtle); color: var(--success); }
+  .каб-стало.loss { padding: 2px 8px; border-radius: 3px; font-size: var(--fs-xs);
+                    background: var(--danger-subtle); color: var(--danger); }
+  .чис { font-size: var(--fs-2xs); color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+</style></head>
+<body data-проба-готова="1">
+<h1>Значки H2H: было и стало</h1>
+<p class="пояс">Окно H2H написано дважды — страница игрока и кабинет. Слева снимок «до»,
+справа «после». Фон, подложка строки и размеры оставлены как в коде каждой копии:
+меняется ТОЛЬКО краска.</p>
+
+<div class="пара">
+  <div class="окно"><h2>Страница игрока — БЫЛО</h2>
+    <div class="ряд стр"><span class="дата">12.10</span><span class="счёт">6:4 6:2</span><span class="зн стр-было win">W</span></div>
+    <div class="ряд стр"><span class="дата">05.10</span><span class="счёт">3:6 4:6</span><span class="зн стр-было loss">L</span></div>
+  </div>
+  <div class="окно"><h2>Страница игрока — СТАЛО</h2>
+    <div class="ряд стр"><span class="дата">12.10</span><span class="счёт">6:4 6:2</span><span class="зн стр-стало win">W</span></div>
+    <div class="ряд стр"><span class="дата">05.10</span><span class="счёт">3:6 4:6</span><span class="зн стр-стало loss">L</span></div>
+  </div>
+  <div class="окно"><h2>Кабинет — БЫЛО</h2>
+    <div class="ряд каб"><span class="дата">12.10</span><span class="счёт">6:4 6:2</span><span class="зн каб-было win">W</span></div>
+    <div class="ряд каб"><span class="дата">05.10</span><span class="счёт">3:6 4:6</span><span class="зн каб-было loss">L</span></div>
+  </div>
+  <div class="окно"><h2>Кабинет — СТАЛО</h2>
+    <div class="ряд каб"><span class="дата">12.10</span><span class="счёт">6:4 6:2</span><span class="зн каб-стало win">W</span></div>
+    <div class="ряд каб"><span class="дата">05.10</span><span class="счёт">3:6 4:6</span><span class="зн каб-стало loss">L</span></div>
+  </div>
+</div>
+
+<p class="чис">
+Победа, страница игрока: <b>#22c55e → --success</b>, ΔE 6.5, контраст 5.29 → 6.03 (AA).<br>
+Победа, кабинет: <b>#34c759 → --success</b>, ΔE 8.5, контраст 6.03 → 6.76 (AA).<br>
+Проигрыш, кабинет: <b>#ff3b30 → --danger</b>, ΔE 19.5, контраст 4.21 → 4.39 — <b>ОБА НИЖЕ AA 4.5</b>,
+и система этого не чинит: красный текст на красном тинте не добирает нормы на всём, что выше
+карточки. Это отдельная запись и отдельный кусок.
+</p>
+</body></html>

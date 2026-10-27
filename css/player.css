@@ -1453,9 +1453,11 @@ a.pp-tournament:hover {
     flex-shrink: 0;
 }
 
+/* Та же роль «победа», что и в кабинете (css/dashboard.css). Здесь жил
+   третий зелёный #22c55e, ΔE 6.5 до системного. Контраст 5.29 -> 6.03. */
 .h2h-match-result.win {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
+    background: var(--success-subtle);
+    color: var(--success);
 }
 
 .h2h-match-result.loss {

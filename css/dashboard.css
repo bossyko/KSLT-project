@@ -1936,8 +1936,11 @@ select.db-field-input {
 }
 .h2h-overlay.visible { opacity: 1; }
 
+/* ОКНО H2H СТОИТ В ДВУХ ФАЙЛАХ: тот же блок есть в css/player.css. До
+   куска 185 здесь был литерал #1a1a1a — ровно значение --neutral-800, но
+   написанное мимо системы, и потому молча расходившееся бы с ним. */
 .h2h-modal {
-    background: #1a1a1a;
+    background: var(--neutral-800);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-xl);
     padding: 36px 32px;
@@ -2083,8 +2086,12 @@ select.db-field-input {
     font-size: var(--fs-xs); font-weight: 700;
     padding: 2px 8px; border-radius: 3px;
 }
-.h2h-match-result.win { background: rgba(52,199,89,0.15); color: #34c759; }
-.h2h-match-result.loss { background: rgba(255,59,48,0.15); color: #ff3b30; }
+/* Победа и проигрыш — роль, решённая 15.10 и 19.10: системные --success и
+   --danger. Сторож «отказ одной краской» смотрел только copy в player.css
+   и этих двух строк не видел — краски iOS (#34c759, #ff3b30) жили здесь
+   десять дней. ΔE до системных 8.5 и 19.5, контраст 6.03→6.76 и 4.21→4.39. */
+.h2h-match-result.win { background: var(--success-subtle); color: var(--success); }
+.h2h-match-result.loss { background: var(--danger-subtle); color: var(--danger); }
 
 .h2h-profile-btn {
     display: block;

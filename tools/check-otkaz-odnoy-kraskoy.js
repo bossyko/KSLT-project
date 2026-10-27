@@ -57,6 +57,10 @@ const РОЛЬ = [
     ['css/player.css',            '.pp-stat-change.down'],
     ['css/player.css',            '.pp-match-result.loss'],
     ['css/player.css',            '.h2h-match-result.loss'],
+    /* КУСОК 185: та же роль стоит ВТОРОЙ КОПИЕЙ в кабинете, и десять дней
+       она говорила краской iOS #ff3b30 — список смотрел один файл из двух.
+       СТОРОЖ, СМОТРЯЩИЙ ЧАСТЬ ПРОДУКТА, НЕ СТОРОЖИТ НИЧЕГО, двенадцатый раз. */
+    ['css/dashboard.css',         '.h2h-match-result.loss'],
     ['css/player.css',            '.pp-cat-bar-l'],
     ['css/player.css',            '.pp-cat-mark-l'],
     ['css/player.css',            '.pp-chal-req'],
