@@ -201,7 +201,9 @@ const КУСКИ = [
     ['рейтинг приложения', 'check-reyting-prilozheniya.js',
      'check-reyting-prilozheniya-otkat.js'],
     ['числа клуба', 'check-chisla-kluba.js',
-     'check-chisla-kluba-otkat.js']
+     'check-chisla-kluba-otkat.js'],
+    ['главная приложения', 'check-glavnaya-prilozheniya.js',
+     'check-glavnaya-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -394,9 +394,22 @@ a, button, [role="button"] {
   letter-spacing: -0.02em;
 }
 .section-title .see-all {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--accent-text);
+  /* ЦЕЛЬ НАЖАТИЯ 44 ПРИ ТОМ ЖЕ ВИДЕ: ссылка «Все» была высотой 21.
+     Область растёт отступами, а отрицательный отступ справа возвращает
+     её на прежнее место — на экране ничего не сдвигается. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  margin-right: calc(var(--space-2) * -1);
+}
+.section-title .see-all:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 8px);
 }
 
 /* ===== CARDS ===== */
@@ -669,8 +682,12 @@ a, button, [role="button"] {
 }
 .news-scroll::-webkit-scrollbar { display: none; }
 .news-card {
-  min-width: 260px;
-  max-width: 280px;
+  /* КУСОК 211: было три набора по трём границам — 220/240 на 340,
+     256/280 в основе, 280/310 на 414. Карточка тянется между своими
+     пределами и больше ни на одной границе не переопределяется. */
+  min-width: 224px;
+  max-width: 304px;
+  width: 72vw;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-card);
@@ -679,7 +696,7 @@ a, button, [role="button"] {
   scroll-snap-align: start;
 }
 .news-card-img {
-  height: 140px;
+  height: 144px;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   display: flex;
   align-items: center;
@@ -699,18 +716,18 @@ a, button, [role="button"] {
 }
 .news-card-body { padding: 12px; }
 .news-card-tag {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   color: var(--accent-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 .news-card-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1490,7 +1507,7 @@ a, button, [role="button"] {
   justify-content: center;
   position: relative;
 }
-.news-list-img-icon { font-size: 48px; opacity: 0.25; }
+.news-list-img-icon { font-size: 40px; opacity: 0.25; }
 
 /* ---- Своя обложка ----
    Мировые новости приходят без картинки, место закрывает снимок из набора
@@ -1508,7 +1525,7 @@ a, button, [role="button"] {
   position: absolute;
   right: 10px;
   bottom: 8px;
-  width: 42px;
+  width: 40px;
   height: 14px;
   background: url('../img/kslt-logo.svg') no-repeat center / contain;
   opacity: 0.75;
@@ -1517,20 +1534,20 @@ a, button, [role="button"] {
 }
 /* Карточка на главной и шапка открытой новости позиционируются сами не всегда */
 .tcv-img.news-own-cover, .nd-hero-img.news-own-cover { position: relative; }
-.news-list-body { padding: 14px; }
+.news-list-body { padding: var(--space-4); }
 .news-list-tag {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   color: var(--accent-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 .news-list-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.3;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
 }
 .news-list-excerpt {
   font-size: 12px;
@@ -2245,7 +2262,7 @@ a, button, [role="button"] {
   position: absolute; inset: 0;
   background: var(--img-overlay-40);
 }
-.tcv-img-icon { font-size: 36px; opacity: 0.25; }
+.tcv-img-icon { font-size: 32px; opacity: 0.25; }
 .tcv-date {
   position: absolute;
   top: 8px; left: 8px;
@@ -2253,26 +2270,26 @@ a, button, [role="button"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 8px;
+  padding: var(--space-2);
   background: var(--accent);
   border-radius: var(--radius-sm);
 }
 .tcv-date-day { font-size: 16px; font-weight: 800; color: #000; line-height: 1; }
-.tcv-date-month { font-size: 9px; font-weight: 700; color: #000; text-transform: uppercase; }
+.tcv-date-month { font-size: var(--fs-2xs); font-weight: 700; color: #000; text-transform: uppercase; }
 .tcv-badge {
   position: absolute;
   top: 8px; right: 8px;
   z-index: 2;
-  font-size: 10px; font-weight: 600;
-  padding: 3px 8px;
+  font-size: var(--fs-2xs); font-weight: 600;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
   background: var(--badge-overlay);
   color: var(--lime-500);
   backdrop-filter: blur(4px);
 }
-.tcv-body { padding: 10px 12px; }
+.tcv-body { padding: var(--space-3); }
 .tcv-name {
-  font-size: 13px; font-weight: 600;
+  font-size: 14px; font-weight: 600;
   line-height: 1.3; margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -2282,7 +2299,7 @@ a, button, [role="button"] {
 .tcv-meta {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-2);
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -4349,11 +4366,7 @@ select.prof-field-input { color: var(--text); }
      значений на 340 — границе нечего переопределять. */
 
   /* General: reduce padding and fonts */
-  .section-title { padding: 12px 12px 6px; }
-  .section-title h2 { font-size: 16px; }
   .screen-title h1 { font-size: 1.2rem; }
-  .news-card { min-width: 220px; max-width: 240px; }
-  .news-card-img { height: 120px; }
 
   /* Tournament cards */
   .tc-card { margin-bottom: 10px; }
@@ -4374,8 +4387,6 @@ select.prof-field-input { color: var(--text); }
      четвёртый набор чисел; из них 13 и 22 вообще мимо шкалы кеглей. */
 
   /* General */
-  .section-title h2 { font-size: 20px; }
-  .news-card { min-width: 280px; max-width: 310px; }
 }
 
 /* ===== RESPONSIVE — EXTRA LARGE (430px+ tablets in phone mode) ===== */
@@ -5114,7 +5125,7 @@ select.prof-field-input { color: var(--text); }
 }
 .hb-badges-scroll::-webkit-scrollbar { display: none; }
 .hb-badge {
-  width: 132px; flex-shrink: 0; padding: 14px 12px;
+  width: 136px; flex-shrink: 0; padding: 14px 12px;
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 14px; text-align: center;
   /* Незаработанные приглушены, но видны: человек должен понимать,
@@ -5123,36 +5134,49 @@ select.prof-field-input { color: var(--text); }
 }
 .hb-badge--got { opacity: 1; border-color: rgba(204,255,0,0.35); }
 .hb-badge-icon { font-size: 26px; line-height: 1; margin-bottom: 8px; }
-.hb-badge-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.hb-badge-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .hb-badge--got .hb-badge-name { color: var(--accent-text); }
 .hb-badge-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.35; }
 
+/* КУСОК 211, УРОК ПЕРЕКЛЮЧАТЕЛЯ ПОЛА. Замер площади акцента на главной:
+   «Начать путь к победе» весило 17665px² сплошного лайма, а главное
+   действие экрана «Найти игрока» — 7092px², ВДВОЕ МЕНЬШЕ. Самое крупное
+   акцентное пятно стояло не на главном действии.
+   ОДНО ГЛАВНОЕ ДЕЙСТВИЕ НА ЭКРАН — ОДНА ЗАЛИВКА. Второй призыв остаётся
+   призывом, но контуром: текст и рамка акцентные, фона нет. */
 .hb-cta {
-  display: block; width: calc(100% - 32px); margin: 12px 16px 0;
-  padding: 14px; border-radius: 999px; border: none;
-  background: var(--accent); color: #0A0A0A;
-  font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer;
+  display: block; width: calc(100% - 32px); margin: var(--space-3) var(--space-4) 0;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-full);
+  background: transparent; border: 2px solid var(--accent); color: var(--accent-text);
+  font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer;
 }
+.hb-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
 .hb-cta:active { opacity: .8; }
 
 /* ---- О проекте ---- */
 .hb-about-text {
-  padding: 0 16px 14px; font-size: 13.5px;
+  padding: 0 var(--space-4) var(--space-4); font-size: 14px;
   color: var(--text-sec); line-height: 1.6;
 }
 .hb-about-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px;
+  /* КУСОК 211: три колонки включались границей 500. Сетка сама кладёт
+     столько колонок, сколько влезает, — граница не нужна. */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
 }
 .hb-about-item {
   /* Плитки ужаты: шесть штук в полный рост занимали пол-экрана прокрутки,
      а это справка, а не главное на странице */
-  padding: 10px; background: var(--bg-card);
+  padding: var(--space-3); background: var(--bg-card);
   border: 1px solid var(--border); border-radius: 12px;
   display: flex; align-items: flex-start; gap: 8px;
 }
-.hb-about-icon { font-size: 15px; line-height: 1.2; flex-shrink: 0; }
-.hb-about-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
-.hb-about-desc { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; line-height: 1.35; }
+.hb-about-icon { font-size: 16px; line-height: 1.2; flex-shrink: 0; }
+.hb-about-name { font-size: var(--fs-xs); font-weight: 700; color: var(--text); }
+.hb-about-desc { font-size: var(--fs-2xs); color: var(--text-muted); margin-top: 2px; line-height: 1.35; }
 
 /* ---- Спонсоры ---- */
 /* Лента едет непрерывно, как на сайте, а не дёргается по одной плитке:
@@ -5184,20 +5208,16 @@ select.prof-field-input { color: var(--text); }
 }
 .hb-sponsors::-webkit-scrollbar { display: none; }
 .hb-sponsor {
-  width: 108px; height: 64px; flex-shrink: 0;
+  width: 112px; height: 64px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 12px; padding: 10px;
 }
 .hb-sponsor img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.hb-sponsor span { font-size: 11.5px; color: var(--text-sec); text-align: center; }
+.hb-sponsor span { font-size: var(--fs-2xs); color: var(--text-sec); text-align: center; }
 
 /* Раскрытый складной телефон: плитки «О проекте» встают в три столбца */
 @media (min-width: 500px) {
-  .hb-about-grid { grid-template-columns: repeat(3, 1fr); }
-  .hb-about-text, .hb-about-grid, .hb-badges-scroll, .hb-sponsors {
-    padding-left: 20px; padding-right: 20px;
-  }
 }
 
 /* Фотография бойца в карточке баттла: на сайте здесь лица, а не буквы */
@@ -5206,7 +5226,7 @@ select.prof-field-input { color: var(--text); }
 /* Окно спонсора: логотип, название, чем занимается и как связаться */
 .hb-sp-logo {
   display: flex; align-items: center; justify-content: center;
-  height: 74px; margin-bottom: 12px;
+  height: 72px; margin-bottom: 12px;
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 12px; padding: 12px;
 }
@@ -5231,19 +5251,22 @@ select.prof-field-input { color: var(--text); }
 }
 .hh-season {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 13px; border-radius: 999px;
+  padding: var(--space-2) var(--space-3); border-radius: 999px;
   border: 1px solid rgba(204,255,0,.4); color: var(--accent-text);
-  font-size: 11.5px; font-weight: 600; margin-bottom: 14px;
+  font-size: var(--fs-2xs); font-weight: 600; margin-bottom: 14px;
 }
 .hh-season::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-.hh-mark { font-size: 42px; font-weight: 900; letter-spacing: 1px; color: var(--accent-text); line-height: 1; }
+.hh-mark { font-size: 40px; font-weight: 900; letter-spacing: 1px; color: var(--accent-text); line-height: 1; }
 .hh-sub { font-size: 12px; color: var(--text-sec); font-style: italic; margin-top: 6px; }
-.hh-claim { font-size: 17px; font-weight: 800; letter-spacing: .3px; margin-top: 16px; color: var(--text); }
-.hh-text { font-size: 12.5px; color: var(--text-sec); line-height: 1.55; margin-top: 8px; }
+.hh-claim { font-size: 18px; font-weight: 800; letter-spacing: .3px; margin-top: 16px; color: var(--text); }
+.hh-text { font-size: var(--fs-xs); color: var(--text-sec); line-height: 1.55; margin-top: 8px; }
 .hh-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 18px; padding: 13px 26px; border-radius: 999px; border: none;
-  background: var(--accent); color: #0A0A0A; font-size: 14.5px; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  /* ЦЕЛЬ НАЖАТИЯ 44. Было 43: отступ 13 и кегль 14 дали ровно на пиксель
+     меньше — цифра, которую глазами не поймать. */
+  min-height: 44px;
+  margin-top: var(--space-4); padding: var(--space-3) var(--space-6); border-radius: var(--radius-full); border: none;
+  background: var(--accent); color: #0A0A0A; font-size: 14px; font-weight: 800;
   font-family: inherit; cursor: pointer;
 }
 .hh-btn:active { opacity: .8; }
@@ -5252,22 +5275,26 @@ select.prof-field-input { color: var(--text); }
    помещаются, он их переносит. Кладём по три в ряд, а неполный нижний ряд
    встаёт по центру: два числа, прижатые влево, читаются как обрыв */
 .hh-stats {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  justify-content: center; margin-top: 20px;
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+  justify-content: center; margin-top: var(--space-6);
 }
 .hh-stat {
   /* Ширина задана жёстко: со сжатием карточки ужимались каждая под свою
      подпись, и ряд выходил вразнобой — «Зарегистрировано» шире, чем
-     «Турниров» */
-  flex: 0 0 calc((100% - 12px) / 3);
+     «Турниров».
+     КУСОК 211: на границе 500 включалось «пять в ряд» и особый случай на
+     четыре карточки. Теперь ряд сам кладёт столько, сколько влезает по
+     нижнему пределу, и границы не нужны. */
+  flex: 1 1 96px;
+  max-width: 160px;
   min-width: 0;
-  padding: 7px 4px; border-radius: 10px;
+  padding: var(--space-2); border-radius: var(--radius-md);
   background: rgba(255,255,255,.05); border: 1px solid var(--border);
 }
 .hh-stat-num { display: block; font-size: 16px; font-weight: 800; color: var(--accent-text); line-height: 1.1; }
 .hh-stat-cap {
-  display: block; font-size: 8px; color: var(--text-muted);
-  margin-top: 3px; line-height: 1.25;
+  display: block; font-size: var(--fs-2xs); color: var(--text-muted);
+  margin-top: 2px; line-height: 1.25;
   /* «Зарегистрировано» — одно слово шире карточки, переносить его негде,
      и оно вылезало за край. Разрешаем разрыв внутри слова: лучше перенос
      посреди слова, чем текст поверх соседней карточки */
@@ -5279,21 +5306,12 @@ select.prof-field-input { color: var(--text); }
   flex: 0 0 calc((100% - 6px) / 2);
 }
 
-/* Раскрытый складной телефон — места хватает на все в одну строку */
-@media (min-width: 500px) {
-  .hh-stat { flex: 0 0 calc((100% - 24px) / 5); }
-  .hh-stats:has(.hh-stat:nth-child(4):last-child) .hh-stat {
-    flex: 0 0 calc((100% - 18px) / 4);
-  }
-}
-
 /* Лозунг под заголовком достижений. Полностью в заголовок он не влезал:
    рядом стоит «Все», и строка ломалась пополам */
 .hb-motto {
-  padding: 0 16px 10px;
+  padding: 0 var(--space-4) var(--space-3);
   font-size: 12px; color: var(--text-sec); line-height: 1.45;
 }
-@media (min-width: 500px) { .hb-motto { padding-left: 20px; padding-right: 20px; } }
 
 /* Ссылки на документы под формой регистрации. Раньше это были обычные
    ссылки в браузер — теперь кнопки, открывающие документ внутри */
