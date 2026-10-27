@@ -1553,6 +1553,44 @@
     A.compressImage = compressImage;
     A.exportCsv = exportCsv;
 
+    /**
+     * ДЕЙСТВИЕ НАД ПОЛЬЗОВАТЕЛЕМ — ОДИН ЗОВ НА ВСЮ АДМИНКУ (кусок 201).
+     *
+     * ЕЁ НЕ ЗАБЫЛИ — ЕЁ ПОДРАЗУМЕВАЛИ. `sections/users.js:730` звал
+     * `A.adminAction('unblock_otp', …)` у кнопки «Разблокировать» в
+     * карточке пользователя, а такой функции в `KSLT_ADMIN` не было
+     * НИКОГДА: зов падал в `catch`, человек получал красный тост
+     * «Ошибка», и блокировка входа не снималась. Остальные шесть мест
+     * писали тот же `fetch` руками.
+     *
+     * Сервер всё умеет: `supabase/functions/admin-manage-user` знает
+     * `create_manager`, `ban_user`, `unban_user`, `delete_user`,
+     * `ban_player`, `unban_player` и `unblock_otp` (строка 415).
+     *
+     * БРОСАЕТ, А НЕ ВОЗВРАЩАЕТ ОШИБКУ: зовущий у кнопки разблокировки
+     * обёрнут в `try/catch` и ждёт именно исключения. Ошибка сервера
+     * доносится текстом, а не превращается в молчаливый успех.
+     */
+    A.adminAction = async function (действие, данные) {
+        var сессия = await A.client.auth.getSession();
+        var токен = (сессия.data.session && сессия.data.session.access_token) || '';
+        var тело = Object.assign({ action: действие }, данные || {});
+        var ответ = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + токен
+            },
+            body: JSON.stringify(тело)
+        });
+        var отв = null;
+        try { отв = await ответ.json(); } catch (e) { отв = null; }
+        if (отв && отв.error) throw new Error(отв.error);
+        if (!ответ.ok) throw new Error('HTTP ' + ответ.status);
+        return отв;
+    };
+
+
     // NTRP select options helper (1.0 - 7.0, step 0.25)
     A.ntrpOptions = function(selectedVal, opts) {
         opts = opts || {};

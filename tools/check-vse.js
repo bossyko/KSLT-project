@@ -185,7 +185,9 @@ const КУСКИ = [
        его не гонял `check-vse`. СТОРОЖ, КОТОРОГО НЕ ГОНЯЮТ, НЕ СТОРОЖ. */
     ['вход', 'check-auth.js', 'check-auth-otkat.js'],
     ['фокус после перерисовки', 'check-fokus-posle-pererisovki.js',
-     'check-fokus-posle-pererisovki-otkat.js']
+     'check-fokus-posle-pererisovki-otkat.js'],
+    ['действие над пользователем', 'check-deystvie-nad-polzovatelem.js',
+     'check-deystvie-nad-polzovatelem-otkat.js']
 ];
 
 function прогнать(файл) {

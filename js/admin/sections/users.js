@@ -1172,27 +1172,13 @@
 
         A.showConfirm(L.usrDeleteConfirmTitle, L.usrDeleteConfirm, async function() {
             try {
-                var session = await A.client.auth.getSession();
-                var token = session.data.session.access_token;
-
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ action: 'delete_user', user_id: userId })
-                });
-
-                var data = await resp.json();
-                if (data.error) {
-                    A.showToast(data.error, 'error');
-                } else {
-                    A.showToast(L.usrUserDeleted, 'success');
-                    renderUsersList();
-                }
+                /* Зов через дом (кусок 201): здесь стоял свой `fetch` —
+                   пятая копия одного и того же. */
+                await A.adminAction('delete_user', { user_id: userId });
+                A.showToast(L.usrUserDeleted, 'success');
+                renderUsersList();
             } catch (err) {
-                A.showToast('Error: ' + err.message, 'error');
+                A.showToast(err.message, 'error');
             }
         });
     }
@@ -1236,35 +1222,17 @@
             btn.disabled = true;
 
             try {
-                var session = await A.client.auth.getSession();
-                var token = session.data.session.access_token;
-
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        action: 'ban_user',
-                        user_id: userId,
-                        duration: duration,
-                        reason: reason || undefined
-                    })
+                /* Зов через дом (кусок 201). */
+                await A.adminAction('ban_user', {
+                    user_id: userId,
+                    duration: duration,
+                    reason: reason || undefined
                 });
-
-                var data = await resp.json();
-                if (data.error) {
-                    A.showToast(data.error, 'error');
-                    btn.textContent = L.usrBanUser;
-                    btn.disabled = false;
-                } else {
-                    overlay.remove();
-                    A.showToast(L.usrBanSuccess, 'success');
-                    loadAndEditUser(userId);
-                }
+                overlay.remove();
+                A.showToast(L.usrBanSuccess, 'success');
+                loadAndEditUser(userId);
             } catch (err) {
-                A.showToast('Error: ' + err.message, 'error');
+                A.showToast(err.message, 'error');
                 btn.textContent = L.usrBanUser;
                 btn.disabled = false;
             }
@@ -1274,27 +1242,12 @@
     async function unbanUserHandler(userId) {
         A.showConfirm(L.usrUnbanUser, L.usrUnbanConfirm, async function() {
             try {
-                var session = await A.client.auth.getSession();
-                var token = session.data.session.access_token;
-
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ action: 'unban_user', user_id: userId })
-                });
-
-                var data = await resp.json();
-                if (data.error) {
-                    A.showToast(data.error, 'error');
-                } else {
-                    A.showToast(L.usrUnbanSuccess, 'success');
-                    loadAndEditUser(userId);
-                }
+                /* Зов через дом (кусок 201). */
+                await A.adminAction('unban_user', { user_id: userId });
+                A.showToast(L.usrUnbanSuccess, 'success');
+                loadAndEditUser(userId);
             } catch (err) {
-                A.showToast('Error: ' + err.message, 'error');
+                A.showToast(err.message, 'error');
             }
         }, L.usrUnbanUser);
     }
@@ -1345,33 +1298,15 @@
             btn.disabled = true;
 
             try {
-                var session = await A.client.auth.getSession();
-                var token = session.data.session.access_token;
-
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        action: 'create_manager',
-                        email: email,
-                        first_name: firstName,
-                        last_name: lastName
-                    })
+                /* Зов через дом (кусок 201). */
+                var data = await A.adminAction('create_manager', {
+                    email: email,
+                    first_name: firstName,
+                    last_name: lastName
                 });
-
-                var data = await resp.json();
-                if (data.error) {
-                    A.showToast(data.error, 'error');
-                    btn.textContent = L.usrAddManager;
-                    btn.disabled = false;
-                } else {
-                    overlay.remove();
-                    A.showToast(data.action === 'invited' ? L.usrManagerInvited : L.usrManagerAdded, 'success');
-                    loadUsersList();
-                }
+                overlay.remove();
+                A.showToast(data.action === 'invited' ? L.usrManagerInvited : L.usrManagerAdded, 'success');
+                loadUsersList();
             } catch (err) {
                 A.showToast('Error: ' + err.message, 'error');
                 btn.textContent = L.usrAddManager;
