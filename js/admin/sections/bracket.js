@@ -3608,7 +3608,7 @@
                     '</div>';
                 A.showConfirm(L.regAddExternal, modalHtml, async function() {
                     var extName = document.getElementById('adExtName').value.trim();
-                    if (!extName) { A.showToast('Имя обязательно', 'error'); return; }
+                    if (!extName) { A.showToast(L.toastNameRequired, 'error'); return; }
                     var extCountry = document.getElementById('adExtCountry').value.trim() || null;
                     var extNtrp = parseFloat(document.getElementById('adExtNtrp').value) || null;
                     var extGender = document.getElementById('adExtGender').value;

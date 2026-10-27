@@ -203,7 +203,7 @@
             }
             сохрСуммы.disabled = false;
             if (беды.length) { A.showToast(беды.join(' · '), 'error'); return; }
-            A.showToast('Сохранено', 'success');
+            A.showToast(L.toastSaved, 'success');
             renderSetPrices();
         });
 
@@ -225,7 +225,7 @@
             }
             сохрТекст.disabled = false;
             if (беды.length) { A.showToast(беды.join(' · '), 'error'); return; }
-            A.showToast('Сохранено', 'success');
+            A.showToast(L.toastSaved, 'success');
             renderSetPrices();
         });
     }
@@ -290,7 +290,7 @@
                 A.showToast(res.error.message, 'error');
                 return;
             }
-            A.showToast('Сохранено', 'success');
+            A.showToast(L.toastSaved, 'success');
             renderSetAccess();
         }
 

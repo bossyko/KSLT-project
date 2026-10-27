@@ -2216,7 +2216,7 @@
             };
 
             if (!data.name) {
-                A.showToast('Название обязательно', 'error');
+                A.showToast(L.toastTitleRequired, 'error');
                 saveBtn.disabled = false;
                 saveBtn.textContent = L.save;
                 return;
@@ -2278,7 +2278,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast('Удалено', 'success');
+        A.showToast(L.toastDeleted, 'success');
         renderCourtsList();
     }
 

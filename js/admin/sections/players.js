@@ -914,7 +914,7 @@
                     var el = document.getElementById(fid);
                     if (el) { el.removeAttribute('readonly'); el.style.opacity = ''; el.style.cursor = ''; }
                 });
-                A.showToast('Поля разблокированы', 'info');
+                A.showToast(L.toastFieldsUnlocked, 'info');
             });
         }
         var recalcStatsBtn = document.getElementById('adPlrRecalcStats');
@@ -943,7 +943,7 @@
                 document.querySelectorAll('.ad-plr-doubles-field').forEach(function(el) {
                     el.removeAttribute('readonly'); el.style.opacity = ''; el.style.cursor = '';
                 });
-                A.showToast('Поля разблокированы', 'info');
+                A.showToast(L.toastFieldsUnlocked, 'info');
             });
         }
 
@@ -1297,7 +1297,7 @@
             };
 
             if (!fnRu) {
-                A.showToast('Имя обязательно', 'error');
+                A.showToast(L.toastNameRequired, 'error');
                 setSaving(false);
                 return;
             }
@@ -1392,7 +1392,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast('Удалено', 'success');
+        A.showToast(L.toastDeleted, 'success');
         renderPlayersSection();
     }
 

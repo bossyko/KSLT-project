@@ -1367,7 +1367,7 @@
             A.showToast(result.error.message, 'error');
             return;
         }
-        A.showToast('Удалено', 'success');
+        A.showToast(L.toastDeleted, 'success');
         renderCoachesList();
     }
 

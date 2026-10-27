@@ -187,7 +187,9 @@ const КУСКИ = [
     ['фокус после перерисовки', 'check-fokus-posle-pererisovki.js',
      'check-fokus-posle-pererisovki-otkat.js'],
     ['действие над пользователем', 'check-deystvie-nad-polzovatelem.js',
-     'check-deystvie-nad-polzovatelem-otkat.js']
+     'check-deystvie-nad-polzovatelem-otkat.js'],
+    ['тосты админки без копий', 'check-tosty-bez-kopiy.js',
+     'check-tosty-bez-kopiy-otkat.js']
 ];
 
 function прогнать(файл) {
