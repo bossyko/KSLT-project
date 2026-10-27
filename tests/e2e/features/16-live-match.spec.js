@@ -51,14 +51,37 @@ test.describe('Live Match — Load', () => {
 
 test.describe('Live Match — Page Structure', () => {
     for (const lp of LIVE_PAGES) {
+        /* ТЕЛЕФОН ЛЁЖА — ПОЛНОЭКРАННОЕ ТАБЛО, И ШАПКИ ТАМ НЕТ НАМЕРЕННО.
+           Решение Кости 25.09: «в горизонтальном сразу чтобы открывался
+           полноразмерный экран». Шапка и подвал сняты в
+           `css/live-match.css:1033-1034`, иначе за кадром во весь рост
+           стоит подвал.
+           Правила «шапка видна» и «логотип виден» этого не знали и падали
+           на phone-landscape — на РЕШЕНИИ, а не на беде (27.10, кусок 198).
+           Теперь правило держит ОТНОШЕНИЕ в обе стороны: лёжа шапки нет,
+           стоя — есть. Признак вида меряется браузером, а не именем
+           проекта. */
+        const низкийЛёжа = page =>
+            page.evaluate(() => matchMedia('(max-height: 500px) and (orientation: landscape)').matches);
+
         test(`${lp.name}: Has header element`, async ({ page }) => {
             await page.goto(lp.path, { waitUntil: 'domcontentloaded' });
-            await expect(page.locator('header')).toBeVisible();
+            if (await низкийЛёжа(page)) {
+                await expect(page.locator('header'),
+                    'лёжа табло полноэкранное — шапки быть не должно (решение 25.09)').toBeHidden();
+            } else {
+                await expect(page.locator('header')).toBeVisible();
+            }
         });
 
         test(`${lp.name}: Has KSLT logo`, async ({ page }) => {
             await page.goto(lp.path, { waitUntil: 'domcontentloaded' });
-            await expect(page.locator('.logo-img').first()).toBeVisible();
+            if (await низкийЛёжа(page)) {
+                await expect(page.locator('.logo-img').first(),
+                    'логотип живёт в шапке, а её лёжа нет').toBeHidden();
+            } else {
+                await expect(page.locator('.logo-img').first()).toBeVisible();
+            }
         });
 
         test(`${lp.name}: Has main container for live content`, async ({ page }) => {

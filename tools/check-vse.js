@@ -177,7 +177,8 @@ const КУСКИ = [
     ['договор имени', 'check-dogovor-imeni.js', 'check-dogovor-imeni-otkat.js'],
     ['селектор через дом', 'check-selektor-cherez-dom.js', 'check-selektor-cherez-dom-otkat.js'],
     ['видимость — один дом', 'check-vidimost-odin-dom.js', 'check-vidimost-odin-dom-otkat.js'],
-    ['схема не двоится', 'check-shema-ne-dvoitsya.js', 'check-shema-ne-dvoitsya-otkat.js']
+    ['схема не двоится', 'check-shema-ne-dvoitsya.js', 'check-shema-ne-dvoitsya-otkat.js'],
+    ['телефон лёжа', 'check-vid-lezha.js', 'check-vid-lezha-otkat.js']
 ];
 
 function прогнать(файл) {
