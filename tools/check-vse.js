@@ -197,7 +197,9 @@ const КУСКИ = [
     ['имена в коде', 'check-imena-v-kode.js',
      'check-imena-v-kode-otkat.js'],
     ['светлая тема приложения', 'check-svetlaya-tema-prilozheniya.js',
-     'check-svetlaya-tema-prilozheniya-otkat.js']
+     'check-svetlaya-tema-prilozheniya-otkat.js'],
+    ['рейтинг приложения', 'check-reyting-prilozheniya.js',
+     'check-reyting-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {

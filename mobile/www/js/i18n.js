@@ -240,6 +240,11 @@
     'rating.ptsShort':   { ru: 'очков',             en: 'pts',             kg: 'упай' },
     'rating.ntrp':       { ru: 'NTRP',               en: 'NTRP',            kg: 'NTRP' },
     'rating.wl':         { ru: 'В/П',                en: 'W/L',             kg: 'Ж/У' },
+    /* Подписи для диктора: столбец «#» и «В/П» прочитать нельзя, а таблица
+       и пьедестал на div-ах без имени читаются как сплошной текст. */
+    'rating.tableLabel':  { ru: 'Таблица рейтинга', en: 'Rating table',   kg: 'Рейтинг таблицасы' },
+    'rating.podiumLabel': { ru: 'Первая тройка',    en: 'Top three',      kg: 'Биринчи үчтүк' },
+    'rating.wlLabel':     { ru: 'Побед и поражений', en: 'Wins and losses', kg: 'Жеңиш жана утулуу' },
     'rating.empty':      { ru: 'Нет игроков',        en: 'No players',      kg: 'Оюнчу жок' },
     'rating.emptyText':  { ru: 'В данной категории пока нет игроков', en: 'No players in this category yet', kg: 'Бул категорияда азырынча оюнчу жок' },
     'rating.guestTitle': { ru: 'Полный рейтинг',     en: 'Full Rating',     kg: 'Толук рейтинг' },

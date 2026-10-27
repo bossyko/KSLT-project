@@ -576,21 +576,23 @@ a, button, [role="button"] {
 }
 
 /* ===== TOP RATING MINI ===== */
+/* МИНИ-РЕЙТИНГ НА ГЛАВНОЙ — тот же раздел, кусок 208: кегли 13 и
+   отступы 3 · 10 были мимо шкалы. */
 .rating-mini {
-  margin: 8px 16px;
+  margin: var(--space-2) var(--space-4);
   padding: 0;
 }
 .rating-mini-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border);
 }
 .rating-mini-cat {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
-  padding: 3px 10px;
+  padding: 2px var(--space-3);
   border-radius: var(--radius-full);
   background: var(--glass);
   border: 1px solid var(--border);
@@ -604,8 +606,8 @@ a, button, [role="button"] {
 .rating-mini-row {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
-  gap: 12px;
+  padding: var(--space-3) var(--space-4);
+  gap: var(--space-3);
   border-bottom: 1px solid var(--border);
   transition: background 0.15s;
 }
@@ -627,18 +629,22 @@ a, button, [role="button"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text-sec);
   flex-shrink: 0;
 }
 .rating-mini-name {
   flex: 1;
-  font-size: 13px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
   font-weight: 500;
 }
 .rating-mini-pts {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--accent-text);
 }
@@ -1009,40 +1015,63 @@ a, button, [role="button"] {
 }
 
 /* ===== SCREEN: RATING ===== */
+/* ТАБЛИЦА РЕЙТИНГА — КУСОК 208 (27.10).
+
+   ШИРИНА СТОЛБЦА ОПРЕДЕЛЯЕТСЯ ОДИН РАЗ. Было два определения на каждый
+   столбец — в шапке и в строке, — и столбец очков уже разошёлся: шапка
+   48, строка 50. Замерено в браузере: заголовок и число под ним стояли
+   на разных вертикалях.
+
+   ОДИН КЕГЕЛЬ НА УРОВЕНЬ, НА ВСЕХ ВИДАХ. Было четыре границы ширины
+   (340 · 414 · 430 · 500), и один уровень определялся в них три-четыре
+   раза разными числами: имя 11 / 13 / 14, очки 11 / 13 / 14, аватар
+   28 / 32 / 36. На шкале проекта границ между 340 и 500 нет вовсе.
+   ТЯНУЩИЙСЯ КЕГЕЛЬ ЭТУ БЕДУ НЕ ЛЕЧИТ, А ПРЯЧЕТ: `clamp` на 375 давал
+   12.2 и 15.6 — ни одно не ступень. Поэтому типографика от ширины НЕ
+   зависит; по ширине меняется только то, сколько текста видно: имя
+   обрезается многоточием, а карточки пьедестала делят полосу. */
 .rating-table {
-  margin: 0 16px;
+  /* Столбцы: одно определение на понятие, каждый на ступени.
+     Место 24 (хватает трёх знаков при кегле 14), очки 44 — ступень
+     кнопок; было 32 и 48, и эти 12 лишних пикселей отбирались у имени:
+     на узком виде имени доставалось 58px вместо 70. */
+  --rt-mesto: 24px;
+  --rt-ochki: 44px;
+  --rt-ntrp: 44px;
+  --rt-wl: 44px;
+  margin: 0 var(--space-4);
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
-.rating-table-head {
+.rating-table-head,
+.rating-row {
   display: flex;
-  padding: 10px 14px;
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border);
-  font-size: 11px;
+}
+.rating-table-head {
+  font-size: var(--fs-2xs);
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
-.rt-col-rank { width: 32px; }
+.rt-col-rank { width: var(--rt-mesto); }
 .rt-col-name { flex: 1; }
-.rt-col-pts { width: 48px; text-align: right; }
-.rt-col-ntrp { width: 44px; text-align: right; }
-.rt-col-wl { width: 44px; text-align: right; }
+.rt-col-pts { width: var(--rt-ochki); text-align: right; }
+.rt-col-ntrp { width: var(--rt-ntrp); text-align: right; }
+.rt-col-wl { width: var(--rt-wl); text-align: right; }
 
 .rating-row {
-  display: flex;
   align-items: center;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
   transition: background 0.15s;
 }
 .rating-row:last-child { border-bottom: none; }
 .rating-row:active { background: var(--glass); }
 .rr-rank {
-  width: 32px;
+  width: var(--rt-mesto);
   font-size: 14px;
   font-weight: 700;
   color: var(--text-muted);
@@ -1052,40 +1081,50 @@ a, button, [role="button"] {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
+  min-width: 0;
 }
 .rr-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--bg-elevated);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   color: var(--text-sec);
   flex-shrink: 0;
 }
-.rr-name { font-size: 13px; font-weight: 500; }
+.rr-name {
+  /* Один кегль на все виды. Узкому помогает обрезка, а не мельчание:
+     было 11 / 13 / 14 по трём границам, из них 13 мимо шкалы. */
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .rr-pts {
-  width: 50px;
+  width: var(--rt-ochki);
   text-align: right;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--accent-text);
 }
 .rr-ntrp {
-  width: 44px;
+  width: var(--rt-ntrp);
   text-align: right;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text-primary);
 }
 .rr-wl {
-  width: 44px;
+  width: var(--rt-wl);
   text-align: right;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-sec);
 }
 
@@ -1103,8 +1142,8 @@ a, button, [role="button"] {
 .rr-guest-overlay {
   position: relative;
   margin-top: -120px;
-  padding-top: 30px;
-  padding-bottom: 8px;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-2);
   background: linear-gradient(to bottom,
     transparent 0%,
     var(--guest-gradient-mid) 25%,
@@ -1116,8 +1155,10 @@ a, button, [role="button"] {
 .rr-guest-cta {
   position: relative;
   text-align: center;
-  padding: 32px 24px 28px;
-  margin: 0 16px;
+  /* Было 32/24/28 здесь, 24/16/20 на границе 340 и 36/28/32 на 430 —
+     три набора на одно окно. Теперь один, со шкалы. */
+  padding: var(--space-8, 32px) var(--space-6) var(--space-6);
+  margin: 0 var(--space-4);
   background: var(--guest-cta-bg);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -1149,21 +1190,28 @@ a, button, [role="button"] {
   border-radius: 50%;
   color: var(--accent-text);
 }
-.rr-guest-icon svg { width: 22px; height: 22px; }
+.rr-guest-icon svg { width: 21px; height: 21px; }
 .rr-guest-title {
-  font-size: 16px; font-weight: 700;
+  /* 16 → 18 по ширине: на границе 430 заголовок был 18, теперь течёт. */
+  font-size: 18px;
+  font-weight: 700;
   line-height: 1.3;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 .rr-guest-text {
-  font-size: 13px;
+  /* Было 13 — мимо шкалы; на 430 поднималось до 14. */
+  font-size: 14px;
   color: var(--text-muted);
   line-height: 1.4;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5, 20px);
 }
 .rr-guest-btn {
   display: inline-flex;
-  padding: 12px 40px;
+  align-items: center;
+  justify-content: center;
+  /* ЦЕЛЬ НАЖАТИЯ 44. Было 41 по высоте. */
+  min-height: 44px;
+  padding: var(--space-3) var(--space-10, 40px);
   background: var(--accent);
   color: #000;
   font-size: 14px; font-weight: 700;
@@ -1173,6 +1221,7 @@ a, button, [role="button"] {
   transition: all 0.15s;
 }
 .rr-guest-btn:active { transform: scale(0.95); background: var(--accent-hover); }
+.rr-guest-btn:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
 
 /* ===== SCREEN: PROFILE ===== */
 .profile-hero {
@@ -1792,8 +1841,9 @@ a, button, [role="button"] {
   font-weight: 600;
 }
 .rating-type-btn {
-  padding: 7px 14px;
-  font-size: 13px;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
   transition: all 0.15s;
@@ -1809,37 +1859,44 @@ a, button, [role="button"] {
 /* --- Rating filter dropdowns row --- */
 .rf-row {
   display: flex;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   align-items: flex-start;
 }
 .rf-col { flex: 1; min-width: 0; }
 .rf-label {
-  font-size: 10px;
+  /* Было 9 на узком и 10 на остальных — оба мимо шкалы. Низ шкалы 11. */
+  font-size: var(--fs-2xs);
   font-weight: 500;
   color: var(--text-sec);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
   padding-left: 2px;
 }
 .rf-select {
   width: 100%;
+  /* ЦЕЛЬ НАЖАТИЯ 44. Было 33 по высоте: выпадашку приходилось целить. */
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
-  padding: 8px 10px;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--glass);
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.rf-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .rf-select svg {
   width: 14px;
@@ -1855,12 +1912,14 @@ a, button, [role="button"] {
   display: flex;
   justify-content: center;
   gap: 0;
-  padding: 6px 16px;
+  padding: var(--space-2) var(--space-4);
 }
 .rating-toggle-btn {
   flex: 1;
   max-width: 160px;
-  padding: 10px 0;
+  /* ЦЕЛЬ НАЖАТИЯ 44. Было 41 — с рамкой 2 и отступом 10 не дотягивал. */
+  min-height: 44px;
+  padding: var(--space-2) 0;
   font-size: 14px;
   font-weight: 600;
   border: 2px solid var(--border);
@@ -1870,6 +1929,10 @@ a, button, [role="button"] {
   transition: all 0.2s;
   font-family: inherit;
 }
+.rating-toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .rating-toggle-btn:first-child { border-radius: 12px 0 0 12px; }
 .rating-toggle-btn:last-child { border-radius: 0 12px 12px 0; border-left: none; }
 .rating-toggle-btn.active {
@@ -1878,39 +1941,51 @@ a, button, [role="button"] {
   color: #000;
 }
 
-/* --- Rating podium (top 3) --- */
+/* --- Rating podium (top 3) ---
+   КАРТОЧКИ ДЕЛЯТ ШИРИНУ, А НЕ МЕНЯЮТ ЕЁ НА ГРАНИЦАХ. Было четыре
+   фиксированные ширины (74 · 90 · 100 · 110) под четыре границы вида.
+   Теперь три карточки делят полосу поровну с пределом сверху, и ни одной
+   границы не нужно. Фото первого — на ступень отступов больше остальных
+   (44+12 и 52+12): это ОТНОШЕНИЕ, а не два отдельных числа. */
 .rating-podium {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px 8px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-2);
 }
 .rp-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 0 0 auto;
-  width: 90px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 112px;
 }
 .rp-first { order: 2; }
 .rp-second { order: 1; }
 .rp-third { order: 3; }
-.rp-medal { font-size: 16px; margin-bottom: 4px; }
-.rp-first .rp-medal { font-size: 20px; }
+.rp-medal {
+  font-size: 16px;
+  margin-bottom: var(--space-1);
+}
+/* Медаль первого на ступень крупнее — ОТНОШЕНИЕ, а не два числа. */
+.rp-first .rp-medal { font-size: 21px; }
 .rp-photo-wrap {
   width: 52px;
   height: 52px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--border);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
+  flex-shrink: 0;
 }
 .rp-first .rp-photo-wrap {
+  /* Фото первого больше остальных на одну ступень отступов (52 + 12). */
   width: 64px;
   height: 64px;
   border-color: var(--accent);
-  box-shadow: 0 0 12px rgba(204,255,0,0.3);
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 .rp-photo {
   width: 100%;
@@ -1918,18 +1993,18 @@ a, button, [role="button"] {
   object-fit: cover;
 }
 .rp-name {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
   line-height: 1.2;
-  max-width: 80px;
+  max-width: 100%;
   white-space: pre-line;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .rp-pts {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--accent-text);
   margin-top: 2px;
@@ -4244,32 +4319,10 @@ select.prof-field-input { color: var(--text); }
 
 /* ===== RESPONSIVE — SMALL PHONES (SE, 5s, narrow Android) ===== */
 @media (max-width: 340px) {
-  /* Podium: shrink cards */
-  .rp-card { width: 74px; }
-  .rp-photo-wrap { width: 44px; height: 44px; }
-  .rp-first .rp-photo-wrap { width: 54px; height: 54px; }
-  .rp-name { font-size: 10px; max-width: 68px; }
-  .rp-pts { font-size: 10px; }
-  .rp-medal { font-size: 14px; }
-  .rp-first .rp-medal { font-size: 17px; }
-  .rating-podium { gap: 4px; padding: 8px 12px 6px; }
-
-  /* Dropdowns: smaller text */
-  .rf-select { font-size: 11px; padding: 6px 8px; gap: 2px; }
-  .rf-label { font-size: 9px; }
-  .rf-row { gap: 4px; padding: 6px 12px; }
-
-  /* Rating table: tighter columns */
-  .rating-table { margin: 0 10px; }
-  .rating-table-head, .rating-row { padding: 8px 10px; }
-  .rr-rank { width: 24px; font-size: 12px; }
-  .rr-name { font-size: 11px; }
-  .rr-pts { width: 38px; font-size: 11px; }
-  .rr-ntrp { width: 36px; font-size: 10px; }
-  .rr-wl { width: 36px; font-size: 11px; }
-  .rr-avatar, .rr-avatar-img { width: 28px; height: 28px; }
-  .rt-col-rank { font-size: 10px; }
-  .rt-col-name, .rt-col-pts, .rt-col-ntrp, .rt-col-wl { font-size: 10px; }
+  /* РЕЙТИНГ ОТСЮДА СНЯТ — КУСОК 208. Двадцать три правила этой границы
+     задавали рейтингу третий набор чисел (имя 11, очки 38, аватар 28,
+     кегли 9 и 10). Теперь те же уровни тянутся по ширине вида от своих
+     значений на 340 — границе нечего переопределять. */
 
   /* General: reduce padding and fonts */
   .section-title { padding: 12px 12px 6px; }
@@ -4286,10 +4339,6 @@ select.prof-field-input { color: var(--text); }
   .tab-item svg { width: 22px; height: 22px; }
   .tab-item span { font-size: 9px; }
 
-  /* Guest CTA */
-  .rr-guest-cta { padding: 24px 16px 20px; }
-  .rr-guest-btn { padding: 10px 32px; font-size: 13px; }
-
   /* Bottom sheet */
   .bs-option { padding: 8px 14px; font-size: 13px; min-width: 70px; }
   .bs-title { font-size: 15px; }
@@ -4297,24 +4346,8 @@ select.prof-field-input { color: var(--text); }
 
 /* ===== RESPONSIVE — LARGE PHONES (Pro Max, Samsung Ultra) ===== */
 @media (min-width: 414px) {
-  /* Podium: larger cards */
-  .rp-card { width: 100px; }
-  .rp-photo-wrap { width: 56px; height: 56px; }
-  .rp-first .rp-photo-wrap { width: 70px; height: 70px; }
-  .rp-name { font-size: 12px; max-width: 92px; }
-  .rp-pts { font-size: 12px; }
-  .rp-medal { font-size: 18px; }
-  .rp-first .rp-medal { font-size: 22px; }
-  .rating-podium { gap: 12px; }
-
-  /* Dropdowns: more room */
-  .rf-select { font-size: 13px; }
-
-  /* Rating table: spacious */
-  .rr-name { font-size: 14px; }
-  .rr-pts { font-size: 14px; }
-  .rr-wl { font-size: 13px; }
-  .rr-avatar, .rr-avatar-img { width: 36px; height: 36px; }
+  /* РЕЙТИНГ ОТСЮДА СНЯТ — КУСОК 208. Четырнадцать правил давали рейтингу
+     четвёртый набор чисел; из них 13 и 22 вообще мимо шкалы кеглей. */
 
   /* General */
   .section-title h2 { font-size: 20px; }
@@ -4323,19 +4356,9 @@ select.prof-field-input { color: var(--text); }
 
 /* ===== RESPONSIVE — EXTRA LARGE (430px+ tablets in phone mode) ===== */
 @media (min-width: 430px) {
-  .rp-card { width: 110px; }
-  .rp-first .rp-photo-wrap { width: 74px; height: 74px; }
-  .rp-photo-wrap { width: 60px; height: 60px; }
-  .rating-podium { gap: 14px; padding: 16px 20px 10px; }
-
-  .rf-row { padding: 10px 20px; }
-  .rating-table { margin: 0 20px; }
-  .rating-table-head, .rating-row { padding: 12px 16px; }
+  /* РЕЙТИНГ ОТСЮДА СНЯТ — КУСОК 208. Отступы 10, 14 и 20 были мимо
+     шкалы; теперь таблица и пьедестал держат 12 · 16 на всех видах. */
   .tournament-list { padding: 0 20px; }
-
-  .rr-guest-cta { padding: 36px 28px 32px; }
-  .rr-guest-title { font-size: 18px; }
-  .rr-guest-text { font-size: 14px; }
 }
 
 /* ===== SAFE AREA — notch/dynamic island phones ===== */
@@ -5015,10 +5038,11 @@ select.prof-field-input { color: var(--text); }
    приглушённо, места в рейтинге не занимает, играть с ним нельзя */
 .rating-row.rr-guest { opacity: .45; }
 .rr-guest-mark {
-  display: inline-block; margin-left: 6px;
-  font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px;
+  display: inline-block; margin-left: var(--space-2);
+  /* Было 9.5px — ниже низа шкалы (11) и дробью. */
+  font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .3px;
   color: var(--text-muted); border: 1px solid var(--border);
-  border-radius: 999px; padding: 1px 6px; vertical-align: middle;
+  border-radius: var(--radius-full); padding: 1px var(--space-2); vertical-align: middle;
 }
 
 /* Кнопка приглашения на карточке поиска игрока. Карточка выложена в строку,
@@ -5035,19 +5059,22 @@ select.prof-field-input { color: var(--text); }
 /* Кнопка «Показать ещё» под таблицей рейтинга. Список отдаётся частями:
    в Futures под две сотни человек, и рисовать их разом телефону тяжело */
 .rr-more-btn {
-  display: block; width: calc(100% - 32px); margin: 12px 16px 0;
-  padding: 12px; border-radius: 999px;
+  display: block; width: calc(100% - 32px);
+  margin: var(--space-3) var(--space-4) 0;
+  min-height: 44px; padding: var(--space-3); border-radius: var(--radius-full);
   background: transparent; border: 1px solid var(--border);
-  color: var(--text-sec); font-size: 13.5px; font-family: inherit; cursor: pointer;
+  /* Было 13.5px — не ступень, а дробь. */
+  color: var(--text-sec); font-size: 14px; font-family: inherit; cursor: pointer;
 }
+.rr-more-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .rr-more-btn:active { opacity: .7; }
 
 /* Раскрытый складной телефон: места по ширине больше, поэтому карточки
    турниров и новостей идут крупнее, а поля по краям заметнее */
 @media (min-width: 500px) {
   .tournament-scroll { padding-left: 20px; padding-right: 20px; }
-  .rating-table, .rr-more-btn { margin-left: 20px; margin-right: 20px; }
-  .rr-more-btn { width: calc(100% - 40px); }
+  /* РЕЙТИНГ ОТСЮДА СНЯТ — КУСОК 208: пятая граница на тот же раздел,
+     отступ 20 мимо шкалы. Таблица держит 16 на всех видах. */
 }
 
 /* ============================================

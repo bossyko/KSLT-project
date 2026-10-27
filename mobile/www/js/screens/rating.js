@@ -265,16 +265,21 @@
     var sizeClass = ['rp-first', 'rp-second', 'rp-third'];
     var pts = 'points';
 
-    var html = '<div class="rating-podium">';
+    var html = '<div class="rating-podium" role="list" aria-label="' +
+      esc(I18N.t('rating.podiumLabel')) + '">';
     for (var oi = 0; oi < order.length; oi++) {
       var i = order[oi];
       if (!top3[i]) continue;
       var p = top3[i];
       var photo = p.photo || 'https://placehold.co/60x60/1a1a2e/888?text=' + initials(p.name);
-      html += '<div class="rp-card ' + sizeClass[i] + '">' +
-        '<div class="rp-medal">' + medals[i] + '</div>' +
+      /* Медаль — картинка смысла, а не текст: диктору читается место
+         словами, сам значок от него скрыт. */
+      html += '<div class="rp-card ' + sizeClass[i] + '" role="listitem"' +
+          ' aria-label="' + esc((i + 1) + '. ' + p.name + ' — ' +
+            (p[pts] || 0) + ' ' + I18N.t('rating.ptsShort')) + '">' +
+        '<div class="rp-medal" aria-hidden="true">' + medals[i] + '</div>' +
         '<div class="rp-photo-wrap">' +
-          '<img class="rp-photo" src="' + esc(photo) + '" alt="' + esc(p.name) + '">' +
+          '<img class="rp-photo" src="' + esc(photo) + '" alt="" aria-hidden="true">' +
         '</div>' +
         '<div class="rp-name">' + esc(shortName(p.name)) + '</div>' +
         '<div class="rp-pts">' + (p[pts] || 0) + ' ' + I18N.t('rating.ptsShort') + '</div>' +
@@ -315,13 +320,16 @@
       : Math.min(shown, displayPlayers.length);
     var pts = 'points';
 
-    var html = '<div class="rating-table">';
-    html += '<div class="rating-table-head">' +
-      '<span class="rt-col-rank">' + I18N.t('rating.rank') + '</span>' +
-      '<span class="rt-col-name">' + I18N.t('rating.player') + '</span>' +
-      '<span class="rt-col-pts">' + I18N.t('rating.pts') + '</span>' +
-      '<span class="rt-col-ntrp">' + I18N.t('rating.ntrp') + '</span>' +
-      '<span class="rt-col-wl">' + I18N.t('rating.wl') + '</span>' +
+    /* Таблица собрана на div-ах, поэтому роли ставятся явно: без них
+       диктор читал пять столбцов одной строкой без имён. */
+    var html = '<div class="rating-table" role="table" aria-label="' +
+      esc(I18N.t('rating.tableLabel')) + '">';
+    html += '<div class="rating-table-head" role="row">' +
+      '<span class="rt-col-rank" role="columnheader">' + I18N.t('rating.rank') + '</span>' +
+      '<span class="rt-col-name" role="columnheader">' + I18N.t('rating.player') + '</span>' +
+      '<span class="rt-col-pts" role="columnheader">' + I18N.t('rating.pts') + '</span>' +
+      '<span class="rt-col-ntrp" role="columnheader">' + I18N.t('rating.ntrp') + '</span>' +
+      '<span class="rt-col-wl" role="columnheader">' + I18N.t('rating.wl') + '</span>' +
     '</div>';
 
     // Место в рейтинге получают только члены клуба: иначе первым в таблице
@@ -349,18 +357,20 @@
 
       var rowClickAttr = (!isGuest && p.id) ? ' data-player-id="' + p.id + '" style="cursor:pointer"' : '';
 
-      html += '<div class="rating-row' + blurClass + '"' + rowClickAttr + '>' +
-        '<span class="rr-rank' + (rank && rank <= 3 ? ' top' : '') + '">' + (rank || '—') + '</span>' +
-        '<div class="rr-player">' +
-          (p.photo ? '<img class="rr-avatar-img" src="' + esc(p.photo) + '" alt="">' : '<div class="rr-avatar">' + initials(p.name) + '</div>') +
+      html += '<div class="rating-row' + blurClass + '" role="row"' + rowClickAttr + '>' +
+        '<span class="rr-rank' + (rank && rank <= 3 ? ' top' : '') + '" role="cell">' + (rank || '—') + '</span>' +
+        '<div class="rr-player" role="cell">' +
+          (p.photo ? '<img class="rr-avatar-img" src="' + esc(p.photo) + '" alt="" aria-hidden="true">' : '<div class="rr-avatar" aria-hidden="true">' + initials(p.name) + '</div>') +
           '<span class="rr-name">' + esc(p.name) +
             (isBg ? '<span class="rr-guest-mark">' + I18N.t('rating.notMember') + '</span>' : '') +
           '</span>' +
         '</div>' +
-        '<span class="rr-pts">' + (p[pts] || 0) + '</span>' +
-        '<span class="rr-ntrp">' + ((RULES && RULES.ntrpКоротко
+        '<span class="rr-pts" role="cell">' + (p[pts] || 0) + '</span>' +
+        '<span class="rr-ntrp" role="cell">' + ((RULES && RULES.ntrpКоротко
             && RULES.ntrpКоротко(p.ntrp_singles, p.ntrp_doubles)) || '—') + '</span>' +
-        '<span class="rr-wl">' + (p.wins || 0) + '/' + (p.losses || 0) + '</span>' +
+        '<span class="rr-wl" role="cell" aria-label="' +
+          esc(I18N.t('rating.wlLabel') + ': ' + (p.wins || 0) + ' / ' + (p.losses || 0)) +
+          '">' + (p.wins || 0) + '/' + (p.losses || 0) + '</span>' +
       '</div>';
     }
     html += '</div>';
