@@ -15,7 +15,17 @@
     el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     supabaseClient.from('challenges')
-      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name, photo, country), opponent_player:players!challenges_opponent_player_id_fkey(name, photo, country), challenger_partner:players!challenges_challenger_partner_id_fkey(name, photo, country), opponent_partner:players!challenges_opponent_partner_id_fkey(name, photo, country)')
+      // 27.10: ЗДЕСЬ ТЯНУЛИСЬ ДВЕ СВЯЗИ, КОТОРЫХ В БАЗЕ НЕТ —
+      // `challenges_challenger_partner_id_fkey` и
+      // `challenges_opponent_partner_id_fkey`. Весь запрос падал 400
+      // («Could not find a relationship between challenges and players»),
+      // `catch` ниже молча показывал пустой список, и экран баттлов в
+      // приложении не работал НИКОГДА. Проверено чтением базы по одной
+      // связи: три живые, эти две не существуют. Имя, фото и страна
+      // партнёра лежат в самой таблице плоскими полями
+      // (`challenger_partner_name` и прочие) — отрисовка ниже их уже и
+      // берёт, так что логика не меняется.
+      .select('*, challenger:profiles!challenges_challenger_id_fkey(full_name), challenger_player:players!challenges_challenger_player_id_fkey(name, photo, country), opponent_player:players!challenges_opponent_player_id_fkey(name, photo, country)')
       .eq('battle_published', true)
       .order('created_at', { ascending: false })
       .then(function(r) {

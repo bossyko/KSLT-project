@@ -195,7 +195,9 @@ const КУСКИ = [
     ['спонсор на экране загрузки', 'check-sponsor-na-zagruzke.js',
      'check-sponsor-na-zagruzke-otkat.js'],
     ['имена в коде', 'check-imena-v-kode.js',
-     'check-imena-v-kode-otkat.js']
+     'check-imena-v-kode-otkat.js'],
+    ['светлая тема приложения', 'check-svetlaya-tema-prilozheniya.js',
+     'check-svetlaya-tema-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {
