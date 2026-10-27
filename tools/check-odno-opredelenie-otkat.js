@@ -26,6 +26,8 @@ const ФАЙЛЫ = [
        `courts.js` выпал из списка потребителей куском 145. */
     'js/invite-player.js',
     'js/tournament-generator.js', 'js/admin/sections/bracket.js',
+    /* ДОБАВЛЕН 27.10: на нём стоят два правила про подпись «без рейтинга». */
+    'js/tournament-featured.js',
     'pages/player.html', 'pages/courts.html'
 ];
 const исходник = {};
@@ -36,9 +38,21 @@ const T = 'css/tokens.css', S = 'css/style.css', A = 'css/admin.css',
       PC = 'css/player.css', M = 'js/kslt-mesta.js', RP = 'js/rating-points.js',
       PJ = 'js/player.js', TJ = 'js/kslt-toast.js', CJ = 'js/courts.js',
       PH = 'pages/player.html', CH = 'pages/courts.html',
-      TG = 'js/tournament-generator.js', BR = 'js/admin/sections/bracket.js';
+      TG = 'js/tournament-generator.js', BR = 'js/admin/sections/bracket.js',
+      TF = 'js/tournament-featured.js';
 
 const ОТКАТЫ = [
+
+/* ── подпись «без рейтинга» (кусок 193) ── */
+['вернуть второе английское слово на то же понятие', TF,
+ "register: 'Register', noRating: 'Unranked'",
+ "register: 'Register', noRating: 'No rating'",
+ 'подпись «без рейтинга» — одна на язык'],
+
+['вернуть второй ключ на то же понятие', TF,
+ "            reg: 'Reg' }, { details: 'Толугураак'",
+ "            reg: 'Reg', noRatingРяд: 'Unranked' }, { details: 'Толугураак'",
+ 'второго ключа на то же понятие нет'],
 
 /* ── толщина рамки ── */
 ['убрать шкалу толщины', T,

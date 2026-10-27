@@ -27,13 +27,21 @@
 
     /* Язык — у дома (js/kslt-yazyk.js). */
 
-    var L = KSLT_YAZYK.выбрать({ details: 'Details', register: 'Register', noRating: 'No rating',
+    /* ОДНО ПОНЯТИЕ — ОДИН КЛЮЧ. Ключей было два, `noRating` и
+       `noRatingРяд`, и по-русски с по-кыргызски они говорили ОДНО И ТО
+       ЖЕ, а по-английски разное: карточка «No rating», полоса
+       «Unranked». Обзор турниров при этом говорил «Unranked» везде —
+       то есть из трёх мест два были согласны, а третье нет.
+       Сведено на «Unranked»: так говорит теннис и так говорило
+       большинство мест. Второй ключ снят — он больше ничего не
+       различает. */
+    var L = KSLT_YAZYK.выбрать({ details: 'Details', register: 'Register', noRating: 'Unranked',
             live: 'IN PROGRESS', prefix: 'Starts in', days: 'd', hours: 'h', min: 'm', sec: 's',
-            reg: 'Reg', noRatingРяд: 'Unranked' }, { details: 'Толугураак', register: 'Катталуу', noRating: 'Рейтингсиз',
+            reg: 'Reg' }, { details: 'Толугураак', register: 'Катталуу', noRating: 'Рейтингсиз',
                 live: 'АЗЫР ЖҮРҮҮДӨ', prefix: 'Башталууга', days: 'к', hours: 'с', min: 'м', sec: 'сек',
-                reg: 'Кат', noRatingРяд: 'Рейтингсиз' }, { details: 'Подробнее', register: 'Регистрация', noRating: 'Без рейтинга',
+                reg: 'Кат' }, { details: 'Подробнее', register: 'Регистрация', noRating: 'Без рейтинга',
                 live: 'ИДЁТ СЕЙЧАС', prefix: 'Старт через', days: 'д', hours: 'ч', min: 'м', sec: 'с',
-                reg: 'Рег', noRatingРяд: 'Без рейтинга' });
+                reg: 'Рег' });
 
     /* ДВА АНГЛИЙСКИХ СЛОВА НА ОДНО ПОНЯТИЕ, И ЭТО ЗАМЕРЕНО, А НЕ УГАДАНО:
        крупная карточка говорит `No rating`, а ПОЛОСА на обеих страницах —
@@ -342,7 +350,7 @@
                     '<span class="to-month">' + t.date.month + '</span>' +
                 '</div>' +
                 (t.genderLabel ? '<span class="to-compact-gender-badge">' + t.genderLabel + '</span>' : '') +
-                (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRatingРяд + '</span>' : '') +
+                (t.noRating ? '<span class="to-compact-norating-badge">' + L.noRating + '</span>' : '') +
             '</div>' +
             '<div class="to-compact-info">' +
                 '<h4>' + window.KSLT_SLOY.экр(t.name) + '</h4>' +
