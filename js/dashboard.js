@@ -1357,12 +1357,10 @@
         var container = document.getElementById('dbSidebar');
         if (!container) return;
 
-        var nameParts = (profile.full_name || '').split(' ');
-        var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
-
+        /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
         var avatarHtml = profile.avatar_url
             ? '<img src="' + KSLT_экранировать(profile.avatar_url) + '" class="db-sidebar-avatar" alt="">'
-            : '<div class="db-sidebar-avatar-placeholder">' + initials + '</div>';
+            : window.KSLT_LICO.кружок(profile.full_name, 'db-sidebar-avatar-placeholder');
 
         // Role badge for admin/manager only
         var roleHtml = '';
@@ -1414,11 +1412,10 @@
             return;
         }
 
-        var буквы = (profile.full_name || '?').split(' ')
-            .map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+        /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
         var фото = profile.avatar_url
             ? '<img src="' + KSLT_экранировать(profile.avatar_url) + '" alt="" class="db-profile-card-photo">'
-            : '<div class="db-profile-card-photo db-profile-card-initials">' + буквы + '</div>';
+            : window.KSLT_LICO.кружок(profile.full_name, 'db-profile-card-photo db-profile-card-initials');
 
         var строки = '';
         if (client) {
@@ -1948,11 +1945,11 @@
         var nameParts = (profile.full_name || '').split(' ');
         var firstName = nameParts[0] || '';
         var lastName = nameParts.slice(1).join(' ') || '';
-        var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
-
+        /* Кружок рисует дом (кусок 194). Имя узла `avatarPreview` —
+           довод дома: обработчик загрузки ищет кружок по нему. */
         var avatarHtml = profile.avatar_url
             ? '<img src="' + KSLT_экранировать(profile.avatar_url) + '" class="db-avatar-preview" id="avatarPreview" alt="">'
-            : '<div class="db-avatar-preview-placeholder" id="avatarPreview">' + initials + '</div>';
+            : window.KSLT_LICO.кружок(profile.full_name, 'db-avatar-preview-placeholder', 'div', 'avatarPreview');
 
         // Пол — двумя кнопками вместо списка: выбор из двух значений не
         // стоит трёх касаний (открыть список, выбрать, закрыть). Выбранная
@@ -3353,7 +3350,7 @@
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. ЭТО
        поведение (имя плюс фамилия, верхним регистром) и стало общим —
        вместе с рассуждением выше, ради которого оно было выбрано. */
-    function dbInitials(name) { return window.KSLT_LICO.инициалы(name); }
+    /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
 
     /** Кружок игрока: фото, а без него — инициалы. */
     /**
@@ -3373,7 +3370,7 @@
         var cls = 'db-match-avatar' + (extraClass ? ' ' + extraClass : '');
         return photo
             ? '<img src="' + KSLT_экранировать(photo) + '" alt="" class="' + cls + '">'
-            : '<div class="' + cls + ' db-match-avatar-ph">' + KSLT_экранировать(dbInitials(name)) + '</div>';
+            : window.KSLT_LICO.кружок(name, cls + ' db-match-avatar-ph');
     }
 
     /** Имена и фото соперников — одним запросом на всю пачку матчей. */
@@ -3809,7 +3806,9 @@
         // Header
         html += '<div class="h2h-header">';
         html += '<div class="h2h-player">';
-        html += myPhoto ? '<img src="' + KSLT_экранировать(myPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + KSLT_экранировать(myName.charAt(0)) + '</div>';
+        /* Кружок рисует дом (кусок 194): здесь была ОДНА буква и БЕЗ
+           верхнего регистра — девятнадцатое место на продукт. */
+        html += myPhoto ? '<img src="' + KSLT_экранировать(myPhoto) + '" class="h2h-photo" alt="">' : window.KSLT_LICO.кружок(myName, 'h2h-photo h2h-photo-ph');
         html += '<div class="h2h-name">' + KSLT_экранировать(myName) + '</div>';
         html += '</div>';
         html += '<div class="h2h-center">';
@@ -3817,7 +3816,7 @@
         html += '<div class="h2h-label">' + matches.length + LH.matchesLabel + '</div>';
         html += '</div>';
         html += '<div class="h2h-player">';
-        html += oppPhoto ? '<img src="' + KSLT_экранировать(oppPhoto) + '" class="h2h-photo" alt="">' : '<div class="h2h-photo h2h-photo-ph">' + KSLT_экранировать(oppName.charAt(0)) + '</div>';
+        html += oppPhoto ? '<img src="' + KSLT_экранировать(oppPhoto) + '" class="h2h-photo" alt="">' : window.KSLT_LICO.кружок(oppName, 'h2h-photo h2h-photo-ph');
         html += '<div class="h2h-name">' + KSLT_экранировать(oppName) + '</div>';
         html += '</div>';
         html += '</div>';

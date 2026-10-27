@@ -364,7 +364,7 @@
         return p.photo
             ? '<img' + (класс ? ' class="' + класс + '"' : '') +
               ' src="' + KSLT_экранировать(p.photo) + '" alt="" loading="lazy">'
-            : window.KSLT_LICO.кружок(p.name, класс, 'span');
+            : window.KSLT_LICO.кружок(p.name, (класс ? класс + ' ' : '') + 'avatar-initials', 'span');
     }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная

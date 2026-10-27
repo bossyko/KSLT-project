@@ -330,11 +330,16 @@
         items.forEach(function(u) {
             var name = A.esc(u.full_name || '');
             var email = A.esc(u.email || '');
-            var initials = (u.full_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
-
+            /* КРУЖОК РИСУЕТ ДОМ, КЛАСС — АДМИНКА (кусок 194). Здесь стоял
+               свой инлайн 32px/50% — ТО ЖЕ САМОЕ, что `.ad-table-avatar` и
+               `.ad-table-avatar-placeholder` в `css/admin.css:838,847`,
+               только акцентным цветом и без обводки. Две таблицы
+               пользователей в одной админке показывали одно понятие двумя
+               видами, и подсчёт инициалов тут был третьим в продукте:
+               первые буквы ВСЕХ слов. */
             var avatarHtml = u.avatar_url
-                ? '<img src="' + A.esc(u.avatar_url) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">'
-                : '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:var(--fs-xs);font-weight:600;">' + initials + '</div>';
+                ? '<img src="' + A.esc(u.avatar_url) + '" class="ad-table-avatar" alt="">'
+                : window.KSLT_LICO.кружок(u.full_name, 'ad-table-avatar-placeholder');
 
             // ОДНО ОПРЕДЕЛЕНИЕ: класс `.kslt-role` в style.css (96в, 19.10).
             // Здесь стоял свой инлайн — 12/600, радиус 4px, без капса и без
@@ -506,10 +511,12 @@
         var lastSeen = user.last_seen ? user.last_seen.split('T')[0] + ' ' + user.last_seen.split('T')[1].substring(0, 5) : '—';
         var regDate = user.created_at ? user.created_at.split('T')[0] + ' ' + user.created_at.split('T')[1].substring(0, 5) : '—';
 
-        var initials = (user.full_name || '?').split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase();
+        /* КРУЖОК РИСУЕТ ДОМ, РАЗМЕР — CSS (кусок 194). Инлайн 64px/50%
+           переехал в `.ad-user-avatar` и `.ad-user-avatar-placeholder`
+           (`css/admin.css`): вид тот же, определение одно. */
         var avatarHtml = user.avatar_url
-            ? '<img src="' + A.esc(user.avatar_url) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
-            : '<div style="width:64px;height:64px;border-radius:50%;background:var(--accent-subtle);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);font-weight:700;">' + initials + '</div>';
+            ? '<img src="' + A.esc(user.avatar_url) + '" class="ad-user-avatar" alt="">'
+            : window.KSLT_LICO.кружок(user.full_name, 'ad-user-avatar-placeholder');
 
         // --- Membership section with inline payment ---
         var memHtml = '';

@@ -655,8 +655,11 @@
            научился разворачивать местные переменные внутри функции: до этого
            `initial` был для него непрозрачным, и вся функция считалась
            экраном. */
-        var initial = name ? KSLT_экранировать(name.charAt(0).toUpperCase()) : '?';
-        return '<div class="lm-avatar-placeholder" aria-hidden="true">' + initial + '</div>';
+        /* КРУЖОК РИСУЕТ ДОМ (кусок 194): js/kslt-lico.js. Здесь была ОДНА
+           буква — второе и последнее такое место в продукте (первым был
+           `match-score.js`, сведён куском 75). Продукт берёт две: первую
+           и последнюю. Экранирование и `aria-hidden` отдаёт дом. */
+        return window.KSLT_LICO.кружок(name, 'lm-avatar-placeholder');
     }
 
     function showError(msg) {

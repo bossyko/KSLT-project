@@ -191,7 +191,7 @@
        четвёртым объявлением одного и того же. */
 
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
-    function getInitials(name) { return window.KSLT_LICO.инициалы(name); }
+    /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная
        кавычка тоже. Иначе безопасность держится на соглашении «атрибут
@@ -493,7 +493,7 @@
         if (p.avatar_url) {
             avatarHtml = '<img class="pt-avatar" src="' + KSLT_экранировать(p.avatar_url) + '" alt="" loading="lazy">';
         } else {
-            avatarHtml = '<div class="pt-avatar-placeholder">' + KSLT_экранировать(getInitials(p.full_name)) + '</div>';
+            avatarHtml = window.KSLT_LICO.кружок(p.full_name, 'pt-avatar-placeholder');
         }
 
         var ntrpHtml = '';

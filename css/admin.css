@@ -835,6 +835,29 @@ body.ad-page {
     background: var(--alpha-white-04);
 }
 
+/* КРУЖОК ПОЛЬЗОВАТЕЛЯ В КАРТОЧКЕ — 64px. Стоял инлайном в
+   `admin/sections/users.js`: то же понятие, что `.ad-table-avatar`,
+   только крупнее. Вид оставлен прежним знак в знак (кусок 194). */
+.ad-user-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.ad-user-avatar-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs-md);
+    font-weight: 700;
+}
+
 .ad-table-avatar {
     width: 32px;
     height: 32px;

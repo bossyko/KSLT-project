@@ -31,7 +31,7 @@
     function лицо(p, класс, alt) {
         return p.photo
             ? '<img src="' + KSLT_экранировать(p.photo) + '" alt="' + KSLT_экранировать(alt || '') + '" class="' + класс + '">'
-            : window.KSLT_LICO.кружок(p.name, класс, 'span');
+            : window.KSLT_LICO.кружок(p.name, класс + ' avatar-initials', 'span');
     }
 
     /* ЭКРАНИРОВАНИЕ ДЛЯ АТРИБУТА, А НЕ ТОЛЬКО ДЛЯ ТЕКСТА: одинарная

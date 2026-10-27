@@ -578,7 +578,7 @@
     }
 
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
-    function getInitials(name) { return window.KSLT_LICO.инициалы(name); }
+    /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
 
     // --- Featured Partner ---
 
@@ -598,7 +598,7 @@
         if (p.avatar_url) {
             avatarHtml = '<img class="sv-player-ava" src="' + KSLT_экранировать(p.avatar_url) + '" alt="" loading="lazy">';
         } else {
-            avatarHtml = '<div class="sv-player-ava sv-player-initials">' + KSLT_экранировать(getInitials(name)) + '</div>';
+            avatarHtml = window.KSLT_LICO.кружок(name, 'sv-player-ava sv-player-initials');
         }
 
         // Пол, уровень игры и когда человек последний раз заходил — то, по

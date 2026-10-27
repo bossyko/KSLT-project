@@ -979,7 +979,7 @@
      */
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. ЭТО
        поведение и стало общим: имя плюс фамилия, как у Apple и Linear. */
-    function инициалыИмени(имя) { return window.KSLT_LICO.инициалы(имя); }
+    /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
 
     /**
      * Кружок игрока: фотография, а без неё — инициалы.
@@ -993,8 +993,7 @@
         var кл = класс || 'pp-match-opponent-photo';
         return фото
             ? '<img src="' + KSLT_экранировать(фото) + '" alt="' + KSLT_экранировать(имя || '') + '" class="' + кл + '">'
-            : '<span class="' + кл + ' pp-photo-ph" aria-hidden="true">' +
-                KSLT_экранировать(инициалыИмени(имя)) + '</span>';
+            : window.KSLT_LICO.кружок(имя, кл + ' pp-photo-ph', 'span');
     }
 
     // Look up player from static data or cache

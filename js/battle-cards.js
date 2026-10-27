@@ -188,7 +188,7 @@
             ph += src
                 ? '<img src="' + KSLT_экранировать(src) + '" alt="">'
                 /* Кружок рисует дом (кусок 194), а не этот файл. */
-                : window.KSLT_LICO.кружок((side.names || [])[i], '', 'span');
+                : window.KSLT_LICO.кружок((side.names || [])[i], 'avatar-initials', 'span');
         });
         ph += '</div>';
 

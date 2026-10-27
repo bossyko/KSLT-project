@@ -718,10 +718,12 @@
                     var dropdown = document.createElement('div');
                     dropdown.className = 'user-dropdown';
 
-                    var initials = userName.split(' ').map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
+                    /* Кружок рисует дом (кусок 194): js/kslt-lico.js. Свой
+                       подсчёт брал первые буквы ВСЕХ слов, продукт берёт
+                       первую и последнюю. Имя стоит рядом текстом. */
                     var avatarHtml = userAvatar
                         ? '<img src="' + userAvatar + '" class="user-dropdown-avatar" alt="">'
-                        : '<div class="user-dropdown-avatar-ph">' + initials + '</div>';
+                        : window.KSLT_LICO.кружок(userName, 'user-dropdown-avatar-ph');
 
                     dropdown.innerHTML =
                         '<button class="user-dropdown-toggle">' +

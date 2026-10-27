@@ -189,7 +189,7 @@
     }
 
     /* Инициалы — одно определение на продукт: js/kslt-lico.js. */
-    function initials(name) { return window.KSLT_LICO.инициалы(name); }
+    /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
 
     /* ФОРМА — ЧЕТЫРЕ ПУСТЫХ <i>, И ДИКТОР МОЛЧАЛ. Цвет точки был
        единственным носителем смысла. Даём всей полоске роль и подпись
@@ -243,7 +243,7 @@
             '<div class="pt-avatar-wrap">' +
                 (p.avatar_url
                     ? '<img class="pt-avatar" src="' + KSLT_экранировать(p.avatar_url) + '" alt="" loading="lazy">'
-                    : '<div class="pt-avatar-placeholder">' + KSLT_экранировать(initials(p.full_name)) + '</div>') +
+                    : window.KSLT_LICO.кружок(p.full_name, 'pt-avatar-placeholder')) +
                 /* ТОЧКА «ОНЛАЙН» — ЦВЕТ БЫЛ ЕДИНСТВЕННЫМ НОСИТЕЛЕМ СМЫСЛА.
                    WCAG 1.4.1: цвет не может быть единственным способом
                    передать сведения. Теперь у точки есть роль и подпись. */

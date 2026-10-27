@@ -13,12 +13,14 @@
         var container = document.getElementById('adSidebar');
         if (!container) return;
 
-        var nameParts = (profile.full_name || '').split(' ');
-        var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
-
+        /* КРУЖОК РИСУЕТ ДОМ (кусок 194): js/kslt-lico.js. Свой подсчёт
+           брал первые буквы ВСЕХ слов — на имени из трёх слов админка
+           показывала три буквы там, где продукт показывает две (первая и
+           последняя). Имя стоит рядом текстом в `.ad-sidebar-name`,
+           поэтому буквы скрыты от диктора. */
         var avatarHtml = profile.avatar_url
             ? '<img src="' + A.esc(profile.avatar_url) + '" class="ad-sidebar-avatar" alt="">'
-            : '<div class="ad-sidebar-avatar-placeholder">' + initials + '</div>';
+            : window.KSLT_LICO.кружок(profile.full_name, 'ad-sidebar-avatar-placeholder');
 
         var sections = A.ROLE_SECTIONS[A.currentRole] || A.ROLE_SECTIONS.manager;
 
@@ -558,11 +560,10 @@
 
         // Recent registrations
         fillDashTable('adDashRecentUsers', results[14], function(u) {
-            var nameParts = (u.full_name || '').split(' ');
-            var initials = nameParts.map(function(n) { return n.charAt(0); }).join('').toUpperCase() || '?';
+            /* Кружок рисует дом (кусок 194): js/kslt-lico.js. */
             var avatarHtml = u.avatar_url
                 ? '<img src="' + A.esc(u.avatar_url) + '" class="ad-table-avatar" alt="">'
-                : '<div class="ad-table-avatar-placeholder">' + initials + '</div>';
+                : window.KSLT_LICO.кружок(u.full_name, 'ad-table-avatar-placeholder');
 
             return '<tr>' +
                 '<td><div class="ad-table-user-cell">' + avatarHtml +
