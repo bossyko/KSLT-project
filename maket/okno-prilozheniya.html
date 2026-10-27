@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>КСЛТ — окно приложения</title>
+<style>
+:root {
+  --fon: #141414; --card: #1C1C1C; --ramka: rgba(255,255,255,0.12);
+  --tekst: #F2F2F2; --tusklo: rgba(255,255,255,0.55); --lajm: #CCFF00;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--fon); color: var(--tekst);
+  font: 14px/1.4 -apple-system, "Segoe UI", system-ui, sans-serif;
+  display: flex; min-height: 100vh;
+}
+.pult {
+  width: 240px; flex-shrink: 0; padding: 16px;
+  border-right: 1px solid var(--ramka); overflow-y: auto; height: 100vh;
+}
+.pult h1 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.pult .pod { font-size: 11px; color: var(--tusklo); margin-bottom: 24px; }
+.grup { margin-bottom: 24px; }
+.grup-imya {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--tusklo); margin-bottom: 8px;
+}
+.knopki { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: inherit; font-size: 12px; cursor: pointer;
+  padding: 8px 12px; min-height: 36px;
+  background: var(--card); color: var(--tekst);
+  border: 1px solid var(--ramka); border-radius: 8px;
+}
+button:hover { border-color: rgba(255,255,255,0.3); }
+button.aktiv { background: var(--lajm); color: #000; border-color: var(--lajm); font-weight: 600; }
+button:focus-visible { outline: 2px solid var(--lajm); outline-offset: 2px; }
+.stolb { display: flex; flex-direction: column; gap: 8px; }
+.stolb button { text-align: left; }
+.holst {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  padding: 24px; overflow: auto;
+}
+.tablo { font-size: 12px; color: var(--tusklo); }
+.tablo b { color: var(--lajm); font-weight: 600; }
+.telefon {
+  border: 8px solid #2A2A2A; border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  background: #000; overflow: hidden; flex-shrink: 0;
+}
+iframe { display: block; border: 0; background: #0A0A0A; }
+</style>
+</head>
+<body>
+
+<div class="pult">
+  <h1>Окно приложения</h1>
+  <div class="pod">Стенд. Вид меняется ЗАГРУЗКОЙ на нужной ширине, а не сжатием окна.</div>
+
+  <div class="grup">
+    <div class="grup-imya">Вид</div>
+    <div class="stolb" id="vidy"></div>
+  </div>
+
+  <div class="grup">
+    <div class="grup-imya">Язык</div>
+    <div class="knopki" id="yazyki"></div>
+  </div>
+
+  <div class="grup">
+    <div class="grup-imya">Тема</div>
+    <div class="knopki" id="temy"></div>
+  </div>
+
+  <div class="grup">
+    <div class="grup-imya">Экран</div>
+    <div class="stolb" id="ekrany"></div>
+  </div>
+
+  <div class="grup">
+    <div class="knopki">
+      <button id="zanovo">Перезагрузить</button>
+    </div>
+  </div>
+</div>
+
+<div class="holst">
+  <div class="tablo" id="tablo">загрузка…</div>
+  <div class="telefon" id="ramka">
+    <iframe id="okno" title="Мобильное приложение КСЛТ"></iframe>
+  </div>
+</div>
+
+<script>
+/* Стенд лежит в maket/, приложение — в mobile/www/. Оба отдаются одним
+   сервером, поэтому окно и стенд одного происхождения, и стенд может
+   переключать язык, тему и экран внутри приложения. */
+var АДРЕС = '../mobile/www/index.html';
+
+var ВИДЫ = [
+  ['Телефон 375×812',        375,  812],
+  ['Узкий 340×720',          340,  720],
+  ['Большой 430×932',        430,  932],
+  ['Телефон лёжа 844×390',   844,  390],
+  ['Планшет 768×1024',       768, 1024],
+  ['Планшет лёжа 1024×768', 1024,  768],
+  ['Десктоп 1280×800',      1280,  800]
+];
+var ЯЗЫКИ = [['ru','RU'], ['en','EN'], ['kg','KG']];
+var ТЕМЫ  = [['system','Системная'], ['light','Светлая'], ['dark','Тёмная']];
+var ЭКРАНЫ = [
+  ['screenHome','Главная'], ['screenTournaments','Турниры'],
+  ['screenRating','Рейтинг'], ['screenNews','Новости'],
+  ['screenProfile','Профиль'], ['screenBattles','Баттлы'],
+  ['screenLive','Идёт сейчас'], ['screenPartners','Партнёры'],
+  ['screenSponsors','Спонсоры'], ['screenCoaches','Тренеры'],
+  ['screenCourts','Корты']
+];
+
+var вид = ВИДЫ[0], язык = 'ru', тема = 'system', экран = 'screenHome';
+
+var окно = document.getElementById('okno');
+var табло = document.getElementById('tablo');
+
+function кнопка(подпись, активна, дело) {
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = подпись;
+  if (активна) b.className = 'aktiv';
+  b.addEventListener('click', дело);
+  return b;
+}
+
+function нарисоватьПульт() {
+  var к = document.getElementById('vidy');
+  к.textContent = '';
+  ВИДЫ.forEach(function (в) {
+    к.appendChild(кнопка(в[0], в === вид, function () { вид = в; загрузить(); }));
+  });
+
+  к = document.getElementById('yazyki');
+  к.textContent = '';
+  ЯЗЫКИ.forEach(function (я) {
+    к.appendChild(кнопка(я[1], я[0] === язык, function () { язык = я[0]; применить(); }));
+  });
+
+  к = document.getElementById('temy');
+  к.textContent = '';
+  ТЕМЫ.forEach(function (т) {
+    к.appendChild(кнопка(т[1], т[0] === тема, function () { тема = т[0]; применить(); }));
+  });
+
+  к = document.getElementById('ekrany');
+  к.textContent = '';
+  ЭКРАНЫ.forEach(function (э) {
+    к.appendChild(кнопка(э[1], э[0] === экран, function () { экран = э[0]; применить(); }));
+  });
+}
+
+/* Вид ставится ДО загрузки: свойства внутри переходов при сжатии
+   возвращают прежнее значение, и замер врёт. */
+function загрузить() {
+  окно.style.width = вид[1] + 'px';
+  окно.style.height = вид[2] + 'px';
+  табло.textContent = 'загрузка ' + вид[1] + '×' + вид[2] + '…';
+  нарисоватьПульт();
+  окно.src = АДРЕС + '?stend=' + Date.now();
+}
+
+function применить() {
+  нарисоватьПульт();
+  var в = окно.contentWindow;
+  if (!в || !в.KSLT_APP) return;
+  try {
+    if (в.KSLT_I18N) { в.localStorage.setItem('kslt_lang', язык); в.KSLT_I18N.setLang(язык); }
+    в.KSLT_APP.setTheme(тема);
+    в.KSLT_APP.switchScreen(экран);
+    тaбло_обновить();
+  } catch (e) {
+    табло.textContent = 'окно ещё не готово — нажмите «Перезагрузить»';
+  }
+}
+
+function тaбло_обновить() {
+  var в = окно.contentWindow;
+  var ш = в ? в.innerWidth : '?';
+  var в_ = в ? в.innerHeight : '?';
+  var т = в && в.document.documentElement.getAttribute('data-theme');
+  табло.innerHTML = 'вид <b>' + ш + '×' + в_ + '</b> · язык <b>' + язык +
+    '</b> · тема <b>' + (т || тема) + '</b> · экран <b>' + экран + '</b>';
+}
+
+окно.addEventListener('load', function () {
+  /* Заставка приложения держится до 3 с со спонсором; ждём её и только
+     потом ставим язык, тему и экран. */
+  setTimeout(применить, 3600);
+  setTimeout(тaбло_обновить, 3800);
+});
+
+document.getElementById('zanovo').addEventListener('click', загрузить);
+
+загрузить();
+</script>
+</body>
+</html>
