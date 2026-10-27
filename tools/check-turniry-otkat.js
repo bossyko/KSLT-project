@@ -29,6 +29,7 @@ const JSФ = 'js/tournaments-overview.js';
 const ТОК = 'css/tokens.css';
 const HTML = 'pages/tournaments-overview.html';
 const СТАТ = 'js/stats.js';
+const ДОМ_ЧИСЕЛ = 'js/kslt-chisla-kluba.js';
 const HTMLen = 'pages/tournaments-overview-en.html';
 const СТЕНД = 'maket/turniry-zamer.html';
 const ТЕСТ  = 'tests/e2e/design-system/44-turniry.spec.js';
@@ -250,8 +251,11 @@ const ОТКАТЫ = [
      принял имя за путь к файлу: ENOENT на «увести имя общей формулы». ФОРМА
      ОТКАТА ЧИТАЕТСЯ У СОСЕДА, А НЕ ВСПОМИНАЕТСЯ. */
 
-  [СТАТ, `window.KSLT_STATS.турнировВсего = function(изБазы) {`,
-         `window.KSLT_STATS.турнировИтого = function(изБазы) {`,
+  /* 27.10, кусок 209: формула переехала в общий дом
+     `js/kslt-chisla-kluba.js`, сайт и приложение читают одно имя.
+     Откат уводит имя в самом доме. */
+  [ДОМ_ЧИСЕЛ, `    Д.турнировВсего = function (изБазы) {`,
+              `    Д.турнировИтого = function (изБазы) {`,
    'счёт турниров — ОДНО определение, и оно названо именем'],
 
   [СТАТ, `apply('statTournaments', null, window.KSLT_STATS.турнировВсего(d.tournaments));`,
@@ -261,8 +265,8 @@ const ОТКАТЫ = [
   /* Второе объявление ТОГО ЖЕ имени, а не похожего: правило считает
      вхождения `ARCHIVE_TOURNAMENTS =`, и `ARCHIVE_TOURNAMENTS_OLD =` под него
      не попадало — откат проходил незамеченным. Прувер сказал об этом прямо. */
-  [СТАТ, `    var ARCHIVE_TOURNAMENTS = 300;`,
-         `    var ARCHIVE_TOURNAMENTS = 300;\n    var ARCHIVE_TOURNAMENTS = 300;`,
+  [ДОМ_ЧИСЕЛ, `    var АРХИВ_ТУРНИРОВ = 300;`,
+              `    var АРХИВ_ТУРНИРОВ = 300;\n    var АРХИВ_ТУРНИРОВ = 300;`,
    'архив клуба заведён ОДНИМ числом'],
 
   [JSФ, `            var elВсего = document.getElementById('toStatTotal');`,

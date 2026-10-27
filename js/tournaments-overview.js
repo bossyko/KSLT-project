@@ -247,11 +247,11 @@
                БАЗА МОЛЧИТ — ОСТАЁТСЯ ПРОЧЕРК: соврать числом хуже, чем
                честно не знать, и запасной счёт вернул бы прежний шов. */
             var elВсего = document.getElementById('toStatTotal');
-            if (elВсего && window.KSLT_STATS && window.KSLT_STATS.турнировВсего) {
-                client.rpc('get_club_stats').then(function(ст) {
-                    var д = (ст.data && ст.data[0]) || null;
-                    if (ст.error || !д) return;
-                    elВсего.textContent = window.KSLT_STATS.турнировВсего(д.tournaments);
+            var ЧИСЛА = window.KSLT_CHISLA_KLUBA;
+            if (elВсего && ЧИСЛА) {
+                ЧИСЛА.прочитать(client).then(function(д) {
+                    if (!д) return;
+                    elВсего.textContent = ЧИСЛА.турнировВсего(д.tournaments);
                 });
             }
 

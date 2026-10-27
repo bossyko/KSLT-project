@@ -1867,6 +1867,11 @@ a, button, [role="button"] {
 .rf-label {
   /* Было 9 на узком и 10 на остальных — оба мимо шкалы. Низ шкалы 11. */
   font-size: var(--fs-2xs);
+  /* 27.10: подпись и ширина колонки стояли ЗАШИТЫМИ СТИЛЯМИ В РАЗМЕТКЕ
+     (`style="max-width:280px"` и две центровки). Из-за этого выпадашка
+     вставала уже переключателя под ней — 280 против 343, — и число 280
+     было мимо шкалы и мимо файла стилей. Пара держит одну полосу. */
+  text-align: center;
   font-weight: 500;
   color: var(--text-sec);
   text-transform: uppercase;
@@ -1887,8 +1892,12 @@ a, button, [role="button"] {
   border-radius: var(--radius-md);
   background: var(--glass);
   color: var(--text-primary);
-  font-size: var(--fs-xs);
-  font-weight: 500;
+  /* ВЫПАДАШКА И ПЕРЕКЛЮЧАТЕЛЬ ПОД НЕЙ — ОДНА ПАРА: обе выбирают, что
+     показать в таблице, и стоят рядом. Значит и ступень у них одна.
+     Было 12/500 против 14/600 — на вид полоса читалась мельче, хотя по
+     высоте обе 44. */
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -1916,7 +1925,10 @@ a, button, [role="button"] {
 }
 .rating-toggle-btn {
   flex: 1;
-  max-width: 160px;
+  /* Было `max-width: 160px` — пара переключателей вставала уже выпадашки
+     над ней (320 против 343). Пара, которая читается как пара, держит
+     одну полосу. */
+  min-width: 0;
   /* ЦЕЛЬ НАЖАТИЯ 44. Было 41 — с рамкой 2 и отступом 10 не дотягивал. */
   min-height: 44px;
   padding: var(--space-2) 0;
@@ -1933,6 +1945,9 @@ a, button, [role="button"] {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+/* На залитой кнопке лаймовая обводка по лаймовому фону не видна —
+   обводка берёт цвет текста этой кнопки. */
+.rating-toggle-btn.active:focus-visible { outline-color: var(--text-primary); }
 .rating-toggle-btn:first-child { border-radius: 12px 0 0 12px; }
 .rating-toggle-btn:last-child { border-radius: 0 12px 12px 0; border-left: none; }
 .rating-toggle-btn.active {

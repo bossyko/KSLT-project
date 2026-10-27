@@ -9,7 +9,7 @@ const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-reyting-'));
 
 ['mobile/www/css/app.css', 'mobile/www/js/screens/rating.js', 'mobile/www/js/i18n.js',
- 'tools/check-reyting-prilozheniya.js'].forEach(отн => {
+ 'mobile/www/index.html', 'tools/check-reyting-prilozheniya.js'].forEach(отн => {
     const куда = path.join(песок, отн);
     fs.mkdirSync(path.dirname(куда), { recursive: true });
     fs.copyFileSync(path.join(КОРЕНЬ, отн), куда);
@@ -117,6 +117,21 @@ const ОТКАТЫ = [
     ['медаль снова читается диктору', J,
      'class="rp-medal" aria-hidden="true"', 'class="rp-medal"',
      'медаль и аватар от диктора скрыты'],
+
+    ['выпадашка снова мельче переключателя', C,
+     '  /* ВЫПАДАШКА И ПЕРЕКЛЮЧАТЕЛЬ ПОД НЕЙ — ОДНА ПАРА: обе выбирают, что\n     показать в таблице, и стоят рядом. Значит и ступень у них одна.\n     Было 12/500 против 14/600 — на вид полоса читалась мельче, хотя по\n     высоте обе 44. */\n  font-size: 14px;\n  font-weight: 600;',
+     '  font-size: var(--fs-xs);\n  font-weight: 500;',
+     'выпадашка и переключатель стоят на одной ступени'],
+
+    ['переключателю вернули предел ширины', C,
+     '.rating-toggle-btn {\n  flex: 1;',
+     '.rating-toggle-btn {\n  flex: 1;\n  max-width: 160px;',
+     'переключатель не уже полосы фильтра'],
+
+    ['ширину колонки снова зашили в разметку', 'mobile/www/index.html',
+     '<div class="rf-col">',
+     '<div class="rf-col" style="max-width:280px">',
+     'в разметке раздела нет зашитых стилей'],
 
     ['подпись таблицы осталась в одном языке', I,
      "'rating.tableLabel':  { ru: 'Таблица рейтинга', en: 'Rating table',   kg: 'Рейтинг таблицасы' },",

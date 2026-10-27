@@ -103,9 +103,9 @@
   var _stats = null;
 
   function loadStats() {
-    if (!supabaseClient) return;
-    supabaseClient.rpc('get_club_stats').then(function (r) {
-      var d = (r.data && r.data[0]) || null;
+    var ЧИСЛА = window.KSLT_CHISLA_KLUBA;
+    if (!supabaseClient || !ЧИСЛА) return;
+    ЧИСЛА.прочитать(supabaseClient).then(function (d) {
       if (!d) return;
       _stats = d;
       var box = document.getElementById('hhStats');
@@ -114,11 +114,18 @@
   }
 
   function statsHtml(d) {
-    var ARCHIVE = 300;   // турниры до 2025 года в базе не заведены
+    /* 27.10, КУСОК 209: ЗДЕСЬ БРАЛОСЬ `d.members` — ПОЛЯ С ТАКИМ ИМЕНЕМ
+       ФУНКЦИЯ БАЗЫ НЕ ОТДАЁТ ВОВСЕ, и на главной стояло `undefined`.
+       Решение Кости 09.10 — «Членов клуба» → «В рейтинге»: счётчик
+       членств показывал один, идёт бесплатный период. Сайт перевели
+       (`js/stats.js`), приложение забыли.
+       Архив турниров (300) тоже был зашит здесь вторым числом — теперь
+       и он, и формула живут в доме. */
+    var ЧИСЛА = window.KSLT_CHISLA_KLUBA;
     var cards = [
-      [d.members, I18N.t('home.stMembers')],
+      [d.ranked, I18N.t('home.stRanked')],
       [d.users, I18N.t('home.stUsers')],
-      [ARCHIVE + (d.tournaments || 0), I18N.t('home.stTournaments')],
+      [ЧИСЛА.турнировВсего(d.tournaments), I18N.t('home.stTournaments')],
       [d.courts, I18N.t('home.stCourts')]
     ];
     // Тренеров нет — карточку не рисуем: «ноль тренеров» хуже молчания
