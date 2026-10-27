@@ -1,0 +1,51 @@
+# ============================================================
+# ЗАЛИВКА EDGE-ФУНКЦИЙ ПРИ ПУШЕ
+# ============================================================
+#
+# Заводится один раз, чтобы не заливать девять функций руками.
+#
+# ЧТО НУЖНО СДЕЛАТЬ ОДИН РАЗ:
+#   1. https://supabase.com/dashboard/account/tokens -> Generate new token
+#   2. GitHub -> репозиторий -> Settings -> Secrets and variables ->
+#      Actions -> New repository secret
+#      имя:     SUPABASE_ACCESS_TOKEN
+#      значение: токен из пункта 1
+#
+# ПОЧЕМУ СПИСОК ФУНКЦИЙ ЗАДАН ПОИМЁННО, А НЕ «ВСЕ ПОДРЯД».
+# Флаг --no-verify-jwt снимает проверку входного билета на шлюзе. Для
+# этих девяти так и надо: их зовёт расписание, у которого билета нет, и
+# они проверяют доступ сами. Для функций, которые зовут из браузера с
+# билетом человека, тот же флаг СНИЗИЛ БЫ защиту. Поэтому «залить все
+# разом» здесь опаснее, чем список.
+name: Заливка функций
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Залить функции расписания
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: qqkzszesviukopgjbead
+        run: |
+          set -e
+          for f in match-notify tournament-notify tournament-reminder \
+                   send-push membership-notify news-fetch news-offer \
+                   score-dispute-notify send-email; do
+            echo "::group::$f"
+            supabase functions deploy "$f" --no-verify-jwt --project-ref "$PROJECT_REF"
+            echo "::endgroup::"
+          done
