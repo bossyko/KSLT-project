@@ -833,7 +833,7 @@
         function строка(подпись, значение) {
             return '<li><span>' + подпись + '</span><b>' + значение + '</b></li>';
         }
-        var число = function(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+        var число = function(n) { return KSLT_CHISLA.тысячи(n); };
         var есть = п.заявок || п.матчей || п.результатов || п.начислений;
         if (!есть) {
             return '<p class="ad-udalenie-pusto">' + L.trnKromeSamogoTurnira + '</p>';

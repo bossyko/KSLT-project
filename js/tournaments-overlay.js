@@ -29,7 +29,7 @@
     // Format prize fund total: 500000 → "500 000 сом", 0 → "0 сом"
     function formatPrize(num) {
         if (!num) return '0 ' + (KSLT_YAZYK.выбрать('som', "сом", 'сом'));
-        var str = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        var str = KSLT_CHISLA.тысячи(num);
         return str + ' ' + (KSLT_YAZYK.выбрать('som', "сом", 'сом'));
     }
 

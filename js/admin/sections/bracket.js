@@ -2781,7 +2781,7 @@
                        номер плюс тот же список заявок дают ту же сетку. */
                     (tournament.draw_seed
                         ? '<span class="ad-brk-zerno">' + L.drawSeedLabel + ' № ' +
-                            A.esc(String(tournament.draw_seed).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) +
+                            A.esc(KSLT_CHISLA.тысячи(tournament.draw_seed)) +
                           '</span>'
                         : '') +
                 '</div>' +
