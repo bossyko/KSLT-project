@@ -1634,7 +1634,7 @@
             _profile.telegram_id = null;
             window.KSLT_AUTH.currentProfile = _profile;
             closeSubOverlay(ov);
-            renderProfile();
+            P.load();
           });
       });
     }
@@ -1665,7 +1665,7 @@
                   _profile.telegram_id = r.data.telegram_chat_id;
                   window.KSLT_AUTH.currentProfile = _profile;
                   if (wait) wait.innerHTML = '<span style="color:var(--accent)">\u2713 ' + I18N.t('profile.tgConnectedNow') + '</span>';
-                  setTimeout(function() { closeSubOverlay(ov); renderProfile(); }, 1200);
+                  setTimeout(function() { closeSubOverlay(ov); P.load(); }, 1200);
                 } else {
                   poll(tries + 1);
                 }

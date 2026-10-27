@@ -51,4 +51,4 @@ const пф={};дыры.forEach(д=>{const ф=д.split(':')[0];пф[ф]=(пф[ф]
 console.log('ЧУЖОЕ ПОЛЕ В РАЗМЕТКЕ БЕЗ ЭКРАНИРОВАНИЯ:',дыры.length,'в',Object.keys(пф).length,'файлах\n');
 Object.entries(пф).sort((a,b)=>b[1]-a[1]).forEach(([ф,н])=>console.log('  '+String(н).padStart(3)+'  '+ф));
 console.log('\n--- все места ---');
-dedup=[...new Set(дыры)];dedup.forEach((д,i)=>console.log(String(i+1).padStart(3)+'. '+д));
+const без_повторов=[...new Set(дыры)];без_повторов.forEach((д,i)=>console.log(String(i+1).padStart(3)+'. '+д));

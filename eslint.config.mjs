@@ -23,6 +23,19 @@ import { join } from 'node:path';
  * СПИСОК, КОТОРЫЙ ДЕРЖИТСЯ РУКАМИ, ОТСТАЁТ. Теперь имена берутся оттуда,
  * где дома объявляются: `window.KSLT_ИМЯ =` в `js/`.
  */
+/**
+ * 27.10, КУСОК 206: СЧИТАЛОСЬ С ПОЛОВИНЫ ПРОДУКТА. Обход шёл только по
+ * `js/`, а приложение живёт в `mobile/www/js/` — и `KSLT_NEWS_MEDIA`,
+ * объявленный там, давал три `no-undef` на живом коде. Шум прятал две
+ * НАСТОЯЩИЕ беды: `AUTH` в `mobile/www/js/screens/rating.js` (экран
+ * рейтинга падал на первом зове и оставался пустым) и `renderProfile()`
+ * в `profile.js` — имя, которого в файле нет вовсе.
+ *
+ * Собираются ДВА признака, оба из кода: дом `window.KSLT_ИМЯ =` и
+ * глобальная функция `function имя(` БЕЗ ОТСТУПА — внутри IIFE все
+ * объявления с отступом, так что без отступа остаются только настоящие
+ * глобали (`initSupabase` из `mobile/www/js/supabase-config.js`).
+ */
 const домаПродукта = (() => {
     const имена = {};
     const обойти = дир => {
@@ -32,9 +45,11 @@ const домаПродукта = (() => {
             if (!э.name.endsWith('.js')) continue;
             const т = readFileSync(п, 'utf8');
             for (const м of т.matchAll(/window\.(KSLT_[A-Za-zА-Яа-яЁё_]+)\s*=/g)) имена[м[1]] = 'readonly';
+            for (const м of т.matchAll(/^function\s+([A-Za-zА-Яа-яЁё_$][\w$А-Яа-яЁё]*)\s*\(/gm)) имена[м[1]] = 'readonly';
         }
     };
     обойти('js');
+    обойти('mobile/www/js');
     return имена;
 })();
 
@@ -109,17 +124,36 @@ export default [
         }
     },
     {
-        // Наши инструменты: запускаются в Node
+        /* Наши инструменты: запускаются в Node.
+
+           27.10, КУСОК 206: здесь было 30 находок, и все до одной —
+           слепота настроек, а не беда в коде. ДВЕ ПРИЧИНЫ:
+
+           1. `sourceType: 'script'` вместо `commonjs`. Node оборачивает
+              модуль в функцию, поэтому `return` на верхнем уровне законен
+              и прувер версий им пользуется, — а линтер звал это
+              синтаксической ошибкой и ВООБЩЕ НЕ ЧИТАЛ файл.
+           2. Замерщики пишут код для браузера строкой внутри
+              `page.evaluate(...)`. Линтер читает его как свой и требует
+              `document`. Браузерные имена объявлены ниже. */
         files: ['tools/**/*.js'],
         languageOptions: {
             ecmaVersion: 2021,
-            sourceType: 'script',
+            sourceType: 'commonjs',
             globals: {
                 require: 'readonly', module: 'writable', exports: 'writable',
                 process: 'readonly', console: 'readonly',
                 __dirname: 'readonly', __filename: 'readonly',
                 Buffer: 'readonly', fetch: 'readonly', window: 'writable',
-                global: 'writable'
+                global: 'writable', structuredClone: 'readonly',
+                setTimeout: 'readonly', clearTimeout: 'readonly', URL: 'readonly',
+                // имена для кода, который уезжает в браузер строкой
+                document: 'readonly', getComputedStyle: 'readonly',
+                location: 'readonly', navigator: 'readonly',
+                localStorage: 'readonly', matchMedia: 'readonly',
+                // дома продукта: сторожа поднимают их в `global`
+                ...домаПродукта,
+                KSLT_RULES: 'readonly', SEED_POSITIONS: 'readonly'
             }
         },
         rules: {

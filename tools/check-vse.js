@@ -193,7 +193,9 @@ const КУСКИ = [
     ['удаление аккаунта', 'check-udalenie-akkaunta.js',
      'check-udalenie-akkaunta-otkat.js'],
     ['спонсор на экране загрузки', 'check-sponsor-na-zagruzke.js',
-     'check-sponsor-na-zagruzke-otkat.js']
+     'check-sponsor-na-zagruzke-otkat.js'],
+    ['имена в коде', 'check-imena-v-kode.js',
+     'check-imena-v-kode-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -126,9 +126,9 @@ function своиTasovkaОдин() { return своиТасовки[0] === 'js/sp
     'Дом `js/kslt-tasovka.js` обязан отдавать `перемешать` и\n' +
     '`продвинутыеПервыми` и объявляться в `window.KSLT_TASOVKA`.');
 
-domЗовут = ['js/kslt-vitrina.js','js/partners.js','js/services.js',
+const домЗовут = ['js/kslt-vitrina.js','js/partners.js','js/services.js',
             'js/home-courts-coaches.js','js/home-partners.js'];
-домВездеГдеЗовут('js/kslt-tasovka.js', domЗовут,
+домВездеГдеЗовут('js/kslt-tasovka.js', домЗовут,
     'дом перемешивания подключён на каждой странице, где его зовут');
 
 /* ── 2. ВИТРИНА ОТДАЛА ПОНЯТИЕ, А НЕ СПРЯТАЛА ЕГО ── */

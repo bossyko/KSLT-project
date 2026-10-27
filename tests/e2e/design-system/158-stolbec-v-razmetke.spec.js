@@ -74,7 +74,6 @@ async function вПесочнице(page, дело, доводы) {
         const песок = document.createElement('div');
         песок.id = 'kslt-proba-158';
         document.body.appendChild(песок);
-        // eslint-disable-next-line no-new-func
         const f = new Function('песок', 'д', дело_);
         const итог = f(песок, доводы_);
         песок.remove();

@@ -5,6 +5,10 @@
 (function() {
   'use strict';
   var I18N = window.KSLT_I18N;
+  // Дом входа берётся так же, как дом языка выше: `js/auth.js` подключён
+  // раньше этого файла. Без этой строки `AUTH.бесплатныйПериод()` ниже
+  // падал `ReferenceError`, и экран рейтинга оставался пустым.
+  var AUTH = window.KSLT_AUTH;
 
   var R = window.KSLT_RATING = {};
   var allPlayers = [];

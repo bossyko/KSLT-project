@@ -100,7 +100,6 @@
     'td.fee':       { ru: 'Взнос',        en: 'Entry fee',   kg: 'Катышуу акысы' },
     'td.feeMember': { ru: 'членам',       en: 'members',     kg: 'мүчөлөргө' },
     'td.feeGuest':  { ru: 'гостям',       en: 'guests',      kg: 'конокторго' },
-    'td.venue':     { ru: 'Место',        en: 'Venue',       kg: 'Орду' },
     'menu.terms':   { ru: 'Условия использования', en: 'Terms of Service', kg: 'Колдонуу шарттары' },
     'menu.privacy': { ru: 'Политика конфиденциальности', en: 'Privacy Policy', kg: 'Купуялык саясаты' },
     'menu.offer':   { ru: 'Публичная оферта', en: 'Public Offer', kg: 'Ачык оферта' },
