@@ -1970,15 +1970,14 @@
     var cachedCategories = [];
     var categoriesMap = {};
 
-    async function loadCategories() {
-        if (cachedCategories.length > 0) return;
-        if (!client) return;
-        var result = await client.from('categories').select('*').order('sort_order', { ascending: true });
-        cachedCategories = result.data || [];
-        cachedCategories.forEach(function(c) {
-            categoriesMap[c.id] = c;
-        });
-    }
+    /* МЁРТВАЯ КОПИЯ СНЯТА 27.10, КУСКОМ 202. Здесь лежала вторая
+       `loadCategories`, звавшая `client` — переменной, которой в этом
+       файле нет вовсе: зов упал бы `ReferenceError` на первой же строке.
+       Её никто и не звал: все пять зовущих идут в `A.loadCategories`
+       (объявлена ниже, строка ~2144, и берёт `A.client`).
+       ДВЕ ФУНКЦИИ НА ОДНО ПОНЯТИЕ, и одна из них не могла работать.
+       МЁРТВЫМ КОД НАЗВАН ПОСЛЕ ПРОВЕРКИ: зовущие посчитаны поиском по
+       всей админке, их пять, и все до одного зовут через `A.`. */
 
     var TOURNAMENT_FORMATS = {
         singles: L.formatSingles,

@@ -1324,6 +1324,10 @@
         if (court.lat && court.lng) initDetailMap(court);
     }
 
+    /* global L */ /* Leaflet — внешняя библиотека карт, грузится тегом на
+       странице; сам код проверяет `typeof L === 'undefined'`. Объявляем её
+       линтеру здесь, а не в общих настройках: `L` в админке — это словарь
+       подписей, и глобальное разрешение спрятало бы настоящие ошибки. */
     function initDetailMap(court) {
         var mapEl = document.getElementById('courtDetailMap');
         if (!mapEl || typeof L === 'undefined') return;

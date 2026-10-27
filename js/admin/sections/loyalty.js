@@ -454,7 +454,11 @@
         var page = loyTxFiltered.slice(start, start + LOY_PER_PAGE);
 
         if (total === 0) {
-            wrap.innerHTML = A.пустоеСостояние({ всего: loyTxAll.length, значок: '⭐', пусто: L.loyNoTransactions });
+            /* ОПЕЧАТКА В ИМЕНИ (кусок 202): `loyTxAll` не существует,
+               переменная зовётся `loyTxAllData` (строка 14). Пустое
+               состояние операций лояльности падало `ReferenceError`
+               ровно тогда, когда должно было показаться. */
+            wrap.innerHTML = A.пустоеСостояние({ всего: loyTxAllData.length, значок: '⭐', пусто: L.loyNoTransactions });
             return;
         }
 

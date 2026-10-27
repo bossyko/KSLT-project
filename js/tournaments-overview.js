@@ -263,7 +263,11 @@
                 var cat = t.category_id || '';
                 if (cat) cats[cat] = true;
             });
-            el = document.getElementById('toStatCategories');
+            /* `var` ВЕРНУЛСЯ 27.10, КУСКОМ 202. Здесь и ниже переменная
+               присваивалась БЕЗ объявления — три неявные глобальные.
+               Файл не в строгом режиме, поэтому оно работало, но имя
+               висело на `window` и ждало совпадения с чужим. */
+            var el = document.getElementById('toStatCategories');
             if (el) el.textContent = Object.keys(cats).length;
 
             // Prize fund

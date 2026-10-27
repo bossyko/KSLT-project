@@ -1463,14 +1463,22 @@
             btn.textContent = L.saving;
             btn.disabled = true;
 
-            // 1. Direct DB update (works via RLS)
-            var result = await A.client.from('players').update({
-                banned_until: bannedUntil,
-                ban_reason: reason || null
-            }).eq('id', playerId);
-
-            if (result.error) {
-                A.showToast(result.error.message, 'error');
+            /* БАН ПИШЕТСЯ ОДИН РАЗ — ФУНКЦИЕЙ (кусок 202, слово Кости 27.10).
+               Здесь стояли ДВА пути одного действия: сперва клиент писал
+               `banned_until` и `ban_reason` в `players` напрямую, потом
+               функция `ban_player` писала ТО ЖЕ САМОЕ и слала Telegram.
+               Ошибка функции при этом глоталась пустым `.catch()`: бан в
+               базе есть, уведомление не ушло, и никто об этом не знает.
+               Теперь источник правды один — функция: она и пишет, и
+               уведомляет, и её ошибка доходит до человека. */
+            try {
+                await A.adminAction('ban_player', {
+                    player_id: playerId,
+                    banned_until: bannedUntil,
+                    reason: reason || undefined
+                });
+            } catch (e) {
+                A.showToast(e.message, 'error');
                 btn.textContent = L.plrBanPlayer;
                 btn.disabled = false;
                 return;
@@ -1479,66 +1487,21 @@
             overlay.remove();
             A.showToast(L.plrBanSuccess, 'success');
             loadAndEditPlayer(playerId);
-
-            // 2. TG notification (best-effort, non-blocking)
-            try {
-                var session = await A.client.auth.getSession();
-                var token = session.data && session.data.session ? session.data.session.access_token : null;
-                if (token) {
-                    fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token,
-                            'apikey': SUPABASE_ANON_KEY
-                        },
-                        body: JSON.stringify({
-                            action: 'ban_player',
-                            player_id: playerId,
-                            banned_until: bannedUntil,
-                            reason: reason || undefined
-                        })
-                    }).catch(function() {});
-                }
-            } catch (e) { /* TG notification is best-effort */ }
         });
     }
 
     async function unbanPlayerHandler(playerId) {
         A.showConfirm(L.plrUnbanPlayer, L.plrUnbanConfirm, async function() {
-            // 1. Direct DB update
-            var result = await A.client.from('players').update({
-                banned_until: null,
-                ban_reason: null
-            }).eq('id', playerId);
-
-            if (result.error) {
-                A.showToast(result.error.message, 'error');
+            /* СНЯТИЕ БАНА — ТОЖЕ ОДНИМ ПУТЁМ (кусок 202). */
+            try {
+                await A.adminAction('unban_player', { player_id: playerId });
+            } catch (e) {
+                A.showToast(e.message, 'error');
                 return;
             }
 
             A.showToast(L.plrUnbanSuccess, 'success');
             loadAndEditPlayer(playerId);
-
-            // 2. TG notification (best-effort, non-blocking)
-            try {
-                var session = await A.client.auth.getSession();
-                var token = session.data && session.data.session ? session.data.session.access_token : null;
-                if (token) {
-                    fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token,
-                            'apikey': SUPABASE_ANON_KEY
-                        },
-                        body: JSON.stringify({
-                            action: 'unban_player',
-                            player_id: playerId
-                        })
-                    }).catch(function() {});
-                }
-            } catch (e) { /* TG notification is best-effort */ }
         });
     }
 

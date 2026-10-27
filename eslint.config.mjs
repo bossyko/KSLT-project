@@ -76,6 +76,13 @@ export default [
                    `no-undef` на `instanceof File` — это браузерный API, а
                    не дом продукта. */
                 File: 'readonly', FileReader: 'readonly', Blob: 'readonly',
+                performance: 'readonly',
+                /* 27.10, кусок 202: глобали из соседних файлов продукта —
+                   `tournament-generator.js` и `data/players-data*.js`.
+                   Зовущие сами проверяют `typeof X !== 'undefined'`, то
+                   есть это не ошибки, а необъявленные линтеру имена. */
+                KSLT_ROUNDS: 'readonly', ROUND_DEFS: 'readonly',
+                playersData: 'readonly', tournamentsData: 'readonly',
 
                 // ДОМА ПРОДУКТА — СЧИТАНЫ ИЗ КОДА (см. верх файла)
                 ...домаПродукта,
