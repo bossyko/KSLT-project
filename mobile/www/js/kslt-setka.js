@@ -172,5 +172,118 @@
         return h;
     };
 
+    /**
+     * КЛЕТКА МАТЧА В СЕТКЕ.
+     *
+     * Разметка одна на сайт и приложение; всё, что зависит от продукта,
+     * приходит подстановками:
+     *   игрок(id)        → { имя: РАЗМЕТКА, посев, оформление }
+     *   меткаГруппы(id)  → «A1», «G2» или пусто
+     *   слот(matchId)    → { s1, s2 } — кого ждёт пустая клетка
+     *   проход(матч)     → в клетке окажется ровно один человек
+     *   подвал(матч)     → свой довесок под клеткой (у сайта — полоса
+     *                      предсказания; у приложения её нет)
+     *
+     * ПУСТАЯ КЛЕТКА БЫВАЕТ ДВУХ РОДОВ: BYE — соперника не будет вовсе,
+     * TBD — он ещё приедет из прошлого круга. Решает `проход`, а где
+     * метки слотов проставлены — отсутствие метки и есть BYE (слово
+     * Кости 02.10: «поставим BYE, а не TBD, где понятно, что нет игр»).
+     */
+    /* Метка пустого слота: «A1» — победитель группы A, «Q1» — первый из
+       отбора. Понятнее безликого «TBD» и видно сразу после жеребьёвки. */
+    function метка(текст) {
+        return '<span class="td-slot-wait">' + текст + '</span>';
+    }
+
+    S.матч = function (м, опции) {
+        var игрок = опции.игрок;
+        var p1 = игрок(м.player1Id);
+        var p2 = игрок(м.player2Id);
+
+        var этоПроход = !!опции.проход && опции.проход(м) &&
+                        !!(м.player1Id || м.player2Id);
+        if (!м.player1Id && м.player2Id && этоПроход) p1 = { имя: 'BYE' };
+        if (!м.player2Id && м.player1Id && этоПроход) p2 = { имя: 'BYE' };
+
+        var слоты = опции.слот ? опции.слот(м.matchId) : null;
+        if (слоты) {
+            if (!м.player1Id && p1.имя === 'TBD') {
+                p1 = слоты.s1 ? { имя: метка(слоты.s1) } : { имя: 'BYE' };
+            }
+            if (!м.player2Id && p2.имя === 'TBD') {
+                p2 = слоты.s2 ? { имя: метка(слоты.s2) } : { имя: 'BYE' };
+            }
+        }
+
+        var сырые = м.score ? м.score.split(' ') : [];
+        var исход = '';
+        if (сырые.length > 0 && ИСХОДЫ.indexOf(сырые[сырые.length - 1]) !== -1) {
+            исход = сырые.pop();
+        }
+        var p1Класс = м.winnerId === м.player1Id ? 'winner' : (м.winnerId ? 'loser' : '');
+        var p2Класс = м.winnerId === м.player2Id ? 'winner' : (м.winnerId ? 'loser' : '');
+
+        function сторона(p, класс, метка, номер) {
+            var h = '<div class="td-match-player ' + класс + '">' +
+                (p.посев ? '<span class="td-seed">[' + p.посев + ']</span>'
+                         : '<span class="td-seed"></span>') +
+                (метка ? '<span class="td-grp-label">' + метка + '</span>' : '') +
+                '<span class="td-player-name">' + p.имя + '</span>';
+            if (м.status === 'live' && сырые.length > 0 && номер === 1) {
+                h += '<span class="td-match-score live-score">' + сырые.join(' ') + '</span>';
+            } else if (м.status !== 'live') {
+                сырые.forEach(function (s) {
+                    var ч = s.split('/');
+                    h += '<span class="td-match-score">' + (ч[номер - 1] || '') + '</span>';
+                });
+            }
+            if (номер === 1 && исход) h += '<span class="td-match-outcome">' + исход + '</span>';
+            return h + '</div>';
+        }
+
+        var h = '<div class="td-match ' + (м.status || '') + '"' +
+                ' data-p1="' + (м.player1Id || '') + '" data-p2="' + (м.player2Id || '') + '"' +
+                (м.matchId ? ' data-match-id="' + м.matchId + '"' : '') + '>';
+        h += сторона(p1, p1Класс, опции.меткаГруппы ? опции.меткаГруппы(м.player1Id) : '', 1);
+        h += сторона(p2, p2Класс, опции.меткаГруппы ? опции.меткаГруппы(м.player2Id) : '', 2);
+        if (опции.подвал) h += опции.подвал(м) || '';
+        return h + '</div>';
+    };
+
+    /**
+     * СЕТКА СТОЛБЦАМИ: круг, столбец соединительных линий, следующий круг.
+     *
+     * Та же разметка стояла в коде сайта ЧЕТЫРЕЖДЫ — у одиночной сетки, у
+     * лиги, у кругового плей-офф и у сетки «все места». Одно понятие,
+     * четыре копии: беда родилась бы ровно на шве.
+     *
+     * круги: [{ name, matches: [матч] }]
+     */
+    S.сетка = function (круги, опции) {
+        var h = '<div class="td-bracket-scroll"><div class="td-bracket">';
+        круги.forEach(function (круг, i) {
+            h += '<div class="td-bracket-round">';
+            h += '<div class="td-round-title">' + круг.name + '</div>';
+            h += '<div class="td-bracket-matches">';
+            круг.matches.forEach(function (м) { h += S.матч(м, опции); });
+            h += '</div></div>';
+            if (i < круги.length - 1) {
+                /* Столбец линий между кругами. Пар ровно вдвое меньше,
+                   чем матчей в текущем круге: каждая пара сводится в один
+                   матч следующего. */
+                var пар = Math.floor(круг.matches.length / 2);
+                h += '<div class="td-connector-column">';
+                h += '<div class="td-round-title td-round-title-spacer">&nbsp;</div>';
+                h += '<div class="td-connector-inner">';
+                for (var c = 0; c < пар; c++) {
+                    h += '<div class="td-connector-pair"><div class="td-conn-top"></div>' +
+                         '<div class="td-conn-mid"></div><div class="td-conn-bottom"></div></div>';
+                }
+                h += '</div></div>';
+            }
+        });
+        return h + '</div></div>';
+    };
+
     global.KSLT_SETKA = S;
 })(typeof window !== 'undefined' ? window : this);

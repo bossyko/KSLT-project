@@ -603,137 +603,59 @@ function имяВКлетку(участник) {
 }
 
 function renderMatch(tournament, match, predOpts) {
-    var p1 = getPlayer(tournament, match.player1Id);
-    var p2 = getPlayer(tournament, match.player2Id);
-
-    // Пустая клетка бывает двух родов: BYE — соперника не будет вовсе,
-    // TBD — он ещё не определился и приедет из прошлого круга. Решает общий
-    // счёт: проход там, где в клетке в итоге окажется ровно один человек.
-    var этоПроход = tdИтоги[match.roundNum + ':' + match.matchOrder] === 1;
-    // «BYE» пишем только напротив человека: в пустой клетке писать нечего.
-    этоПроход = этоПроход && !!(match.player1Id || match.player2Id);
-    if (!match.player1Id && match.player2Id && этоПроход) {
-        p1 = { name: 'BYE', seed: null, country: '' };
-    }
-    if (!match.player2Id && match.player1Id && этоПроход) {
-        p2 = { name: 'BYE', seed: null, country: '' };
-    }
-    var rawScores = match.score ? match.score.split(' ') : [];
-    var matchOutcome = '';
-    if (rawScores.length > 0 && TD_OUTCOMES.indexOf(rawScores[rawScores.length - 1]) !== -1) {
-        matchOutcome = rawScores.pop();
-    }
-    var scores = rawScores;
-
-    var p1Class = match.winnerId === match.player1Id ? 'winner' : (match.winnerId ? 'loser' : '');
-    var p2Class = match.winnerId === match.player2Id ? 'winner' : (match.winnerId ? 'loser' : '');
-
-    // Номер матча нужен кнопке «вписать счёт»: по нему открывается окно
-    /* СОСТОЯНИЕ МАТЧА ИДЁТ В ИМЯ КЛАССА: `matches.status` признак читает как
-       текстовый столбец (в схеме он объявлен и с CHECK, и без него — записано
-       находкой), а кавычка в имени класса закрывает атрибут. */
-    var html = '<div class="td-match ' + KSLT_экранировать(match.status) + '" data-p1="' + (match.player1Id || '') + '" data-p2="' + (match.player2Id || '') + '"' +
-        (match.matchId ? ' data-match-id="' + match.matchId + '"' : '') + '>';
-
-    /* МЕТКА ГРУППЫ — ПОСЛЕ ПОСЕВА, ПЕРЕД ИМЕНЕМ, как в админке. Пустая
-       метка не рисуется вовсе: в сетке без групп её нет ни у кого, и
-       пустая плашка съедала бы ширину у имени. */
-    var p1Grp = tdМеткиГрупп[match.player1Id] || '';
-    var p2Grp = tdМеткиГрупп[match.player2Id] || '';
-
-    /* ПУСТАЯ КЛЕТКА ГОВОРИТ, КОГО ЖДЁТ. «A1» — победитель группы A, «IG1» —
-       победитель первого дополнительного матча, «Q1» — первый из отбора.
-       Это понятнее безликого «TBD» и видно сразу после жеребьёвки, когда
-       групп ещё никто не доиграл. Правило и слова взяты у админки
-       (`emptySlotName`, `bracket.js:6005`), а не придуманы заново.
-       BYE не трогаем: там соперника не будет вовсе, и ждать некого. */
-    var слоты = tdМеткиСлотов[match.matchId];
-    if (слоты) {
-        /* В КЛЕТКЕ С МЕТКАМИ ПУСТОЙ СЛОТ — ЭТО BYE, А НЕ «ЖДЁМ».
-           `создатьПустойПлейофф` пишет метку каждому слоту, куда кто-то
-           придёт; где не придёт — оставляет пусто. Значит отсутствие метки
-           в такой клетке и есть свободное место: играть не с кем, а не
-           «соперник ещё не определился». Слово Кости 02.10: «давай на
-           публичной поставим BYE, а не TBD, где понятно, что нет игр».
-           Замер на боевом CHALLENGERS: 14 меток на 16 слотов — свободных
-           мест ровно два, и admin их тоже зовёт BYE. */
-        if (!match.player1Id && p1.name === 'TBD') {
-            p1 = слоты.s1
-                ? { name: слоты.s1, оформление: 'метка', seed: null, country: '' }
-                : { name: 'BYE', seed: null, country: '' };
-        }
-        if (!match.player2Id && p2.name === 'TBD') {
-            p2 = слоты.s2
-                ? { name: слоты.s2, оформление: 'метка', seed: null, country: '' }
-                : { name: 'BYE', seed: null, country: '' };
-        }
-    }
-
-    // Player 1
-    html += '<div class="td-match-player ' + p1Class + '">' +
-        (p1.seed ? '<span class="td-seed">[' + p1.seed + ']</span>' : '<span class="td-seed"></span>') +
-        (p1Grp ? '<span class="td-grp-label">' + p1Grp + '</span>' : '') +
-        '<span class="td-player-name">' + имяВКлетку(p1) + '</span>';
-
-    if (match.status === 'live' && scores.length > 0) {
-        // Live: show current score
-        html += '<span class="td-match-score live-score">' + scores.join(' ') + '</span>';
-    } else {
-        scores.forEach(function(s) {
-            var parts = s.split('/');
-            html += '<span class="td-match-score">' + (parts[0] || '') + '</span>';
-        });
-    }
-    if (matchOutcome) html += '<span class="td-match-outcome">' + matchOutcome + '</span>';
-    html += '</div>';
-
-    // Player 2
-    html += '<div class="td-match-player ' + p2Class + '">' +
-        (p2.seed ? '<span class="td-seed">[' + p2.seed + ']</span>' : '<span class="td-seed"></span>') +
-        (p2Grp ? '<span class="td-grp-label">' + p2Grp + '</span>' : '') +
-        '<span class="td-player-name">' + имяВКлетку(p2) + '</span>';
-
-    if (match.status !== 'live') {
-        scores.forEach(function(s) {
-            var parts = s.split('/');
-            html += '<span class="td-match-score">' + (parts[1] || '') + '</span>';
-        });
-    }
-    html += '</div>';
-
-    // Prediction bar (non-completed matches with two known players)
-    if (predOpts && match.status !== 'completed' && match.player1Id && match.player2Id) {
-        var p1Data = predOpts.playersMap[match.player1Id];
-        var p2Data = predOpts.playersMap[match.player2Id];
-        if (p1Data && p2Data && (p1Data.points || p2Data.points)) {
-            var pred = calculatePrediction(p1Data, p2Data, predOpts.h2hMap);
-            var isLeftFav = pred.p1Pct >= pred.p2Pct;
-            // Подпись под полосой — фамилии. Имя пары приходит с разметкой
-            // (два игрока, каждый в своём теге), и «последнее слово» цепляло
-            // кусок тега: на экране появлялось «Кульджаев</span>»
-            var p1Short = краткоеИмя(p1.name);
-            var p2Short = краткоеИмя(p2.name);
-            html += '<div class="td-prediction">' +
-                '<div class="td-pred-names">' +
-                    '<span class="td-pred-name">' + KSLT_экранировать(p1Short) + '</span>' +
-                    '<span class="td-pred-name">' + KSLT_экранировать(p2Short) + '</span>' +
-                '</div>' +
-                '<div class="td-pred-bar" title="' + KSLT_экранировать(predOpts.tooltip) + '">' +
-                    '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-fav' : 'td-pred-dog') + '" data-width="' + pred.p1Pct + '%" style="width:0">' +
-                        '<span class="td-pred-pct">' + pred.p1Pct + '%</span>' +
-                    '</div>' +
-                    '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-dog' : 'td-pred-fav') + '" data-width="' + pred.p2Pct + '%" style="width:0">' +
-                        '<span class="td-pred-pct">' + pred.p2Pct + '%</span>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="td-pred-label">' + predOpts.label + '</div>' +
-            '</div>';
-        }
-    }
-
-    html += '</div>';
-    return html;
+    /* 28.10, КУСОК 217: разметка клетки переехала в общий дом
+       `js/kslt-setka.js` — тот же, что рисует сетку в приложении. Здесь
+       остались подстановки, которые знает только сайт: кто участник,
+       метка его группы, кого ждёт пустой слот, и полоса предсказания. */
+    return KSLT_SETKA.матч({
+        matchId: match.matchId, player1Id: match.player1Id, player2Id: match.player2Id,
+        score: match.score, winnerId: match.winnerId, status: match.status
+    }, {
+        игрок: function (id) {
+            var p = getPlayer(tournament, id);
+            return { имя: имяВКлетку(p), посев: p.seed };
+        },
+        меткаГруппы: function (id) { return tdМеткиГрупп[id] || ''; },
+        слот: function (matchId) { return tdМеткиСлотов[matchId]; },
+        проход: function (м) { return tdИтоги[м.roundNum + ':' + м.matchOrder] === 1; },
+        подвал: function () { return полосаПредсказания(tournament, match, predOpts); }
+    });
 }
+
+/**
+ * Полоса предсказания под клеткой — довесок САЙТА: в приложении её нет.
+ * Поэтому она осталась здесь, а не уехала в общий дом.
+ */
+function полосаПредсказания(tournament, match, predOpts) {
+    if (!predOpts || match.status === 'completed' || !match.player1Id || !match.player2Id) return '';
+    var p1Data = predOpts.playersMap[match.player1Id];
+    var p2Data = predOpts.playersMap[match.player2Id];
+    if (!p1Data || !p2Data || !(p1Data.points || p2Data.points)) return '';
+
+    var pred = calculatePrediction(p1Data, p2Data, predOpts.h2hMap);
+    var isLeftFav = pred.p1Pct >= pred.p2Pct;
+    // Подпись под полосой — фамилии. Имя пары приходит с разметкой (два
+    // игрока, каждый в своём теге), и «последнее слово» цепляло кусок
+    // тега: на экране появлялось «Кульджаев</span>»
+    var p1Short = краткоеИмя(getPlayer(tournament, match.player1Id).name);
+    var p2Short = краткоеИмя(getPlayer(tournament, match.player2Id).name);
+    return '<div class="td-prediction">' +
+        '<div class="td-pred-names">' +
+            '<span class="td-pred-name">' + KSLT_экранировать(p1Short) + '</span>' +
+            '<span class="td-pred-name">' + KSLT_экранировать(p2Short) + '</span>' +
+        '</div>' +
+        '<div class="td-pred-bar" title="' + KSLT_экранировать(predOpts.tooltip) + '">' +
+            '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-fav' : 'td-pred-dog') + '" data-width="' + pred.p1Pct + '%" style="width:0">' +
+                '<span class="td-pred-pct">' + pred.p1Pct + '%</span>' +
+            '</div>' +
+            '<div class="td-pred-fill ' + (isLeftFav ? 'td-pred-dog' : 'td-pred-fav') + '" data-width="' + pred.p2Pct + '%" style="width:0">' +
+                '<span class="td-pred-pct">' + pred.p2Pct + '%</span>' +
+            '</div>' +
+        '</div>' +
+        '<div class="td-pred-label">' + predOpts.label + '</div>' +
+    '</div>';
+}
+
 
 // ========================================
 // ROUND ROBIN

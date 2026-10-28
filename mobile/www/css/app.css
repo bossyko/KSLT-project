@@ -4445,12 +4445,113 @@ select.prof-field-input { color: var(--text); }
 .td-gt-ratio-pct { color: var(--text-muted); }
 .td-gt-pos { font-weight: 700; }
 .td-gt-pos.td-gt-win { color: var(--accent-text); }
-.td-gt-qualified { background: var(--accent-dim); }
+/* 28.10: строка прошедшего была залита целиком — `--accent-dim` в
+   тёмной теме почти сплошной лайм, и текст на нём терялся. Костя
+   увидел это глазами: «надо было только текст имени». Выделяем ИМЯ, а
+   не полосу: заливка во всю строку спорит ещё и со счётом в клетках. */
+.td-gt-qualified .td-gt-name,
+.td-gt-qualified .td-gt-num { color: var(--accent-text); font-weight: 600; }
 .td-grp-lot {
   display: block; margin-top: 2px;
   font-size: var(--fs-2xs); font-weight: 500; line-height: 1;
   color: var(--text-muted); white-space: normal;
 }
+
+/* ---- СЕТКА ПЛЕЙ-ОФФ (кусок 217, 28.10) ----
+   Разметку рисует общий дом `js/kslt-setka.js` — тот же, что на сайте.
+   Оформление своё, на шкале приложения. Сетка шире экрана и двигается
+   вбок внутри своей обёртки: 654 при видимых 343 на сайте, где Костя
+   этот вид принял. Столбцами её на 375 иначе не показать, а таблетками
+   кругов не виден путь пары из четвертьфинала в финал. */
+.td-bracket-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.td-bracket-scroll::-webkit-scrollbar { display: none; }
+.td-bracket {
+  display: flex;
+  align-items: stretch;
+  min-width: max-content;
+}
+.td-bracket-round {
+  display: flex;
+  flex-direction: column;
+  min-width: 176px;
+  position: relative;
+}
+.td-round-title {
+  text-align: center;
+  font-size: var(--fs-2xs); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-muted);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+.td-bracket-matches {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex: 1;
+}
+.td-match {
+  width: 168px;
+  margin: var(--space-1) 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.td-match-player {
+  display: flex; align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  font-size: var(--fs-xs);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.td-match-player:last-child { border-bottom: none; }
+/* ПОДЛОЖКА — `--accent-subtle`, А НЕ `--accent-dim`. Имя `--accent-dim`
+   значит разное в двух базах: на сайте это СПЛОШНОЙ цвет, в приложении
+   полупрозрачная подложка — и переопределено оно только под светлую
+   тему (`app.css:157`). В тёмной из `tokens.css` приходит сплошной лайм,
+   и заливка им съедает текст. Предупреждение об этом стоит прямо в
+   `tokens.css`, и я на него напоролся. */
+.td-match-player.winner { background: var(--accent-subtle); }
+.td-match-player.loser .td-player-name { color: var(--text-muted); }
+.td-seed { color: var(--text-muted); font-size: var(--fs-2xs); min-width: 16px; }
+/* Имя пары переносится в две строки, по одной на игрока: обрезать
+   фамилию многоточием нельзя — правило куска 216. */
+.td-player-name {
+  flex: 1; min-width: 0;
+  color: var(--text-sec);
+  line-height: var(--lh-snug);
+}
+.td-match-player.winner .td-player-name { color: var(--text); font-weight: 600; }
+.td-slot-wait { color: var(--text-sec); font-weight: 600; letter-spacing: 0.04em; }
+.td-match-score {
+  font-weight: 600; min-width: 16px; text-align: center;
+  color: var(--text-muted); font-size: var(--fs-xs);
+}
+.td-match-player.winner .td-match-score { color: var(--accent-text); }
+.td-match-outcome {
+  font-size: var(--fs-2xs); font-weight: 700;
+  padding: 0 var(--space-1); border-radius: var(--radius-xs);
+  background: var(--accent-subtle); color: var(--accent-text);
+  margin-left: 2px;
+}
+/* Столбец соединительных линий между кругами. */
+.td-connector-column {
+  display: flex; flex-direction: column;
+  width: 24px; flex-shrink: 0;
+}
+.td-connector-inner { flex: 1; display: flex; flex-direction: column; }
+.td-connector-pair { flex: 1; display: flex; flex-direction: column; position: relative; }
+.td-conn-top, .td-conn-bottom { flex: 1; position: relative; }
+.td-conn-top { border-right: 1px solid var(--border); border-top: 1px solid var(--border); }
+.td-conn-bottom { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.td-conn-mid { position: relative; height: 0; border-top: 1px solid var(--border); }
+.td-third-place { margin-top: var(--space-6); max-width: 176px; }
 
 /* ---- Отсечка длинного списка (кусок 216) ----
    Первые десять строк, остальное по нажатию — то же правило, что на

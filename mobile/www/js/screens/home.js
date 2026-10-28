@@ -606,16 +606,16 @@
       // GL mode: two separate league sections
       if (plMatches.length > 0) {
         playoffHtml += '<div class="mob-section-title">' + I18N.t('td.premierLeague') + '</div>';
-        playoffHtml += renderPlayoffWithPills(container, plMatches, regsMap, playersMap, isDbl, 'PL');
+        playoffHtml += сеткаПлейофф(plMatches, regsMap, playersMap, isDbl, 'PL');
       }
       if (clMatches.length > 0) {
         playoffHtml += '<div class="mob-section-title" style="margin-top:24px">' + I18N.t('td.consolationLeague') + '</div>';
-        playoffHtml += renderPlayoffWithPills(container, clMatches, regsMap, playersMap, isDbl, 'CL');
+        playoffHtml += сеткаПлейофф(clMatches, regsMap, playersMap, isDbl, 'CL');
       }
     } else if (ploffMatches.length > 0) {
       // Standard SE playoff
       playoffHtml += '<div class="mob-section-title">' + I18N.t('td.playoff') + '</div>';
-      playoffHtml += renderPlayoffWithPills(container, ploffMatches, regsMap, playersMap, isDbl, '');
+      playoffHtml += сеткаПлейофф(ploffMatches, regsMap, playersMap, isDbl, '');
     }
 
     /* Порядок больше не решается состоянием турнира: вкладки стоят
@@ -637,7 +637,7 @@
     if (tournament && tournament.bracket_type === 'fic') {
       html += renderFicMobile(tournament, matches, regsMap, playersMap, isDbl);
     } else {
-      html += renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, '');
+      html += сеткаПлейофф(matches, regsMap, playersMap, isDbl, '');
     }
     html += '</div>';
     container.innerHTML = html;
@@ -662,7 +662,7 @@
       ? window.KSLT_RULES.ficSections(tournament.draw_size || 16, I18N.lang === 'en' ? 'en' : 'ru')
       : [];
     if (!блоки.length) {
-      return renderPlayoffWithPills(null, matches, regsMap, playersMap, isDbl, '');
+      return сеткаПлейофф(matches, regsMap, playersMap, isDbl, '');
     }
 
     // Собираем круги: в каком круге какие блоки участвуют
@@ -712,62 +712,98 @@
     return html;
   }
 
-  function renderPlayoffWithPills(container, matches, regsMap, playersMap, isDbl, prefix) {
-    // Separate 3rd-place matches (supports '3RD', 'PL-3RD', 'CL-3RD')
-    // Отменённый матч за третье место в приложении не показываем
-    var thirdPlace = matches.filter(function(m) {
+  /**
+   * ПЛЕЙ-ОФФ СЕТКОЙ (кусок 217, 28.10).
+   *
+   * Было: таблетки кругов — виден один круг за раз, и путь пары из
+   * четвертьфинала в финал проследить нельзя. Костя сказал: «мне не
+   * нравится, хочется видеть СЕ сетку». Довод про боковой ход снят им
+   * же: на сайте сетка на 375 двигается вбок (654 при видимых 343), и
+   * этот вид он принял.
+   *
+   * Рисует ОБЩИЙ ДОМ `js/kslt-setka.js` — тот же, что на сайте.
+   */
+  function сеткаПлейофф(matches, regsMap, playersMap, isDbl, prefix) {
+    var заТретье = matches.filter(function (m) {
       if (m.status === 'cancelled') return false;
       return m.round === '3RD' || m.round === (prefix + '-3RD');
     });
-    var regularMatches = matches.filter(function(m) {
+    var обычные = matches.filter(function (m) {
       return m.round !== '3RD' && m.round !== (prefix + '-3RD');
     });
+    if (!обычные.length) return '';
 
-    // Group by round_number
-    var rounds = {};
-    regularMatches.forEach(function(m) {
+    var поКругам = {};
+    обычные.forEach(function (m) {
       var rn = m.round_number || 1;
-      if (!rounds[rn]) rounds[rn] = [];
-      rounds[rn].push(m);
+      (поКругам[rn] = поКругам[rn] || []).push(m);
     });
+    var номера = Object.keys(поКругам).map(Number);
+    var макс = Math.max.apply(null, номера);
+    /* Слева ранние круги, справа финал — как на сайте. ПОСЧИТАНО
+       замером, а не угадано: подписи `playoffRoundName` дали «Финал»
+       у НАИБОЛЬШЕГО номера, значит порядок по возрастанию. */
+    номера.sort(function (a, b) { return a - b; });
 
-    var thirdKey = '3RD-' + (prefix || 'SE');
-    if (thirdPlace.length > 0) {
-      rounds[thirdKey] = thirdPlace;
-    }
-
-    // Sort: Final → 3rd place → Semi → Quarter → ...
-    var numericKeys = Object.keys(rounds).filter(function(k) { return k.indexOf('3RD') !== 0; }).map(Number);
-    var maxRound = numericKeys.length > 0 ? Math.max.apply(null, numericKeys) : 1;
-    var roundKeys = numericKeys.sort(function(a, b) { return b - a; });
-    // Insert 3rd place right after final (index 1)
-    if (thirdPlace.length > 0) roundKeys.splice(1, 0, thirdKey);
-
-    if (roundKeys.length === 0) return '';
-
-    // Unique data-attribute prefix to avoid collisions between PL/CL pills
-    var uid = prefix || 'se';
-
-    // Build pills with relative round names
-    var html = '<div class="round-pills">';
-    roundKeys.forEach(function(rk, idx) {
-      var label = (typeof rk === 'string' && rk.indexOf('3RD') === 0) ? I18N.t('td.thirdPlace') : playoffRoundName(rk, maxRound);
-      html += '<button class="round-pill' + (idx === 0 ? ' active' : '') + '" data-rpill="' + uid + '" data-round="' + rk + '">' + label + '</button>';
-    });
-    html += '</div>';
-
-    // Build round panels
-    roundKeys.forEach(function(rk, idx) {
-      var rMatches = rounds[rk];
-      html += '<div class="round-panel" data-rpill="' + uid + '" data-round-panel="' + rk + '"' + (idx !== 0 ? ' style="display:none"' : '') + '>';
-      rMatches.forEach(function(m) {
-        html += renderMatchCard(m, regsMap, playersMap, isDbl);
+    var круги = номера.map(function (rn) {
+      var список = поКругам[rn].slice().sort(function (a, b) {
+        return (a.match_order || 0) - (b.match_order || 0);
       });
-      html += '</div>';
+      return {
+        name: playoffRoundName(rn, макс),
+        matches: список.map(вДом)
+      };
     });
 
-    return html;
+    var опции = {
+      игрок: function (id) {
+        if (!id) return { имя: 'TBD' };
+        return {
+          имя: getMobileTeamName(id, regsMap, playersMap, isDbl),
+          посев: посевИгрока(id, regsMap)
+        };
+      },
+      меткаГруппы: function (id) {
+        var reg = regsMap ? regsMap[id] : null;
+        if (!reg || !reg.group_number) return '';
+        return (KSLT_RULES.букваГруппы(reg.group_number) || reg.group_number) +
+               (reg.draw_position ? String(reg.draw_position) : '');
+      },
+      проход: function (м) {
+        /* В клетке окажется ровно один человек — значит это проход, и
+           напротив него пишем BYE, а не «ждём соперника». */
+        return (м.player1Id ? 1 : 0) + (м.player2Id ? 1 : 0) === 1;
+      }
+    };
+
+    var h = KSLT_SETKA.сетка(круги, опции);
+
+    if (заТретье.length) {
+      h += '<div class="td-third-place">';
+      h += '<div class="td-round-title">' + I18N.t('td.thirdPlace') + '</div>';
+      заТретье.forEach(function (m) { h += KSLT_SETKA.матч(вДом(m), опции); });
+      h += '</div>';
+    }
+    return h;
   }
+
+  /** Матч базы — в тот вид, который знает общий дом. */
+  function вДом(m) {
+    return {
+      matchId: m.id, player1Id: m.player1_id, player2Id: m.player2_id,
+      score: m.score || '', winnerId: m.winner_id, status: m.status || 'upcoming'
+    };
+  }
+
+  function посевИгрока(id, regsMap) {
+    var reg = regsMap ? regsMap[id] : null;
+    return reg && reg.seed_number ? reg.seed_number : null;
+  }
+
+  /* 28.10, КУСОК 217: `renderPlayoffWithPills` снесена — плей-офф
+     рисует общий дом сеткой. Мёртвой названа ПОСЛЕ ПРОВЕРКИ: зовов не
+     осталось ни одного, все шесть переведены на `сеткаПлейофф`. */
+
 
   /** Кнопки счёта в списке круга. Зовут то же окно, что и «Мои матчи». */
   function bindScoreButtons(container) {
