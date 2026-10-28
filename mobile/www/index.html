@@ -40,8 +40,8 @@
   <div class="status-bar-spacer"></div>
 
   <!-- Header -->
-  <header class="header">
-    <div class="header-logo" id="headerLogo" style="cursor:pointer">
+  <header class="header" role="banner">
+    <div class="header-logo" id="headerLogo" style="cursor:pointer" role="button" tabindex="0">
       <img src="img/kslt-logo.svg" alt="KSLT" class="header-logo-img">
     </div>
     <div class="header-actions">
@@ -56,7 +56,7 @@
   </header>
 
   <!-- Screens container -->
-  <div class="screens">
+  <main class="screens" id="appMain">
 
     <!-- HOME -->
     <div class="screen active" id="screenHome">
@@ -86,11 +86,11 @@
           <input type="text" id="tournamentSearch" placeholder="Поиск турнира..." data-i18n-ph="tournaments.search">
         </div>
       </div>
-      <div class="filters-row" id="tournamentStatusChips">
-        <button class="filter-chip active" data-status="all" data-i18n="tournaments.all">Все</button>
-        <button class="filter-chip" data-status="upcoming" data-i18n="tournaments.upcoming">Предстоящие</button>
-        <button class="filter-chip" data-status="live" data-i18n="tournaments.live">Текущие</button>
-        <button class="filter-chip" data-status="completed" data-i18n="tournaments.completed">Завершённые</button>
+      <div class="filters-row" id="tournamentStatusChips" role="group" data-i18n-aria="a11y.fStatus" aria-label="Состояние турнира">
+        <button class="filter-chip active" data-status="all" aria-pressed="true" data-i18n="tournaments.all">Все</button>
+        <button class="filter-chip" data-status="upcoming" aria-pressed="false" data-i18n="tournaments.upcoming">Предстоящие</button>
+        <button class="filter-chip" data-status="live" aria-pressed="false" data-i18n="tournaments.live">Текущие</button>
+        <button class="filter-chip" data-status="completed" aria-pressed="false" data-i18n="tournaments.completed">Завершённые</button>
       </div>
       <div class="tc-pull-indicator" id="tcPullIndicator"><span class="tc-pull-spinner"></span><span class="tc-pull-text"></span></div>
       <div class="tournament-list animate-in" id="tournamentList"></div>
@@ -147,10 +147,10 @@
           <input type="text" id="newsSearch" placeholder="Поиск новости..." data-i18n-ph="news.search">
         </div>
       </div>
-      <div class="filters-row" id="newsChips">
-        <button class="filter-chip active" data-tag="all" data-i18n="news.all">Все</button>
-        <button class="filter-chip" data-tag="tournaments" data-i18n="news.tournaments">Турниры</button>
-        <button class="filter-chip" data-tag="club" data-i18n="news.club">КСЛТ</button>
+      <div class="filters-row" id="newsChips" role="group" data-i18n-aria="a11y.fSection" aria-label="Раздел новостей">
+        <button class="filter-chip active" data-tag="all" aria-pressed="true" data-i18n="news.all">Все</button>
+        <button class="filter-chip" data-tag="tournaments" aria-pressed="false" data-i18n="news.tournaments">Турниры</button>
+        <button class="filter-chip" data-tag="club" aria-pressed="false" data-i18n="news.club">КСЛТ</button>
       </div>
       <div class="news-list animate-in" id="newsList"></div>
     </div>
@@ -169,9 +169,9 @@
         <h1 data-i18n="battles.title">Баттлы</h1>
         <p data-i18n="battles.subtitle">Голосуй за любимого игрока</p>
       </div>
-      <div class="filters-row" id="battleChips">
-        <button class="filter-chip active" data-filter="active" data-i18n="battles.active">Активные</button>
-        <button class="filter-chip" data-filter="completed" data-i18n="battles.completed">Завершённые</button>
+      <div class="filters-row" id="battleChips" role="group" data-i18n-aria="a11y.fBattle" aria-label="Состояние баттла">
+        <button class="filter-chip active" data-filter="active" aria-pressed="true" data-i18n="battles.active">Активные</button>
+        <button class="filter-chip" data-filter="completed" aria-pressed="false" data-i18n="battles.completed">Завершённые</button>
       </div>
       <div class="animate-in" id="battleList"></div>
     </div>
@@ -190,17 +190,17 @@
       </div>
       <!-- Отбор тот же, что на сайте: сначала пол, потом уровень словами.
            Голые числа 2.5 / 3.0 новичку ничего не говорят -->
-      <div class="filters-row" id="partnerGenderChips">
-        <button class="filter-chip active" data-gender="all" data-i18n="partners.fAll">Все</button>
-        <button class="filter-chip" data-gender="men" data-i18n="partners.fMen">Мужчины</button>
-        <button class="filter-chip" data-gender="women" data-i18n="partners.fWomen">Женщины</button>
+      <div class="filters-row" id="partnerGenderChips" role="group" data-i18n-aria="a11y.fGender" aria-label="Пол">
+        <button class="filter-chip active" data-gender="all" aria-pressed="true" data-i18n="partners.fAll">Все</button>
+        <button class="filter-chip" data-gender="men" aria-pressed="false" data-i18n="partners.fMen">Мужчины</button>
+        <button class="filter-chip" data-gender="women" aria-pressed="false" data-i18n="partners.fWomen">Женщины</button>
       </div>
-      <div class="filters-row" id="partnerNtrpChips">
-        <button class="filter-chip active" data-filter="all" data-i18n="partners.lvlAll">Все уровни</button>
-        <button class="filter-chip" data-filter="1-2.5" data-i18n="partners.lvl1">Начинающий</button>
-        <button class="filter-chip" data-filter="2.5-3.5" data-i18n="partners.lvl2">Средний</button>
-        <button class="filter-chip" data-filter="3.5-4.5" data-i18n="partners.lvl3">Продвинутый</button>
-        <button class="filter-chip" data-filter="4.5-5.5" data-i18n="partners.lvl4">Сильный</button>
+      <div class="filters-row" id="partnerNtrpChips" role="group" data-i18n-aria="a11y.fLevel" aria-label="Уровень игры">
+        <button class="filter-chip active" data-filter="all" aria-pressed="true" data-i18n="partners.lvlAll">Все уровни</button>
+        <button class="filter-chip" data-filter="1-2.5" aria-pressed="false" data-i18n="partners.lvl1">Начинающий</button>
+        <button class="filter-chip" data-filter="2.5-3.5" aria-pressed="false" data-i18n="partners.lvl2">Средний</button>
+        <button class="filter-chip" data-filter="3.5-4.5" aria-pressed="false" data-i18n="partners.lvl3">Продвинутый</button>
+        <button class="filter-chip" data-filter="4.5-5.5" aria-pressed="false" data-i18n="partners.lvl4">Сильный</button>
       </div>
       <div class="animate-in" id="partnersList"></div>
     </div>
@@ -229,14 +229,14 @@
         <h1 data-i18n="courts.title">Корты</h1>
         <p data-i18n="courts.subtitle">Теннисные площадки Бишкека</p>
       </div>
-      <div class="filters-row" id="courtTypeChips">
-        <button class="filter-chip active" data-filter="all" data-i18n="courts.all">Все</button>
-        <button class="filter-chip" data-filter="indoor">Indoor</button>
-        <button class="filter-chip" data-filter="outdoor">Outdoor</button>
+      <div class="filters-row" id="courtTypeChips" role="group" data-i18n-aria="a11y.fCourtType" aria-label="Тип корта">
+        <button class="filter-chip active" data-filter="all" aria-pressed="true" data-i18n="courts.all">Все</button>
+        <button class="filter-chip" data-filter="indoor" aria-pressed="false">Indoor</button>
+        <button class="filter-chip" data-filter="outdoor" aria-pressed="false">Outdoor</button>
       </div>
       <!-- Город и покрытие — как на сайте. Собираются из самих кортов -->
-      <div class="filters-row" id="courtCityChips"></div>
-      <div class="filters-row" id="courtSurfaceChips"></div>
+      <div class="filters-row" id="courtCityChips" role="group" data-i18n-aria="a11y.fCity" aria-label="Город"></div>
+      <div class="filters-row" id="courtSurfaceChips" role="group" data-i18n-aria="a11y.fSurface" aria-label="Покрытие"></div>
       <div class="animate-in" id="courtsList"></div>
     </div>
 
@@ -246,31 +246,31 @@
         <h1 data-i18n="live.title">Live</h1>
         <p data-i18n="live.subtitle">Матчи в реальном времени</p>
       </div>
-      <div id="liveList"></div>
+      <div id="liveList" aria-live="polite"></div>
     </div>
 
-  </div><!-- /screens -->
+  </main><!-- /screens -->
 
   <!-- TAB BAR -->
-  <nav class="tab-bar">
-    <button class="tab-item active" data-screen="screenHome">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  <nav class="tab-bar" role="navigation" data-i18n-aria="menu.sections" aria-label="Разделы">
+    <button class="tab-item active" data-screen="screenHome" aria-current="page">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span data-i18n="nav.home">Главная</span>
     </button>
     <button class="tab-item" data-screen="screenTournaments">
-      <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
       <span data-i18n="nav.tournaments">Турниры</span>
     </button>
     <button class="tab-item" data-screen="screenRating">
-      <svg viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
       <span data-i18n="nav.rating">Рейтинг</span>
     </button>
     <button class="tab-item" data-screen="screenNews">
-      <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>
       <span data-i18n="nav.news">Новости</span>
     </button>
     <button class="tab-item" data-screen="screenProfile">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span data-i18n="nav.profile">Профиль</span>
     </button>
   </nav>
@@ -649,7 +649,7 @@
 
 <!-- App JS -->
 <script src="js/group-standings.js?v=1"></script>
-<script src="js/i18n.js?v=5"></script>
+<script src="js/i18n.js?v=6"></script>
 <script src="js/phone.js?v=1"></script>
 <script src="js/supabase-config.js?v=3"></script>
 <script src="js/kslt-rules.js?v=1"></script>
@@ -670,19 +670,19 @@
 <script src="js/kslt-chisla-kluba.js?v=1"></script>
 <script src="js/screens/home-blocks.js?v=3"></script>
 <script src="js/tournament-register.js?v=1"></script>
-<script src="js/screens/tournaments.js?v=2"></script>
+<script src="js/screens/tournaments.js?v=3"></script>
 <script src="js/screens/rating.js?v=3"></script>
-<script src="js/screens/news.js?v=1"></script>
+<script src="js/screens/news.js?v=2"></script>
 <script src="js/screens/profile.js?v=1"></script>
-<script src="js/screens/live.js?v=2"></script>
-<script src="js/screens/battles.js?v=2"></script>
+<script src="js/screens/live.js?v=3"></script>
+<script src="js/screens/battles.js?v=3"></script>
 <script src="js/rating-chart.js?v=1"></script>
 <script src="js/screens/player-detail.js?v=2"></script>
-<script src="js/screens/coaches.js?v=1"></script>
-<script src="js/screens/courts.js?v=3"></script>
-<script src="js/screens/partners.js?v=3"></script>
+<script src="js/screens/coaches.js?v=2"></script>
+<script src="js/screens/courts.js?v=4"></script>
+<script src="js/screens/partners.js?v=4"></script>
 <script src="js/badge-celebration.js?v=1"></script>
 <script src="js/push.js?v=1"></script>
-<script src="js/app.js?v=1"></script>
+<script src="js/app.js?v=3"></script>
 </body>
 </html>

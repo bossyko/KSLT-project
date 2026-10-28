@@ -142,7 +142,8 @@
     for (var i = 0; i < visibleCount; i++) {
       var p = filtered[i];
 
-      html += '<div class="partner-card"' + (isGuest ? '' : ' data-player-id="' + p.id + '"') + '>';
+      html += '<div class="partner-card" role="listitem" aria-label="' + esc(p.name) + '"' +
+              (isGuest ? '' : ' data-player-id="' + p.id + '" tabindex="0"') + '>';
       html += '<div class="partner-avatar">';
       html += p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : '<span>' + initials(p.name) + '</span>';
       html += '</div>';
@@ -167,7 +168,7 @@
 
     // Guest overlay
     if (isGuest && filtered.length > GUEST_VISIBLE) {
-      html += '<div class="rr-guest-overlay">' +
+      html += '<div class="rr-guest-overlay" role="listitem">' +
         '<div class="rr-guest-cta">' +
           '<div class="rr-guest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>' +
           '<div class="rr-guest-title">' + I18N.t('guest.partnersTitle') + '</div>' +
@@ -176,6 +177,8 @@
     }
 
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('partners.title'));
 
     if (isGuest) {
       var loginBtn = document.getElementById('partnersLoginBtn');
@@ -229,9 +232,11 @@
   };
 
   function renderSponsors(el, sponsors) {
-    var html = '<div class="sponsors-grid">';
+    var html = '<div class="sponsors-grid" role="list" aria-label="' +
+               esc(I18N.t('sponsors.title')) + '">';
     sponsors.forEach(function(s) {
-      html += '<div class="sponsor-card" data-sponsor="' + esc(s.id) + '">';
+      html += '<div class="sponsor-card" role="listitem" tabindex="0"' +
+              ' aria-label="' + esc(s.name) + '" data-sponsor="' + esc(s.id) + '">';
       if (s.logo) html += '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + '" class="sponsor-logo">';
       html += '<div class="sponsor-name">' + esc(s.name) + '</div>';
       if (s.description) html += '<div class="sponsor-desc">' + esc(s.description) + '</div>';

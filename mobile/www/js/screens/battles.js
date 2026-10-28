@@ -112,7 +112,9 @@
         return h + '</div></div>';
       }
 
-      html += '<div class="battle-card" data-battle-id="' + b.id + '">' +
+      html += '<div class="battle-card" data-battle-id="' + b.id + '"' +
+        ' role="listitem" tabindex="0" aria-label="' +
+        esc(b.battle_title || I18N.t('battles.battle')) + '">' +
         '<div class="battle-title">' + esc(b.battle_title || I18N.t('battles.battle')) + '</div>' +
         (fmtLabel ? '<div class="battle-format">' + esc(fmtLabel) + '</div>' : '') +
         '<div class="battle-vs">' +
@@ -126,6 +128,8 @@
       '</div>';
     });
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('battles.title'));
 
     // Bind card clicks → open detail
     el.querySelectorAll('.battle-card[data-battle-id]').forEach(function(card) {

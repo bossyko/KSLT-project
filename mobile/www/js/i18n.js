@@ -816,7 +816,21 @@
     'td.venue':        { ru: 'Место проведения', en: 'Venue',          kg: 'Өткөрүлүүчү жер' },
     'td.navigate':     { ru: 'Навигация',        en: 'Navigate',       kg: 'Навигация' },
     'td.openIn':       { ru: 'Открыть в',        en: 'Open in',        kg: 'Ачуу' },
-    'td.description':  { ru: 'Описание',         en: 'Description',    kg: 'Сүрөттөмө' }
+    'td.description':  { ru: 'Описание',         en: 'Description',    kg: 'Сүрөттөмө' },
+
+    /* 28.10, КУСОК 215: подписи для диктора. Ряды фильтров стоят без
+       имени — диктор читал «Все, Предстоящие, Текущие», не сказав, ЧТО
+       этим выбирают. Имя принадлежит РЯДУ, а не кнопке: у кнопки своё
+       имя уже есть. */
+    'a11y.fStatus':    { ru: 'Состояние турнира',  en: 'Tournament status', kg: 'Мелдештин абалы' },
+    'a11y.fSection':   { ru: 'Раздел новостей',    en: 'News section',      kg: 'Жаңылык бөлүмү' },
+    'a11y.fBattle':    { ru: 'Состояние баттла',   en: 'Battle status',     kg: 'Баттлдын абалы' },
+    'a11y.fGender':    { ru: 'Пол',                en: 'Gender',            kg: 'Жынысы' },
+    'a11y.fLevel':     { ru: 'Уровень игры',       en: 'Playing level',     kg: 'Оюн деңгээли' },
+    'a11y.fCourtType': { ru: 'Тип корта',          en: 'Court type',        kg: 'Корттун түрү' },
+    'a11y.fCity':      { ru: 'Город',              en: 'City',              kg: 'Шаар' },
+    'a11y.fSurface':   { ru: 'Покрытие',           en: 'Surface',           kg: 'Каптама' },
+    'a11y.liveList':   { ru: 'Матчи в прямом эфире', en: 'Live matches',    kg: 'Түз эфирдеги матчтар' }
   };
 
   // === Public API ===
@@ -865,6 +879,14 @@
         els[i].textContent = val;
       }
     }
+    /* Подпись для диктора тоже переводится. До куска 215 её не было
+       вовсе, а единственная зашитая — «Разделы» у полосы вкладок —
+       оставалась русской на всех языках. */
+    var ariaEls = document.querySelectorAll('[data-i18n-aria]');
+    for (var a = 0; a < ariaEls.length; a++) {
+      ariaEls[a].setAttribute('aria-label', I18N.t(ariaEls[a].getAttribute('data-i18n-aria')));
+    }
+
     // Update placeholders with data-i18n-ph
     var phEls = document.querySelectorAll('[data-i18n-ph]');
     for (var j = 0; j < phEls.length; j++) {

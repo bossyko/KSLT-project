@@ -24,8 +24,19 @@
     supabaseClient.from('live_matches')
       .select('*, player1:players!live_matches_player1_id_fkey(id, name, name_en, name_kg, photo), player2:players!live_matches_player2_id_fkey(id, name, name_en, name_kg, photo)')
       .in('status', ['live', 'warmup', 'paused'])
-      .order('updated_at', { ascending: false })
+      /* 28.10, КУСОК 215: сортировка шла по `updated_at`, которого у
+         `live_matches` НЕТ (столбцы: id, match_id, …, created_at,
+         started_at, completed_at). Postgres отвечал 400, экран Live был
+         пуст ВСЕГДА — даже когда матч идёт. Сортируем по `created_at`:
+         он есть у каждой строки, в отличие от `started_at`, пустого у
+         разминки. Ошибку запроса теперь видно, а не проглатывается. */
+      .order('created_at', { ascending: false })
       .then(function(r) {
+        if (r.error) {
+          console.error('[KSLT live] запрос матчей не прошёл:', r.error.message);
+          renderList(el, []);
+          return;
+        }
         renderList(el, r.data || []);
       });
   };
@@ -52,7 +63,8 @@
       var badgeClass = isWarmup ? 'live-badge-warmup' : isPaused ? 'live-badge-paused' : '';
       var badgeText = isWarmup ? I18N.t('live.warmup') : isPaused ? I18N.t('live.paused') : 'LIVE';
 
-      html += '<div class="live-list-card" data-match-id="' + m.id + '">' +
+      html += '<div class="live-list-card" data-match-id="' + m.id + '"' +
+        ' role="listitem" tabindex="0" aria-label="' + esc(p1Name + ' — ' + p2Name) + '">' +
         '<div class="live-list-top">' +
           '<span class="live-badge ' + badgeClass + '">' + badgeText + '</span>' +
           '<span class="live-list-info">' + esc(m.tournament_label || '') + '</span>' +
@@ -77,6 +89,8 @@
       '</div>';
     });
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('a11y.liveList'));
 
     // Bind click events
     el.querySelectorAll('.live-list-card').forEach(function(card) {

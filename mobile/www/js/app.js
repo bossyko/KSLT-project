@@ -59,7 +59,14 @@
 
   APP.switchScreen = function(screenId) {
     screens.forEach(function(s) { s.classList.remove('active'); });
-    tabs.forEach(function(t) { t.classList.remove('active'); });
+    tabs.forEach(function(t) {
+      t.classList.remove('active');
+      /* 28.10, КУСОК 215: диктор узнаёт текущий раздел по `aria-current`,
+         а не по классу — класс он не видит вовсе. Метка снимается со всех
+         и ставится одной, ровно там же, где и подсветка. ОДНО МЕСТО НА
+         ОДНО СОСТОЯНИЕ: разойтись им негде. */
+      t.removeAttribute('aria-current');
+    });
 
     var target = document.getElementById(screenId);
     if (target) {
@@ -70,6 +77,7 @@
     tabs.forEach(function(t) {
       if (t.getAttribute('data-screen') === screenId) {
         t.classList.add('active');
+        t.setAttribute('aria-current', 'page');
       }
     });
 
@@ -173,8 +181,14 @@
     container.addEventListener('click', function(e) {
       var chip = e.target.closest('.filter-chip');
       if (!chip) return;
-      container.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+      /* Нажатость для диктора ставится ТАМ ЖЕ, где класс: разъедутся —
+         диктор будет называть выбранным прежний фильтр (кусок 215). */
+      container.querySelectorAll('.filter-chip').forEach(function(c) {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
       chip.classList.add('active');
+      chip.setAttribute('aria-pressed', 'true');
       var val = chip.getAttribute('data-status') || chip.getAttribute('data-tag') || chip.getAttribute('data-filter') || chip.textContent.trim();
       callback(val);
     });

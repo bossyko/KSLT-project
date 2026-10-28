@@ -84,7 +84,8 @@
         ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
       var bgStyle = картинка
         ? 'background-image:url(' + картинка + ');background-size:cover;background-position:center' : '';
-      html += '<div class="news-list-item" data-news-id="' + n.id + '">' +
+      html += '<div class="news-list-item" data-news-id="' + n.id + '"' +
+        ' role="listitem" tabindex="0" aria-label="' + esc(n.title || '') + '">' +
         '<div class="news-list-img' + (своя ? ' news-own-cover' : '') + '"' +
           (bgStyle ? ' style="' + bgStyle + '"' : '') + '>' +
           (картинка ? '' : '<span class="news-list-img-icon">📰</span>') +
@@ -102,7 +103,11 @@
         '</div>' +
       '</div>';
     });
+    /* 28.10, кусок 215: роль списка ставится вместе с содержимым — так
+       ей негде разойтись с тем, что внутри. */
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('news.title'));
 
     // Click → open news detail overlay (uses HOME's overlay)
     el.querySelectorAll('.news-list-item[data-news-id]').forEach(function(item) {

@@ -207,7 +207,9 @@ const КУСКИ = [
     ['шкала всего приложения', 'check-shkala-prilozheniya.js',
      'check-shkala-prilozheniya-otkat.js'],
     ['словарь приложения', 'check-slovar-prilozheniya.js',
-     'check-slovar-prilozheniya-otkat.js']
+     'check-slovar-prilozheniya-otkat.js'],
+    ['доступность приложения', 'check-dostupnost-prilozheniya.js',
+     'check-dostupnost-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {

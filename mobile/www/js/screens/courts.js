@@ -116,9 +116,11 @@
     function chips(box, values, current, labelOf) {
       if (values.length < 2) { box.innerHTML = ''; return; }   // выбирать не из чего
       var html = '<button class="filter-chip' + (current === 'all' ? ' active' : '') +
+                 '" aria-pressed="' + (current === 'all') +
                  '" data-filter="all">' + I18N.t('courts.all') + '</button>';
       values.forEach(function(v) {
         html += '<button class="filter-chip' + (current === v ? ' active' : '') +
+                '" aria-pressed="' + (current === v) +
                 '" data-filter="' + esc(v) + '">' + esc(labelOf(v)) + '</button>';
       });
       box.innerHTML = html;
@@ -173,7 +175,8 @@
     var html = '';
     for (var i = 0; i < visibleCount; i++) {
       var c = courtsToShow[i];
-      html += '<div class="court-card" data-court-idx="' + i + '">';
+      html += '<div class="court-card" data-court-idx="' + i + '"' +
+        ' role="listitem" tabindex="0" aria-label="' + esc(c.name || '') + '">';
       if (c.photo) {
         html += '<div class="court-card-photo"><img src="' + esc(c.photo) + '" alt="">';
         if (c.partner) html += '<span class="coach-partner-badge">Партнёр</span>';
@@ -194,7 +197,7 @@
 
     // Guest blur overlay
     if (isGuest && courtsToShow.length > GUEST_VISIBLE) {
-      html += '<div class="rr-guest-overlay">' +
+      html += '<div class="rr-guest-overlay" role="listitem">' +
         '<div class="rr-guest-cta">' +
           '<div class="rr-guest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>' +
           '<div class="rr-guest-title">' + I18N.t('guest.courtsTitle') + '</div>' +
@@ -204,6 +207,8 @@
     }
 
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('courts.title'));
 
     // Login button
     var loginBtn = document.getElementById('courtsLoginBtn');

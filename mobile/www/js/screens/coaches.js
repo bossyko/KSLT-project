@@ -84,7 +84,8 @@
     var html = '';
     for (var i = 0; i < visibleCount; i++) {
       var c = allCoaches[i];
-      html += '<div class="coach-card" data-coach-idx="' + i + '">';
+      html += '<div class="coach-card" data-coach-idx="' + i + '"' +
+        ' role="listitem" tabindex="0" aria-label="' + esc(c.name || '') + '">';
       html += '<div class="coach-card-photo">';
       html += c.photo
         ? '<img src="' + esc(c.photo) + '" alt="">'
@@ -110,7 +111,7 @@
 
     // Guest blur overlay
     if (isGuest && allCoaches.length > GUEST_VISIBLE) {
-      html += '<div class="rr-guest-overlay">' +
+      html += '<div class="rr-guest-overlay" role="listitem">' +
         '<div class="rr-guest-cta">' +
           '<div class="rr-guest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>' +
           '<div class="rr-guest-title">Все тренеры доступны<br>после входа</div>' +
@@ -120,6 +121,8 @@
     }
 
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('coaches.title'));
 
     // Login button
     var loginBtn = document.getElementById('coachesLoginBtn');

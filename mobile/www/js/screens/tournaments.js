@@ -153,6 +153,8 @@
       html += renderCard(t, today);
     });
     el.innerHTML = html;
+    el.setAttribute('role', 'list');
+    el.setAttribute('aria-label', I18N.t('tournaments.title'));
 
     // Click handlers
     el.querySelectorAll('.tc-card').forEach(function(card) {
@@ -193,7 +195,10 @@
     else if (formatText === 'doubles') formatText = I18N.t('format.doubles');
     else if (formatText === 'mixed') formatText = I18N.t('format.mixed');
 
-    var html = '<div class="tc-card" data-tournament-id="' + t.id + '">';
+    /* 28.10, КУСОК 215: карточка турнира — элемент списка. Нажимается
+       она целиком, поэтому получает и роль кнопки, и доступ с клавиатуры. */
+    var html = '<div class="tc-card" data-tournament-id="' + t.id + '"' +
+      ' role="listitem" tabindex="0" aria-label="' + esc(t.title) + '">';
 
     // Image block
     html += '<div class="tc-img" style="' + imgStyle + '">';
