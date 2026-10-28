@@ -364,9 +364,23 @@
    * `getMobileTeamName` сокращает до «А. Канаев»: это для клетки сетки,
    * где ширина 168. В таблице места больше, и обрезать нечего.
    */
+  /** «Алан Аджибеков» → «А. Аджибеков». Одно слово остаётся как есть. */
+  function коротко(имя) {
+    var ч = String(имя).trim().split(/\s+/);
+    if (ч.length < 2) return имя;
+    return ч[0].charAt(0) + '. ' + ч.slice(1).join(' ');
+  }
+
   function полноеИмя(playerId, regsMap, playersMap, isDbl) {
     var p = playersMap[playerId];
     var капитан = p ? esc(I18N.поле(p, 'name') || p.name) : (playerId ? 'TBD' : 'BYE');
+    /* ОДИНОЧНИК ПИШЕТСЯ ЦЕЛИКОМ, ПАРА — СОКРАЩЁННО (кусок 225).
+       Прежняя запись в этом файле говорила: «в таблице места больше, и
+       обрезать нечего». ЗАМЕР НА НАСТОЯЩЕЙ РАЗМЕТКЕ ЕЁ ОТМЕНИЛ: колонка
+       имени 120 px, вся таблица 399.7 при экране 411 — то есть запаса
+       11 px. Пара полными именами занимала ЧЕТЫРЕ строки и 79.4 px на
+       ряд; сокращённая при колонке 152 — две строки и 50 px.
+       Один человек в клетку помещается, двое — нет. */
     if (!isDbl) return '<span class="tm-pair"><span class="tm-p">' + капитан + '</span></span>';
     var reg = regsMap ? regsMap[playerId] : null;
     var напарник = '';
@@ -376,8 +390,8 @@
     } else if (reg && reg.partner_external_name) {
       напарник = esc(reg.partner_external_name);
     }
-    return '<span class="tm-pair"><span class="tm-p">' + капитан + '</span>' +
-           (напарник ? '<span class="tm-p">' + напарник + '</span>' : '') + '</span>';
+    return '<span class="tm-pair"><span class="tm-p">' + коротко(капитан) + '</span>' +
+           (напарник ? '<span class="tm-p">' + коротко(напарник) + '</span>' : '') + '</span>';
   }
 
   /** Тот же состав, но чистым текстом — для подписей диктору. */

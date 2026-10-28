@@ -4364,7 +4364,7 @@ select.prof-field-input { color: var(--text); }
 /* Имя целиком — один блок, чтобы номер посева стоял СЛЕВА от него, а не
    над ним (кусок 222). Выравнивание наследуется: вид клетки не меняем,
    меняем только место посева. */
-.tm-pair { display: inline-block; vertical-align: top; text-align: inherit; }
+.tm-pair { display: block; overflow: hidden; text-align: inherit; }
 
 /* Обводка нажатой вкладки. Браузер рисовал свою синюю — она не из нашей
    палитры и видна была даже после нажатия мышью. Своя обводка только
@@ -4486,9 +4486,8 @@ select.prof-field-input { color: var(--text); }
      float — номер и имя наложились друг на друга в одной точке;
      flex — номер 13 px слева, имя рядом, высота клетки 63.3 → 48.2.
      Взят flex. */
-  display: flex; align-items: flex-start; gap: var(--space-1);
   text-align: left; white-space: normal;
-  min-width: 120px; color: var(--text);
+  min-width: 152px; color: var(--text);
   line-height: var(--lh-snug);
 }
 .td-gt-opp, .td-gt-score, .td-gt-empty, .td-gt-self { min-width: 48px; }
@@ -4500,7 +4499,18 @@ select.prof-field-input { color: var(--text); }
   white-space: nowrap;
 }
 /* Посев стоит ПЕРЕД именем и не отрывается от него (кусок 219). */
-/* Отступ даёт `gap` клетки — второго определения не заводим. */
+/* ПОСЕВ ПЛАВАЕТ СЛЕВА, ИМЯ ОБТЕКАЕТ ЕГО СПРАВА (кусок 225).
+   `flex` куска 224 ставил номер на первую строку, но отнимал у имени
+   ширину, и пара разъезжалась на четыре строки — Костя увидел и сказал
+   «ещё хуже стал». Замер на НАСТОЯЩЕЙ разметке, восемь колонок:
+     сейчас (flex, полные)      — 4 строки, ряд 79.4
+     посев ПОСЛЕ имени          — 4 строки, ряд 79.4 (не помогает вовсе)
+     плав + полные, колонка 120 — 4 строки, ряд 79.4
+     плав + сокр., колонка 152  — 2 строки, ряд 50
+   Взято последнее. Цена названа: таблица 399.7 → 429.7 при экране 411,
+   то есть 18.7 px бокового хода — он у таблицы и так был, а колонки
+   номера и имени закреплены и никуда не уезжают. */
+.td-gt-name .td-gt-seed { float: left; margin-right: var(--space-1); }
 .td-gt-self { color: var(--text-muted); }
 .td-gt-empty { color: var(--text-muted); }
 .td-gt-score.td-gt-win { color: var(--accent-text); font-weight: 600; }
