@@ -22,15 +22,13 @@
     return d.innerHTML;
   }
 
-  function lang() { return (I18N && I18N.currentLang) || 'ru'; }
-
-  /** Название и описание на языке, который выбран в приложении. */
-  function field(row, base) {
-    var l = lang();
-    if (l === 'en') return row[base + '_en'] || row[base] || '';
-    if (l === 'kg') return row[base + '_kg'] || row[base] || '';
-    return row[base] || '';
-  }
+  /* 28.10, КУСОК 214: здесь жил свой выбор языкового поля, и читал он
+     `I18N.currentLang` — имени, которого в `js/i18n.js` НЕТ ВОВСЕ (язык
+     лежит в `I18N.lang`). Значение всегда выходило `undefined`, язык
+     считался русским, и названия ачивок с описаниями показывались
+     по-русски на всех трёх языках — двадцать четыре строки на одном
+     экране. Выбор переехал в дом `I18N.поле`. */
+  function field(row, base) { return I18N.поле(row, base); }
 
   function accessLevel() {
     var AUTH = window.KSLT_AUTH;

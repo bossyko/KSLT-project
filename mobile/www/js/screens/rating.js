@@ -132,8 +132,10 @@
   }
 
   function getCatLabel(cat) {
-    if (I18N && I18N.currentLang === 'en' && cat.name_en) return cat.name_en;
-    if (I18N && I18N.currentLang === 'kg' && cat.name_kg) return cat.name_kg;
+    /* 28.10, кусок 214: было `I18N.currentLang` — имени нет, и разряды
+       на английском и киргизском оставались русскими. */
+    var своё = I18N.поле(cat, 'name');
+    if (своё) return своё;
     return cat.name || cat.id;
   }
 

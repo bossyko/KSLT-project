@@ -21,7 +21,11 @@
     var cache = null;
 
     function lang() {
-        if (window.KSLT_I18N && window.KSLT_I18N.currentLang) return window.KSLT_I18N.currentLang;
+        /* 28.10, КУСОК 214: было `currentLang` — имени в `js/i18n.js` нет
+           вовсе, язык лежит в `lang`. Условие никогда не срабатывало, и в
+           приложении язык определялся по адресу страницы — а у приложения
+           один адрес на все три языка, значит всегда выходил русский. */
+        if (window.KSLT_I18N && window.KSLT_I18N.lang) return window.KSLT_I18N.lang;
         var p = window.location.pathname;
         if (p.indexOf('-en') !== -1) return 'en';
         if (p.indexOf('-kg') !== -1) return 'kg';

@@ -1828,7 +1828,7 @@
     if (t.category_id) {
       // Название разряда — из общего свода, а не сырой идентификатор из базы
       var catName = window.KSLT_RULES
-        ? window.KSLT_RULES.categoryLabel(t.category_id, I18N.currentLang)
+        ? window.KSLT_RULES.categoryLabel(t.category_id, I18N.lang)
         : t.category_id;
       info += tdInfoRow('🏷', I18N.t('td.category'), catName);
     }

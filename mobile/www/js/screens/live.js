@@ -322,11 +322,12 @@
   // ====== HELPERS ======
 
   function pName(player, fallback) {
-    var lang = I18N.lang || 'ru';
-    if (lang === 'en' && player && player.name_en) return player.name_en;
-    if (lang === 'kg' && player && player.name_kg) return player.name_kg;
-    if (player && player.name) return player.name;
-    return fallback || '—';
+    /* 28.10, кусок 214: свой выбор языкового поля был здесь ВЕРНЫМ —
+       читал `I18N.lang`, а не несуществующее имя, — и именно поэтому
+       на фоне семи сломанных мест его никто не замечал. Выбор всё
+       равно переезжает в дом: два определения одного понятия сходятся
+       лишь до первой правки одного из них. */
+    return I18N.поле(player, 'name') || fallback || '—';
   }
 
   function avatarSmall(player, name) {

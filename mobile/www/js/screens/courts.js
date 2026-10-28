@@ -28,7 +28,10 @@
     return 'кортов';
   }
 
-  var SURFACE_MAP = { hard: 'Хард', clay: 'Грунт', carpet: 'Ковёр', grass: 'Трава' };
+  /* 28.10, КУСОК 214: карта покрытий была зашита по-русски, и на
+     английском с киргизским фильтр и карточки показывали русские слова.
+     Теперь имена берутся из словаря — там же, где их держит сайт. */
+  function покрытие(ключ) { return I18N.t('surface.' + ключ); }
   var AMENITY_MAP = {
     locker_rooms: '🔑 Раздевалки', showers: '🚿 Душевые', parking: '🅿️ Парковка',
     racket_rental: '🎾 Прокат', pro_shop: '🛍 Магазин', cafe: '☕ Кафе',
@@ -71,7 +74,7 @@
             minPrice: minPrice,
             hasIndoor: hasIndoor,
             hasOutdoor: hasOutdoor,
-            surface: types.length > 0 ? (SURFACE_MAP[types[0].surface] || types[0].surface) : '',
+            surface: types.length > 0 ? (покрытие(types[0].surface) || types[0].surface) : '',
             address: address,
             phone: row.phone || '',
             whatsapp: row.whatsapp || '',
@@ -133,7 +136,7 @@
     surfaces.sort();
 
     chips(cityBox, cities, currentCity, function(v) { return v; });
-    chips(surfBox, surfaces, currentSurface, function(v) { return SURFACE_MAP[v] || v; });
+    chips(surfBox, surfaces, currentSurface, function(v) { return покрытие(v) || v; });
   }
 
   function render() {
@@ -194,9 +197,9 @@
       html += '<div class="rr-guest-overlay">' +
         '<div class="rr-guest-cta">' +
           '<div class="rr-guest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>' +
-          '<div class="rr-guest-title">Все корты доступны<br>после входа</div>' +
-          '<div class="rr-guest-text">Войдите, чтобы увидеть все корты и цены</div>' +
-          '<button class="rr-guest-btn" id="courtsLoginBtn">Войти</button>' +
+          '<div class="rr-guest-title">' + I18N.t('guest.courtsTitle') + '</div>' +
+          '<div class="rr-guest-text">' + I18N.t('guest.courtsText') + '</div>' +
+          '<button class="rr-guest-btn" id="courtsLoginBtn">' + I18N.t('profile.login') + '</button>' +
         '</div></div>';
     }
 
@@ -282,7 +285,7 @@
       html += '<div class="pd-matches-list">';
       c.courtTypes.forEach(function(t) {
         var typeName = t.type === 'indoor' ? 'Indoor' : 'Outdoor';
-        var surfName = SURFACE_MAP[t.surface] || t.surface || '';
+        var surfName = покрытие(t.surface) || t.surface || '';
         html += '<div class="pd-match" style="cursor:default">';
         html += '<div class="pd-match-info"><div class="pd-match-opp">' + typeName + ' · ' + surfName + '</div><div class="pd-match-tournament">' + (t.count || 1) + ' корт(ов)</div></div>';
         html += '<div class="pd-match-score" style="color:var(--accent)">' + (t.price || '—') + ' сом</div>';
@@ -310,7 +313,9 @@
 
     // Часы работы. На сайте они есть, в приложении не было — а это второе,
     // что спрашивают после адреса
-    var schedule = (I18N.currentLang === 'en' && c.schedule_en) || c.schedule;
+    /* 28.10, кусок 214: было `I18N.currentLang` — расписание на других
+       языках не показывалось никогда. */
+    var schedule = I18N.поле(c, 'schedule');
     if (schedule) {
       html += '<div class="pd-section"><h3 class="pd-section-title">🕘 ' + I18N.t('court.schedule') + '</h3>';
       html += '<div class="pd-empty-small" style="color:var(--text-sec)">' + esc(schedule) + '</div>';
@@ -322,7 +327,7 @@
       html += '<div class="pd-section"><h3 class="pd-section-title">➕ ' + I18N.t('court.services') + '</h3><div class="coach-tags">';
       c.services.forEach(function(sv) {
         var name = typeof sv === 'string' ? sv
-          : ((I18N.currentLang === 'en' && sv.service_name_en) || sv.service_name || '');
+          : I18N.поле(sv, 'service_name');
         var price = (sv && sv.price) ? ' — ' + sv.price : '';
         if (name) html += '<span class="coach-tag">' + esc(name + price) + '</span>';
       });

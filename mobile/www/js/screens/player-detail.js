@@ -109,7 +109,7 @@
         }
         _player = r.data;
         _categoryLabel = window.KSLT_RULES
-          ? window.KSLT_RULES.categoryLabel(_player.category_id, I18N.currentLang)
+          ? window.KSLT_RULES.categoryLabel(_player.category_id, I18N.lang)
           : (_player.category_id || '');
 
         // Load rank (count players with more points in same category)

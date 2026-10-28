@@ -152,7 +152,7 @@
       if (p.ntrp_singles) html += '<span>NTRP ' + Number(p.ntrp_singles).toFixed(1) + '</span>';
       // Название разряда — из общего свода, а не из своей копии карты
       if (p.category_id) html += '<span>' + esc(window.KSLT_RULES
-        ? window.KSLT_RULES.categoryLabel(p.category_id, I18N.currentLang)
+        ? window.KSLT_RULES.categoryLabel(p.category_id, I18N.lang)
         : p.category_id) + '</span>';
       html += '</div>';
       html += '</div>';
@@ -170,8 +170,8 @@
       html += '<div class="rr-guest-overlay">' +
         '<div class="rr-guest-cta">' +
           '<div class="rr-guest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>' +
-          '<div class="rr-guest-title">Все партнёры доступны<br>после входа</div>' +
-          '<button class="rr-guest-btn" id="partnersLoginBtn">Войти</button>' +
+          '<div class="rr-guest-title">' + I18N.t('guest.partnersTitle') + '</div>' +
+          '<button class="rr-guest-btn" id="partnersLoginBtn">' + I18N.t('profile.login') + '</button>' +
         '</div></div>';
     }
 

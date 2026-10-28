@@ -188,9 +188,10 @@
 
     // Format
     var formatText = t.format || '';
-    if (formatText === 'singles') formatText = 'Одиночный';
-    else if (formatText === 'doubles') formatText = 'Парный';
-    else if (formatText === 'mixed') formatText = 'Микст';
+    /* 28.10, кусок 214: три слова были зашиты по-русски. */
+    if (formatText === 'singles') formatText = I18N.t('format.singles');
+    else if (formatText === 'doubles') formatText = I18N.t('format.doubles');
+    else if (formatText === 'mixed') formatText = I18N.t('format.mixed');
 
     var html = '<div class="tc-card" data-tournament-id="' + t.id + '">';
 
