@@ -7,8 +7,17 @@ android {
         applicationId "com.kslt.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.2"
+        /* ВЫПУСК ДЛЯ PLAY, 28.10 (П2). versionCode обязан РАСТИ с каждой
+           загрузкой: Play отвергает равный или меньший, и исправить это
+           после загрузки нечем. versionName — для человека, versionCode —
+           для магазина, и путать их нельзя.
+           ЧТО ВОШЛО В 1.3: переход на Capacitor 8 и targetSdk 36 (без
+           него Play не принимает вовсе), экран турнира с шестью
+           вкладками, группа и сетка из общего дома, лента кадров,
+           нижняя навигация на экранах-подробностях, тай-брейк по мировой
+           записи. */
+        versionCode 4
+        versionName "1.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
