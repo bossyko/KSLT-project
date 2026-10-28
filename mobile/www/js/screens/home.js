@@ -311,12 +311,59 @@
   }
 
   // Helper: get team name for doubles or singles (shortened)
+  /**
+   * ИМЯ УЧАСТНИКА РАЗМЕТКОЙ (кусок 216, 28.10).
+   *
+   * Пара шла одной строкой «А / Б» и ломалась где придётся: перенос
+   * вставал посреди фамилии («К. Иманходжаев / Б. Бакыт-\nбек»), а в
+   * таблице группы имя занимало три строки вместо двух. Костя увидел
+   * это глазами. Теперь каждый игрок — свой блок, и строка рвётся
+   * ровно между ними. Так же показывают пары приложения ATP и WTA.
+   *
+   * Возвращает РАЗМЕТКУ. Там, где нужен чистый текст (подпись для
+   * диктора), зовите `имяПарыТекстом` — иначе тег попадёт в atribut
+   * и будет прочитан вслух (беда куска 158 на сайте).
+   */
+  /**
+   * Подписи круговой таблицы для общего дома `KSLT_SETKA` (кусок 216).
+   * Дом не знает ни про словарь приложения, ни про язык сайта — слова
+   * ему даёт зовущий.
+   */
+  function словоГруппы(ключ) {
+    return {
+      num:     '№',
+      player:  I18N.t('rating.player'),
+      wins:    I18N.t('td.winsShort'),
+      games:   I18N.t('td.gamesShort'),
+      place:   I18N.t('td.posShort'),
+      group:   I18N.t('td.group'),
+      lot:     I18N.t('td.lot'),
+      lotHint: I18N.t('td.lotHint'),
+      whyHead: I18N.t('td.whyHead'),
+      whyMini: I18N.t('td.whyMini'),
+      whySets: I18N.t('td.whySets'),
+      whyGames: I18N.t('td.whyGames')
+    }[ключ] || ключ;
+  }
+
   function getMobileTeamName(playerId, regsMap, playersMap, isDbl) {
+    var части = частиИмени(playerId, regsMap, playersMap, isDbl);
+    if (части.length < 2) return '<span class="tm-p">' + части[0] + '</span>';
+    return '<span class="tm-p">' + части[0] + '</span>' +
+           '<span class="tm-p">' + части[1] + '</span>';
+  }
+
+  /** Тот же состав, но чистым текстом — для подписей диктору. */
+  function имяПарыТекстом(playerId, regsMap, playersMap, isDbl) {
+    return частиИмени(playerId, regsMap, playersMap, isDbl).join(' / ');
+  }
+
+  function частиИмени(playerId, regsMap, playersMap, isDbl) {
     var p = playersMap[playerId];
     var captainName = p ? esc(shortName(p.name)) : (playerId ? 'TBD' : 'BYE');
-    if (!isDbl) return captainName;
+    if (!isDbl) return [captainName];
     var reg = regsMap ? regsMap[playerId] : null;
-    if (!reg) return captainName;
+    if (!reg) return [captainName];
     var partnerName = '';
     if (reg.partner_id) {
       var pp = playersMap[reg.partner_id];
@@ -324,7 +371,7 @@
     } else if (reg.partner_external_name) {
       partnerName = esc(shortName(reg.partner_external_name));
     }
-    return partnerName ? captainName + ' / ' + partnerName : captainName;
+    return partnerName ? [captainName, partnerName] : [captainName];
   }
 
   // Helper: parse score "6/3 4/6 7/5" → [[6,3],[4,6],[7,5]]
@@ -387,9 +434,14 @@
   }
 
   function loadBracket(tournament) {
-    var container = document.getElementById('tdBracket');
-    if (!container) return;
+    /* 28.10, КУСОК 216: группы и плей-офф разъехались по своим вкладкам.
+       Одной лентой они давали 4.68 экрана прокрутки, и до таблицы
+       группы приходилось листать через всю сетку. */
+    var container = document.getElementById('tdGroups');
+    var вПлей = document.getElementById('tdPlayoff');
+    if (!container || !вПлей) return;
     container.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
+    вПлей.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     var tid = tournament.id;
     var isDbl = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
@@ -410,7 +462,12 @@
       var rRes = results[1];
 
       if (mRes.error || !mRes.data || mRes.data.length === 0) {
-        container.innerHTML = '<div class="pd-empty-small" style="padding:40px 16px">' + I18N.t('td.bracketEmpty') + '</div>';
+        if (mRes.error) console.error('[KSLT сетка] запрос не прошёл:', mRes.error.message);
+        var пусто = '<div class="mob-no-results" style="padding:40px 16px">' + I18N.t('td.bracketEmpty') + '</div>';
+        container.innerHTML = пусто;
+        вПлей.innerHTML = пусто;
+        var пустоеРасп = document.getElementById('tdSched');
+        if (пустоеРасп) пустоеРасп.innerHTML = '<div class="mob-no-results">' + I18N.t('td.noSchedule') + '</div>';
         return;
       }
 
@@ -444,42 +501,30 @@
         var MS = window.KSLT_MATCH_SCORE;
         var готово = MS && MS.loadMyIds ? MS.loadMyIds() : Promise.resolve();
         готово.then(function () {
-          renderBracketContent(container, tournament, matches, regsMap, playersMap, isDbl);
+          renderBracketContent(container, вПлей, tournament, matches, regsMap, playersMap, isDbl);
+          /* Расписание читает те же матчи: второго запроса не делаем. */
+          loadSchedule(tournament, matches, regsMap, playersMap, isDbl);
         });
       });
     });
   }
 
-  function renderBracketContent(container, tournament, matches, regsMap, playersMap, isDbl) {
+  function renderBracketContent(вГруппы, вПлей, tournament, matches, regsMap, playersMap, isDbl) {
     var hasGroups = matches.some(function(m) { return m.group_number && m.group_number > 0; });
     if (hasGroups) {
-      renderMobileGroups(container, tournament, matches, regsMap, playersMap, isDbl);
+      renderMobileGroups(вГруппы, вПлей, tournament, matches, regsMap, playersMap, isDbl);
     } else {
-      renderMobilePlayoff(container, tournament, matches, regsMap, playersMap, isDbl);
+      вГруппы.innerHTML = '<div class="mob-no-results">' + I18N.t('td.noGroups') + '</div>';
+      renderMobilePlayoff(вПлей, tournament, matches, regsMap, playersMap, isDbl);
     }
   }
 
   // ============================
   // GROUPS
   // ============================
-  function renderMobileGroups(container, tournament, matches, regsMap, playersMap, isDbl) {
-  /**
-   * Подпись под местом: почему оно такое. Равных разводит личная встреча,
-   * матчи между собой, сеты или геймы; где не развело ничто — жеребьёвка
-   */
-  function почемуМесто(st) {
-    if (st.жребий) {
-      return '<span class="mob-lot" title="' + I18N.t('td.lotHint') + '">' + I18N.t('td.lot') + '</span>';
-    }
-    var ключ = {
-      'встреча': 'td.whyHead',
-      'между собой': 'td.whyMini',
-      'сеты': 'td.whySets',
-      'геймы': 'td.whyGames'
-    }[st.причина];
-    return ключ ? '<span class="mob-lot">' + I18N.t(ключ) + '</span>' : '';
-  }
-
+  /* Подпись «чем развели равных» уехала в общий дом `KSLT_SETKA`
+     вместе с самой таблицей (кусок 216). */
+  function renderMobileGroups(container, вПлей, tournament, matches, regsMap, playersMap, isDbl) {
     var grpMatches = matches.filter(function(m) { return m.group_number && m.group_number > 0; });
     var ploffMatches = matches.filter(function(m) { return (!m.group_number || m.group_number <= 0) && m.round !== 'IG'; });
 
@@ -503,8 +548,6 @@
         if (m.player2_id && gPlayerIds.indexOf(m.player2_id) === -1) gPlayerIds.push(m.player2_id);
       });
 
-      var hasResults = gMatches.some(function(m) { return m.status === 'completed'; });
-
       // Места считает общий расчёт — тот же, что в админке и на сайте:
       // победы, личная встреча, доля сетов, доля геймов
       var standings = KSLT_GROUPS.расчёт(gPlayerIds, gMatches);
@@ -522,43 +565,35 @@
       }
 
       var letter = KSLT_RULES.букваГруппы(g) || String(g);
-      groupsHtml += '<div class="mob-group">';
-      groupsHtml += '<div class="mob-group-title">' + I18N.t('td.group') + ' ' + letter + '</div>';
-
-      // Standings table — only when there are results
-      if (hasResults) {
-        groupsHtml += '<table class="mob-standings">';
-        groupsHtml += '<thead><tr><th class="num">#</th><th>' + I18N.t('home.player') + '</th>';
-        groupsHtml += '<th class="stat">' + I18N.t('td.winsShort') + '</th>';
-        groupsHtml += '<th class="stat">' + I18N.t('td.lossesShort') + '</th>';
-        groupsHtml += '<th class="stat">' + I18N.t('td.gamesShort') + '</th>';
-        groupsHtml += '<th class="stat">' + I18N.t('td.posShort') + '</th>';
-        groupsHtml += '</tr></thead><tbody>';
-
-        standings.forEach(function(st, idx) {
-          var name = getMobileTeamName(st.playerId, regsMap, playersMap, isDbl);
-          var seedHtml = st.seed ? '<span class="seed">[' + st.seed + ']</span>' : '';
-          var isQualified = st.place <= qualifiers && allGroupDone;
-          groupsHtml += '<tr' + (isQualified ? ' class="qualified"' : '') + '>';
-          groupsHtml += '<td class="num">' + (idx + 1) + '</td>';
-          groupsHtml += '<td>' + name + seedHtml + '</td>';
-          groupsHtml += '<td class="stat">' + st.wins + '</td>';
-          groupsHtml += '<td class="stat">' + st.losses + '</td>';
-          groupsHtml += '<td class="stat mob-games">' + st.gamesWon + '-' + st.gamesLost + '</td>';
-          // Почему место такое: жребий либо то, чем развели равных
-          var lot = groupDone ? почемуМесто(st) : '';
-          groupsHtml += '<td class="stat" style="font-weight:700;white-space:nowrap' + (isQualified ? ';color:var(--accent)' : '') + '">' + st.place + lot + '</td>';
-          groupsHtml += '</tr>';
-        });
-        groupsHtml += '</tbody></table>';
-      }
-
-      // Match cards for this group
-      gMatches.forEach(function(m) {
-        groupsHtml += renderMatchCard(m, regsMap, playersMap, isDbl);
+      /* 28.10, КУСОК 216: группу рисует ОБЩИЙ ДОМ — тот же, что на сайте.
+         Было своё: таблица итогов плюс отдельная карточка на каждый матч.
+         Те же данные ложились дважды, занимали 5.24 экрана против 2.99 на
+         сайте, а главного — кто кого обыграл — видно не было вовсе.
+         Костя сказал прямо: «не понятно, а не получится как на сайте».
+         Порядок строк тот же, что на сайте: по посеву, дальше по порядку
+         появления в группе, — чтобы столбцы «1 · 2 · 3» совпадали с
+         номерами строк. */
+      standings.sort(function (a, b) {
+        var sa = a.seed || 9999, sb = b.seed || 9999;
+        if (sa !== sb) return sa - sb;
+        return gPlayerIds.indexOf(a.playerId) - gPlayerIds.indexOf(b.playerId);
       });
 
-      groupsHtml += '</div>'; // /mob-group
+      groupsHtml += KSLT_SETKA.круговаяГруппа({
+        буква: letter,
+        места: standings,
+        матчи: gMatches,
+        проходят: qualifiers,
+        группаЗакрыта: groupDone,
+        этапЗакрыт: allGroupDone,
+        имя: function (id) { return getMobileTeamName(id, regsMap, playersMap, isDbl); },
+        фамилия: function (id) {
+          return имяПарыТекстом(id, regsMap, playersMap, isDbl)
+            .replace(/<[^>]*>/g, '').trim().split(/\s+/).pop();
+        },
+        слово: словоГруппы
+      });
+
     }
 
     // Build playoff HTML — check for GL dual leagues (PL-/CL- rounds)
@@ -583,24 +618,22 @@
       playoffHtml += renderPlayoffWithPills(container, ploffMatches, regsMap, playersMap, isDbl, '');
     }
 
-    // Order: completed → playoff first, otherwise groups first
-    var html = '<div style="padding:16px">';
-    if (tournament.status === 'completed' && playoffHtml) {
-      html += playoffHtml + groupsHtml;
-    } else {
-      html += groupsHtml + playoffHtml;
-    }
-    html += '</div>';
-    container.innerHTML = html;
+    /* Порядок больше не решается состоянием турнира: вкладки стоят
+       рядом, и до любой из них одно нажатие. */
+    container.innerHTML = '<div class="td-pane">' + groupsHtml + '</div>';
+    вПлей.innerHTML = '<div class="td-pane">' +
+      (playoffHtml || '<div class="mob-no-results">' + I18N.t('td.noPlayoff') + '</div>') + '</div>';
     bindRoundPills(container);
     bindScoreButtons(container);
+    bindRoundPills(вПлей);
+    bindScoreButtons(вПлей);
   }
 
   // ============================
   // PLAYOFF — Round Pills
   // ============================
   function renderMobilePlayoff(container, tournament, matches, regsMap, playersMap, isDbl) {
-    var html = '<div style="padding:16px">';
+    var html = '<div class="td-pane">';
     if (tournament && tournament.bracket_type === 'fic') {
       html += renderFicMobile(tournament, matches, regsMap, playersMap, isDbl);
     } else {
@@ -818,9 +851,21 @@
   // ============================
   // PARTICIPANTS
   // ============================
+  /**
+   * УЧАСТНИКИ — СВОЯ ВКЛАДКА, ТАБЛИЦЕЙ (кусок 216, 28.10).
+   *
+   * Было: фишки с лицами внизу «Информации», и те пустые — запрос
+   * сортировался по `created_at`, которого у заявок нет.
+   * Стало: строение взято у сайта (`js/tournament-detail.js:2424`), где
+   * Костя его принял — номер, лицо, имя, NTRP, дата и время записи,
+   * лист ожидания отдельным блоком. Оформление своё, на шкале
+   * приложения: подключить css сайта нельзя, у него свои `.td-tab` и
+   * `.td-section`, они столкнулись бы с нашими.
+   */
   function loadParticipants(tournament) {
-    var container = document.getElementById('tdParticipants');
+    var container = document.getElementById('tdPart');
     if (!container) return;
+    container.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
     var tid = tournament.id;
     var isDbl = tournament.format === 'doubles' || tournament.format === 'mixed_doubles';
@@ -828,48 +873,218 @@
     supabaseClient.from('tournament_registrations')
       .select('*')
       .eq('tournament_id', tid)
-      .in('status', ['approved', 'draw', 'pending'])
-      .order('created_at', { ascending: true })
+      .in('status', ['approved', 'draw', 'pending', 'waitlist'])
+      /* 28.10, КУСОК 216: сортировка шла по `created_at`, которого у
+         `tournament_registrations` НЕТ. Postgres отвечал 400, `r.data`
+         приходил пустым — и список участников был пуст ВСЕГДА, в любом
+         турнире. Время записи лежит в `registered_at`; по нему же
+         показывает и сайт. */
+      .order('registered_at', { ascending: true })
       .then(function(r) {
-        if (!r.data || r.data.length === 0) return;
-        var regs = r.data;
+        if (r.error) {
+          console.error('[KSLT участники] запрос не прошёл:', r.error.message);
+          container.innerHTML = '<div class="mob-no-results">' + I18N.t('td.noParticipants') + '</div>';
+          return;
+        }
+        var regs = r.data || [];
+        if (!regs.length) {
+          container.innerHTML = '<div class="mob-no-results">' + I18N.t('td.noParticipants') + '</div>';
+          return;
+        }
 
-        // Collect all player IDs (player_id + partner_id)
         var pIds = {};
         regs.forEach(function(reg) {
           if (reg.player_id) pIds[reg.player_id] = true;
-          if (isDbl && reg.partner_id) pIds[reg.partner_id] = true;
+          if (reg.partner_id) pIds[reg.partner_id] = true;
         });
         var idArr = Object.keys(pIds);
-        if (idArr.length === 0) return;
 
-        supabaseClient.from('players').select('id, name, photo, category_id').in('id', idArr).then(function(pRes) {
+        var дальше = idArr.length
+          ? supabaseClient.from('players')
+              .select('id, name, name_en, name_kg, photo, ntrp_singles, ntrp_doubles')
+              .in('id', idArr)
+          : Promise.resolve({ data: [] });
+
+        дальше.then(function(pRes) {
           var playersMap = {};
           (pRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
-
-          // Build regsMap for getMobileTeamName
           var regsMap = {};
           regs.forEach(function(reg) { if (reg.player_id) regsMap[reg.player_id] = reg; });
 
-          var html = '<div style="margin-top:16px"><div class="pd-section-title" style="font-size:14px;font-weight:600;margin-bottom:8px">' + (isDbl ? I18N.t('td.pairs') : I18N.t('td.participants')) + ' (' + regs.length + ')</div>';
-          html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
-          regs.forEach(function(reg) {
-            var p = playersMap[reg.player_id];
-            var displayName = getMobileTeamName(reg.player_id, regsMap, playersMap, isDbl);
-            var photo = p ? p.photo : '';
-            var plainName = p ? p.name : I18N.t('home.player');
-            html += '<div style="display:flex;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:4px 10px 4px 4px;font-size:12px">';
-            html += photo
-              ? '<img src="' + esc(photo) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover" alt="">'
-              : '<div style="width:24px;height:24px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">' + initials(plainName) + '</div>';
-            html += '<span style="color:var(--text-sec)">' + displayName + '</span>';
-            if (reg.status === 'pending') html += '<span style="color:var(--orange);font-size:10px">⏳</span>';
-            html += '</div>';
-          });
-          html += '</div></div>';
+          var основные = regs.filter(function(x) { return x.status !== 'waitlist'; });
+          var очередь = regs.filter(function(x) { return x.status === 'waitlist'; });
+
+          var html = '<div class="td-pane">';
+          html += таблицаЗаявок(I18N.t('td.mainDraw'), основные, regsMap, playersMap, isDbl, false);
+          if (очередь.length) {
+            html += таблицаЗаявок(I18N.t('td.waitlist'), очередь, regsMap, playersMap, isDbl, true);
+          }
+          html += '</div>';
           container.innerHTML = html;
+          связатьОтсечки(container);
         });
       });
+  }
+
+  /**
+   * ОТСЕЧКА ДЛИННОГО СПИСКА (кусок 216, 28.10).
+   *
+   * Двадцать участников и восемнадцать строк расписания шли сплошняком.
+   * Показываем первые ПОРОГ, остальное — по нажатию, как на сайте
+   * («Показать все (18)»). Порог 10 взят у сайта, чтобы одно понятие
+   * вело себя одинаково в обоих продуктах.
+   */
+  var ПОРОГ_ОТСЕЧКИ = 10;
+
+  function кнопкаОтсечки(всего, имяБлока) {
+    if (всего <= ПОРОГ_ОТСЕЧКИ) return '';
+    return '<button class="td-more-btn" data-cut="' + имяБлока + '"' +
+           ' aria-expanded="false">' +
+           I18N.t('td.showAll') + ' (' + всего + ')</button>';
+  }
+
+  /** Вешает раскрывашки на все отсечённые блоки внутри узла. */
+  function связатьОтсечки(узел) {
+    узел.querySelectorAll('.td-more-btn[data-cut]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var блок = узел.querySelector('[data-cut-block="' + btn.getAttribute('data-cut') + '"]');
+        if (!блок) return;
+        var свёрнут = блок.classList.toggle('is-cut');
+        btn.setAttribute('aria-expanded', свёрнут ? 'false' : 'true');
+        btn.textContent = свёрнут
+          ? I18N.t('td.showAll') + ' (' + btn.getAttribute('data-total') + ')'
+          : I18N.t('td.less');
+      });
+      var блок = узел.querySelector('[data-cut-block="' + btn.getAttribute('data-cut') + '"]');
+      if (блок) btn.setAttribute('data-total', блок.querySelectorAll('tbody tr').length);
+    });
+  }
+
+  /** NTRP игрока: в парном турнире парный, в одиночном одиночный. */
+  function ntrpИгрока(id, playersMap, isDbl) {
+    var и = playersMap[id];
+    if (!и) return null;
+    var знач = isDbl ? (и.ntrp_doubles || и.ntrp_singles) : и.ntrp_singles;
+    return знач ? Number(знач).toFixed(1) : null;
+  }
+
+  function таблицаЗаявок(заголовок, список, regsMap, playersMap, isDbl, очередь) {
+    var h = '<div class="td-part-block">';
+    h += '<div class="td-part-title">' + esc(заголовок) +
+         ' <span class="td-part-count">' + список.length + '</span></div>';
+    var имяБлока = очередь ? 'queue' : 'main';
+    h += '<table class="td-part-table' + (очередь ? ' is-queue' : '') +
+         (список.length > ПОРОГ_ОТСЕЧКИ ? ' is-cut' : '') + '"' +
+         ' data-cut-block="' + имяБлока + '" role="table"' +
+         ' aria-label="' + esc(заголовок) + '">';
+    h += '<thead><tr role="row">' +
+         '<th class="num" role="columnheader">#</th>' +
+         '<th role="columnheader">' + I18N.t('rating.player') + '</th>' +
+         '<th class="ntrp" role="columnheader">NTRP</th>' +
+         '<th class="when" role="columnheader">' + I18N.t('td.time') + '</th>' +
+         '</tr></thead><tbody>';
+
+    список.forEach(function (reg, i) {
+      var p = playersMap[reg.player_id] || {};
+      var имя = isDbl
+        ? getMobileTeamName(reg.player_id, regsMap, playersMap, true)
+        : '<span class="tm-p">' +
+          esc(I18N.поле(p, 'name') || reg.external_name || I18N.t('home.player')) +
+          '</span>';
+      var ntrp;
+      if (isDbl) {
+        var н1 = ntrpИгрока(reg.player_id, playersMap, true);
+        var н2 = ntrpИгрока(reg.partner_id, playersMap, true);
+        ntrp = (н1 || н2) ? ((н1 || '—') + '/' + (н2 || '—')) : '—';
+      } else {
+        ntrp = ntrpИгрока(reg.player_id, playersMap, false) || '—';
+      }
+      var когда = '—';
+      if (reg.registered_at) {
+        var d = new Date(reg.registered_at);
+        когда = d.getDate() + ' ' + I18N.month(d.getMonth()) + ', ' +
+                ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+      }
+      h += '<tr role="row">' +
+           '<td class="num" role="cell">' + (i + 1) + '</td>' +
+           '<td role="cell">' + имя +
+             (reg.status === 'pending' ? ' <span class="td-part-wait">⏳</span>' : '') + '</td>' +
+           '<td class="ntrp" role="cell">' + esc(ntrp) + '</td>' +
+           '<td class="when" role="cell">' + esc(когда) + '</td>' +
+           '</tr>';
+    });
+    h += '</tbody></table>';
+    h += кнопкаОтсечки(список.length, имяБлока);
+    h += '</div>';
+    return h;
+  }
+
+  /**
+   * РАСПИСАНИЕ ЗАПУСКОВ (кусок 216, 28.10).
+   *
+   * В приложении его не было вовсе, хотя в базе у матчей стоят время,
+   * корт и состояние. Строение взято у сайта
+   * (`js/tournament-detail.js:1373`): одна очередь от раннего запуска к
+   * позднему, корт известен не у всех — там прочерк.
+   */
+  function loadSchedule(tournament, matches, regsMap, playersMap, isDbl) {
+    var container = document.getElementById('tdSched');
+    if (!container) return;
+
+    var расписанные = (matches || []).filter(function (m) {
+      return m.scheduled_time && m.score !== 'BYE' && (m.player1_id || m.player2_id);
+    });
+    if (!расписанные.length) {
+      container.innerHTML = '<div class="mob-no-results">' + I18N.t('td.noSchedule') + '</div>';
+      return;
+    }
+
+    расписанные.sort(function (a, b) {
+      var д = String(a.scheduled_day || '').localeCompare(String(b.scheduled_day || ''));
+      if (д) return д;
+      var в = String(a.scheduled_time || '').localeCompare(String(b.scheduled_time || ''));
+      if (в) return в;
+      return (a.match_order || 0) - (b.match_order || 0);
+    });
+
+    var состояния = {
+      completed: I18N.t('td.mPlayed'),
+      live: I18N.t('td.mLive'),
+      in_progress: I18N.t('td.mLive')
+    };
+
+    var h = '<div class="td-pane"><table class="td-sched-table' +
+            (расписанные.length > ПОРОГ_ОТСЕЧКИ ? ' is-cut' : '') +
+            '" data-cut-block="sched" role="table"' +
+            ' aria-label="' + esc(I18N.t('td.scheduleFull')) + '">';
+    h += '<thead><tr role="row">' +
+         '<th class="when" role="columnheader">' + I18N.t('td.time') + '</th>' +
+         '<th role="columnheader">' + I18N.t('td.game') + '</th>' +
+         '<th class="court" role="columnheader">' + I18N.t('td.court') + '</th>' +
+         '</tr></thead><tbody>';
+
+    расписанные.forEach(function (m) {
+      var п1 = getMobileTeamName(m.player1_id, regsMap, playersMap, isDbl);
+      var п2 = getMobileTeamName(m.player2_id, regsMap, playersMap, isDbl);
+      var группа = m.group_number > 0
+        ? (I18N.t('td.group') + ' ' + (KSLT_RULES.букваГруппы(m.group_number) || m.group_number))
+        : (m.round ? I18N.t('td.playoff') : '');
+      var состояние = состояния[m.status] || I18N.t('td.mScheduled');
+      h += '<tr role="row" class="st-' + esc(m.status || '') + '">' +
+           '<td class="when" role="cell">' + esc(String(m.scheduled_time).slice(0, 5)) +
+             (группа ? '<span class="td-sched-grp">' + esc(группа) + '</span>' : '') + '</td>' +
+           '<td role="cell"><div class="td-sched-p">' + п1 + '</div>' +
+             '<div class="td-sched-vs">vs</div>' +
+             '<div class="td-sched-p">' + п2 + '</div></td>' +
+           '<td class="court" role="cell">' + esc(m.court || '—') +
+             '<span class="td-sched-st">' + esc(состояние) + '</span></td>' +
+           '</tr>';
+    });
+    h += '</tbody></table>';
+    h += кнопкаОтсечки(расписанные.length, 'sched');
+    h += '</div>';
+    container.innerHTML = h;
+    связатьОтсечки(container);
   }
 
   // ============================
@@ -1592,11 +1807,20 @@
         var tab = e.target.closest('.td-tab');
         if (!tab) return;
         var tabId = tab.getAttribute('data-tab');
-        tdTabs.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
+        /* Признак для диктора переставляется ТАМ ЖЕ, где класс
+           (правило куска 215). */
+        tdTabs.querySelectorAll('.td-tab').forEach(function(t) {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
         tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
         document.querySelectorAll('#tdOverlay .td-tab-content').forEach(function(tc) {
           tc.classList.toggle('active', tc.id === tabId);
         });
+        /* Выбранная вкладка подъезжает к глазам: полоса прокручивается
+           вбок, и «Расписание» с «Очками» стоят за краем экрана. */
+        if (tab.scrollIntoView) tab.scrollIntoView({ inline: 'center', block: 'nearest' });
       });
     }
     document.getElementById('tdBack').addEventListener('click', function() {
@@ -1799,7 +2023,11 @@
     var bracketLabels = { single_elimination: 'Single Elimination', round_robin: 'Round Robin', group_league: 'Group League', fic: 'FIC' };
 
     // Info rows
-    var info = '<div class="td-info-section">';
+    /* 28.10, КУСОК 216: восемь строк в столбик давали 1350 пикселей —
+       1.66 экрана на 375×812, и Костя увидел это глазами. Короткие пары
+       «подпись — значение» встают по две в ряд, длинные (место, взнос)
+       занимают ряд целиком. */
+    var info = '<div class="td-info-section td-info-grid">';
     info += tdInfoRow('📅', I18N.t('td.date'), dateStr + (t.start_time ? ', ' + t.start_time : ''));
     if (t.format) info += tdInfoRow('🎾', I18N.t('td.format'), formatLabels[t.format] || t.format);
     if (t.bracket_type) info += tdInfoRow('📊', I18N.t('td.bracketType'), bracketLabels[t.bracket_type] || t.bracket_type);
@@ -1824,7 +2052,10 @@
     }
 
     // Где играем. На сайте под этим целый раздел с адресом корта
-    if (t.location) info += tdInfoRow('📍', I18N.t('td.venue'), I18N.field(t, 'location'));
+    /* Строку «Место проведения» ставим ТОЛЬКО когда карточки корта
+       ниже не будет: иначе одно и то же имя стоит дважды, и длинное
+       значение занимает целый ряд сетки. */
+    if (t.location && !court) info += tdInfoRow('📍', I18N.t('td.venue'), I18N.field(t, 'location'));
     if (t.category_id) {
       // Название разряда — из общего свода, а не сырой идентификатор из базы
       var catName = window.KSLT_RULES
@@ -1835,9 +2066,22 @@
     info += '</div>';
 
     // Description
-    if (t.description) {
+    if (I18N.поле(t, 'description')) {
+      /* Переносы строк и перевод — как на сайте (`js/tournament-detail.js`).
+         Здесь описание шло голым `t.description` в `esc()`: абзацы
+         схлопывались в одно полотно, а переводы из базы не брались. */
+      var текст = esc(I18N.поле(t, 'description')).replace(/\n/g, '<br>');
+      /* Длинное описание сворачивается: у этого турнира 1113 знаков —
+         582 пикселя, и всё, что ниже (место, запись), уезжало за два
+         экрана. Порог 320 знаков ПОСЧИТАН: кегль 14 на ширине 343 даёт
+         около 40 знаков в строку, восемь строк — 320. */
+      var длинное = текст.replace(/<br>/g, ' ').length > 320;
       info += '<div class="mob-section-title" style="margin-top:16px">' + I18N.t('td.description') + '</div>';
-      info += '<p class="td-description">' + esc(t.description) + '</p>';
+      info += '<p class="td-description' + (длинное ? ' is-clamped' : '') + '" id="tdDesc">' + текст + '</p>';
+      if (длинное) {
+        info += '<button class="td-desc-more" id="tdDescMore" aria-expanded="false"' +
+                ' aria-controls="tdDesc">' + I18N.t('td.more') + '</button>';
+      }
     }
 
     // Venue — clickable with navigation
@@ -1901,10 +2145,18 @@
       }
     }
 
-    // Participants
-    info += '<div id="tdParticipants"></div>';
 
     document.getElementById('tdInfo').innerHTML = info;
+
+    var ещё = document.getElementById('tdDescMore');
+    if (ещё) {
+      ещё.addEventListener('click', function () {
+        var п = document.getElementById('tdDesc');
+        var свёрнуто = п.classList.toggle('is-clamped');
+        ещё.setAttribute('aria-expanded', свёрнуто ? 'false' : 'true');
+        ещё.textContent = I18N.t(свёрнуто ? 'td.more' : 'td.less');
+      });
+    }
 
     // Уже записан? Меняем «Записаться» на статус и кнопку снятия
     checkMyRegistration(t);
@@ -1918,13 +2170,38 @@
       });
     });
 
-    overlay.querySelectorAll('.td-tab').forEach(function(tab, i) { tab.classList.toggle('active', i === 0); });
+    /* 28.10, КУСОК 216: «Очки» показываем только там, где они идут.
+       Правило — в общем доме `KSLT_RULES.идутОчки`, одно на сайт и
+       приложение: на дружеских и парных турнирах вкладка вела в пустой
+       раздел, и человек ждал, что в ней что-то появится. На сайте её
+       убрали, в приложении — нет. */
+    var вкладкаОчков = overlay.querySelector('.td-tab[data-tab="tdResults"]');
+    var полеОчков = overlay.querySelector('#tdResults');
+    var сОчками = KSLT_RULES.идутОчки(t);
+    if (вкладкаОчков) вкладкаОчков.hidden = !сОчками;
+    if (полеОчков) полеОчков.hidden = !сОчками;
+
+    overlay.querySelectorAll('.td-tab').forEach(function(tab, i) {
+      tab.classList.toggle('active', i === 0);
+      tab.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    });
     overlay.querySelectorAll('.td-tab-content').forEach(function(tc, i) { tc.classList.toggle('active', i === 0); });
+    if (overlay.querySelector('.td-tabs')) overlay.querySelector('.td-tabs').scrollLeft = 0;
     overlay.classList.add('open');
   }
 
-  function tdInfoRow(icon, l, v) {
-    return '<div class="td-info-row"><span class="td-info-icon">' + icon + '</span><div class="td-info-text"><div class="td-info-label">' + esc(l) + '</div><div class="td-info-value">' + esc(v) + '</div></div></div>';
+  /**
+   * Строка сведений. `широкая` — когда значение длинное (место
+   * проведения, взнос двумя суммами): такое в половину ширины не
+   * влезает и переносится в три строки, съедая выигрыш от двух столбцов.
+   * Порог 18 знаков посчитан: половина ряда на 375 — это 163 пикселя,
+   * кегль 14 даёт около 18 знаков в строку. ПОСЧИТАНО и проверено в
+   * браузере.
+   */
+  function tdInfoRow(icon, l, v, широкая) {
+    var знач = String(v == null ? '' : v);
+    var ш = широкая || знач.length > 18;
+    return '<div class="td-info-row' + (ш ? ' wide' : '') + '"><span class="td-info-icon">' + icon + '</span><div class="td-info-text"><div class="td-info-label">' + esc(l) + '</div><div class="td-info-value">' + esc(знач) + '</div></div></div>';
   }
 
   function roundName(n) {

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=29">
-<link rel="stylesheet" href="css/app.css?v=16">
+<link rel="stylesheet" href="css/app.css?v=22">
 </head>
 <body>
 
@@ -569,14 +569,23 @@
     <div class="td-hero-meta" id="tdBadges"></div>
     <div class="td-hero-detail" id="tdDetails"></div>
   </div>
-  <div class="td-tabs" id="tdTabs">
-    <button class="td-tab active" data-tab="tdInfo" data-i18n="td.info">Информация</button>
-    <button class="td-tab" data-tab="tdBracket" data-i18n="td.bracket">Сетка</button>
-    <button class="td-tab" data-tab="tdResults" data-i18n="td.results">Очки</button>
+  <!-- 28.10, КУСОК 216: вкладок стало шесть, как на сайте. Группы и
+       плей-офф разведены: одной лентой они давали 4.68 экрана прокрутки,
+       и до групп приходилось долистывать через всю сетку. -->
+  <div class="td-tabs" id="tdTabs" role="tablist" data-i18n-aria="td.tournament" aria-label="Турнир">
+    <button class="td-tab active" data-tab="tdInfo" role="tab" aria-selected="true" aria-controls="tdInfo" data-i18n="td.info">Информация</button>
+    <button class="td-tab" data-tab="tdPart" role="tab" aria-selected="false" aria-controls="tdPart" data-i18n="td.participants">Участники</button>
+    <button class="td-tab" data-tab="tdGroups" role="tab" aria-selected="false" aria-controls="tdGroups" data-i18n="td.groupStage">Групповой этап</button>
+    <button class="td-tab" data-tab="tdPlayoff" role="tab" aria-selected="false" aria-controls="tdPlayoff" data-i18n="td.playoff">Плей-офф</button>
+    <button class="td-tab" data-tab="tdSched" role="tab" aria-selected="false" aria-controls="tdSched" data-i18n="td.schedule">Расписание</button>
+    <button class="td-tab" data-tab="tdResults" role="tab" aria-selected="false" aria-controls="tdResults" data-i18n="td.results">Очки</button>
   </div>
-  <div class="td-tab-content active" id="tdInfo"></div>
-  <div class="td-tab-content" id="tdBracket"></div>
-  <div class="td-tab-content" id="tdResults"></div>
+  <div class="td-tab-content active" id="tdInfo" role="tabpanel"></div>
+  <div class="td-tab-content" id="tdPart" role="tabpanel"></div>
+  <div class="td-tab-content" id="tdGroups" role="tabpanel"></div>
+  <div class="td-tab-content" id="tdPlayoff" role="tabpanel"></div>
+  <div class="td-tab-content" id="tdSched" role="tabpanel"></div>
+  <div class="td-tab-content" id="tdResults" role="tabpanel"></div>
 </div>
 
 <!-- Live Match Detail Overlay -->
@@ -649,10 +658,11 @@
 
 <!-- App JS -->
 <script src="js/group-standings.js?v=1"></script>
-<script src="js/i18n.js?v=6"></script>
+<script src="js/i18n.js?v=9"></script>
 <script src="js/phone.js?v=1"></script>
 <script src="js/supabase-config.js?v=3"></script>
-<script src="js/kslt-rules.js?v=1"></script>
+<script src="js/kslt-rules.js?v=2"></script>
+<script src="js/kslt-setka.js?v=1"></script>
 <script src="js/bracket-draw.js?v=1"></script>
 <script src="js/country-utils.js?v=4"></script>
 <script src="js/match-score-texts.js?v=1"></script>
@@ -665,7 +675,7 @@
 <script src="js/account-restore.js?v=1"></script>
 <script src="js/auth.js?v=1"></script>
 <script src="js/news-media.js?v=1"></script>
-<script src="js/screens/home.js?v=2"></script>
+<script src="js/screens/home.js?v=8"></script>
 <script src="js/kslt-sponsory.js?v=1"></script>
 <script src="js/kslt-chisla-kluba.js?v=1"></script>
 <script src="js/screens/home-blocks.js?v=3"></script>
@@ -677,7 +687,7 @@
 <script src="js/screens/live.js?v=3"></script>
 <script src="js/screens/battles.js?v=3"></script>
 <script src="js/rating-chart.js?v=1"></script>
-<script src="js/screens/player-detail.js?v=2"></script>
+<script src="js/screens/player-detail.js?v=3"></script>
 <script src="js/screens/coaches.js?v=2"></script>
 <script src="js/screens/courts.js?v=4"></script>
 <script src="js/screens/partners.js?v=4"></script>

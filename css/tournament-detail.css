@@ -3095,7 +3095,12 @@ tr.td-rr-row-highlight {
 .td-group-table .td-gt-score { text-align: center; white-space: nowrap; }
 
 /* Сам против себя — клетка, которой не бывает */
-.td-group-table .td-gt-self {
+.td-group-table /* 28.10, КУСОК 216: строка прошедшего дальше. Была инлайном в коде
+   (`style="background:var(--alpha-lime-06)"`) — вид в разметке, а не в
+   стилях; при переезде рисунка в общий дом стала классом. */
+.td-gt-qualified { background: var(--alpha-lime-06); }
+
+.td-gt-self {
     text-align: center;
     background: var(--surface-glass);
     color: var(--text-muted);

@@ -48,6 +48,30 @@ function включитьОтсечку(контейнер) {
  * геймы. Где не развело ничто — жеребьёвка. Без подписи одинаковые цифры в
  * таблице выглядели произволом.
  */
+/**
+ * Подписи круговой таблицы для общего дома `KSLT_SETKA` (кусок 216).
+ * Дом не знает про язык сайта — слова ему даёт зовущий.
+ */
+function словоГруппы(ключ) {
+    var p = function (en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); };
+    return {
+        num:     p('No', '№', '№'),
+        player:  p('Player', 'Оюнчу', 'Игрок'),
+        wins:    p('W', 'Ж', 'П'),
+        games:   p('Games', 'Геймдер', 'Геймы'),
+        place:   p('Pos', 'О', 'М'),
+        group:   p('Group', 'Топ', 'Группа'),
+        lot:     p('by lot', 'чүчүкулак', 'жребий'),
+        lotHint: p('Wins, sets and games are all equal — the place is decided by lot',
+                   'Жеңиштер, сеттер жана геймдер бирдей — орун чүчүкулак менен аныкталган',
+                   'Победы, сеты и геймы равны — место определено жребием'),
+        whyHead: p('head-to-head', 'өз ара беттеш', 'личная встреча'),
+        whyMini: p('among tied', 'өз ара', 'между собой'),
+        whySets: p('on sets', 'сеттер боюнча', 'по сетам'),
+        whyGames: p('on games', 'геймдер боюнча', 'по геймам')
+    }[ключ] || ключ;
+}
+
 function почемуМесто(st, isEn, isKg) {
     var pick3 = function(en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); };
 
@@ -92,10 +116,10 @@ function isDoublesTournamentPublic(t) {
  * думает, что данные потерялись.
  */
 function isRatingTournament(t) {
-    if (!t) return false;
-    if (t.category_id === 'friendly') return false;
-    if (t.format === 'doubles' || t.format === 'mixed_doubles') return false;
-    return true;
+    /* 28.10, КУСОК 216: правило переехало в общий дом `js/kslt-rules.js`,
+       чтобы приложение считало так же. Здесь оставлено имя — его зовут
+       из шести мест этого файла. */
+    return window.KSLT_RULES.идутОчки(t);
 }
 
 /* КАРТА ЗАЯВОК — ДОМ СВОБОДНЫХ МЕСТ (кусок 155). Имя оставлено своё:
@@ -1616,79 +1640,34 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     });
 
                     var ggLetter = KSLT_RULES.букваГруппы(gg) || String(gg);
-                    группыЛиг += '<div class="td-gt-block">';
-                    группыЛиг += '<div class="td-group-name">' + (KSLT_YAZYK.выбрать('Group ', 'Топ ', 'Группа ')) + ggLetter + '</div>';
-                    группыЛиг += '<div class="td-gt-scroll"><table class="td-group-table">';
-                    группыЛиг += '<thead><tr><th>№</th><th>' + (KSLT_YAZYK.выбрать('Player', 'Оюнчу', 'Игрок')) + '</th>';
-                    for (var gc = 0; gc < ggStandings.length; gc++) группыЛиг += '<th class="td-gt-opp">' + (gc + 1) + '</th>';
-                    группыЛиг += '<th class="td-gt-wins">' + (KSLT_YAZYK.выбрать('W', 'Ж', 'П')) + '</th>';
-                    группыЛиг += '<th class="td-gt-games">' + (KSLT_YAZYK.выбрать('Games', 'Геймдер', 'Геймы')) + '</th>';
-                    группыЛиг += '<th class="td-gt-place">' + (KSLT_YAZYK.выбрать('Pos', 'О', 'М')) + '</th>';
-                    группыЛиг += '</tr></thead><tbody>';
-
-                    for (var grow = 0; grow < ggStandings.length; grow++) {
-                        var gst = ggStandings[grow];
-                        var gpName = pName(gst.playerId);
-                        var gSeedHtml = gst.seed ? ' <span class="td-gt-seed">[' + gst.seed + ']</span>' : '';
-                        var glQPG = t.qualifiers_per_group || 4;
-                        var glPLCut = Math.floor(Math.min(glQPG, ggStandings.length) / 2);
-                        var gIsPL = gst.place <= glPLCut && glAllGroupDone;
-                        var gIsCL = gst.place > glPLCut && gst.place <= glQPG && glAllGroupDone;
-
-                        группыЛиг += '<tr data-player-id="' + gst.playerId + '"' + ((gIsPL || gIsCL) && glAllGroupDone ? ' class="td-gt-qual"' : '') + '>';
-                        группыЛиг += '<td class="td-gt-num">' + (grow + 1) + '</td>';
-                        группыЛиг += '<td class="td-gt-name">' + gpName + gSeedHtml + '</td>';
-
-                        for (var gcol = 0; gcol < ggStandings.length; gcol++) {
-                            if (grow === gcol) {
-                                группыЛиг += '<td class="td-gt-self">&times;</td>';
-                            } else {
-                                var gOppId = ggStandings[gcol].playerId;
-                                var gMatch = ggMatches.find(function(m) {
-                                    return (m.player1_id === gst.playerId && m.player2_id === gOppId) ||
-                                           (m.player1_id === gOppId && m.player2_id === gst.playerId);
-                                });
-                                if (gMatch && gMatch.status === 'completed' && gMatch.score) {
-                                    var gScoreParts = gMatch.score.split(' ');
-                                    var gCellOutcome = '';
-                                    if (gScoreParts.length > 0 && TD_OUTCOMES.indexOf(gScoreParts[gScoreParts.length - 1]) !== -1) {
-                                        gCellOutcome = gScoreParts.pop();
-                                    }
-                                    var gIsWinner = gMatch.winner_id === gst.playerId;
-                                    var gNeedFlip = gMatch.player1_id !== gst.playerId;
-                                    var gScoreDisp = gScoreParts.map(function(s) {
-                                        var pp = s.match(/^(\d+)\/(\d+)/);
-                                        if (!pp) return s;
-                                        return gNeedFlip ? pp[2] + ':' + pp[1] : pp[1] + ':' + pp[2];
-                                    }).join(' ') + (gCellOutcome ? ' ' + gCellOutcome : '');
-                                    группыЛиг += '<td class="td-gt-score' + (gIsWinner ? ' td-gt-win' : '') + '">' + gScoreDisp + '</td>';
-                                } else {
-                                    группыЛиг += '<td class="td-gt-empty">—</td>';
-                                }
-                            }
-                        }
-
-                        var glLot = ggGroupDone ? почемуМесто(gst, isEn, isKg) : '';
-                        группыЛиг += '<td class="td-gt-total">' + gst.wins + '</td>';
-                        /* ПРОЦЕНТ ГЕЙМОВ — ТОЛЬКО У СПОРНЫХ, как в админке.
-                           `разбор` заполняется лишь у тех, кого разводил
-                           расчёт при равных победах. У кого спора не было —
-                           прочерк: сравнивать не с чем, и число там только
-                           мешает. Слово Кости 01.10.
-                           Числа — ТЕ ЖЕ, ЧТО У МЕНЕДЖЕРА: встречи между
-                           равными, а не по всей группе. */
-                        var glДоли = KSLT_GROUPS.долиГеймов(gst.разбор);
-                        группыЛиг += '<td class="td-gt-ratio">' +
-                            (ggHasResults && glДоли
-                                ? gst.разбор.gamesWon + '-' + gst.разбор.gamesLost +
-                                  '<br><span class="td-gt-ratio-pct">' + glДоли.процент + '</span>'
-                                : '—') + '</td>';
-                        группыЛиг += '<td class="td-gt-pos' + (gIsPL ? ' td-gt-win' : '') + '">' +
-                            (ggHasResults ? gst.place : '—') + glLot + '</td>';
-                        группыЛиг += '</tr>';
-                    }
-                    группыЛиг += '</tbody></table></div></div>';
+                    /* 28.10, КУСОК 216: вторая копия круговой таблицы на
+                       сайте — лиговая. Она отличалась только правилом
+                       выделения строки: верх группы идёт в высшую лигу,
+                       низ в утешительную, и подсвечены обе. Правило
+                       отдано дому параметром, разметка общая. */
+                    группыЛиг += KSLT_SETKA.круговаяГруппа({
+                        буква: ggLetter,
+                        места: ggStandings,
+                        матчи: ggMatches,
+                        группаЗакрыта: ggGroupDone,
+                        этапЗакрыт: glAllGroupDone,
+                        классПрошедшего: 'td-gt-qual',
+                        /* Выделяются обе лиги: верх группы уходит в высшую,
+                           остальные места в пределах `qualifiers_per_group`
+                           — в утешительную. Числа те же, что были в
+                           вырезанной копии. */
+                        прошёл: function (st) {
+                            var glQPG = t.qualifiers_per_group || 4;
+                            return st.place <= glQPG && glAllGroupDone;
+                        },
+                        имя: function (id) { return pName(id); },
+                        фамилия: function (id) {
+                            return pName(id).replace(/<[^>]*>/g, '').trim().split(/\s+/).pop();
+                        },
+                        слово: словоГруппы
+                    });
                 }
+
                 группыЛиг += '</div>'; // /td-groups-grid
 
                 /* ЖИВОЕ ВЫШЕ ЗАКОНЧЕННОГО — признак свой, `glAllGroupDone`,
@@ -1934,97 +1913,24 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                     });
 
                     var letter = KSLT_RULES.букваГруппы(g) || String(g);
-                    группы += '<div class="td-gt-block">';
-                    группы += '<div class="td-group-name">' + (KSLT_YAZYK.выбрать('Group ', 'Топ ', 'Группа ')) + letter + '</div>';
-                    группы += '<div class="td-gt-scroll"><table class="td-group-table">';
-                    группы += '<thead><tr><th>№</th><th>' + (KSLT_YAZYK.выбрать('Player', 'Оюнчу', 'Игрок')) + '</th>';
-                    for (var c = 0; c < standings.length; c++) группы += '<th class="td-gt-opp">' + (c + 1) + '</th>';
-                    группы += '<th class="td-gt-wins">' + (KSLT_YAZYK.выбрать('W', 'Ж', 'П')) + '</th>';
-                    группы += '<th class="td-gt-games">' + (KSLT_YAZYK.выбрать('Games', 'Геймдер', 'Геймы')) + '</th>';
-                    группы += '<th class="td-gt-place">' + (KSLT_YAZYK.выбрать('Pos', 'О', 'М')) + '</th>';
-                    группы += '</tr></thead><tbody>';
-
-                    for (var row = 0; row < standings.length; row++) {
-                        var st = standings[row];
-                        var stName = pName(st.playerId);
-                        var seedHtml = st.seed ? ' <span class="td-gt-seed">[' + st.seed + ']</span>' : '';
-                        var isQualified = st.place <= qualifiers && allGroupDone;
-
-                        группы += '<tr data-player-id="' + st.playerId + '"' + (isQualified && allGroupDone ? ' style="background:var(--alpha-lime-06);"' : '') + '>';
-                        группы += '<td class="td-gt-num">' + (row + 1) + '</td>';
-                        группы += '<td class="td-gt-name">' + stName + seedHtml + '</td>';
-
-                        for (var col = 0; col < standings.length; col++) {
-                            if (row === col) {
-                                группы += '<td class="td-gt-self">&times;</td>';
-                            } else {
-                                var oppId = standings[col].playerId;
-                                var match = gMatches.find(function(m) {
-                                    return (m.player1_id === st.playerId && m.player2_id === oppId) ||
-                                           (m.player1_id === oppId && m.player2_id === st.playerId);
-                                });
-                                if (match && match.status === 'completed' && match.score) {
-                                    var scoreParts = match.score.split(' ');
-                                    var cellOutcome = '';
-                                    if (scoreParts.length > 0 && TD_OUTCOMES.indexOf(scoreParts[scoreParts.length - 1]) !== -1) {
-                                        cellOutcome = scoreParts.pop();
-                                    }
-                                    var score;
-                                    // Flip score if current player is player2
-                                    if (match.player2_id === st.playerId) {
-                                        score = scoreParts.map(function(s) {
-                                            var parts = s.split('/');
-                                            return parts.length === 2 ? parts[1] + ':' + parts[0] : s;
-                                        }).join(' ');
-                                    } else {
-                                        score = scoreParts.join(' ').replace(/\//g, ':');
-                                    }
-                                    if (cellOutcome) score += ' ' + cellOutcome;
-                                    var isWin = match.winner_id === st.playerId;
-                                    /* ПРОИГРАННЫЙ СЧЁТ — ОДНА КРАСКА НА ОБЕ ТАБЛИЦЫ. Здесь стоял
-                                       `--text-muted` (0.50), в таблице лиги строкой выше —
-                                       `--text-secondary` (0.72): одно понятие, два значения.
-                                       Оба проходят AA (5.33 и 9.52), поэтому выбор по роли:
-                                       счёт — это ДАННЫЕ, а не подпись, и `--text-muted`
-                                       остаётся за «матч не сыгран». */
-                                    группы += '<td class="td-gt-score' + (isWin ? ' td-gt-win' : '') + '">' + score + '</td>';
-                                } else if (match) {
-                                    // Матч есть, счёта ещё нет: клетка несёт номер и имя
-                                    // соперника — по ним свой матч заполняется прямо отсюда
-                                    var противName = pName(oppId).replace(/<[^>]*>/g, '');
-                                    var противФам = противName.trim().split(/\s+/).pop();
-                                    /* ОДИН АТРИБУТ `class`: оба имени в нём, а не два атрибута подряд —
-                                       браузер взял бы первый и выбросил второй. */
-                                    группы += '<td class="td-grp-cell td-gt-empty" data-match-id="' + match.id +
-                                             '" data-opp="' + противФам + '">—</td>';
-                                } else {
-                                    группы += '<td class="td-gt-empty">—</td>';
-                                }
-                            }
-                        }
-
-                        var sbPlaceDisplay = sbGroupHasResults ? st.place : '—';
-                        var sbLot = sbGroupDone ? почемуМесто(st, isEn, isKg) : '';
-                        группы += '<td class="td-gt-total">' + st.wins + '</td>';
-                        /* ПРОЦЕНТ ГЕЙМОВ — ТОЛЬКО У СПОРНЫХ, как в админке.
-                           `разбор` заполняется лишь у тех, кого разводил
-                           расчёт при равных победах. У кого спора не было —
-                           прочерк: сравнивать не с чем, и число там только
-                           мешает. Слово Кости 01.10.
-                           Числа — ТЕ ЖЕ, ЧТО У МЕНЕДЖЕРА: встречи между
-                           равными, а не по всей группе. */
-                        var sbДоли = KSLT_GROUPS.долиГеймов(st.разбор);
-                        группы += '<td class="td-gt-ratio">' +
-                            (sbGroupHasResults && sbДоли
-                                ? st.разбор.gamesWon + '-' + st.разбор.gamesLost +
-                                  '<br><span class="td-gt-ratio-pct">' + sbДоли.процент + '</span>'
-                                : '—') + '</td>';
-                        группы += '<td class="td-gt-pos' + (isQualified ? ' td-gt-win' : '') + '">' +
-                            sbPlaceDisplay + sbLot + '</td>';
-                        группы += '</tr>';
-                    }
-
-                    группы += '</tbody></table></div></div>';
+                    /* 28.10, КУСОК 216: рисунок круговой таблицы переехал в
+                       общий дом `js/kslt-setka.js` — тот же, что теперь
+                       рисует группу в приложении. Здесь остался только
+                       сбор данных и свои подстановки: имя участника и
+                       язык подписей. */
+                    группы += KSLT_SETKA.круговаяГруппа({
+                        буква: letter,
+                        места: standings,
+                        матчи: gMatches,
+                        проходят: qualifiers,
+                        группаЗакрыта: sbGroupDone,
+                        этапЗакрыт: allGroupDone,
+                        имя: function (id) { return pName(id); },
+                        фамилия: function (id) {
+                            return pName(id).replace(/<[^>]*>/g, '').trim().split(/\s+/).pop();
+                        },
+                        слово: словоГруппы
+                    });
                 }
 
                 группы += '</div>'; // close td-groups-grid

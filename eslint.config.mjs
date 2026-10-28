@@ -106,6 +106,7 @@ export default [
                 supabaseClient: 'readonly', KSLT_PHONE: 'readonly',
                 KSLT_SLOTS: 'readonly', newsArticleData: 'readonly',
                 A: 'readonly', KSLT_GROUPS: 'readonly', KSLT_POINTS: 'readonly',
+                KSLT_SETKA: 'readonly',
                 KSLT_RULES: 'readonly', KSLT_AUTH: 'readonly', KSLT_APP: 'readonly',
                 KSLT_I18N: 'readonly', KSLT_PUSH: 'readonly',
                 SEED_POSITIONS: 'readonly', I18N: 'readonly',
@@ -153,7 +154,8 @@ export default [
                 localStorage: 'readonly', matchMedia: 'readonly',
                 // дома продукта: сторожа поднимают их в `global`
                 ...домаПродукта,
-                KSLT_RULES: 'readonly', SEED_POSITIONS: 'readonly'
+                KSLT_RULES: 'readonly', SEED_POSITIONS: 'readonly',
+                KSLT_SETKA: 'readonly'
             }
         },
         rules: {

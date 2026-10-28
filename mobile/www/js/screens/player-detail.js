@@ -532,7 +532,9 @@
     supabaseClient.from('tournament_registrations')
       .select('*, tournament:tournaments(id, title, date_start, status)')
       .eq('player_id', _playerId)
-      .order('created_at', { ascending: false })
+      /* 28.10, КУСОК 216: тот же несуществующий `created_at` — турниры
+         игрока не показывались НИКОГДА, на странице каждого игрока. */
+      .order('registered_at', { ascending: false })
       .limit(20)
       .then(function(r) {
         if (r.error || !r.data || r.data.length === 0) {

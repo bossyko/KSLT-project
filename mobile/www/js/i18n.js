@@ -830,7 +830,36 @@
     'a11y.fCourtType': { ru: 'Тип корта',          en: 'Court type',        kg: 'Корттун түрү' },
     'a11y.fCity':      { ru: 'Город',              en: 'City',              kg: 'Шаар' },
     'a11y.fSurface':   { ru: 'Покрытие',           en: 'Surface',           kg: 'Каптама' },
-    'a11y.liveList':   { ru: 'Матчи в прямом эфире', en: 'Live matches',    kg: 'Түз эфирдеги матчтар' }
+    'a11y.liveList':   { ru: 'Матчи в прямом эфире', en: 'Live matches',    kg: 'Түз эфирдеги матчтар' },
+
+    /* 28.10, КУСОК 216: экран турнира получил вкладки сайта — участники,
+       расписание запусков, группы и плей-офф врозь. Подписи взяты у
+       сайта (`pages/tournament.html`), чтобы одно понятие звучало на
+       сайте и в приложении одинаково. */
+    'td.schedule':     { ru: 'Расписание',          en: 'Schedule',         kg: 'Тартип' },
+    'td.scheduleFull': { ru: 'Расписание запусков', en: 'Court schedule',   kg: 'Корт тартиби' },
+    'td.noSchedule':   { ru: 'Расписание пока не составлено',
+                         en: 'Schedule is not published yet',
+                         kg: 'Тартип азырынча түзүлө элек' },
+    'td.court':        { ru: 'Корт',                en: 'Court',            kg: 'Корт' },
+    'td.time':         { ru: 'Время',               en: 'Time',             kg: 'Убакыт' },
+    'td.game':         { ru: 'Игра',                en: 'Match',            kg: 'Оюн' },
+    'td.state':        { ru: 'Статус',              en: 'Status',           kg: 'Абал' },
+    'td.mainDraw':     { ru: 'Основная сетка',      en: 'Main draw',        kg: 'Негизги тор' },
+    'td.waitlist':     { ru: 'Лист ожидания',       en: 'Waiting list',     kg: 'Күтүү тизмеси' },
+    'td.noParticipants': { ru: 'Заявок пока нет',   en: 'No entries yet',   kg: 'Арыздар жок' },
+    'td.noGroups':     { ru: 'Групп в этом турнире нет',
+                         en: 'This tournament has no groups',
+                         kg: 'Бул мелдеште группалар жок' },
+    'td.noPlayoff':    { ru: 'Плей-офф ещё не начался',
+                         en: 'Playoff has not started yet',
+                         kg: 'Плей-офф башталган жок' },
+    'td.mPlayed':      { ru: 'Сыгран',              en: 'Played',           kg: 'Ойнолду' },
+    'td.mScheduled':   { ru: 'Назначен',            en: 'Scheduled',        kg: 'Дайындалды' },
+    'td.mLive':        { ru: 'Идёт',                en: 'Live',             kg: 'Жүрүүдө' },
+    'td.more':         { ru: 'Показать полностью',  en: 'Show full text',   kg: 'Толук көрсөтүү' },
+    'td.less':         { ru: 'Свернуть',            en: 'Collapse',         kg: 'Жыйыштыруу' },
+    'td.showAll':      { ru: 'Показать все',        en: 'Show all',         kg: 'Баарын көрсөтүү' }
   };
 
   // === Public API ===

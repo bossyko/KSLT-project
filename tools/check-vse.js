@@ -209,7 +209,9 @@ const КУСКИ = [
     ['словарь приложения', 'check-slovar-prilozheniya.js',
      'check-slovar-prilozheniya-otkat.js'],
     ['доступность приложения', 'check-dostupnost-prilozheniya.js',
-     'check-dostupnost-prilozheniya-otkat.js']
+     'check-dostupnost-prilozheniya-otkat.js'],
+    ['экран турнира приложения', 'check-ekran-turnira-prilozheniya.js',
+     'check-ekran-turnira-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -263,6 +263,13 @@ body {
 }
 @media (min-width: 640px) and (min-height: 640px) {
   body { max-width: 600px; }
+  /* 28.10, КУСОК 216: окна-экраны (турнир, баттл, игрок, новость) едут
+     ТОЙ ЖЕ границей, что и тело. У `.td-overlay` стоял безусловный
+     `max-width: 440px` мимо шкалы: на телефоне лёжа 844 окно вставало
+     полосой 440 по центру, и по краям была видна главная — Костя
+     увидел это глазами («телефон лёжа открывает окно, а не страницу»).
+     ЗАМОРОЖЕНО ОТНОШЕНИЕ: окно шириной с тело, а не число 440. */
+  .td-overlay, .live-full { max-width: 600px; }
 }
 
 a { color: inherit; text-decoration: none; }
@@ -2350,7 +2357,6 @@ a, button, [role="button"] {
   position: fixed;
   top: 0; bottom: 0;
   left: 0; right: 0;
-  max-width: 440px;
   margin: 0 auto;
   background: var(--bg);
   z-index: 300;
@@ -2401,13 +2407,23 @@ a, button, [role="button"] {
 .td-badge.status-completed { background: var(--glass); color: var(--text-muted); }
 
 .td-tabs {
+  /* 28.10, КУСОК 216: вкладок стало шесть, как на сайте. Делить ширину
+     375 на шесть нельзя — подпись «Расписание» не влезает. Полоса
+     прокручивается вбок, кнопка держит свою ширину по содержимому. */
   display: flex;
   border-bottom: 1px solid var(--border);
   margin: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+.td-tabs::-webkit-scrollbar { display: none; }
 .td-tab {
-  flex: 1; padding: 12px 0; text-align: center;
-  font-size: 14px; font-weight: 500; color: var(--text-muted);
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-3); text-align: center;
+  white-space: nowrap;
+  font-size: var(--fs-sm); font-weight: 500; color: var(--text-muted);
   border-bottom: 2px solid transparent;
   background: none; border-top: none; border-left: none; border-right: none;
   cursor: pointer;
@@ -2424,20 +2440,46 @@ a, button, [role="button"] {
   padding: 12px;
   margin-bottom: 16px;
 }
+/* 28.10, КУСОК 216: восемь строк столбиком — 1350 пикселей, 1.66 экрана.
+   Короткие пары встают по две в ряд, длинные занимают ряд целиком.
+   ЗАМОРОЖЕНО ОТНОШЕНИЕ: ряд делится на два, а не ширина 163. */
+.td-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-3);
+}
+.td-info-grid > .td-info-row.wide { grid-column: 1 / -1; }
 .td-info-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 8px 0;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) 0;
   border-bottom: 1px solid var(--border);
+  min-width: 0;
 }
 .td-info-row:last-child { border-bottom: none; }
-.td-info-icon { font-size: 18px; flex-shrink: 0; }
-.td-info-text { flex: 1; }
-.td-info-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-.td-info-value { font-size: 14px; font-weight: 500; color: var(--text); }
+.td-info-icon { font-size: var(--fs-md); flex-shrink: 0; }
+.td-info-text { flex: 1; min-width: 0; }
+.td-info-label { font-size: var(--fs-2xs); color: var(--text-muted); margin-bottom: 2px; }
+.td-info-value { font-size: var(--fs-sm); font-weight: 500; color: var(--text); }
 .td-description {
-  font-size: 14px; line-height: 1.6;
+  font-size: var(--fs-sm); line-height: var(--lh-relaxed);
   color: var(--text-sec);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
+}
+/* Свёрнутое описание: восемь строк. Разворачивается кнопкой — так же
+   делает сайт («показать все») и так же делают ленты FAANG. */
+.td-description.is-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+.td-desc-more {
+  display: block; min-height: 44px;
+  padding: 0; margin-bottom: var(--space-4);
+  font-size: var(--fs-sm); font-weight: 600;
+  color: var(--accent-text);
+  background: none; border: none;
 }
 .td-register-btn {
   width: 100%; padding: 16px; font-size: 16px;
@@ -4208,9 +4250,14 @@ select.prof-field-input { color: var(--text); }
   color: var(--text-muted); font-size: 11px;
   min-width: 24px; font-weight: 700;
 }
+/* 28.10, КУСОК 216: имя пары обрезалось многоточием — замер нашёл
+   восемь таких мест, где не хватало 11-17 пикселей из 221. Костя
+   увидел это глазами («обрезанно»). Имя переносится в две строки:
+   длинное имя важнее одной строки. */
 .mob-match-name {
-  flex: 1; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
+  flex: 1; min-width: 0;
+  white-space: normal;
+  line-height: var(--lh-snug);
 }
 .mob-match-sets {
   display: flex; gap: 2px; flex-shrink: 0;
@@ -4224,7 +4271,7 @@ select.prof-field-input { color: var(--text); }
 .mob-match-row.winner .mob-match-name { color: var(--accent-text); }
 .mob-match-vs {
   text-align: center; padding: 2px 0;
-  font-size: 11px; color: var(--text-muted);
+  font-size: var(--fs-2xs); color: var(--text-muted);
   letter-spacing: 1px;
 }
 
@@ -4236,16 +4283,26 @@ select.prof-field-input { color: var(--text); }
 }
 .mob-standings {
   width: 100%; border-collapse: collapse;
-  font-size: 14px; margin-bottom: 12px;
+  font-size: var(--fs-sm); margin-bottom: var(--space-3);
 }
 .mob-standings th {
-  text-align: left; padding: 8px 8px;
-  color: var(--text-muted); font-size: 11px;
+  text-align: left; padding: var(--space-2);
+  color: var(--text-muted); font-size: var(--fs-2xs);
   font-weight: 600; text-transform: uppercase;
   border-bottom: 1px solid var(--border);
 }
+/* 28.10, КУСОК 216: ширины пересчитаны. Имени доставалось 105 из 343,
+   и фамилия второго игрока переносилась второй строкой — строка
+   таблицы вырастала до 122 пикселей. Цифровым колонкам хватает места
+   под два знака, место шире: под числом стоит подпись, чем развели
+   равных («по геймам», «личная встреча»). ПОСЧИТАНО: 28 + 24 + 24 +
+   48 + 48 = 172, имени остаётся 171 — вдвое больше прежнего. */
 .mob-standings th.num { text-align: center; width: 28px; }
-.mob-standings th.stat { text-align: center; width: 32px; }
+.mob-standings th.stat { text-align: center; width: 24px; }
+.mob-standings th.stat.mob-games,
+.mob-standings td.stat.mob-games { width: 48px; }
+.mob-standings th.stat:last-child,
+.mob-standings td.stat:last-child { width: 48px; }
 .mob-standings td {
   padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
 }
@@ -4267,12 +4324,171 @@ select.prof-field-input { color: var(--text); }
   font-weight: 700; margin-left: 8px;
 }
 .mob-section-title {
-  font-size: 14px; font-weight: 700; color: var(--accent-text);
-  margin: 16px 0 8px;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--accent-text);
+  margin: var(--space-4) 0 var(--space-2);
 }
+
+/* ===== ЭКРАН ТУРНИРА — ВКЛАДКИ (кусок 216, 28.10) ===== */
+
+/* Поле вкладки. Отступ был зашит инлайном `style="padding:16px"` в трёх
+   местах кода — одно понятие, три определения. */
+.td-pane { padding: var(--space-4); }
+
+/* Пара — две строки, по одной на игрока. Одной строкой «А / Б» перенос
+   вставал посреди фамилии, а в таблице группы имя занимало три строки
+   вместо двух. Так же показывают пары приложения ATP и WTA. */
+.tm-p { display: block; }
+.tm-p + .tm-p { color: inherit; }
+
+/* Обводка нажатой вкладки. Браузер рисовал свою синюю — она не из нашей
+   палитры и видна была даже после нажатия мышью. Своя обводка только
+   для прохода с клавиатуры. */
+.td-tab:focus { outline: none; }
+.td-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+.round-pill:focus { outline: none; }
+.round-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Участники ---- */
+.td-part-block + .td-part-block { margin-top: var(--space-6); }
+.td-part-title {
+  font-size: var(--fs-sm); font-weight: 700; color: var(--accent-text);
+  margin-bottom: var(--space-2);
+}
+.td-part-count {
+  font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted);
+  background: var(--glass); border-radius: var(--radius-full);
+  padding: 2px var(--space-2); margin-left: var(--space-2);
+}
+.td-part-table, .td-sched-table {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+.td-part-table th, .td-sched-table th {
+  text-align: left; padding: var(--space-2);
+  font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.td-part-table td, .td-sched-table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+.td-part-table .num, .td-sched-table .when { width: 28px; }
+.td-part-table th.num { text-align: center; }
+.td-part-table td.num { text-align: center; color: var(--text-muted); }
+.td-part-table .ntrp { width: 64px; text-align: center; white-space: nowrap; }
+.td-part-table .when {
+  width: 72px; text-align: right; white-space: nowrap;
+  font-size: var(--fs-2xs); color: var(--text-muted);
+}
+.td-part-table.is-queue tbody tr { opacity: 0.72; }
+.td-part-wait { font-size: var(--fs-2xs); }
+
+/* ---- Круговая таблица группы (кусок 216, 28.10) ----
+   Разметку рисует общий дом `js/kslt-setka.js` — тот же, что на сайте.
+   Оформление своё, на шкале приложения: подключить css сайта нельзя,
+   у него свои `.td-tab` и `.td-overlay`, они столкнулись бы с нашими.
+   Таблица шире экрана (595 при 343) и двигается вбок внутри своей
+   обёртки — ровно как на сайте, где Костя этот вид принял. */
+.td-gt-block + .td-gt-block { margin-top: var(--space-6); }
+.td-group-name {
+  font-size: var(--fs-sm); font-weight: 700;
+  color: var(--accent-text);
+  margin-bottom: var(--space-2);
+}
+.td-gt-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.td-gt-scroll::-webkit-scrollbar { display: none; }
+.td-group-table {
+  border-collapse: collapse;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+.td-group-table th {
+  padding: var(--space-2);
+  font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.td-group-table th:nth-child(2) { text-align: left; }
+.td-group-table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: center;
+  color: var(--text-sec);
+}
+.td-gt-num { width: 24px; color: var(--text-muted); }
+.td-gt-name {
+  text-align: left; white-space: normal;
+  min-width: 120px; color: var(--text);
+  line-height: var(--lh-snug);
+}
+.td-gt-opp, .td-gt-score, .td-gt-empty, .td-gt-self { min-width: 48px; }
+.td-gt-seed { color: var(--accent-text); font-size: var(--fs-2xs); font-weight: 700; }
+.td-gt-self { color: var(--text-muted); }
+.td-gt-empty { color: var(--text-muted); }
+.td-gt-score.td-gt-win { color: var(--accent-text); font-weight: 600; }
+.td-gt-total { font-weight: 600; color: var(--text); }
+.td-gt-ratio { font-size: var(--fs-2xs); color: var(--text-muted); white-space: normal; }
+.td-gt-ratio-pct { color: var(--text-muted); }
+.td-gt-pos { font-weight: 700; }
+.td-gt-pos.td-gt-win { color: var(--accent-text); }
+.td-gt-qualified { background: var(--accent-dim); }
+.td-grp-lot {
+  display: block; margin-top: 2px;
+  font-size: var(--fs-2xs); font-weight: 500; line-height: 1;
+  color: var(--text-muted); white-space: normal;
+}
+
+/* ---- Отсечка длинного списка (кусок 216) ----
+   Первые десять строк, остальное по нажатию — то же правило, что на
+   сайте. Прячем строками таблицы, а не высотой блока: половина строки
+   на срезе читается как беда вёрстки. */
+.td-part-table.is-cut tbody tr:nth-child(n + 11),
+.td-sched-table.is-cut tbody tr:nth-child(n + 11) { display: none; }
+.td-more-btn {
+  display: block; width: 100%;
+  min-height: 44px; margin-top: var(--space-2);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent-text);
+  font-size: var(--fs-sm); font-weight: 600;
+}
+.td-more-btn:focus { outline: none; }
+.td-more-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---- Расписание запусков ---- */
+.td-sched-table .when { width: 56px; white-space: nowrap; font-weight: 600; }
+.td-sched-table .court {
+  width: 72px; text-align: right; white-space: nowrap;
+  color: var(--text-muted);
+}
+.td-sched-grp, .td-sched-st {
+  display: block; margin-top: 2px;
+  font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted);
+}
+.td-sched-p { line-height: var(--lh-snug); }
+.td-sched-vs {
+  font-size: var(--fs-2xs); color: var(--text-muted);
+  margin: 2px 0;
+}
+.td-sched-table tr.st-completed .td-sched-st { color: var(--accent-text); }
 .mob-no-results {
-  text-align: center; padding: 16px;
-  color: var(--text-muted); font-size: 14px;
+  text-align: center; padding: var(--space-6) var(--space-4);
+  color: var(--text-muted); font-size: var(--fs-sm);
 }
 
 /* ===== Venue Card ===== */
