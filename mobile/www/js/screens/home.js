@@ -810,6 +810,17 @@
       }
     };
 
+    /* Матч за третье место отдаём ДОМУ хвостом, а не дописываем после
+       сетки: дописанный блок оказывался под первым столбцом, потому что
+       полоса сетки прокручивается вбок, а он стоял за её пределами.
+       Костя увидел это глазами 28.10: «за 3 место стоит в 1 круге». */
+    if (заТретье.length) {
+      var хвост = '<div class="td-third-place">';
+      хвост += '<div class="td-round-title">' + I18N.t('td.thirdPlace') + '</div>';
+      заТретье.forEach(function (m) { хвост += KSLT_SETKA.матч(вДом(m), опции); });
+      опции.хвост = хвост + '</div>';
+    }
+
     var h = KSLT_SETKA.сетка(круги, опции);
     /* 28.10, КУСОК 220: сетка открывается НА ПОСЛЕДНЕМ СЫГРАННОМ КРУГЕ.
        Она шире экрана (776 при видимых 311) и открывалась слева, на
@@ -822,12 +833,6 @@
     });
     отложеннаяПрокрутка = последний;
 
-    if (заТретье.length) {
-      h += '<div class="td-third-place">';
-      h += '<div class="td-round-title">' + I18N.t('td.thirdPlace') + '</div>';
-      заТретье.forEach(function (m) { h += KSLT_SETKA.матч(вДом(m), опции); });
-      h += '</div>';
-    }
     return h;
   }
 
@@ -947,7 +952,13 @@
           var playersMap = {};
           (pRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
 
-          var html = '<div style="padding:16px"><div class="pd-matches-list">';
+          /* ОТСЕЧКА ОЧКОВ (кусок 221). Механизм заведён куском 216 и
+             стоял на участниках и расписании; в трекере было записано
+             поставить его на Очки, когда попадётся турнир с длинным
+             списком. Попался: 20 участников, 13+ строк начислений. */
+          var html = '<div style="padding:16px"><div class="pd-matches-list td-points-list' +
+                     (rows.length > ПОРОГ_ОТСЕЧКИ ? ' is-cut' : '') +
+                     '" data-cut-block="results">';
           rows.forEach(function(row, i) {
             var p = playersMap[row.player_id];
             var pName = p ? p.name : '?';
@@ -957,8 +968,9 @@
             html += '<div class="pd-match-score" style="color:var(--accent);font-weight:700">+' + (row.points_earned || 0) + '</div>';
             html += '</div>';
           });
-          html += '</div></div>';
+          html += '</div>' + кнопкаОтсечки(rows.length, 'results') + '</div>';
           container.innerHTML = html;
+          связатьОтсечки(container);
         });
       });
   }
@@ -1054,7 +1066,7 @@
   function кнопкаОтсечки(всего, имяБлока) {
     if (всего <= ПОРОГ_ОТСЕЧКИ) return '';
     return '<button class="td-more-btn" data-cut="' + имяБлока + '"' +
-           ' aria-expanded="false">' +
+           ' data-total="' + всего + '" aria-expanded="false">' +
            I18N.t('td.showAll') + ' (' + всего + ')</button>';
   }
 
@@ -1070,8 +1082,9 @@
           ? I18N.t('td.showAll') + ' (' + btn.getAttribute('data-total') + ')'
           : I18N.t('td.less');
       });
-      var блок = узел.querySelector('[data-cut-block="' + btn.getAttribute('data-cut') + '"]');
-      if (блок) btn.setAttribute('data-total', блок.querySelectorAll('tbody tr').length);
+      /* Число строк кладётся В КНОПКУ ПРИ СБОРКЕ. Раньше оно считалось
+         по DOM через `tbody tr` — то есть одно и то же число жило в двух
+         местах, и для списка из `div` (Очки) второе место давало ноль. */
     });
   }
 

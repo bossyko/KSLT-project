@@ -2353,9 +2353,17 @@ a, button, [role="button"] {
 }
 
 /* ===== TOURNAMENT DETAIL OVERLAY ===== */
+/* НИЖНЯЯ ПАНЕЛЬ ОСТАЁТСЯ ВИДИМОЙ (кусок 221, предположение).
+   Накладка занимала весь экран и закрывала навигацию верхнего уровня:
+   чтобы из турнира попасть в Новости, надо было сначала нажать «Назад».
+   И Material, и Apple HIG держат панель на экранах-подробностях и
+   прячут только на настоящих модалках — просмотр фото (.nm-viewer) и
+   полноэкранный Live (.live-full), они этим правилом не тронуты.
+   Цена: высота панели плюс вырез. Списки внутри и так отступают снизу
+   на ту же величину. */
 .td-overlay {
   position: fixed;
-  top: 0; bottom: 0;
+  top: 0; bottom: calc(var(--tab-height) + var(--safe-bottom));
   left: 0; right: 0;
   margin: 0 auto;
   background: var(--bg);
@@ -4339,6 +4347,13 @@ select.prof-field-input { color: var(--text); }
    вместо двух. Так же показывают пары приложения ATP и WTA. */
 .tm-p { display: block; }
 .tm-p + .tm-p { color: inherit; }
+/* РАЗДЕЛИТЕЛЬ ПАРЫ (кусок 221). На сайте пара пишется через косую
+   (js/tournament-detail.js:160), в приложении разделитель был потерян:
+   два имени шли двумя блоками подряд, и на узком виде каждое ещё и
+   переносилось — пара читалась четырьмя строками без признака пары.
+   Косая ставится в КОНЦЕ первой строки, как в турнирных сетках, и
+   приглушена, чтобы не спорить с именем. */
+.tm-p:not(:last-child)::after { content: ' /'; color: var(--text-muted); }
 
 /* Обводка нажатой вкладки. Браузер рисовал свою синюю — она не из нашей
    палитры и видна была даже после нажатия мышью. Своя обводка только
@@ -4588,6 +4603,8 @@ select.prof-field-input { color: var(--text); }
    на срезе читается как беда вёрстки. */
 .td-part-table.is-cut tbody tr:nth-child(n + 11),
 .td-sched-table.is-cut tbody tr:nth-child(n + 11) { display: none; }
+/* Очки — тот же порог, но список из `div`, а не таблица (кусок 221). */
+.td-points-list.is-cut > .pd-match:nth-child(n + 11) { display: none; }
 .td-more-btn {
   display: block; width: 100%;
   min-height: 44px; margin-top: var(--space-2);
