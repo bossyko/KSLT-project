@@ -215,7 +215,9 @@ const КУСКИ = [
     ['сетка плей-офф приложения', 'check-setka-prilozheniya.js',
      'check-setka-prilozheniya-otkat.js'],
     ['статус и имена приложения', 'check-status-i-imena-prilozheniya.js',
-     'check-status-i-imena-prilozheniya-otkat.js']
+     'check-status-i-imena-prilozheniya-otkat.js'],
+    ['новости приложения', 'check-novosti-prilozheniya.js',
+     'check-novosti-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {

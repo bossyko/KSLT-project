@@ -4448,8 +4448,8 @@ select.prof-field-input { color: var(--text); }
   color: var(--accent-text); font-size: var(--fs-2xs); font-weight: 700;
   white-space: nowrap;
 }
-.td-gt-name .tm-p:last-child { display: inline; }
-.td-gt-name .tm-p:last-child::after { content: ''; }
+/* Посев стоит ПЕРЕД именем и не отрывается от него (кусок 219). */
+.td-gt-name .td-gt-seed { margin-right: var(--space-1); }
 .td-gt-self { color: var(--text-muted); }
 .td-gt-empty { color: var(--text-muted); }
 .td-gt-score.td-gt-win { color: var(--accent-text); font-weight: 600; }
@@ -4932,6 +4932,38 @@ select.prof-field-input { color: var(--text); }
   border-radius: var(--radius-md);
   display: block;
 }
+
+/* ---- ВЕРТИКАЛЬНАЯ ВРЕЗКА INSTAGRAM (кусок 219, 28.10) ----
+   Кадру ставилось 16/9 — при ширине 343 это 193 пикселя. Инстаграм
+   рисует вертикальный ролик 9:16 ПЛЮС свою шапку с именем аккаунта и
+   низ с лайками, и в 193 это не влезает: ВНУТРИ кадра появляется своя
+   полоса прокрутки. Костя увидел её глазами — и уже второй раз: на
+   сайте ту же беду чинили 08.10, здесь дома просто не было.
+   Правило и числа взяты у сайта (`css/news.css:1195`), а не выдуманы
+   заново: шапка 54 и низ 240 СНЯТЫ ЗАМЕРОМ живого встраивания при
+   ширине 400, форма кадра 4/5 ПОСЧИТАНА по снимку. Это чужой кадр —
+   числа НАМЕРЕННО не со шкалы, они описывают не наш макет. */
+.nd-body {
+  --ig-shapka: 54px;
+  --ig-niz: 240px;
+  --ig-kadr: 4 / 5;
+}
+.nd-body figure:has(> .news-video-ig) {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  aspect-ratio: var(--ig-kadr);
+}
+.nd-body figure .news-video-ig {
+  position: absolute;
+  left: 0;
+  top: calc(-1 * var(--ig-shapka));
+  width: 100%;
+  /* Высота — видимая часть плюс то, что срезаем сверху и снизу. */
+  height: calc(100% + var(--ig-shapka) + var(--ig-niz));
+  aspect-ratio: auto;
+  border-radius: 0;
+}
 .nd-body h3 { margin: 16px 0 8px; font-size: 16px; color: var(--text); }
 .nd-body ul,
 .nd-body ol { margin: 0 0 12px; padding-left: 24px; }
@@ -5036,6 +5068,32 @@ select.prof-field-input { color: var(--text); }
   font-size: 26px;
   line-height: 1;
 }
+/* ---- Кнопки листания (кусок 219, 28.10) ----
+   Листать можно было только свайпом, а на компьютере его нет вовсе.
+   Цель нажатия 44 — ступень шкалы кнопок. */
+.nm-viewer-nav, .nm-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: var(--fs-xl);
+  line-height: 1;
+  z-index: 2;
+}
+.nm-viewer-nav.nm-prev, .nm-nav.nm-prev { left: var(--space-2); }
+.nm-viewer-nav.nm-next, .nm-nav.nm-next { right: var(--space-2); }
+.nm-viewer-nav:focus, .nm-nav:focus { outline: none; }
+.nm-viewer-nav:focus-visible, .nm-nav:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.nm-viewer:focus { outline: none; }
+
 .nm-viewer-count {
   position: absolute;
   bottom: calc(env(safe-area-inset-bottom) + 14px);

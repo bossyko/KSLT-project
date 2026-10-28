@@ -1332,6 +1332,15 @@
       html += '</div>'; // close nd-content
       var detail = document.getElementById('newsDetail');
       detail.innerHTML = html;
+      /* 28.10, КУСОК 219: кадры внешнего видео чинит ОБЩИЙ ДОМ
+         `js/kslt-video.js` — тот же, что на сайте. В базе кадры лежат
+         голыми `iframe` без классов (их срезала чистка при сохранении,
+         находка 08.10), и правило вертикальной врезки к ним не
+         применялось: кадр вставал высотой 193 вместо своей, и ВНУТРИ
+         него появлялась своя полоса прокрутки. На сайте это починили
+         08.10, в приложении дома не было вовсе — Костя увидел ту же
+         беду здесь: «первое инста там скрол почему?». */
+      if (window.KSLT_VIDEO) KSLT_VIDEO.починитьКадры(detail);
       overlay.classList.add('open');
       if (window.KSLT_NEWS_MEDIA) {
         KSLT_NEWS_MEDIA.init(detail, gallery);

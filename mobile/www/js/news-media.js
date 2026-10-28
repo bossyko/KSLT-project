@@ -83,7 +83,9 @@
       блок.dataset.photos = JSON.stringify(адреса);
       блок.innerHTML =
         '<div class="nm-stage">' +
+          '<button type="button" class="nm-nav nm-prev" aria-label="Предыдущий">&#8249;</button>' +
           '<img class="nm-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
+          '<button type="button" class="nm-nav nm-next" aria-label="Следующий">&#8250;</button>' +
           '<div class="nm-count">1 / ' + адреса.length + '</div>' +
         '</div>' +
         '<div class="nm-thumbs">' +
@@ -135,6 +137,11 @@
     thumbs.forEach(function(t) {
       t.addEventListener('click', function() { show(Number(t.dataset.index)); });
     });
+    /* Кнопки листания: свайп остаётся, но он не единственный путь. */
+    var назад = wrap.querySelector('.nm-nav.nm-prev');
+    var вперёд = wrap.querySelector('.nm-nav.nm-next');
+    if (назад) назад.addEventListener('click', function(e) { e.stopPropagation(); show(index - 1); });
+    if (вперёд) вперёд.addEventListener('click', function(e) { e.stopPropagation(); show(index + 1); });
     onSwipe(wrap.querySelector('.nm-stage'), function(dir) { show(index + dir); });
   }
 
@@ -175,9 +182,17 @@
   function open(urls, index) {
     var overlay = document.createElement('div');
     overlay.className = 'nm-viewer';
+    /* 28.10, КУСОК 219: листать можно БЫЛО только свайпом, а по снимку
+       клик ЗАКРЫВАЛ окно. На компьютере свайпа нет вовсе, на телефоне
+       неточный свайп читался как нажатие — и вместо следующего кадра
+       окно пропадало. Костя: «не получается листать фото в увеличенном
+       и в миниатюре». Ставим кнопки и снимаем закрытие по снимку. */
+    var многоКадров = urls.length > 1;
     overlay.innerHTML =
       '<button type="button" class="nm-viewer-close" aria-label="Закрыть">&times;</button>' +
+      (многоКадров ? '<button type="button" class="nm-viewer-nav nm-prev" aria-label="Предыдущий">&#8249;</button>' : '') +
       '<img class="nm-viewer-img" src="' + esc(urls[index]) + '" alt="">' +
+      (многоКадров ? '<button type="button" class="nm-viewer-nav nm-next" aria-label="Следующий">&#8250;</button>' : '') +
       '<div class="nm-viewer-count"></div>';
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
@@ -211,9 +226,28 @@
 
     window.addEventListener('popstate', onPop);
     overlay.querySelector('.nm-viewer-close').addEventListener('click', close);
+    /* Закрывает только фон. Нажатие по самому снимку раньше закрывало —
+       и это съедало неточный свайп. */
     overlay.addEventListener('click', function(e) {
-      if (e.target === overlay || e.target === img) close();
+      if (e.target === overlay) close();
     });
+    if (многоКадров) {
+      overlay.querySelector('.nm-prev').addEventListener('click', function(e) {
+        e.stopPropagation(); show(index - 1);
+      });
+      overlay.querySelector('.nm-next').addEventListener('click', function(e) {
+        e.stopPropagation(); show(index + 1);
+      });
+      /* С клавиатуры — стрелками: на планшете с клавиатурой и в окне
+         разработчика свайпа нет. */
+      overlay.tabIndex = -1;
+      overlay.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') show(index - 1);
+        else if (e.key === 'ArrowRight') show(index + 1);
+        else if (e.key === 'Escape') close();
+      });
+      setTimeout(function() { overlay.focus(); }, 0);
+    }
     onSwipe(overlay, function(dir) { show(index + dir); });
 
     show(index);

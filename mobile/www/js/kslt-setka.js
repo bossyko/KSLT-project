@@ -124,8 +124,13 @@
             h += '<tr data-player-id="' + st.playerId + '"' +
                  (прошёл ? ' class="' + классПрошедшего + '"' : '') + '>';
             h += '<td class="td-gt-num">' + (row + 1) + '</td>';
-            h += '<td class="td-gt-name">' + имя(st.playerId) +
-                 (st.seed ? ' <span class="td-gt-seed">[' + st.seed + ']</span>' : '') + '</td>';
+            /* 28.10, КУСОК 219: посев ПЕРЕД именем. Слово Кости: «номер
+               сеяного наверно лучше поставить перед ФИО, а не после».
+               Так же стоит и в клетке сетки — посев там всегда был
+               первым, и теперь оба места читаются одинаково. */
+            h += '<td class="td-gt-name">' +
+                 (st.seed ? '<span class="td-gt-seed">[' + st.seed + ']</span> ' : '') +
+                 имя(st.playerId) + '</td>';
 
             for (var col = 0; col < места.length; col++) {
                 if (row === col) { h += '<td class="td-gt-self">&times;</td>'; continue; }
