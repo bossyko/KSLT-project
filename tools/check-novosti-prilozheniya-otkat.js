@@ -15,7 +15,7 @@ function копировать(отн) {
     fs.mkdirSync(path.dirname(куда), { recursive: true });
     fs.cpSync(откуда, куда, { recursive: true });
 }
-['mobile/www', 'js/kslt-video.js', 'js/kslt-setka.js',
+['mobile/www', 'js/kslt-video.js', 'js/kslt-setka.js', 'js/kslt-lenta.js',
  'tools/check-novosti-prilozheniya.js'].forEach(копировать);
 
 function прогон() {
@@ -77,10 +77,10 @@ const ОТКАТЫ = [
      "''",
      'в просмотре есть кнопки листания'],
 
-    ['кнопки карусели снесены', M,
-     "'<button type=\"button\" class=\"nm-nav nm-prev\" aria-label=\"Предыдущий\">&#8249;</button>' +",
+    ['кнопки ленты снесены', 'js/kslt-lenta.js',
+     "'<button class=\"news-carousel-nav news-carousel-prev\" aria-label=\"Предыдущее\">&#8249;</button>' +",
      "",
-     'в карусели есть кнопки листания'],
+     'в ленте есть кнопки листания'],
 
     ['нажатие по снимку снова закрывает', M,
      '      if (e.target === overlay) close();',
@@ -108,7 +108,7 @@ const ОТКАТЫ = [
      'посев стоит перед именем'],
 
     ['версия правленого файла не поднята', H,
-     'js/news-media.js?v=2',
+     'js/news-media.js?v=5',
      'js/news-media.js?v=1',
      'версии правленых файлов подняты']
 ];

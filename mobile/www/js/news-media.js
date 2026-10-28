@@ -56,7 +56,28 @@
   /** Оживляет разметку: листание ленты и просмотр во весь экран. */
   M.init = function(root, gallery) {
     if (!root) return;
-    собратьСнимкиВТексте(root);
+    /* Ленту собирает общий дом — тот же, что на сайте и в предпросмотре
+       админки. `.nd-body` переименован в `.news-html` на время сборки:
+       дом ищет тело новости по этому имени, и заводить ему второе
+       значило бы развести одно понятие по двум именам. */
+    var тело = root.querySelector('.nd-body');
+    var подпись = window.KSLT_I18N ? window.KSLT_I18N.t('news.open') : 'Открыть';
+    if (тело && window.KSLT_LENTA) {
+      тело.classList.add('news-html');
+      KSLT_LENTA.собрать(root, подпись);
+      тело.classList.remove('news-html');
+      /* Сборка только рисует. Обработчики каждой ленте вешает `завести` —
+         так же делает и сайт (`js/news.js:729`). Без этого кнопки стоят,
+         а не работают: я это и поймал замером. */
+      Array.prototype.forEach.call(root.querySelectorAll('.news-carousel'), function (wrap) {
+        var кадры = wrap.dataset.kadry ? JSON.parse(wrap.dataset.kadry) : null;
+        if (!кадры) {
+          var адреса = wrap.dataset.photos ? JSON.parse(wrap.dataset.photos) : [];
+          кадры = адреса.map(function (а) { return { вид: 'фото', адрес: а }; });
+        }
+        KSLT_LENTA.завести(wrap, кадры, подпись);
+      });
+    }
     initCarousel(root, gallery || []);
     initViewer(root, gallery || []);
   };
@@ -68,44 +89,14 @@
    *
    * Одиночный снимок остаётся снимком: галерея из одного кадра ни к чему.
    */
-  function собратьСнимкиВТексте(root) {
-    var тело = root.querySelector('.nd-body');
-    if (!тело) return;
+  /* 28.10, КУСОК 220: своя сборка ленты снесена. Она брала ТОЛЬКО
+     фотографии, и видео шло отдельными кадрами друг за другом — Костя
+     увидел это и сказал: «инста наверно тоже карусель сделать, или
+     поместить вместе с фото в одну». На сайте это решено ещё 08.10 его
+     же словами, и для этого есть общий дом `js/kslt-lenta.js`: он
+     собирает фото и видео в ОДНУ ленту и снимает отношение коробки с
+     первого кадра, чтобы она не прыгала при листании. */
 
-    var дети = Array.prototype.slice.call(тело.children);
-    var набор = [];
-
-    function закрыть() {
-      if (набор.length < 2) { набор = []; return; }
-      var адреса = набор.map(function(f) { return f.querySelector('img').src; });
-      var блок = document.createElement('div');
-      блок.className = 'nm-carousel';
-      блок.dataset.photos = JSON.stringify(адреса);
-      блок.innerHTML =
-        '<div class="nm-stage">' +
-          '<button type="button" class="nm-nav nm-prev" aria-label="Предыдущий">&#8249;</button>' +
-          '<img class="nm-main" src="' + esc(адреса[0]) + '" alt="" data-index="0">' +
-          '<button type="button" class="nm-nav nm-next" aria-label="Следующий">&#8250;</button>' +
-          '<div class="nm-count">1 / ' + адреса.length + '</div>' +
-        '</div>' +
-        '<div class="nm-thumbs">' +
-          адреса.map(function(url, i) {
-            return '<button type="button" class="nm-thumb' + (i === 0 ? ' active' : '') +
-              '" data-index="' + i + '"><img src="' + esc(url) + '" alt="" loading="lazy"></button>';
-          }).join('') +
-        '</div>';
-      набор[0].parentNode.insertBefore(блок, набор[0]);
-      набор.forEach(function(f) { f.remove(); });
-      набор = [];
-    }
-
-    дети.forEach(function(эл) {
-      var снимок = эл.tagName === 'FIGURE' && эл.querySelector('img') && !эл.textContent.trim();
-      if (снимок) { набор.push(эл); return; }
-      закрыть();
-    });
-    закрыть();
-  }
 
   function initCarousel(root, photos) {
     // Каруселей может быть несколько: галерея новости и наборы снимков в
@@ -157,6 +148,9 @@
     // .nd-body img — снимки, вставленные в текст: редактор оборачивает их
     // в figure, а старые новости из блоков — в обычный div
     var IN_TEXT = '.nm-grid-item, .nd-body img';
+    /* Крупный кадр ленты, которую собрал общий дом. Листается она сама,
+       а нажатие открывает снимок на весь экран. */
+    var КАДР_ЛЕНТЫ = '.news-carousel-kadr, .news-carousel-main';
 
     root.addEventListener('click', function(e) {
       var main = e.target.closest('.nm-main');
@@ -166,6 +160,23 @@
         if (свои && свои.length) {
           e.preventDefault();
           open(свои, Number(main.dataset.index) || 0);
+          return;
+        }
+      }
+
+      var кадр = e.target.closest(КАДР_ЛЕНТЫ);
+      if (кадр) {
+        var лента = кадр.closest('.news-carousel');
+        var снимок = лента && лента.querySelector('.news-carousel-main');
+        /* У видео своего снимка нет — его открывает сам проигрыватель. */
+        if (снимок && снимок.src && !лента.querySelector('.news-carousel-video:not([hidden])')) {
+          var все = Array.prototype.slice.call(лента.querySelectorAll('.news-carousel-thumb img'))
+            .map(function (i) { return i.src; });
+          var текущий = лента.querySelector('.news-carousel-thumb.active');
+          e.preventDefault();
+          open(все.length ? все : [снимок.src],
+               текущий ? Array.prototype.indexOf.call(
+                 лента.querySelectorAll('.news-carousel-thumb'), текущий) : 0);
           return;
         }
       }

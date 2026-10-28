@@ -4434,6 +4434,22 @@ select.prof-field-input { color: var(--text); }
   text-align: center;
   color: var(--text-sec);
 }
+/* 28.10, КУСОК 220: номер и имя не уезжают при боковом ходе. Листая
+   встречи, всегда видно, ЧЬЯ это строка — иначе счёт в клетке не к
+   кому отнести. */
+.td-group-table .td-gt-num,
+.td-group-table .td-gt-name,
+.td-group-table thead th:nth-child(1),
+.td-group-table thead th:nth-child(2) {
+  position: sticky;
+  z-index: 1;
+  background: var(--bg);
+}
+.td-group-table .td-gt-num, .td-group-table thead th:nth-child(1) { left: 0; }
+.td-group-table .td-gt-name, .td-group-table thead th:nth-child(2) { left: 24px; }
+.td-group-table .td-gt-qualified .td-gt-num,
+.td-group-table .td-gt-qualified .td-gt-name { background: var(--bg); }
+
 .td-gt-num { width: 24px; color: var(--text-muted); }
 .td-gt-name {
   text-align: left; white-space: normal;
@@ -4982,6 +4998,108 @@ select.prof-field-input { color: var(--text); }
    Фотографии внутри новости: лента и просмотр
    ============================================ */
 
+/* ---- ЛЕНТА КАДРОВ: ФОТО И ВИДЕО ВМЕСТЕ (кусок 220, 28.10) ----
+   Разметку собирает общий дом `js/kslt-lenta.js` — тот же, что на сайте
+   и в предпросмотре админки. Своя сборка в приложении брала ТОЛЬКО
+   фотографии, и видео шло отдельными кадрами друг за другом; Костя
+   увидел это и сказал то же, что говорил 08.10 про сайт: «все видео
+   тоже в одну карусель к фото, а не отдельно».
+   Отношение коробки дом снимает с ПЕРВОГО кадра и при листании не
+   меняет — иначе коробка прыгала бы на каждом шаге. */
+.news-carousel { --kadr-shirina-k: 1.3333; margin: var(--space-4) 0 var(--space-2); }
+.news-carousel-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--kadr-shirina-k, 1.3333);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.news-carousel-kadr {
+  width: 100%; height: 100%;
+  padding: 0; border: 0; background: none; display: block;
+}
+.news-carousel-kadr:focus { outline: none; }
+.news-carousel-kadr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* Снимок ЦЕЛИКОМ, не обрезком — то же правило, что у афиши новости. */
+.news-carousel-main { width: 100%; height: 100%; object-fit: contain; display: block; }
+.news-carousel-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-xl); line-height: 1;
+  color: #fff;
+  background: rgba(0,0,0,0.45);
+  border: 0; border-radius: 50%;
+  z-index: 2;
+}
+.news-carousel-nav:focus { outline: none; }
+.news-carousel-nav:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.news-carousel-nav[disabled] { opacity: 0.35; }
+.news-carousel-prev { left: var(--space-2); }
+.news-carousel-next { right: var(--space-2); }
+.news-carousel-count {
+  position: absolute; right: var(--space-2); bottom: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--fs-2xs); color: #fff;
+  background: rgba(0,0,0,0.6);
+  border-radius: var(--radius-full);
+}
+.news-carousel-thumbs {
+  display: flex; gap: var(--space-2);
+  margin-top: var(--space-2);
+  overflow-x: auto; scrollbar-width: none;
+  padding-bottom: var(--space-1);
+}
+.news-carousel-thumbs::-webkit-scrollbar { display: none; }
+.news-carousel-thumb {
+  flex: 0 0 auto;
+  height: 56px;
+  aspect-ratio: var(--kadr-shirina-k, 1.3333);
+  padding: 0; border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  overflow: hidden; background: var(--bg-card);
+  opacity: 0.55;
+}
+.news-carousel-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.news-carousel-thumb.active { opacity: 1; border-color: var(--accent); }
+.news-carousel-thumb:focus { outline: none; }
+.news-carousel-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Короб видео стоит В ТОЙ ЖЕ сцене, что и крупный снимок: переключение
+   меняет видимость, а не разметку — иначе каждый шаг ленты
+   перезагружал бы чужой проигрыватель. */
+.news-carousel-video {
+  position: absolute; inset: 0; overflow: hidden;
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+}
+.news-carousel-ramka {
+  position: relative; display: block;
+  height: 100%; aspect-ratio: var(--ig-kadr); max-width: 100%;
+  overflow: hidden;
+}
+.news-carousel-ramka iframe { position: absolute; left: 0; width: 100%; border: 0; }
+.news-carousel-ramka .news-video-ig {
+  top: calc(-1 * var(--ig-shapka));
+  height: calc(100% + var(--ig-shapka) + var(--ig-niz));
+}
+.news-carousel-ramka:has(> .news-video-yt),
+.news-carousel-ramka:has(> .news-video-vm) { aspect-ratio: 16 / 9; }
+.news-carousel-ramka .news-video-yt,
+.news-carousel-ramka .news-video-vm { top: 0; height: 100%; }
+/* У видео миниатюры нет, и это решение: кадр инстаграма закрыт, картинку
+   оттуда не достать. Плитка со знаком «играть» честнее чужого снимка. */
+.news-carousel-thumb--video {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+.news-carousel-igrat { font-size: var(--fs-lg); line-height: 1; color: var(--text-sec); }
+
+
 /* Лента снимков — как на сайте: один крупно, остальные полосой под ним */
 .nm-carousel { margin: 16px 0 8px; }
 
@@ -4989,13 +5107,21 @@ select.prof-field-input { color: var(--text); }
   position: relative;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--border);
+  /* Подложка видна по краям кадра, который не заполняет короб целиком —
+     как у афиши новости. */
+  background: var(--bg-card);
 }
+/* 28.10, КУСОК 220: снимок показывается ЦЕЛИКОМ, а не обрезком. Стояло
+   `cover`: вертикальные кадры резались сверху и снизу — у человека
+   пропадали голова и диплом в руках (Костя увидел это глазами).
+   Правило уже выведено на афише новости строкой 2618: «афиша
+   показывается целиком, а не обрезком; пустоту по краям закрывает
+   подложка карточки». Применяем его к ленте без нового разбора. */
 .nm-main {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
+  object-fit: contain;
 }
 .nm-count {
   position: absolute;
@@ -5007,6 +5133,10 @@ select.prof-field-input { color: var(--text); }
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
+
+/* Миниатюра показывает тот же кадр целиком: иначе в полосе и в крупном
+   кадре человек видит РАЗНЫЕ куски одного снимка. */
+.nm-thumb img { object-fit: contain; background: var(--bg-card); }
 
 /* Полоса миниатюр листается пальцем — на экране их помещается три-четыре */
 .nm-thumbs {

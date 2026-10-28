@@ -217,7 +217,9 @@ const КУСКИ = [
     ['статус и имена приложения', 'check-status-i-imena-prilozheniya.js',
      'check-status-i-imena-prilozheniya-otkat.js'],
     ['новости приложения', 'check-novosti-prilozheniya.js',
-     'check-novosti-prilozheniya-otkat.js']
+     'check-novosti-prilozheniya-otkat.js'],
+    ['лента и группа приложения', 'check-lenta-prilozheniya.js',
+     'check-lenta-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {

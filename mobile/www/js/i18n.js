@@ -859,7 +859,8 @@
     'td.mLive':        { ru: 'Идёт',                en: 'Live',             kg: 'Жүрүүдө' },
     'td.more':         { ru: 'Показать полностью',  en: 'Show full text',   kg: 'Толук көрсөтүү' },
     'td.less':         { ru: 'Свернуть',            en: 'Collapse',         kg: 'Жыйыштыруу' },
-    'td.showAll':      { ru: 'Показать все',        en: 'Show all',         kg: 'Баарын көрсөтүү' }
+    'td.showAll':      { ru: 'Показать все',        en: 'Show all',         kg: 'Баарын көрсөтүү' },
+    'news.open':       { ru: 'Открыть',              en: 'Open',             kg: 'Ачуу' }
   };
 
   // === Public API ===

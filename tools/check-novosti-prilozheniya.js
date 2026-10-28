@@ -100,9 +100,14 @@ const css = безСлов('mobile/www/css/app.css');
     'Листание было ТОЛЬКО свайпом, а на компьютере его нет вовсе.');
 
 правило(
-    'в карусели есть кнопки листания',
-    /class="nm-nav nm-prev"/.test(медиа) && /class="nm-nav nm-next"/.test(медиа),
-    'Миниатюры работали, а крупный кадр листался только свайпом.');
+    'в ленте есть кнопки листания',
+    /news-carousel-nav news-carousel-prev/.test(безСлов('js/kslt-lenta.js')) &&
+    /news-carousel-nav news-carousel-next/.test(безСлов('js/kslt-lenta.js')),
+    'Миниатюры работали, а крупный кадр листался только свайпом.\n' +
+    'ПРАВИЛО ПЕРЕПИСАНО КУСКОМ 220: кнопки я сперва написал своими\n' +
+    'руками в `news-media.js`, а потом оказалось, что в общем доме\n' +
+    '`js/kslt-lenta.js` они были с самого начала. Своя сборка снесена,\n' +
+    'и правило смотрит туда, где эти кнопки теперь живут.');
 
 правило(
     'нажатие по снимку больше не закрывает просмотр',
@@ -136,8 +141,9 @@ const css = безСлов('mobile/www/css/app.css');
 
 /* ── 4. ВЕРСИИ ── */
 (function () {
-    const ВЕРСИИ = [['css/app.css', 27], ['js/news-media.js', 2],
-                    ['js/screens/home.js', 12], ['js/kslt-video.js', 1]];
+    const ВЕРСИИ = [['css/app.css', 30], ['js/news-media.js', 5],
+                    ['js/screens/home.js', 14], ['js/kslt-video.js', 1],
+                    ['js/kslt-lenta.js', 1], ['js/kslt-ekranirovanie.js', 1]];
     const отстали = [];
     ВЕРСИИ.forEach(function (в) {
         const м = разметка.match(new RegExp(в[0].replace(/[./]/g, '\\$&') + '\\?v=(\\d+)'));

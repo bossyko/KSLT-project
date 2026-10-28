@@ -90,6 +90,13 @@
      *                  выделяются обе — поэтому решение отдано зовущему
      *   классПрошедшего — имя класса такой строки (по умолчанию
      *                  `td-gt-qualified`)
+     *   итогВперёд   — поставить «В · Геймы · М» СРАЗУ ПОСЛЕ ИМЕНИ, а
+     *                  встречи увести вправо. Нужно на узком экране:
+     *                  замер на 375 при четырёх игроках — таблица 477
+     *                  при видимых 311, и место, ЗА КОТОРЫМ таблицу и
+     *                  открывают, оставалось за краем. Порядок зависит
+     *                  от ШИРИНЫ, а не от продукта: на сайте места
+     *                  хватает, и там он прежний
      *   фамилия      — фамилия(playerId) → фамилия текстом, для клетки
      *                  незаполненного матча (необязательно)
      *   группаЗакрыта — все матчи сыграны (от этого знак жеребьёвки)
@@ -102,14 +109,19 @@
         var слово = опции.слово;
         var естьРезультаты = матчи.some(function (m) { return m.status === 'completed'; });
 
+        var итогВперёд = !!опции.итогВперёд;
+        var шапкаИтога = '<th class="td-gt-wins">' + слово('wins') + '</th>' +
+                         '<th class="td-gt-games">' + слово('games') + '</th>' +
+                         '<th class="td-gt-place">' + слово('place') + '</th>';
+        var шапкаВстреч = '';
+        for (var c = 0; c < места.length; c++) шапкаВстреч += '<th class="td-gt-opp">' + (c + 1) + '</th>';
+
         var h = '<div class="td-gt-block">';
         h += '<div class="td-group-name">' + слово('group') + ' ' + опции.буква + '</div>';
-        h += '<div class="td-gt-scroll"><table class="td-group-table">';
+        h += '<div class="td-gt-scroll"><table class="td-group-table' +
+             (итогВперёд ? ' itog-vperyod' : '') + '">';
         h += '<thead><tr><th>' + слово('num') + '</th><th>' + слово('player') + '</th>';
-        for (var c = 0; c < места.length; c++) h += '<th class="td-gt-opp">' + (c + 1) + '</th>';
-        h += '<th class="td-gt-wins">' + слово('wins') + '</th>';
-        h += '<th class="td-gt-games">' + слово('games') + '</th>';
-        h += '<th class="td-gt-place">' + слово('place') + '</th>';
+        h += итогВперёд ? (шапкаИтога + шапкаВстреч) : (шапкаВстреч + шапкаИтога);
         h += '</tr></thead><tbody>';
 
         var классПрошедшего = опции.классПрошедшего || 'td-gt-qualified';
@@ -132,8 +144,9 @@
                  (st.seed ? '<span class="td-gt-seed">[' + st.seed + ']</span> ' : '') +
                  имя(st.playerId) + '</td>';
 
+            var встречи = '';
             for (var col = 0; col < места.length; col++) {
-                if (row === col) { h += '<td class="td-gt-self">&times;</td>'; continue; }
+                if (row === col) { встречи += '<td class="td-gt-self">&times;</td>'; continue; }
                 var oppId = места[col].playerId;
                 var match = матчи.find(function (m) {
                     return (m.player1_id === st.playerId && m.player2_id === oppId) ||
@@ -141,7 +154,7 @@
                 });
                 if (match && match.status === 'completed' && match.score) {
                     var выиграл = match.winner_id === st.playerId;
-                    h += '<td class="td-gt-score' + (выиграл ? ' td-gt-win' : '') + '">' +
+                    встречи += '<td class="td-gt-score' + (выиграл ? ' td-gt-win' : '') + '">' +
                          счётВКлетке(match, st.playerId) + '</td>';
                 } else if (match) {
                     /* Матч есть, счёта ещё нет: клетка несёт номер матча —
@@ -150,26 +163,28 @@
                        подставляет её подложкой, иначе две соседние клетки
                        сливаются в полосу и непонятно, с кем какой матч. */
                     var фам = опции.фамилия ? опции.фамилия(oppId) : '';
-                    h += '<td class="td-grp-cell td-gt-empty" data-match-id="' + match.id +
+                    встречи += '<td class="td-grp-cell td-gt-empty" data-match-id="' + match.id +
                          '" data-opp="' + фам + '">—</td>';
                 } else {
-                    h += '<td class="td-gt-empty">—</td>';
+                    встречи += '<td class="td-gt-empty">—</td>';
                 }
             }
 
             var доли = global.KSLT_GROUPS.долиГеймов(st.разбор);
-            h += '<td class="td-gt-total">' + st.wins + '</td>';
+            var итог = '<td class="td-gt-total">' + st.wins + '</td>';
             /* Процент геймов — только у спорных: `разбор` заполняется лишь
                у тех, кого разводил расчёт при равных победах. У кого спора
                не было — прочерк, число там только мешает (слово Кости 01.10). */
-            h += '<td class="td-gt-ratio">' +
+            итог += '<td class="td-gt-ratio">' +
                  (естьРезультаты && доли
                     ? st.разбор.gamesWon + '-' + st.разбор.gamesLost +
                       '<br><span class="td-gt-ratio-pct">' + доли.процент + '</span>'
                     : '—') + '</td>';
-            h += '<td class="td-gt-pos' + (прошёл ? ' td-gt-win' : '') + '">' +
+            итог += '<td class="td-gt-pos' + (прошёл ? ' td-gt-win' : '') + '">' +
                  (естьРезультаты ? st.place : '—') +
                  (опции.группаЗакрыта ? почемуМесто(st, слово) : '') + '</td>';
+
+            h += итогВперёд ? (итог + встречи) : (встречи + итог);
             h += '</tr>';
         }
 
