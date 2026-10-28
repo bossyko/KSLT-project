@@ -353,6 +353,27 @@
            '<span class="tm-p">' + части[1] + '</span>';
   }
 
+  /**
+   * Имя БЕЗ сокращения — для таблицы группы и списка участников.
+   * `getMobileTeamName` сокращает до «А. Канаев»: это для клетки сетки,
+   * где ширина 168. В таблице места больше, и обрезать нечего.
+   */
+  function полноеИмя(playerId, regsMap, playersMap, isDbl) {
+    var p = playersMap[playerId];
+    var капитан = p ? esc(I18N.поле(p, 'name') || p.name) : (playerId ? 'TBD' : 'BYE');
+    if (!isDbl) return '<span class="tm-p">' + капитан + '</span>';
+    var reg = regsMap ? regsMap[playerId] : null;
+    var напарник = '';
+    if (reg && reg.partner_id) {
+      var pp = playersMap[reg.partner_id];
+      напарник = pp ? esc(I18N.поле(pp, 'name') || pp.name) : '?';
+    } else if (reg && reg.partner_external_name) {
+      напарник = esc(reg.partner_external_name);
+    }
+    return '<span class="tm-p">' + капитан + '</span>' +
+           (напарник ? '<span class="tm-p">' + напарник + '</span>' : '');
+  }
+
   /** Тот же состав, но чистым текстом — для подписей диктору. */
   function имяПарыТекстом(playerId, regsMap, playersMap, isDbl) {
     return частиИмени(playerId, regsMap, playersMap, isDbl).join(' / ');
@@ -586,7 +607,12 @@
         проходят: qualifiers,
         группаЗакрыта: groupDone,
         этапЗакрыт: allGroupDone,
-        имя: function (id) { return getMobileTeamName(id, regsMap, playersMap, isDbl); },
+        /* 28.10, КУСОК 218: в таблице группы имя ПОЛНОЕ. Сокращение
+         «А. Канаев» нужно в клетке сетки, где ширина 168, а здесь
+         колонка 128 с переносом в две строки — и фамилия с именем
+         влезают целиком. Слово Кости: «можно отображать полностью имя
+         и фамилия». */
+      имя: function (id) { return полноеИмя(id, regsMap, playersMap, isDbl); },
         фамилия: function (id) {
           return имяПарыТекстом(id, regsMap, playersMap, isDbl)
             .replace(/<[^>]*>/g, '').trim().split(/\s+/).pop();
@@ -1022,11 +1048,12 @@
 
     список.forEach(function (reg, i) {
       var p = playersMap[reg.player_id] || {};
-      var имя = isDbl
-        ? getMobileTeamName(reg.player_id, regsMap, playersMap, true)
+      /* Имя ПОЛНОЕ: колонка широкая, сокращать нечего. То же правило,
+         что в таблице группы (кусок 218). */
+      var имя = reg.player_id
+        ? полноеИмя(reg.player_id, regsMap, playersMap, isDbl)
         : '<span class="tm-p">' +
-          esc(I18N.поле(p, 'name') || reg.external_name || I18N.t('home.player')) +
-          '</span>';
+          esc(reg.external_name || I18N.t('home.player')) + '</span>';
       var ntrp;
       if (isDbl) {
         var н1 = ntrpИгрока(reg.player_id, playersMap, true);
@@ -2048,8 +2075,17 @@
     document.getElementById('tdName').textContent = t.title;
     var badges = '';
     if (t.category_id) badges += '<span class="td-badge cat">' + esc(t.category_id) + '</span>';
-    var statusMap = { upcoming: I18N.t('tournaments.registration'), live: I18N.t('tournaments.inProgress'), completed: I18N.t('tournaments.finished') };
-    if (t.status) badges += '<span class="td-badge status-' + t.status + '">' + (statusMap[t.status] || t.status) + '</span>';
+    /* 28.10, КУСОК 218: подпись статуса берётся из общего дома
+       `js/tournament-status.js`. Своя карта знала три состояния —
+       `upcoming`, `live`, `completed`, — а в базе их другие три:
+       `completed` (47 турниров), `registration_closed` (4),
+       `registration_open` (1). Два из трёх НЕ ПЕРЕВОДИЛИСЬ НИКОГДА и
+       показывались сырым именем из базы: Костя увидел на экране
+       «registration_closed». Карта писалась не по базе. */
+    if (t.status) {
+        badges += '<span class="td-badge status-' + t.status + '">' +
+                  esc(KSLT_STATUS.подпись(t.status, I18N.lang)) + '</span>';
+    }
     document.getElementById('tdBadges').innerHTML = badges;
     var slotsLine = window.KSLT_SLOTS && KSLT_SLOTS.line(t, t._taken, t.status);
     document.getElementById('tdDetails').textContent = dateStr + (t.location ? ' · ' + t.location : '') + (slotsLine ? ' · ' + slotsLine.text : '');

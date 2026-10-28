@@ -4410,7 +4410,12 @@ select.prof-field-input { color: var(--text); }
   scrollbar-width: none;
 }
 .td-gt-scroll::-webkit-scrollbar { display: none; }
+/* 28.10, КУСОК 218: таблица тянется на всю ширину, когда влезает.
+   Костя увидел лёжа: экран 844, таблица 530, справа пустота. `width`
+   по содержимому нужен ТОЛЬКО когда таблица шире экрана и её двигают
+   вбок — `min-width` даёт оба случая одним правилом. */
 .td-group-table {
+  min-width: 100%;
   border-collapse: collapse;
   font-size: var(--fs-xs);
   white-space: nowrap;
@@ -4436,7 +4441,15 @@ select.prof-field-input { color: var(--text); }
   line-height: var(--lh-snug);
 }
 .td-gt-opp, .td-gt-score, .td-gt-empty, .td-gt-self { min-width: 48px; }
-.td-gt-seed { color: var(--accent-text); font-size: var(--fs-2xs); font-weight: 700; }
+/* Посев идёт следом за именем и НЕ уезжает отдельной строкой: Костя
+   увидел «[1]» третьей строкой под фамилией. Последний блок имени и
+   метка держатся вместе. */
+.td-gt-seed {
+  color: var(--accent-text); font-size: var(--fs-2xs); font-weight: 700;
+  white-space: nowrap;
+}
+.td-gt-name .tm-p:last-child { display: inline; }
+.td-gt-name .tm-p:last-child::after { content: ''; }
 .td-gt-self { color: var(--text-muted); }
 .td-gt-empty { color: var(--text-muted); }
 .td-gt-score.td-gt-win { color: var(--accent-text); font-weight: 600; }

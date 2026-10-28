@@ -413,8 +413,12 @@
       document.getElementById('tdName').textContent = t.title;
       var badges = '';
       if (t.category_id) badges += '<span class="td-badge cat">' + esc(t.category_id) + '</span>';
-      var statusMap = { upcoming: I18N.t('tournaments.registration'), live: I18N.t('tournaments.inProgress'), completed: I18N.t('tournaments.finished') };
-      if (t.status) badges += '<span class="td-badge status-' + t.status + '">' + (statusMap[t.status] || t.status) + '</span>';
+      /* Подпись статуса — из общего дома (кусок 218). Здесь стояла
+         ВТОРАЯ копия той же карты, и обе знали не те состояния. */
+      if (t.status) {
+        badges += '<span class="td-badge status-' + t.status + '">' +
+                  esc(KSLT_STATUS.подпись(t.status, I18N.lang)) + '</span>';
+      }
       document.getElementById('tdBadges').innerHTML = badges;
       var slotsLine = window.KSLT_SLOTS && KSLT_SLOTS.line(t, t._taken, t.status);
       document.getElementById('tdDetails').textContent = dateStr + (t.location ? ' · ' + t.location : '') + (slotsLine ? ' · ' + slotsLine.text : '');
