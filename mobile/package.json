@@ -10,13 +10,13 @@
     "cap:run": "npx cap run android"
   },
   "dependencies": {
-    "@capacitor/android": "^6",
-    "@capacitor/cli": "^6",
-    "@capacitor/core": "^6",
-    "@capacitor/keyboard": "^6",
-    "@capacitor/splash-screen": "^6",
-    "@capacitor/push-notifications": "^6",
-    "@capacitor/status-bar": "^6"
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/keyboard": "^8.0.6",
+    "@capacitor/push-notifications": "^8.1.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4"
   },
   "devDependencies": {
     "sharp": "^0.34.5"

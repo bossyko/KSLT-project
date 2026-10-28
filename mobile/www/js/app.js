@@ -26,11 +26,18 @@
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    // StatusBar (Capacitor)
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar) {
-      var SB = window.Capacitor.Plugins.StatusBar;
-      SB.setStyle({ style: isDark ? 'DARK' : 'LIGHT' });
-      SB.setBackgroundColor({ color: isDark ? '#0A0A0A' : '#F5F5F5' });
+    // Системные полосы (Capacitor 8).
+    // Под край-в-край фон полос не красится: в плагине System Bars
+    // setBackgroundColor помечен Unsupported, а под верхней полосой рисует
+    // сам .status-bar-spacer (app.css: padding-top: var(--safe-top),
+    // background: var(--bg)). Остаётся задать только цвет значков.
+    // 'DARK' в обоих плагинах значит СВЕТЛЫЕ значки на тёмном фоне.
+    var _plugins = window.Capacitor && window.Capacitor.Plugins;
+    var _barStyle = { style: isDark ? 'DARK' : 'LIGHT' };
+    if (_plugins && _plugins.SystemBars) {
+      _plugins.SystemBars.setStyle(_barStyle);
+    } else if (_plugins && _plugins.StatusBar) {
+      _plugins.StatusBar.setStyle(_barStyle);
     }
   }
 
