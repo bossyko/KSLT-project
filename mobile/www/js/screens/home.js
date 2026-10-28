@@ -348,9 +348,15 @@
 
   function getMobileTeamName(playerId, regsMap, playersMap, isDbl) {
     var части = частиИмени(playerId, regsMap, playersMap, isDbl);
-    if (части.length < 2) return '<span class="tm-p">' + части[0] + '</span>';
-    return '<span class="tm-p">' + части[0] + '</span>' +
-           '<span class="tm-p">' + части[1] + '</span>';
+    /* Имя целиком — ОДИН блок `.tm-pair` (кусок 222). Без него номер
+       посева, стоящий перед именем, оказывался НАД ним: `.tm-p` —
+       блочный, и первый же партнёр начинал новую строку. Костя увидел
+       глазами: «[1] стоит сверху, а надо слева». */
+    if (части.length < 2) {
+      return '<span class="tm-pair"><span class="tm-p">' + части[0] + '</span></span>';
+    }
+    return '<span class="tm-pair"><span class="tm-p">' + части[0] + '</span>' +
+           '<span class="tm-p">' + части[1] + '</span></span>';
   }
 
   /**
@@ -361,7 +367,7 @@
   function полноеИмя(playerId, regsMap, playersMap, isDbl) {
     var p = playersMap[playerId];
     var капитан = p ? esc(I18N.поле(p, 'name') || p.name) : (playerId ? 'TBD' : 'BYE');
-    if (!isDbl) return '<span class="tm-p">' + капитан + '</span>';
+    if (!isDbl) return '<span class="tm-pair"><span class="tm-p">' + капитан + '</span></span>';
     var reg = regsMap ? regsMap[playerId] : null;
     var напарник = '';
     if (reg && reg.partner_id) {
@@ -370,8 +376,8 @@
     } else if (reg && reg.partner_external_name) {
       напарник = esc(reg.partner_external_name);
     }
-    return '<span class="tm-p">' + капитан + '</span>' +
-           (напарник ? '<span class="tm-p">' + напарник + '</span>' : '');
+    return '<span class="tm-pair"><span class="tm-p">' + капитан + '</span>' +
+           (напарник ? '<span class="tm-p">' + напарник + '</span>' : '') + '</span>';
   }
 
   /** Тот же состав, но чистым текстом — для подписей диктору. */
