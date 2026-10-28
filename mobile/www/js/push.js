@@ -14,19 +14,26 @@
     return null;
   }
 
-  // Request permission and register
+  /**
+   * ПРИ ЗАПУСКЕ РАЗРЕШЕНИЯ НЕ СПРАШИВАЕМ (Ю10, кусок 230).
+   *
+   * Было: `init()` звался сразу после входа и перехода на главную, то
+   * есть системное окно «разрешить уведомления?» всплывало на первом
+   * же экране — человеку, который ещё не понял, что это за приложение.
+   * Apple требует спрашивать ПРИ ПЕРВОМ ИСПОЛЬЗОВАНИИ функции, и это же
+   * просто вежливее: отказ на запуске необратим без похода в настройки
+   * телефона.
+   *
+   * Стало: при запуске только слушатели и — ЕСЛИ разрешение уже дано —
+   * обновление признака устройства. Спрашиваем в `спросить()`, из тех
+   * мест, где человек сам пришёл за уведомлениями.
+   */
   PUSH.init = function() {
     var plugin = getPlugin();
     if (!plugin) return;
 
     plugin.checkPermissions().then(function(permResult) {
-      if (permResult.receive === 'prompt') {
-        return plugin.requestPermissions();
-      }
-      return permResult;
-    }).then(function(permResult) {
-      if (permResult && permResult.receive !== 'granted') return;
-      plugin.register();
+      if (permResult && permResult.receive === 'granted') plugin.register();
     }).catch(function() {});
 
     // Registration success — save token
@@ -92,6 +99,23 @@
       .eq('id', AUTH.currentUser.id)
       .then(function() {});
   }
+
+  /**
+   * СПРОСИТЬ РАЗРЕШЕНИЕ — ЗОВЁТСЯ ИЗ МЕСТА, КУДА ЧЕЛОВЕК ПРИШЁЛ САМ.
+   * Второй раз системное окно не всплывёт: если уже отказали, телефон
+   * отдаёт `denied` и спрашивать нечего — ведём в настройки словом, а не
+   * окном.
+   */
+  PUSH.спросить = function() {
+    var plugin = getPlugin();
+    if (!plugin) return;
+    plugin.checkPermissions().then(function(permResult) {
+      if (!permResult || permResult.receive !== 'prompt') return permResult;
+      return plugin.requestPermissions();
+    }).then(function(permResult) {
+      if (permResult && permResult.receive === 'granted') plugin.register();
+    }).catch(function() {});
+  };
 
   // Remove token on logout
   PUSH.clearToken = function() {

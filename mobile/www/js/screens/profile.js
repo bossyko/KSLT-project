@@ -1478,6 +1478,13 @@
             var category = cb.getAttribute('data-category');
             var channel = cb.getAttribute('data-channel');
             var optedOut = !cb.checked;
+            /* ВКЛЮЧИЛ УВЕДОМЛЕНИЕ — ЗНАЧИТ ХОЧЕТ ЕГО ПОЛУЧАТЬ (Ю10,
+               кусок 230). Это второе место, где человек приходит за
+               уведомлениями сам; спрашивать разрешение здесь честно, а
+               на запуске — нет. Выключил — не спрашиваем. */
+            if (!optedOut && window.KSLT_PUSH && window.KSLT_PUSH.спросить) {
+              window.KSLT_PUSH.спросить();
+            }
 
             supabaseClient.from('notification_preferences')
               .upsert({

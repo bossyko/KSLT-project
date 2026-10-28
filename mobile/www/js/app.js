@@ -345,6 +345,10 @@
     notifBtn.addEventListener('click', function() {
       notifOverlay.classList.add('open');
       loadNotifications();
+      /* ПЕРВОЕ ИСПОЛЬЗОВАНИЕ УВЕДОМЛЕНИЙ (Ю10, кусок 230): человек сам
+         пришёл за ними — вот здесь и спрашиваем разрешение, а не на
+         первом экране после входа. */
+      if (window.KSLT_PUSH && window.KSLT_PUSH.спросить) window.KSLT_PUSH.спросить();
     });
   }
   if (notifBack) {
