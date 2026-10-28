@@ -97,7 +97,7 @@
        поверх. Снаружи это читалось как «кнопки не работают»: подсветка
        переезжала, картинка не менялась. Закрывается ровно так же, как
        кнопкой «Назад» (`home.js:1969`) — снятием класса. */
-    document.querySelectorAll('.td-overlay.open').forEach(function (o) {
+    document.querySelectorAll('.td-overlay.open, .live-full.open').forEach(function (o) {
       o.classList.remove('open');
     });
 

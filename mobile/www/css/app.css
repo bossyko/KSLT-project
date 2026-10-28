@@ -1480,6 +1480,10 @@ a, button, [role="button"] {
 .menu-item span {
   font-size: 14px;
   font-weight: 500;
+  /* По левому краю, как все остальные. Длинная подпись («Политика
+     конфиденциальности») переносилась на две строки и вставала по
+     центру — одна строка из списка выбивалась из колонки (кусок 224). */
+  text-align: left;
 }
 .menu-item .menu-badge {
   margin-left: auto;
@@ -2495,9 +2499,12 @@ a, button, [role="button"] {
 }
 
 /* ===== LIVE MATCH DETAIL OVERLAY ===== */
+/* Нижняя панель видна и здесь — слово Кости 28.10: «сделай так, чтобы
+   на всех страницах нижняя навигация отображалась». Без панели остаётся
+   только просмотр снимка (`.nm-viewer`): там она закрывает само фото. */
 .live-full {
   position: fixed;
-  top: 0; bottom: 0;
+  top: 0; bottom: calc(var(--tab-height) + var(--safe-bottom));
   left: 0; right: 0;
   max-width: 440px;
   margin: 0 auto;
@@ -4471,6 +4478,15 @@ select.prof-field-input { color: var(--text); }
 
 .td-gt-num { width: 24px; color: var(--text-muted); }
 .td-gt-name {
+  /* ПОСЕВ СЛЕВА ОТ ИМЕНИ, А НЕ НАД НИМ (кусок 224). Замер стенда на 411
+     показал, почему `inline-block` не помог и почему «увеличить ячейку»
+     НЕ помогло бы: клетка и так 315.5 px, а блок имени растягивался на
+     299.5 — места номеру на той же строке не оставалось. Три правки
+     мерились ОДНИМ прогоном: шире — посев остался сверху (63.3 высота);
+     float — номер и имя наложились друг на друга в одной точке;
+     flex — номер 13 px слева, имя рядом, высота клетки 63.3 → 48.2.
+     Взят flex. */
+  display: flex; align-items: flex-start; gap: var(--space-1);
   text-align: left; white-space: normal;
   min-width: 120px; color: var(--text);
   line-height: var(--lh-snug);
@@ -4484,7 +4500,7 @@ select.prof-field-input { color: var(--text); }
   white-space: nowrap;
 }
 /* Посев стоит ПЕРЕД именем и не отрывается от него (кусок 219). */
-.td-gt-name .td-gt-seed { margin-right: var(--space-1); }
+/* Отступ даёт `gap` клетки — второго определения не заводим. */
 .td-gt-self { color: var(--text-muted); }
 .td-gt-empty { color: var(--text-muted); }
 .td-gt-score.td-gt-win { color: var(--accent-text); font-weight: 600; }
