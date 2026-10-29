@@ -309,7 +309,25 @@
     }
 
     S.сетка = function (круги, опции) {
-        var h = '<div class="td-bracket-scroll"><div class="td-bracket">';
+        var h = '';
+        /* РЯД КРУГОВ НАД СЕТКОЙ (кусок 232). Замер при четырёх кругах:
+           сетка 776 px при видимых 343 на ширине 375 — ДВА С ЧЕТВЕРТЬЮ
+           экрана. Чтобы увидеть финал из первого раунда, надо пролистать
+           два экрана вбок, и человек не знает, сколько ещё листать.
+           Ряд отвечает на оба вопроса сразу: сколько кругов всего и где
+           он сейчас. Боковой ход при этом НЕ отнимается — он остаётся,
+           ряд просто ещё один путь. ЕДИНСТВЕННЫЙ ПУТЬ ДЕЙСТВИЯ — ЭТО
+           ОТСУТСТВИЕ ПУТИ ДЛЯ ПОЛОВИНЫ ЛЮДЕЙ, правило уже в указателе. */
+        if (опции && опции.круги && круги.length > 1) {
+            h += '<div class="td-rounds" role="tablist">';
+            круги.forEach(function (круг, i) {
+                h += '<button type="button" class="td-round-chip" role="tab"' +
+                     ' data-krug="' + i + '" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' +
+                     экр(круг.name) + '</button>';
+            });
+            h += '</div>';
+        }
+        h += '<div class="td-bracket-scroll"><div class="td-bracket">';
         круги.forEach(function (круг, i) {
             h += '<div class="td-bracket-round">';
             /* Подпись круга приходит доводом от зовущего. Сегодня её
@@ -344,6 +362,79 @@
             }
         });
         return h + '</div></div>';
+    };
+
+    /**
+     * ЗАВЕСТИ РЯД КРУГОВ: нажатие подводит сетку к кругу, боковой ход
+     * подсвечивает тот круг, который сейчас виден.
+     *
+     * Зовётся ПРИ ПОКАЗЕ, а не при сборке: у скрытого элемента ширина
+     * ноль, и считать не от чего — правило уже в указателе.
+     */
+    S.завестиКруги = function (узел) {
+        if (!узел || узел.dataset.кругиЗаведены) return;
+        var ряд = узел.querySelector('.td-rounds');
+        var полоса = узел.querySelector('.td-bracket-scroll');
+        if (!ряд || !полоса) return;
+        узел.dataset.кругиЗаведены = '1';
+
+        var чипы = Array.prototype.slice.call(ряд.querySelectorAll('.td-round-chip'));
+        var столбцы = Array.prototype.slice.call(узел.querySelectorAll('.td-bracket-round'));
+        if (!чипы.length || чипы.length !== столбцы.length) return;
+
+        function пометить(i) {
+            чипы.forEach(function (ч, n) {
+                ч.classList.toggle('active', n === i);
+                /* Признак для диктора живёт ТАМ ЖЕ, где класс. */
+                ч.setAttribute('aria-selected', n === i ? 'true' : 'false');
+            });
+        }
+        S.кКругу = function (узел2, i) {
+            var п = узел2.querySelector('.td-bracket-scroll');
+            var с = узел2.querySelectorAll('.td-bracket-round')[i];
+            if (!п || !с) return;
+            п.scrollTo({ left: Math.max(0, с.offsetLeft - 16), behavior: 'smooth' });
+            /* БОКОВОГО ХОДА МАЛО, И ЭТО ПОКАЗАЛ ЗАМЕР. При 64 участниках
+               столбец первого раунда высотой 3406 px, а матчи круга стоят
+               по центру своего столбца (`justify-content: space-around`).
+               Перепрыгнув вбок на финал, человек упирался бы в пустоту:
+               единственная клетка финала висит посреди трёх с половиной
+               тысяч пикселей. Поэтому подводим ещё и ПО ВЫСОТЕ — к первой
+               клетке того круга. */
+            var клетка = с.querySelector('.td-match');
+            if (клетка && клетка.scrollIntoView) {
+                клетка.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+        };
+
+        чипы.forEach(function (ч, i) {
+            ч.addEventListener('click', function () {
+                S.кКругу(узел, i);
+                пометить(i);
+            });
+        });
+
+        /* Какой круг считается видимым: тот, чья левая граница ближе всего
+           к левому краю полосы. Считаем по СОДЕРЖИМОМУ, а не по доле
+           прокрутки: столбцы одной ширины сегодня, но завтра могут быть
+           разной, и доля соврёт. */
+        var ждём = false;
+        полоса.addEventListener('scroll', function () {
+            if (ждём) return;
+            ждём = true;
+            requestAnimationFrame(function () {
+                ждём = false;
+                var x = полоса.scrollLeft;
+                var ближний = 0, лучшее = Infinity;
+                столбцы.forEach(function (с, i) {
+                    var d = Math.abs(с.offsetLeft - 16 - x);
+                    if (d < лучшее) { лучшее = d; ближний = i; }
+                });
+                пометить(ближний);
+            });
+        });
+
+        пометить(0);
     };
 
     global.KSLT_SETKA = S;

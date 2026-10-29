@@ -4548,6 +4548,31 @@ select.prof-field-input { color: var(--text); }
   align-items: stretch;
   min-width: max-content;
 }
+/* РЯД КРУГОВ НАД СЕТКОЙ (кусок 232). Сам ряд тоже прокручивается вбок:
+   при восьми кругах он не поместится, а переносить его на две строки
+   значит отнять у сетки высоту. Цель нажатия 44 — по планке. */
+.td-rounds {
+  display: flex; gap: var(--space-2);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  padding: 0 0 var(--space-2);
+  scrollbar-width: none;
+}
+.td-rounds::-webkit-scrollbar { display: none; }
+.td-round-chip {
+  flex: 0 0 auto;
+  min-height: 44px; padding: 0 var(--space-4);
+  border: 1px solid var(--border); border-radius: var(--radius-full);
+  background: transparent; color: var(--text-sec);
+  font-size: var(--fs-xs); font-weight: 600;
+  white-space: nowrap;
+}
+.td-round-chip.active {
+  background: var(--accent); border-color: var(--accent);
+  color: #0A0A0A;
+}
+.td-round-chip:focus { outline: none; }
+.td-round-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 .td-bracket-round {
   display: flex;
   flex-direction: column;
