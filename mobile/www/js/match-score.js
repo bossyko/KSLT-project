@@ -110,7 +110,7 @@
 
   function окноВвода(m, byId, onDone) {
     var trn = m.tournament || {};
-    var сетов = (trn.set_format === 'short') ? 2 : 3;
+    var сетов = window.KSLT_SCHYOT_MATCHA.сетов(trn);
 
     var шапки = '';
     for (var i = 1; i <= сетов; i++) шапки += '<th>' + t('score.set', 'Сет') + ' ' + i + '</th>';
@@ -142,30 +142,22 @@
     });
   }
 
+  /* СБОР ПАР, ЗОВ БАЗЫ И РАЗБОР КОДА ОШИБКИ — ДОМ (кусок A3.7г):
+     js/kslt-schyot-matcha.js. Здесь остаётся то, чего у сайта нет: имена
+     полей `msa*`, своя полоска сообщения и свои надписи. */
   function отправить(m, сетов, окно, onDone) {
     if (_busy) return;
-    var пары = [];
-    for (var i = 1; i <= сетов; i++) пары.push([поле('msa1s' + i), поле('msa2s' + i)]);
-
-    var собран = window.KSLT_RULES.buildScore(пары);
-    if (!собран.ok) {
-      сказать(t('score.errBad', 'Проверьте счёт: геймы в сете не могут быть равны'));
-      return;
-    }
+    var SM = window.KSLT_SCHYOT_MATCHA;
+    var пары = SM.собрать(поле, 'msa', сетов);
 
     _busy = true;
     var btn = окно.querySelector('#msaSend');
     if (btn) btn.disabled = true;
 
-    window.supabaseClient.rpc('submit_match_score', {
-      p_match_id: m.id, p_score: собран.score, p_played_at: поле('msaDate') || null
-    }).then(function (res) {
+    SM.вписать(window.supabaseClient, m.id, пары, поле('msaDate')).then(function (итог) {
       _busy = false;
       if (btn) btn.disabled = false;
-      if (res.error || !res.data || !res.data.ok) {
-        сказать(ошибка(res.data && res.data.error));
-        return;
-      }
+      if (!итог.ок) { сказать(слово(итог.ключ)); return; }
       закрыть(окно);
       сказать(t('score.sent', 'Счёт отправлен — ждём соперника'));
       if (typeof onDone === 'function') onDone();
@@ -196,22 +188,21 @@
     var окно = оболочка(t('score.titleConfirm', 'Подтвердите счёт'), тело);
 
     окно.querySelector('#msaYes').addEventListener('click', function () {
-      ответить('confirm_match_score', m.id, t('score.confirmed', 'Счёт подтверждён'), окно, onDone);
+      ответить(m.id, true, t('score.confirmed', 'Счёт подтверждён'), окно, onDone);
     });
     окно.querySelector('#msaNo').addEventListener('click', function () {
-      ответить('dispute_match_score', m.id, t('score.disputed', 'Матч ушёл организатору'), окно, onDone);
+      ответить(m.id, false, t('score.disputed', 'Матч ушёл организатору'), окно, onDone);
     });
   }
 
-  function ответить(функция, id, сообщение, окно, onDone) {
+  /* `согласен = false` — это `dispute`, а не отказ: счёт остаётся,
+     решать будет организатор. Какой зов уходит в базу, знает дом. */
+  function ответить(матчId, согласен, сообщение, окно, onDone) {
     if (_busy) return;
     _busy = true;
-    window.supabaseClient.rpc(функция, { p_match_id: id }).then(function (res) {
+    window.KSLT_SCHYOT_MATCHA.ответить(window.supabaseClient, матчId, согласен).then(function (итог) {
       _busy = false;
-      if (res.error || !res.data || !res.data.ok) {
-        сказать(ошибка(res.data && res.data.error));
-        return;
-      }
+      if (!итог.ок) { сказать(слово(итог.ключ)); return; }
       закрыть(окно);
       сказать(сообщение);
       if (typeof onDone === 'function') onDone();
@@ -220,12 +211,22 @@
 
   // ---- Мелочи ----
 
-  function ошибка(код) {
-    if (код === 'own_score') return t('score.errOwn', 'Свой счёт подтверждает соперник');
-    if (код === 'already_final') return t('score.errFinal', 'Счёт уже окончательный');
-    if (код === 'not_a_player') return t('score.errNotPlayer', 'Вы не играете в этом матче');
-    if (код === 'no_winner') return t('score.errNoWinner', 'По сетам никто не выиграл');
-    return t('score.err', 'Не удалось сохранить счёт');
+  /* СЛОВА ОШИБОК ПО КЛЮЧУ. Код базы разбирает дом — здесь только слова.
+     ЗАКРЫТА ДЫРА: ветки `tied_set`/`bad_score`/`empty_score` здесь не было
+     вовсе, человек видел общее «не удалось сохранить счёт» и не понимал,
+     что геймы в сете равны. Теперь ключ `errBad` приходит из дома. */
+  var СЛОВА = {
+    errOwn: ['score.errOwn', 'Свой счёт подтверждает соперник'],
+    errFinal: ['score.errFinal', 'Счёт уже окончательный'],
+    errNotPlayer: ['score.errNotPlayer', 'Вы не играете в этом матче'],
+    errNoWinner: ['score.errNoWinner', 'По сетам никто не выиграл'],
+    errBad: ['score.errBad', 'Проверьте счёт: геймы в сете не могут быть равны'],
+    err: ['score.err', 'Не удалось сохранить счёт']
+  };
+
+  function слово(ключ) {
+    var п = СЛОВА[ключ] || СЛОВА.err;
+    return t(п[0], п[1]);
   }
 
   function пара(m, byId) {
@@ -302,14 +303,18 @@
 
   function закрыть(o) { if (o) o.remove(); }
 
+  /* ОДНО УВЕДОМЛЕНИЕ НА ПРОДУКТ. Здесь стояла ВТОРАЯ полоска сообщения:
+     своя разметка с классом `msa-toast` на случай, если `KSLT_APP` ещё
+     нет. Проверено по месту: `window.KSLT_APP` присваивается в
+     `app.js:7` на верхнем уровне, а `сказать` зовётся только по нажатию
+     человека — то есть после загрузки всех файлов. Ветка была МЁРТВОЙ, и
+     при этом уже разошлась: `.msa-toast` жил кеглем 0.85rem мимо шкалы,
+     своим радиусом, своим отступом снизу и z-index 4000 против 400 — то
+     есть вторая копия тихо отъехала от первой.
+     Компонент Toast 30:59 требует этого сам: «four separate notification
+     mechanisms… They should all render this one component». */
   function сказать(текст) {
-    var APP = window.KSLT_APP;
-    if (APP && APP.toast) { APP.toast(текст); return; }
-    var el = document.createElement('div');
-    el.className = 'msa-toast';
-    el.textContent = текст;
-    document.body.appendChild(el);
-    setTimeout(function () { el.remove(); }, 3000);
+    window.KSLT_APP.toast(текст);
   }
 
   function esc(s) {

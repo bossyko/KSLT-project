@@ -12,7 +12,20 @@
 (function () {
     'use strict';
 
-    var GRACE_DAYS = 30;
+    /* СРОК — В ОБЩЕМ ДОМЕ ПРАВИЛ (шаг A3.7, 29.10). Он жил в ЧЕТЫРЁХ
+       объявлениях кода и ещё в девяти упоминаниях словами на страницах
+       удаления. Это срок, после которого данные уходят навсегда:
+       разойдись он — человеку скажут «ещё 30 дней», а `purge` удалит
+       раньше. Равенство всех четырёх держит `check-srok-vozvrata.js`.
+
+       ЧИТАЕТСЯ ЛЕНИВО, А НЕ ПРИ ЗАГРУЗКЕ. На `pages/dashboard.html`
+       этот файл стоит в разметке РАНЬШЕ `kslt-rules.js` (327 против
+       328), и жадное чтение дало бы ошибку на загрузке. Переставлять
+       теги на девяноста двух страницах — чинить не ту беду: зов во
+       время работы не зависит от порядка вовсе. */
+    function днейНаВозврат() {
+        return window.KSLT_RULES.ДНЕЙ_НА_ВОЗВРАТ;
+    }
 
     var TEXT = {
         ru: {
@@ -52,8 +65,8 @@
 
     /** Дата, когда учётная запись исчезнет насовсем. */
     function purgeDate(deletedAt) {
-        var d = new Date(deletedAt);
-        d.setDate(d.getDate() + GRACE_DAYS);
+        var d = KSLT_RULES.датаУдаления(deletedAt);
+        if (!d) return '';
         return d.toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
@@ -94,18 +107,20 @@
         var session = await client.auth.getSession();
         if (!session.data || !session.data.session) return;
 
-        var userId = session.data.session.user.id;
-        var res = await client.from('profiles').select('deleted_at').eq('id', userId).maybeSingle();
-        if (res.error || !res.data || !res.data.deleted_at) return;
+        /* ПРОВЕРКА МЕТКИ И ЗОВ ВОЗВРАТА — В ОБЩЕМ ДОМЕ
+           `js/kslt-vozvrat.js` (шаг A3.7в, 29.10). Приложение собирало
+           тот же зов `fetch`-ом руками, со своими заголовками. */
+        var метка = await KSLT_VOZVRAT.метка(client);
+        if (!метка) return;
 
         var L = TEXT[lang()];
-        render(L, res.data.deleted_at,
+        render(L, метка,
             async function keep(overlay) {
                 var note = overlay.querySelector('#arNote');
                 var btn = overlay.querySelector('#arKeep');
                 btn.disabled = true;
-                var r = await client.functions.invoke('delete-account', { body: { action: 'restore' } });
-                if (r.error) {
+                var r = await KSLT_VOZVRAT.вернуть(client);
+                if (!r.ок) {
                     btn.disabled = false;
                     note.textContent = L.fail;
                     return;
@@ -125,7 +140,12 @@
         );
     }
 
-    window.KSLT_ACCOUNT_RESTORE = { check: check, graceDays: GRACE_DAYS };
+    /* `graceDays` отдаётся геттером: значение берётся в тот миг, когда
+       его спросят, а не когда файл загрузился. */
+    window.KSLT_ACCOUNT_RESTORE = {
+        check: check,
+        get graceDays() { return днейНаВозврат(); }
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () { check(); });

@@ -33,43 +33,24 @@
             var prof = await client.from('profiles').select('player_id').eq('id', user.id).single();
             if (prof.error || !prof.data || !prof.data.player_id) return;
 
-            var res = await client.from('player_badges')
-                .select('badge_id, earned_at, badge:badge_definitions(icon, name, name_en, name_kg, ' +
-                        'description, description_en, description_kg, sort_order)')
-                .eq('player_id', prof.data.player_id)
-                .is('seen_at', null);
-
-            if (res.error) {
-                // Молча пропустить нельзя: человек так и не узнает, что что-то
-                // заработал, а мы не узнаем, что поздравление не работает
-                console.error('[KSLT] достижения не проверены:', res.error.message || res.error);
-                return;
-            }
-
-            queue = (res.data || [])
-                .filter(function(r) { return r.badge; })
-                .sort(function(a, b) { return (a.badge.sort_order || 0) - (b.badge.sort_order || 0); });
-
+            /* ЧТЕНИЕ ОЧЕРЕДИ И ОТМЕТКА — В ОБЩЕМ ДОМЕ
+               `js/kslt-pozdravlenie.js` (шаг A3.7б, 29.10). Здесь
+               остаётся только ДОБЫЧА playerId: сайт берёт его сам, а
+               приложение получает снаружи — это строение запуска, и оно
+               законно разное. */
+            queue = await KSLT_POZDRAVLENIE.очередь(client, prof.data.player_id);
             if (!queue.length) return;
 
             build();
             next();
-
-            // Отметку ставим сразу, а не после просмотра: человек может закрыть
-            // вкладку на середине, и тогда при каждом входе его встречало бы
-            // одно и то же поздравление
-            var mark = await client.rpc('mark_badges_seen');
-            if (mark.error) console.error('[KSLT] отметка о показе не сохранена:', mark.error.message);
+            await KSLT_POZDRAVLENIE.пометить(client);
         } catch (e) {
             console.error('[KSLT] поздравление:', e);
         }
     }
 
     function build() {
-        overlay = document.createElement('div');
-        overlay.className = 'ach-overlay';
-        overlay.innerHTML = '<div class="ach-card"></div>';
-        document.body.appendChild(overlay);
+        overlay = KSLT_POZDRAVLENIE.оболочка(document);
     }
 
     function next() {
@@ -83,24 +64,21 @@
 
         var b = queue.shift().badge;
         var left = queue.length;
-        var name = KSLT_YAZYK.выбрать(b.name_en || b.name, b.name_kg || b.name, b.name);
-        var desc = KSLT_YAZYK.выбрать(b.description_en || b.description, b.description_kg || b.description, b.description);
 
         overlay.querySelector('.ach-card').innerHTML =
-            '<div class="ach-fx balls">' + balls(26) + '</div>' +
-            '<div class="ach-halo"></div>' +
-            '<div class="ach-kicker">' + L.kicker + '</div>' +
-            /* Значок — текстовый столбец базы, экранируется как имя рядом. */
-            '<div class="ach-emoji">' + window.KSLT_экранировать(b.icon || '🏅') + '</div>' +
-            '<div class="ach-name"></div>' +
-            '<div class="ach-desc"></div>' +
-            '<button class="ach-btn" type="button">' + (left ? L.next : L.done) + '</button>' +
-            (left ? '<div class="ach-count">' + L.left + left + '</div>' : '');
+            KSLT_POZDRAVLENIE.карточка(b, left,
+                { шапка: L.kicker, дальше: L.next, готово: L.done, осталось: L.left },
+                balls);
 
         // Название и описание вставляем текстом, а не разметкой: они приходят
         // из базы, и однажды туда попадёт что-нибудь с угловой скобкой
-        overlay.querySelector('.ach-name').textContent = name || '';
-        overlay.querySelector('.ach-desc').textContent = desc || '';
+        KSLT_POZDRAVLENIE.назвать(overlay.querySelector('.ach-card'), b,
+            function (значок, основа) {
+                return KSLT_YAZYK.выбрать(
+                    значок[основа + '_en'] || значок[основа],
+                    значок[основа + '_kg'] || значок[основа],
+                    значок[основа]);
+            });
         overlay.querySelector('.ach-btn').addEventListener('click', next);
 
         overlay.classList.remove('show');

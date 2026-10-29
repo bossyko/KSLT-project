@@ -70,7 +70,7 @@
     // Путь в базе записан относительно сайта: приложение лежит отдельно,
     // поэтому короткие пути достраиваем до полного адреса
     if (img && img.indexOf('http') !== 0) {
-      img = (window.KSLT_SITE_URL || 'https://kslt.netlify.app') + '/' + img.replace(/^\/+/, '');
+      img = window.KSLT_SAYT.адрес + '/' + img.replace(/^\/+/, '');
     }
 
     var stats = _stats;   // считаются один раз, ниже

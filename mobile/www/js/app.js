@@ -684,20 +684,18 @@
     function one(title, cls, w, l) {
       var played = w + l;
       if (!played) return '';
-      var rate = Math.round(w / played * 100);
+      var rate = window.KSLT_RULES.процентПобед(w, l);
       return '<div class="prof-pair-block">' +
         '<div class="prof-pair-head">' +
           '<span class="prof-pair-title">' + title + '</span>' +
           '<span class="match-tag ' + cls + '">' + t('pairs.note') + '</span>' +
         '</div>' +
-        '<div class="stats-grid stats-grid-3">' +
-          '<div class="stat-card"><div class="stat-value">' + played + '</div>' +
-            '<div class="stat-label">' + t('pairs.matches') + '</div></div>' +
-          '<div class="stat-card"><div class="stat-value">' + w + '</div>' +
-            '<div class="stat-label">' + t('profile.wins') + '</div></div>' +
-          '<div class="stat-card"><div class="stat-value">' + l + '</div>' +
-            '<div class="stat-label">' + t('profile.losses') + '</div></div>' +
-        '</div>' +
+        /* Плитки даёт общий дом `js/kslt-plitki.js` (шаг A3.5) */
+        window.KSLT_PLITKI.сетка([
+          window.KSLT_PLITKI.плитка(played, t('pairs.matches')),
+          window.KSLT_PLITKI.плитка(w,      t('profile.wins')),
+          window.KSLT_PLITKI.плитка(l,      t('profile.losses'))
+        ], { свой: 'kst-grid-3' }) +
         '<div class="prof-pair-bar">' +
           '<i class="prof-pair-w" style="width:' + rate + '%"></i>' +
           '<i class="prof-pair-l" style="width:' + (100 - rate) + '%"></i>' +

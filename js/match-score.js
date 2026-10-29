@@ -130,7 +130,7 @@
 
     function buildEnter(m, byId, onDone) {
         var trn = m.tournament || {};
-        var сетов = (trn.set_format === 'short') ? 2 : 3;
+        var сетов = window.KSLT_SCHYOT_MATCHA.сетов(trn);
         var сегодня = (m.played_at ? new Date(m.played_at) : new Date());
 
         var шапки = '';
@@ -164,36 +164,26 @@
         });
     }
 
+    /* СБОР ПАР, ЗОВ БАЗЫ И РАЗБОР КОДА ОШИБКИ — ДОМ (кусок A3.7г):
+       js/kslt-schyot-matcha.js. Здесь остаётся то, чего у приложения нет:
+       имена полей `ms*`, тост и надписи. */
     async function отправить(m, сетов, overlay, onDone) {
         if (_busy) return;
-        var пары = [];
-        for (var i = 1; i <= сетов; i++) пары.push([поле('ms1s' + i), поле('ms2s' + i)]);
-
-        var собран = window.KSLT_RULES.buildScore(пары);
-        if (!собран.ok) { toast(L.errBad, 'error'); return; }
+        var SM = window.KSLT_SCHYOT_MATCHA;
+        var пары = SM.собрать(поле, 'ms', сетов);
 
         _busy = true;
         var btn = overlay.querySelector('#msSend');
         if (btn) btn.disabled = true;
-        try {
-            var res = await window.supabaseClient.rpc('submit_match_score', {
-                p_match_id: m.id,
-                p_score: собран.score,
-                p_played_at: поле('msDate') || null
-            });
-            _busy = false;
-            if (btn) btn.disabled = false;
-            if (res.error) { toast(L.err, 'error'); return; }
-            var d = res.data || {};
-            if (!d.ok) { toast(ошибка(d.error), 'error'); return; }
-            close(overlay);
-            toast(L.sent, 'success');
-            if (typeof onDone === 'function') onDone();
-        } catch (e) {
-            _busy = false;
-            if (btn) btn.disabled = false;
-            toast(L.err, 'error');
-        }
+
+        var итог = await SM.вписать(window.supabaseClient, m.id, пары, поле('msDate'));
+        _busy = false;
+        if (btn) btn.disabled = false;
+        if (!итог.ок) { toast(слово(итог.ключ), 'error'); return; }
+
+        close(overlay);
+        toast(L.sent, 'success');
+        if (typeof onDone === 'function') onDone();
     }
 
     // ---- Окно подтверждения ----
@@ -221,41 +211,34 @@
         var overlay = shell(L.titleConfirm, тело);
 
         overlay.querySelector('#msYes').addEventListener('click', function () {
-            ответить('confirm_match_score', { p_match_id: m.id }, L.confirmed, overlay, onDone);
+            ответить(m.id, true, L.confirmed, overlay, onDone);
         });
         overlay.querySelector('#msNo').addEventListener('click', function () {
-            ответить('dispute_match_score', { p_match_id: m.id }, L.disputed, overlay, onDone);
+            ответить(m.id, false, L.disputed, overlay, onDone);
         });
     }
 
-    async function ответить(функция, аргументы, сообщение, overlay, onDone) {
+    /* `согласен = false` — это `dispute`, а не отказ: счёт остаётся,
+       решать будет организатор. Какой именно зов уходит в базу, знает дом. */
+    async function ответить(матчId, согласен, сообщение, overlay, onDone) {
         if (_busy) return;
         _busy = true;
-        try {
-            var res = await window.supabaseClient.rpc(функция, аргументы);
-            _busy = false;
-            if (res.error || !res.data || !res.data.ok) {
-                toast(res.data ? ошибка(res.data.error) : L.err, 'error');
-                return;
-            }
-            close(overlay);
-            toast(сообщение, 'success');
-            if (typeof onDone === 'function') onDone();
-        } catch (e) {
-            _busy = false;
-            toast(L.err, 'error');
-        }
+        var итог = await window.KSLT_SCHYOT_MATCHA.ответить(window.supabaseClient, матчId, согласен);
+        _busy = false;
+        if (!итог.ок) { toast(слово(итог.ключ), 'error'); return; }
+
+        close(overlay);
+        toast(сообщение, 'success');
+        if (typeof onDone === 'function') onDone();
     }
 
     // ---- Мелочи ----
 
-    function ошибка(код) {
-        if (код === 'own_score') return L.errOwn;
-        if (код === 'already_final') return L.errFinal;
-        if (код === 'not_a_player') return L.errNotPlayer;
-        if (код === 'no_winner') return L.errNoWinner;
-        if (код === 'tied_set' || код === 'bad_score' || код === 'empty_score') return L.errBad;
-        return L.err;
+    /** Слово по КЛЮЧУ, который отдал дом. Код базы разбирает дом, а не мы:
+        ветка `tied_set`/`bad_score`/`empty_score` была здесь и не было её
+        в приложении — теперь она одна на оба. */
+    function слово(ключ) {
+        return L[ключ] || L.err;
     }
 
     function имяТурнира(t) {

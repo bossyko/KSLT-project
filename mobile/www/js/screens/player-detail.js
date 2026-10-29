@@ -198,7 +198,7 @@
     var p = _player;
     var form = p.form || [];
     var totalM = (p.wins || 0) + (p.losses || 0);
-    var winRate = totalM > 0 ? Math.round(p.wins / totalM * 100) : 0;
+    var winRate = window.KSLT_RULES.процентПобедТекст(p.wins, p.losses);
     var streak = calcStreak(form);
 
     var html = '';
@@ -242,21 +242,28 @@
     html += '</div>'; // .pd-hero
 
     // ---- Stats grid ----
-    html += '<div class="pd-stats">';
+    /* Сетка плиток — из дома: `kst-grid` держит и три плитки, и пять,
+       а прежняя `.pd-stats` была жёстко `repeat(3, 1fr)` */
+    html += '<div class="kst-grid">';
     html += pdStatCard(p.points || 0, I18N.t('pd.rating'), p.rank_change);
     html += pdStatCard(p.wins || 0, I18N.t('pd.wins'), null);
     html += pdStatCard(p.losses || 0, I18N.t('pd.losses'), null);
-    html += pdStatCard(winRate + '%', I18N.t('pd.winRate'), null);
+    /* Знак процента печатает дом целиком: приписка `+ '%'` снаружи
+       превратила бы прочерк при нуле игр в «—%» (шаг A3.1). */
+    html += pdStatCard(winRate, I18N.t('pd.winRate'), null);
     // Streak with form dots
-    html += '<div class="pd-stat">';
-    html += '<div class="pd-stat-num">' + streak.count + (streak.type === 'up' ? 'W' : 'L') + '</div>';
-    html += '<div class="pd-stat-label">' + I18N.t('pd.streak') + '</div>';
+    /* Плитка серии несёт ещё и точки формы, поэтому собирается не
+       зовом дома, а на его именах: дом отвечает за строение, а этот
+       экран добавляет к нему свой хвост. */
+    html += '<div class="kst-card">';
+    html += '<div class="kst-value">' + streak.count + (streak.type === 'up' ? 'W' : 'L') + '</div>';
+    html += '<div class="kst-label">' + I18N.t('pd.streak') + '</div>';
     html += '<div class="pd-form-dots">';
     form.slice(-5).forEach(function(f) {
       html += '<span class="pd-form-dot ' + (f === 'W' || f === 'w' ? 'w' : 'l') + '"></span>';
     });
     html += '</div></div>';
-    html += '</div>'; // .pd-stats
+    html += '</div>'; // .kst-grid
 
     // Парный и микст. На сайте они показаны отдельными блоками: очки за них
     // не начисляются, но сыгранное — сыграно, и человек хочет это видеть.
@@ -378,16 +385,16 @@
     }
   }
 
+  /* ПЛИТКУ СТРОИТ ОБЩИЙ ДОМ `js/kslt-plitki.js` (шаг A3.5, 29.10).
+     Здесь жил ЧЕТВЁРТЫЙ строитель одного и того же понятия, со своей
+     семьёй имён `pd-stat-*`. Имена `pd-stat-*` остаются карточке
+     ТРЕНЕРА (`screens/coaches.js:177`) — там это цена и опыт, другие
+     данные; это записано в трекер как оставшийся долг, а не замолчано.
+
+     Обёртка оставлена нарочно: зовов пять, и у них своя подпись
+     «сдвиг». Переименовывать зовы незачем — меняется только тело. */
   function pdStatCard(num, label, change) {
-    var h = '<div class="pd-stat">';
-    h += '<div class="pd-stat-num">' + num + '</div>';
-    h += '<div class="pd-stat-label">' + label + '</div>';
-    if (change !== null && change !== undefined && change !== 0) {
-      var cls = change > 0 ? 'up' : 'down';
-      var text = change > 0 ? '+' + change : '' + change;
-      h += '<div class="pd-stat-change ' + cls + '">' + text + '</div>';
-    }
-    h += '</div>';
+    var h = window.KSLT_PLITKI.плитка(num, label, { сдвиг: change });
     return h;
   }
 

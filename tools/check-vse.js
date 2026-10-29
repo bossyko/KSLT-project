@@ -225,7 +225,30 @@ const КУСКИ = [
     ['выпуск приложения', 'check-vypusk-prilozheniya.js',
      'check-vypusk-prilozheniya-otkat.js'],
     ['одни классы в двух продуктах', 'check-odni-klassy.js',
-     'check-odni-klassy-otkat.js']
+     'check-odni-klassy-otkat.js'],
+    ['адрес сайта в приложении — одно определение',
+     'check-adres-sayta-prilozheniya.js',
+     'check-adres-sayta-prilozheniya-otkat.js'],
+    ['данные графика рейтинга — один дом',
+     'check-grafik-dannye.js', 'check-grafik-dannye-otkat.js'],
+    ['один язык, пока языки убраны',
+     'check-odin-yazyk.js', 'check-odin-yazyk-otkat.js'],
+    ['процент побед — одно определение',
+     'check-procent-pobed.js', 'check-procent-pobed-otkat.js'],
+    ['плитка числа с подписью — один дом',
+     'check-plitki.js', 'check-plitki-otkat.js'],
+    ['разбивка по категориям — один дом',
+     'check-kategorii.js', 'check-kategorii-otkat.js'],
+    ['одно имя файла — одно тело, или названная причина',
+     'check-kopii-js.js', 'check-kopii-js-otkat.js'],
+    ['срок возврата удалённого аккаунта — одно число',
+     'check-srok-vozvrata.js', 'check-srok-vozvrata-otkat.js'],
+    ['поздравление с достижением — один дом',
+     'check-pozdravlenie.js', 'check-pozdravlenie-otkat.js'],
+    ['возврат учётной записи — один дом',
+     'check-vozvrat.js', 'check-vozvrat-otkat.js'],
+    ['счёт матча — один дом',
+     'check-schyot-matcha.js', 'check-schyot-matcha-otkat.js']
 ];
 
 function прогнать(файл) {

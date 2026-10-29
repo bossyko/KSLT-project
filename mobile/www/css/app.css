@@ -201,7 +201,7 @@
 [data-theme="light"] .live-list-card,
 [data-theme="light"] .prof-membership,
 [data-theme="light"] .pd-stat,
-[data-theme="light"] .stat-card {
+[data-theme="light"] .kst-card {
   border: 1px solid rgba(0,0,0,0.08);
 }
 /* У знака КСЛТ буквы белые — на светлом фоне их попросту не видно.
@@ -1314,33 +1314,56 @@ a, button, [role="button"] {
 .profile-membership svg { width: 14px; height: 14px; fill: var(--accent); stroke: none; }
 
 /* Stats grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 0 16px;
-  margin-bottom: 16px;
-}
-.stat-card {
+/* ОДНО ОБЪЯВЛЕНИЕ `.kst-grid` — ВТОРОЕ, НИЖЕ (шаг A3.1, 29.10).
+   Здесь стояло первое: три колонки, зазор 12, отступ снизу 16. Оно было
+   ПОЛНОСТЬЮ перебито объявлением в «Stats grid extension» ниже
+   (auto-fit, зазор 8) — замер в браузере показал колонки
+   83.5 · 83.5 · 83.5 · 83.5, то есть ЧЕТЫРЕ, а не три.
+   Мёртвым назвал ПОСЛЕ замера, а не по виду. */
+.kst-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px 12px;
+  /* Боковой отступ 12 -> 8 (шаг A3.1, 29.10). Замер на 390: карточка 84,
+     место под цифру 58, а «100%» при кегле 21 требует 60 — не влезало на
+     два пикселя и ломалось на две строки.
+     МЕРИЛИ СЕМЬ ВАРИАНТОВ ОДНИМ ПРОГОНОМ. Кегль 18 тоже решал, но менял
+     высоту карточки с 80 на 77; отступ 8 оставляет высоту прежней и
+     держит цифру на ступени 21. 8 — ступень шкалы. */
+  padding: 16px 8px;
   text-align: center;
 }
-.stat-value {
+.kst-value {
   font-size: 21px;
   font-weight: 800;
+  /* АКЦЕНТНЫЙ, А НЕ ОБЫЧНЫЙ (шаг A3.5, 29.10). В карточке игрока то же
+     число красилось `--text` (`.pd-stat-num`), в профиле — акцентом.
+     Ориентир — сайт: там `.db-stat-value` красится `--accent`. */
   color: var(--accent-text);
   line-height: 1;
   margin-bottom: 8px;
 }
-.stat-label {
+.kst-label {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  /* ПОДПИСЬ ТОРЧАЛА ЗА КРАЙ, и это было ДО правки процента (шаг A3.1,
+     29.10). Замер на 390, карточка 84, место под подпись 66:
+     «ПОРАЖЕНИЯ» требовала 75, кыргызские «ЖЕҢИШТЕР» 68 и «ЖЕҢИЛҮҮЛӨР»
+     85. Одно слово короче контейнера не становится — ломаться ему
+     нечем, поэтому оно просто выходило наружу.
+
+     МЕРИЛИ ШЕСТЬ ВАРИАНТОВ ОДНИМ ПРОГОНОМ. Прописные и разрядка и были
+     причиной: без них «Поражения» влезает. Кыргызскому этого мало (69
+     против 66), поэтому ещё и перенос внутри слова — но он срабатывает
+     ТОЛЬКО там, где слово иначе торчало.
+
+     Цена названа числами: по-русски и по-английски высота карточки
+     остаётся 80 на всех пяти видах, по-кыргызски на телефоне 390 она
+     становится 96. Слово целиком важнее ровной высоты: торчащее слово —
+     это вранье о том, что подпись прочитана. */
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Profile sections */
@@ -3884,7 +3907,7 @@ select:-webkit-autofill {
 }
 .prof-pair-w { background: #4ade80; }
 .prof-pair-l { background: #ff6b62; }
-.stats-grid-3 { grid-template-columns: repeat(3, 1fr); margin-bottom: 12px; }
+.kst-grid-3 { grid-template-columns: repeat(3, 1fr); margin-bottom: 12px; }
 
 /* Что именно посчитано: победы, поражения и форма — только по рейтинговым
    одиночным. Стоит сразу под цифрами, там же, где возникает вопрос */
@@ -3895,10 +3918,149 @@ select:-webkit-autofill {
 }
 
 /* Stats grid extension */
-.stats-grid {
+.kst-grid {
+  /* ОДНА СЕТКА НА ТРИ И НА ЧЕТЫРЕ ПЛИТКИ (шаг A3.5, 29.10). У карточки
+     игрока стояло `repeat(3, 1fr)` (`.pd-stats`), у профиля — auto-fit.
+     Жёсткие три сломались бы на четвёртой плитке; auto-fit держит оба. */
   display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
   gap: 8px; padding: 0 16px 12px;
 }
+
+/* ---- РАЗБИВКА ПО КАТЕГОРИЯМ (шаг A3.6, 29.10) ----
+   Блока в приложении не было вовсе; разметку даёт общий дом
+   `js/kslt-kategorii.js`, здесь только краска.
+
+   ЧИСЛА ПО ШКАЛЕ: отступы 8 · 12 · 16 · 24, кегли 11 · 12 · 14.
+   У сайта в тех же правилах стоят 10 · 6 · 5 · 3 · 2 — мимо ступеней;
+   это долг сайта, он записан в трекер, а здесь не повторяется.
+   НАМЕРЕНО вне шкалы: точка категории 10 и высота полосы 6 — это не
+   отступы, а графика, и своей шкалы у неё нет. */
+.kst-cat-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-3) var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.kst-cat-name {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* НАМЕРЕНО 10: точка — графика, не отступ */
+/* ТОЧКА И ПОЛОСА — НА ШКАЛЕ (кусок A3.7г). Кусок категорий завёл их
+   числами 10 и 6, мимо ступеней 8·12·16·24·32·40, и сторож шкалы
+   приложения это поймал. У сайта сторожа шкалы нет, там по-прежнему
+   10 и 6 — расхождение замерено и записано ДОЛГОМ, глаза Кости по
+   нему ещё не прошли. */
+.kst-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.kst-cat-home {
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  /* ЦВЕТ ТЕКСТА — ЧЕРЕЗ `--accent-text` (кусок A3.7г): в светлой теме
+     приложения лайм `--accent` на белом даёт контраст ниже нормы, и для
+     этого в теме живёт `--accent-text: #3D7500`. Сторож светлой темы
+     поймал оба моих места — здесь и у значения графика. */
+  color: var(--accent-text);
+}
+
+.kst-cat-closed {
+  font-size: var(--fs-2xs);
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--bg-elevated, rgba(255,255,255,.08));
+  color: var(--text-muted);
+}
+
+.kst-cat-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* МИНИ-СЕТКА ВНУТРИ БЛОКА КАТЕГОРИИ (шаг A3.6, 29.10).
+   Без неё плитки вставали СТОЛБИКОМ: `auto-fit, minmax(70px, 1fr)` в
+   flex-ребёнке берёт минимальную ширину, сетка сжималась до 113 px, и
+   блок вырастал с 190 до 448. Замер на 390.
+
+   КОЛОНКИ ПОСТОЯННОЙ ШИРИНЫ И ПРИЖАТЫ ВЛЕВО — решение взято у сайта,
+   где рядом с тем же правилом написано: «категории сравнивают по
+   вертикали, столбцы должны совпадать». Мерили пять вариантов одним
+   прогоном: у долей (`repeat(4, 1fr)`) карточка гуляет с 70 на 183
+   между видами, у постоянных вид одинаков на всех пяти.
+
+   НАМЕРЕНО вне шкалы: 72 и 56 — ширины колонок, то есть графика сетки,
+   своей шкалы у неё нет. Числа подобраны замером: на 390 рядом с
+   процентом справа (49) всё влезает в одну строку. У сайта в том же
+   месте 92 и 96 — там шире блок. */
+.kst-cat-top .kst-grid {
+  min-width: 0;
+  padding: 0;
+}
+
+.kst-grid-mini {
+  grid-template-columns: 72px repeat(3, 56px);
+  justify-content: start;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+}
+
+.kst-grid-mini .kst-card {
+  background: none;
+  border: none;
+  padding: var(--space-1) 0;
+}
+
+.kst-grid-mini .kst-value { font-size: var(--fs-base); margin-bottom: var(--space-1); }
+.kst-grid-mini .kst-label { font-size: var(--fs-2xs); }
+
+.kst-cat-rate { text-align: right; flex-shrink: 0; padding-right: var(--space-4); }
+.kst-cat-rate b { font-size: var(--fs-sm); font-weight: 700; color: var(--accent-text); }
+.kst-cat-rate span { display: block; font-size: var(--fs-2xs); color: var(--text-muted); }
+.kst-cat-rate-empty b { color: var(--text-muted); }
+
+/* НАМЕРЕНО 6: высота полосы — графика */
+.kst-cat-bar {
+  display: flex;
+  height: 8px;
+  margin: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-elevated, rgba(255,255,255,.08));
+}
+.kst-cat-bar-w, .kst-cat-bar-l { display: block; height: 100%; }
+.kst-cat-bar-w { background: #4ade80; }
+.kst-cat-bar-l { background: #ff6b62; }
+
+.kst-cat-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: 0 var(--space-4) var(--space-2);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.kst-cat-record { display: inline-flex; align-items: center; gap: var(--space-1); }
+/* НАМЕРЕНО 8 и 2: значок — графика, повторяет значок таблицы матчей */
+.kst-cat-mark { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.kst-cat-mark-w { background: #4ade80; }
+.kst-cat-mark-l { background: #ff6b62; margin-left: var(--space-2); }
+
+/* Сдвиг места под подписью: «+3» или «−1». Ноль не рисуется вовсе —
+   «+0» ничего не сообщает (решение дома `js/kslt-plitki.js`). */
+.kst-change { font-size: 11px; font-weight: 600; margin-top: 2px; }
+.kst-change.up { color: var(--success, #2ecc71); }
+.kst-change.down { color: var(--danger, #e74c3c); }
 
 /* Profile row extra colors */
 .profile-row-icon.purple { background: rgba(155,89,182,0.15); color: #9b59b6; }
@@ -4845,6 +5007,54 @@ select.prof-field-input { color: var(--text); }
 
 .rc-line-home {
   stroke-width: 3;
+}
+
+/* ---- ГРАФИК ОЦЕНКИ NTRP (шаг A3.3б, 29.10) ----
+   Второй блок в той же секции, что и график очков: очки и оценка — две
+   стороны одной истории игрока, и заголовок у них общий.
+   Все числа — ступени шкалы: отступы 8 · 12 · 16 · 24, кегли 11 · 12 ·
+   14 · 26. Своих промежуточных размеров здесь не заводится. */
+.rc-ntrp-block {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+
+.rc-sub-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-1);
+}
+
+/* Линия оценки отличается от линий очков НАМЕРЕНО: очков много и они
+   разноцветные по категориям, оценка одна. Красим её краской темы, а не
+   цветом категории — иначе она притворялась бы ещё одной категорией. */
+.rc-line-ntrp {
+  stroke: var(--accent);
+}
+
+/* ОДНО ИЗМЕРЕНИЕ — ЭТО ЧИСЛО, А НЕ ГРАФИК. Решение взято у сайта
+   (`css/style.css`), числа приведены к шкале: там gap 10, здесь 12. */
+.rc-single {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.rc-single-value {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--accent-text);
+  line-height: 1;
+}
+
+.rc-single-note {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
 }
 
 .rc-dot-debut {
@@ -6130,18 +6340,9 @@ select.prof-field-input { color: var(--text); }
     border: 1px solid var(--border);
 }
 
-.msa-toast {
-    position: fixed;
-    left: 50%;
-    bottom: 90px;
-    transform: translateX(-50%);
-    background: var(--bg-elevated, #222);
-    color: var(--text-primary);
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    z-index: 4000;
-}
+/* `.msa-toast` СНЯТ (кусок A3.7г): его ставила мёртвая запасная ветка
+   окна счёта. Полоску сообщения в приложении рисует одно место —
+   `APP.toast` в `app.js`, класс `.toast`. */
 
 /* Полоса «ждёт ответа» над списком матчей */
 .msa-todo {

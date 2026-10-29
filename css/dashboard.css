@@ -602,7 +602,7 @@ select.db-field-input {
 }
 
 /* ---- Stats Grid ---- */
-.db-stats-grid {
+.kst-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
@@ -648,7 +648,19 @@ select.db-field-input {
 /* Что именно посчитано. Стоит под заголовком раздела, а не под карточками:
    вопрос «почему победы не сходятся с историей» возникает до того, как
    человек дочитает до конца */
-.db-stats-note {
+/* Сдвиг места под подписью — дом `js/kslt-plitki.js` умеет его рисовать.
+   В кабинете он пока не зовётся, но правило стоит здесь, а не появится
+   вместе с первым зовом: иначе первый зов нарисует неокрашенный текст. */
+/* Отступ снизу у сетки платежей: раньше стоял прямо в разметке
+   (`style="margin-bottom:16px"`), и такие размеры «жили отдельной
+   жизнью». 16 — ступень шкалы. */
+.kst-grid-pay { margin-bottom: var(--space-md); }
+
+.kst-change { font-size: var(--fs-2xs); font-weight: 600; margin-top: 2px; }
+.kst-change.up { color: var(--success, #2ecc71); }
+.kst-change.down { color: var(--danger, #e74c3c); }
+
+.kst-note {
     margin: -8px 0 16px;
     color: var(--text-muted);
     font-size: var(--fs-sm);
@@ -657,7 +669,7 @@ select.db-field-input {
 /* Внутри категории карточки те же, но ниже: категорий у игрока до четырёх,
    и в полный рост они уводили «Статистику» на два экрана. Состав блока
    прежний — четыре числа и полоса побед с поражениями. */
-.db-stats-grid-mini {
+.kst-grid-mini {
     /* Колонки постоянной ширины и прижаты влево.
        В четыре равные доли на всю ширину блока числа разъезжались по углам,
        и середина зияла пустотой. По содержимому — тоже плохо: ширина зависит
@@ -674,7 +686,7 @@ select.db-field-input {
 /* Внутри категории у чисел нет своей рамки: блок категории уже обведён, и
    получалась рамка в рамке. Без неё четыре числа читаются так же, а высота
    падает ещё на четверть */
-.db-stats-grid-mini .db-stat-card {
+.kst-grid-mini .kst-card {
     padding: 4px 0;
     background: none;
     border: none;
@@ -683,7 +695,7 @@ select.db-field-input {
     text-align: center;
 }
 
-.db-stats-grid-mini .db-stat-value {
+.kst-grid-mini .kst-value {
     font-size: var(--fs-base);
     margin-bottom: 4px;
 }
@@ -693,19 +705,19 @@ select.db-field-input {
 /* Главное число категории — ТА ЖЕ единственная ступень кабинета.
    Соседние 16 остаются: это не «крупная цифра», а вторичные числа при
    ней, и разница между ними — то, ради чего блок так устроен */
-.db-stats-grid-mini .db-stat-card:first-child .db-stat-value {
+.kst-grid-mini .kst-card:first-child .kst-value {
     font-size: var(--db-fs-cifra);
     line-height: var(--lh-tight);
 }
 
 /* Разрядка была рассчитана на крупную подпись под большим числом; на этом
    размере она только растягивала слова */
-.db-stats-grid-mini .db-stat-label {
+.kst-grid-mini .kst-label {
     font-size: var(--fs-2xs);
     letter-spacing: 0.2px;
 }
 
-.db-stat-card {
+.kst-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -717,7 +729,7 @@ select.db-field-input {
    макету 765:12: «26». Было пять ступеней в шести объявлениях: xl здесь,
    lg в двух медиа, md в третьем, base у мини-плиток. Баланс баллов и
    плитки платежей уже стоят на этой переменной */
-.db-stat-value {
+.kst-value {
     font-size: var(--db-fs-cifra);
     font-weight: 700;
     line-height: var(--lh-tight);
@@ -725,7 +737,7 @@ select.db-field-input {
     margin-bottom: 4px;
 }
 
-.db-stat-label {
+.kst-label {
     font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
@@ -733,18 +745,18 @@ select.db-field-input {
 }
 
 /* ---- Points by category ---- */
-.db-cat-block {
+.kst-cat-block {
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 12px 2px;
     margin-bottom: 8px;
 }
 
-.db-cat-block:last-child {
+.kst-cat-block:last-child {
     margin-bottom: 0;
 }
 
-.db-cat-name {
+.kst-cat-name {
     font-weight: 600;
     margin-bottom: 8px;
     display: flex;
@@ -752,14 +764,14 @@ select.db-field-input {
     gap: 8px;
 }
 
-.db-cat-dot {
+.kst-cat-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-.db-cat-home {
+.kst-cat-home {
     font-size: var(--fs-2xs);
     font-weight: 500;
     color: var(--accent);
@@ -768,7 +780,7 @@ select.db-field-input {
 
 /* Категория закрыта для новых заявок. Очки и матчи в ней остаются, поэтому
    она не прячется, а помечается */
-.db-cat-closed {
+.kst-cat-closed {
     margin-left: 8px;
     padding: 2px 8px;
     border-radius: var(--radius-full);
@@ -782,7 +794,7 @@ select.db-field-input {
    Четыре цифры одинакового размера не показывали главного — как игрок
    выступает. Цвета те же, что у значков W и L в таблице матчей, чтобы не
    заводить второй язык цветов */
-.db-cat-bar {
+.kst-cat-bar {
     display: flex;
     height: 6px;
     margin: 8px 0 5px;
@@ -791,17 +803,17 @@ select.db-field-input {
     background: var(--alpha-white-08);
 }
 
-.db-cat-bar-w,
-.db-cat-bar-l {
+.kst-cat-bar-w,
+.kst-cat-bar-l {
     display: block;
     height: 100%;
     transition: width 0.6s ease;
 }
 
-.db-cat-bar-w { background: #4ade80; }
-.db-cat-bar-l { background: #ff6b62; }
+.kst-cat-bar-w { background: #4ade80; }
+.kst-cat-bar-l { background: #ff6b62; }
 
-.db-cat-legend {
+.kst-cat-legend {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -812,13 +824,13 @@ select.db-field-input {
     color: var(--text-muted);
 }
 
-.db-cat-record {
+.kst-cat-record {
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
-.db-cat-mark {
+.kst-cat-mark {
     width: 8px;
     height: 8px;
     border-radius: 2px;
@@ -826,9 +838,9 @@ select.db-field-input {
 }
 
 /* Второй квадратик отделяем от предыдущего числа */
-.db-cat-record .db-cat-mark + * { margin-right: 2px; }
-.db-cat-mark-w { background: #4ade80; }
-.db-cat-mark-l { background: #ff6b62; margin-left: 6px; }
+.kst-cat-record .kst-cat-mark + * { margin-right: 2px; }
+.kst-cat-mark-w { background: #4ade80; }
+.kst-cat-mark-l { background: #ff6b62; margin-left: 6px; }
 
 /* ---- Settings ---- */
 .db-settings-section {
@@ -1496,7 +1508,7 @@ select.db-field-input {
         padding: 16px;
     }
 
-    .db-stats-grid {
+    .kst-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
@@ -1549,12 +1561,12 @@ select.db-field-input {
         padding: 16px;
     }
 
-    .db-stats-grid {
+    .kst-grid {
         grid-template-columns: 1fr 1fr;
         gap: 8px;
     }
 
-    .db-stat-card {
+    .kst-card {
         padding: 12px;
     }
 
@@ -2654,7 +2666,7 @@ select:-webkit-autofill {
 /* ПЛИТКИ ПЛАТЕЖЕЙ БЕРУТ ТУ ЖЕ ЕДИНСТВЕННУЮ СТУПЕНЬ, что баланс и окно
    обмена. Было 26 с межстрочным 1.5 на широком и 18 с 1.1 на узком —
    один уровень с двумя межстрочными и двумя кеглями */
-#db-payments .db-stat-value {
+#db-payments .kst-value {
     font-size: var(--db-fs-cifra);
     line-height: var(--lh-tight);
 }
@@ -2919,19 +2931,19 @@ select:-webkit-autofill {
 /* ---- Строка чисел категории ----
    Числа слева, итог справа. Раньше всё жалось к левому краю, и правая
    половина блока пустовала — глазу не за что было зацепиться. */
-.db-cat-top {
+.kst-cat-top {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 16px;
 }
 
-.db-cat-rate {
+.kst-cat-rate {
     text-align: right;
     flex-shrink: 0;
 }
 
-.db-cat-rate b {
+.kst-cat-rate b {
     display: block;
     font-size: var(--fs-xl);
     line-height: 1.1;
@@ -2939,7 +2951,7 @@ select:-webkit-autofill {
     color: var(--accent);
 }
 
-.db-cat-rate span {
+.kst-cat-rate span {
     display: block;
     margin-top: 1px;
     font-size: var(--fs-2xs);
@@ -2949,7 +2961,7 @@ select:-webkit-autofill {
 }
 
 /* Матчей ещё не было — процента нет, но столбец остаётся на месте */
-.db-cat-rate-empty b {
+.kst-cat-rate-empty b {
     color: var(--text-muted);
 }
 
@@ -3730,12 +3742,12 @@ select:-webkit-autofill {
    сорок пикселей в сумме */
 
 @media (max-width: 992px) {
-    .db-stat-card {
+    .kst-card {
         padding: 8px;
     }
 
 
-    .db-stat-label {
+    .kst-label {
         font-size: var(--fs-2xs);
     }
 }
@@ -3937,14 +3949,14 @@ select:-webkit-autofill {
         padding: 4px 4px;
     }
 
-    .db-stat-value {
+    .kst-value {
         /* кегль один на все виды; здесь остаётся только межстрочный,
            и он тот же, что в базе уровня */
         line-height: var(--lh-tight);
         margin-bottom: 4px;
     }
 
-    .db-stat-label {
+    .kst-label {
         font-size: var(--fs-2xs);
     }
 }
@@ -4425,7 +4437,7 @@ select:-webkit-autofill {
    xl и md у плиток. Слово Кости 12.10 по макету 749:12 — «сумма одинаково
    сделай, они больше чем другие»: один кегль у баланса, окна и плиток,
    и он крупнее подписей рядом (26 против 11 и 12) и заголовка раздела 21.
-   Шесть остальных объявлений .db-stat-value живут в статистике и админских
+   Шесть остальных объявлений .kst-value живут в статистике и админских
    карточках — они сводятся вместе с их куском, здесь не трогаются. */
 :root {
     --db-fs-cifra: var(--fs-xl);

@@ -11,7 +11,10 @@
   'use strict';
 
   var AR = window.KSLT_ACCOUNT_RESTORE = {};
-  var GRACE_DAYS = 30;
+  /* СРОК — В ОБЩЕМ ДОМЕ ПРАВИЛ (шаг A3.7, 29.10): он жил в четырёх
+     объявлениях кода. Подробности — в `js/kslt-rules.js`.
+     Здесь он больше не объявляется вовсе: единственный зов — расчёт
+     даты удаления, и его делает дом. */
 
   // Кому окно уже показали в этом заходе.
   //
@@ -31,8 +34,8 @@
 
   /** Дата, когда учётная запись исчезнет насовсем. */
   function purgeDate(deletedAt) {
-    var d = new Date(deletedAt);
-    d.setDate(d.getDate() + GRACE_DAYS);
+    var d = window.KSLT_RULES.датаУдаления(deletedAt);
+    if (!d) return '';
     var lang = (window.KSLT_I18N && window.KSLT_I18N.lang) || 'ru';
     return d.toLocaleDateString(lang === 'en' ? 'en-US' : 'ru-RU',
       { day: 'numeric', month: 'long', year: 'numeric' });
@@ -70,21 +73,15 @@
       btn.disabled = true;
       btn.textContent = '...';
 
-      supabaseClient.auth.getSession().then(function (sess) {
-        var token = sess.data.session ? sess.data.session.access_token : '';
-        return fetch(SUPABASE_URL + '/functions/v1/delete-account', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ action: 'restore' })
-        });
-      })
-      .then(function (r) { return r.json(); })
+      /* ЗОВ ВОЗВРАТА — В ОБЩЕМ ДОМЕ `js/kslt-vozvrat.js`
+         (шаг A3.7в, 29.10). Здесь он собирался `fetch`-ом руками: свой
+         адрес, свой `Authorization`, свой `apikey`, свой разбор ответа.
+         Сайт в том же месте звал `functions.invoke`. Поменяйся формат
+         заголовков — приложение замолчало бы, а срок шёл бы своим
+         чередом. */
+      window.KSLT_VOZVRAT.вернуть(supabaseClient)
       .then(function (data) {
-        if (data.error) throw new Error(data.error);
+        if (!data.ок) throw new Error(data.беда || 'не вышло');
         if (window.KSLT_AUTH && window.KSLT_AUTH.currentProfile) {
           window.KSLT_AUTH.currentProfile.deleted_at = null;
         }

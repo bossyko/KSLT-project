@@ -162,7 +162,8 @@
         regWithdrawNo: 'Cancel',
         regWithdrawDone: 'Entry withdrawn',
         regWithdrawError: 'Could not withdraw the entry',
-        wins: 'Wins', losses: 'Losses', rank: 'Rank Change',
+        wins: 'Wins', losses: 'Losses',
+        winRate: 'Win %',
         catsTitle: 'Points by category', catHome: 'home', place: 'Place',
         catWins: ['win', 'wins', 'wins'],
         catLosses: ['loss', 'losses', 'losses'],
@@ -473,7 +474,8 @@
         regWithdrawNo: 'Жокко чыгаруу',
         regWithdrawDone: 'Арыз алынды',
         regWithdrawError: 'Арызды алуу мүмкүн болгон жок',
-        wins: 'Жеңиштер', losses: 'Жеңилүүлөр', rank: 'Рейтинг өзгөрүшү',
+        wins: 'Жеңиштер', losses: 'Жеңилүүлөр',
+        winRate: '% жеңиш',
         catsTitle: 'Категориялар боюнча упайлар', catHome: 'негизги', place: 'Орун',
         catWins: ['жеңиш', 'жеңиш', 'жеңиш'],
         catLosses: ['жеңилүү', 'жеңилүү', 'жеңилүү'],
@@ -784,7 +786,8 @@
         regWithdrawNo: 'Отмена',
         regWithdrawDone: 'Заявка снята',
         regWithdrawError: 'Не удалось снять заявку',
-        wins: 'Победы', losses: 'Поражения', rank: 'Изм. рейтинга',
+        wins: 'Победы', losses: 'Поражения',
+        winRate: '% побед',
         catsTitle: 'Очки по категориям', catHome: 'домашняя', place: 'Место',
         catWins: ['победа', 'победы', 'побед'],
         catLosses: ['поражение', 'поражения', 'поражений'],
@@ -5178,16 +5181,20 @@
             // Без этой строчки цифры выглядят враньём: в истории матчей
             // одиннадцать игр, а побед и поражений здесь считается четыре.
             // Дружеские, парные, микст и баттлы в зачёт не идут
-            '<div class="db-stats-note">' + L.statsNote + '</div>' +
+            KSLT_PLITKI.подпись(L.statsNote) +
             // Сводный ряд повторяет домашнюю категорию — показываем его только
             // тем, у кого категорий ещё нет. Так же сделано в админке.
             (catsHtml ? '' :
-                '<div class="db-stats-grid">' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + (p.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + wins + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + losses + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + ((p.rank_change || 0) > 0 ? '+' : '') + (p.rank_change || 0) + '</div><div class="db-stat-label">' + L.rank + '</div></div>' +
-                '</div>') +
+                KSLT_PLITKI.сетка([
+                    /* Разметку плитки даёт общий дом `js/kslt-plitki.js`
+                       (шаг A3.5, 29.10): одно понятие жило под семью
+                       семьями имён, строителей было четыре. Здесь
+                       остаются только ДАННЫЕ и ПОДПИСИ. */
+                    KSLT_PLITKI.плитка(p.points || 0, L.points),
+                    KSLT_PLITKI.плитка(wins,          L.wins),
+                    KSLT_PLITKI.плитка(losses,        L.losses),
+                    KSLT_PLITKI.плитка(KSLT_RULES.процентПобедТекст(wins, losses), L.winRate)
+                ])) +
             // Категория без очков — одна строка, а не карточка с заголовком:
             // ради одного слова блок занимал 113 пикселей высоты
             (catsHtml ||
@@ -5251,12 +5258,11 @@
      * forms — [одна, две, пять]. У английского и кыргызского формы совпадают,
      * поэтому правило считаем только для русского.
      */
-    function plural(n, forms) {
-        /* ПРАВИЛО ВЫБОРА ФОРМЫ — ДОМ ЯЗЫКА (кусок 155). Оно стояло ЗДЕСЬ
-           и ещё в четырёх местах; прибор копий видел две из семи, потому
-           что у остальных своя обвязка вокруг того же правила. */
-        return n + ' ' + KSLT_YAZYK.счёт(n, forms[0], forms[1], forms[2]);
-    }
+    /* `plural` УДАЛЁН (шаг A3.6, 29.10): после переезда разбивки по
+       категориям в общий дом у него не осталось зовущих — проверено
+       счётом. Само правило выбора формы живёт в доме языка
+       (`KSLT_YAZYK.счёт`), и дом категорий зовёт его напрямую. */
+
 
     /**
      * Парные и смешанные игры — счёт отдельным блоком.
@@ -5274,7 +5280,7 @@
     function pairBlockHtml(title, tagText, tagClass, w, l) {
         var played = w + l;
         if (!played) return '';
-        var rate = Math.round(w / played * 100);
+        var rate = KSLT_RULES.процентПобед(w, l);
         return '<div class="db-pair-block">' +
             '<div class="db-pair-head">' +
                 '<span class="db-pair-title">' + KSLT_экранировать(title) + '</span>' +
@@ -5282,11 +5288,11 @@
                 '<span class="db-pair-note">' + KSLT_экранировать(L.pairsNote) + '</span>' +
             '</div>' +
             '<div class="db-cat-top">' +
-                '<div class="db-stats-grid db-stats-grid-mini db-pair-grid">' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + played + '</div><div class="db-stat-label">' + L.pairsMatches + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + w + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                    '<div class="db-stat-card"><div class="db-stat-value">' + l + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                '</div>' +
+                KSLT_PLITKI.сетка([
+                    KSLT_PLITKI.плитка(played, L.pairsMatches),
+                    KSLT_PLITKI.плитка(w,      L.wins),
+                    KSLT_PLITKI.плитка(l,      L.losses)
+                ], { мини: true, свой: 'db-pair-grid' }) +
                 '<div class="db-cat-rate"><b>' + rate + '%</b><span>' + L.catWinRate + '</span></div>' +
             '</div>' +
             '<div class="db-cat-bar">' +
@@ -5303,124 +5309,58 @@
                              p.mixed_wins || 0, p.mixed_losses || 0);
     }
 
+    /**
+     * РАЗБИВКА ПО КАТЕГОРИЯМ — ОБЩИЙ ДОМ `js/kslt-kategorii.js`
+     * (шаг A3.6, 29.10).
+     *
+     * Здесь жили и ДАННЫЕ (отбор своих строк, добавление домашней
+     * категории без очков, расчёт МЕСТА по своему полу), и разметка.
+     * В приложении этого блока не было вовсе — значит он появился бы там
+     * второй реализацией, и место считалось бы дважды. Человек увидел бы
+     * на сайте «#4», а в приложении «#6»; это хуже отсутствия блока.
+     *
+     * Здесь остаются только СЛОВА: словарь у сайта свой. Формы
+     * склонения приходят массивами из трёх (`L.catWins`), а само
+     * правило выбора формы — из дома языка.
+     */
     async function renderStatsCategories(p) {
         if (!client) return '';
 
-        var pcRes = await client.from('player_categories')
-            .select('player_id, category_id, points, wins, losses, closed_at, closed_reason')
-            .order('points', { ascending: false });
-        var allRows = pcRes.data || [];
-        // Friendly в рейтинге не участвует: турниры и матчи записываются,
-        // очков за них нет
-        var myRows = allRows.filter(function(r) {
-            return r.player_id === p.id && r.category_id !== 'friendly';
-        });
-
-        // Домашняя категория видна и без очков: игрок в ней уже числится,
-        // просто ещё ничего не набрал
-        if (p.category_id && !myRows.some(function(r) { return r.category_id === p.category_id; })) {
-            myRows.push({ player_id: p.id, category_id: p.category_id, points: 0, wins: 0, losses: 0 });
-        }
-
-        if (myRows.length === 0) return '';
+        var строки = await KSLT_KATEGORII.строки(client, p);
+        if (!строки.length) return '';
 
         var cats = await loadCategoriesMeta();
-        var catName = {}, catColor = {};
+        var имена = {}, цвета = {};
         Object.keys(cats).forEach(function(id) {
-            catName[id] = cats[id].name;
-            catColor[id] = cats[id].color;
+            имена[id] = cats[id].name;
+            цвета[id] = cats[id].color;
         });
 
-        // Место считается так же, как в публичном рейтинге: свой пол, домашняя
-        // категория — всегда, чужая — только если там есть очки
-        var plrRes = await client.from('players').select('id, gender, category_id').eq('gender', p.gender);
-        var sameGender = plrRes.data || [];
-
-        var html = '<div class="db-card"><div class="db-card-title">' + L.catsTitle + '</div>';
-
-        myRows.forEach(function(row) {
-            var pointsIn = {};
-            allRows.forEach(function(r) {
-                if (r.category_id === row.category_id) pointsIn[r.player_id] = r.points || 0;
-            });
-            var place = sameGender.filter(function(o) {
-                if (o.category_id !== row.category_id && !(pointsIn[o.id] > 0)) return false;
-                return (pointsIn[o.id] || 0) > (row.points || 0);
-            }).length + 1;
-
-            var isHome = row.category_id === p.category_id;
-            html += '<div class="db-cat-block">' +
-                '<div class="db-cat-name">' +
-                    '<span class="db-cat-dot" style="background:' + KSLT_экранировать(catColor[row.category_id] || '#8A8A8F') + '"></span>' +
-                    KSLT_экранировать(catName[row.category_id] || row.category_id) +
-                    (isHome ? ' <span class="db-cat-home">' + L.catHome + '</span>' : '') +
-                    // Категория закрыта для новых заявок. Очки и матчи в ней
-                    // остаются, поэтому она видна, но помечена. Причину игрок
-                    // видит у себя: это про него
-                    (row.closed_at
-                        ? ' <span class="db-cat-closed">' + L.catClosed +
-                          (row.closed_reason ? ' \u00b7 ' + KSLT_экранировать(row.closed_reason) : '') + '</span>'
-                        : '') +
-                '</div>' +
-                '<div class="db-cat-top">' +
-                    '<div class="db-stats-grid db-stats-grid-mini">' +
-                        '<div class="db-stat-card"><div class="db-stat-value">' + (row.points || 0) + '</div><div class="db-stat-label">' + L.points + '</div></div>' +
-                        '<div class="db-stat-card"><div class="db-stat-value">' + (row.wins || 0) + '</div><div class="db-stat-label">' + L.wins + '</div></div>' +
-                        '<div class="db-stat-card"><div class="db-stat-value">' + (row.losses || 0) + '</div><div class="db-stat-label">' + L.losses + '</div></div>' +
-                        '<div class="db-stat-card"><div class="db-stat-value">#' + place + '</div><div class="db-stat-label">' + L.place + '</div></div>' +
-                    '</div>' +
-                    catRateHtml(row) +
-                '</div>' +
-                catBarHtml(row) +
-            '</div>';
-        });
-
-        return html + '</div>';
-    }
-
-    /**
-     * Полоса побед и поражений под плитками категории.
-     *
-     * Четыре цифры одинакового размера не показывали главного — как игрок
-     * выступает. Соотношение видно полоской, а цвета взяты из таблицы
-     * матчей: там зелёный значок — победа, красный — поражение.
-     */
-    /**
-     * Процент побед у правого края строки.
-     *
-     * Он и раньше был в блоке, но мелким текстом под полосой, в одном ряду
-     * с легендой. Правая половина блока при этом пустовала: все числа
-     * стояли слева. Процент — итог категории, ему там и место.
-     */
-    function catRateHtml(row) {
-        var w = row.wins || 0, l = row.losses || 0, played = w + l;
-        var value = played ? Math.round(w / played * 100) + '%' : '\u2014';
-        return '<div class="db-cat-rate' + (played ? '' : ' db-cat-rate-empty') + '">' +
-            '<b>' + value + '</b>' +
-            '<span>' + L.catWinRate + '</span>' +
+        return '<div class="db-card"><div class="db-card-title">' + L.catsTitle + '</div>' +
+            KSLT_KATEGORII.все(строки, {
+                имена: имена,
+                цвета: цвета,
+                счёт: KSLT_YAZYK.счёт,
+                слова: {
+                    очки: L.points, победыКратко: L.wins, поражКратко: L.losses,
+                    место: L.place, домашняя: L.catHome, закрыта: L.catClosed,
+                    процент: L.catWinRate, всего: L.catTotal,
+                    нетМатчей: L.catNoMatches,
+                    победа: L.catWins[0], победы: L.catWins[1], побед: L.catWins[2],
+                    поражение: L.catLosses[0], поражения: L.catLosses[1],
+                    поражений: L.catLosses[2]
+                }
+            }) +
         '</div>';
     }
 
-    function catBarHtml(row) {
-        var w = row.wins || 0, l = row.losses || 0, played = w + l;
+    /* ПОЛОСА ПОБЕД И ПРОЦЕНТ КАТЕГОРИИ — В ОБЩЕМ ДОМЕ
+       `js/kslt-kategorii.js` (шаг A3.6, 29.10). Здесь стояли
+       `catBarHtml` и `catRateHtml`; после переезда разбивки они остались
+       без зовущих — проверено счётом (объявление есть, зовов ноль), и
+       только после этого удалены. МЁРТВЫМ КОД НАЗЫВАЕТСЯ ПОСЛЕ
+       ПРОВЕРКИ, А НЕ ПО ВИДУ. */
 
-        if (!played) {
-            return '<div class="db-cat-bar"></div>' +
-                '<div class="db-cat-legend"><span>' + L.catNoMatches + '</span></div>';
-        }
-
-        return '<div class="db-cat-bar">' +
-                '<i class="db-cat-bar-w" style="width:' + (w / played * 100) + '%"></i>' +
-                '<i class="db-cat-bar-l" style="width:' + (l / played * 100) + '%"></i>' +
-            '</div>' +
-            '<div class="db-cat-legend">' +
-                '<span>' + L.catTotal + ': ' + played + '</span>' +
-                '<span class="db-cat-record">' +
-                    '<span class="db-cat-mark db-cat-mark-w"></span>' + plural(w, L.catWins) +
-                    '<span class="db-cat-mark db-cat-mark-l"></span>' + plural(l, L.catLosses) +
-                '</span>' +
-            '</div>';
-    }
 
     // ---- Badges Card in Stats ----
     async function renderStatsBadges(playerId) {
@@ -6233,16 +6173,13 @@
 
             // Плитки те же, что в статистике: свои размеры прямо в разметке
             // жили отдельной жизнью и на телефоне выходили вдвое крупнее
-            html += '<div class="db-stats-grid" style="margin-bottom:16px;">' +
-                '<div class="db-stat-card">' +
-                    '<div class="db-stat-value">' + total + '</div>' +
-                    '<div class="db-stat-label">' + L.payHistory + '</div>' +
-                '</div>' +
-                '<div class="db-stat-card">' +
-                    '<div class="db-stat-value">' + totalAmount.toLocaleString() + '</div>' +
-                    '<div class="db-stat-label">' + L.payAmount + ' (KGS)</div>' +
-                '</div>' +
-            '</div>';
+            /* Отступ снизу стоял прямо в разметке — вынесен в класс:
+               «свои размеры в разметке жили отдельной жизнью и на
+               телефоне выходили вдвое крупнее» (прежний комментарий). */
+            html += KSLT_PLITKI.сетка([
+                KSLT_PLITKI.плитка(total, L.payHistory),
+                KSLT_PLITKI.плитка(totalAmount.toLocaleString(), L.payAmount + ' (KGS)')
+            ], { свой: 'kst-grid-pay' });
 
             // Table
             // Таблица общая — та же, что в матчах и уведомлениях. На телефоне

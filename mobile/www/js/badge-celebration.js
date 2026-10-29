@@ -20,33 +20,17 @@
   C.check = function(playerId) {
     if (!playerId || !window.supabaseClient) return;
 
-    supabaseClient.from('player_badges')
-      .select('badge_id, badge:badge_definitions(icon, name, name_en, name_kg, ' +
-              'description, description_en, description_kg, sort_order)')
-      .eq('player_id', playerId)
-      .is('seen_at', null)
-      .then(function(res) {
-        if (res.error) {
-          // Молчать нельзя: человек не узнает, что заработал, а мы не узнаем,
-          // что поздравление сломалось
-          console.error('[KSLT] достижения не проверены:', res.error.message || res.error);
-          return;
-        }
-
-        queue = (res.data || [])
-          .filter(function(r) { return r.badge; })
-          .sort(function(a, b) { return (a.badge.sort_order || 0) - (b.badge.sort_order || 0); });
-
+    /* ЧТЕНИЕ ОЧЕРЕДИ И ОТМЕТКА — В ОБЩЕМ ДОМЕ
+       `js/kslt-pozdravlenie.js` (шаг A3.7б, 29.10). Здесь остаётся
+       только то, что законно своё: `playerId` приходит СНАРУЖИ, из
+       `app.js` после входа, а не добывается самим файлом. */
+    window.KSLT_POZDRAVLENIE.очередь(supabaseClient, playerId)
+      .then(function (список) {
+        queue = список;
         if (!queue.length) return;
-
         build();
         next();
-
-        // Отмечаем сразу, а не по нажатию: приложение могут закрыть на
-        // середине, и тогда при каждом запуске встречало бы одно и то же
-        supabaseClient.rpc('mark_badges_seen').then(function(r) {
-          if (r.error) console.error('[KSLT] отметка о показе не сохранена:', r.error.message);
-        });
+        return window.KSLT_POZDRAVLENIE.пометить(supabaseClient);
       });
   };
 
@@ -69,10 +53,7 @@
   }
 
   function build() {
-    overlay = document.createElement('div');
-    overlay.className = 'ach-overlay';
-    overlay.innerHTML = '<div class="ach-card"></div>';
-    document.body.appendChild(overlay);
+    overlay = window.KSLT_POZDRAVLENIE.оболочка(document);
   }
 
   function next() {
@@ -85,19 +66,18 @@
     var b = queue.shift().badge;
     var left = queue.length;
 
+    /* ЗНАЧОК ШЁЛ ЗДЕСЬ СЫРЫМ (шаг A3.7б, 29.10): `icon` — текстовый
+       столбец базы, а экранирования не было. Сторож разметки этого не
+       видел, потому что его признак обходит только `js/`. Теперь
+       разметку даёт дом, и экранирование в нём одно на оба продукта. */
     overlay.querySelector('.ach-card').innerHTML =
-      '<div class="ach-fx balls">' + balls(22) + '</div>' +
-      '<div class="ach-halo"></div>' +
-      '<div class="ach-kicker">' + t('ach.kicker') + '</div>' +
-      '<div class="ach-emoji">' + (b.icon || '🏅') + '</div>' +
-      '<div class="ach-name"></div>' +
-      '<div class="ach-desc"></div>' +
-      '<button class="ach-btn" type="button">' + (left ? t('ach.next') : t('ach.done')) + '</button>' +
-      (left ? '<div class="ach-count">' + t('ach.left') + left + '</div>' : '');
+      window.KSLT_POZDRAVLENIE.карточка(b, left,
+        { шапка: t('ach.kicker'), дальше: t('ach.next'),
+          готово: t('ach.done'), осталось: t('ach.left') },
+        balls);
 
     // Текстом, а не разметкой: названия приходят из базы
-    overlay.querySelector('.ach-name').textContent = pick(b, 'name') || '';
-    overlay.querySelector('.ach-desc').textContent = pick(b, 'description') || '';
+    window.KSLT_POZDRAVLENIE.назвать(overlay.querySelector('.ach-card'), b, pick);
     overlay.querySelector('.ach-btn').addEventListener('click', next);
 
     overlay.classList.remove('show');

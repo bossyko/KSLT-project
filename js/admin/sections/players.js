@@ -1629,7 +1629,7 @@
                 '<div class="ad-cat-legend"><span>' + noMatches + '</span></div>';
         }
 
-        var pct = Math.round(w / played * 100);
+        var pct = KSLT_RULES.процентПобед(w, l);
         var total = 'Всего матчей';
         var rateWord = 'побед';
 

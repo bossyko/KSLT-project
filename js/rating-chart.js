@@ -49,39 +49,26 @@
     // ---- Категории: название, цвет, порядок ----
     // Колонка color заводится миграцией sql/схема/category-colors.sql. Пока её нет,
     // запрос с ней падает целиком, поэтому откатываемся на выборку без цвета.
+    /* ДАННЫЕ БЕРЁТ ОБЩИЙ ДОМ (шаг A3.3, 29.10): `js/kslt-grafik-dannye.js`
+       плюс его побайтовая копия в приложении. Подпись наружу оставлена
+       как была — зовущие (`js/dashboard.js:5230`) не трогаются.
+       Язык и цвет-заглушка остаются ЗДЕСЬ: дом про данные, а язык у
+       сайта и приложения устроен по-разному, цвета-заглушки берутся из
+       темы, которой в приложении нет. */
     API.categories = async function(client, isEn, isKg) {
-        var res = await client.from('categories').select('id, name, name_en, name_kg, sort_order, color');
-        if (res.error) res = await client.from('categories').select('id, name, name_en, name_kg, sort_order');
-
-        var map = {};
-        (res.data || []).forEach(function(c) {
-            map[c.id] = {
-                name: KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name),
-                color: c.color || FALLBACK_COLOR(),
-                sort: c.sort_order || 0
-            };
+        var map = await window.KSLT_GRAFIK_DANNYE.categories(client, function(c) {
+            return KSLT_YAZYK.выбрать(c.name_en || c.name, c.name_kg || c.name, c.name);
+        });
+        Object.keys(map).forEach(function(id) {
+            if (!map[id].color) map[id].color = FALLBACK_COLOR();
         });
         return map;
     };
 
     // ---- Записи, из которых складываются очки ----
-    API.rows = async function(client, playerId) {
-        var now = new Date();
-        var year = now.getFullYear();
-        // Сезон начинается 1 сентября — то же, что oldest_date в recalc_player_categories
-        var oldest = ((now.getMonth() + 1) >= 9 ? year - 1 : year - 2) + '-09-01';
-
-        // Второй ключ сортировки: оценку NTRP можно поменять несколько раз за
-        // день, и такие записи лежат одной датой. Без него порядок внутри дня
-        // произвольный, и линия оценки шла зигзагом
-        var res = await client.from('rating_history')
-            .select('recorded_at, points_earned, tournament_name, category_id, is_doubles, ntrp_after')
-            .eq('player_id', playerId)
-            .gte('recorded_at', oldest)
-            .order('recorded_at', { ascending: true })
-            .order('created_at', { ascending: true });
-
-        return res.data || [];
+    /* Окно сезона, второй ключ сортировки и `ntrp_after` — в общем доме */
+    API.rows = function(client, playerId) {
+        return window.KSLT_GRAFIK_DANNYE.rows(client, playerId);
     };
 
     /**
@@ -91,49 +78,12 @@
      * отдельной строкой без категории и без очков — при отборе на входе она
      * не доходила бы и до графика NTRP.
      */
-    function pointRows(rows) {
-        return rows.filter(function(r) {
-            // Friendly в рейтинге не участвует: очков за него нет, и линии
-            // на графике тоже быть не должно
-            return r.category_id && r.category_id !== 'friendly' && r.is_doubles !== true;
-        });
-    }
-
-    // ---- Накопление по категории с переносом значения вперёд ----
-    // Между турнирами линия держит достигнутое, в день турнира — ступенька вверх
+    /* ОТБОР И НАКОПЛЕНИЕ — В ОБЩЕМ ДОМЕ (шаг A3.3, 29.10).
+       Здесь жили: выброс `friendly`, порядок по `поСилеКатегорий`,
+       перенос значения вперёд. Приложение считало то же самое по-своему
+       и расходилось на пяти местах — теперь считает один дом. */
     API.series = function(allRows, cats) {
-        var rows = pointRows(allRows);
-        var dates = [];
-        rows.forEach(function(r) { if (dates.indexOf(r.recorded_at) === -1) dates.push(r.recorded_at); });
-        dates.sort();
-
-        var byCat = {};
-        rows.forEach(function(r) { (byCat[r.category_id] = byCat[r.category_id] || []).push(r); });
-
-        // Сильные категории первыми, как в рейтинге. Правило одно на продукт:
-        // карточки категорий на странице игрока сортируются им же
-        var order = Object.keys(byCat).sort(function(a, b) {
-            return window.KSLT_RULES.поСилеКатегорий(cats[a], cats[b]);
-        });
-
-        var sets = order.map(function(cat) {
-            var sum = 0, started = false, debut = -1;
-            var values = [], meta = [];
-            dates.forEach(function(d, i) {
-                var hit = null;
-                byCat[cat].forEach(function(r) { if (r.recorded_at === d) hit = r; });
-                if (hit) {
-                    sum += hit.points_earned || 0;
-                    if (!started) debut = i;
-                    started = true;
-                }
-                values.push(started ? sum : null);
-                meta.push(hit);
-            });
-            return { cat: cat, values: values, meta: meta, debut: debut, total: sum };
-        });
-
-        return { dates: dates, sets: sets };
+        return window.KSLT_GRAFIK_DANNYE.series(allRows, cats);
     };
 
     // ---- Название категории и её итог у конца линии ----
@@ -173,7 +123,7 @@
         // NTRP рисуется даже тогда, когда очков ещё нет
         if (opts.ntrpCanvasId) renderNtrp(rows, opts);
 
-        if (pointRows(rows).length === 0) return false;
+        if (window.KSLT_GRAFIK_DANNYE.pointRows(rows).length === 0) return false;
 
         var canvas = document.getElementById(opts.canvasId);
         if (!canvas) return false;
@@ -383,10 +333,10 @@
         ];
     }
 
-    /** Оценка как её выбрали: 3.75, 4.0, 4.25 — а не округлённая до 3.8. */
+    /* Печать оценки — в общем доме (шаг A3.3б): 4.0 и 4 это одна оценка,
+       и человек обязан видеть её одинаково на сайте и в приложении. */
     function ntrpText(v) {
-        var n = Number(v);
-        return (Math.round(n * 100) % 100 === 0) ? n.toFixed(1) : String(n);
+        return window.KSLT_GRAFIK_DANNYE.ntrpТекст(v);
     }
 
     /** Короткая дата для подписей оси: 16.03.26. */
@@ -407,13 +357,13 @@
         var canvas = document.getElementById(opts.ntrpCanvasId);
         if (!canvas) return;
 
-        var labels = [], values = [];
-        rows.forEach(function(r) {
-            if (r.ntrp_after == null) return;
-            labels.push(r.recorded_at);
-            values.push(r.ntrp_after);
-        });
-        if (values.length === 0) return;
+        /* Отбор точек оценки — в общем доме (шаг A3.3б): оценка пишется
+           отдельной строкой истории, без категории и без очков, и
+           признак для неё обязан быть один на оба продукта. */
+        var точки = window.KSLT_GRAFIK_DANNYE.ntrpPoints(rows);
+        if (точки.length === 0) return;
+        var labels = точки.map(function(п) { return п.дата; });
+        var values = точки.map(function(п) { return п.оценка; });
 
         if (wrap) wrap.style.display = '';
         destroyChart(opts.ntrpCanvasId);

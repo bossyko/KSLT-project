@@ -466,7 +466,10 @@
     function pairBlockHtml(title, tagText, tagClass, w, l) {
         var played = w + l;
         if (!played) return '';
-        var rate = Math.round(w / played * 100);
+        /* Выше стоит `if (!played) return ''`, поэтому `null` сюда не
+           дойдёт. Но зовём всё равно ТЕКСТ: снимут когда-нибудь ту
+           проверку — и «null%» вылезет молча. */
+        var rate = KSLT_RULES.процентПобедТекст(w, l);
         return '<div class="pp-pair-block pp-fade-in">' +
             '<div class="pp-pair-head">' +
                 '<span class="pp-pair-title">' + KSLT_экранировать(title) + '</span>' +
@@ -477,7 +480,7 @@
                 statCard(played, L.pairsMatches, '', '') +
                 statCard(w, L.statsWins, '', '') +
                 statCard(l, L.statsLosses, '', '') +
-                statCard(rate + '%', L.pairsWinRate, '', '') +
+                statCard(rate, L.pairsWinRate, '', '') +
             '</div>' +
             '<div class="pp-cat-bar">' +
                 '<i class="pp-cat-bar-w" style="width:' + rate + '%"></i>' +
@@ -494,6 +497,25 @@
     }
 
     // ---- Render helpers ----
+    /**
+     * ПЛИТКА СТРАНИЦЫ ИГРОКА ОСТАЛАСЬ СВОЕЙ — И ЭТО РЕШЕНИЕ, А НЕ
+     * НЕДОДЕЛКА (шаг A3.5, 29.10).
+     *
+     * Это ВОСЬМАЯ семья имён одного понятия: `pp-stat-*`, мини-сетка
+     * `108px repeat(3, 104px)`, зазор `0 10px` — против `92px
+     * repeat(3, 96px)` и `0 8px` в кабинете. Зазор 10 вообще мимо шкалы
+     * (ступени 8 · 12 · 16). Свести просилось.
+     *
+     * НО КЕГЛЬ ЦИФРЫ ЗДЕСЬ — 21 ПО СЛОВУ КОСТИ: «Stat tile 39:57 просит
+     * 32 Bold, Костя посмотрел на макете и сказал мельче — ступень 21,
+     * вес из системы. ГЛАЗ ГЛАВНЕЕ КОМПОНЕНТА» (`css/player.css`,
+     * отклонение записано на доске 722:12). В кабинете кегль свой.
+     * Свести их под одним именем значит ПОТЕРЯТЬ это решение.
+     *
+     * Поэтому переезд этого экрана ждёт модификатора вида: дом даёт
+     * строение, экран задаёт кегль. Записано в трекер как оставшийся
+     * долг A3.5б с этой самой причиной, а не замолчано.
+     */
     function statCard(num, label, change, changeClass) {
         var h = '<div class="pp-stat"><div class="pp-stat-num">' + num + '</div>' +
             '<div class="pp-stat-label">' + label + '</div>';
@@ -518,7 +540,7 @@
                 '<div class="pp-cat-legend"><span>' + noMatches + '</span></div>';
         }
 
-        var pct = Math.round(w / played * 100);
+        var pct = KSLT_RULES.процентПобед(w, l);
         var totalWord = KSLT_YAZYK.выбрать('Matches played', 'Бардык матчтар', 'Всего матчей');
         var rateWord = KSLT_YAZYK.выбрать('wins', 'жеңиш', 'побед');
         return '<div class="pp-cat-bar">' +
@@ -631,7 +653,10 @@
         var rank = data.rank;
         var streak = calcStreak(player.form || []);
         var totalM = (player.wins || 0) + (player.losses || 0);
-        var winRate = totalM > 0 ? Math.round(player.wins / totalM * 100) : 0;
+        /* ТЕКСТ, А НЕ ЧИСЛО: зовётся один раз, в плитке ниже (:827),
+           и раньше там было `totalM > 0 ? ... : 0`. Дом отдаёт `null`
+           при нуле игр, и приписка `+ '%'` дала бы «null%». */
+        var winRate = KSLT_RULES.процентПобедТекст(player.wins, player.losses);
         var authPage = KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html');
         var back = getBackLink(data.categoryKey);
 
@@ -792,7 +817,12 @@
             var homeLabel = KSLT_YAZYK.выбрать('home', 'негизги', 'домашняя');
             myCats.forEach(function(c) {
                 var played = (c.wins || 0) + (c.losses || 0);
-                var rate = played ? Math.round(c.wins / played * 100) : 0;
+                /* ТЕКСТ, А НЕ ЧИСЛО: раньше здесь стояло
+                   `played ? Math.round(...) : 0`, то есть при нуле игр
+                   показывался «0%». Дом отдаёт `null`, и приписка `+ '%'`
+                   ниже превратила бы его в «null%». Беду завела моя же
+                   правка, поймал сторож `check-procent-pobed`. */
+                var rate = KSLT_RULES.процентПобедТекст(c.wins, c.losses);
 
                 html += '<div class="pp-cat-block pp-fade-in">';
                 html += '<div class="pp-cat-head">' +
@@ -805,7 +835,7 @@
                 html += statCard(c.points, L.statsPoints, c.isHome ? changeText : '', c.isHome ? changeClass : '');
                 html += statCard(c.wins || 0, L.statsWins, '', '');
                 html += statCard(c.losses || 0, L.statsLosses, '', '');
-                html += statCard(rate + '%', L.statsWinRate, '', '');
+                html += statCard(rate, L.statsWinRate, '', '');
                 html += '</div>';
                 html += ppCatBar(c.wins || 0, c.losses || 0);
                 html += '</div>';
@@ -816,7 +846,7 @@
             html += statCard(player.points, L.statsPoints, changeText, changeClass);
             html += statCard(player.wins, L.statsWins, '', '');
             html += statCard(player.losses, L.statsLosses, '', '');
-            html += statCard(winRate + '%', L.statsWinRate, '', '');
+            html += statCard(winRate, L.statsWinRate, '', '');
             html += '</div>';
         }
 

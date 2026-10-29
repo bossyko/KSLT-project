@@ -44,7 +44,16 @@ const домаПродукта = (() => {
             if (э.isDirectory()) { обойти(п); continue; }
             if (!э.name.endsWith('.js')) continue;
             const т = readFileSync(п, 'utf8');
-            for (const м of т.matchAll(/window\.(KSLT_[A-Za-zА-Яа-яЁё_]+)\s*=/g)) имена[м[1]] = 'readonly';
+            /* ПРИЗНАК, ИЩУЩИЙ ОДНО НАПИСАНИЕ, ВИДИТ ЧАСТЬ (кусок A3.7г, 29.10).
+               Признак брал только `window.KSLT_ИМЯ =`, а ДЕСЯТЬ домов
+               объявляются через параметр обёртки — `global.KSLT_ИМЯ =`
+               внутри `(function (global) {…})(window)`: `KSLT_PLITKI`,
+               `KSLT_KATEGORII`, `KSLT_POZDRAVLENIE`, `KSLT_VOZVRAT`,
+               `KSLT_GRAFIK_DANNYE`, `KSLT_SCHYOT_MATCHA`, `KSLT_OKNO`,
+               `KSLT_SETKA`, `KSLT_GROUPS`, `KSLT_POINTS`. Линтер давал 22
+               `no-undef` на правильном коде — и шум прятал настоящие беды,
+               ровно как в куске 206. */
+            for (const м of т.matchAll(/(?:window|global|globalThis|self)\.(KSLT_[A-Za-zА-Яа-яЁё_]+)\s*=/g)) имена[м[1]] = 'readonly';
             for (const м of т.matchAll(/^function\s+([A-Za-zА-Яа-яЁё_$][\w$А-Яа-яЁё]*)\s*\(/gm)) имена[м[1]] = 'readonly';
         }
     };

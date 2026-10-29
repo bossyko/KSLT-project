@@ -90,13 +90,20 @@
     // ---- Stats (if player) ----
     if (_player) {
       var totalM = (_player.wins || 0) + (_player.losses || 0);
-      var winRate = totalM > 0 ? Math.round(_player.wins / totalM * 100) : 0;
-      html += '<div class="stats-grid">';
-      html += '<div class="stat-card"><div class="stat-value">' + (_player.points || 0) + '</div><div class="stat-label">' + I18N.t('profile.points') + '</div></div>';
-      html += '<div class="stat-card"><div class="stat-value">' + (_player.wins || 0) + '</div><div class="stat-label">' + I18N.t('profile.wins') + '</div></div>';
-      html += '<div class="stat-card"><div class="stat-value">' + (_player.losses || 0) + '</div><div class="stat-label">' + I18N.t('profile.losses') + '</div></div>';
-      html += '<div class="stat-card"><div class="stat-value">' + winRate + '%</div><div class="stat-label">' + I18N.t('profile.winRate') + '</div></div>';
-      html += '</div>';
+      /* Процент — из дома правил (шаг A3.1): при нуле игр он даёт
+         прочерк, а не «0%». «Играл и не выиграл» и «не играл» — разные
+         утверждения, и приложение говорило второе первым. */
+      var winRate = window.KSLT_RULES.процентПобедТекст(_player.wins, _player.losses);
+      /* Разметку плитки даёт общий дом `js/kslt-plitki.js` (шаг A3.5):
+         одно понятие жило под семью семьями имён, и строителей было
+         четыре. Здесь остаются только ДАННЫЕ и ПОДПИСИ. */
+      var П = window.KSLT_PLITKI;
+      html += П.сетка([
+        П.плитка(_player.points || 0, I18N.t('profile.points')),
+        П.плитка(_player.wins   || 0, I18N.t('profile.wins')),
+        П.плитка(_player.losses || 0, I18N.t('profile.losses')),
+        П.плитка(winRate,             I18N.t('profile.winRate'))
+      ]);
 
       // Form dots
       var form = _player.form || [];
@@ -113,6 +120,16 @@
       // одиннадцать игр, а побед и поражений здесь четыре. Дружеские,
       // парные, микст и баттлы в зачёт не идут
       html += '<div class="prof-stats-note">' + I18N.t('match.statsNote') + '</div>';
+
+      /* РАЗБИВКА ПО КАТЕГОРИЯМ (шаг A3.6, 29.10). На сайте этот блок
+         есть, в приложении его не было вовсе — слово Кости: «если на
+         сайте есть, значит и в приложении надо». Разметку и расчёт
+         МЕСТА даёт общий дом `js/kslt-kategorii.js`: разойдись расчёт
+         между продуктами, человек увидел бы на сайте «#4», а здесь
+         «#6». Блок грузится отдельно, после отрисовки: он спрашивает
+         базу дважды и задерживать весь экран ради него незачем. */
+      html += '<div id="profCats"></div>';
+
       html += window.KSLT_APP.pairBlocks(_player, esc);
     }
 
@@ -214,15 +231,23 @@
     html += '</div></div>';
 
     // Language switcher
-    var currentLang = I18N.lang;
-    html += '<div class="profile-row">';
-    html += '<div class="profile-row-icon blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>';
-    html += '<div class="profile-row-text"><div class="profile-row-label">' + I18N.t('profile.language') + '</div></div>';
-    html += '<div class="seg-control" id="langControl">';
-    html += '<button class="seg-btn' + (currentLang === 'ru' ? ' active' : '') + '" data-lang="ru">РУ</button>';
-    html += '<button class="seg-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en">EN</button>';
-    html += '<button class="seg-btn' + (currentLang === 'kg' ? ' active' : '') + '" data-lang="kg">KG</button>';
-    html += '</div></div>';
+    /* РЯД ЯЗЫКА НЕ РИСУЕТСЯ ВОВСЕ, пока язык заперт (слово Кости 29.10).
+       Не `display: none`: скрытый ряд всё равно читает диктор и ловит
+       Tab, то есть переключатель остаётся для того, кто ходит клавишами
+       и слушает, — а именно его убрать и просили.
+       Выключатель живёт в `js/i18n.js` (`I18N.ОДИН_ЯЗЫК`), здесь только
+       его чтение: одно определение на одно понятие. */
+    if (!I18N.ОДИН_ЯЗЫК) {
+      var currentLang = I18N.lang;
+      html += '<div class="profile-row">';
+      html += '<div class="profile-row-icon blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>';
+      html += '<div class="profile-row-text"><div class="profile-row-label">' + I18N.t('profile.language') + '</div></div>';
+      html += '<div class="seg-control" id="langControl">';
+      html += '<button class="seg-btn' + (currentLang === 'ru' ? ' active' : '') + '" data-lang="ru">РУ</button>';
+      html += '<button class="seg-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en">EN</button>';
+      html += '<button class="seg-btn' + (currentLang === 'kg' ? ' active' : '') + '" data-lang="kg">KG</button>';
+      html += '</div></div>';
+    }
 
     html += profileRow('orange',
       '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -266,6 +291,7 @@
     // Bind events
     bindLogout();
     loadMembership();
+    loadCategories();
     bindRowOverlays();
     loadLoyaltyBalance();
     bindThemeControl();
@@ -273,6 +299,63 @@
   };
 
   // ---- Membership card ----
+  /**
+   * РАЗБИВКА ПО КАТЕГОРИЯМ. Данные и разметка — общий дом
+   * `js/kslt-kategorii.js` (шаг A3.6, 29.10). Здесь только слова:
+   * словарь у приложения свой, правило склонения — из дома языка.
+   *
+   * Пусто — блок не появляется вовсе: у игрока без категорий показывать
+   * нечего, а пустая карточка с заголовком занимает место и ничего не
+   * говорит.
+   */
+  function loadCategories() {
+    var el = document.getElementById('profCats');
+    if (!el || !_player || !window.KSLT_KATEGORII) return;
+
+    var K = window.KSLT_KATEGORII;
+    K.строки(supabaseClient, _player).then(function (строки) {
+      if (!строки.length) return;
+
+      return supabaseClient.from('categories')
+        .select('id, name, name_en, name_kg, color')
+        .then(function (r) {
+          var имена = {}, цвета = {};
+          (r.data || []).forEach(function (c) {
+            имена[c.id] = window.KSLT_I18N
+              ? window.KSLT_I18N.поле(c, 'name') : c.name;
+            цвета[c.id] = c.color || null;
+          });
+
+          var победы = I18N.формы('cats.wins');
+          var поражения = I18N.формы('cats.losses');
+
+          el.innerHTML =
+            '<div class="profile-section-title">' + esc(I18N.t('cats.title')) + '</div>' +
+            K.все(строки, {
+              имена: имена,
+              цвета: цвета,
+              счёт: window.KSLT_YAZYK ? window.KSLT_YAZYK.счёт : null,
+              слова: {
+                очки: I18N.t('profile.points'),
+                победыКратко: I18N.t('profile.wins'),
+                поражКратко: I18N.t('profile.losses'),
+                место: I18N.t('cats.place'),
+                домашняя: I18N.t('cats.home'),
+                закрыта: I18N.t('cats.closed'),
+                процент: I18N.t('cats.winRate'),
+                всего: I18N.t('cats.total'),
+                нетМатчей: I18N.t('cats.noMatches'),
+                победа: победы[0], победы: победы[1], побед: победы[2],
+                поражение: поражения[0], поражения: поражения[1],
+                поражений: поражения[2]
+              }
+            });
+        });
+    }).catch(function (e) {
+      console.error('[KSLT] разбивка по категориям:', e);
+    });
+  }
+
   function loadMembership() {
     var container = document.getElementById('profMembership');
     if (!container) return;
