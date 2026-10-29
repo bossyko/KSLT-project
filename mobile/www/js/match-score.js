@@ -126,17 +126,65 @@
       return '<tr><td class="msa-name">' + esc(фамилия(имя)) + '</td>' + поля + '</tr>';
     }
 
+    /**
+     * СТРОКА ТАЙ-БРЕЙКА — 29.10, слово Кости.
+     *
+     * Четыре поля на сет, как в админке и как уже лежит в базе:
+     * `7/6(11-9)`. Показывается только при 7:6 и 6:7 — правило живёт в
+     * своде (`R.сетСТайБрейком`), одно на сайт и приложение: разойдись
+     * оно, один продукт открывал бы поле там, где другой его прячет.
+     */
+    function тбСтрока(сетов) {
+      var клетки = '';
+      for (var i = 1; i <= сетов; i++) {
+        клетки += '<td class="msa-cell msa-tb-cell" data-tb-set="' + i + '" hidden>' +
+          '<input class="msa-in msa-tb-in" id="msatb1s' + i + '" inputmode="numeric" ' +
+            'maxlength="2" aria-label="' + esc(t('score.tb', 'Тай-брейк')) + ' ' + i + '">' +
+          '<input class="msa-in msa-tb-in" id="msatb2s' + i + '" inputmode="numeric" ' +
+            'maxlength="2" aria-label="' + esc(t('score.tb', 'Тай-брейк')) + ' ' + i + '">' +
+        '</td>';
+      }
+      return '<tr class="msa-tb-row"><td class="msa-tb-label">' +
+             esc(t('score.tb', 'Тай-брейк')) + '</td>' + клетки + '</tr>';
+    }
+
+    function тбПоказ(окно, сетов) {
+      var R = window.KSLT_RULES;
+      function пересчитать() {
+        for (var i = 1; i <= сетов; i++) {
+          var клетка = окно.querySelector('[data-tb-set="' + i + '"]');
+          if (!клетка) continue;
+          var видно = R.сетСТайБрейком(поле('msa1s' + i), поле('msa2s' + i));
+          клетка.hidden = !видно;
+          if (!видно) {
+            /* ЗАКРЫЛИ — ОЧИЩАЕМ: иначе в счёт уедет тай-брейк от сета,
+               который человек уже переписал. */
+            var п1 = document.getElementById('msatb1s' + i);
+            var п2 = document.getElementById('msatb2s' + i);
+            if (п1) п1.value = '';
+            if (п2) п2.value = '';
+          }
+        }
+      }
+      окно.querySelectorAll('.msa-in').forEach(function (поле) {
+        поле.addEventListener('input', пересчитать);
+      });
+      пересчитать();
+    }
+
     var тело =
       '<div class="msa-trn">' + esc(имяТурнира(trn)) + '</div>' +
       пара(m, byId) +
       '<div class="msa-when"><span>' + t('score.date', 'Дата матча') + '</span>' +
         '<input type="date" class="msa-date" id="msaDate" value="' + датой(m.played_at) + '"></div>' +
       '<table class="msa-table"><thead><tr><th>' + t('score.player', 'Игрок') + '</th>' + шапки +
-      '</tr></thead><tbody>' + строка(m.player1_id, 1) + строка(m.player2_id, 2) + '</tbody></table>' +
+      '</tr></thead><tbody>' + строка(m.player1_id, 1) + строка(m.player2_id, 2) +
+      тбСтрока(сетов) + '</tbody></table>' +
       '<div class="msa-hint">' + t('score.hint', 'Впишите геймы в каждом сете. Победителя считаем из счёта.') + '</div>' +
       '<button class="btn-accent msa-send" id="msaSend">' + t('score.send', 'Отправить счёт') + '</button>';
 
     var окно = оболочка(t('score.title', 'Счёт матча'), тело);
+    тбПоказ(окно, сетов);
     окно.querySelector('#msaSend').addEventListener('click', function () {
       отправить(m, сетов, окно, onDone);
     });
@@ -221,6 +269,9 @@
     errNotPlayer: ['score.errNotPlayer', 'Вы не играете в этом матче'],
     errNoWinner: ['score.errNoWinner', 'По сетам никто не выиграл'],
     errBad: ['score.errBad', 'Проверьте счёт: геймы в сете не могут быть равны'],
+    errTbHalf: ['score.errTbHalf', 'Тай-брейк: впишите оба счёта или оставьте пустым'],
+    errTbBad: ['score.errTbBad', 'Тай-брейк: два числа, не больше 99, и не равные'],
+    errTbSide: ['score.errTbSide', 'Тай-брейк выиграл не тот, кто взял сет — проверьте цифры'],
     err: ['score.err', 'Не удалось сохранить счёт']
   };
 

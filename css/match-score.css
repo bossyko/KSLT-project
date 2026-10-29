@@ -186,6 +186,31 @@
 
 .ms-in:focus { outline: none; border-color: var(--accent); }
 
+/* ТАЙ-БРЕЙК (29.10). Два поля в одной клетке сета: очки обеих сторон, в
+   порядке сторон — та же форма, что лежит в базе и что принимает
+   серверная функция. Клетка показывается только при 7:6 и 6:7, прячет её
+   атрибут `hidden` из js: решение живёт в своде `R.сетСТайБрейком`, одно
+   на сайт и приложение. */
+.ms-tb-row .ms-tb-label {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.ms-tb-cell {
+    width: 60px;
+    text-align: center;
+}
+
+.ms-tb-in {
+    width: 22px;
+    height: 32px;
+    padding: 0;
+    font-size: var(--fs-sm);
+}
+
+.ms-tb-in + .ms-tb-in { margin-left: 2px; }
+
 /* Счёт, который прислал соперник: читается сразу, крупно */
 .ms-score-big {
     text-align: center;

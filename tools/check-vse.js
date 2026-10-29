@@ -260,7 +260,9 @@ const КУСКИ = [
     ['окна приложения — ни одно без оснастки',
      'check-okna-prilozheniya.js', 'check-okna-prilozheniya-otkat.js'],
     ['документы достижимы из приложения',
-     'check-dokumenty-prilozheniya.js', 'check-dokumenty-prilozheniya-otkat.js']
+     'check-dokumenty-prilozheniya.js', 'check-dokumenty-prilozheniya-otkat.js'],
+    ['тай-брейк вписывает игрок',
+     'check-tay-breyk.js', 'check-tay-breyk-otkat.js']
 ];
 
 function прогнать(файл) {

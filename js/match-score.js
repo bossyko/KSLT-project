@@ -153,15 +153,76 @@
             '<div class="ms-when"><span>' + L.date + '</span>' +
                 '<input type="date" class="ms-date" id="msDate" value="' + датой(сегодня) + '"></div>' +
             '<table class="ms-table"><thead><tr><th>' + L.player + '</th>' + шапки + '</tr></thead>' +
-            '<tbody>' + строка(m.player1_id, 1) + строка(m.player2_id, 2) + '</tbody></table>' +
+            '<tbody>' + строка(m.player1_id, 1) + строка(m.player2_id, 2) +
+                тбСтрока(сетов) + '</tbody></table>' +
             '<div class="ms-hint">' + L.hint + '</div>' +
             '<button class="ms-send" id="msSend">' + L.send + '</button>';
 
         var overlay = shell(L.titleEnter, тело);
 
+        тбПоказ(overlay, сетов, 'ms');
+
         overlay.querySelector('#msSend').addEventListener('click', function () {
             отправить(m, сетов, overlay, onDone);
         });
+    }
+
+    /**
+     * СТРОКА ТАЙ-БРЕЙКА — 29.10, слово Кости: «тай-брейк счёт надо будет
+     * чтобы игроки могли ввести».
+     *
+     * ЧЕТЫРЕ ПОЛЯ НА СЕТ, как в админке, и форма та же, что УЖЕ ЛЕЖИТ В
+     * БАЗЕ — `7/6(11-9)`. Серверная функция её принимала с самого начала
+     * (`sql/функции/match-score-notify.sql:140`); не умел только ввод.
+     *
+     * ПОКАЗЫВАЕМ ТОЛЬКО ПРИ 7:6 И 6:7 — НАМЕРЕНО. Тай-брейк бывает
+     * именно там; поле, открытое всегда, учит человека вписывать в него
+     * что попало, а разбирать потом некому. Редкие случаи (решающий
+     * тай-брейк коротким форматом, старая запись одним числом) умеет
+     * админка — её разбор на `js/admin/sections/bracket.js:11272` берёт
+     * обе формы.
+     */
+    function тбСтрока(сетов) {
+        var клетки = '';
+        for (var i = 1; i <= сетов; i++) {
+            клетки += '<td class="ms-cell ms-tb-cell" data-tb-set="' + i + '" hidden>' +
+                '<input class="ms-in ms-tb-in" id="mstb1s' + i + '" inputmode="numeric" ' +
+                    'maxlength="2" autocomplete="off" aria-label="' + L.tb + ' ' + i + '">' +
+                '<input class="ms-in ms-tb-in" id="mstb2s' + i + '" inputmode="numeric" ' +
+                    'maxlength="2" autocomplete="off" aria-label="' + L.tb + ' ' + i + '">' +
+            '</td>';
+        }
+        return '<tr class="ms-tb-row"><td class="ms-tb-label">' + L.tb + '</td>' + клетки + '</tr>';
+    }
+
+    /**
+     * ПОКАЗ ПОЛЕЙ ТАЙ-БРЕЙКА ПО ВВЕДЁННЫМ ГЕЙМАМ.
+     *
+     * Правило одно и живёт в своде: `R.сетСТайБрейком`. Разойдись оно —
+     * сайт открывал бы поле там, где приложение его прячет.
+     */
+    function тбПоказ(overlay, сетов, приставка) {
+        var R = window.KSLT_RULES;
+        function пересчитать() {
+            for (var i = 1; i <= сетов; i++) {
+                var клетка = overlay.querySelector('[data-tb-set="' + i + '"]');
+                if (!клетка) continue;
+                var видно = R.сетСТайБрейком(поле(приставка + '1s' + i), поле(приставка + '2s' + i));
+                клетка.hidden = !видно;
+                if (!видно) {
+                    /* ЗАКРЫЛИ — ОЧИЩАЕМ: иначе в счёт уедет тай-брейк от
+                       сета, которого человек уже переписал. */
+                    var п1 = document.getElementById(приставка + 'tb1s' + i);
+                    var п2 = document.getElementById(приставка + 'tb2s' + i);
+                    if (п1) п1.value = '';
+                    if (п2) п2.value = '';
+                }
+            }
+        }
+        overlay.querySelectorAll('.ms-in').forEach(function (поле) {
+            поле.addEventListener('input', пересчитать);
+        });
+        пересчитать();
     }
 
     /* СБОР ПАР, ЗОВ БАЗЫ И РАЗБОР КОДА ОШИБКИ — ДОМ (кусок A3.7г):

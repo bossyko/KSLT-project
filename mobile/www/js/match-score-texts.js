@@ -15,6 +15,10 @@
     window.KSLT_SCORE_TEXTS = T;
 
     T.ru = {
+        errTbHalf: 'Тай-брейк: впишите оба счёта или оставьте пустым',
+        errTbBad: 'Тай-брейк: два числа, не больше 99, и не равные',
+        errTbSide: 'Тай-брейк выиграл не тот, кто взял сет — проверьте цифры',
+        tb: 'Тай-брейк',
         titleEnter: 'Счёт матча',
         titleConfirm: 'Подтвердите счёт',
         date: 'Дата матча',
@@ -50,6 +54,10 @@
     };
 
     T.en = {
+        errTbHalf: 'Tie-break: enter both scores or leave it empty',
+        errTbBad: 'Tie-break: two numbers, up to 99, and not equal',
+        errTbSide: 'The tie-break went to the player who lost the set — check the figures',
+        tb: 'Tie-break',
         titleEnter: 'Match score',
         titleConfirm: 'Confirm the score',
         date: 'Match date',
@@ -85,6 +93,10 @@
     };
 
     T.kg = {
+        errTbHalf: 'Тай-брейк: эки эсепти жазыңыз же бош калтырыңыз',
+        errTbBad: 'Тай-брейк: эки сан, 99дан ашпайт, бирдей болбойт',
+        errTbSide: 'Тай-брейкти сетти албаган оюнчу алган — сандарды текшериңиз',
+        tb: 'Тай-брейк',
         titleEnter: 'Оюндун эсеби',
         titleConfirm: 'Эсепти ырастаңыз',
         date: 'Оюндун күнү',
