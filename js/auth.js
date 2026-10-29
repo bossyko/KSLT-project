@@ -26,6 +26,12 @@
         return window.KSLT_VHOD.почтой(адрес);
     }
 
+    /** Значение поля по id. Нет элемента — пусто, а не падение. */
+    function поле(id) {
+        var э = document.getElementById(id);
+        return э ? э.value : '';
+    }
+
     var L = KSLT_YAZYK.выбрать({
         signingIn: 'Signing in...',
         signIn: 'Sign In',
@@ -1929,9 +1935,20 @@
 
             var email = document.getElementById('tg-email').value.trim();
             var gender = document.querySelector('input[name="tg-gender"]:checked');
-            var birthDay = document.getElementById('tg-birth-day').value;
-            var birthMonth = document.getElementById('tg-birth-month').value;
-            var birthYear = document.getElementById('tg-birth-year').value;
+            /* ЖИВАЯ БЕДА, НАЙДЕННАЯ ЗАМЕРОМ 29.10 (кусок A5): элемента
+               `tg-birth-year` НЕТ НИ В ОДНОЙ РАЗМЕТКЕ — ни в
+               `pages/auth.html`, ни в английской, ни в кыргызской. А
+               здесь он читался БЕЗ ЗАЩИТЫ, и `.value` у `null` бросал
+               TypeError: РЕГИСТРАЦИЯ ЧЕРЕЗ TELEGRAM ПАДАЛА ПРИ ОТПРАВКЕ
+               ФОРМЫ — человек заполнял почту, пол, день и месяц, жал
+               кнопку, и не происходило ничего, даже без сообщения.
+               Строкой выше, на `:1806`, тот же элемент читается
+               ЗАЩИЩЁННО (`if (tgYearSelect)`) — то есть автор знал, что
+               его может не быть, и забыл про второе место.
+               Год не спрашивается нигде, поэтому здесь просто пусто. */
+            var birthDay = поле('tg-birth-day');
+            var birthMonth = поле('tg-birth-month');
+            var birthYear = поле('tg-birth-year');
             var btn = document.getElementById('tgRegSubmit');
 
             if (!email) {

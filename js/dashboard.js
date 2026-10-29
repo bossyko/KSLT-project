@@ -2067,7 +2067,20 @@
                     genderSelect +
                 '</div>' +
                 '<div class="db-field">' +
-                    '<label class="db-field-label">' + L.birthday + ' <span class="db-required">*</span></label>' +
+                    /* ЗВЁЗДОЧКА СНЯТА (кусок A5, 29.10). Она обещала
+                       обязательность, которой НЕ БЫЛО НИ У КОГО: ни
+                       `isProfileComplete` (`:1010`), ни `профильНеполон`
+                       в подаче заявки (`tournament-register.js:253`) дату
+                       не спрашивают, сервер принимает пусто
+                       (`verify-otp/index.ts:271` — `number | null`), а при
+                       регистрации её вообще не спрашивают. Из 42 мест, где
+                       встречается дата рождения, НИ В ОДНОМ нет проверки
+                       возраста — ни 18+, ни возрастных категорий; в
+                       админке поле только показывается. Слово Кости 29.10:
+                       возрастных категорий не будет.
+                       НАДПИСЬ, КОТОРУЮ НИКТО НЕ ПРОВЕРЯЕТ, — ТАКОЙ ЖЕ
+                       ВРУЩИЙ ОРГАН, КАК ПОЛЗУНОК БЕЗ ЧИТАТЕЛЯ. */
+                    '<label class="db-field-label">' + L.birthday + '</label>' +
                     '<div class="db-field-row db-field-row-3">' +
                         '<select class="db-field-input" id="profileBirthDay">' + dayOpts + '</select>' +
                         '<select class="db-field-input" id="profileBirthMonth">' + monthOpts + '</select>' +

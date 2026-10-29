@@ -254,7 +254,9 @@ const КУСКИ = [
     ['вход — один дом',
      'check-vhod.js', 'check-vhod-otkat.js'],
     ['уведомления — экран не расходится с сервером',
-     'check-uvedomleniya.js', 'check-uvedomleniya-otkat.js']
+     'check-uvedomleniya.js', 'check-uvedomleniya-otkat.js'],
+    ['дата рождения — необязательна',
+     'check-data-rozhdeniya.js', 'check-data-rozhdeniya-otkat.js']
 ];
 
 function прогнать(файл) {
