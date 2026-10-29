@@ -20,8 +20,10 @@
      * Держимся латиницы: домены в кириллице бывают, но у наших писем и
      * рассылки их не будет, а опечатку раскладкой ловить важнее.
      */
+    /* ПРАВИЛО ПОЧТЫ — ДОМ (кусок A3.7е): js/kslt-vhod.js. Было два
+       объявления, сегодня знак в знак; поправь одно — второе промолчит. */
     function похоже_на_почту(адрес) {
-        return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(адрес || '');
+        return window.KSLT_VHOD.почтой(адрес);
     }
 
     var L = KSLT_YAZYK.выбрать({
@@ -249,49 +251,12 @@
     var client = window.supabaseClient;
 
     // ---- Device fingerprint helpers ----
-    function simpleHash(str) {
-        var hash = 0;
-        for (var i = 0; i < str.length; i++) {
-            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            hash |= 0;
-        }
-        return hash.toString(36);
-    }
-
+    /* ОТПЕЧАТОК УСТРОЙСТВА И ПИСЬМО О НОВОМ ВХОДЕ — ДОМ (кусок A3.7е).
+       Хеш и вся работа с `user_devices` были написаны второй раз в
+       приложении — и ТАМ АДРЕС БАЗЫ БЫЛ ЗАШИТ СТРОКОЙ, а ключ пуст по
+       умолчанию: пустой ключ даёт молчаливый отказ сервера. */
     function checkDeviceFingerprint(userId) {
-        try {
-            var deviceHash = simpleHash(navigator.userAgent + '|' + screen.width + 'x' + screen.height);
-            client.from('user_devices').select('id').eq('profile_id', userId).eq('device_hash', deviceHash).maybeSingle().then(function(res) {
-                var isNew = !res.data;
-                // Upsert device (update last_seen or insert)
-                client.from('user_devices').upsert({
-                    profile_id: userId,
-                    device_hash: deviceHash,
-                    user_agent: navigator.userAgent.substring(0, 500),
-                    last_seen: new Date().toISOString()
-                }, { onConflict: 'profile_id,device_hash' }).then(function() {});
-                // Notify if new device
-                if (isNew) {
-                    client.auth.getSession().then(function(s) {
-                        var token = s.data && s.data.session && s.data.session.access_token;
-                        if (token) {
-                            fetch(window.SUPABASE_URL + '/functions/v1/security-notify', {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': 'Bearer ' + token,
-                                    'Content-Type': 'application/json',
-                                    'apikey': window.SUPABASE_ANON_KEY
-                                },
-                                body: JSON.stringify({
-                                    event_type: 'new_device_login',
-                                    metadata: { user_agent: navigator.userAgent.substring(0, 500) }
-                                })
-                            }).catch(function() {});
-                        }
-                    });
-                }
-            });
-        } catch (e) { /* non-blocking */ }
+        window.KSLT_VHOD.запомнитьУстройство(client, userId);
     }
 
     // ---- Return URL (from auth-guard redirect) ----
@@ -331,24 +296,12 @@
      * её не присваивает: человек подтвердит сам в кабинете. Молча отдавать
      * чужой рейтинг однофамильцу нельзя.
      */
+    /* ЗАВЕСТИ КАРТОЧКУ ИГРОКА — ДОМ (кусок A3.7е). Зов стоял в ПЯТИ
+       местах: здесь, в `tournament-register.js`, дважды в `dashboard.js`
+       и в приложении. Дом не бросает: не получилось — кабинет и подача
+       заявки попробуют снова. */
     async function завестиКарточкуИгрока() {
-        try {
-            var сессия = await client.auth.getSession();
-            var session = сессия.data && сессия.data.session;
-            if (!session || !session.access_token) return;
-            await fetch(window.SUPABASE_URL + '/functions/v1/ensure-player-card', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': window.SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + session.access_token
-                },
-                body: JSON.stringify({})
-            });
-        } catch (e) {
-            // Не получилось — не беда: кабинет и подача заявки попробуют снова
-            console.warn('[KSLT] карточка игрока:', e.message);
-        }
+        await window.KSLT_VHOD.завестиКарточку(client);
     }
 
     function наЯзыке(файл) {
@@ -787,12 +740,7 @@
 
         // Server-side rate limit check
         try {
-            var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                body: JSON.stringify({ action: 'login', key: email })
-            });
-            var rlData = await rlRes.json();
+            var rlData = await window.KSLT_VHOD.зовФункции('rate-limit', { action: 'login', key: email });
             if (!rlData.allowed) {
                 setLoading(btn, false, L.signingIn, L.signIn);
                 showMessage(signinForm, L.errTooMany, true);
@@ -936,12 +884,7 @@
 
         // Server-side rate limit check
         try {
-            var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                body: JSON.stringify({ action: 'signup', key: email })
-            });
-            var rlData = await rlRes.json();
+            var rlData = await window.KSLT_VHOD.зовФункции('rate-limit', { action: 'signup', key: email });
             if (!rlData.allowed) {
                 setLoading(btn, false, L.creatingAccount, L.createAccount);
                 showMessage(signupForm, L.errTooMany, true);
@@ -1010,24 +953,16 @@
 
             showOtpScreen('register', email, 'email', otpResult.channel || 'email', async function(code) {
                 // Verify OTP and create user
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                    body: JSON.stringify({
-                        flow: 'register',
-                        identifier: email,
-                        code: code,
-                        email: _otpFormData.email,
-                        password: _otpFormData.password,
-                        full_name: _otpFormData.full_name,
-                        gender: _otpFormData.gender,
-                        birth_day: _otpFormData.birth_day,
-                        birth_month: _otpFormData.birth_month,
-                        birth_year: _otpFormData.birth_year,
-                        ntrp: _otpFormData.ntrp
-                    })
+                var data = await window.KSLT_VHOD.проверитьКод('register', email, code, {
+                    email: _otpFormData.email,
+                    password: _otpFormData.password,
+                    full_name: _otpFormData.full_name,
+                    gender: _otpFormData.gender,
+                    birth_day: _otpFormData.birth_day,
+                    birth_month: _otpFormData.birth_month,
+                    birth_year: _otpFormData.birth_year,
+                    ntrp: _otpFormData.ntrp
                 });
-                var data = await resp.json();
 
                 if (data.error === 'wrong_code') {
                     var inputsWrap = document.getElementById('otpInputs');
@@ -1203,41 +1138,18 @@
     }
 
     // Send OTP via Edge Function
-    async function sendOtp(flow, identifier, identifierType, telegramChatId) {
-        var body = {
-            flow: flow,
-            identifier: identifier,
-            identifier_type: identifierType
-        };
-        // Язык страницы: при регистрации профиля ещё нет, и сервер не знает,
-        // на каком языке писать. Код придёт на том, с которого человек
-        // регистрируется
-        body.lang = KSLT_YAZYK.код;
-        if (telegramChatId) body.telegram_chat_id = telegramChatId;
-        if (flow === 'forgot_password' && _forgotToken) body.turnstile_token = _forgotToken;
-
-        var resp = await fetch(SUPABASE_URL + '/functions/v1/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-            body: JSON.stringify(body)
+    /* ЗОВ `send-otp` И РАЗБОР ОТВЕТА — ДОМ (кусок A3.7е). Язык страницы
+       обязателен: при регистрации профиля ещё нет, и сервер не знает, на
+       каком языке писать. У приложения язык не уходил вовсе. */
+    function sendOtp(flow, identifier, identifierType, telegramChatId) {
+        return window.KSLT_VHOD.отправитьКод({
+            поток: flow,
+            адресат: identifier,
+            видАдресата: identifierType,
+            язык: KSLT_YAZYK.код,
+            телеграм: telegramChatId,
+            turnstile: (flow === 'forgot_password' && _forgotToken) ? _forgotToken : null
         });
-
-        // Ответ разбирался вслепую. Если функция не развёрнута или упала,
-        // тело приходит не в JSON, разбор падает, и человек видел
-        // «Произошла ошибка» без единого намёка на причину — а в консоли
-        // не оставалось и того
-        var text = await resp.text();
-        var data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error('[KSLT] send-otp ответил не JSON:', resp.status, text.slice(0, 300));
-            throw new Error('send-otp: HTTP ' + resp.status);
-        }
-        if (!resp.ok || data.error) {
-            console.error('[KSLT] send-otp:', resp.status, data);
-        }
-        return data;
     }
 
     // Show OTP code entry screen
@@ -1258,14 +1170,11 @@
        5 запросов в час (send-otp, RATE_LIMIT_MAX).
        СЛОМАЕТСЯ, ЕСЛИ: не сбросить шаг при входе на экран кода — человек,
        вернувшийся к форме заново, получит ожидание с прошлого раза. */
-    var ЛЕСТНИЦА_ПОВТОРА = [30, 60, 120, 300];
-    var _шагПовтора = 0;
-    function следующаяЗадержкаПовтора() {
-        var с = ЛЕСТНИЦА_ПОВТОРА[Math.min(_шагПовтора, ЛЕСТНИЦА_ПОВТОРА.length - 1)];
-        _шагПовтора++;
-        return с;
-    }
-    function сбросЛестницыПовтора() { _шагПовтора = 0; }
+    /* ЛЕСТНИЦА ЖИВЁТ В ДОМЕ (кусок A3.7е): у приложения на её месте
+       стояли ПЛОСКИЕ 60 в двух местах, и человек, не получивший письма,
+       упирался в серверный предел пяти запросов в час. */
+    function следующаяЗадержкаПовтора() { return window.KSLT_VHOD.задержкаПовтора(); }
+    function сбросЛестницыПовтора() { window.KSLT_VHOD.сбросПовтора(); }
 
     function startResendCooldown(seconds) {
         if (!otpResend) return;
@@ -1464,12 +1373,7 @@
 
             showOtpScreen('forgot_password', identifier, identifierType, channel, async function(code) {
                 // Step 1: verify code only
-                var verifyResp = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                    body: JSON.stringify({ flow: 'forgot_password', identifier: identifier, code: code })
-                });
-                var verifyData = await verifyResp.json();
+                var verifyData = await window.KSLT_VHOD.проверитьКод('forgot_password', identifier, code);
 
                 if (verifyData.error === 'wrong_code') {
                     var inputsWrap = document.getElementById('otpInputs');
@@ -1568,17 +1472,8 @@
             }
 
             try {
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                    body: JSON.stringify({
-                        flow: 'forgot_password',
-                        identifier: _otpIdentifier,
-                        code: _otpVerifiedCode,
-                        new_password: newPw
-                    })
-                });
-                var data = await resp.json();
+                var data = await window.KSLT_VHOD.проверитьКод(
+                    'forgot_password', _otpIdentifier, _otpVerifiedCode, { new_password: newPw });
 
                 if (data.error) {
                     setLoading(btn, false, L.otpSavingPw, L.otpSavePw);
@@ -1691,17 +1586,8 @@
                 return;
             }
             showOtpScreen('forgot_password', почта, 'email', отправка.channel || 'email', async function(код) {
-                var ответ = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                    body: JSON.stringify({
-                        flow: 'forgot_password',
-                        identifier: почта,
-                        code: код,
-                        login_only: true
-                    })
-                });
-                var данные = await ответ.json();
+                var данные = await window.KSLT_VHOD.проверитьКод(
+                    'forgot_password', почта, код, { login_only: true });
                 if (данные.error === 'wrong_code') {
                     showMessage(otpCodeForm, (данные.remaining > 0
                         ? L.otpWrongCode + ' (' + L.otpAttemptsLeft(данные.remaining) + ')'
@@ -1961,16 +1847,8 @@
         if (btn) setLoading(btn, true, L.tgLoggingIn, L.signIn);
 
         try {
-            var resp = await fetch(window.SUPABASE_URL + '/functions/v1/telegram-auth', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': window.SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({ action: 'login', tg_data: tgData })
-            });
-
-            var data = await resp.json();
+            var data = await window.KSLT_VHOD.зовФункции('telegram-auth',
+                { action: 'login', tg_data: tgData });
 
             if (data.status === 'new_user') {
                 // Show mini registration form
@@ -2083,23 +1961,15 @@
                 var channel = otpResult.channel || 'email';
 
                 showOtpScreen('telegram_register', email, 'email', channel, async function(code) {
-                    var resp = await fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                        body: JSON.stringify({
-                            flow: 'telegram_register',
-                            identifier: email,
-                            code: code,
-                            email: _otpFormData.email,
-                            tg_data: _otpFormData.tg_data,
-                            full_name: _otpFormData.full_name,
-                            gender: _otpFormData.gender,
-                            birth_day: _otpFormData.birth_day,
-                            birth_month: _otpFormData.birth_month,
-                            birth_year: _otpFormData.birth_year
-                        })
+                    var data = await window.KSLT_VHOD.проверитьКод('telegram_register', email, code, {
+                        email: _otpFormData.email,
+                        tg_data: _otpFormData.tg_data,
+                        full_name: _otpFormData.full_name,
+                        gender: _otpFormData.gender,
+                        birth_day: _otpFormData.birth_day,
+                        birth_month: _otpFormData.birth_month,
+                        birth_year: _otpFormData.birth_year
                     });
-                    var data = await resp.json();
 
                     if (data.error === 'wrong_code') {
                         var inputsWrap = document.getElementById('otpInputs');

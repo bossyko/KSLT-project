@@ -6510,3 +6510,106 @@ select.prof-field-input { color: var(--text); }
   border: 0; background: none; color: var(--text-sec);
   font-size: 21px; line-height: 1; padding: 0 2px;
 }
+
+/* ==========================================================================
+   ОКНО ЗАЯВКИ НА ТУРНИР — ВИД ЖИВЁТ В CSS (кусок A3.7д, 29.10)
+   ==========================================================================
+   Здесь стояла функция `injectStyles` в
+   `mobile/www/js/tournament-register.js`: ДЕСЯТЬ правил строкой,
+   вписывались в <head> при первом открытии окна. У сайта ту же беду снял
+   кусок 174 (семнадцать правил), а копия приложения осталась — ПРАВИЛО,
+   ВЫВЕДЕННОЕ НА ОДНОМ КУСКЕ, ПРИМЕНЯЕТСЯ К СЛЕДУЮЩЕМУ БЕЗ НОВОГО
+   РАЗБОРА.
+   Правило в строке js не читает ни один сторож, и внутри жили: краска
+   `#ff3b30` — ЧЕТВЁРТЫЙ КРАСНЫЙ мимо системы, ровно тот, на который
+   указывает описание компонента `Input` 25:5 («the code currently uses
+   #ff3b30 here, a fourth red that is not in the palette — it should
+   become status/danger»); пять кеглей в `rem` мимо шкалы (2.2 · 1.15 ·
+   0.92 · 0.83 · 1); отступы 20 · 22 · 13 · 14 · 10 мимо ступеней;
+   радиусы 16 · 10 · 8 числом.
+   z-index был 10000 — выше всего в приложении. Поставлен 3000, как у
+   окна счёта (`.msa-overlay`): два окна одного продукта не спорят. */
+
+.mob-reg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mob-reg-overlay.active { opacity: 1; }
+
+.mob-reg-modal {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
+}
+
+.mob-reg-overlay.active .mob-reg-modal { transform: scale(1); }
+
+.mob-reg-icon {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-none);
+  margin-bottom: var(--space-3);
+}
+
+.mob-reg-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+.mob-reg-text {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--text-muted);
+}
+
+.mob-reg-note {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--alpha-lime-30);
+  border-radius: var(--radius-sm);
+  background: var(--alpha-lime-06);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+  color: var(--text-secondary);
+}
+
+.mob-reg-btn {
+  width: 100%;
+  min-height: 44px;
+  margin-top: var(--space-6);
+  padding: var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  background: var(--accent);
+  color: var(--accent-on);
+  cursor: pointer;
+}
+
+.mob-reg-btn.is-error {
+  background: var(--danger);
+  color: var(--danger-on);
+}
+
+/* ==========================================================================
+   /ОКНО ЗАЯВКИ
+   ========================================================================== */

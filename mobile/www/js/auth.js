@@ -14,8 +14,9 @@
    * Держимся латиницы: домены в кириллице бывают, но у нашей почты их нет,
    * а опечатку раскладкой ловить важнее. Такая же проверка на сайте.
    */
+  /* ПРАВИЛО ПОЧТЫ — ДОМ (кусок A3.7е): js/kslt-vhod.js. */
   function похоже_на_почту(адрес) {
-    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(адрес || '');
+    return window.KSLT_VHOD.почтой(адрес);
   }
 
 
@@ -122,17 +123,13 @@
 
   // Telegram Login
   AUTH.telegramAuth = function(action, tgData, extra) {
-    var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    /* ЗОВ — ДОМ (кусок A3.7е): здесь был ЗАШИТЫЙ АДРЕС БАЗЫ и пустой
+       ключ по умолчанию. */
     var body = { action: action, tg_data: tgData };
     if (extra) {
       Object.keys(extra).forEach(function(k) { body[k] = extra[k]; });
     }
-    return fetch(SUPABASE_URL + '/functions/v1/telegram-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify(body)
-    }).then(function(r) { return r.json(); });
+    return window.KSLT_VHOD.зовФункции('telegram-auth', body);
   };
 
   // Verify OTP (magic link token from telegram-auth Edge Function)
@@ -224,29 +221,27 @@
   };
 
   // Send OTP code
+  /* ЗОВ `send-otp` — ДОМ (кусок A3.7е). ДВЕ БЕДЫ ЗАКРЫТЫ ЗДЕСЬ:
+     ЯЗЫК НЕ УХОДИЛ ВОВСЕ — сервер не знал, на каком языке писать, а при
+     регистрации профиля ещё нет, спросить ему некого;
+     ОТВЕТ РАЗБИРАЛСЯ ВСЛЕПУЮ — `r.json()` на не-JSON теле бросал
+     SyntaxError, и человек видел пустоту вместо причины. Дом говорит в
+     консоль, что ответило не JSON, и бросает внятное «HTTP <код>». */
   AUTH.sendOtp = function(flow, identifier, identifierType, telegramChatId) {
-    var SUPABASE_URL = window.SUPABASE_URL || '';
-    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-    var body = { flow: flow, identifier: identifier, identifier_type: identifierType };
-    if (telegramChatId) body.telegram_chat_id = telegramChatId;
-    return fetch(SUPABASE_URL + '/functions/v1/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify(body)
-    }).then(function(r) { return r.json(); });
+    var I = window.KSLT_I18N;
+    return window.KSLT_VHOD.отправитьКод({
+      поток: flow,
+      адресат: identifier,
+      видАдресата: identifierType,
+      язык: (I && I.lang) || 'ru',
+      телеграм: telegramChatId
+    });
   };
 
-  // Verify OTP code
+  /* ЗОВ `verify-otp` — ДОМ (кусок A3.7е). Зов стоял в ШЕСТИ местах:
+     пять на сайте и это. */
   AUTH.verifyOtp = function(flow, identifier, code, extra) {
-    var SUPABASE_URL = window.SUPABASE_URL || '';
-    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-    var body = { flow: flow, identifier: identifier, code: code };
-    if (extra) Object.keys(extra).forEach(function(k) { body[k] = extra[k]; });
-    return fetch(SUPABASE_URL + '/functions/v1/verify-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify(body)
-    }).then(function(r) { return r.json(); });
+    return window.KSLT_VHOD.проверитьКод(flow, identifier, code, extra);
   };
 
   // Setup auth UI handlers
@@ -396,7 +391,15 @@
     }
 
     function showOtpOverlay(flow, identifier, identifierType, channel, callback) {
-      startResendCooldown(60);
+      /* ЛЕСТНИЦА ПОВТОРА — ДОМ (кусок A3.7е). Здесь стояли ПЛОСКИЕ 60, и
+         человек, не получивший письма, жал повтор каждую минуту, упирался
+         в серверный предел пяти запросов в час и получал блокировку на
+         четверть часа — наказание за медленное письмо. Первое ожидание
+         теперь 30, а не 60: ждать вдвое дольше нужного тоже незачем.
+         Шаг СБРАСЫВАЕТСЯ при входе на экран кода, иначе вернувшийся к
+         форме заново получит ожидание с прошлого раза. */
+      window.KSLT_VHOD.сбросПовтора();
+      startResendCooldown(window.KSLT_VHOD.задержкаПовтора());
       _otpFlow = flow;
       _otpIdentifier = identifier;
       _otpIdentifierType = identifierType;
@@ -493,7 +496,7 @@
           clearOtpInputs();
           startOtpTimer(600);
           self.textContent = I18N.t('otp.sent');
-          setTimeout(function() { startResendCooldown(60); }, 1500);
+          setTimeout(function() { startResendCooldown(window.KSLT_VHOD.задержкаПовтора()); }, 1500);
         });
       });
     }
@@ -686,14 +689,8 @@
 
       // Server-side rate limit
       try {
-        var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-        var rlRes = await fetch(SUPABASE_URL + '/functions/v1/rate-limit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-          body: JSON.stringify({ action: 'login', key: email })
-        });
-        var rlData = await rlRes.json();
+        /* ЗОВ — ДОМ (кусок A3.7е): здесь был ЗАШИТЫЙ АДРЕС БАЗЫ. */
+        var rlData = await window.KSLT_VHOD.зовФункции('rate-limit', { action: 'login', key: email });
         if (!rlData.allowed) {
           errEl.textContent = I18N.t('otp.tooManyTries');
           errEl.className = 'auth-error show';
@@ -978,81 +975,37 @@
   };
 
   // ---- Device fingerprint ----
-  function simpleHash(str) {
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return hash.toString(36);
-  }
-
   /**
    * Карточка игрока — сразу при входе, как на сайте.
    *
-   * Без неё человек не может ни записаться на турнир, ни вызвать на баттл. В
-   * приложении карточку не заводили вовсе: кабинет живёт на сайте, и тот, кто
-   * пользуется только приложением, упирался в «у вас нет карточки игрока».
+   * Без неё человек не может ни записаться на турнир, ни вызвать на
+   * баттл. В приложении карточку не заводили вовсе: кабинет живёт на
+   * сайте, и тот, кто пользуется только приложением, упирался в «у вас
+   * нет карточки игрока».
    *
-   * Нашлась похожая карточка с рейтингом — сервер её не присваивает, человек
-   * подтверждает сам: чужую историю вслепую не отдаём.
+   * Нашлась похожая карточка с рейтингом — сервер её не присваивает,
+   * человек подтверждает сам: чужую историю вслепую не отдаём.
+   *
+   * ЗОВ — ДОМ ВХОДА (кусок A3.7е): он стоял в ПЯТИ местах, и ЗДЕСЬ АДРЕС
+   * БАЗЫ БЫЛ ЗАШИТ СТРОКОЙ, а ключ пуст по умолчанию — пустой ключ даёт
+   * молчаливый отказ сервера.
+   *
+   * ЭТУ ФУНКЦИЮ Я СНЁС СВОЕЙ ЖЕ ПРАВКОЙ И ВЕРНУЛ: участок, которым я
+   * заменял хеш и отпечаток, тянулся от `simpleHash` до
+   * `AUTH.checkDeviceFingerprint`, а `ensurePlayerCard` стояла МЕЖДУ
+   * ними. Нашёл линтер — три `no-undef` на живых зовах (515, 717, 961).
+   * ЖАДНЫЙ УЧАСТОК СЪЕДАЕТ СОСЕДА, И ЭТО ВИДНО ТОЛЬКО ПРИБОРУ.
    */
   function ensurePlayerCard() {
     if (!supabaseClient) return;
-    supabaseClient.auth.getSession().then(function(res) {
-      var session = res.data && res.data.session;
-      if (!session || !session.access_token) return;
-      var url = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-      var anon = window.SUPABASE_ANON_KEY || '';
-      return fetch(url + '/functions/v1/ensure-player-card', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': anon,
-          'Authorization': 'Bearer ' + session.access_token
-        },
-        body: JSON.stringify({})
-      });
-    }).catch(function(e) {
-      // Не вышло — кабинет и подача заявки попробуют снова
-      console.warn('[KSLT] карточка игрока:', e && e.message);
-    });
+    window.KSLT_VHOD.завестиКарточку(supabaseClient);
   }
 
+  /* ОТПЕЧАТОК УСТРОЙСТВА И ПИСЬМО О НОВОМ ВХОДЕ — ДОМ (кусок A3.7е).
+     Хеш и вся работа с `user_devices` были написаны второй раз, и ЗДЕСЬ
+     АДРЕС БАЗЫ БЫЛ ЗАШИТ СТРОКОЙ. */
   function checkDeviceFingerprint(userId) {
-    try {
-      var deviceHash = simpleHash(navigator.userAgent + '|' + screen.width + 'x' + screen.height);
-      supabaseClient.from('user_devices').select('id').eq('profile_id', userId).eq('device_hash', deviceHash).maybeSingle().then(function(res) {
-        var isNew = !res.data;
-        supabaseClient.from('user_devices').upsert({
-          profile_id: userId,
-          device_hash: deviceHash,
-          user_agent: navigator.userAgent.substring(0, 500),
-          last_seen: new Date().toISOString()
-        }, { onConflict: 'profile_id,device_hash' }).then(function() {});
-        if (isNew) {
-          supabaseClient.auth.getSession().then(function(s) {
-            var token = s.data && s.data.session && s.data.session.access_token;
-            if (token) {
-              var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-              var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-              fetch(SUPABASE_URL + '/functions/v1/security-notify', {
-                method: 'POST',
-                headers: {
-                  'Authorization': 'Bearer ' + token,
-                  'Content-Type': 'application/json',
-                  'apikey': SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({
-                  event_type: 'new_device_login',
-                  metadata: { user_agent: navigator.userAgent.substring(0, 500) }
-                })
-              }).catch(function() {});
-            }
-          });
-        }
-      });
-    } catch (e) { /* non-blocking */ }
+    window.KSLT_VHOD.запомнитьУстройство(supabaseClient, userId);
   }
 
   AUTH.checkDeviceFingerprint = checkDeviceFingerprint;

@@ -27,215 +27,46 @@
      * @param {Object} [extra] Партнёр для парных: partner_id или partner_external_*
      * @returns {Promise<{ok:boolean, data:Object}>}
      */
-    async function callRegister(client, tournamentId, extra) {
-        try {
-            var session = await client.auth.getSession();
-            var token = session.data.session ? session.data.session.access_token : '';
-            var payload = { tournament_id: tournamentId };
-            if (extra) {
-                for (var k in extra) {
-                    if (extra[k] !== undefined && extra[k] !== null && extra[k] !== '') payload[k] = extra[k];
-                }
-            }
-            var res = await fetch(SUPABASE_URL + '/functions/v1/tournament-register', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            var data = await res.json();
-            return { ok: res.ok, data: data };
-        } catch (e) {
-            return { ok: false, data: { error: e.message } };
-        }
+    /* ЗОВ ФУНКЦИИ ДОПУСКА — ДОМ (кусок A3.7д): js/kslt-zayavka.js.
+       Сессия, токен, отсев пустых полей и заголовки были написаны здесь
+       и в приложении — знак в знак, только одно через `await`, другое
+       через `then`. Имя `callRegister` оставлено: его отдают наружу как
+       `KSLT_REG.call`, и зовущих трогать не нужно. */
+    function callRegister(client, tournamentId, extra) {
+        return window.KSLT_ZAYAVKA.зов(client, tournamentId, extra);
+    }
+
+    /** Надписи окна заявки — общий файл js/zayavka-texts.js. */
+    function надписи() {
+        var T = window.KSLT_ZAYAVKA_TEXTS;
+        return T ? T.of(KSLT_YAZYK.выбрать('en', 'kg', 'ru')) : {};
     }
 
     /**
      * Человеческий текст по ответу функции.
+     *
+     * ДЕРЕВО РЕШЕНИЙ — ДОМ (кусок A3.7д): js/kslt-zayavka.js. Здесь
+     * жили девятнадцать слов на коды отказа, восемь статусов, восемь
+     * коротких подписей и сам порядок ветвей — и всё это было написано
+     * второй раз в приложении, где из девятнадцати слов было ДЕВЯТЬ, а
+     * ветки смены напарника не было вовсе.
+     *
+     * Доводы `isEn`, `isKg` оставлены в подписи: их передают двадцать
+     * зовов из шести файлов, а язык всё равно берётся у `KSLT_YAZYK` —
+     * так было и до этого куска.
+     *
      * @returns {{title:string, text:string, note:string, tone:string, short:string}}
      */
     function resultText(data, isEn, isKg) {
-        function pick(en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); }
-
-        var errors = {
-            already_registered: pick('You have already applied for this tournament',
-                'Сиз бул мелдешке буга чейин арыз бергенсиз',
-                'Вы уже подавали заявку на этот турнир'),
-            no_player: pick('Your account is not linked to a player profile',
-                'Аккаунтуңуз оюнчу картасына байланган эмес',
-                'Ваш аккаунт не связан с карточкой игрока'),
-            no_membership: pick('Active KSLT membership required',
-                'KSLT активдүү мүчөлүгү талап кылынат',
-                'Требуется активное членство KSLT'),
-            not_paid: pick('Please pay your membership first',
-                'Адегенде мүчөлүк төлөмүн төлөңүз',
-                'Сначала оплатите членство'),
-            banned: pick('Your account is temporarily blocked',
-                'Аккаунтуңуз убактылуу бөгөттөлгөн',
-                'Ваш аккаунт временно заблокирован'),
-            registration_closed: pick('Registration for this tournament is closed',
-                'Бул мелдешке каттоо жабык',
-                'Регистрация на этот турнир закрыта'),
-            gender_mismatch: pick('This tournament is for another gender category',
-                'Бул мелдеш башка жыныс категориясы үчүн',
-                'Этот турнир для другой гендерной категории'),
-            partner_gender_required: pick('Choose the guest gender',
-                'Коноктун жынысын тандаңыз',
-                'Укажите пол гостя'),
-            partner_ntrp_required: pick('Enter the guest NTRP',
-                'Коноктун NTRP көрсөтүңүз',
-                'Укажите NTRP гостя'),
-            partner_gender_mismatch: pick('Your partner does not fit this tournament by gender',
-                'Өнөктөшүңүз бул мелдешке жынысы боюнча туура келбейт',
-                'Напарник не подходит турниру по полу'),
-            mixed_pair_same_gender: pick('A mixed pair must be a man and a woman. Register without a partner — the manager will complete the pair',
-                'Аралаш жупта эркек жана аял болушу керек. Өнөктөшсүз катталыңыз — жупту менеджер толуктайт',
-                'В миксте пара — мужчина и женщина. Подайте заявку без напарника, пару дополнит менеджер'),
-            category_closed: pick('This category is closed for you. Contact the club to reopen it',
-                'Бул категория сиз үчүн жабык. Ачуу үчүн клубга кайрылыңыз',
-                'Эта категория для вас закрыта. Чтобы вернуться в неё, обратитесь в клуб'),
-            ntrp_too_low: pick('Your NTRP is below the tournament minimum',
-                'NTRP көрсөткүчүңүз мелдештин минимумунан төмөн',
-                'Ваш NTRP ниже минимального для турнира'),
-            ntrp_too_high: pick('Your NTRP is above the tournament maximum',
-                'NTRP көрсөткүчүңүз мелдештин максимумунан жогору',
-                'Ваш NTRP выше максимального для турнира'),
-            ntrp_combined_exceeded: pick('Combined NTRP of the pair exceeds the tournament limit',
-                'Жуптун жалпы NTRP көрсөткүчү чектен ашты',
-                'Суммарный NTRP пары превышает лимит турнира'),
-            partner_taken: pick('This player is already in another pair of this tournament',
-                'Бул оюнчу мелдештин башка жубунда',
-                'Этот игрок уже в другой паре этого турнира'),
-            entry_in_draw: pick('The draw is done — the lineup is closed. To change a partner, contact the club',
-                'Сетка тартылды — курам жабык. Өнөктөштү алмаштыруу үчүн клубга кайрылыңыз',
-                'Сетка сформирована — состав закрыт. Чтобы сменить напарника, обратитесь в клуб'),
-            entry_rejected: pick('The club closed your entry for this tournament. To return, contact a manager',
-                'Клуб бул мелдешке арызыңызды жапты. Кайра кирүү үчүн менеджерге кайрылыңыз',
-                'Клуб закрыл вашу заявку на этот турнир. Чтобы вернуться, обратитесь к менеджеру'),
-            entry_not_active: pick('This entry is out of the tournament — there is no partner to change. Apply again while registration is open',
-                'Бул арыз мелдештен тышкары — өнөктөштү алмаштырууга болбойт. Каттоо ачык болсо, кайра арыз бериңиз',
-                'Заявка вне турнира — менять напарника не на чем. Подайте заявку заново, пока регистрация открыта')
-        };
-
-        // Напарника заменили: заявка та же, место то же — говорим именно это,
-        // а не «вы уже подали заявку»
-        if (data && data.partner_changed) {
-            var гость = !!data.guest;
-            return {
-                tone: 'success',
-                icon: гость ? '\u23F3' : '\u2705',
-                title: pick('Partner changed', 'Өнөктөш алмаштырылды', 'Напарник заменён'),
-                text: гость
-                    ? pick('Your partner is a guest: the place is held, but the manager confirms the pair.',
-                           'Өнөктөшүңүз конок: орун сакталат, бирок жупту менеджер ырастайт.',
-                           'Напарник — гость: место за вами, но пару подтверждает менеджер.')
-                    : pick('Your place in the tournament stays.',
-                           'Мелдештеги орунуңуз сакталат.',
-                           'Ваше место в турнире сохраняется.'),
-                note: '',
-                short: гость
-                    ? pick('Under review', 'Каралууда', 'На рассмотрении')
-                    : pick('Partner changed', 'Өнөктөш алмаштырылды', 'Напарник заменён')
-            };
-        }
-
-        // Заявка уже подана — показываем её текущий статус, а не общий отказ
-        if (data && data.error === 'already_registered') {
-            var statusText = {
-                approved: pick('You are in the main draw.', 'Сиз негизги сеткадасыз.', 'Вы в основной сетке.'),
-                draw: pick('You are in the main draw, the draw has been made.',
-                    'Сиз негизги сеткадасыз, жеребьёвка өттү.',
-                    'Вы в основной сетке, жеребьёвка проведена.'),
-                pending: pick('The application is awaiting a decision.',
-                    'Арыз чечимди күтүүдө.', 'Заявка ожидает решения администратора.'),
-                waitlist: pick('You are on the waiting list.',
-                    'Сиз күтүү тизмесиндесиз.', 'Вы в листе ожидания.'),
-                rejected: pick('The application was rejected by the administrator.',
-                    'Арызды администратор четке какты.', 'Заявка отклонена администратором.'),
-                withdrawn: pick('The application was withdrawn.',
-                    'Арыз кайтарылып алынган.', 'Заявка была отозвана.'),
-                blocked: pick('The application did not pass the entry rules.',
-                    'Арыз катышуу эрежелеринен өткөн жок.', 'Заявка не прошла правила допуска.')
-            };
-            var shortByStatus = {
-                approved: pick('In the main draw', 'Негизги сеткада', 'В основной сетке'),
-                draw: pick('In the main draw', 'Негизги сеткада', 'В основной сетке'),
-                pending: pick('Under review', 'Каралууда', 'На рассмотрении'),
-                waitlist: pick('On the waiting list', 'Күтүү тизмесинде', 'В листе ожидания'),
-                rejected: pick('Rejected', 'Четке кагылган', 'Отклонена'),
-                withdrawn: pick('Withdrawn', 'Кайтарылган', 'Отозвана'),
-                blocked: pick('Not accepted', 'Кабыл алынган жок', 'Не принята')
-            };
-            var isBad = data.status === 'rejected' || data.status === 'blocked';
-            return {
-                tone: isBad ? 'error' : 'success',
-                icon: isBad ? '⛔' : '📋',
-                title: pick('You have already applied', 'Сиз буга чейин арыз бергенсиз', 'Вы уже подали заявку'),
-                text: statusText[data.status] || pick('Status: ', 'Абалы: ', 'Статус: ') + (data.status || ''),
-                note: '',
-                short: shortByStatus[data.status] || pick('Applied', 'Арыз берилген', 'Заявка подана')
-            };
-        }
-
-        if (data && data.error) {
-            return {
-                tone: 'error', icon: '⛔',
-                title: pick('Application not accepted', 'Арыз кабыл алынган жок', 'Заявка не принята'),
-                text: errors[data.error] || data.error,
-                note: '',
-                short: pick('Not accepted', 'Кабыл алынган жок', 'Не принята')
-            };
-        }
-
-        var status = data && data.status;
-
-        if (status === 'approved') {
-            // Игрока нижней категории честно предупреждаем: место не закреплено
-            var note = (data.reason === 'top_rank')
-                ? pick('Your spot is not locked in: if a player of the tournament category applies, you may be moved to the waiting list.',
-                    'Орун бекитилген эмес: мелдеш категориясындагы оюнчу арыз берсе, сиз күтүү тизмесине өтүшүңүз мүмкүн.',
-                    'Место не закреплено: если заявку подаст игрок категории турнира, вы можете быть перемещены в лист ожидания.')
-                : '';
-            return {
-                tone: 'success', icon: '✅',
-                title: pick('Application accepted', 'Арыз кабыл алынды', 'Заявка принята'),
-                text: pick('You are in the main draw.', 'Сиз негизги сеткадасыз.', 'Вы в основной сетке.'),
-                note: note,
-                short: pick('In the main draw', 'Негизги сеткада', 'В основной сетке')
-            };
-        }
-
-        if (status === 'waitlist') {
-            var reasons = {
-                no_category: pick('Your category is not assigned yet, so the application needs a review.',
-                    'Категорияңыз дайындала элек, ошондуктан арыз каралат.',
-                    'Вам ещё не присвоена категория, поэтому заявка требует рассмотрения.'),
-                rank_waitlist: pick('You are ranked 11-20 in your category — the application needs approval.',
-                    'Категорияңызда 11-20 орундасыз — арыз бекитүүнү талап кылат.',
-                    'Вы занимаете с 11 по 20 место в своей категории — заявка требует одобрения.'),
-                draw_full: pick('The main draw is full.', 'Негизги сетка толук.', 'Основная сетка заполнена.')
-            };
-            return {
-                tone: 'success', icon: '⏳',
-                title: pick('Application accepted — under review', 'Арыз кабыл алынды — каралууда', 'Заявка принята — на рассмотрении'),
-                text: reasons[data.reason] || pick('The administrator will make a decision.',
-                    'Чечимди администратор кабыл алат.', 'Решение примет администратор.'),
-                note: '',
-                short: pick('Under review', 'Каралууда', 'На рассмотрении')
-            };
-        }
-
+        var Z = window.KSLT_ZAYAVKA;
+        var слова = Z.словами(Z.разобрать(data), надписи(), data);
         return {
-            tone: 'error', icon: '⛔',
-            title: pick('Application not accepted', 'Арыз кабыл алынган жок', 'Заявка не принята'),
-            text: (data && data.block_reason) || pick('You do not meet the tournament entry rules.',
-                'Сиз мелдешке катышуу эрежелерине туура келбейсиз.',
-                'Вы не проходите по правилам допуска на турнир.'),
-            note: '',
-            short: pick('Not accepted', 'Кабыл алынган жок', 'Не принята')
+            tone: слова.тон,
+            icon: слова.значок,
+            title: слова.титул,
+            text: слова.текст,
+            note: слова.заметка,
+            short: слова.коротко
         };
     }
 
@@ -318,7 +149,7 @@
                     (info.textHtml != null ? info.textHtml : текстом(info.text)) + '</p>' +
                 (info.note ? '<div class="trn-register-modal-note">' + текстом(info.note) + '</div>' : '') +
                 '<button class="trn-register-modal-btn' + (info.tone === 'error' ? ' is-error' : '') + '">' +
-                    (KSLT_YAZYK.выбрать('Got it', 'Түшүндүм', 'Понятно')) +
+                    текстом(надписи().ok) +
                 '</button>' +
             '</div>';
 
@@ -388,18 +219,22 @@
      * ни его рейтинга, ни того, придёт ли он. Дописываем это в окно, иначе
      * человек уверен, что уже играет.
      */
-    function приписатьПроГостя(info, isEn, isKg) {
-        var текст = KSLT_YAZYK.выбрать('Your partner is a guest: the place is held, but the manager confirms the pair.', 'Өнөктөшүңүз конок: орун сакталат, бирок жупту менеджер ырастайт.', 'Напарник — гость: место за вами, но пару подтверждает менеджер.');
+    /* СЛОВА ПРИПИСОК — ТЕ ЖЕ, ЧТО У ДОМА. `noteGuest` дом уже отдаёт
+       как текст ветки смены напарника: одно слово, одно место. */
+    function приписать(info, ключ) {
+        var L = надписи();
+        var текст = L[ключ] || '';
         info.note = info.note ? (info.note + ' ' + текст) : текст;
-        info.short = KSLT_YAZYK.выбрать('Under review', 'Каралууда', 'На рассмотрении');
+        info.short = L.shortReview || '';
         return info;
     }
 
+    function приписатьПроГостя(info, isEn, isKg) {
+        return приписать(info, 'noteGuest');
+    }
+
     function приписатьПроСостав(info, isEn, isKg) {
-        var текст = KSLT_YAZYK.выбрать('The lineup does not match the tournament by gender: the place is held, the manager decides.', 'Курам мелдешке жынысы боюнча дал келбейт: орун сакталат, чечимди менеджер кабыл алат.', 'Состав не совпадает с турниром по полу: место за вами, решение принимает менеджер.');
-        info.note = info.note ? (info.note + ' ' + текст) : текст;
-        info.short = KSLT_YAZYK.выбрать('Under review', 'Каралууда', 'На рассмотрении');
-        return info;
+        return приписать(info, 'noteGender');
     }
 
     function pick3(isEn, isKg, en, kg, ru) { return KSLT_YAZYK.выбрать(en, kg, ru); }
@@ -438,24 +273,9 @@
      *
      * Возвращает 'created', 'candidate' или пусто.
      */
-    async function завестиКарточку(client) {
-        try {
-            var сессия = await client.auth.getSession();
-            if (!сессия.data.session) return '';
-            var res = await fetch(SUPABASE_URL + '/functions/v1/ensure-player-card', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + сессия.data.session.access_token
-                },
-                body: JSON.stringify({})
-            });
-            var д = await res.json();
-            return д.status || '';
-        } catch (e) {
-            return '';
-        }
+    /* ЗОВ — ДОМ ВХОДА (кусок A3.7е): он стоял в ПЯТИ местах. */
+    function завестиКарточку(client) {
+        return window.KSLT_VHOD.завестиКарточку(client);
     }
 
     async function submit(client, tournamentId, opts) {
@@ -518,7 +338,10 @@
         // сразу, а не оставлять человека в уверенности, что он в сетке
         if (reg.data && reg.data.gender_review) приписатьПроСостав(info, isEn, isKg);
         showModal(info, isEn, isKg);
-        info.created = !(reg.data && reg.data.error && reg.data.error !== 'already_registered');
+        /* ПРИЗНАК «ЗАЯВКА СОЗДАНА» — ДОМ: по нему кнопка меняет вид, и
+           он стоял в двух файлах знак в знак. Тонкость в том, что
+           `already_registered` — отказ по коду, а кнопку менять надо. */
+        info.created = window.KSLT_ZAYAVKA.создана(reg.data);
         return info;
     }
 

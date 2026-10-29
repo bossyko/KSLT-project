@@ -2476,16 +2476,11 @@
             var сессия = await client.auth.getSession();
             if (!сессия.data.session) return;
 
-            var res = await fetch(SUPABASE_URL + '/functions/v1/ensure-player-card', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + сессия.data.session.access_token
-                },
-                body: JSON.stringify({})
-            });
-            var д = await res.json();
+            /* ЗОВ — ДОМ ВХОДА (кусок A3.7е): он стоял в ПЯТИ местах.
+               Кабинету нужен ВЕСЬ ответ — `status`, `candidate`,
+               `player_id`, — поэтому зовётся `карточкаИгрока`, а не
+               короткая обёртка. */
+            var д = (await window.KSLT_VHOD.карточкаИгрока(client)) || {};
 
             if (д.status === 'candidate' && д.candidate) {
                 предложитьКарточку(д.candidate);
@@ -2523,16 +2518,8 @@
             var кн = this;
             кн.disabled = true;
             var сессия = await client.auth.getSession();
-            var res = await fetch(SUPABASE_URL + '/functions/v1/ensure-player-card', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + сессия.data.session.access_token
-                },
-                body: JSON.stringify({ confirm_player_id: карточка.id })
-            });
-            var д = await res.json();
+            var д = (await window.KSLT_VHOD.карточкаИгрока(client,
+                { confirm_player_id: карточка.id })) || {};
             if (д.ok) {
                 location.reload();
             } else {
@@ -4715,21 +4702,10 @@
 
             // Security notify if phone changed
             if (phone !== oldPhone && oldPhone) {
-                try {
-                    var session = await client.auth.getSession();
-                    var token = session.data && session.data.session && session.data.session.access_token;
-                    if (token) {
-                        fetch(SUPABASE_URL + '/functions/v1/security-notify', {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                'Content-Type': 'application/json',
-                                'apikey': SUPABASE_ANON_KEY
-                            },
-                            body: JSON.stringify({ event_type: 'phone_changed', metadata: { old_phone: oldPhone, new_phone: phone } })
-                        }).catch(function() {});
-                    }
-                } catch (e) {}
+                /* ПИСЬМО БЕЗОПАСНОСТИ — ДОМ ВХОДА (кусок A3.7е): зов с
+                   добычей токена стоял в ЧЕТЫРЁХ местах. */
+                window.KSLT_VHOD.письмоБезопасности(client, 'phone_changed',
+                    { old_phone: oldPhone, new_phone: phone });
             }
 
             // Update banner
@@ -6342,18 +6318,17 @@
     }
 
     /**
-     * Отпечаток этого браузера. Считаем в точности как при входе
-     * (js/auth.js, simpleHash): иначе «это устройство» не совпало бы
-     * ни с одной строкой в списке, и человек решил бы, что зашёл чужой.
+     * Отпечаток этого браузера — ДОМ ВХОДА (кусок A3.7е).
+     *
+     * Здесь жила ТРЕТЬЯ копия хеша, и в подписи у неё стояло «считаем в
+     * точности как при входе (js/auth.js, simpleHash)» — то есть автор
+     * ЗНАЛ, что это копия, и попросил будущего себя не разойтись.
+     * Разойдись она — «это устройство» не совпало бы ни с одной строкой
+     * в списке, и человек решил бы, что в его запись зашёл чужой.
+     * ПОЧИНИЛ ОДИН — ПРОВЕРЬ БЛИЗНЕЦА.
      */
     function отпечатокУстройства() {
-        var строка = navigator.userAgent + '|' + screen.width + 'x' + screen.height;
-        var hash = 0;
-        for (var i = 0; i < строка.length; i++) {
-            hash = ((hash << 5) - hash) + строка.charCodeAt(i);
-            hash |= 0;
-        }
-        return hash.toString(36);
+        return window.KSLT_VHOD.отпечаток();
     }
 
     /** Человеческое название вместо строки браузера в 200 знаков. */
@@ -6634,21 +6609,8 @@
             } catch (e) {}
 
             // Notify user about password change (email + TG)
-            try {
-                var session = await client.auth.getSession();
-                var token = session.data && session.data.session && session.data.session.access_token;
-                if (token) {
-                    fetch(SUPABASE_URL + '/functions/v1/security-notify', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Content-Type': 'application/json',
-                            'apikey': SUPABASE_ANON_KEY
-                        },
-                        body: JSON.stringify({ event_type: 'password_changed' })
-                    }).catch(function() {});
-                }
-            } catch (e) {}
+            /* ПИСЬМО БЕЗОПАСНОСТИ — ДОМ ВХОДА (кусок A3.7е). */
+            window.KSLT_VHOD.письмоБезопасности(client, 'password_changed');
         }
 
         btn.textContent = L.updatePassword;
