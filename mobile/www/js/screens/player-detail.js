@@ -774,47 +774,67 @@
   }
 
   // ---- Challenge handler ----
+  /**
+   * ВЫЗОВ НА БАТТЛ.
+   *
+   * ПЕРЕПИСАНО 29.10, И ЭТО БЫЛА ПОЛОМКА, А НЕ НЕХВАТКА БЛОКА.
+   *
+   * Здесь шла ПРЯМАЯ ВСТАВКА в таблицу `challenges` со статусом
+   * `pending` — а в ограничении базы `challenges_status_check` такого
+   * статуса НЕТ ВОВСЕ (допустимы `active`, `negotiating`, `countered`,
+   * `accepted`, `declined`, `expired`, `completed`, `cancelled`). База
+   * отклоняла вставку, и человек получал ошибку при каждом нажатии
+   * «Вызвать».
+   *
+   * И вставка шла МИМО серверной функции `create-challenge`, которую
+   * зовёт сайт, — то есть мимо восьми её проверок: вошёл ли, есть ли
+   * карточка, не себя ли вызывает, член ли клуба, нашёлся ли соперник,
+   * не слишком ли много висящих вызовов, нет ли уже такого вызова, нет
+   * ли назначенного матча. И мимо уведомлений, которые она отправляет
+   * сопернику.
+   *
+   * Теперь зов один — через дом `js/kslt-vyzov.js`, как на сайте.
+   * Проверки «вошёл» и «есть карточка» оставлены ЗДЕСЬ намеренно: это
+   * не правила клуба, а подсказка человеку до обращения к серверу.
+   */
   function handleChallenge() {
     var AUTH = window.KSLT_AUTH;
     if (!AUTH || !AUTH.currentUser) {
-      window.KSLT_APP.toast(I18N.t('pd.chalLogin'));
+      window.KSLT_APP.toast(словоВызова('chalLogin'));
       return;
     }
     if (!AUTH.currentProfile || !AUTH.currentProfile.player_id) {
-      window.KSLT_APP.toast(I18N.t('pd.chalLinkPlayer'));
+      window.KSLT_APP.toast(словоВызова('chalNoPlayer'));
       return;
     }
     if (AUTH.currentProfile.player_id === _playerId) {
-      window.KSLT_APP.toast(I18N.t('pd.chalSelf'));
+      window.KSLT_APP.toast(словоВызова('chalSelf'));
       return;
     }
 
-    // Check pending challenge
-    supabaseClient.from('challenges')
-      .select('id')
-      .eq('challenger_id', AUTH.currentUser.id)
-      .eq('opponent_player_id', _playerId)
-      .in('status', ['pending', 'accepted'])
-      .limit(1)
-      .then(function(r) {
-        if (r.data && r.data.length > 0) {
-          window.KSLT_APP.toast(I18N.t('pd.chalExists'));
-          return;
-        }
-        // Create challenge
-        supabaseClient.from('challenges').insert({
-          challenger_id: AUTH.currentUser.id,
-          challenger_player_id: AUTH.currentProfile.player_id,
-          opponent_player_id: _playerId,
-          status: 'pending'
-        }).then(function(res) {
-          if (res.error) {
-            window.KSLT_APP.toast(I18N.t('common.error') + ': ' + (res.error.message || I18N.t('common.tryLater')));
-          } else {
-            window.KSLT_APP.toast(I18N.t('pd.chalSent'));
-          }
-        });
-      });
+    window.KSLT_VYZOV.создать(supabaseClient, _playerId, '').then(function (итог) {
+      window.KSLT_APP.toast(итог.ок ? I18N.t('pd.chalSent') : словоВызова(итог.ключ));
+    });
+  }
+
+  /* СЛОВА ОТКАЗОВ ВЫЗОВА. Дом отдаёт КЛЮЧ, слово по ключу — здесь: у
+     сайта свой словарь на три языка, у приложения свой. Восемь кодов
+     серверной функции сведены домом в семь ключей плюс общий. */
+  var СЛОВА_ВЫЗОВА = {
+    chalLogin:     ['pd.chalLogin', 'Войдите, чтобы вызвать'],
+    chalNoPlayer:  ['pd.chalLinkPlayer', 'Свяжите учётную запись с карточкой игрока'],
+    chalSelf:      ['pd.chalSelf', 'Себя вызвать нельзя'],
+    chalNotMember: ['pd.chalNotMember', 'Вызов доступен членам клуба'],
+    chalLimit:     ['pd.chalLimit', 'Слишком много висящих вызовов — дождитесь ответа'],
+    chalExists:    ['pd.chalExists', 'Вызов этому игроку уже отправлен'],
+    chalMatchSet:  ['pd.chalMatchSet', 'Матч с этим игроком уже назначен'],
+    chalError:     ['pd.chalError', 'Не удалось отправить вызов']
+  };
+
+  function словоВызова(ключ) {
+    var п = СЛОВА_ВЫЗОВА[ключ] || СЛОВА_ВЫЗОВА.chalError;
+    var v = I18N.t(п[0]);
+    return (v && v !== п[0]) ? v : п[1];
   }
 
   // ---- Init overlay back button ----

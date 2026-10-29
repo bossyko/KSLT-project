@@ -2186,26 +2186,22 @@
      * Раньше человек заполнял сообщение, жал «Отправить» и только тогда
      * упирался в запрет. Теперь кнопка сразу говорит, почему нельзя.
      */
+    /* ЗАПРОС «ВЫЗОВ УЖЕ ЕСТЬ» — ДОМ (29.10): js/kslt-vyzov.js. Он же
+       знает, что живыми считаются статусы `active` и `accepted`, и что
+       смотреть надо В ОБЕ СТОРОНЫ. Приложение смотрело в одну и по
+       статусу `pending`, которого в ограничении базы нет вовсе. */
     async function checkChallengeAllowed(player, btn) {
-        if (!client || !_myPlayerId || !player || _myPlayerId === player.id) return;
-        try {
-            var res = await client.from('challenges')
-                .select('status')
-                .or('and(challenger_player_id.eq.' + _myPlayerId + ',opponent_player_id.eq.' + player.id + ')' +
-                    ',and(challenger_player_id.eq.' + player.id + ',opponent_player_id.eq.' + _myPlayerId + ')')
-                .in('status', ['active', 'accepted'])
-                .limit(1);
-            var row = res.data && res.data[0];
-            if (!row) return;
+        if (!player) return;
+        var итог = await window.KSLT_VYZOV.занят(client, _myPlayerId, player.id);
+        if (!итог.есть) return;
 
-            // Кнопка не отключается, а меняет подпись и объясняет причину
-            // по нажатию. Отключённая на телефоне не объяснит ничего:
-            // подсказки по наведению там нет
-            _challengeBlocked = row.status === 'accepted' ? 'match' : 'pending';
-            btn.classList.add('pp-action-off');
-            btn.innerHTML = '<span class="pp-action-icon">\u23F3</span> ' +
-                (row.status === 'accepted' ? L.challengeBtnMatchSet : L.challengeBtnWaiting);
-        } catch(e) { /* не смогли спросить — кнопка останется живой, откажет база */ }
+        // Кнопка не отключается, а меняет подпись и объясняет причину
+        // по нажатию. Отключённая на телефоне не объяснит ничего:
+        // подсказки по наведению там нет
+        _challengeBlocked = итог.вид === 'матч' ? 'match' : 'pending';
+        btn.classList.add('pp-action-off');
+        btn.innerHTML = '<span class="pp-action-icon">\u23F3</span> ' +
+            (итог.вид === 'матч' ? L.challengeBtnMatchSet : L.challengeBtnWaiting);
     }
 
     function handleChallengeClick(player) {
@@ -2319,6 +2315,24 @@
         }
     }
 
+    /* СЛОВА ОТКАЗОВ ВЫЗОВА. Дом отдаёт КЛЮЧ, слово по ключу — здесь:
+       словарь сайта живёт на трёх языках в `L`. Лестница `else if` по
+       восьми кодам базы снята — коды разбирает дом. */
+    var СЛОВА_ВЫЗОВА = {
+        chalLogin:     'challengeError',
+        chalNoPlayer:  'challengeNoPlayer',
+        chalSelf:      'challengeSelf',
+        chalNotMember: 'challengeNotMember',
+        chalLimit:     'challengeLimit',
+        chalExists:    'challengePendingText',
+        chalMatchSet:  'challengeMatchPending',
+        chalError:     'challengeError'
+    };
+
+    function словоВызова(ключ) {
+        return L[СЛОВА_ВЫЗОВА[ключ] || 'challengeError'] || L.challengeError;
+    }
+
     async function submitChallenge(player, overlay) {
         if (_challengeSending) return;
 
@@ -2332,47 +2346,29 @@
         }
 
         try {
-            var session = await client.auth.getSession();
-            var token = session.data.session ? session.data.session.access_token : null;
-            if (!token) {
-                showChalToast(L.challengeError, 'error');
-                return;
-            }
-
-            var body = { opponent_player_id: _playerId };
-            if (msgEl && msgEl.value.trim()) {
-                body.message = msgEl.value.trim();
-            }
-
-            var res = await fetch(SUPABASE_URL + '/functions/v1/create-challenge', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify(body)
-            });
-
-            var data = await res.json();
-
-            if (res.ok && data.success) {
+            /* ТОКЕН ДОБЫВАЕТ ДОМ: раньше он брался здесь руками, и это
+               было одно из тридцати таких мест по продукту. Нет сессии —
+               дом отдаст `chalLogin`, и слово найдётся по ключу. */
+            /* ЗОВ ФУНКЦИИ И РАЗБОР КОДОВ ОТКАЗА — ДОМ (29.10):
+               js/kslt-vyzov.js. Здесь токен добывался руками, а восемь
+               кодов отказа разбирались лестницей `else if`. В приложении
+               вызов писался В ТАБЛИЦУ НАПРЯМУЮ статусом `pending`,
+               которого в ограничении базы нет вовсе, — то есть не
+               работал. Теперь зов и разбор одни на оба продукта. */
+            var итог = await window.KSLT_VYZOV.создать(client, _playerId,
+                (msgEl && msgEl.value) || '');
+            if (итог.ок) {
                 closeChalModal(overlay);
                 showChallengeAlert('\uD83D\uDD25 ' + L.challengeSent, L.challengeSentText);
-            } else if (data.error === 'already_pending') {
+            } else if (итог.ключ === 'chalExists') {
+                /* «Уже отправлен» — не отказ, а положение дел: окно
+                   закрываем и объясняем спокойно, как было. */
                 closeChalModal(overlay);
                 showChallengeAlert('\u26A0\uFE0F ' + L.challengePending, L.challengePendingText, 'warn');
             } else {
                 // Отказ по правилу — не сбой: человеку нужно понять, почему
                 // нельзя, а не увидеть «попробуйте позже»
-                var errMsg = L.challengeError;
-                if (data.error === 'too_many_pending') errMsg = L.challengeLimit;
-                else if (data.error === 'match_pending') errMsg = L.challengeMatchPending;
-                else if (data.error === 'not_member') errMsg = L.challengeNotMember;
-                else if (data.error === 'self_challenge') errMsg = L.challengeSelf;
-                else if (data.error === 'no_player') errMsg = L.challengeNoPlayer;
-                else if (data.error === 'opponent_not_found') errMsg = L.challengeNoPlayer;
-                showChalToast(errMsg, 'error');
+                showChalToast(словоВызова(итог.ключ), 'error');
             }
         } catch (e) {
             console.error('Challenge error:', e);

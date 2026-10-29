@@ -226,6 +226,34 @@
     API.зовФункции = позвать;
 
     /**
+     * ЗОВ ФУНКЦИИ ОТ ИМЕНИ ЧЕЛОВЕКА — с токеном, а не только с ключом.
+     *
+     * Часть функций решает, что человеку можно, и потому обязана знать,
+     * кто он: `create-challenge` спрашивает `auth.getUser()`.
+     *
+     * Замер 29.10: токен добывается руками в ТРИДЦАТИ местах по всему
+     * продукту. Свести все — отдельный кусок, записанный в трекер
+     * числом; здесь живёт один способ для тех, кто уже переехал.
+     */
+    API.зовОтИмени = function (client, имя, тело) {
+        return client.auth.getSession().then(function (сессия) {
+            var токен = (сессия.data && сессия.data.session)
+                ? сессия.data.session.access_token : '';
+            if (!токен) return { ok: false, error: 'not_logged_in' };
+            var н = настройки();
+            return fetch(н.адрес + '/functions/v1/' + имя, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': н.ключ,
+                    'Authorization': 'Bearer ' + токен
+                },
+                body: JSON.stringify(тело || {})
+            }).then(function (resp) { return разобрать(resp, имя); });
+        });
+    };
+
+    /**
      * ОТПРАВИТЬ КОД.
      *
      * ЯЗЫК ОБЯЗАТЕЛЕН И ПЕРЕДАЁТСЯ ПРОДУКТОМ: при регистрации профиля
