@@ -24,11 +24,29 @@
 (function (global) {
     'use strict';
 
+    /* СПИСОК ОКОН. Держится не руками: сторож `check-okna-prilozheniya.js`
+       обходит ВСЕ места, где ставится класс `open`, разбирает класс узла и
+       падает, если окно не накрыто этим списком и не названо исключением.
+       ПОЧЕМУ НЕ «ЛЮБОЙ УЗЕЛ С КЛАССОМ open»: класс `open` носит и
+       НЕ-ОКНО — `.tc-status.open` (корт «открыт», `app.css:911`). Дом,
+       объявивший такую плашку окном, увёл бы в неё фокус.
+
+       ДОБАВЛЕНО 29.10 ПО ЗАМЕРУ: кусок 230 накрыл восемь классов, а
+       окон, ставящих `open`, двадцать шесть — и СЕМЬ из них в список не
+       попали: возврат учётной записи, онбординг, смена пароля, вход
+       через Telegram, приглашения на игру и личные встречи (из двух
+       мест). Для диктора эти семь окон не существовали, Tab из них
+       уходил читать страницу под окном, Esc не работал.
+       СПИСОК, КОТОРЫЙ ДЕРЖИТСЯ РУКАМИ, ОТСТАЁТ — потому и сторож. */
     var ОКНА = '.td-overlay, .otp-overlay, .notif-overlay, .bottom-sheet-overlay,' +
-               ' .menu-overlay, .live-full, .nm-viewer, .msa-overlay';
-    var ПОДПИСЬ = 'h1, h2, h3, .bs-title, .td-title, .notif-title, .otp-title';
+               ' .menu-overlay, .live-full, .nm-viewer, .msa-overlay,' +
+               ' .ar-overlay, .onboarding-overlay, .otp-pw-overlay,' +
+               ' .tg-reg-overlay, .gi-overlay, .pd-h2h-modal';
+    var ПОДПИСЬ = 'h1, h2, h3, .bs-title, .td-title, .notif-title, .otp-title,' +
+                  ' .ar-title, .gi-title, .prof-sub-title, .tg-reg-title';
     var ЗАКРЫТЬ = '[data-okno-zakryt], .td-back, .notif-back, .otp-close,' +
-                  ' .live-back, .nm-viewer-close, .menu-close';
+                  ' .live-back, .nm-viewer-close, .menu-close,' +
+                  ' .ar-close, .gi-close, .prof-sub-back, .tg-reg-close';
     var ФОКУС = 'a[href], button:not([disabled]), input:not([disabled]),' +
                 ' select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
