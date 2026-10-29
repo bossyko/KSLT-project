@@ -4207,8 +4207,27 @@ select.prof-field-input { color: var(--text); }
   margin-bottom: 12px;
 }
 .prof-notif-header { font-size: 14px; font-weight: 700; color: var(--text); }
-.prof-notif-desc { font-size: 12px; color: var(--text-muted); margin: 2px 0 12px; }
-.prof-notif-toggles { display: flex; flex-direction: column; gap: 8px; }
+/* `.prof-notif-desc` СНЯТ (кусок A2.3): подписи под названием раздела
+   рисовала прежняя редакция окна, у сайта их нет, а ОРИЕНТИР ПО
+   ФУНКЦИОНАЛУ — САЙТ. Проверено грепом по `mobile/www/js` и разметке:
+   класс не ставит никто. */
+.prof-notif-toggles { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* ГАШЕНИЕ КАНАЛА БЕЗ ПРИВЯЗАННОГО БОТА (кусок A2.3). Правило было
+   только у сайта (`.db-notif-off`), в приложении его не было вовсе:
+   человек включал телеграм и ждал сообщений, которым неоткуда взяться. */
+.prof-notif-off { opacity: 0.45; cursor: not-allowed; }
+
+.prof-notif-hint {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
 .prof-notif-toggle {
   display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; font-size: 14px; color: var(--text-sec);

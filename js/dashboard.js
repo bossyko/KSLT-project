@@ -294,7 +294,8 @@
         notifTournaments: 'Tournaments',
         notifMatches: 'Matches',
         notifChallenges: 'Challenges',
-        notifSite: 'Site and app',
+        notifSecurity: 'Security',
+        notifGeneral: 'General',
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Notification settings saved',
@@ -606,7 +607,8 @@
         notifTournaments: 'Мелдештер',
         notifMatches: 'Матчтар',
         notifChallenges: 'Сынактар',
-        notifSite: 'Сайт и приложение',
+        notifSecurity: 'Коопсуздук',
+        notifGeneral: 'Жалпы',
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Билдирме жөндөөлөрү сакталды',
@@ -915,7 +917,8 @@
         notifTournaments: 'Турниры',
         notifMatches: 'Матчи',
         notifChallenges: 'Вызовы',
-        notifSite: 'Сайт и приложение',
+        notifSecurity: 'Безопасность',
+        notifGeneral: 'Общие',
         notifTelegram: 'Telegram',
         notifEmail: 'Email',
         notifSaved: 'Настройки уведомлений сохранены',
@@ -5705,19 +5708,22 @@
     }
 
     // ---- Notification Preferences ----
-    var NOTIF_CATS = ['membership', 'tournaments', 'matches', 'challenges'];
-    // Колокольчик показывал всё подряд: переключатели управляли только
-    // Telegram и почтой, а отключить уведомления о чужих баттлах было нечем
-    var NOTIF_CHANNELS = ['site', 'tg', 'email'];
+    /* ИМЕНА КАНАЛОВ И РАЗДЕЛОВ И ПРАВИЛО «ВКЛЮЧЕНО ЛИ» — ДОМ (кусок
+       A2.3): js/kslt-uvedomleniya.js. Здесь стояло ТРИ канала, и один из
+       них — `site` — НЕ СПРАШИВАЕТ НИ ОДНА из шестнадцати серверных
+       функций: человек выключал ползунок, и ничего не менялось. Столбец
+       снят. И разделов здесь было ЧЕТЫРЕ против шести серверных:
+       `security` (письма о входе с нового устройства) и `general`
+       выключить было нечем вовсе. */
+    function NOTIF_CATS() { return window.KSLT_UVEDOMLENIYA.РАЗДЕЛЫ; }
+    function NOTIF_CHANNELS() { return window.KSLT_UVEDOMLENIYA.КАНАЛЫ; }
 
     function getNotifyPrefs() {
-        var p = window.ksltProfile;
-        return (p && p.notify_preferences) ? p.notify_preferences : {};
+        return window.KSLT_UVEDOMLENIYA.прочитать(window.ksltProfile);
     }
 
     function isNotifOn(prefs, channel, cat) {
-        if (!prefs || !prefs[channel]) return true;
-        return prefs[channel][cat] !== false;
+        return window.KSLT_UVEDOMLENIYA.включено(prefs, channel, cat);
     }
 
     function buildNotifySection() {
@@ -5726,20 +5732,23 @@
             membership: L.notifMembership,
             tournaments: L.notifTournaments,
             matches: L.notifMatches,
-            challenges: L.notifChallenges
+            challenges: L.notifChallenges,
+            security: L.notifSecurity,
+            general: L.notifGeneral
         };
+        var chLabels = { tg: L.notifTelegram, email: L.notifEmail };
 
         // Без подключённого бота столбец телеграма бесполезен: человек включал
         // ползунок и ждал сообщений, которым неоткуда взяться. Гасим его и
         // говорим, что делать.
-        var tgLinked = !!(window.ksltProfile && window.ksltProfile.telegram_chat_id);
+        var tgLinked = window.KSLT_UVEDOMLENIYA.каналДоступен('tg', window.ksltProfile);
 
         var rows = '';
-        NOTIF_CATS.forEach(function(cat) {
+        NOTIF_CATS().forEach(function(cat) {
             var cells = '';
-            NOTIF_CHANNELS.forEach(function(ch) {
+            NOTIF_CHANNELS().forEach(function(ch) {
                 var on = isNotifOn(prefs, ch, cat);
-                var off = (ch === 'tg' && !tgLinked);
+                var off = !window.KSLT_UVEDOMLENIYA.каналДоступен(ch, window.ksltProfile);
                 cells +=
                     '<td class="db-notify-cell">' +
                         '<label class="db-notif-toggle' + (off ? ' db-notif-off' : '') + '">' +
@@ -5761,9 +5770,9 @@
             '<table class="db-notify-table">' +
                 '<thead><tr>' +
                     '<th></th>' +
-                    '<th class="db-notify-head">' + L.notifSite + '</th>' +
-                    '<th class="db-notify-head">' + L.notifTelegram + '</th>' +
-                    '<th class="db-notify-head">' + L.notifEmail + '</th>' +
+                    NOTIF_CHANNELS().map(function(ch) {
+                        return '<th class="db-notify-head">' + chLabels[ch] + '</th>';
+                    }).join('') +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
@@ -5779,21 +5788,19 @@
         var cat = cb.dataset.cat;
         var on = cb.checked;
 
-        var prefs = getNotifyPrefs();
-        if (!prefs[ch]) prefs[ch] = {};
-        prefs[ch][cat] = on;
+        /* ПЕРЕКЛЮЧЕНИЕ — ДОМ: отдаёт НОВЫЕ настройки, прежний слепок
+           остаётся целым, и возвращать при неудаче есть что. */
+        var было = getNotifyPrefs();
+        var prefs = window.KSLT_UVEDOMLENIYA.переключить(было, ch, cat, on);
 
         // Optimistic update
         if (window.ksltProfile) window.ksltProfile.notify_preferences = prefs;
 
         var res = await client.from('profiles').update({ notify_preferences: prefs }).eq('id', window.ksltUser.id);
         if (res.error) {
-            // Revert
+            // Revert — возвращаем ПРЕЖНИЙ слепок, а не правим новый
             cb.checked = !on;
-            if (window.ksltProfile) {
-                prefs[ch][cat] = !on;
-                window.ksltProfile.notify_preferences = prefs;
-            }
+            if (window.ksltProfile) window.ksltProfile.notify_preferences = было;
             showMessage('settingsMessage', res.error.message, true);
         } else {
             showMessage('settingsMessage', L.notifSaved, false);

@@ -72,7 +72,10 @@ Deno.serve(async (req) => {
 
       // 2. Личные данные, которые не нужны ни турнирам, ни рейтингу
       await db.from('loyalty_transactions').delete().eq('profile_id', profile.id)
-      await db.from('notification_preferences').delete().eq('profile_id', profile.id)
+      // ЗОВ СНЯТ (кусок A2.3, 29.10): таблицы `notification_preferences`
+      // в базе нет вовсе, а результат этого зова здесь даже не
+      // проверялся — ТИХОЕ РАСХОЖДЕНИЕ. Настройки живут в
+      // `profiles.notify_preferences` и уходят вместе с профилем.
 
       // 3. Сама учётная запись. Удаление профиля запускает триггер, который
       //    складывает ФИО и почту в журнал удалённых — по нему видно, кто и

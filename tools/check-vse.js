@@ -252,7 +252,9 @@ const КУСКИ = [
     ['заявка на турнир — один дом',
      'check-zayavka.js', 'check-zayavka-otkat.js'],
     ['вход — один дом',
-     'check-vhod.js', 'check-vhod-otkat.js']
+     'check-vhod.js', 'check-vhod-otkat.js'],
+    ['уведомления — экран не расходится с сервером',
+     'check-uvedomleniya.js', 'check-uvedomleniya-otkat.js']
 ];
 
 function прогнать(файл) {

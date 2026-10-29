@@ -1509,82 +1509,103 @@
     });
   }
 
+  /**
+   * НАСТРОЙКИ УВЕДОМЛЕНИЙ.
+   *
+   * ПЕРЕПИСАНО КУСКОМ A2.3. Здесь было написано вот что: чтение и запись
+   * в таблицу `notification_preferences`, КОТОРОЙ В БАЗЕ НЕТ ВОВСЕ —
+   * проверено запросом 29.10, «relation does not exist», ни в одной
+   * схеме. Чтение возвращало ошибку, данных не было, и из-за
+   * `prefs[key] !== false` все восемь ползунков показывались
+   * ВКЛЮЧЁННЫМИ. Человек трогал любой — запись падала, и ему
+   * показывали «ошибка сохранения». А перед падением приложение успевало
+   * спросить системное разрешение на пуши: разрешение взяли, обещание не
+   * исполнили.
+   *
+   * И имена не совпадали ни в чём: каналы `telegram`/`email` вместо
+   * `tg`/`email`, разделы `tournament`/`payment`/`system`/`marketing`
+   * вместо шести, которые спрашивает сервер.
+   *
+   * Теперь всё как на сайте: `profiles.notify_preferences`, имена и
+   * правило «включено ли» — из дома `js/kslt-uvedomleniya.js`.
+   */
   function showNotifications() {
+    var U = window.KSLT_UVEDOMLENIYA;
     var ov = openSubOverlay(I18N.t('profile.notifications'), '<div class="loading-center"><div class="spinner"></div></div>');
     var content = ov.querySelector('.prof-sub-content');
 
-    supabaseClient.from('notification_preferences')
-      .select('*')
-      .eq('profile_id', _profile.id)
-      .then(function(r) {
-        var prefs = {};
-        if (r.data) {
-          r.data.forEach(function(p) {
-            prefs[p.category + '_' + p.channel] = !p.opted_out;
-          });
-        }
+    var настройки = U.прочитать(_profile);
 
-        var categories = [
-          { key: 'tournament', label: I18N.t('profile.notifTournaments'), desc: I18N.t('profile.notifTournamentsDesc') },
-          { key: 'payment', label: I18N.t('profile.notifPayments'), desc: I18N.t('profile.notifPaymentsDesc') },
-          { key: 'system', label: I18N.t('profile.notifSystem'), desc: I18N.t('profile.notifSystemDesc') },
-          { key: 'marketing', label: I18N.t('profile.notifMarketing'), desc: I18N.t('profile.notifMarketingDesc') }
-        ];
-        var channels = [
-          { key: 'telegram', label: 'Telegram' },
-          { key: 'email', label: 'Email' }
-        ];
+    var имена = {
+      tournaments: I18N.t('profile.notifTournaments'),
+      challenges:  I18N.t('profile.notifChallenges'),
+      membership:  I18N.t('profile.notifMembership'),
+      matches:     I18N.t('profile.notifMatches'),
+      security:    I18N.t('profile.notifSecurity'),
+      general:     I18N.t('profile.notifGeneral')
+    };
+    var каналы = { tg: I18N.t('profile.notifTelegram'), email: I18N.t('profile.notifEmail') };
 
-        var html = '';
-        categories.forEach(function(cat) {
-          html += '<div class="prof-notif-card">';
-          html += '<div class="prof-notif-header">' + esc(cat.label) + '</div>';
-          html += '<div class="prof-notif-desc">' + esc(cat.desc) + '</div>';
-          html += '<div class="prof-notif-toggles">';
-          channels.forEach(function(ch) {
-            var key = cat.key + '_' + ch.key;
-            var checked = prefs[key] !== false; // default on
-            html += '<label class="prof-notif-toggle">';
-            html += '<span>' + ch.label + '</span>';
-            html += '<input type="checkbox" class="prof-notif-cb" data-category="' + cat.key + '" data-channel="' + ch.key + '"' + (checked ? ' checked' : '') + '>';
-            html += '<span class="prof-toggle-switch"></span>';
-            html += '</label>';
-          });
-          html += '</div></div>';
-        });
+    var html = '';
+    U.РАЗДЕЛЫ.forEach(function(раздел) {
+      html += '<div class="prof-notif-card">';
+      html += '<div class="prof-notif-header">' + esc(имена[раздел]) + '</div>';
+      html += '<div class="prof-notif-toggles">';
+      U.КАНАЛЫ.forEach(function(канал) {
+        var вкл = U.включено(настройки, канал, раздел);
+        /* БЕЗ ПРИВЯЗАННОГО БОТА СТОЛБЕЦ ТЕЛЕГРАМА БЕСПОЛЕЗЕН: человек
+           включал ползунок и ждал сообщений, которым неоткуда взяться.
+           Это правило было только у сайта, здесь его не было вовсе. */
+        var гасить = !U.каналДоступен(канал, _profile);
+        html += '<label class="prof-notif-toggle' + (гасить ? ' prof-notif-off' : '') + '">';
+        html += '<span>' + esc(каналы[канал]) + '</span>';
+        html += '<input type="checkbox" class="prof-notif-cb"' +
+                ' data-razdel="' + esc(раздел) + '" data-kanal="' + esc(канал) + '"' +
+                (вкл && !гасить ? ' checked' : '') + (гасить ? ' disabled' : '') + '>';
+        html += '<span class="prof-toggle-switch"></span>';
+        html += '</label>';
+      });
+      html += '</div></div>';
+    });
 
-        content.innerHTML = html;
+    if (!U.каналДоступен('tg', _profile)) {
+      html += '<div class="prof-notif-hint">' + esc(I18N.t('profile.notifTgOff')) + '</div>';
+    }
 
-        // Toggle handlers
-        content.querySelectorAll('.prof-notif-cb').forEach(function(cb) {
-          cb.addEventListener('change', function() {
-            var category = cb.getAttribute('data-category');
-            var channel = cb.getAttribute('data-channel');
-            var optedOut = !cb.checked;
-            /* ВКЛЮЧИЛ УВЕДОМЛЕНИЕ — ЗНАЧИТ ХОЧЕТ ЕГО ПОЛУЧАТЬ (Ю10,
-               кусок 230). Это второе место, где человек приходит за
-               уведомлениями сам; спрашивать разрешение здесь честно, а
-               на запуске — нет. Выключил — не спрашиваем. */
-            if (!optedOut && window.KSLT_PUSH && window.KSLT_PUSH.спросить) {
+    content.innerHTML = html;
+
+    content.querySelectorAll('.prof-notif-cb').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var раздел = cb.getAttribute('data-razdel');
+        var канал = cb.getAttribute('data-kanal');
+        var вкл = cb.checked;
+
+        /* ВКЛЮЧИЛ УВЕДОМЛЕНИЕ — ЗНАЧИТ ХОЧЕТ ЕГО ПОЛУЧАТЬ (Ю10, кусок
+           230). Разрешение на пуши спрашиваем ТОЛЬКО ПОСЛЕ успешной
+           записи: прежде спрашивали до неё, запись падала, и человек
+           отдавал разрешение ни за что. */
+        var было = U.прочитать(_profile);
+        var стало = U.переключить(было, канал, раздел, вкл);
+        _profile.notify_preferences = стало;
+
+        supabaseClient.from('profiles')
+          .update({ notify_preferences: стало })
+          .eq('id', _profile.id)
+          .then(function(r) {
+            if (r.error) {
+              cb.checked = !вкл;
+              _profile.notify_preferences = было;
+              window.KSLT_APP.toast(I18N.t('profile.savedErr'));
+              return;
+            }
+            if (вкл && window.KSLT_PUSH && window.KSLT_PUSH.спросить) {
               window.KSLT_PUSH.спросить();
             }
-
-            supabaseClient.from('notification_preferences')
-              .upsert({
-                profile_id: _profile.id,
-                category: category,
-                channel: channel,
-                opted_out: optedOut
-              }, { onConflict: 'profile_id,category,channel' })
-              .then(function(r) {
-                if (r.error) window.KSLT_APP.toast(I18N.t('profile.savedErr'));
-              });
           });
-        });
       });
+    });
   }
 
-  // ---- Password change ----
   function showPasswordChange() {
     var html = '<div class="prof-edit-form">';
     html += profField(I18N.t('profile.newPass'), 'profNewPass', '', 'password');

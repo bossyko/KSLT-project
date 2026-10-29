@@ -663,14 +663,20 @@
     'profile.fileTooLarge':   { ru: 'Файл слишком большой (макс. 2MB)', en: 'File too large (max 2MB)', kg: 'Файл өтө чоң (макс. 2MB)' },
     'profile.avatarOk':       { ru: 'Аватар обновлён', en: 'Avatar updated', kg: 'Аватар жаңыланды' },
     'profile.avatarErr':      { ru: 'Ошибка загрузки', en: 'Upload error', kg: 'Жүктөө катасы' },
-    'profile.notifTournaments':    { ru: 'Турниры', en: 'Tournaments', kg: 'Мелдештер' },
-    'profile.notifTournamentsDesc':{ ru: 'Напоминания о турнирах', en: 'Tournament reminders', kg: 'Мелдеш эскертмелери' },
-    'profile.notifPayments':       { ru: 'Платежи', en: 'Payments', kg: 'Төлөмдөр' },
-    'profile.notifPaymentsDesc':   { ru: 'Напоминания об оплате', en: 'Payment reminders', kg: 'Төлөм эскертмелери' },
-    'profile.notifSystem':         { ru: 'Система', en: 'System', kg: 'Система' },
-    'profile.notifSystemDesc':     { ru: 'Системные уведомления', en: 'System notifications', kg: 'Системалык билдирүүлөр' },
-    'profile.notifMarketing':      { ru: 'Маркетинг', en: 'Marketing', kg: 'Маркетинг' },
-    'profile.notifMarketingDesc':  { ru: 'Новости и акции', en: 'News & promotions', kg: 'Жанылыктар жана акциялар' },
+    /* РАЗДЕЛЫ НАЗВАНЫ КАК У СЕРВЕРА (кусок A2.3). Было четыре своих
+       имени — `tournament`, `payment`, `system`, `marketing`, — и ни
+       одно не совпадало с тем, что спрашивают шестнадцать серверных
+       функций. Теперь шесть, и ровно те. Подписи сняты: у сайта их нет,
+       а ОРИЕНТИР ПО ФУНКЦИОНАЛУ — САЙТ. */
+    'profile.notifTournaments': { ru: 'Турниры', en: 'Tournaments', kg: 'Мелдештер' },
+    'profile.notifChallenges':  { ru: 'Вызовы', en: 'Challenges', kg: 'Сынактар' },
+    'profile.notifMembership':  { ru: 'Членство', en: 'Membership', kg: 'Мүчөлүк' },
+    'profile.notifMatches':     { ru: 'Матчи', en: 'Matches', kg: 'Матчтар' },
+    'profile.notifSecurity':    { ru: 'Безопасность', en: 'Security', kg: 'Коопсуздук' },
+    'profile.notifGeneral':     { ru: 'Общие', en: 'General', kg: 'Жалпы' },
+    'profile.notifTelegram':    { ru: 'Telegram', en: 'Telegram', kg: 'Telegram' },
+    'profile.notifEmail':       { ru: 'Email', en: 'Email', kg: 'Email' },
+    'profile.notifTgOff':       { ru: 'Telegram-бот не подключён — сюда ничего не придёт. Подключить его можно в Профиле.', en: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.', kg: 'Telegram-ботко байланган эмес — билдирүүлөр келбейт. Профилден байласаңыз болот.' },
     'profile.newPass':        { ru: 'Новый пароль', en: 'New password', kg: 'Жаңы сырсөз' },
     'profile.confirmPass':    { ru: 'Подтверждение', en: 'Confirm', kg: 'Ырастоо' },
     'profile.passRule':       { ru: 'Минимум 6 символов', en: 'Min 6 characters', kg: 'Жок дегенде 6 белги' },
