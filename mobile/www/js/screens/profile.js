@@ -438,6 +438,7 @@
     bindRowClick('profNotifyRow', showNotifications);
     bindRowClick('profPasswordRow', showPasswordChange);
     bindRowClick('profTelegramRow', showTelegramConnect);
+    bindRowClick('profDocsRow', showDocuments);
     bindRowClick('profDeleteRow', showDeleteAccount);
   }
 
@@ -1505,6 +1506,52 @@
       input.addEventListener('change', function() {
         var label = (root || document).querySelector('.prof-show-label[data-for="' + input.id + '"]');
         if (label) label.textContent = I18N.t(input.checked ? 'profile.visibleToClub' : 'profile.hiddenFromAll');
+      });
+    });
+  }
+
+  /**
+   * ДОКУМЕНТЫ КЛУБА.
+   *
+   * Список и адреса — дом `js/kslt-dokumenty.js`: адрес сайта берётся у
+   * `KSLT_SAYT`, а не вписывается здесь, и язык выбирает продукт.
+   *
+   * ОТКРЫВАЕМ СИСТЕМНЫМ БРАУЗЕРОМ (`_system`), а не внутри накладки:
+   * документ длинный, его читают, копируют и показывают юристу, и держать
+   * его в окне приложения без адресной строки — хуже. Этот приём в
+   * приложении уже есть (`screens/home.js:1312`).
+   */
+  function showDocuments() {
+    var D = window.KSLT_DOKUMENTY;
+    var I = window.KSLT_I18N;
+    var язык = (I && I.lang) || 'ru';
+    var имена = {
+      privacy: I18N.t('profile.docPrivacy'),
+      offer:   I18N.t('profile.docOffer'),
+      rules:   I18N.t('profile.docRules'),
+      terms:   I18N.t('profile.docTerms')
+    };
+
+    var список = D ? D.все(язык) : [];
+    var html = '';
+    список.forEach(function (д) {
+      html += '<div class="profile-row prof-doc-row" data-doc="' + esc(д.адрес) + '">' +
+        '<div class="profile-row-text"><div class="profile-row-label">' +
+          esc(имена[д.имя] || д.страница) + '</div></div>' +
+        '<span class="profile-row-arrow">›</span>' +
+      '</div>';
+    });
+    if (!список.length) {
+      html = '<div class="empty-state"><div class="empty-title">' +
+             esc(I18N.t('profile.savedErr')) + '</div></div>';
+    } else {
+      html += '<div class="prof-notif-hint">' + esc(I18N.t('profile.docOpens')) + '</div>';
+    }
+
+    var ov = openSubOverlay(I18N.t('profile.documents'), html);
+    ov.querySelectorAll('.prof-doc-row').forEach(function (строка) {
+      строка.addEventListener('click', function () {
+        window.open(строка.getAttribute('data-doc'), '_system');
       });
     });
   }

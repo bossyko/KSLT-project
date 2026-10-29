@@ -212,13 +212,17 @@
       });
   };
 
-  // Reset password (legacy — kept for fallback)
-  AUTH.resetPassword = function(email) {
-    var siteUrl = 'https://bossyko.github.io/KSLT-project';
-    return supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: siteUrl + '/pages/reset-password.html'
-    });
-  };
+  /* СБРОС ПАРОЛЯ ССЫЛКОЙ — СНЯТ 29.10, И ВОТ ПОЧЕМУ, ЧИСЛАМИ.
+     Здесь был ТРЕТИЙ АДРЕС САЙТА — `https://bossyko.github.io/KSLT-project`
+     — вписанный строкой, при том что одно определение адреса завёл шаг
+     A3.4 (`KSLT_SAYT.адрес`). И вёл он на `pages/reset-password.html`,
+     КОТОРОЙ В РЕПОЗИТОРИИ НЕТ ВОВСЕ: человек, нажавший ссылку из письма,
+     попадал на несуществующую страницу чужого адреса.
+     Зовов у функции было НОЛЬ (проверено грепом по `mobile/www`): пароль
+     в приложении меняют кодом через `AUTH.sendOtp('forgot_password', …)`,
+     и это работает. Функция стояла заряженная и ждала первого зовущего.
+     ПОМЕЧЕНО «legacy, kept for fallback» — но запасной ход, ведущий в
+     никуда, хуже отсутствующего. */
 
   // Send OTP code
   /* ЗОВ `send-otp` — ДОМ (кусок A3.7е). ДВЕ БЕДЫ ЗАКРЫТЫ ЗДЕСЬ:

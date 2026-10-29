@@ -258,7 +258,9 @@ const КУСКИ = [
     ['дата рождения — необязательна',
      'check-data-rozhdeniya.js', 'check-data-rozhdeniya-otkat.js'],
     ['окна приложения — ни одно без оснастки',
-     'check-okna-prilozheniya.js', 'check-okna-prilozheniya-otkat.js']
+     'check-okna-prilozheniya.js', 'check-okna-prilozheniya-otkat.js'],
+    ['документы достижимы из приложения',
+     'check-dokumenty-prilozheniya.js', 'check-dokumenty-prilozheniya-otkat.js']
 ];
 
 function прогнать(файл) {
