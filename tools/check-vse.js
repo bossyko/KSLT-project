@@ -264,7 +264,9 @@ const КУСКИ = [
     ['тай-брейк вписывает игрок',
      'check-tay-breyk.js', 'check-tay-breyk-otkat.js'],
     ['вызов на баттл — один дом',
-     'check-vyzov.js', 'check-vyzov-otkat.js']
+     'check-vyzov.js', 'check-vyzov-otkat.js'],
+    ['значки у имени — один дом',
+     'check-znachki.js', 'check-znachki-otkat.js']
 ];
 
 function прогнать(файл) {

@@ -78,8 +78,9 @@
     }
 
     // Badge data loaded from Supabase (player_id → [{badge_id, icon, name}])
-    var _badgesByPlayer = {};
-    var _badgeDefsMap = {};
+    /* ОДИН СЛЕПОК ВМЕСТО ДВУХ КАРТ (29.10): значки игроков и определения
+       живут вместе, их отдаёт дом `js/kslt-znachki.js`. */
+    var _значки = { поИгрокам: {}, определения: {} };
 
     // ========================================
     // HELPERS
@@ -187,16 +188,14 @@
     }
 
     function getBadgeTooltip(badgeId) {
-        var def = _badgeDefsMap[badgeId];
-        if (!def) return badgeId;
-        return isEnPage() ? (def.name_en || def.name) : (isKgPage() ? (def.name_kg || def.name) : def.name);
+        return window.KSLT_ZNACHKI.название(_значки, badgeId,
+            isEnPage() ? 'en' : (isKgPage() ? 'kg' : 'ru'));
     }
 
     function getPlayerBadgesHtml(playerId, maxCount) {
-        var badges = _badgesByPlayer[playerId];
-        if (!badges || badges.length === 0) return '';
+        var show = window.KSLT_ZNACHKI.первые(_значки, playerId, maxCount);
+        if (!show.length) return '';
         var html = '';
-        var show = badges.slice(0, maxCount || 5);
         for (var i = 0; i < show.length; i++) {
             var b = show[i];
             /* ЗНАЧОК ЭКРАНИРУЕТСЯ НАРАВНЕ С ПОДПИСЬЮ. Подпись здесь
@@ -307,41 +306,14 @@
     // LOAD BADGES FROM SUPABASE
     // ========================================
 
+    /* ЗАГРУЗКА ЗНАЧКОВ — ДОМ (29.10): js/kslt-znachki.js. Здесь жили два
+       запроса и две карты, а в приложении значков у имени не было ВОВСЕ.
+       Сколько показывать, в каком порядке и как зовётся значок на языке
+       страницы — три правила, которые легко разъехать. */
     async function loadBadgesFromSupabase() {
-        if (!window.supabaseClient) return;
-        var client = window.supabaseClient;
-        try {
-            // Load badge definitions
-            var defsRes = await client.from('badge_definitions').select('*');
-            if (defsRes.data) {
-                defsRes.data.forEach(function(d) { _badgeDefsMap[d.id] = d; });
-            }
-            // Load all player badges
-            var pbRes = await client.from('player_badges')
-                .select('player_id, badge_id, badge:badge_definitions(icon)')
-                .order('earned_at', { ascending: true });
-            if (pbRes.data) {
-                pbRes.data.forEach(function(pb) {
-                    if (!_badgesByPlayer[pb.player_id]) _badgesByPlayer[pb.player_id] = [];
-                    _badgesByPlayer[pb.player_id].push({
-                        badge_id: pb.badge_id,
-                        icon: pb.badge ? pb.badge.icon : ''
-                    });
-                });
-            }
-        } catch(e) {
-            console.warn('[KSLT] badges load error:', e);
-        }
+        _значки = await window.KSLT_ZNACHKI.загрузить(window.supabaseClient);
     }
 
-    // ========================================
-    // SUPABASE DATA LOADER
-    // ========================================
-
-    /**
-     * Данные рейтинга живут в отдельном файле: их же читает блок «Топ
-     * рейтинга» на главной. Одна логика на двоих — иначе однажды разойдутся.
-     */
     async function loadFromSupabase() {
         if (!window.KSLT_RANKINGS) return null;
         return window.KSLT_RANKINGS.load();

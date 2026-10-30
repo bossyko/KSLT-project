@@ -1,212 +1,114 @@
-/**
- * ДОКАЗАТЕЛЬСТВО ЗАМОРОЗКИ ЗНАЧКОВ ОТКАТОМ. Работаем на КОПИИ.
- *   node tools/check-znachki-otkat.js
- */
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+#!/usr/bin/env node
+/** ПРУВЕР К СТОРОЖУ ЗНАЧКОВ (29.10). */
+const fs = require('fs'); const os = require('os'); const path = require('path');
 const { execFileSync } = require('child_process');
-
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['css/tokens.css', 'css/style.css', 'js/home-badges.js'];
-const исходник = {};
-ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
-const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-znachki.js'), 'utf8');
+const ДОМ = 'js/kslt-znachki.js';
+const ДОМ_П = 'mobile/www/js/kslt-znachki.js';
+const САЙТ = 'js/players.js';
+const ПРИЛ = 'mobile/www/js/screens/rating.js';
 
 const ОТКАТЫ = [
-['вернуть подписи значков лайм', 'css/style.css',
- '    font-weight: var(--fw-bold);\n    color: var(--text-primary);\n}\n\n.badge-cta-desc',
- '    font-weight: var(--fw-bold);\n    color: var(--accent);\n}\n\n.badge-cta-desc',
- 'подпись значка нейтральная, а не лаймовая'],
+  { имя: 'из дома убрано понятие', ждём: 'дом объявлен и отдаёт все четыре понятия',
+    файл: ДОМ, было: '    API.название = function (слепок, значокId, язык) {',
+    станет: '    API.подпись = function (слепок, значокId, язык) {' },
 
-['вернуть плитке самодельные поля 12/10', 'css/style.css',
- '    padding: var(--space-3);          /* 12 — Padding=Dense */',
- '    padding: 12px 10px;',
- 'плитка — Padding=Dense 12, одна плотность на все виды'],
+  { имя: 'копии дома разошлись', ждём: 'копии дома побайтово равны',
+    файл: ДОМ_П, было: '    var API = global.KSLT_ZNACHKI = {};',
+    станет: '    var API = global.KSLT_ZNACHKI = {}; /* уехало */' },
 
-['снять с плитки радиус компонента', 'css/style.css',
- '    border-radius: var(--radius-lg);\n    padding: var(--space-3);',
- '    border-radius: 12px;\n    padding: var(--space-3);',
- 'плитка держит остальное от компонента Card'],
+  { имя: 'число значков в строке изменено', ждём: 'сколько значков в строке — одно число',
+    файл: ДОМ, было: '    API.СКОЛЬКО = 5;', станет: '    API.СКОЛЬКО = 8;' },
 
-['вернуть перебивке clamp и вес раздела', 'css/style.css',
- '.badges-cta-text h2 {\n    font-size: var(--fs-lg);\n    font-weight: var(--fw-bold);',
- '.badges-cta-text h2 {\n    font-size: clamp(1.05rem, 1.8vw, 1.25rem);\n    font-weight: 800;',
- 'перебивка набрана ступенью h3, а не голосом раздела'],
+  { имя: 'порядок стал задаваться не базой', ждём: 'порядок задаёт БАЗА, а не продукт',
+    файл: ДОМ, было: ".order('earned_at', { ascending: true });",
+    станет: ".order('badge_id', { ascending: false });" },
 
-/* ПЕРЕЯКОРЕНО 24.09: якорь держался на СОСЕДЯХ по списку селекторов, и
-   список вырос — блоку «Станьте спонсором» добавили .sp-offer h2. Держимся
-   за один свой селектор и вставляем перебивку перед ним. */
-['вернуть перебивку в правило заголовков разделов', 'css/style.css',
- '    section > h2 {\n        font-size: var(--fs-lg);   /* 21 */',
- '    .badges-cta-text h2,\n    section > h2 {\n        font-size: var(--fs-lg);   /* 21 */',
- 'перебивка НЕ входит в правило заголовков разделов'],
+  { имя: 'добавлен третий запрос', ждём: 'грузится двумя запросами, а не по запросу на игрока',
+    файл: ДОМ, было: '                var поИгрокам = {};',
+    станет: "                client.from('players').select('id');\n                var поИгрокам = {};" },
 
-['отодвинуть переключение перебивки с 768 на 640', 'css/style.css',
- '@media (max-width: 768px) {\n    .badges-cta-text h2 { font-size: var(--fs-base); }',
- '@media (max-width: 639px) {\n    .badges-cta-text h2 { font-size: var(--fs-base); }',
- 'перебивка падает на ступень ниже там же, где заголовок раздела (768)'],
+  { имя: 'бросок на месте перестал ловиться',
+    ждём: 'дом не бросает ни при отказе, ни при броске на месте',
+    файл: ДОМ, было: '        } catch (e) {\n            return Promise.resolve({ поИгрокам: {}, определения: определения });\n        }',
+    станет: '        } catch (e) {\n            throw e;\n        }' },
 
-['уронить подзаголовок обратно на 16 — пара схлопывается', 'css/style.css',
- '    .badges-cta-text p { font-size: var(--fs-sm); }',
- '    .badges-cta-text p { font-size: var(--fs-base); }',
- 'подзаголовок на ступень НИЖЕ заголовка перебивки'],
+  { имя: 'в дом попала разметка', ждём: 'дом не знает ни разметки, ни экранирования',
+    файл: ДОМ, было: '        return все.slice(0, n);',
+    станет: "        return все.slice(0, n).map(function (з) { return '<span>' + з.icon; });" },
 
-/* ДВА ОТКАТА НА БЕДУ, КОТОРУЮ ПОЙМАЛ PLAYWRIGHT 24.09, А НЕ ЭТА ПРОВЕРКА.
-   Первый воспроизводит её дословно: подзаголовок уезжает обратно на 640,
-   заголовок остаётся на 768, и в полосе 641-768 оба сидят на 16. */
-['развести пару по разным границам: подзаголовок обратно на 640', 'css/style.css',
- '    .badges-cta-text p { font-size: var(--fs-sm); }\n}\n\n/* ТЕЛЕФОН.',
- '}\n\n/* ТЕЛЕФОН.',
- 'заголовок и подзаголовок перебивки падают на ОДНОЙ границе'],
+  { имя: 'сайт перестал звать дом', ждём: 'у сайта дом зовётся',
+    файл: САЙТ, было: 'KSLT_ZNACHKI', станет: 'KSLT_CHUZHIE', всеВхождения: true },
 
-['завести подзаголовку третью границу', 'css/style.css',
- '/* ТЕЛЕФОН. Подпись значка',
- '@media (max-width: 480px) { .badges-cta-text p { font-size: var(--fs-xs); } }\n\n/* ТЕЛЕФОН. Подпись значка',
- 'кегль подзаголовка перебивки задан ровно дважды: база и одна граница'],
+  { имя: 'приложение перестало звать дом', ждём: 'у приложения дом зовётся',
+    файл: ПРИЛ, было: 'KSLT_ZNACHKI', станет: 'KSLT_CHUZHIE', всеВхождения: true },
 
-['вернуть подписи значка кегль 11 на телефоне', 'css/style.css',
- '    .badge-cta-name {\n        font-size: var(--fs-sm);\n        line-height: 1.1;',
- '    .badge-cta-name {\n        font-size: var(--fs-2xs);\n        line-height: 1.1;',
- 'подпись значка на телефоне — телефонная ступень card title'],
+  { имя: 'сайт снова грузит значки сам', ждём: 'у сайта нет своей загрузки значков',
+    файл: САЙТ, было: '        _значки = await window.KSLT_ZNACHKI.загрузить(window.supabaseClient);',
+    станет: "        await window.supabaseClient.from('player_badges').select('player_id');\n        _значки = await window.KSLT_ZNACHKI.загрузить(window.supabaseClient);" },
 
-['вернуть кнопке высоту из полей', 'css/style.css',
- '    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    height: var(--btn-h-md);          /* 44 */\n    padding: 0 var(--space-8);        /* 32; было 36 — не ступень */',
- '    display: inline-block;\n    padding: 13px 36px;',
- 'высота кнопки задаётся свойством, а не полями'],
+  { имя: 'приложение снова грузит значки само', ждём: 'у приложения нет своей загрузки значков',
+    файл: ПРИЛ, было: '    if (!_значки && window.KSLT_ZNACHKI) {',
+    станет: "    supabaseClient.from('badge_definitions').select('*');\n    if (!_значки && window.KSLT_ZNACHKI) {" },
 
-['вернуть кнопке поле 36', 'css/style.css',
- '    padding: 0 var(--space-8);        /* 32; было 36 — не ступень */',
- '    padding: 0 36px;',
- 'горизонтальное поле кнопки — ступень шкалы'],
+  { имя: 'сайт снова режет список своим числом', ждём: 'у сайта нет своего числа значков в строке',
+    файл: САЙТ, было: '        var show = window.KSLT_ZNACHKI.первые(_значки, playerId, maxCount);',
+    станет: '        var show = (_значки.поИгрокам[playerId] || []).slice(0, maxCount || 5);' },
 
-/* ЯКОРЬ ПЕРЕПИСАН 24.09: он держался на соседе по списку — .pt-invite-btn,
-   которого 24.09 из этого яруса вынули четвёртым по счёту. Держится теперь
-   на том, что в блоке постоянно, — на первой строке самого списка. */
-['вернуть кнопку в ступень «обычная 40»', 'css/style.css',
- /* тот же список: мёртвые кнопки сняты 14.10, якорь на оставшейся */
- '    .btn-secondary.btn-secondary{',
- '    .badges-cta-btn.badges-cta-btn,\n    .btn-secondary.btn-secondary{',
- 'кнопка вынута из ступени «обычная 40»'],
+  { имя: 'приложение режет список своим числом',
+    ждём: 'у приложения нет своего числа значков в строке',
+    файл: ПРИЛ, было: '    var список = Z.первые(_значки, игрокId);',
+    станет: '    var список = (_значки.поИгрокам[игрокId] || []).slice(0, 5);' },
 
-['сделать кнопку круглой в обход решения', 'css/style.css',
- '    font-weight: 800;\n    border-radius: 12px;\n    text-decoration: none;',
- '    font-weight: 800;\n    border-radius: var(--radius-full);\n    text-decoration: none;',
- 'радиус кнопки не тронут — он решается вместе с коробкой'],
+  { имя: 'у сайта значок пошёл в разметку сырым',
+    ждём: 'у сайта значок И подсказка экранируются',
+    файл: САЙТ, было: "'\">' + KSLT_экранировать(b.icon || '') + '</span>'",
+    станет: "'\">' + (b.icon || '') + '</span>'" },
 
-['сломать базовые шесть колонок', 'css/style.css',
- '.badges-cta-cards {\n    display: grid;\n    grid-template-columns: repeat(6, 1fr);',
- '.badges-cta-cards {\n    display: grid;\n    grid-template-columns: repeat(4, 1fr);',
- 'база — шесть колонок'],
+  { имя: 'у приложения значок пошёл в разметку сырым',
+    ждём: 'у приложения значок И подсказка экранируются',
+    файл: ПРИЛ, было: "'\">' + esc(з.icon) + '</span>'", станет: "'\">' + з.icon + '</span>'" },
 
-['вернуть колонкам границу 768 вместо 992', 'css/style.css',
- '@media (max-width: 992px) {\n    .badges-cta-cards {\n        grid-template-columns: repeat(3, 1fr);',
- '@media (max-width: 768px) {\n    .badges-cta-cards {\n        grid-template-columns: repeat(3, 1fr);',
- 'от 992 и уже — три колонки'],
+  { имя: 'у значка в приложении снят вид', ждём: 'у значка в строке есть вид в обоих продуктах',
+    файл: 'mobile/www/css/app.css', было: '.rr-badge {', станет: '.rr-znachok {' },
 
-['отнять у ленты возврат на шесть колонок', 'css/style.css',
- '    .badges-cta-cards { grid-template-columns: repeat(6, 1fr); }',
- '    .badges-cta-cards { grid-template-columns: repeat(3, 1fr); }',
- 'в тесной по высоте ленте колонки ВОЗВРАЩАЮТСЯ на шесть'],
+  { имя: 'дом поставлен ПОСЛЕ зовущего', ждём: 'дом подключён и грузится ДО того, кто его зовёт',
+    файл: 'pages/players-kg.html',
+    было: '    <script src="../js/kslt-znachki.js?v=1"></script>\n', станет: '' },
 
-['показать пояснение на узких', 'css/style.css',
- '    .badge-cta-desc { display: none; }\n}',
- '    .badge-cta-desc { display: block; }\n}',
- 'пояснение скрыто ОДНИМ правилом, от 992 и уже'],
-
-['воскресить мёртвый слой 480', 'css/style.css',
- '.badges-cta-cards.badges-all {',
- '@media (max-width: 480px) {\n    .badges-cta-cards { grid-template-columns: 1fr 1fr; }\n}\n\n.badges-cta-cards.badges-all {',
- 'мёртвых слоёв 540 и 480 больше нет'],
-
-['воскресить второй слой 768 с колонками', 'css/style.css',
- '/* ЛЕСТНИЦА ГРАНИЦ. Решение 23.09',
- '@media (max-width: 768px) {\n    .badges-cta-cards { gap: 8px; }\n}\n\n/* ЛЕСТНИЦА ГРАНИЦ. Решение 23.09',
- 'слоя 768 с колонками больше нет'],
-
-['снять с тумана размытие', 'css/style.css',
- '    filter: blur(2.5px);',
- '    filter: none;',
- 'туман не тронут: размытие и маска на месте'],
-
-['разрешить туману ловить мышь', 'css/style.css',
- '    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 62%);\n    pointer-events: none;',
- '    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 62%);\n    pointer-events: auto;',
- 'закрытый ряд не ловит мышь'],
-
-['убрать наезд коробки', 'css/style.css',
- '    margin-top: -46px;',
- '    margin-top: 0;',
- 'коробка наезжает на закрытый ряд'],
-
-['вернуть коробке поля 22/34', 'css/style.css',
- '    padding: var(--space-6) var(--space-8);   /* 24 / 32 */',
- '    padding: 22px 34px;',
- 'поля коробки встали на шкалу'],
-['снять общий отказ от движения', 'css/tokens.css',
- '    *,\n    *::before,\n    *::after {',
- '    .db-mobile-tab,\n    .site-header {',
- 'движение выключается тем, кто попросил его выключить'],
-
-['вернуть эмодзи в дерево доступности', 'js/home-badges.js',
- "        icon.setAttribute('aria-hidden', 'true');",
- "        icon.dataset.decorative = 'true';",
- 'эмодзи скрыт от экранного диктора'],
-
-['вернуть закрытый ряд диктору', 'js/home-badges.js',
- "        locked.setAttribute('aria-hidden', 'true');",
- "        locked.dataset.locked = 'true';",
- 'закрытый ряд выведен из дерева доступности'],
-
-['воскресить мёртвый hover плитки', 'css/style.css',
- '.badge-cta-card:hover {\n    transform: translateY(-3px);',
- '.badge-cta-card:hover {\n    transform: translateY(-4px);\n    border-color: var(--accent);\n}\n\n.badge-cta-card:hover {\n    transform: translateY(-3px);',
- 'мёртвый hover плитки убран']
+  { имя: 'список стал ждать значки', ждём: 'список рисуется НЕ ДОЖИДАЯСЬ значков',
+    файл: ПРИЛ,
+    было: '    loadCategories();\n  };',
+    станет: '  };' }
 ];
 
-const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'znachki-otkat-'));
-fs.mkdirSync(path.join(песок, 'css'));
-/* Общий блок отказа от движения живёт в tokens.css, и правило читает
-   его по соседству — без копии песочница не проходит сама по себе. */
-fs.copyFileSync(path.join(__dirname, '..', 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
-fs.mkdirSync(path.join(песок, 'js'));
-fs.mkdirSync(path.join(песок, 'tools'));
-fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
-fs.writeFileSync(path.join(песок, 'tools', 'check-znachki.js'), ПРАВИЛО);
-
-function прогон(замена) {
-    ФАЙЛЫ.forEach(ф => {
-        fs.writeFileSync(path.join(песок, ф), замена && замена.файл === ф ? замена.текст : исходник[ф]);
-    });
-    try {
-        execFileSync(process.execPath, [path.join(песок, 'tools', 'check-znachki.js')], { encoding: 'utf8' });
-        return { упало: false, вывод: '' };
-    } catch (e) { return { упало: true, вывод: (e.stdout || '') + (e.stderr || '') }; }
+function копия() {
+  const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-zn-'));
+  for (const о of ['js', 'mobile/www', 'pages', 'tools', 'css'])
+    fs.cpSync(path.join(КОРЕНЬ, о), path.join(к, о), { recursive: true });
+  return к;
 }
-
-console.log('');
-const база = прогон(null);
-if (база.упало) {
-    console.log('  НЕ ТАК  исходники сами по себе не проходят check-znachki.js.');
-    console.log(база.вывод); process.exit(1);
+function прогон(к) {
+  try { return execFileSync('node', [path.join(к, 'tools/check-znachki.js')],
+    { env: { ...process.env, KSLT_KOREN: к }, encoding: 'utf8' }); }
+  catch (e) { return (e.stdout || '') + (e.stderr || ''); }
 }
-console.log('  база    исходный код правила проходит');
+console.log('\n  ПРУВЕР: ЗНАЧКИ\n');
+let беда = 0;
+for (const о of ОТКАТЫ) {
+  const к = копия(); const п = path.join(к, о.файл);
+  const было = fs.readFileSync(п, 'utf8');
+  const n = было.split(о.было).length - 1;
+  if (n === 0 || (!о.всеВхождения && n !== 1)) {
+    console.log('  ✗ ' + о.имя + ' — ЯКОРЬ ВСТРЕЧАЕТСЯ ' + n + ' РАЗ');
+    беда++; fs.rmSync(к, { recursive: true, force: true }); continue;
+  }
+  fs.writeFileSync(п, о.всеВхождения ? было.split(о.было).join(о.станет) : было.replace(о.было, о.станет));
+  const в = прогон(к);
+  if (в.includes('✗ ' + о.ждём)) console.log('  ок  ' + о.имя + ' → упало «' + о.ждём + '»');
+  else { console.log('  ✗   ' + о.имя + ' → правило «' + о.ждём + '» НЕ УПАЛО'); беда++; }
+  fs.rmSync(к, { recursive: true, force: true });
+}
 console.log('');
-
-let плохих = 0;
-ОТКАТЫ.forEach(([имя, ф, что, на, ждём]) => {
-    const сколько = исходник[ф].split(что).length - 1;
-    if (сколько === 0) { console.log('  ? ' + имя); console.log('      якоря нет в ' + ф); плохих++; return; }
-    if (сколько > 1)  { console.log('  ! ' + имя); console.log('      якорь встречается ' + сколько + ' раз'); плохих++; return; }
-    const р = прогон({ файл: ф, текст: исходник[ф].replace(что, на) });
-    if (!р.упало) { console.log('  ✗ ' + имя); console.log('      правило не упало — значит оно ничего не держит'); плохих++; }
-    else if (р.вывод.indexOf(ждём) === -1) { console.log('  ~ ' + имя); console.log('      упало ДРУГОЕ. Ждали: ' + ждём); плохих++; }
-    else console.log('  ✓ ' + имя + '  →  «' + ждём + '»');
-});
-
-fs.rmSync(песок, { recursive: true, force: true });
-console.log('');
-if (плохих) { console.log('  НЕ ТАК  ' + плохих + ' из ' + ОТКАТЫ.length + ' откатов не доказали правило'); console.log(''); process.exit(1); }
-console.log('  ок      все ' + ОТКАТЫ.length + ' откатов доказали свои правила');
-console.log('          оригиналы не изменялись — работа шла на копии');
-console.log('');
+if (беда) { console.log('  БЕДА    откатов не поймано: ' + беда + ' из ' + ОТКАТЫ.length + '\n'); process.exitCode = 1; }
+else { console.log('  ок      все ' + ОТКАТЫ.length + ' откатов уронили свои правила\n'); }

@@ -12,6 +12,9 @@
 
   var R = window.KSLT_RATING = {};
   var allPlayers = [];
+  /* Слепок значков — один на экран, грузится раз за показ: по запросу на
+     строку список из двух сотен человек не нарисуется никогда. */
+  var _значки = null;
   var allCategories = [];      // всё, что лежит в таблице categories
   var categoriesFromDB = [];   // из них — положенные текущему полу
 
@@ -54,6 +57,17 @@
       initDropdowns();
       initSearch();
       listenersReady = true;
+    }
+    /* ЗНАЧКИ ГРУЗЯТСЯ ОДИН РАЗ ЗА ЗАПУСК, а не на каждый показ экрана:
+       два запроса на две сотни игроков — это два запроса, а не двести, но
+       и повторять их при каждом переключении разряда незачем.
+       Список рисуется НЕ ДОЖИДАЯСЬ их: значки — украшение строки, и
+       таблица без них лучше таблицы, которая ждёт. Пришли — перерисуем. */
+    if (!_значки && window.KSLT_ZNACHKI) {
+      window.KSLT_ZNACHKI.загрузить(supabaseClient).then(function (слепок) {
+        _значки = слепок;
+        if (document.getElementById('ratingContent')) render();
+      });
     }
     loadCategories();
   };
@@ -363,7 +377,7 @@
         '<span class="rr-rank' + (rank && rank <= 3 ? ' top' : '') + '" role="cell">' + (rank || '—') + '</span>' +
         '<div class="rr-player" role="cell">' +
           (p.photo ? '<img class="rr-avatar-img" src="' + esc(p.photo) + '" alt="" aria-hidden="true">' : '<div class="rr-avatar" aria-hidden="true">' + initials(p.name) + '</div>') +
-          '<span class="rr-name">' + esc(p.name) +
+          '<span class="rr-name">' + esc(p.name) + значкиСтрокой(p.id) +
             (isBg ? '<span class="rr-guest-mark">' + I18N.t('rating.notMember') + '</span>' : '') +
           '</span>' +
         '</div>' +
@@ -427,6 +441,32 @@
     var parts = name.split(' ');
     if (parts.length >= 2) return parts[0] + '\n' + parts.slice(1).join(' ');
     return name;
+  }
+
+  /**
+   * ЗНАЧКИ У ИМЕНИ В СТРОКЕ РЕЙТИНГА.
+   *
+   * ИХ ЗДЕСЬ НЕ БЫЛО ВОВСЕ (замер 29.10: ноль упоминаний на 444 строки),
+   * хотя на сайте они у имени с давних пор. Сколько показывать, в каком
+   * порядке и как зовётся значок на языке — три правила, и они живут в
+   * доме `js/kslt-znachki.js`, один на оба продукта.
+   *
+   * ЗНАЧОК И ПОДСКАЗКА ЭКРАНИРУЮТСЯ ОБА: `badge_definitions.icon` и
+   * `name` — текстовые столбцы, которые пишет человек. Куском A3.7б уже
+   * закрывалась дыра, где значок вставлялся сырым.
+   */
+  function значкиСтрокой(игрокId) {
+    var Z = window.KSLT_ZNACHKI;
+    if (!Z || !_значки) return '';
+    var список = Z.первые(_значки, игрокId);
+    if (!список.length) return '';
+    var лэнг = (I18N && I18N.lang) || 'ru';
+    var html = '';
+    список.forEach(function (з) {
+      html += '<span class="rr-badge" title="' +
+        esc(Z.название(_значки, з.badge_id, лэнг)) + '">' + esc(з.icon) + '</span>';
+    });
+    return html;
   }
 
   function initials(name) {

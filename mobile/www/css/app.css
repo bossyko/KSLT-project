@@ -6343,6 +6343,17 @@ select.prof-field-input { color: var(--text); }
 
 .msa-tb-in + .msa-tb-in { margin-left: 2px; }
 
+/* ЗНАЧКИ У ИМЕНИ В СТРОКЕ РЕЙТИНГА (29.10). На сайте они у имени с
+   давних пор (`css/players.css:695`), в приложении не было вовсе.
+   Не больше пяти в строке — число живёт в доме `kslt-znachki.js`:
+   шестой выдавливает столбец очков. */
+.rr-badge {
+  margin-left: var(--space-1);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-none);
+  vertical-align: middle;
+}
+
 .msa-score {
     text-align: center;
     font-size: 1.6rem;
