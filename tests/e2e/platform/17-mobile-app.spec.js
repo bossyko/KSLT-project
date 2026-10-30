@@ -373,15 +373,43 @@ test.describe('Mobile App — Side Menu', () => {
         expect(await themeControl.count()).toBe(1);
     });
 
-    test('Side menu has language control', async ({ page }) => {
+    /**
+     * ПЕРЕКЛЮЧАТЕЛЯ ЯЗЫКА В МЕНЮ НЕТ, И ЭТО РЕШЕНИЕ, А НЕ ПОЛОМКА.
+     *
+     * ПРОБА ПЕРЕПИСАНА 30.10. Она требовала ряд из трёх кнопок и падала
+     * на всех пяти видах — а ряд УБРАН НАМЕРЕННО: переключателей языка
+     * было ДВА (этот и в профиле) и работали они по-разному — меню
+     * ронял кэш экранов и перерисовывал всё, профиль перерисовывал
+     * только себя. Один был верным, другой врал, и до возврата языков
+     * (`I18N.ОДИН_ЯЗЫК` в `js/i18n.js`) ряд живёт закомментированным в
+     * разметке — РАЗМЕТКОЙ, а не `display: none`: скрытый ряд всё равно
+     * читает диктор и ловит Tab.
+     *
+     * ПРОБА, СПОРЯЩАЯ С ПРИНЯТЫМ РЕШЕНИЕМ, — ЭТО СГНИВШАЯ ПРОБА, а не
+     * находка. Тот же вывод, что дал вечер 29.10 на 42 пруверах:
+     * бегунок, который не запускают, молча гниёт.
+     *
+     * Теперь проба держит САМО РЕШЕНИЕ и развернётся обратно сама, когда
+     * языки вернут: при снятом `ОДИН_ЯЗЫК` она требует РОВНО ОДИН ряд с
+     * тремя кнопками — не два, как было до уборки.
+     */
+    test('переключатель языка один: пока языки заперты — ни одного',
+        async ({ page }) => {
         await page.goto('/mobile/www/index.html', { waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(() => !!window.KSLT_I18N, null, { timeout: 15000 });
 
-        const langControl = page.locator('#menuLangControl');
-        expect(await langControl.count()).toBe(1);
+        const заперто = await page.evaluate(() => !!window.KSLT_I18N.ОДИН_ЯЗЫК);
+        const рядов = await page.locator('#menuLangControl').count();
+        const кнопок = await page.locator('[data-lang]').count();
 
-        // 3 language buttons: RU, EN, KG
-        const langBtns = langControl.locator('.seg-btn');
-        expect(await langBtns.count()).toBe(3);
+        if (заперто) {
+            expect(рядов, 'ряд языка убран разметкой, пока язык заперт').toBe(0);
+            expect(кнопок, 'и ни одной кнопки языка: скрытую читает диктор').toBe(0);
+        } else {
+            expect(рядов, 'языки вернули — переключатель РОВНО ОДИН').toBe(1);
+            expect(await page.locator('#menuLangControl .seg-btn').count(),
+                'три языка: РУ, EN, KG').toBe(3);
+        }
     });
 
     test('Side menu has version info', async ({ page }) => {
