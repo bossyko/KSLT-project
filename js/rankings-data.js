@@ -138,7 +138,14 @@
                                 losses: p.losses || 0,
                                 change: p.rank_change || 0,
                                 form: p.form || [],
-                                online: false,
+                                /* ПОЛЕ `online` СНЯТО 29.10. Оно всегда было
+                                   `false`, и в `true` его не ставил никто: онлайн с
+                                   рейтинга убран твоим словом 06.10 — «смысла нет там
+                                   это отображать». Понятие живо и считается одним
+                                   правилом `KSLT_LICO.вСети(last_seen)` — его зовут
+                                   услуги, партнёры и главная. Решишь вернуть онлайн в
+                                   рейтинг — передай сюда `last_seen`, правило уже есть,
+                                   второе писать не надо. */
                                 ntrp_singles: p.ntrp_singles || null,
                                 ntrp_doubles: p.ntrp_doubles || null,
                                 banned_until: баны[p.id] || null,

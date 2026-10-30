@@ -69,7 +69,36 @@ const СОВПАДАЮТ = [
        и беда родится ровно на шве. В таблицу внесены куском 221: сторож
        поймал, что пять копий живут без записи, и был прав. */
     'js/kslt-setka.js', 'js/tournament-status.js', 'js/kslt-lenta.js',
-    'js/kslt-ekranirovanie.js', 'js/kslt-video.js'
+    'js/kslt-ekranirovanie.js', 'js/kslt-video.js',
+    /* ЗАВЕДЕНЫ ОБЩИМИ 29.10, ВЕТКА A3 И ВЕЧЕР ЗА НЕЙ — ТРИНАДЦАТЬ ДОМОВ.
+       Сторож поймал их все сразу и был прав: до записи здесь каждая такая
+       копия заводилась молча. Почему каждый — дом, а не вторая копия:
+         · `kslt-yazyk.js`, `kslt-plitki.js`, `kslt-kategorii.js`,
+           `kslt-grafik-dannye.js` — шаги A3.1-A3.5: язык страницы,
+           плитки, разбивка по категориям и ДАННЫЕ графика (рисование у
+           продуктов законно разное, данные — одни);
+         · `kslt-vozvrat.js` (A3.7а) — срок возврата учётной записи, жил
+           в тринадцати местах;
+         · `kslt-pozdravlenie.js` (A3.7б) — карточка поздравления с
+           достижением;
+         · `kslt-schyot-matcha.js` (A3.7г) — сбор полей счёта вокруг
+           общих правил;
+         · `kslt-zayavka.js` и `zayavka-texts.js` (A3.7д) — разбор ответа
+           серверной функции о допуске и девятнадцать слов отказа;
+         · `kslt-vhod.js` (A3.7е) — одиннадцать понятий входа, последний
+           долг переписи;
+         · `kslt-uvedomleniya.js` (шаг A2) — каналы, разделы и правило
+           `включено`, копия серверного `shouldNotify`;
+         · `kslt-vyzov.js` — вызов на баттл: статусы из ограничения базы
+           и разбор восьми кодов отказа;
+         · `kslt-znachki.js` — значки у имени в рейтинге.
+       Все тринадцать обязаны совпадать ДО БАЙТА, и это держит
+       `tools/check-kopii-js.js`; здесь — только то, что копия НАЗВАНА. */
+    'js/kslt-yazyk.js', 'js/kslt-plitki.js', 'js/kslt-kategorii.js',
+    'js/kslt-grafik-dannye.js', 'js/kslt-vozvrat.js',
+    'js/kslt-pozdravlenie.js', 'js/kslt-schyot-matcha.js',
+    'js/kslt-zayavka.js', 'js/zayavka-texts.js', 'js/kslt-vhod.js',
+    'js/kslt-uvedomleniya.js', 'js/kslt-vyzov.js', 'js/kslt-znachki.js'
 ];
 
 /**
@@ -79,12 +108,20 @@ const СОВПАДАЮТ = [
 const РАЗОШЛИСЬ = {
     'index.html':                'своя оболочка приложения — законно',
     'js/supabase-config.js':     'свой адрес базы — законно',
-    'js/auth.js':                'ДОЛГ: вход написан дважды',
-    'js/rating-chart.js':        'ДОЛГ: отстала от сайта',
-    'js/match-score.js':         'ДОЛГ: отстала от сайта',
-    'js/tournament-register.js': 'ДОЛГ: отстала от сайта',
-    'js/account-restore.js':     'ДОЛГ: отстала от сайта',
-    'js/badge-celebration.js':   'ДОЛГ: отстала от сайта'
+    /* ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ — И ПРИЧИНА РАСХОЖДЕНИЯ ТОЖЕ
+       ПОНЯТИЕ. Здесь стояло шесть «ДОЛГ: отстала от сайта» — своя,
+       вторая запись причин, и к 29.10 она ВРАЛА: все шесть сведены
+       шагами A3.7а-A3.7е, в приложении осталось законно разное
+       строение запуска и экранов. Причина каждого расхождения названа
+       одним местом — таблицей `ПРИЧИНЫ` в `tools/check-kopii-js.js`,
+       где у каждого НАМЕРЕНО сказано ЧЕМ и указан свой сторож. Здесь
+       файл только НАЗВАН, чтобы новая копия не завелась молча. */
+    'js/auth.js':                'НАМЕРЕНО — чем, сказано в check-kopii-js.js',
+    'js/rating-chart.js':        'НАМЕРЕНО — чем, сказано в check-kopii-js.js',
+    'js/match-score.js':         'НАМЕРЕНО — чем, сказано в check-kopii-js.js',
+    'js/tournament-register.js': 'НАМЕРЕНО — чем, сказано в check-kopii-js.js',
+    'js/account-restore.js':     'НАМЕРЕНО — чем, сказано в check-kopii-js.js',
+    'js/badge-celebration.js':   'НАМЕРЕНО — чем, сказано в check-kopii-js.js'
 };
 
 const ошибки = [];

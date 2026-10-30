@@ -205,7 +205,8 @@
         var R = window.KSLT_RULES;
         function пересчитать() {
             for (var i = 1; i <= сетов; i++) {
-                var клетка = overlay.querySelector('[data-tb-set="' + i + '"]');
+                var клетка = overlay.querySelector('[data-tb-set="' +
+                        window.KSLT_селектор(i) + '"]');
                 if (!клетка) continue;
                 var видно = R.сетСТайБрейком(поле(приставка + '1s' + i), поле(приставка + '2s' + i));
                 клетка.hidden = !видно;

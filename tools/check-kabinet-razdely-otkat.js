@@ -69,12 +69,16 @@ const ОТКАТЫ = [
    'у общей полосы страниц слой 44 по ОБЕИМ сторонам'],
 
   /* ── крупная цифра ── */
-  [CSS, '.db-stat-value {\n    font-size: var(--db-fs-cifra);\n    font-weight: 700;',
-        '.db-stat-value {\n    font-size: var(--fs-xl);\n    font-weight: 700;',
+  /* ИМЕНА ВЗЯТЫ ИЗ ФАЙЛА, А НЕ ИЗ ПАМЯТИ. Цифру плитки кабинета зовут
+     `kst-value` с шага A3.5 (разметку отдаёт общий дом
+     `js/kslt-plitki.js`), и прежние якоря `db-stat-value` встречались
+     НОЛЬ раз — откат отвечал «?», то есть не доказывал ничего. */
+  [CSS, '.kst-value {\n    font-size: var(--db-fs-cifra);\n    font-weight: 700;',
+        '.kst-value {\n    font-size: var(--fs-xl);\n    font-weight: 700;',
    'крупная цифра не заводит своих ступеней помимо вторичных чисел'],
 
-  [CSS, '.db-stats-grid-mini .db-stat-card:first-child .db-stat-value {\n    font-size: var(--db-fs-cifra);',
-        '.db-stats-grid-mini .db-stat-card:first-child .db-stat-value {\n    font-size: var(--fs-2xl);',
+  [CSS, '.kst-grid-mini .kst-card:first-child .kst-value {\n    font-size: var(--db-fs-cifra);',
+        '.kst-grid-mini .kst-card:first-child .kst-value {\n    font-size: var(--fs-2xl);',
    'все три места крупной цифры зовут одну переменную'],
 
   /* ── межстрочные ── */

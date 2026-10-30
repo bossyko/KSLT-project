@@ -25,6 +25,7 @@ const CSS = 'css/player.css';
 const JSФ = 'js/player.js';
 const RU  = 'pages/player.html';
 const ГРФ = 'js/rating-chart.js';
+const ДОМГ = 'js/kslt-grafik-dannye.js';
 const ПРВ = 'js/kslt-rules.js';
 const EN  = 'pages/player-en.html';
 
@@ -180,7 +181,11 @@ const ОТКАТЫ = [
         "select('id, name, name_en, name_kg')",
    'страница игрока строит карточки по ступени, а не по очкам'],
 
-  [ГРФ, 'return window.KSLT_RULES.поСилеКатегорий(cats[a], cats[b]);',
+  /* ПОРЯДОК КАТЕГОРИЙ ПЕРЕЕХАЛ В ДОМ ГРАФИКА (шаг A3.3): зов общего
+     сравнения стоит там, а не в `rating-chart.js`, где якорь встречался
+     НОЛЬ раз. Откат возвращает своей арифметике ИМЕННО то место, где
+     понятие живёт сейчас. */
+  [ДОМГ, 'return правило(cats[a], cats[b]);',
         'return ((cats[b] && cats[b].sort) || 0) - ((cats[a] && cats[a].sort) || 0);',
    'график линий зовёт общее правило, а не сравнивает ступень руками'],
 

@@ -37,12 +37,15 @@ const ОТКАТЫ = [
         '.db-redeem-balance-value {\n    font-size: var(--fs-2xl);',
    'цифру зовёт \\.db-redeem-balance-value, а не своё число'],
 
-  [CSS, '#db-payments .db-stat-value {\n    font-size: var(--db-fs-cifra);',
-        '#db-payments .db-stat-value {\n    font-size: var(--fs-xl);',
+  /* ИМЯ ЦИФРЫ ПЛИТКИ — `kst-value` С ШАГА A3.5: разметку плиток отдаёт
+     общий дом `js/kslt-plitki.js`. Якоря с прежним `db-stat-value`
+     встречались НОЛЬ раз, и откат отвечал «?» вместо доказательства. */
+  [CSS, '#db-payments .kst-value {\n    font-size: var(--db-fs-cifra);',
+        '#db-payments .kst-value {\n    font-size: var(--fs-xl);',
    'плитки платежей берут ту же единственную ступень'],
 
-  [CSS, '#db-payments .db-stat-value {\n    font-size: var(--db-fs-cifra);\n    line-height: var(--lh-tight);',
-        '#db-payments .db-stat-value {\n    font-size: var(--db-fs-cifra);\n    line-height: var(--lh-normal);',
+  [CSS, '#db-payments .kst-value {\n    font-size: var(--db-fs-cifra);\n    line-height: var(--lh-tight);',
+        '#db-payments .kst-value {\n    font-size: var(--db-fs-cifra);\n    line-height: var(--lh-normal);',
    'цифра плитки платежей несёт межстрочный заголовка на всех видах'],
 
   /* второй кегль в медиа — ровно то, что сняли */

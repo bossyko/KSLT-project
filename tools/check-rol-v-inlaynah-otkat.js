@@ -18,7 +18,8 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-rol-'));
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(песок, 'mobile/www/js'),
           { recursive: true });
 
-const ФАЙЛЫ = ['js/auth.js', 'js/dashboard.js', 'js/doubles-entry.js',
+const ФАЙЛЫ = ['js/auth.js', 'js/dashboard.js', 'js/auth-guard.js',
+                'js/doubles-entry.js',
                 'js/tournament-register.js', 'js/players.js',
                 'js/admin/sections/users.js', 'css/tokens.css',
                 'mobile/www/js/screens/partners.js'];
@@ -37,7 +38,8 @@ function прогон(замена) {
     } catch (e) { return { упало: true, вывод: (e.stdout || '') + (e.stderr || '') }; }
 }
 
-const АУ = 'js/auth.js', КБ = 'js/dashboard.js', ПЗ = 'js/doubles-entry.js',
+const АУ = 'js/auth.js', КБ = 'js/dashboard.js', ОХ = 'js/auth-guard.js',
+      ПЗ = 'js/doubles-entry.js',
       РГ = 'js/tournament-register.js', ИГ = 'js/players.js',
       ПЛ = 'js/admin/sections/users.js', ТК = 'css/tokens.css',
       МБ = 'mobile/www/js/screens/partners.js';
@@ -54,16 +56,19 @@ const ОТКАТЫ = [
      "el.style.borderColor = bad ? '#ff4444' : '';",
      'на сайте роль в инлайнах js не пишется числом'],
 
-    ['вернуть #f44336 Material неверному вводу', ПЗ,
-     "'.de-bad-note{margin:6px 0 0;font-size:.78rem;color:var(--danger)}'",
-     "'.de-bad-note{margin:6px 0 0;font-size:.78rem;color:#f44336}'",
-     'на сайте роль в инлайнах js не пишется числом'],
+    /* ДВА ОТКАТА СНЯТЫ 29.10, И ВОТ ПОЧЕМУ. Они держались на строках
+       инлайнового css ВНУТРИ js — `.de-bad-note{…}` в
+       `js/doubles-entry.js` и `.trn-register-modal-btn.is-error{…}` в
+       `js/tournament-register.js`. Обеих строк в js больше нет: стили
+       переехали в `css/style.css` (например `:11972` для `is-error`), и
+       якорь стал встречаться НОЛЬ раз. Это не починка правила и не
+       ослабление: ПРАВИЛО «на сайте роль в инлайнах js не пишется
+       числом» доказывают ПЯТЬ других откатов ниже, живых. Держать
+       мёртвый якорь — значит каждый прогон получать «?» вместо ответа,
+       а «?» ничего не доказывает. */
 
     /* тот, что давал контраст 3.55 при пороге 4.5 */
-    ['вернуть белый на красном кнопке ошибки — контраст 3.55', РГ,
-     "'.trn-register-modal-btn.is-error{background:var(--danger);color:var(--danger-on)}' +",
-     "'.trn-register-modal-btn.is-error{background:#ff3b30;color:#fff}' +",
-     'на сайте роль в инлайнах js не пишется числом'],
+
 
     /* ЯКОРЬ СУЖЕН СОСЕДНЕЙ СТРОКОЙ: бейдж «Заблок.» стоит в `players.js`
        ДВАЖДЫ одинаково — это часть самой находки. Берём тот, что идёт за
@@ -84,9 +89,15 @@ const ОТКАТЫ = [
      'на сайте роль в инлайнах js не пишется числом'],
 
     /* текст на акценте */
-    ['вернуть #000 тексту на акценте', ПЗ,
-     "'.de-send{background:var(--accent);color:var(--accent-on)}',",
-     "'.de-send{background:var(--accent);color:#000}',",
+    /* ПОНЯТИЕ ПЕРЕЕХАЛО — ОТКАТ ПЕРЕЕХАЛ ЗА НИМ. Якорь стоял на
+       `.de-send{…}` в `js/doubles-entry.js`; эта строка css ушла из js.
+       Правило «текст поверх акцента берёт --accent-on» держит ОДИН
+       откат, и снять его нельзя — без него правило не доказано ничем.
+       Взято живое место, прочитанное по строке:
+       `js/auth-guard.js:73` — единственное вхождение в файле. */
+    ['вернуть #000 тексту на акценте', ОХ,
+     'background:var(--accent);color:var(--accent-on)',
+     'background:var(--accent);color:#000',
      'текст поверх акцента берёт --accent-on, а не число'],
 
     /* роли должны быть объявлены */

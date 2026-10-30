@@ -674,22 +674,10 @@
 }
 
 /* Online dot */
-.pl-online-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #22c55e;
-}
-
-.pl-online-pulse {
-    animation: pl-pulse 2s ease-in-out infinite;
-}
-
-@keyframes pl-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
-    50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-}
+/* `.pl-online-dot` и `.pl-online-pulse` СНЯТЫ 29.10: точку рисовало
+   условие `p.online`, а это поле всегда было `false` — онлайн с рейтинга
+   убран твоим словом 06.10. Понятие живо и считается одним правилом
+   `KSLT_LICO.вСети(last_seen)`; вернёшь онлайн — вид завести заново. */
 
 /* Badge */
 .pl-badge {
@@ -732,8 +720,9 @@
     font-size: var(--fs-sm);
 }
 
-/* Action buttons */
-.pl-btn-message,
+/* Action buttons.
+   `.pl-btn-message` СНЯТА 29.10: кнопку письма рисовало условие
+   `p.online`, а поле всегда было `false`. Кнопка вызова осталась. */
 .pl-btn-challenge {
     display: inline-flex;
     align-items: center;
@@ -744,16 +733,6 @@
     text-decoration: none;
     font-size: var(--fs-sm);
     transition: all 0.2s;
-}
-
-.pl-btn-message {
-    background: transparent;
-    border: var(--bw-hair) solid var(--border-subtle);
-}
-
-.pl-btn-message:hover {
-    border-color: var(--accent);
-    background: var(--alpha-lime-06);
 }
 
 .pl-btn-challenge {
@@ -1000,7 +979,6 @@
         transition: none;
     }
 
-    .pl-online-dot,
     .pl-guest-cta::before{
         animation: none;
     }
@@ -1360,7 +1338,6 @@
         margin-top: 4px;
     }
 
-    .pl-btn-message,
     .pl-btn-challenge {
         width: auto;
         padding: 6px 16px;
@@ -1636,7 +1613,6 @@
         gap: 4px;
     }
 
-    .pl-btn-message,
     .pl-btn-challenge {
         width: 28px;
         height: 28px;

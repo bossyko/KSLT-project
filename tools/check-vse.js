@@ -266,7 +266,9 @@ const КУСКИ = [
     ['вызов на баттл — один дом',
      'check-vyzov.js', 'check-vyzov-otkat.js'],
     ['значки у имени — один дом',
-     'check-znachki.js', 'check-znachki-otkat.js']
+     'check-znachki.js', 'check-znachki-otkat.js'],
+    ['онлайн снят с рейтинга',
+     'check-onlayn.js', 'check-onlayn-otkat.js']
 ];
 
 function прогнать(файл) {

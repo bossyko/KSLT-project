@@ -142,11 +142,27 @@ const ОТКАТЫ = [
     файл: 'pages/dashboard-kg.html',
     было: '<script src="../js/kslt-schyot-matcha.js?v=2"></script>\n    ', станет: '' },
 
-  { имя: 'дом поставлен ПОСЛЕ зовущего', ждём: 'дом грузится ДО того, кто его зовёт',
-    файл: 'mobile/www/index.html',
-    было: '<script src="js/kslt-schyot-matcha.js?v=2"></script>\n<script src="js/match-score.js?v=4"></script>',
-    станет: '<script src="js/match-score.js?v=4"></script>\n<script src="js/kslt-schyot-matcha.js?v=2"></script>' }
+  /* ОТКАТ ПОРЯДКА БЕРЁТ ЯКОРЬ ИЗ РАЗМЕТКИ, А НЕ ХРАНИТ ВЕРСИИ. Здесь
+     стояли оба тега целиком, с `match-score.js?v=4` внутри; через час я
+     сам поднял эту версию до 5, и откат стал отвечать «якорь
+     встречается 0 раз». Версия в якоре — это якорь на положении. */
 ];
+
+const ЧИТ = ф => fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8');
+
+(function откатПорядка() {
+  const П = 'mobile/www/index.html';
+  const стр = ЧИТ(П).split('\n');
+  const д = стр.findIndex(с => с.indexOf('/kslt-schyot-matcha.js?') !== -1);
+  const з = стр.findIndex((с, i) => i > д && с.indexOf('/match-score.js?') !== -1);
+  if (д === -1 || з === -1) return;
+  const кусок = стр.slice(д, з + 1);
+  ОТКАТЫ.push({ имя: 'дом поставлен ПОСЛЕ зовущего',
+    ждём: 'дом грузится ДО того, кто его зовёт',
+    файл: П,
+    было: кусок.join('\n'),
+    станет: кусок.slice(1).concat(кусок[0]).join('\n') });
+})();
 
 function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-schyot-'));

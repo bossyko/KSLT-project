@@ -103,12 +103,12 @@
         if (isEn) return {
             title: 'KSLT Rankings',
             subtitle: 'Season 2026',
-            statPlayers: 'players', statOnline: 'online',
+            statPlayers: 'players',
             searchPlaceholder: 'Search player...',
             men: 'Men', women: 'Women',
             rank: '#', player: 'Player', country: 'Ctry', points: 'Pts',
             record: 'W/L', form: 'Form', change: '\u0394',
-            actions: 'Challenge', ntrp: 'NTRP', online: 'Online',
+            actions: 'Challenge', ntrp: 'NTRP',
             message: 'Message', challenge: 'Challenge',
             prevPage: '\u2190 Back', nextPage: 'Next \u2192',
             shownOf: 'of', pageOf: 'of',
@@ -123,12 +123,12 @@
         if (isKg) return {
             title: 'KSLT рейтинги',
             subtitle: '2026-сезон',
-            statPlayers: 'оюнчу', statOnline: 'онлайн',
+            statPlayers: 'оюнчу',
             searchPlaceholder: 'Оюнчуну издөө...',
             men: 'Эркектер', women: 'Аялдар',
             rank: '#', player: 'Оюнчу', country: 'Өлк.', points: 'Упай',
             record: 'Ж/Ж', form: 'Форма', change: '\u0394',
-            actions: 'Чакыруу', ntrp: 'NTRP', online: 'Онлайн',
+            actions: 'Чакыруу', ntrp: 'NTRP',
             message: 'Жазуу', challenge: 'Чакыруу',
             prevPage: '\u2190 Артка', nextPage: 'Кийинки \u2192',
             shownOf: 'ичинен', pageOf: 'ичинен',
@@ -143,12 +143,12 @@
         return {
             title: 'Рейтинг KSLT',
             subtitle: 'Сезон 2026',
-            statPlayers: 'игроков', statOnline: 'онлайн',
+            statPlayers: 'игроков',
             searchPlaceholder: 'Поиск игрока...',
             men: 'Мужчины', women: 'Женщины',
             rank: '#', player: 'Игрок', country: 'Стр.', points: 'Очки',
             record: 'В/П', form: 'Форма', change: '\u0394',
-            actions: 'Вызов', ntrp: 'NTRP', online: 'Онлайн',
+            actions: 'Вызов', ntrp: 'NTRP',
             message: 'Написать', challenge: 'Вызов',
             prevPage: '\u2190 Назад', nextPage: 'Далее \u2192',
             shownOf: 'из', pageOf: 'из',
@@ -235,15 +235,6 @@
             }
         }
         return all;
-    }
-
-    function countOnline() {
-        var count = 0;
-        var all = getAllPlayers();
-        for (var i = 0; i < all.length; i++) {
-            if (all[i].online) count++;
-        }
-        return count;
     }
 
     /**
@@ -384,7 +375,6 @@
         // включая тех, кто записался и ещё не играл — в разряды они не попадают
         var поКарточкам = window.KSLT_RANKINGS && window.KSLT_RANKINGS.всегоИгроков;
         var totalPlayers = поКарточкам || getAllPlayers().length;
-        var onlineCount = countOnline();
         /* НА ОБЛОЖКЕ РЕЙТИНГА ЧИСЕЛ НЕТ — слово Кости 06.10: сперва
            «онлайн убери, смысла нет», потом «391 игроков — убери тоже,
            числа не надо». Обложка называет раздел и сезон; числа живут
@@ -432,7 +422,6 @@
                 '<div class="pl-podium-medal">' + medals[i] + '</div>' +
                 '<div class="pl-podium-photo-wrap">' +
                     лицо(p, 'pl-podium-photo', p.name) +
-                    (p.online ? '<span class="pl-online-dot pl-online-pulse"></span>' : '') +
                 '</div>' +
                 /* ТУМБА — ЭТО КОРОБКА, А НЕ ПОЛОСА ПОД КАРТОЧКОЙ.
                    До 24.09 тумбу рисовал ::after с жёсткой высотой, и её
@@ -630,9 +619,6 @@
             // Ведём на карточку игрока: там кнопка вызова и работает
             if (logged && p.hasAccount) {
                 var картаИгрока = (isEnPage() ? 'player-en.html' : (isKgPage() ? 'player-kg.html' : 'player.html')) + '?id=' + p.id;
-                if (p.online) {
-                    actionsHtml += '<a href="' + картаИгрока + '" class="pl-btn-message" title="' + labels.message + '">\u2709\ufe0f</a>';
-                }
                 actionsHtml += '<a href="' + картаИгрока + '" class="pl-btn-challenge" title="' + labels.challenge + '">\u2694\ufe0f</a>';
             }
 
