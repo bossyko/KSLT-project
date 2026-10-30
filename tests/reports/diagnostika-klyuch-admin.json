@@ -6,44 +6,44 @@
   "поИдСтроки": [
     {
       "хвост": "01",
-      "т": "test-itogi",
-      "г": null,
-      "к": "F",
+      "т": "test-metka",
+      "г": 1,
+      "к": null,
       "с": "completed"
     },
     {
       "хвост": "02",
-      "т": "test-itogi",
-      "г": null,
-      "к": "3RD",
+      "т": "test-metka",
+      "г": 1,
+      "к": null,
       "с": "completed"
     },
     {
       "хвост": "03",
-      "т": "test-itogi-fic",
-      "г": null,
-      "к": "F",
+      "т": "test-metka",
+      "г": 1,
+      "к": null,
       "с": "completed"
     },
     {
       "хвост": "04",
-      "т": "test-itogi-fic",
-      "г": null,
-      "к": "3RD",
+      "т": "test-metka",
+      "г": 2,
+      "к": null,
       "с": "completed"
     },
     {
       "хвост": "05",
-      "т": "test-itogi-fic",
-      "г": null,
-      "к": "F5",
+      "т": "test-metka",
+      "г": 2,
+      "к": null,
       "с": "completed"
     },
     {
       "хвост": "06",
-      "т": "test-itogi-fic",
-      "г": null,
-      "к": "F7",
+      "т": "test-metka",
+      "г": 2,
+      "к": null,
       "с": "completed"
     },
     {
@@ -93,12 +93,36 @@
   ],
   "вошёл": true,
   "почта": "admin@test.kslt.kg",
-  "своиСколько": 1,
+  "своиСколько": 7,
   "своиОшибка": null,
   "своиСтроки": [
     {
+      "г": 1,
+      "с": "completed"
+    },
+    {
+      "г": 1,
+      "с": "completed"
+    },
+    {
+      "г": 1,
+      "с": "completed"
+    },
+    {
+      "г": 2,
+      "с": "completed"
+    },
+    {
+      "г": 2,
+      "с": "completed"
+    },
+    {
       "г": null,
       "с": "upcoming"
+    },
+    {
+      "г": 2,
+      "с": "completed"
     }
   ],
   "завершённыхВидно": 5,

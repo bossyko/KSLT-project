@@ -195,31 +195,39 @@ test.describe('Auth Forms — Registration Form', () => {
             await expect(emailInput).toHaveAttribute('autocomplete', 'email');
         });
 
-        test(`${authPage.name}: Registration form has password field`, async ({ page }) => {
+        /**
+         * ПАРОЛЯ В РЕГИСТРАЦИИ НЕТ — ЭТО РЕШЕНИЕ, А НЕ ПОЛОМКА.
+         *
+         * ПРОБЫ ПЕРЕПИСАНЫ 30.10. Две прежние требовали `#signup-password`
+         * и `#signup-confirm` и падали на всех трёх языках × двух видах.
+         * Полей нет В РАЗМЕТКЕ ВОВСЕ: они ушли коммитом `7eaaef2` от
+         * 21.09 — «Вариант B: регистрация без пароля, вход по коду».
+         * То есть пробы были красными ПЯТЬ НЕДЕЛЬ, и никто не знал:
+         * набор не прогоняли. БЕГУНОК, КОТОРЫЙ НЕ ЗАПУСКАЮТ, МОЛЧА
+         * ГНИЁТ — тот же вывод, что дали 42 сгнивших прувера 29.10.
+         *
+         * Теперь проба держит САМО РЕШЕНИЕ: пароля в регистрации нет, и
+         * она упадёт, если он вернётся мимо разговора.
+         */
+        test(`${authPage.name}: пароля в регистрации нет — вход по коду`, async ({ page }) => {
             await page.goto(authPage.path, { waitUntil: 'domcontentloaded' });
             await page.locator('.auth-tab[data-tab="signup"]').click();
             await page.waitForTimeout(200);
             await page.locator('#signupShowForm').click();
             await page.waitForTimeout(200);
 
-            const passwordInput = page.locator('#signup-password');
-            await expect(passwordInput).toBeVisible();
-            await expect(passwordInput).toHaveAttribute('type', 'password');
-            await expect(passwordInput).toHaveAttribute('autocomplete', 'new-password');
-            await expect(passwordInput).toHaveAttribute('minlength', '8');
-        });
+            expect(await page.locator('#signup-password').count(),
+                'пароль в регистрации не спрашивают с 21.09').toBe(0);
+            expect(await page.locator('#signup-confirm').count(),
+                'и подтверждения пароля тоже нет').toBe(0);
+            expect(await page.locator('#signupForm input[type="password"]').count(),
+                'ни одного поля пароля во всей форме регистрации').toBe(0);
 
-        test(`${authPage.name}: Registration form has confirm password field`, async ({ page }) => {
-            await page.goto(authPage.path, { waitUntil: 'domcontentloaded' });
-            await page.locator('.auth-tab[data-tab="signup"]').click();
-            await page.waitForTimeout(200);
-            await page.locator('#signupShowForm').click();
-            await page.waitForTimeout(200);
-
-            const confirmInput = page.locator('#signup-confirm');
-            await expect(confirmInput).toBeVisible();
-            await expect(confirmInput).toHaveAttribute('type', 'password');
-            await expect(confirmInput).toHaveAttribute('autocomplete', 'new-password');
+            /* А ЧТО ЕСТЬ — названо здесь же: иначе проба стерегла бы
+               только отсутствие и не заметила бы пустую форму. */
+            await expect(page.locator('#signup-email')).toBeVisible();
+            await expect(page.locator('#signup-firstname')).toBeVisible();
+            await expect(page.locator('#signup-lastname')).toBeVisible();
         });
 
         test(`${authPage.name}: Registration form has gender radio buttons`, async ({ page }) => {
@@ -235,30 +243,26 @@ test.describe('Auth Forms — Registration Form', () => {
             expect(await femaleRadio.count()).toBe(1);
         });
 
-        test(`${authPage.name}: Registration form has birth day dropdown`, async ({ page }) => {
+        /**
+         * ДАТЫ РОЖДЕНИЯ В РЕГИСТРАЦИИ НЕТ — ТОЖЕ РЕШЕНИЕ (21.09,
+         * `ff36dd3` «Регистрация: дата рождения уходит из формы»; шаг A5
+         * трекера: «дата рождения необязательна»). Прежние две пробы
+         * требовали день и месяц и падали пять недель.
+         */
+        test(`${authPage.name}: даты рождения в регистрации не спрашивают`,
+            async ({ page }) => {
             await page.goto(authPage.path, { waitUntil: 'domcontentloaded' });
             await page.locator('.auth-tab[data-tab="signup"]').click();
             await page.waitForTimeout(200);
             await page.locator('#signupShowForm').click();
             await page.waitForTimeout(200);
 
-            const birthDay = page.locator('#signup-birth-day');
-            await expect(birthDay).toBeVisible();
-        });
-
-        test(`${authPage.name}: Registration form has birth month dropdown`, async ({ page }) => {
-            await page.goto(authPage.path, { waitUntil: 'domcontentloaded' });
-            await page.locator('.auth-tab[data-tab="signup"]').click();
-            await page.waitForTimeout(200);
-            await page.locator('#signupShowForm').click();
-            await page.waitForTimeout(200);
-
-            const birthMonth = page.locator('#signup-birth-month');
-            await expect(birthMonth).toBeVisible();
-
-            // Should have 12 month options + 1 placeholder
-            const options = birthMonth.locator('option');
-            expect(await options.count()).toBe(13);
+            expect(await page.locator('#signup-birth-day').count(),
+                'дня рождения в регистрации нет').toBe(0);
+            expect(await page.locator('#signup-birth-month').count(),
+                'месяца тоже нет').toBe(0);
+            expect(await page.locator('#signupForm [id*="birth"]').count(),
+                'и ни одного поля с «birth» во всей форме').toBe(0);
         });
 
         test(`${authPage.name}: Registration form does NOT have birth year field`, async ({ page }) => {
@@ -307,34 +311,52 @@ test.describe('Auth Forms — Registration Form', () => {
     }
 });
 
+/**
+ * ПРАВИЛА ПАРОЛЯ СТОЯТ ТАМ, ГДЕ ПАРОЛЬ ЗАДАЮТ.
+ *
+ * ПРОБА ПЕРЕПИСАНА 30.10. Прежняя искала `#pwRules` в форме регистрации
+ * и падала на всех трёх языках × двух видах. Замер разметки:
+ * `#pwRules` НЕ СУЩЕСТВУЕТ ВОВСЕ, а правила живут двумя рядами —
+ * `#otpPwRules` (экран нового пароля после кода) и `#resetPwRules`
+ * (сброс по ссылке из письма). И это верно: с 21.09 регистрация пароля
+ * не спрашивает, значит и правилам там делать нечего.
+ *
+ * Проба теперь держит ОТНОШЕНИЕ: правила есть у каждого места, где
+ * задают пароль, и их НЕТ там, где пароля не спрашивают. Ряды ищутся по
+ * разметке, не нажатием: оба экрана за кодом из письма, а проба в базу
+ * не пишет и писем не ждёт.
+ */
 test.describe('Auth Forms — Password Rules Display', () => {
     for (const authPage of AUTH_PAGES) {
-        test(`${authPage.name}: Password rules are shown in registration form`, async ({ page }) => {
+        test(`${authPage.name}: правила пароля стоят у пароля, а не в регистрации`,
+            async ({ page }) => {
             await page.goto(authPage.path, { waitUntil: 'domcontentloaded' });
-            await page.locator('.auth-tab[data-tab="signup"]').click();
-            await page.waitForTimeout(200);
-            await page.locator('#signupShowForm').click();
-            await page.waitForTimeout(200);
 
-            const pwRules = page.locator('#pwRules');
-            await expect(pwRules).toBeVisible();
+            /* ДВА МЕСТА, ГДЕ ЗАДАЮТ ПАРОЛЬ, И У КАЖДОГО СВОЙ РЯД. */
+            for (const ряд of ['#otpPwRules', '#resetPwRules']) {
+                expect(await page.locator(ряд).count(), 'ряд правил ' + ряд).toBe(1);
+                for (const правило of ['length', 'upper', 'digit', 'special']) {
+                    expect(await page.locator(ряд + ' [data-rule="' + правило + '"]').count(),
+                        правило + ' в ' + ряд).toBe(1);
+                }
+            }
 
-            // Check individual rules exist
-            const lengthRule = pwRules.locator('[data-rule="length"]');
-            const upperRule = pwRules.locator('[data-rule="upper"]');
-            const digitRule = pwRules.locator('[data-rule="digit"]');
-            const specialRule = pwRules.locator('[data-rule="special"]');
+            /* И НИ ОДНОГО РЯДА В РЕГИСТРАЦИИ: пароля там не спрашивают. */
+            expect(await page.locator('#pwRules').count(),
+                '`#pwRules` — имя из той поры, когда пароль был в регистрации').toBe(0);
+            expect(await page.locator('#signupForm [data-rule]').count(),
+                'правил пароля в форме регистрации нет').toBe(0);
 
-            await expect(lengthRule).toBeVisible();
-            await expect(upperRule).toBeVisible();
-            await expect(digitRule).toBeVisible();
-            await expect(specialRule).toBeVisible();
-
-            // Verify text content
-            expect(await lengthRule.textContent()).toContain('8+');
-            expect(await upperRule.textContent()).toContain('A-Z');
-            expect(await digitRule.textContent()).toContain('0-9');
-            expect(await specialRule.textContent()).toContain('!@#$');
+            /* ТЕКСТ ПРАВИЛ ЧИТАЕМ У СБРОСА: там он задан разметкой на
+               всех трёх языках, а не подставляется словарём. */
+            const длина = page.locator('#resetPwRules [data-rule="length"]');
+            expect(await длина.textContent()).toContain('8+');
+            expect(await page.locator('#resetPwRules [data-rule="upper"]').textContent())
+                .toContain('A-Z');
+            expect(await page.locator('#resetPwRules [data-rule="digit"]').textContent())
+                .toContain('0-9');
+            expect(await page.locator('#resetPwRules [data-rule="special"]').textContent())
+                .toContain('!@#$');
         });
     }
 });
