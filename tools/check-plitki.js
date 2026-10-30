@@ -42,11 +42,12 @@ function чит(отн) {
     const п = path.join(КОРЕНЬ, отн);
     return fs.existsSync(п) ? fs.readFileSync(п, 'utf8') : '';
 }
-function безКомJS(т) {
-    return т
-        .replace(/\/\*[\s\S]*?\*\//g, м => м.replace(/[^\n]/g, ' '))
-        .replace(/(^|[^:])\/\/[^\n]*/g, (м, п) => п + ' '.repeat(м.length - п.length));
-}
+const { безКомментариев } = require('./bez-kommentariev.js');
+/* СНЯТИЕ КОММЕНТАРИЕВ В JS — ОБЩИЙ ДОМ (30.10). Своё было слепым:
+   строка с `accept="image` и открывашкой блочного комментария внутри
+   открывала для регулярки «комментарий» до следующей настоящей
+   закрывашки. Имя `безКомJS` оставлено — его зовут правила ниже. */
+const безКомJS = безКомментариев;
 
 const ДОМ_САЙТ = 'js/kslt-plitki.js';
 const ДОМ_ПРИЛ = 'mobile/www/js/kslt-plitki.js';

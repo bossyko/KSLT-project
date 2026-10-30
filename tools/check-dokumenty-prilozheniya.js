@@ -35,8 +35,13 @@ function правило(имя, условие, объяснение) {
     console.log('    ' + объяснение.split('\n').join('\n    '));
 }
 const чит = о => { const п = path.join(КОРЕНЬ, о); return fs.existsSync(п) ? fs.readFileSync(п, 'utf8') : ''; };
-const безКом = т => т.replace(/\/\*[\s\S]*?\*\//g, м => м.replace(/[^\n]/g, ' '))
-                     .replace(/(^|[^:])\/\/[^\n]*/g, (м, п) => п + ' '.repeat(м.length - п.length));
+const { безКомментариев } = require('./bez-kommentariev.js');
+/* СНЯТИЕ КОММЕНТАРИЕВ — ОБЩИЙ ДОМ (30.10). Своё `безКом` здесь было
+   слепым: строка с `accept="image` и открывашкой блочного комментария
+   внутри открывала для регулярки «комментарий» до следующей настоящей
+   закрывашки, и прибор не видел кода до конца файла. Имя `безКом`
+   оставлено — его зовут правила ниже. */
+const безКом = безКомментариев;
 
 const ДОМ = 'mobile/www/js/kslt-dokumenty.js';
 const ПРОФИЛЬ = 'mobile/www/js/screens/profile.js';

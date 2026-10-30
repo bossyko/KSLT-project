@@ -30,8 +30,13 @@ const path = require('path');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const чит = ф => fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8');
-const безКом = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/[^\n]*$/gm, '');
-
+const { безКомментариев } = require('./bez-kommentariev.js');
+/* СНЯТИЕ КОММЕНТАРИЕВ — ОБЩИЙ ДОМ (30.10). Своё `безКом` здесь было
+   слепым: строка `accept="image(косая)(звёздочка)"` в продукте
+   открывала для регулярки «комментарий» до следующей настоящей
+   закрывашки, и прибор не видел кода до конца файла. Имя `безКом`
+   оставлено — его зовут правила ниже. */
+const безКом = безКомментариев;
 const ADM = безКом(чит('css/admin.css'));
 const NJS = безКом(чит('js/admin/sections/news.js'));
 const EJS = безКом(чит('js/admin/core/editor.js'));
