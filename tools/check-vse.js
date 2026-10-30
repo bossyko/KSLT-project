@@ -276,7 +276,9 @@ const КУСКИ = [
     ['зов серверной функции — один дом',
      'check-zov.js', 'check-zov-otkat.js'],
     ['настройки базы — один дом',
-     'check-baza.js', 'check-baza-otkat.js']
+     'check-baza.js', 'check-baza-otkat.js'],
+    ['строки категорий в кабинете — одно определение',
+     'check-stroki-kategoriy.js', 'check-stroki-kategoriy-otkat.js']
 ];
 
 function прогнать(файл) {

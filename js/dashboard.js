@@ -1419,6 +1419,84 @@
             '</ul>';
     }
 
+    /**
+     * СТРОКИ КАТЕГОРИЙ ИГРОКА — ОДНО ОПРЕДЕЛЕНИЕ НА КАБИНЕТ (30.10).
+     *
+     * ЧТО БЫЛО. Один и тот же запрос с одним и тем же разбором стоял в
+     * этом файле ДВАЖДЫ: карточка в «Моём профиле» (:1448) и боковая
+     * колонка (:1527). Оба читали `player_categories` по игроку, оба
+     * выбрасывали `friendly`, оба тянули справочник категорий и оба
+     * считали место зовом `KSLT_RULES.местоВКатегории`. Разнились только
+     * имена классов — то есть разнилась РАЗМЕТКА, а не понятие.
+     *
+     * И НА ШВЕ УЖЕ РАЗОШЛОСЬ, КАК И ПОЛОЖЕНО. Справочник оба брали как
+     * `select('id, name')` — то есть ТОЛЬКО РУССКОЕ ИМЯ: в английском и
+     * кыргызском кабинете категория показывалась по-русски. На публичной
+     * странице игрока (`js/player.js`) тот же справочник берётся с
+     * `name_en, name_kg` и выбирается по языку. Один человек, два экрана,
+     * два разных имени одной категории.
+     * ТРЕТЬЕ ПИСАНИЕ ЖИВЁТ В `js/player.js`, ЧЕТВЁРТОЕ — В ДОМЕ
+     * `js/kslt-kategorii.js` (блок разбивки и профиль приложения). Свести
+     * все четыре в один дом — отдельный кусок: у них РАЗНЫЕ правила
+     * (страница игрока прячет закрытые и сортирует по ступени лестницы,
+     * кабинет показывает их приглушёнными и сортирует по очкам), и это
+     * решение про ВИД, а не про код. Записано находкой.
+     *
+     * Место по-прежнему считает `KSLT_RULES` — здесь ничего не считается
+     * заново: одно понятие, один счёт.
+     *
+     * @returns {Promise<Array>} [{ id, имя, очки, место, закрыта }]
+     */
+    async function строкиКатегорий(client, игрок) {
+        if (!client || !игрок || !игрок.id) return [];
+
+        var pcRes = await client.from('player_categories')
+            .select('category_id, points, closed_at')
+            .eq('player_id', игрок.id)
+            .order('points', { ascending: false });
+
+        /* Закрытые категории в кабинете ОСТАЮТСЯ, но приглушёнными: игрок
+           в них больше не выступает, и строка не должна читаться как
+           действующая. Friendly в рейтинге не участвует вовсе: турниры и
+           матчи записываются, очков за них нет. */
+        var мои = (pcRes.data || []).filter(function(r) {
+            return r.category_id !== 'friendly';
+        });
+        if (!мои.length) return [];
+
+        /* ИМЯ КАТЕГОРИИ — ПО ЯЗЫКУ СТРАНИЦЫ. Это и была та самая правка
+           на шве: `select('id, name')` отдавал русское имя на все три. */
+        var спр = await client.from('categories').select('id, name, name_en, name_kg');
+        var имена = {};
+        (спр.data || []).forEach(function(c) {
+            имена[c.id] = KSLT_YAZYK.выбрать(c.name_en || c.name,
+                                             c.name_kg || c.name, c.name);
+        });
+
+        var вых = [];
+        for (var i = 0; i < мои.length; i++) {
+            var р = мои[i];
+            /* ИМЯ `место` ЗДЕСЬ НЕ ЗАВОДИТСЯ НАРОЧНО. В карточке профиля
+               так звался КОНТЕЙНЕР, `var` жил во всей функции, и второе
+               объявление затирало первое: после цикла `место.innerHTML`
+               присваивался ЧИСЛУ — молча, без ошибки. Карточка не
+               рисовалась ни у кого, у кого есть хоть одна категория.
+               Нашёл прогон 12.10: 60 падений из 75. */
+            var ступень = window.KSLT_RULES && KSLT_RULES.местоВКатегории
+                ? await KSLT_RULES.местоВКатегории(client, р.category_id,
+                                                   р.points, игрок.gender)
+                : null;
+            вых.push({
+                id: р.category_id,
+                имя: имена[р.category_id] || р.category_id,
+                очки: р.points || 0,
+                место: ступень,
+                закрыта: !!р.closed_at
+            });
+        }
+        return вых;
+    }
+
     /* Карточка игрока в начале «Моего профиля»: фото, имя, категория, очки с
        местом в рейтинге, NTRP, счёт побед, QR и ссылка на публичную
        страницу. На телефоне боковое меню скрыто, и всё это было негде
@@ -1448,36 +1526,14 @@
                 .eq('id', profile.player_id).single();
 
             if (игрок.data) {
-                var катРес = await client.from('player_categories')
-                    .select('category_id, points, closed_at')
-                    .eq('player_id', profile.player_id)
-                    .order('points', { ascending: false });
-
-                var мои = (катРес.data || []).filter(function(r) { return r.category_id !== 'friendly'; });
-                if (мои.length) {
-                    var имена = {};
-                    var спрКат = await client.from('categories').select('id, name');
-                    (спрКат.data || []).forEach(function(c) { имена[c.id] = c.name; });
-
-                    for (var i = 0; i < мои.length; i++) {
-                        var р = мои[i];
-                        // Место — тем же счётом, что и в рейтинге: среди
-                        // игроков того же пола
-                        /* ИМЯ ЗАНЯТО: `место` снаружи — это контейнер карточки.
-                           `var` живёт во всей функции, и второе объявление
-                           затирало первое: после цикла `место.innerHTML`
-                           присваивался ЧИСЛУ, молча и без ошибки. Карточка не
-                           рисовалась ни у кого, у кого есть хоть одна
-                           категория — у меня категорий нет, и замер в браузере
-                           этого показать не мог. Нашёл прогон 12.10: 60 из 75 */
-                        var ступень = window.KSLT_RULES && KSLT_RULES.местоВКатегории
-                            ? await KSLT_RULES.местоВКатегории(client, р.category_id, р.points, игрок.data.gender)
-                            : null;
-                        строки += '<div class="db-profile-card-row' + (р.closed_at ? ' is-off' : '') + '">' +
-                            '<span>' + KSLT_экранировать(имена[р.category_id] || р.category_id) + '</span>' +
-                            '<span>' + (р.points || 0) + (ступень ? ' \u00b7 #' + ступень : '') + '</span>' +
-                        '</div>';
-                    }
+                var мои = await строкиКатегорий(client,
+                    { id: profile.player_id, gender: игрок.data.gender });
+                for (var i = 0; i < мои.length; i++) {
+                    var р = мои[i];
+                    строки += '<div class="db-profile-card-row' + (р.закрыта ? ' is-off' : '') + '">' +
+                        '<span>' + KSLT_экранировать(р.имя) + '</span>' +
+                        '<span>' + р.очки + (р.место ? ' \u00b7 #' + р.место : '') + '</span>' +
+                    '</div>';
                 }
 
                 var R = window.KSLT_RULES;
@@ -1519,44 +1575,25 @@
         var container = document.getElementById('dbSidebarRatings');
         if (!container || !profile.player_id || !client) return;
 
-        var res = await client.from('players').select('points, category_id, ntrp_singles, ntrp_doubles').eq('id', profile.player_id).single();
+        /* ПОЛ СПРАШИВАЕТСЯ ЗДЕСЬ ЖЕ, А НЕ ОТДЕЛЬНЫМ ЗАПРОСОМ НИЖЕ: он
+           нужен для счёта места, и тот же запрос уже идёт. */
+        var res = await client.from('players')
+            .select('points, category_id, ntrp_singles, ntrp_doubles, gender')
+            .eq('id', profile.player_id).single();
         if (!res.data) return;
 
         var player = res.data;
         var html = '';
 
-        // Категории игрока с очками и местом в каждой. Играть можно в своей
-        // и на ступень выше, очки в этих категориях считаются раздельно.
-        var pcRes = await client.from('player_categories')
-            .select('category_id, points, closed_at')
-            .eq('player_id', profile.player_id)
-            .order('points', { ascending: false });
-
-        // Закрытые категории остаются в карточке, но приглушёнными: игрок
-        // в них больше не выступает, и строка не должна читаться как
-        // действующая. Friendly в рейтинге не участвует вовсе
-        var myCats = (pcRes.data || []).filter(function(r) {
-            return r.category_id !== 'friendly';
-        });
-        if (myCats.length > 0) {
-            var catsRes = await client.from('categories').select('id, name');
-            var catName = {};
-            (catsRes.data || []).forEach(function(c) { catName[c.id] = c.name; });
-
-            var полИгрока = (await client.from('players').select('gender')
-                .eq('id', profile.player_id).maybeSingle()).data;
-
-            for (var i = 0; i < myCats.length; i++) {
-                var row = myCats[i];
-                var место = window.KSLT_RULES && KSLT_RULES.местоВКатегории
-                    ? await KSLT_RULES.местоВКатегории(client, row.category_id, row.points, полИгрока && полИгрока.gender)
-                    : null;
-                html += '<div class="db-sidebar-rating-row' +
-                        (row.closed_at ? ' db-sidebar-rating-off' : '') + '">' +
-                    '<span class="db-sidebar-rating-label">' + KSLT_экранировать(catName[row.category_id] || row.category_id) + '</span>' +
-                    '<span class="db-sidebar-rating-value">' + (row.points || 0) + (место ? ' · #' + место : '') + '</span>' +
-                '</div>';
-            }
+        var myCats = await строкиКатегорий(client,
+            { id: profile.player_id, gender: player.gender });
+        for (var i = 0; i < myCats.length; i++) {
+            var row = myCats[i];
+            html += '<div class="db-sidebar-rating-row' +
+                    (row.закрыта ? ' db-sidebar-rating-off' : '') + '">' +
+                '<span class="db-sidebar-rating-label">' + KSLT_экранировать(row.имя) + '</span>' +
+                '<span class="db-sidebar-rating-value">' + row.очки + (row.место ? ' · #' + row.место : '') + '</span>' +
+            '</div>';
         }
 
         // NTRP: одиночный разряд и парные турниры, с подписями
