@@ -3181,18 +3181,16 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                         // В паре выходит только сам игрок: заявка и место
                         // остаются второму. Решает сервер — там же правила
                         if (withdrawBtn.dataset.leave) {
-                            var сессия = await client.auth.getSession();
-                            var ответ = await fetch(SUPABASE_URL + '/functions/v1/tournament-register', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'apikey': SUPABASE_ANON_KEY,
-                                    'Authorization': 'Bearer ' + (сессия.data.session ? сессия.data.session.access_token : '')
-                                },
-                                body: JSON.stringify({ tournament_id: tournament.id, leave_pair: true })
-                            });
-                            var д = await ответ.json();
-                            if (!ответ.ok || д.error) {
+                            /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Было: заголовки
+                               руками и пустой `Bearer`, когда сессии нет
+                               — сервер отвечал 401, а слепой `json()`
+                               ронял разбор вместо показа причины. Дом без
+                               токена сервер не зовёт вовсе и отдаёт
+                               `not_logged_in` тем же ключом. */
+                            var д = await window.KSLT_ZOV.отИмени(client,
+                                'tournament-register',
+                                { tournament_id: tournament.id, leave_pair: true });
+                            if (!д || д.error) {
                                 withdrawBtn.disabled = false;
                                 window.KSLT_REG.notice({
                                     icon: '\u26A0\uFE0F',

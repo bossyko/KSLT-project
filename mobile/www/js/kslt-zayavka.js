@@ -50,8 +50,6 @@
      * @returns {Promise<{ok: boolean, data: Object}>}
      */
     API.зов = function (client, турнирId, extra) {
-        var адрес = global.SUPABASE_URL;
-        var ключ = global.SUPABASE_ANON_KEY;
         return client.auth.getSession().then(function (сессия) {
             var токен = (сессия.data && сессия.data.session)
                 ? сессия.data.session.access_token : '';
@@ -63,17 +61,17 @@
                     }
                 }
             }
-            return fetch(адрес + '/functions/v1/' + API.ФУНКЦИЯ, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + токен,
-                    'apikey': ключ,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(посылка)
-            });
-        }).then(function (res) {
-            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+            /* ЗОВ ЧЕРЕЗ ДОМ ЗОВА (30.10): заголовки, адрес, ключ и
+               разбор ответа — одно место на продукт. Здесь остаётся
+               своё: имя функции и отсев пустых полей.
+               `ok` ПРЕЖНЕЙ ФОРМЫ СОХРАНЁН: его читают зовущие — у
+               заявки «не ок» и «ок с отказом» это разные ветки. Дом
+               отдаёт сами данные, а `ok` выводится из них: нет кода
+               отказа — значит сервер согласился. */
+            return global.KSLT_ZOV.сТокеном(токен, API.ФУНКЦИЯ, посылка)
+                .then(function (data) {
+                    return { ok: !(data && data.error), data: data || {} };
+                });
         }).catch(function (e) {
             return { ok: false, data: { error: e.message } };
         });

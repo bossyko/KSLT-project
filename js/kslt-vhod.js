@@ -54,16 +54,11 @@
 
     var API = global.KSLT_VHOD = {};
 
-    /* ОДИН АДРЕС БАЗЫ НА ПРОДУКТ. Приложение держало здесь строку
-       `https://…supabase.co` и пустой ключ по умолчанию: пустой ключ даёт
-       молчаливый отказ сервера, а зашитый адрес — второе место, где
-       живёт адрес базы. Шаг A3.4 назвал это бедой в другом файле. */
-    function настройки() {
-        return {
-            адрес: global.SUPABASE_URL,
-            ключ: global.SUPABASE_ANON_KEY
-        };
-    }
+    /* АДРЕС БАЗЫ И КЛЮЧ ПЕРЕЕХАЛИ В ДОМ ЗОВА (30.10) ВМЕСТЕ С ЗОВОМ:
+       здесь они больше не нужны ни одной строке — проверено счётом
+       (`н.адрес`/`н.ключ` ноль вхождений), а не на вид. Приложение
+       когда-то держало тут зашитый адрес и пустой ключ по умолчанию;
+       теперь это понятие стоит в одном месте на оба продукта. */
 
     /**
      * ПОХОЖЕ ЛИ НА ПОЧТУ.
@@ -108,19 +103,16 @@
         return client.auth.getSession().then(function (s) {
             var токен = s.data && s.data.session && s.data.session.access_token;
             if (!токен) return false;
-            var н = настройки();
-            return fetch(н.адрес + '/functions/v1/security-notify', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + токен,
-                    'Content-Type': 'application/json',
-                    'apikey': н.ключ
-                },
-                body: JSON.stringify({
-                    event_type: событие,
-                    metadata: подробности || {}
-                })
-            }).then(function () { return true; }).catch(function () { return false; });
+            /* ЗОВ ЧЕРЕЗ ДОМ: заголовки и разбор — одно место на продукт.
+               ЗДЕСЬ ВАЖНО ИМЕННО МОЛЧАНИЕ: письмо о безопасности не
+               должно ломать то, что человек делал, поэтому ответ не
+               разбираем на слова, а только говорим «ушло / не ушло». */
+            return дом().сТокеном(токен, 'security-notify', {
+                event_type: событие,
+                metadata: подробности || {}
+            }).then(function (д) {
+                return !(д && д.error);
+            }).catch(function () { return false; });
         }).catch(function () { return false; });
     };
 
@@ -183,26 +175,22 @@
      * ошибка» без единого намёка на причину, а в консоли не оставалось и
      * того. У сайта это починено, у приложения стоял слепой `r.json()`.
      */
-    function разобрать(resp, имя) {
-        return resp.text().then(function (текст) {
-            var данные;
-            try {
-                данные = JSON.parse(текст);
-            } catch (e) {
-                if (global.console && console.error) {
-                    console.error('[KSLT] ' + имя + ' ответил не JSON:',
-                        resp.status, String(текст).slice(0, 300));
-                }
-                throw new Error(имя + ': HTTP ' + resp.status);
-            }
-            if (!resp.ok || данные.error) {
-                if (global.console && console.error) {
-                    console.error('[KSLT] ' + имя + ':', resp.status, данные);
-                }
-            }
-            return данные;
-        });
+    /* РАЗБОР ОТВЕТА ПЕРЕЕХАЛ В ДОМ ЗОВА (30.10): то же понятие нужно
+       кабинету, колокольчику, странице турнира и админке, а дом входа
+       они не грузят. Здесь остаётся ИМЯ, которым его уже зовут из
+       `auth.js` и приложения, — и оно ведёт в одно место.
+       ДОМ НЕ НАДЕЕТСЯ, А ПРОВЕРЯЕТ: без дома зова говорит вслух и
+       бросает, а не подставляет втихую свой разбор. */
+    function дом() {
+        var З = global.KSLT_ZOV;
+        if (!З) {
+            throw new Error('KSLT_VHOD: нет KSLT_ZOV — зов серверной ' +
+                'функции живёт в одном доме, второго здесь не держим');
+        }
+        return З;
     }
+
+    function разобрать(resp, имя) { return дом().разобрать(resp, имя); }
     API.разобрать = разобрать;
 
     /**
@@ -214,14 +202,7 @@
      * Отдан наружу как `зовФункции`: `telegram-auth` и `rate-limit`
      * своего правила не несут — им нужен только один способ позвать.
      */
-    function позвать(имя, тело) {
-        var н = настройки();
-        return fetch(н.адрес + '/functions/v1/' + имя, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': н.ключ },
-            body: JSON.stringify(тело)
-        }).then(function (resp) { return разобрать(resp, имя); });
-    }
+    function позвать(имя, тело) { return дом().зов(имя, тело); }
 
     API.зовФункции = позвать;
 
@@ -236,21 +217,7 @@
      * числом; здесь живёт один способ для тех, кто уже переехал.
      */
     API.зовОтИмени = function (client, имя, тело) {
-        return client.auth.getSession().then(function (сессия) {
-            var токен = (сессия.data && сессия.data.session)
-                ? сессия.data.session.access_token : '';
-            if (!токен) return { ok: false, error: 'not_logged_in' };
-            var н = настройки();
-            return fetch(н.адрес + '/functions/v1/' + имя, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': н.ключ,
-                    'Authorization': 'Bearer ' + токен
-                },
-                body: JSON.stringify(тело || {})
-            }).then(function (resp) { return разобрать(resp, имя); });
-        });
+        return дом().отИмени(client, имя, тело);
     };
 
     /**
@@ -307,18 +274,8 @@
     API.карточкаИгрока = function (client, тело) {
         return client.auth.getSession().then(function (сессия) {
             if (!(сессия.data && сессия.data.session)) return null;
-            var н = настройки();
-            return fetch(н.адрес + '/functions/v1/ensure-player-card', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': н.ключ,
-                    'Authorization': 'Bearer ' + сессия.data.session.access_token
-                },
-                body: JSON.stringify(тело || {})
-            }).then(function (resp) {
-                return разобрать(resp, 'ensure-player-card');
-            });
+            return дом().сТокеном(сессия.data.session.access_token,
+                'ensure-player-card', тело || {});
         }).catch(function () { return null; });
     };
 

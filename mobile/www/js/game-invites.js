@@ -154,19 +154,15 @@
     token().then(function (tk) {
       if (!tk) { toast(I('inv.error')); _sending = false; return; }
 
-      return fetch(SUPABASE_URL + '/functions/v1/send-game-invite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + tk,
-          'apikey': SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({ receiver_player_id: playerId })
-      }).then(function (r) {
-        return r.json().then(function (data) { return { ok: r.ok, data: data }; });
-      }).then(function (res) {
-        if (res.ok && res.data.success) { toast(I('inv.sent')); return; }
-        toast(errorText(res.data.error));
+      /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Дом сам отличает «не JSON» от отказа:
+         прежде `r.json()` бросал на упавшей функции, и человек видел
+         общее «ошибка» — а код отказа, по которому `errorText` выбирает
+         слово, терялся. */
+      return window.KSLT_ZOV.сТокеном(tk, 'send-game-invite',
+        { receiver_player_id: playerId }
+      ).then(function (данные) {
+        if (данные && данные.success) { toast(I('inv.sent')); return; }
+        toast(errorText(данные && данные.error));
       });
     }).catch(function (e) {
       console.error('[KSLT] invite send:', e);
@@ -196,16 +192,12 @@
    * push и письмом, кому что доступно.
    */
   INV.respond = function (inviteId, accept) {
+    /* ЗОВ ЧЕРЕЗ ДОМ (30.10): без токена сервер не зовётся вовсе, а
+       ответ разбирается через текст — упавшая функция больше не роняет
+       разбор. */
     return token().then(function (tk) {
-      return fetch(SUPABASE_URL + '/functions/v1/respond-game-invite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + tk,
-          'apikey': SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({ invite_id: inviteId, accept: accept })
-      }).then(function (r) { return r.json(); });
+      return window.KSLT_ZOV.сТокеном(tk, 'respond-game-invite',
+        { invite_id: inviteId, accept: accept });
     });
   };
 

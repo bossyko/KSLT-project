@@ -118,11 +118,20 @@ const ОТКАТЫ = [
     файл: 'pages/tournaments-overview-kg.html',
     было: '    <script src="../js/zayavka-texts.js?v=1"></script>\n', станет: '' },
 
-  { имя: 'дом поставлен ПОСЛЕ зовущего', ждём: 'дом и надписи грузятся ДО того, кто их зовёт',
-    файл: 'mobile/www/index.html',
-    было: '<script src="js/kslt-zayavka.js?v=1"></script>\n<script src="js/tournament-register.js?v=2"></script>',
-    станет: '<script src="js/tournament-register.js?v=2"></script>\n<script src="js/kslt-zayavka.js?v=1"></script>' }
 ];
+
+/* ЯКОРЬ БЕРЁТСЯ ИЗ ФАЙЛА — `tools/yakor-tega.js`. Здесь стояли оба тега
+   с версиями (`kslt-zayavka.js?v=1`, `tournament-register.js?v=2`), и
+   обе поднялись переездом зова в дом: откат отвечал «якорь встречается
+   0 раз». ВЕРСИЯ В ЯКОРЕ — ЭТО ЯКОРЬ НА ПОЛОЖЕНИИ. */
+const Я = require('./yakor-tega.js');
+{
+    const пара = Я.переставить(КОРЕНЬ, 'mobile/www/index.html',
+        'kslt-zayavka.js', 'tournament-register.js');
+    if (пара) ОТКАТЫ.push({ имя: 'дом поставлен ПОСЛЕ зовущего',
+        ждём: 'дом и надписи грузятся ДО того, кто их зовёт',
+        файл: 'mobile/www/index.html', было: пара.было, станет: пара.станет });
+}
 
 function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-zayav-'));

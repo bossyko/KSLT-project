@@ -460,11 +460,14 @@
                                 // и на почту. В колокольчик его кладёт база,
                                 // но до мессенджера она не дотягивается
                                 if (!res || !res.error) {
-                                    fetch(DB_URL + '/functions/v1/challenge-notify', {
-                                        method: 'POST',
-                                        headers: apiHeaders({ 'Content-Type': 'application/json' }),
-                                        body: JSON.stringify({ challenge_id: n.action_id })
-                                    }).catch(function(e) {
+                                    /* ЗОВ ФУНКЦИИ — ЧЕРЕЗ ДОМ (30.10).
+                                       `apiHeaders` остаётся: им собраны
+                                       ещё ШЕСТЬ зовов REST в этом файле,
+                                       а REST и функции — разные понятия.
+                                       Через дом идут только функции. */
+                                    KSLT_ZOV.сТокеном(TOKEN, 'challenge-notify',
+                                        { challenge_id: n.action_id }
+                                    ).catch(function(e) {
                                         console.warn('[KSLT] challenge-notify:', e);
                                     });
                                 }
@@ -505,11 +508,14 @@
                          * них незачем, он уже согласился.
                          */
                         function answerInvite(accept, box) {
-                            fetch(DB_URL + '/functions/v1/respond-game-invite', {
-                                method: 'POST',
-                                headers: apiHeaders({ 'Content-Type': 'application/json' }),
-                                body: JSON.stringify({ invite_id: n.action_id, accept: accept })
-                            }).then(function(r) { return r.json(); }).then(function(res) {
+                            /* ЗОВ ФУНКЦИИ — ЧЕРЕЗ ДОМ (30.10): прежде
+                               `r.json()` стоял слепым, и упавшая функция
+                               отвечала не JSON — разбор бросал, кнопки
+                               оставались выключенными, человек не узнавал
+                               ничего. */
+                            KSLT_ZOV.сТокеном(TOKEN, 'respond-game-invite',
+                                { invite_id: n.action_id, accept: accept }
+                            ).then(function(res) {
                                 if (res && res.error) {
                                     var msg = res.error === 'not_found' ? L2.gone
                                         : (res.error === 'already_answered' || res.error === 'not_yours') ? L2.done

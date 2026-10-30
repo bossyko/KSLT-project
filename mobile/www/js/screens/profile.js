@@ -1416,25 +1416,22 @@
             window.KSLT_AUTH.currentProfile = _profile;
             window.KSLT_APP.toast(I18N.t('profile.savedOk'));
 
-            // Security notify if phone changed
+            /* ПИСЬМО О СМЕНЕ НОМЕРА — ЗОВ ЧЕРЕЗ ДОМ ВХОДА (30.10).
+               ЭТО МЕСТО МОЙ ЖЕ ЗАМЕР СНАЧАЛА НЕ УВИДЕЛ: оно стоит
+               ПОСЛЕ `accept="image/*"` на :1259, а прибор, снимавший
+               комментарии регулярками, принял открывашку внутри строки
+               за начало комментария и ослеп до конца файла. Прибор
+               заменён на `tools/bez-kommentariev.js`, который знает
+               строки.
+               И БЕДА ЗДЕСЬ БЫЛА НЕ ОДНА: рядом лежал ЗАШИТЫЙ адрес базы
+               со `|| ''` вместо ключа. Пустой ключ даёт молчаливый отказ
+               сервера, а зашитый адрес — второе определение того, что с
+               шага A3.4 живёт в одном месте. */
             if (phone !== oldPhone && oldPhone) {
               try {
-                supabaseClient.auth.getSession().then(function(s) {
-                  var token = s.data && s.data.session && s.data.session.access_token;
-                  if (token) {
-                    var SUPABASE_URL = window.SUPABASE_URL || 'https://qqkzszesviukopgjbead.supabase.co';
-                    var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-                    fetch(SUPABASE_URL + '/functions/v1/security-notify', {
-                      method: 'POST',
-                      headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
-                      },
-                      body: JSON.stringify({ event_type: 'phone_changed', metadata: { old_phone: oldPhone, new_phone: phone } })
-                    }).catch(function() {});
-                  }
-                });
+                window.KSLT_VHOD.письмоБезопасности(supabaseClient,
+                  'phone_changed',
+                  { old_phone: oldPhone, new_phone: phone });
               } catch (e) {}
             }
           }
@@ -1876,19 +1873,13 @@
       btn.disabled = true;
       btn.textContent = I18N.t('profile.deleting');
 
-      // Call Edge Function for full account deletion
-      supabaseClient.auth.getSession().then(function(sess) {
-        var token = sess.data.session ? sess.data.session.access_token : '';
-        fetch(SUPABASE_URL + '/functions/v1/delete-account', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ action: 'delete' })
-        })
-        .then(function(r) { return r.json(); })
+      /* УДАЛЕНИЕ УЧЁТНОЙ ЗАПИСИ — ЗОВ ЧЕРЕЗ ДОМ (30.10). Здесь слепой
+         `r.json()` был опаснее всего: функция, упавшая на сервере,
+         отвечает не JSON, разбор бросал — и человек видел «ошибка» там,
+         где надо точно знать, удалена запись или нет. Дом отличает «не
+         JSON» (громко, с кодом ответа) от отказа с причиной. */
+      window.KSLT_ZOV.отИмени(supabaseClient, 'delete-account',
+        { action: 'delete' })
         .then(function(data) {
           if (data.error) throw new Error(data.error);
           window.KSLT_AUTH.logout().then(function() {
@@ -1902,7 +1893,6 @@
           btn.disabled = false;
           btn.textContent = I18N.t('profile.deleteBtn');
         });
-      });
     }
   }
 

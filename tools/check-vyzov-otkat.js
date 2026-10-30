@@ -89,12 +89,19 @@ const ОТКАТЫ = [
   { имя: 'у приложения пропало слово на ключ', ждём: 'у приложения есть слово на каждый ключ дома',
     файл: ПРИЛ, было: "    chalLimit:     ['pd.chalLimit', 'Слишком много висящих вызовов — дождитесь ответа'],\n", станет: '' },
 
-  { имя: 'дом вызова поставлен ДО дома входа',
-    ждём: 'на страницах игрока подключены оба дома, и в нужном порядке',
-    файл: 'pages/player-kg.html',
-    было: '<script src="../js/kslt-vhod.js?v=2"></script>\n    <script src="../js/kslt-vyzov.js?v=1"></script>',
-    станет: '<script src="../js/kslt-vyzov.js?v=1"></script>\n    <script src="../js/kslt-vhod.js?v=2"></script>' }
 ];
+
+/* ЯКОРЬ БЕРЁТСЯ ИЗ ФАЙЛА — `tools/yakor-tega.js`: тут стояли версии
+   `kslt-vhod.js?v=2` и `kslt-vyzov.js?v=1`, и первая поднялась
+   переездом зова в свой дом. */
+const Я = require('./yakor-tega.js');
+{
+    const пара = Я.переставить(КОРЕНЬ, 'pages/player-kg.html',
+        'kslt-vhod.js', 'kslt-vyzov.js');
+    if (пара) ОТКАТЫ.push({ имя: 'дом вызова поставлен ДО дома входа',
+        ждём: 'на страницах игрока подключены оба дома, и в нужном порядке',
+        файл: 'pages/player-kg.html', было: пара.было, станет: пара.станет });
+}
 
 function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vyz-'));

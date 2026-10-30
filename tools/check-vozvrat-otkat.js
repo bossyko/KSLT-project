@@ -13,13 +13,19 @@ const ОТКАТЫ = [
     файл: 'js/kslt-vozvrat.js',
     было: 'if (client.functions && client.functions.invoke) {',
     станет: 'if (false) {' },
-  { имя: 'откат на fetch убран', ждём: 'у дома есть откат на fetch',
+  /* ДВА ОТКАТА ПЕРЕЕХАЛИ ЗА ПОНЯТИЕМ (30.10): адрес, ключ и заголовки
+     ушли в дом зова, и в этом файле их больше нет — прежние якоря
+     (`адрес + '/functions/v1/…'`, `var адрес = global.SUPABASE_URL`)
+     встречались ноль раз. Теперь откат снимает ЗОВ ДОМА, а второй
+     вписывает адрес прямо здесь — ровно то, от чего правило сторожит. */
+  { имя: 'откат на зов через дом убран', ждём: 'у дома есть откат на зов через дом',
     файл: 'js/kslt-vozvrat.js',
-    было: "адрес + '/functions/v1/delete-account'", станет: "адрес + '/нет'" },
+    было: "return З.отИмени(client, 'delete-account', { action: 'restore' })",
+    станет: "return Promise.resolve({ ок: false, беда: 'нет' })" },
   { имя: 'адрес базы вписан в дом', ждём: 'адрес базы дом берёт у настроек, а не вписывает',
     файл: 'js/kslt-vozvrat.js',
-    было: '        var адрес = global.SUPABASE_URL;',
-    станет: "        var адрес = 'https://qqkzszesviukopgjbead.supabase.co';" },
+    было: "        if (!(global.SUPABASE_URL && global.SUPABASE_ANON_KEY)) {",
+    станет: "        var адрес = 'https://qqkzszesviukopgjbead.supabase.co';\n        if (!(адрес && global.SUPABASE_ANON_KEY)) {" },
   { имя: 'дом стал бросать вместо исхода', ждём: 'дом отдаёт исход, а не бросает',
     файл: 'js/kslt-vozvrat.js',
     было: 'ок: false', станет: 'оk: false', всеВхождения: true },
@@ -34,13 +40,21 @@ const ОТКАТЫ = [
     файл: 'js/account-restore.js',
     было: '        var метка = await KSLT_VOZVRAT.метка(client);',
     станет: "        var pr = await client.from('profiles').select('deleted_at').eq('id', 1).maybeSingle();\n        var метка = pr.data && pr.data.deleted_at;" },
-  { имя: 'страница грузит возврат без дома', ждём: 'дом подключён во всех разметках',
-    файл: 'pages/dashboard.html',
-    было: '<script src="../js/kslt-vozvrat.js?v=1"></script>', станет: '' },
-  { имя: 'дом поставлен ПОСЛЕ зовущего', ждём: 'дом грузится ДО того, кто его зовёт',
-    файл: 'mobile/www/index.html',
-    было: '<script src="js/kslt-vozvrat.js?v=1"></script>\n', станет: '' }
 ];
+
+/* ДВА ОТКАТА БЕРУТ ЯКОРЬ ИЗ ФАЙЛА — `tools/yakor-tega.js`: они держали
+   тег с `?v=1`, а версия дома поднялась до 2 вместе с переездом зова. */
+const Я = require('./yakor-tega.js');
+{
+    const стр = Я.тегСтрокой(КОРЕНЬ, 'pages/dashboard.html', 'kslt-vozvrat.js');
+    if (стр) ОТКАТЫ.push({ имя: 'страница грузит возврат без дома',
+        ждём: 'дом подключён во всех разметках',
+        файл: 'pages/dashboard.html', было: стр, станет: '' });
+    const прил = Я.тегСтрокой(КОРЕНЬ, 'mobile/www/index.html', 'kslt-vozvrat.js');
+    if (прил) ОТКАТЫ.push({ имя: 'дом поставлен ПОСЛЕ зовущего',
+        ждём: 'дом грузится ДО того, кто его зовёт',
+        файл: 'mobile/www/index.html', было: прил, станет: '' });
+}
 function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vozvr-'));
   for (const о of ['js', 'mobile/www', 'pages', 'tools'])

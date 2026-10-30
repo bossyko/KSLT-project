@@ -272,7 +272,9 @@ const КУСКИ = [
     ['значки у имени — один дом',
      'check-znachki.js', 'check-znachki-otkat.js'],
     ['онлайн снят с рейтинга',
-     'check-onlayn.js', 'check-onlayn-otkat.js']
+     'check-onlayn.js', 'check-onlayn-otkat.js'],
+    ['зов серверной функции — один дом',
+     'check-zov.js', 'check-zov-otkat.js']
 ];
 
 function прогнать(файл) {

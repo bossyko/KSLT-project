@@ -2331,20 +2331,17 @@
      * отправитель не узнавал ничего, пока сам не заглянет в кабинет
      */
     async function respondInvite(inviteId, accept) {
-        var session = await client.auth.getSession();
-        var token = session.data.session && session.data.session.access_token;
+        /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Было: заголовки руками и слепой
+           `resp.json()` — функция, упавшая на сервере, отвечает не JSON,
+           разбор бросал, и человек видел общее «ошибка». И зов уходил
+           даже БЕЗ сессии, с пустым `Bearer`: сервер отвечал 401, а
+           причина терялась там же. Дом без токена сервер не зовёт и
+           отдаёт `not_logged_in` тем же ключом, каким ответил бы он. */
         var res;
         try {
-            var resp = await fetch(SUPABASE_URL + '/functions/v1/respond-game-invite', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ invite_id: inviteId, accept: accept })
-            });
-            res = { data: await resp.json() };
+            res = { data: await window.KSLT_ZOV.отИмени(client,
+                'respond-game-invite',
+                { invite_id: inviteId, accept: accept }) };
         } catch (e) {
             res = { error: { message: e.message || 'Error' } };
         }
@@ -3692,18 +3689,12 @@
      */
     function notifyChallengeAuthor(challengeId) {
         if (!client || !window.SUPABASE_URL) return;
-        client.auth.getSession().then(function(sRes) {
-            var token = sRes.data.session ? sRes.data.session.access_token : '';
-            return fetch(window.SUPABASE_URL + '/functions/v1/challenge-notify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': window.SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({ challenge_id: challengeId })
-            });
-        }).then(function(r) { return r.json(); }).then(function(d) {
+        /* ЗОВ ЧЕРЕЗ ДОМ (30.10): прежде заголовки собирались руками, а
+           `r.json()` стоял слепым — и при 401 без сессии в консоль уходил
+           `SyntaxError` вместо причины. */
+        window.KSLT_ZOV.отИмени(client, 'challenge-notify',
+            { challenge_id: challengeId }
+        ).then(function(d) {
             if (!d || d.error) console.warn('[KSLT] challenge-notify:', d);
         }).catch(function(e) { console.warn('[KSLT] challenge-notify:', e); });
     }
@@ -6652,17 +6643,11 @@
                     return;
                 }
 
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/delete-account', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
-                    },
-                    body: JSON.stringify({ action: 'delete' })
-                });
-
-                var data = await resp.json();
+                /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Токен здесь уже на руках и
+                   проверен выше — поэтому `сТокеном`, а не `отИмени`:
+                   второй спрос сессии ничего бы не добавил. */
+                var data = await window.KSLT_ZOV.сТокеном(token,
+                    'delete-account', { action: 'delete' });
                 if (data.error) {
                     showMessage('settingsMessage', data.error, true);
                     btn.disabled = false;

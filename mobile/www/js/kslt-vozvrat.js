@@ -73,26 +73,19 @@
                 });
         }
 
-        /* ОТКАТ НА `fetch` — для клиента без `functions`. Адрес и ключ
-           берутся у дома настроек, а не вписываются здесь: иначе это
-           второе место, где живёт адрес базы. */
-        var адрес = global.SUPABASE_URL;
-        var ключ = global.SUPABASE_ANON_KEY;
-        if (!адрес || !ключ) {
+        /* ОТКАТ НА ЗОВ ЧЕРЕЗ ДОМ — для клиента без `functions`. Адрес,
+           ключ, заголовки и разбор ответа живут в `js/kslt-zov.js`: до
+           30.10 они стояли здесь своей копией, и слепой `r.json()`
+           ронял разбор, когда функция падала на сервере, — а это ВОЗВРАТ
+           УЧЁТНОЙ ЗАПИСИ, где человеку нужно знать точно. */
+        var З = global.KSLT_ZOV;
+        if (!З) {
+            return Promise.resolve({ ок: false, беда: 'нет дома зова' });
+        }
+        if (!(global.SUPABASE_URL && global.SUPABASE_ANON_KEY)) {
             return Promise.resolve({ ок: false, беда: 'нет адреса базы' });
         }
-        return client.auth.getSession().then(function (сессия) {
-            var с = сессия && сессия.data && сессия.data.session;
-            return global.fetch(адрес + '/functions/v1/delete-account', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + (с ? с.access_token : ''),
-                    'apikey': ключ,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ action: 'restore' })
-            });
-        }).then(function (r) { return r.json(); })
+        return З.отИмени(client, 'delete-account', { action: 'restore' })
           .then(function (data) {
               if (data && data.error) return { ок: false, беда: String(data.error) };
               return { ок: true };

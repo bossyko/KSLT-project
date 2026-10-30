@@ -98,7 +98,15 @@ const СОВПАДАЮТ = [
     'js/kslt-grafik-dannye.js', 'js/kslt-vozvrat.js',
     'js/kslt-pozdravlenie.js', 'js/kslt-schyot-matcha.js',
     'js/kslt-zayavka.js', 'js/zayavka-texts.js', 'js/kslt-vhod.js',
-    'js/kslt-uvedomleniya.js', 'js/kslt-vyzov.js', 'js/kslt-znachki.js'
+    'js/kslt-uvedomleniya.js', 'js/kslt-vyzov.js', 'js/kslt-znachki.js',
+    /* ЗАВЕДЁН ОБЩИМ 30.10: дом ЗОВА СЕРВЕРНОЙ ФУНКЦИИ. Адрес, ключ,
+       заголовки и разбор ответа собирались руками в ДВАДЦАТИ ТРЁХ местах
+       продукта пятью разными написаниями (посчитано по тексту
+       заголовков), и в семи из девяти публичных стоял слепой `r.json()`:
+       функция, упавшая на сервере, отвечает не JSON — разбор бросал, и
+       человек видел общее «ошибка» без причины. Копия обязана совпадать
+       до байта: разойдутся — беда родится ровно на шве. */
+    'js/kslt-zov.js'
 ];
 
 /**
