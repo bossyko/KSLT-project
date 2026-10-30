@@ -92,14 +92,20 @@ const ОТКАТЫ = [
      '  color: var(--lime-500);', '  color: var(--accent-text);',
      'текст бейджа на картинке не зависит от темы'],
 
+    /* ЯКОРЬ ПЕРЕВЯЗАН: кегль в блоке стал ступенью (`var(--fs-xs)`
+       вместо 11px), и якорь встречался ноль раз. Строки взяты из файла. */
     ['имя на пьедестале снова на голой белой краске', СТИЛИ,
-     '.rp-name {\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--text-primary);',
-     '.rp-name {\n  font-size: 11px;\n  font-weight: 600;\n  color: #fff;',
+     '.rp-name {\n  font-size: var(--fs-xs);\n  font-weight: 600;\n  color: var(--text-primary);',
+     '.rp-name {\n  font-size: var(--fs-xs);\n  font-weight: 600;\n  color: #fff;',
      'имя на пьедестале идёт через токен'],
 
+    /* ЯКОРЬ ПЕРЕВЯЗАН: между краской и кеглем встало пояснение о паре
+       «выпадашка и переключатель», и кегль стал 14 — якорь держался на
+       соседе, который уехал. Берём две строки блока `.rf-select`,
+       которые и есть само правило: заливка и краска текста. */
     ['выпадашка рейтинга снова на голой белой краске', СТИЛИ,
-     '  background: var(--glass);\n  color: var(--text-primary);\n  font-size: 12px;',
-     '  background: var(--glass);\n  color: #fff;\n  font-size: 12px;',
+     '  background: var(--glass);\n  color: var(--text-primary);\n  /* ВЫПАДАШКА И ПЕРЕКЛЮЧАТЕЛЬ',
+     '  background: var(--glass);\n  color: #fff;\n  /* ВЫПАДАШКА И ПЕРЕКЛЮЧАТЕЛЬ',
      'выпадашка рейтинга идёт через токен'],
 
     ['запрос баттлов снова тянет несуществующую связь', БАТТЛЫ,

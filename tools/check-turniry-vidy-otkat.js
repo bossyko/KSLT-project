@@ -108,9 +108,12 @@ const ОТКАТЫ = [
  '<a class="tc-none" href="',
  'плитку «Все турниры» рисует js/home-tournaments.js'],
 
+/* ЯЗЫК ВЫБИРАЕТ ДОМ `KSLT_YAZYK.выбрать`, а не тернарник на месте, —
+   поэтому в якоре больше нет вопросительного знака. Прежний якорь
+   встречался ноль раз. */
 ['увести плитку на другой адрес в кыргызской', 'js/home-tournaments.js',
- "? { href: 'pages/tournaments-overview-kg.html', текст: 'Бардык мелдештер' }",
- "? { href: 'pages/tournaments.html', текст: 'Бардык мелдештер' }",
+ "{ href: 'pages/tournaments-overview-kg.html', текст: 'Бардык мелдештер' }",
+ "{ href: 'pages/tournaments.html', текст: 'Бардык мелдештер' }",
  'плитка ведёт туда же, куда ссылка раздела в index-kg.html']
 ];
 

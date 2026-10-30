@@ -28,9 +28,12 @@ const ОТКАТЫ = [
    "' <span style=\"font-size:0.7rem;\">' + L.regDebt + '</span>'",
    'значки строки заявки — классом, а не инлайном'],
 
+  /* ЯКОРЬ ПЕРЕВЯЗАН: страна внешнего игрока теперь ЭКРАНИРУЕТСЯ
+     (`A.esc`) — она приходит из столбца, который пишет человек. Прежний
+     якорь без экрана встречался ноль раз. */
   ['js/admin/sections/bracket.js',
-   "' <span class=\"ad-reg-mark ad-reg-mark-ext\">' + (reg.external_country || 'EXT') + '</span>'",
-   "' <span style=\"display:inline-block;font-size:0.65rem;\">' + (reg.external_country || 'EXT') + '</span>'",
+   "' <span class=\"ad-reg-mark ad-reg-mark-ext\">' + A.esc(reg.external_country || 'EXT') + '</span>'",
+   "' <span style=\"display:inline-block;font-size:0.65rem;\">' + A.esc(reg.external_country || 'EXT') + '</span>'",
    'в строке заявки нет кеглей 0.65rem'],
 
   ['css/admin.css',

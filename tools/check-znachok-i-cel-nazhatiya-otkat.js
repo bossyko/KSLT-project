@@ -55,9 +55,13 @@ const ОТКАТЫ = [
    '.ad-btn-NETU-icon::before {',
    'у значка есть прозрачный слой нажатия'],
 
+  /* ЯКОРЬ СТАЛ НЕ ЕДИНСТВЕННЫМ: тот же слой 44×44 завёлся вторым
+     блоком — у крестика окна (`css/admin.css:4644`). Два вхождения —
+     это не «латаем первое», а «не знаем, какое»: держимся за СВОЙ блок
+     по его селектору. */
   ['сжать слой нажатия до размера значка', AD,
-   '    width: var(--btn-h-md);\n    height: var(--btn-h-md);\n}',
-   '    width: var(--btn-h-sm);\n    height: var(--btn-h-sm);\n}',
+   '.ad-btn-icon::before {\n    content: \'\';\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    width: var(--btn-h-md);\n    height: var(--btn-h-md);',
+   '.ad-btn-icon::before {\n    content: \'\';\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    width: var(--btn-h-sm);\n    height: var(--btn-h-sm);',
    'слой нажатия ровно 44 на 44, ступенью, а не числом'],
 
   /* ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ СВОЕГО БЛОКА. Первая версия отката

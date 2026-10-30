@@ -25,6 +25,8 @@ fs.cpSync(КОРЕНЬ, ВРЕМ, {
     }
 });
 
+const ВЕРСИЯ_БК = (fs.readFileSync(path.join(КОРЕНЬ, 'index.html'), 'utf8')
+    .match(/battle-cards\.js\?v=\d+/) || ['battle-cards.js?v=1'])[0];
 const MF = 'manifest.json', IX = 'index.html', PG = 'pages/admin.html',
       KZ = 'maket/korty-zamer.html', BK = 'js/battle-cards.js';
 
@@ -62,7 +64,7 @@ const ОТКАТЫ = [
   ['снять apple-touch-icon с одной страницы', IX,
    '    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">\n',
    '',
-   'страницы с apple-touch-icon найдены, и их 89'],
+   'страницы с apple-touch-icon найдены, и их 92'],
 
   ['дать странице в корне лишний ../', IX,
    'rel="apple-touch-icon" href="images/icons/apple-touch-icon.png"',
@@ -72,7 +74,7 @@ const ОТКАТЫ = [
   ['отнять ../ у страницы в подпапке', PG,
    'rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png"',
    'rel="apple-touch-icon" href="images/icons/apple-touch-icon.png"',
-   'страницы в подпапке ссылаются на иконку через ../, и их 86'],
+   'страницы в подпапке ссылаются на иконку через ../, и их 89'],
 
   ['вернуть абсолютную ссылку в ОДИНАРНЫХ кавычках', KZ,
    "'../pages/courts.html'", "'/pages/courts.html'",
@@ -96,10 +98,12 @@ const ОТКАТЫ = [
   ['убрать один якорь href="#"', IX,
    '<a href="#live" class="nav-item nav-item-live">',
    '<a href="live.html" class="nav-item nav-item-live">',
-   'якорей href="#" не меньше замеренных 106'],
+   'якорей href="#" не меньше замеренных 109'],
 
+  /* ВЕРСИЮ БЕРЁМ ИЗ ФАЙЛА, А НЕ ХРАНИМ ЧИСЛОМ: было `?v=22`, стало 32,
+     и откат отвечал «якорь встречается 0 раз». */
   ['развести версии battle-cards.js', IX,
-   'battle-cards.js?v=22', 'battle-cards.js?v=21',
+   ВЕРСИЯ_БК, ВЕРСИЯ_БК.replace(/\d+$/, н => Number(н) - 1),
    'версия battle-cards.js одна на все 6 ссылок'],
 
   ['сделать og:image относительным', IX,

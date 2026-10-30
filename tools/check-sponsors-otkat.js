@@ -67,14 +67,20 @@ const ОТКАТЫ = [
    '.spon-modal-close:focus-visible,\n.spon-modal-close-btn:focus-visible,\n.spon-modal-action:focus-visible {\n    outline-offset: 3px;\n    color: inherit;',
    'у окна есть кольцо фокуса на всех трёх видах управления'],
 
+  /* ПЕРЕМЕШИВАНИЕ СОБРАНО В СВОЮ ФУНКЦИЮ `перемешатьРавных` (кусок
+     205, когда ЧТЕНИЕ списка переехало в дом `kslt-sponsory.js`, а
+     ПОКАЗ остался здесь). Прежние якоря писали обе строки так, как они
+     лежали внутри `fetchSponsors`, с отступом в 12 пробелов, и после
+     переезда встречались ноль раз. Теперь строки взяты из файла как
+     есть — с отступом в 8, внутри функции. */
   ['js/sponsors-loader.js',
-   '            _cache = главные.concat(прочие);',
-   '            _cache = список;',
+   '        return главные.concat(прочие);',
+   '        return прочие;',
    'перемешивание одно, и стоит там, где список приходит из базы'],
 
   ['js/sponsors-loader.js',
-   '            список.forEach(function(s) { (s.is_hero ? главные : прочие).push(s); });',
-   '            список.forEach(function(s) { прочие.push(s); });',
+   '        (список || []).forEach(function (s) { (s.is_hero ? главные : прочие).push(s); });',
+   '        (список || []).forEach(function (s) { прочие.push(s); });',
    'генеральный в перемешивание не попадает'],
 
   ['js/sponsors-loader.js',

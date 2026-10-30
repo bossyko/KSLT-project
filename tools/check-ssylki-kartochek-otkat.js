@@ -151,9 +151,10 @@ const ОТКАТЫ = [
 
 /* Якорь держится за СВОЙ класс: строка про data-gender одинакова у крупной
    карточки и у её варианта боком — без класса якорь встречался бы дважды. */
+/* СВОЯ `esc` ЗАМЕНЕНА ОБЩИМ ДОМОМ `KSLT_экранировать`. */
 ['вернуть крупному турниру адрес атрибутом', КТ,
- "'<div class=\"to-featured\" data-status=\"' + esc(t.status) + '\"' +\n            ' data-gender=\"' + esc(t._gender || 'all') + '\">' +",
- "'<div class=\"to-featured\" data-status=\"' + esc(t.status) + '\"' +\n            ' data-gender=\"' + esc(t._gender || 'all') + '\" data-href=\"' + esc(t.href) + '\">' +",
+ "'<div class=\"to-featured\" data-status=\"' + KSLT_экранировать(t.status) + '\"' +\n            ' data-gender=\"' + KSLT_экранировать(t._gender || 'all') + '\">' +",
+ "'<div class=\"to-featured\" data-status=\"' + KSLT_экранировать(t.status) + '\"' +\n            ' data-gender=\"' + KSLT_экранировать(t._gender || 'all') + '\" data-href=\"' + KSLT_экранировать(t.href) + '\">' +",
  'крупная карточка турнира не несёт адреса атрибутом'],
 
 ['снять страховку у карточки баттла', КБ,

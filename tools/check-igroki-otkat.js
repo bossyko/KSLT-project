@@ -90,9 +90,10 @@ const ОТКАТЫ = [
    '.pt-name-link:hover,\n.pt-invite-btn:hover {',
    'видимый фокус есть И у ссылки, И у кнопки'],
 
+  /* СВОЯ `esc` ЗАМЕНЕНА ОБЩИМ ДОМОМ `KSLT_экранировать`. */
   ['js/home-partners.js',
-   'role="img" aria-label="\' +\n                    esc(L.online',
-   'data-rol="img" data-label="\' +\n                    esc(L.online',
+   'role="img" aria-label="\' +\n                    KSLT_экранировать(L.online',
+   'data-rol="img" data-label="\' +\n                    KSLT_экранировать(L.online',
    'точка «онлайн» подписана'],
 
   ['css/style.css',

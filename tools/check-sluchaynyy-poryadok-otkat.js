@@ -96,10 +96,9 @@ const ОТКАТЫ = [
        с `pages/dashboard.html` — и правило не падало, потому что ни один
        из шести зовущих дома лица на кабинете не подключён. Откат, который
        ничего не ломает, НИЧЕГО И НЕ ДОКАЗЫВАЕТ. */
-    ['снять дом лица со страницы «Партнёров»', 'pages/partners.html',
-     'js/kslt-lico.js?v=5',
-     'js/kslt-lico-НЕТ.js?v=5',
-     'дом лица подключён на каждой странице, где его зовут'],
+    /* ДВА ОТКАТА СНЯТЫ ОТСЮДА И СОБРАНЫ НИЖЕ ЧЕРЕЗ `yakor-tega.js`:
+       они держали в якоре номер версии (`kslt-lico.js?v=5`,
+       `match-score.js?v=13`), а версии давно 8 и 18. */
 
     ['вернуть правило счёта в «Баттлы»', 'js/battles-overview.js',
      '        return window.KSLT_YAZYK.счёт(n, one, few, many);',
@@ -116,10 +115,7 @@ const ОТКАТЫ = [
      '    MS.человечноНЕТ = человечно;',
      'дом окна счёта отдаёт «человечно», а кабинет зовёт его'],
 
-    ['снять дом окна счёта со страницы кабинета', 'pages/dashboard.html',
-     'js/match-score.js?v=13',
-     'js/match-score-НЕТ.js?v=13',
-     'дом окна счёта подключён там, где зовут «человечно»'],
+
 
     ['отнять у дома мест карту заявок', 'js/tournament-slots.js',
      '        картаЗаявок: картаЗаявок,',
@@ -136,9 +132,15 @@ const ОТКАТЫ = [
      '        var имя = function(id) {\n            if (!id) return \'—\';\n            var p = playersMap[id] || {};\n            return p.name || id;\n        };',
      'имя игрока по номеру объявлено в сетке один раз, и зовут его четыре места'],
 
+    /* ЯКОРЬ ПЕРЕВЯЗАН: между `function close()` и слушателями встала
+       ОСНАСТКА ОКНА (кусок 156) — якорь держался на соседе, который
+       уехал. Держимся за одну строку, которая живёт в этом месте
+       постоянно: саму `close`, зовущую общее закрытие. Таких строк в
+       файле две (`:159` и `:203`), поэтому берём её вместе со
+       следующей — зовом оснастки, которого у второй нет. */
     ['вернуть одному окну записи своё закрытие числом', 'js/tournament-register.js',
-     '        function close() { закрытьОкно(overlay); }\n        overlay.querySelector(\'.trn-register-modal-close\').addEventListener(\'click\', close);\n        overlay.querySelector(\'.trn-register-modal-btn\').addEventListener(\'click\', close);',
-     '        function close() {\n            overlay.classList.remove(\'active\');\n            setTimeout(function() { overlay.remove(); }, 200);\n        }\n        overlay.querySelector(\'.trn-register-modal-close\').addEventListener(\'click\', close);\n        overlay.querySelector(\'.trn-register-modal-btn\').addEventListener(\'click\', close);',
+     "        function close() { закрытьОкно(overlay); }\n        /* ОСНАСТКА ОКНА — ДОМ (кусок 156): роль диктору",
+     "        function close() {\n            overlay.classList.remove('active');\n            setTimeout(function() { overlay.remove(); }, 200);\n        }\n        /* ОСНАСТКА ОКНА — ДОМ (кусок 156): роль диктору",
      'закрытие окна объявлено в файле записи один раз, и 200 не стоит числом'],
 
     /* ОТКАТ НА ПРАВИЛО ВИДОВ: проба — файл в песке, и её надо туда нести. */
@@ -152,6 +154,21 @@ const ОТКАТЫ = [
      '    function shuffle(list) { var o = list.slice(); return o; }\n\n    /* СЛУЧАЙНЫЙ ПОРЯДОК — ДОМ `js/kslt-tasovka.js` (кусок 155). */\n    function shuffle(arr) { return window.KSLT_TASOVKA.перемешать(arr); }',
      'ни одно имя не объявлено дважды в одной области']
 ];
+
+/* ДВА ОТКАТА БЕРУТ ЯКОРЬ ИЗ ФАЙЛА — `tools/yakor-tega.js`. Имя файла
+   скрипта живёт в разметке постоянно, его `?v=` — нет. */
+const Я = require('./yakor-tega.js');
+[['снять дом лица со страницы «Партнёров»', 'pages/partners.html',
+  'kslt-lico.js', 'kslt-lico-НЕТ.js',
+  'дом лица подключён на каждой странице, где его зовут'],
+ ['снять дом окна счёта со страницы кабинета', 'pages/dashboard.html',
+  'match-score.js', 'match-score-НЕТ.js',
+  'дом окна счёта подключён там, где зовут «человечно»']
+].forEach(([имя, стр, было, станет, ждём]) => {
+    const пара = Я.переименовать(КОРЕНЬ, стр, было, станет);
+    if (пара) ОТКАТЫ.push([имя, стр, пара.было, пара.станет, ждём]);
+});
+
 
 const база = прогон(null);
 if (база.упало) {

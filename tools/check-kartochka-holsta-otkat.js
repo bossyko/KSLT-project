@@ -42,14 +42,19 @@ const Д = 'js/kslt-vaucher-kartochka.js', КТ = 'js/courts.js',
 
 const ОТКАТЫ = [
     /* 1. зовущий снова рисует сам — как было до круга */
+    /* ОКНО ВАУЧЕРА ЦЕЛИКОМ УШЛО В ДОМ (куски 146-148): у кортов и
+       тренеров не осталось ни `qrCanvas`, ни зова `KSLT_VAUCHER`, и оба
+       отката отвечали «якоря нет». Зовущие теперь только ЗОВУТ окно —
+       на этот зов и встаёт откат: рядом с ним дорисовывается своё, и
+       правило «карточку рисует только дом» обязано упасть. */
     ['вернуть кортам своё рисование градиента', КТ,
-     "                var qrCanvas = qrContainer.querySelector('canvas');\n                if (!qrCanvas) return;\n                var карточка = window.KSLT_VAUCHER.нарисовать({",
-     "                var qrCanvas = qrContainer.querySelector('canvas');\n                if (!qrCanvas) return;\n                var ctx = document.createElement('canvas').getContext('2d');\n                var grad = ctx.createLinearGradient(0, 0, 0, 520);\n                var карточка = window.KSLT_VAUCHER.нарисовать({",
+     "        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L_labels });",
+     "        var ctx = document.createElement('canvas').getContext('2d');\n        ctx.createLinearGradient(0, 0, 0, 520);\n        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L_labels });",
      'карточку рисует только дом, зовущие её не рисуют'],
 
     ['вернуть тренерам свой fillText', ТР,
-     "                var qrCanvas = qrContainer.querySelector('canvas');\n                if (!qrCanvas) return;\n                var карточка = window.KSLT_VAUCHER.нарисовать({",
-     "                var qrCanvas = qrContainer.querySelector('canvas');\n                if (!qrCanvas) return;\n                qrCanvas.getContext('2d').fillText('KSLT', 190, 42);\n                var карточка = window.KSLT_VAUCHER.нарисовать({",
+     "        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L });",
+     "        document.createElement('canvas').getContext('2d').fillText('KSLT', 190, 42);\n        KSLT_VAUCHER_BLOK.окноВаучера({ ваучер: ваучер, L: L });",
      'карточку рисует только дом, зовущие её не рисуют'],
 
     ['вернуть кабинету свой fillStyle числом', КБ,

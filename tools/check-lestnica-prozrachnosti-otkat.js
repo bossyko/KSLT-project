@@ -29,9 +29,16 @@ const T = 'css/tokens.css', C = 'css/coaches.css', S = 'css/services.css',
 const ОТКАТЫ = [
 
 /* ── число вместо имени ── */
+/* ЯКОРЬ ПЕРЕВЯЗАН НА ЖИВОЕ МЕСТО (29.10). Все три отката держались за
+   блок `border: var(--bw-hair) solid var(--alpha-white-04);` рядом с
+   `font-size: var(--fs-sm);` — такой пары в `css/coaches.css` больше нет,
+   и каждый откат отвечал «якорь встречается 0 раз», то есть не
+   доказывал ничего. Взята скидочная плитка тренера: её заливка
+   `--alpha-white-04` и граница `--alpha-white-08` встречаются в файле по
+   одному разу каждая (посчитано), а правила те же. */
 ['вернуть белую прозрачность числом', C,
- '    border: var(--bw-hair) solid var(--alpha-white-04);\n    font-size: var(--fs-sm);',
- '    border: var(--bw-hair) solid rgba(255,255,255,0.04);\n    font-size: var(--fs-sm);',
+ '    background: var(--alpha-white-04);\n    border-radius: 12px;',
+ '    background: rgba(255,255,255,0.04);\n    border-radius: 12px;',
  'белая и чёрная прозрачность записана именем'],
 
 ['вернуть чёрное затемнение числом', S,
@@ -46,8 +53,8 @@ const ОТКАТЫ = [
  'ступень берётся по РОЛИ, а не одна на всё'],
 
 ['дать границе ступень текста', C,
- '    border: var(--bw-hair) solid var(--alpha-white-04);\n    font-size: var(--fs-sm);',
- '    border: var(--bw-hair) solid var(--alpha-white-72);\n    font-size: var(--fs-sm);',
+ '    border: var(--bw-hair) solid var(--alpha-white-08);',
+ '    border: var(--bw-hair) solid var(--alpha-white-72);',
  'ступень берётся по РОЛИ, а не одна на всё'],
 
 /* ── лайм живёт тем же принципом ── */
@@ -81,8 +88,8 @@ const ОТКАТЫ = [
 
 /* ── ОБМАН, КОТОРЫЙ НЕ ПРОЙДЁТ: основа вне шкалы ── */
 ['число с основой вне шкалы правило НЕ трогает', C,
- '    border: var(--bw-hair) solid var(--alpha-white-04);\n    font-size: var(--fs-sm);',
- '    border: var(--bw-hair) solid rgba(233,184,36,0.08);\n    font-size: var(--fs-sm);',
+ '    background: var(--alpha-white-04);\n    border-radius: 12px;',
+ '    background: rgba(233,184,36,0.08);\n    border-radius: 12px;',
  null]
 
 ];

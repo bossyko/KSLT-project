@@ -60,11 +60,15 @@ const ОТКАТЫ = [
      [СТР, '<script src="../js/kslt-chisla.js?v=1"></script>\n    ', ''],
      'дом чисел подключён на каждой странице, где его зовут'],
 
+    /* ЯКОРЬ БЕРЁТСЯ ИЗ ФАЙЛА — см. `tools/yakor-tega.js`. Здесь стояли
+       оба тега с версиями (`kslt-chisla.js?v=1`, `tournaments-overview.js?v=54`),
+       и обе уже другие: откат ронял ДРУГОЕ правило, потому что первая
+       замена не срабатывала, а вторая — срабатывала. */
     ['поставить дом ПОСЛЕ его читателя',
      [СТР, т => {
-         const дом = '<script src="../js/kslt-chisla.js?v=1"></script>\n    ';
-         const читатель = '<script src="../js/tournaments-overview.js?v=54"></script>';
-         return т.replace(дом, '').replace(читатель, читатель + '\n    ' + дом.trim());
+         const Я = require('./yakor-tega.js');
+         const пара = Я.переставить(КОРЕНЬ, СТР, 'kslt-chisla.js', 'tournaments-overview.js');
+         return пара ? т.replace(пара.было, пара.станет) : т;
      }],
      'дом чисел подключён РАНЬШЕ тех, кто его зовёт'],
 

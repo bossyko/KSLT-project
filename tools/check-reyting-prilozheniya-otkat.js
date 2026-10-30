@@ -47,9 +47,13 @@ const J = 'mobile/www/js/screens/rating.js';
 const I = 'mobile/www/js/i18n.js';
 
 const ОТКАТЫ = [
+    /* ГРАНИЦЫ 414 В ФАЙЛЕ БОЛЬШЕ НЕТ ВОВСЕ — её и снял этот кусок, —
+       поэтому якорь на неё встречался ноль раз: откат ничего не
+       доказывал. Теперь он ЗАВОДИТ такую границу заново, рядом с
+       единственной живой (640), и правило обязано упасть. */
     ['границу 414 вернули в раздел', C,
-     '@media (min-width: 414px) {',
-     '@media (min-width: 414px) {\n  .rr-name { font-size: 14px; }',
+     '@media (min-width: 640px) and (min-height: 640px) {',
+     '@media (min-width: 414px) {\n  .rr-name { font-size: 14px; }\n}\n@media (min-width: 640px) and (min-height: 640px) {',
      'раздел рейтинга не стоит ни на одной границе ширины'],
 
     ['имя снова тянется по ширине', C,

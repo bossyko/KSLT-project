@@ -47,9 +47,12 @@ const ОТКАТЫ = [
      зов стал одинаковым в ОБОИХ местах сетки, и короткий якорь встречался
      дважды. Это не беда прувера, а признак, что дубликат действительно
      сведён. */
-  ['отнять у одного места зов ключа', BR,
-   "список.innerHTML = '<div style=\"padding:8px;color:var(--text-muted);font-size:var(--fs-sm);\">' +\n                        L.brkPlayersNeNotFound",
-   "список.innerHTML = '<div style=\"padding:8px;color:var(--text-muted);font-size:var(--fs-sm);\">' +\n                        'Игроков не найдено'",
+  [/* ИНЛАЙНОВЫЙ СТИЛЬ В ЭТОМ МЕСТЕ СНЯТ — пустое состояние зовётся
+   классами `ad-spisok-pusto ad-tiho`, и якорь с `style="padding:8px…"`
+   встречался ноль раз. Строка взята из файла (`bracket.js:706`). */
+'отнять у одного места зов ключа', BR,
+   "список.innerHTML = '<div class=\"ad-spisok-pusto ad-tiho\">' +\n                        L.brkPlayersNeNotFound",
+   "список.innerHTML = '<div class=\"ad-spisok-pusto ad-tiho\">' +\n                        'Игроков не найдено'",
    'все три места зовут этот ключ, а не свой текст'],
 
   ['зашить текст обратно в уведомление', PL,

@@ -36,8 +36,11 @@ const НАЖИМАЕМЫЕ = ['.db-sidebar-link', '.db-mobile-tab', '.db-subsect
 
 const ОТКАТЫ = [
   /* ── краска ── */
-  [CSS, '.db-stats-note {\n    margin: -8px 0 16px;\n    color: var(--text-muted);',
-        '.db-stats-note {\n    margin: -8px 0 16px;\n    color: var(--text-dim);',
+  /* ИМЯ ПЕРЕЕХАЛО В ДОМ ПЛИТОК (шаг A3.5): подпись под плитками зовётся
+     `kst-note`, а не `db-stats-note`, и прежний якорь встречался ноль
+     раз. Приставка `kst-` — дома, он стоит в обоих продуктах. */
+  [CSS, '.kst-note {\n    margin: -8px 0 16px;\n    color: var(--text-muted);',
+        '.kst-note {\n    margin: -8px 0 16px;\n    color: var(--text-dim);',
    'краска текста не падает ниже порога AA'],
 
   /* ── вес ── */

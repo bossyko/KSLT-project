@@ -20,7 +20,8 @@ const ФАЙЛЫ = ['css/tokens.css',
     'css/scoreboard.css', 'pages/scoreboard.html', 'js/scoreboard.js',
     'css/verify.css', 'pages/verify.html', 'pages/verify-en.html',
     'pages/verify-kg.html', 'js/verify.js',
-    'js/courts.js', 'js/coaches.js', 'js/dashboard.js'
+    'js/courts.js', 'js/coaches.js', 'js/dashboard.js',
+    'js/kslt-vaucher-blok.js'
 ];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
@@ -28,6 +29,7 @@ const исходник = {};
 const ТАБ = 'css/scoreboard.css', СТРТ = 'pages/scoreboard.html', ДТ = 'js/scoreboard.js';
 const ВАУ = 'css/verify.css', СТРВ = 'pages/verify.html', ДВ = 'js/verify.js';
 const КОРТЫ = 'js/courts.js', ТРЕН = 'js/coaches.js', КАБ = 'js/dashboard.js';
+const БЛОК = 'js/kslt-vaucher-blok.js';
 
 const ОТКАТЫ = [
 
@@ -216,10 +218,13 @@ const ОТКАТЫ = [
  'техническое сообщение человеку не показывается'],
 
 /* ЯКОРЬ ПОСЛЕ КУСКА 137: тройка локалей стала одним зовом. */
-['вернуть дате ваучера двухходовку', ДВ,
- "var ЛОКАЛЬ = KSLT_YAZYK.выбрать('en-US', 'ky-KG', 'ru-RU');",
- "var ЛОКАЛЬ = KSLT_YAZYK.en ? 'en-US' : 'ru-RU';",
- 'дата ваучера знает три языка, а не два'],
+/* ЛОКАЛЬ СТАЛА ОДНИМ ПОНЯТИЕМ В ДОМЕ ЯЗЫКА (кусок 147):
+   `KSLT_YAZYK.локаль`. Прежний якорь со своим `выбрать('en-US',…)`
+   встречался ноль раз, и имя правила в стороже тоже переписано. */
+['вернуть дате ваучера свой счёт локали', ДВ,
+ 'var ЛОКАЛЬ = KSLT_YAZYK.локаль;',
+ "var ЛОКАЛЬ = KSLT_YAZYK.en ? 'en-US' : 'ky-KG';",
+ 'дата ваучера берёт локаль у дома языка'],
 
 ['вернуть инлайновое умолчание в разметку', ДВ,
  '\'<div class="vr-pin-error-msg" id="vrPinError" role="alert"></div>\'',
@@ -234,20 +239,20 @@ const ОТКАТЫ = [
 /* ЯКОРЬ ОБНОВЛЁН 17.10: адрес сайта уехал из строк в `window.KSLT_SAYT`
    (круг «адрес сайта»), и откат держался за написание, которого больше
    нет. Держимся за хвост, который живёт в этом месте постоянно. */
-['вернуть кортам русский адрес ваучера', КОРТЫ,
- "window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token='",
- "'https://kslt.netlify.app/pages/verify.html?token='",
- 'русского адреса ваучера в генераторах QR не осталось'],
+/* ТРИ ГЕНЕРАТОРА QR СТАЛИ ОДНИМ ДОМОМ (куски 145, 146, 148): адрес
+   собирает `js/kslt-vaucher-blok.js`, а корты, тренеры и кабинет зовут
+   его окно. Три отката выше били по трём файлам, где этого кода уже
+   нет, — три «?» вместо трёх доказательств. Теперь они бьют по тому же
+   отношению там, где оно живёт: язык в адресе и ЕДИНСТВЕННОСТЬ места. */
+['отнять у адреса ваучера язык', БЛОК,
+ "        return window.KSLT_SAYT.адрес + '/pages/verify' +\n               KSLT_YAZYK.суффикс + '.html?token=' + токен;",
+ "        return window.KSLT_SAYT.адрес + '/pages/verify.html?token=' + токен;",
+ 'адрес ваучера несёт язык в единственном генераторе'],
 
-['вернуть кабинету русский адрес ваучера', КАБ,
- "window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token='",
- "'https://kslt.netlify.app/pages/verify.html?token='",
- 'русского адреса ваучера в генераторах QR не осталось'],
-
-['завести четвёртое место, где строится адрес ваучера', ТРЕН,
- "        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;",
- "        var verifyUrl = window.KSLT_SAYT.адрес + '/pages/verify' + verifySuffix + '.html?token=' + voucher.qr_token;\n        var verifyUrl2 = 'https://kslt.netlify.app/pages/verify.html?token=' + voucher.qr_token;",
- 'мест, где строится адрес ваучера, ровно три — во всей папке js']
+['завести второе место, где строится адрес ваучера', ТРЕН,
+ '    function coachMapLinks(coach) {',
+ "    function адресВаучера2(токен) {\n        return window.KSLT_SAYT.адрес + '/pages/verify.html?token=' + токен;\n    }\n\n    function coachMapLinks(coach) {",
+ 'место, где строится адрес ваучера, ровно одно — во всей папке js']
 
 ];
 
@@ -258,6 +263,17 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-tablo-'));
 /* Общий блок отказа от движения живёт в tokens.css, и правило читает
    его по соседству — без копии песочница не проходит сама по себе. */
 fs.copyFileSync(path.join(__dirname, '..', 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
+
+/* ПЕСОЧНИЦА БЕРЁТ ВСЮ ПАПКУ `js`, А НЕ СПИСОК ФАЙЛОВ. Сторож считает
+   места, где строится адрес ваучера, ПО ВСЕЙ ПАПКЕ (`check-tablo-vaucher.js:300`
+   — `readdirSync(КОРЕНЬ/js)`), а копировались только названные файлы. Когда
+   адрес переехал в дом `js/kslt-vaucher-blok.js`, прувер УПАЛ С ENOENT:
+   сторож в песочнице искал файл, которого там нет. Список файлов ниже
+   остаётся — он нужен для ВОЗВРАТА прежнего текста, а не для того, чтобы
+   песочница была полной. */
+fs.readdirSync(path.join(КОРЕНЬ, 'js')).filter(ф => ф.endsWith('.js')).forEach(ф => {
+    fs.copyFileSync(path.join(КОРЕНЬ, 'js', ф), path.join(песок, 'js', ф));
+});
 
 /* Сторож покрытия читает ВСЮ папку pages и ВСЕ чекеры — копируем их. */
 fs.readdirSync(path.join(КОРЕНЬ, 'pages')).filter(ф => ф.endsWith('.html')).forEach(ф => {

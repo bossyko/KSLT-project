@@ -227,9 +227,12 @@ const ОТКАТЫ = [
     "photo: p.photo || 'https://placehold.co/80x80/1a1a1a/888?text=?',",
     'index.html и её скрипты не ходят за картинками наружу']);
 
+/* ЭКРАНИРОВАНИЕ ПЕРЕЕХАЛО В ОБЩИЙ ДОМ: своя `esc` в карточке баттла
+   заменена на `KSLT_экранировать`, и прежний якорь встречался ноль раз —
+   откат отвечал «?» вместо доказательства. */
 ОТКАТЫ.push(['вернуть placehold.co в карточку баттла', 'js/battle-cards.js',
-    "                ? '<img src=\"' + esc(src) + '\" alt=\"\">'",
-    "                ? '<img src=\"' + esc(src || 'https://placehold.co/60x60/1a1a1a/666?text=?') + '\" alt=\"\">'",
+    "                ? '<img src=\"' + KSLT_экранировать(src) + '\" alt=\"\">'",
+    "                ? '<img src=\"' + KSLT_экранировать(src || 'https://placehold.co/60x60/1a1a1a/666?text=?') + '\" alt=\"\">'",
     'index.html и её скрипты не ходят за картинками наружу']);
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'live-otkat-'));

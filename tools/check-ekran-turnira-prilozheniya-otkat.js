@@ -125,9 +125,12 @@ const ОТКАТЫ = [
      "      var текст = esc(t.description); var нет = (",
      'описание турнира сохраняет абзацы и берёт перевод'],
 
+    /* ЯКОРЬ ПЕРЕВЯЗАН: низ окна больше не `bottom: 0` — он отбивает
+       полосу вкладок (`calc(var(--tab-height) + var(--safe-bottom))`), и
+       якорь встречался ноль раз. Строки взяты из файла. */
     ['у окна-экрана снова безусловная ширина', C,
-     '.td-overlay {\n  position: fixed;\n  top: 0; bottom: 0;\n  left: 0; right: 0;\n  margin: 0 auto;',
-     '.td-overlay {\n  position: fixed;\n  top: 0; bottom: 0;\n  left: 0; right: 0;\n  max-width: 440px;\n  margin: 0 auto;',
+     '.td-overlay {\n  position: fixed;\n  top: 0; bottom: calc(var(--tab-height) + var(--safe-bottom));\n  left: 0; right: 0;\n  margin: 0 auto;',
+     '.td-overlay {\n  position: fixed;\n  top: 0; bottom: calc(var(--tab-height) + var(--safe-bottom));\n  left: 0; right: 0;\n  max-width: 440px;\n  margin: 0 auto;',
      'у окна-экрана нет безусловной границы ширины'],
 
     ['пара снова склеена одной строкой', G,
@@ -145,16 +148,23 @@ const ОТКАТЫ = [
      '.td-tab:focus-was { outline: none; }',
      'у вкладок и таблеток кругов своя обводка фокуса'],
 
-    ['версия правленого файла не поднята', H,
-     'js/screens/home.js?v=8',
-     'js/screens/home.js?v=1',
-     'версии правленых файлов подняты'],
-
-    ['общий дом не подключён', H,
-     '<script src="js/kslt-setka.js?v=1"></script>\n',
-     '',
-     'общий дом подключён в приложении']
 ];
+
+/* ДВА ОТКАТА БЕРУТ ЯКОРЬ ИЗ ФАЙЛА — `tools/yakor-tega.js`. Оба держали
+   номер версии (`home.js?v=8`, `kslt-setka.js?v=1`); версии выросли, и
+   оба отвечали «якорь встречается 0 раз». Правило требует «не ниже
+   восьми», поэтому откат опускает версию НИЖЕ порога, какой бы она ни
+   была сейчас. */
+{
+    const Я = require('./yakor-tega.js');
+    const домашний = Я.тег(КОРЕНЬ, H, 'screens/home.js');
+    if (домашний) ОТКАТЫ.push(['версия правленого файла не поднята', H,
+        домашний, домашний.replace(/home\.js\?v=\d+/, 'home.js?v=1'),
+        'версии правленых файлов подняты']);
+    const сетка = Я.тегСтрокой(КОРЕНЬ, H, 'kslt-setka.js');
+    if (сетка) ОТКАТЫ.push(['общий дом не подключён', H,
+        сетка, '', 'общий дом подключён в приложении']);
+}
 
 let плохо = 0;
 ОТКАТЫ.forEach(function (о, i) {

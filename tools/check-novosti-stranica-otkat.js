@@ -125,8 +125,9 @@ const ОТКАТЫ = [
   [JS, `    kg: {`, `    kg_было: {`,
    'подписи страницы есть на всех трёх языках'],
 
-  [JS, `esc(searchQuery ? (labels.emptySearchHint || 'Проверьте написание или очистите поиск')`,
-       `esc((`,
+  /* СВОЯ `esc` ЗАМЕНЕНА ОБЩИМ ДОМОМ `KSLT_экранировать`. */
+  [JS, `KSLT_экранировать(searchQuery ? (labels.emptySearchHint || 'Проверьте написание или очистите поиск')`,
+       `KSLT_экранировать((`,
    'пустые состояния говорят РАЗНОЕ про поиск и про категорию'],
 
   [CSS, `@media (prefers-reduced-motion: reduce) {`, `@media (max-width: 992px) {`,

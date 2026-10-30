@@ -95,14 +95,17 @@ const ОТКАТЫ = [
 
 /* ── один h1 на страницу ──────────────────────────────────────────────── */
 
+/* ИМЯ ТЕПЕРЬ ЭКРАНИРУЕТСЯ ОБЩИМ ДОМОМ: `court.name` и `coach.name`
+   идут через `KSLT_экранировать` — они из столбцов, которые пишет
+   человек. Прежние якоря с сырым именем встречались ноль раз. */
 ['вернуть второй h1 в карточку корта', ДК,
- '\'<div class="ct-detail-title-row"><div class="ct-detail-name">\' + court.name + \'</div>\' +',
- '\'<div class="ct-detail-title-row"><h1>\' + court.name + \'</h1>\' +',
+ '\'<div class="ct-detail-title-row"><div class="ct-detail-name">\' + KSLT_экранировать(court.name) + \'</div>\' +',
+ '\'<div class="ct-detail-title-row"><h1>\' + KSLT_экранировать(court.name) + \'</h1>\' +',
  'имя в карточке корта — класс, а не заголовок'],
 
 ['вернуть второй h1 в карточку тренера', ДТ,
- '\'<div class="co-detail-title-row"><div class="co-detail-name">\' + coach.name + \'</div>\' +',
- '\'<div class="co-detail-title-row"><h1>\' + coach.name + \'</h1>\' +',
+ '\'<div class="co-detail-title-row"><div class="co-detail-name">\' + KSLT_экранировать(coach.name) + \'</div>\' +',
+ '\'<div class="co-detail-title-row"><h1>\' + KSLT_экранировать(coach.name) + \'</h1>\' +',
  'имя в карточке тренера — класс, а не заголовок'],
 
 ['вернуть правилу имени селектор по тегу', К,

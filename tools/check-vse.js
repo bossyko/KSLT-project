@@ -127,7 +127,11 @@ const КУСКИ = [
     ['важность', 'check-vazhnost.js', 'check-vazhnost-otkat.js'],
     ['копии функций', 'check-kopii-funkciy.js', 'check-kopii-funkciy-otkat.js'],
     ['отказ от движения', 'check-otkaz-ot-dvizheniya.js', 'check-otkaz-ot-dvizheniya-otkat.js'],
-    ['статус турнира', 'check-status-turnira.js', 'check-status-turnira-otkat.js'],
+    /* ИМЯ РАЗВЕДЕНО 29.10: в бегунке было ДВА куска с именем «статус
+       турнира» (этот и `check-status.js` выше), и отчёт становился
+       неоднозначным — я сам пошёл проверять не тот прувер и решил, что
+       падение «мерцает». ОДНО ИМЯ НА ОДИН КУСОК. */
+    ['статус турнира — один дом', 'check-status-turnira.js', 'check-status-turnira-otkat.js'],
     ['счёт в доме', 'check-schyot-doma.js', 'check-schyot-doma-otkat.js'],
     ['тона бейджа админки', 'check-badge-tona.js', 'check-badge-tona-otkat.js'],
     ['мёртвые классы кабинета', 'check-mertvye-klassy.js', 'check-mertvye-klassy-otkat.js'],

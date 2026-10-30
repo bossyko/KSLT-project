@@ -74,9 +74,10 @@ const ОТКАТЫ = [
  "'<a class=\"hn-none\" href=\"'",
  'плитку рисует js/home-news.js'],
 
+/* ЯЗЫК ВЫБИРАЕТ ДОМ `KSLT_YAZYK.выбрать` — тернарника на месте нет. */
 ['увести плитку новостей на другой адрес в английской', 'js/home-news.js',
- "? { href: 'pages/news-en.html', текст: 'All news' }",
- "? { href: 'pages/news.html', текст: 'All news' }",
+ "{ href: 'pages/news-en.html', текст: 'All news' }",
+ "{ href: 'pages/news.html', текст: 'All news' }",
  'плитка ведёт туда же, куда ссылка раздела в index-en.html'],
 
 /* ── хвосты 23.09: дубль, отступы заголовка, дата в тесной карточке ─────── */
