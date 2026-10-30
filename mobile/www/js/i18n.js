@@ -417,6 +417,13 @@
     'battles.details':     { ru: 'Подробнее',           en: 'Details',          kg: 'Толугураак' },
     'battles.battle':      { ru: 'Баттл',               en: 'Battle',           kg: 'Баттл' },
     'battles.soon':        { ru: 'Скоро здесь появятся баттлы', en: 'Battles coming soon', kg: 'Баттлдар жакында пайда болот' },
+    /* ОТМЕНЁННЫЙ БАТТЛ И КАРТА МЕСТА (30.10): до этого приложение рисовало
+       отменённый баттл как живой, с кнопками голосования. Слова взяты с
+       сайта (`js/challenge-detail.js`), чтобы в двух продуктах человек
+       читал одно и то же. */
+    'battles.cancelled':     { ru: 'Баттл отменён',      en: 'Battle cancelled', kg: 'Баттл жокко чыгарылды' },
+    'battles.cancelledDesc': { ru: 'Этот баттл был отменён.', en: 'This battle has been cancelled.', kg: 'Бул баттл жокко чыгарылды.' },
+    'battles.place':         { ru: 'Место',              en: 'Venue',            kg: 'Жер' },
 
     // === Partners screen ===
     'partners.title':      { ru: 'Поиск игрока',       en: 'Player Search',      kg: 'Оюнчу издөө' },

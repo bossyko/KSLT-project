@@ -3319,6 +3319,63 @@ select:-webkit-autofill {
   font-size: 14px; color: var(--text-sec);
 }
 
+/* КАРТА МЕСТА НА ЭКРАНЕ БАТТЛА (30.10).
+   Числа взяты со шкалы и с соседей этого же экрана: отступ 16 как у
+   `.bd-voting-section`, зазор ссылок 12 как у `.bd-meta`, радиус из
+   системы.
+   ВЫСОТА КАРТЫ 304, А НЕ 300, И ПРИЧИНА НАЗВАНА: у сайта стоит 300
+   (`css/challenge-detail.css:725`), но сторож шкалы ПРИЛОЖЕНИЯ требует
+   кратности восьми и исключений не знает — 300 он уронил сразу. 304 —
+   ближайшая ступень, разница в четыре пикселя глазом не читается.
+   У САЙТА СВОЕГО СТОРОЖА РАЗМЕРОВ НЕТ ВОВСЕ, поэтому 300 там и живёт;
+   свести оба на 304 — свой маленький кусок и твоё слово, потому что это
+   трогает вид трёх страниц сайта. Записано находкой. */
+.bd-map-box {
+  padding: 0 16px 16px;
+}
+.bd-map-links {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.bd-map-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.bd-map {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.bd-map iframe {
+  width: 100%;
+  height: 304px;
+  border: 0;
+  display: block;
+}
+
+/* ОТМЕНЁННЫЙ БАТТЛ: тот же вид, что у «не найден» на сайте — заголовок
+   и строка объяснения по центру. Кеглей своих не заводим: 21 — ступень
+   шкалы и тот же кегль, что у `.bd-title`. */
+.bd-cancelled {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--text-sec);
+}
+.bd-cancelled h2 {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.bd-cancelled p {
+  font-size: 14px;
+  margin: 0;
+}
+
 /* Section titles */
 .bd-section-title {
   font-size: 16px; font-weight: 700; color: var(--text);

@@ -1646,6 +1646,31 @@
       }
 
       _battleData = bRes.data;
+
+      /* ОТМЕНЁННЫЙ БАТТЛ — ОТДЕЛЬНЫЙ ЭКРАН, И ЭТО НЕ КРАСОТА (30.10).
+         Замер чтением: ни один список баттлов — ни в приложении
+         (`screens/home.js:129`, `screens/battles.js:29`), ни на сайте
+         (`js/battles-overview.js:253`) — НЕ ФИЛЬТРУЕТ по статусу:
+         опубликованный баттл остаётся в ленте и после отмены. Сайт на
+         этот случай показывает «Баттл отменён»
+         (`js/challenge-detail.js:296`), а приложение рисовало его как
+         живой — с кнопками голосования. И сервер такой голос ПРИНИМАЛ:
+         `cast_battle_vote` смотрит `battle_published`, `voting_closed` и
+         время матча, а статус не смотрит вовсе
+         (`sql/функции/battle-vote-rpc.sql:25`). Человек голосовал за
+         игру, которой не будет.
+         ЗАПРЕТ НА СТОРОНЕ СЕРВЕРА — отдельный кусок и твоё слово: это
+         правило о данных. Здесь закрыт экран. */
+      if (_battleData.status === 'cancelled') {
+        document.getElementById('battleDetail').innerHTML =
+          '<div class="bd-cancelled">' +
+            '<h2>🚫 ' + I18N.t('battles.cancelled') + '</h2>' +
+            '<p>' + I18N.t('battles.cancelledDesc') + '</p>' +
+          '</div>';
+        overlay.classList.add('open');
+        return;
+      }
+
       _battleVotes = {};
       if (vRes.data) {
         vRes.data.forEach(function(v) {
@@ -1707,6 +1732,9 @@
       html += '</div>';
     }
 
+    // Карта места
+    html += renderBattleMap(b);
+
     // Voting
     html += renderBattleVoting(b, votes);
 
@@ -1728,6 +1756,49 @@
       if (btn1) btn1.addEventListener('click', function() { castBattleVote(b.id, 1); });
       if (btn2) btn2.addEventListener('click', function() { castBattleVote(b.id, 2); });
     }
+  }
+
+  /**
+   * КАРТА МЕСТА — ССЫЛКИ И ВСТРОЕННАЯ КАРТА (30.10).
+   *
+   * ДАННЫЕ У ПРИЛОЖЕНИЯ БЫЛИ С САМОГО НАЧАЛА, и это прочитано, а не
+   * угадано: `get_battle_public` отдаёт `court_google_maps` и
+   * `court_twogis` (`sql/функции/battle-court-links-migration.sql:19`).
+   * Приложение их не читало вовсе (посчитано: ноль упоминаний), и место
+   * показывалось одной строкой текста, тогда как у сайта есть обе ссылки
+   * и встроенная карта.
+   *
+   * АДРЕС КАРТЫ СОБИРАЕТ ДОМ `js/kslt-karta.js` — тот же, что у сайта,
+   * побайтовой копией. Своей копии здесь не заводится: дом знает четыре
+   * вида ссылок (встроенная, `?q=`, координаты `@`, `/place/`) и
+   * отдельно 2ГИС с ОБРАТНЫМ порядком долготы и широты. Написать это
+   * второй раз значит разойтись на первой же короткой ссылке.
+   *
+   * ЧЕГО ЗДЕСЬ НЕТ: запаса по адресу текстом. У баттла адрес места —
+   * свободная строка `proposed_venue` («Корты у Ала-Арчи»), а не адрес
+   * корта, и карта по ней показала бы произвольное место. Сайт на
+   * странице баттла поступает так же: зовёт дом без второго довода.
+   */
+  function renderBattleMap(b) {
+    var gm = b.court_google_maps || '';
+    var tg = b.court_twogis || '';
+    if (!gm && !tg) return '';
+
+    var html = '<div class="bd-map-box">';
+    html += '<div class="bd-section-title">' + I18N.t('battles.place') + '</div>';
+    html += '<div class="bd-map-links">';
+    if (gm) html += '<a class="bd-map-link" href="' + esc(gm) + '" target="_blank" rel="noopener">Google Maps \u2197</a>';
+    if (tg) html += '<a class="bd-map-link" href="' + esc(tg) + '" target="_blank" rel="noopener">2GIS \u2197</a>';
+    html += '</div>';
+
+    var K = window.KSLT_KARTA;
+    var адрес = K ? (K.встроить(gm) || K.встроить(tg)) : null;
+    if (адрес) {
+      html += '<div class="bd-map"><iframe src="' + esc(адрес) +
+              '" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+    }
+    html += '</div>';
+    return html;
   }
 
   /**

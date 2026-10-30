@@ -278,7 +278,9 @@ const КУСКИ = [
     ['настройки базы — один дом',
      'check-baza.js', 'check-baza-otkat.js'],
     ['строки категорий в кабинете — одно определение',
-     'check-stroki-kategoriy.js', 'check-stroki-kategoriy-otkat.js']
+     'check-stroki-kategoriy.js', 'check-stroki-kategoriy-otkat.js'],
+    ['экран баттла приложения — карта и отменённый баттл',
+     'check-ekran-battla.js', 'check-ekran-battla-otkat.js']
 ];
 
 function прогнать(файл) {
