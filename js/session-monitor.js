@@ -20,7 +20,14 @@
     var CHECK_INTERVAL_MS = 60 * 1000; // check every 1 minute
     var MAX_SESSION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days max session
     var SESSION_START_KEY = 'kslt_session_start';
-    var AUTH_TOKEN_KEY = 'sb-qqkzszesviukopgjbead-auth-token';
+    /* ИМЯ ЗАПИСИ С СЕССИЕЙ — У ДОМА НАСТРОЕК, И СПРАШИВАЕТСЯ КАЖДЫЙ РАЗ
+       (30.10). Было зашито буквами на боевой проект: подставили другую
+       базу — сторож простоя стирал не ту запись и не видел выхода в
+       соседней вкладке. Зовётся функцией, а не считается на загрузке:
+       этот файл на 24 страницах из 59 подключён выше дома зова, и
+       порядок тегов здесь не ровен — а функция спросит, когда дом уже
+       точно есть. */
+    function записьСессии() { return window.KSLT_BAZA.имяЗаписи(); }
     var lastActivity = Date.now();
 
     function updateActivity() {
@@ -58,7 +65,7 @@
                     window.location.href = href;
                 });
             } else {
-                localStorage.removeItem(AUTH_TOKEN_KEY);
+                localStorage.removeItem(записьСессии());
                 cleanup();
                 window.location.href = href;
             }
@@ -70,7 +77,7 @@
                     window.location.reload();
                 });
             } else {
-                localStorage.removeItem(AUTH_TOKEN_KEY);
+                localStorage.removeItem(записьСессии());
                 cleanup();
                 window.location.reload();
             }
@@ -79,13 +86,13 @@
 
     // Check if user has an active session
     function hasSession() {
-        return !!localStorage.getItem(AUTH_TOKEN_KEY);
+        return !!localStorage.getItem(записьСессии());
     }
 
     // --- Cross-tab logout ---
     window.addEventListener('storage', function(e) {
         // Auth token removed in another tab → sync logout
-        if (e.key === AUTH_TOKEN_KEY && !e.newValue) {
+        if (e.key === записьСессии() && !e.newValue) {
             localStorage.removeItem(SESSION_START_KEY);
             if (isProtectedPage()) {
                 var suffix = KSLT_YAZYK.суффикс;

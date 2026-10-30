@@ -152,28 +152,22 @@
      * другой базой: проверки не видели ни входа, ни колокольчика, а сам
      * колокольчик из любого окружения ходил в боевую.
      *
-     * Значения по умолчанию продублированы из js/supabase-config.js, а не
-     * взяты оттуда: шапка на большинстве страниц подключена ВЫШЕ конфига
-     * (иначе меню появлялось бы рывком, после загрузки половины скриптов), и
-     * к моменту её запуска SUPABASE_ANON_KEY ещё не объявлен. Ключ уходил
-     * пустым, база отвечала 401 — колокольчик молча показывал «Новых нет».
-     * Ключ публикуемый, он и так лежит в каждой странице открытым текстом.
+     * ОТКУДА ОНИ ТЕПЕРЬ (30.10). Из дома настроек `js/kslt-baza.js`, а не
+     * из конфига: шапка на 25 страницах из 80 подключена ВЫШЕ конфига
+     * (посчитано, иначе меню появлялось бы рывком — после загрузки
+     * половины скриптов), и к моменту её запуска SUPABASE_ANON_KEY ещё не
+     * объявлен. Раньше здесь по этой причине лежала СВОЯ копия значений
+     * по умолчанию; дом снял и её. Дом стоит первым тегом — проверено
+     * сторожем, а не на вид.
      */
-    var DB_URL = (window.KSLT_DB && window.KSLT_DB.url) ||
-        (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://qqkzszesviukopgjbead.supabase.co');
-    var DB_KEY = (window.KSLT_DB && window.KSLT_DB.key) ||
-        (typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY
-            ? SUPABASE_ANON_KEY
-            : 'sb_publishable_JGfk-NkMln4w7iMzhYEigg_z1_2XK7G');
-    var DB_REF = DB_URL.replace(/^https:\/\//, '').split('.')[0];
+    var DB_URL = window.KSLT_BAZA.адрес;
+    var DB_KEY = window.KSLT_BAZA.ключ;
 
     // Check Supabase session in localStorage
     try {
-        var key = 'sb-' + DB_REF + '-auth-token';
-        var raw = localStorage.getItem(key);
-        if (!raw) return;
+        var session = window.KSLT_BAZA.запись();
+        if (!session) return;
 
-        var session = JSON.parse(raw);
         if (session && session.access_token && session.expires_at) {
             var now = Math.floor(Date.now() / 1000);
             if (session.expires_at > now) {
@@ -708,7 +702,7 @@
 
                     // Logout handler
                     adminDd.querySelector('.admin-nav-logout').addEventListener('click', async function() {
-                        localStorage.removeItem(key);
+                        localStorage.removeItem(window.KSLT_BAZA.имяЗаписи());
                         localStorage.removeItem('kslt_role');
                         localStorage.removeItem('kslt_name');
                         localStorage.removeItem('kslt_avatar');
@@ -776,7 +770,7 @@
                     });
 
                     dropdown.querySelector('#navLogoutBtn').addEventListener('click', async function() {
-                        localStorage.removeItem(key);
+                        localStorage.removeItem(window.KSLT_BAZA.имяЗаписи());
                         localStorage.removeItem('kslt_role');
                         localStorage.removeItem('kslt_name');
                         localStorage.removeItem('kslt_avatar');

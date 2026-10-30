@@ -259,13 +259,10 @@
         });
     }
 
+    /* ГОСТЬ ЛИ — У ДОМА НАСТРОЕК (30.10): имя записи с сессией здесь
+       было зашито буквами и не видело подставленной базы. */
     function isGuest() {
-        try {
-            var raw = localStorage.getItem('sb-qqkzszesviukopgjbead-auth-token');
-            if (!raw) return true;
-            var s = JSON.parse(raw);
-            return !(s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000));
-        } catch (e) { return true; }
+        return window.KSLT_BAZA.гость();
     }
 
     /* ТАБЛИЦА НАЧИНАЕТСЯ С ЧЕТВЁРТОГО МЕСТА. Тройку показывает пьедестал, и

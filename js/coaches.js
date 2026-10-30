@@ -227,16 +227,12 @@
     var isListPage = window.location.pathname.indexOf('coaches.html') !== -1 || window.location.pathname.indexOf('coaches-en.html') !== -1 || window.location.pathname.indexOf('coaches-kg.html') !== -1;
     var isDetailPage = coachPage && !isListPage;
 
-    // Check auth (lightweight, no SDK needed)
-    var isLoggedIn = false;
-    try {
-        var key = 'sb-qqkzszesviukopgjbead-auth-token';
-        var raw = localStorage.getItem(key);
-        if (raw) {
-            var s = JSON.parse(raw);
-            if (s && s.access_token && s.expires_at > Math.floor(Date.now() / 1000)) isLoggedIn = true;
-        }
-    } catch(e) {}
+    /* ВОШЁЛ ЛИ ЧЕЛОВЕК — У ДОМА НАСТРОЕК (30.10).
+       Было: имя записи с сессией зашито буквами на боевой проект. В
+       прогонах база подставляется другая, и это место отвечало «гость»
+       ВСЕГДА — страница тренера показывала проверке гостевой вид, а
+       проверка считала его видом вошедшего. */
+    var isLoggedIn = window.KSLT_BAZA.вошёл();
 
     var _accessLevel = 'guest';
     var _toastTimer = null;

@@ -274,7 +274,9 @@ const КУСКИ = [
     ['онлайн снят с рейтинга',
      'check-onlayn.js', 'check-onlayn-otkat.js'],
     ['зов серверной функции — один дом',
-     'check-zov.js', 'check-zov-otkat.js']
+     'check-zov.js', 'check-zov-otkat.js'],
+    ['настройки базы — один дом',
+     'check-baza.js', 'check-baza-otkat.js']
 ];
 
 function прогнать(файл) {

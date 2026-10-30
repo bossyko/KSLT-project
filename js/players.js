@@ -64,17 +64,10 @@
     // Will be populated from Supabase or static
     var categoriesData = {};
 
+    /* ВОШЁЛ ЛИ ЧЕЛОВЕК — У ДОМА НАСТРОЕК (30.10): имя записи с сессией
+       здесь было зашито буквами и не видело подставленной базы. */
     function isLoggedIn() {
-        try {
-            var key = 'sb-qqkzszesviukopgjbead-auth-token';
-            var raw = localStorage.getItem(key);
-            if (!raw) return false;
-            var session = JSON.parse(raw);
-            if (session && session.access_token && session.expires_at) {
-                return session.expires_at > Math.floor(Date.now() / 1000);
-            }
-        } catch (e) {}
-        return false;
+        return window.KSLT_BAZA.вошёл();
     }
 
     // Badge data loaded from Supabase (player_id → [{badge_id, icon, name}])
