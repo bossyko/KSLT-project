@@ -577,7 +577,10 @@
 
       // 5. Banned
       if (player && player.banned_until && new Date(player.banned_until) > new Date()) {
-        area.innerHTML = '<div class="td-access-cta" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2)"><p style="color:#ff3b30">' + I18N.t('trn.banned') + '</p></div>';
+        /* КРАСКИ ОТКАЗА ЖИВУТ В CSS (30.10): класс `is-banned` берёт их
+           из `--danger-*`. Здесь стоял инлайн с четвёртым красным. */
+        area.innerHTML = '<div class="td-access-cta is-banned"><p>' +
+          I18N.t('trn.banned') + '</p></div>';
         return;
       }
 

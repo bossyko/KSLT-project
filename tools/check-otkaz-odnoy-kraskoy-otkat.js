@@ -15,12 +15,16 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/player.css', 'css/players.css', 'css/style.css',
-               'css/challenge-detail.css', 'css/tournament-detail.css', 'css/tokens.css'];
+               'css/challenge-detail.css', 'css/tournament-detail.css', 'css/tokens.css',
+               /* 30.10: роль живёт и в приложении — файл обязан быть здесь,
+                  иначе откат по нему не восстановится. */
+               'mobile/www/css/app.css'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
 const PL = 'css/player.css', PS = 'css/players.css', S = 'css/style.css',
-      CH = 'css/challenge-detail.css', TD = 'css/tournament-detail.css', T = 'css/tokens.css';
+      CH = 'css/challenge-detail.css', TD = 'css/tournament-detail.css', T = 'css/tokens.css',
+      MB = 'mobile/www/css/app.css';
 
 const ОТКАТЫ = [
 
@@ -42,6 +46,19 @@ const ОТКАТЫ = [
 ['вернуть #f44336 отказу в заявке', S,
  '.kslt-status-refused {\n    background: rgba(255, 71, 87, 0.14);',
  '.kslt-status-refused {\n    background: rgba(244, 67, 54, 0.14);',
+ 'отказ и проигрыш говорят одной краской'],
+
+/* ПРИЛОЖЕНИЕ: ЧЕТВЁРТЫЙ И ПЯТЫЙ КРАСНЫЙ В ОДНОМ БЛОКЕ (30.10).
+   Так это и лежало десять дней: фон четвёртым красным, текст пятым — и
+   ни один сторож css приложения не смотрел. */
+['вернуть четвёртый и пятый красный отказу в приложении', MB,
+ '.td-reg-refused {\n  background: var(--danger-subtle) !important;\n  color: var(--danger) !important;',
+ '.td-reg-refused {\n  background: rgba(255, 59, 48, 0.12) !important;\n  color: #ff6b6b !important;',
+ 'отказ и проигрыш говорят одной краской'],
+
+['вернуть #ff3b30 отказу по блокировке в приложении', MB,
+ '.td-access-cta.is-banned p { color: var(--danger); }',
+ '.td-access-cta.is-banned p { color: #ff3b30; }',
  'отказ и проигрыш говорят одной краской'],
 
 ['вернуть #ff6b62 полосе проигрыша', PL,
@@ -93,7 +110,10 @@ const ОТКАТЫ = [
 ];
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-otkaz-'));
-['css', 'tools'].forEach(д => {
+/* `mobile/www/css` ДОБАВЛЕН 30.10 вместе с двумя селекторами роли из
+   приложения: без него прувер падал на открытии файла, которого в
+   песочнице нет. КОПИЯ ОБЯЗАНА СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ СТОРОЖ. */
+['css', 'tools', 'mobile/www/css'].forEach(д => {
     const от = path.join(КОРЕНЬ, д), до = path.join(песок, д);
     if (fs.existsSync(от)) fs.cpSync(от, до, { recursive: true });
 });

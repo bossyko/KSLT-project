@@ -250,12 +250,22 @@
     border: var(--bw-hair) solid var(--border-subtle);
 }
 
-.ms-row2 { display: flex; gap: 10px; }
+/* ЗАЗОР ПО ШКАЛЕ: было 10, стало 12 (30.10).
+   ПРИЖИМАТЬ ВПРАВО НЕЧЕГО, И ЭТО ПОПРАВКА К МОЕЙ ЖЕ ЗАПИСИ: у `.ms-send`
+   стоит `width: 100%`, две кнопки в ряду делят его пополам и заполняют
+   целиком, так что `justify-content` здесь не меняет ничего. Неверным
+   был только ПОРЯДОК. */
+.ms-row2 { display: flex; gap: 12px; }
 
 @media (max-width: 640px) {
     .ms-cell { width: 48px; }
     .ms-in { width: 40px; }
     .ms-vs b { font-size: var(--fs-sm); }
+
+    /* СКЛАДЫВАЕМСЯ В СТОЛБЕЦ, ПЕРВИЧНАЯ СВЕРХУ — `Modal 26:143`: «Below
+       480px the footer stacks and the primary goes on top». Ширина в
+       медиа — 640: своих промежуточных точек останова в продукте нет. */
+    .ms-row2 { flex-direction: column-reverse; }
 }
 
 /* Исход крупно над счётом: подтверждающий видит сразу, выиграл он или нет,

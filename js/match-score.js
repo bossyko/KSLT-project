@@ -265,9 +265,15 @@
                 (выиграл ? L.youWon : L.youLost) + '</div>' +
             '<div class="ms-score-big">' + KSLT_экранировать(человечно(m.score)) + '</div>' +
             '<div class="ms-hint ms-hint-center">' + KSLT_экранировать(имя) + ' ' + L.confirmText + '<br>' + L.autoNote + '</div>' +
+            /* ПОРЯДОК КНОПОК — ПО КОМПОНЕНТУ `Modal 26:143`: «Two =
+               secondary then primary» (30.10). Было наоборот: первичная
+               стояла слева. На телефоне ряд складывается в столбец
+               `column-reverse`, и первичная оказывается СВЕРХУ — как и
+               велит то же описание и как уже сделано в приложении
+               (`.msa-send + .msa-send`). */
             '<div class="ms-row2">' +
-                '<button class="ms-send" id="msYes">' + L.confirm + '</button>' +
                 '<button class="ms-send ms-ghost" id="msNo">' + L.dispute + '</button>' +
+                '<button class="ms-send" id="msYes">' + L.confirm + '</button>' +
             '</div>';
 
         var overlay = shell(L.titleConfirm, тело);

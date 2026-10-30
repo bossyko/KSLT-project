@@ -79,7 +79,17 @@ const РОЛЬ = [
     ['css/style.css',             '.site-notif-no:hover'],
     ['css/style.css',             '.kslt-status-refused'],
     ['css/challenge-detail.css',  '.ch-stat-l'],
-    ['css/tournament-detail.css', '.td-status-badge.cancelled']
+    ['css/tournament-detail.css', '.td-status-badge.cancelled'],
+    /* 30.10: СПИСОК СМОТРЕЛ ТОЛЬКО САЙТ, А ТА ЖЕ РОЛЬ ЖИВЁТ В ПРИЛОЖЕНИИ.
+       СТОРОЖ, СМОТРЯЩИЙ ЧАСТЬ ПРОДУКТА, НЕ СТОРОЖИТ НИЧЕГО — тринадцатый
+       раз, и цена видна: в `.td-reg-refused` стояли ДВА чужих красных
+       сразу (фон `rgba(255,59,48,.12)` — четвёртый, текст `#ff6b6b` —
+       пятый), а отказ по блокировке жил инлайном в
+       `screens/tournaments.js` и ни одному сторожу css не показывался
+       вовсе. Инлайн снят, краски переехали в `.td-access-cta.is-banned`,
+       и теперь оба блока под этим правилом. */
+    ['mobile/www/css/app.css',    '.td-reg-refused'],
+    ['mobile/www/css/app.css',    '.td-access-cta.is-banned']
 ];
 
 /* Красные, которым в ЭТОЙ роли места нет. Каждый остаётся законным в

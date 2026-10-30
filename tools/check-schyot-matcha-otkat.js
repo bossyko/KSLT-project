@@ -150,6 +150,27 @@ const ОТКАТЫ = [
 
 const ЧИТ = ф => fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8');
 
+/* ПОРЯДОК КНОПОК В ОКНЕ ПОДТВЕРЖДЕНИЯ — ТРИ ОТКАТА (30.10). */
+ОТКАТЫ.push(
+  { имя: 'первичная кнопка снова первой в разметке',
+    ждём: 'в окне подтверждения вторичная кнопка идёт раньше первичной',
+    файл: 'js/match-score.js',
+    было: "                '<button class=\"ms-send ms-ghost\" id=\"msNo\">' + L.dispute + '</button>' +\n                '<button class=\"ms-send\" id=\"msYes\">' + L.confirm + '</button>' +",
+    станет: "                '<button class=\"ms-send\" id=\"msYes\">' + L.confirm + '</button>' +\n                '<button class=\"ms-send ms-ghost\" id=\"msNo\">' + L.dispute + '</button>' +" },
+
+  { имя: 'на телефоне столбец перестал переворачиваться',
+    ждём: 'на телефоне ряд кнопок складывается первичной вверх',
+    файл: 'css/match-score.css',
+    было: '    .ms-row2 { flex-direction: column-reverse; }',
+    станет: '    .ms-row2 { flex-direction: column; }' },
+
+  { имя: 'зазор вернулся мимо шкалы',
+    ждём: 'зазор между кнопками стоит на ступени шкалы',
+    файл: 'css/match-score.css',
+    было: '.ms-row2 { display: flex; gap: 12px; }',
+    станет: '.ms-row2 { display: flex; gap: 10px; }' }
+);
+
 (function откатПорядка() {
   const П = 'mobile/www/index.html';
   const стр = ЧИТ(П).split('\n');
@@ -166,7 +187,10 @@ const ЧИТ = ф => fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8');
 
 function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-schyot-'));
-  for (const о of ['js', 'mobile/www', 'pages', 'tools'])
+  /* `css` ДОБАВЛЕН 30.10: сторож стал читать `css/match-score.css`
+     (порядок кнопок и зазор), а копия его не брала — правило смотрело бы
+     в пустоту, и откат доказывал бы неизвестно что. */
+  for (const о of ['js', 'css', 'mobile/www', 'pages', 'tools'])
     fs.cpSync(path.join(КОРЕНЬ, о), path.join(к, о), { recursive: true });
   return к;
 }
