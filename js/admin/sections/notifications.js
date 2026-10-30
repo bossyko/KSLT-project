@@ -199,23 +199,17 @@
                 return;
             }
 
-            var url = A.client.supabaseUrl + '/functions/v1/send-push';
             var body = { title: title, message: message, type: type, audience: audience };
             if (userId) body.user_id = userId;
 
-            var res = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + session.access_token,
-                    'Content-Type': 'application/json',
-                    'apikey': A.client.supabaseKey
-                },
-                body: JSON.stringify(body)
-            });
+            /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Адрес базы здесь брался у клиента
+               (`A.client.supabaseUrl`) — это было второе место, где он
+               живёт; дом берёт его у настроек. */
+            var о = await window.KSLT_ZOV.сТокеномОтвет(
+                session.access_token, 'send-push', body);
+            var result = о.данные;
 
-            var result = await res.json();
-
-            if (!res.ok) {
+            if (!о.ok) {
                 A.showToast(result.error || 'Error', 'error');
                 btn.disabled = false;
                 btn.textContent = L.pushSend;

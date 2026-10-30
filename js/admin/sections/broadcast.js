@@ -113,25 +113,20 @@
                 return;
             }
 
-            var url = A.client.supabaseUrl + '/functions/v1/broadcast';
-            var res = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + session.access_token,
-                    'Content-Type': 'application/json',
-                    'apikey': A.client.supabaseKey
-                },
-                body: JSON.stringify({
+            /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Это место было ЕЩЁ И ТРЕТЬИМ
+               определением адреса базы: оно брало его у клиента
+               (`A.client.supabaseUrl`), а не у настроек, как остальные
+               тринадцать. Дом берёт у настроек — одно место на продукт. */
+            var о = await window.KSLT_ZOV.сТокеномОтвет(
+                session.access_token, 'broadcast', {
                     subject: subject,
                     message: message,
                     audience: audience,
                     channels: { tg: chTg, email: chEmail }
-                })
-            });
+                });
+            var result = о.данные;
 
-            var result = await res.json();
-
-            if (!res.ok) {
+            if (!о.ok) {
                 A.showToast(result.error || 'Error', 'error');
                 btn.disabled = false;
                 btn.textContent = L.broadcastSend;

@@ -220,6 +220,47 @@ test.describe('Зов серверной функции — один дом', ()
         expect(найдено.своихАдресов, 'своего адреса функции у входа не осталось').toBe(0);
     });
 
+    /**
+     * АДМИНКА ПРОБОЙ НЕ ОТКРЫВАЕТСЯ — И ЭТО СКАЗАНО ПРЯМО. Её экраны за
+     * входом, а кнопки пишут в базу: нажимать их тест не имеет права.
+     * Поэтому здесь проверяется то, что проверить МОЖНО, не заходя: в
+     * отданных браузеру файлах админки нет ни одного рукописного зова
+     * функции и ни одного своего `apikey`. Четырнадцать мест переехали
+     * в дом 30.10, и это чтение их не пускает обратно.
+     */
+    test('в файлах админки зова мимо дома нет', async ({ page }) => {
+        await дождаться(page, СТРАНИЦЫ[0].адрес);
+        const найдено = await page.evaluate(async () => {
+            const файлы = ['../js/admin/core/utils.js',
+                           '../js/admin/sections/bracket.js',
+                           '../js/admin/sections/broadcast.js',
+                           '../js/admin/sections/challenges.js',
+                           '../js/admin/sections/notifications.js',
+                           '../js/admin/sections/players.js',
+                           '../js/admin/sections/tournaments.js',
+                           '../js/admin/sections/users.js'];
+            const из = {};
+            for (const п of файлы) {
+                const т = await (await fetch(п)).text();
+                const безКом = т.replace(/\/\*[\s\S]*?\*\//g, ' ')
+                                .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+                из[п] = {
+                    зовов: (безКом.match(/functions\/v1\//g) || []).length,
+                    ключей: (безКом.match(/'apikey'/g) || []).length,
+                    черезДом: (безКом.match(/KSLT_ZOV\./g) || []).length
+                };
+            }
+            return из;
+        });
+        let черезДом = 0;
+        for (const п of Object.keys(найдено)) {
+            expect(найдено[п].зовов, 'рукописный зов функции в ' + п).toBe(0);
+            expect(найдено[п].ключей, 'свой apikey в ' + п).toBe(0);
+            черезДом += найдено[п].черезДом;
+        }
+        expect(черезДом, 'все зовы админки идут через дом').toBeGreaterThanOrEqual(14);
+    });
+
     test('в кабинете и колокольчике зова мимо дома нет', async ({ page }) => {
         await дождаться(page, СТРАНИЦЫ[0].адрес);
         const найдено = await page.evaluate(async () => {

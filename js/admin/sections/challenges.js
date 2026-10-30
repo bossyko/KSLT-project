@@ -1256,18 +1256,12 @@
 
     // ---- Publish Modal ----
     function publishBattle(challengeId, title) {
-        return A.client.auth.getSession().then(function(sRes) {
-            var token = sRes.data.session ? sRes.data.session.access_token : '';
-            return fetch(window.SUPABASE_URL + '/functions/v1/battle-publish', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': window.SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({ challenge_id: challengeId, title: title })
-            });
-        }).then(function(res) { return res.json(); }).then(function(data) {
+        /* ЗОВ ЧЕРЕЗ ДОМ (30.10): прежде `res.json()` стоял слепым — и
+           упавшая функция давала `SyntaxError` в `catch` вместо текста
+           причины в тосте. */
+        return window.KSLT_ZOV.отИмени(A.client, 'battle-publish',
+            { challenge_id: challengeId, title: title }
+        ).then(function(data) {
             if (data.error) { A.showToast(data.error); return false; }
             return true;
         }).catch(function(err) {
@@ -1596,19 +1590,15 @@
             if (!session) { A.showToast('Auth error', 'error'); return; }
 
             // Call battle-publish with notify_only (sends TG with inline voting buttons)
-            var url = window.SUPABASE_URL + '/functions/v1/battle-publish';
-            var res = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + session.access_token,
-                    'Content-Type': 'application/json',
-                    'apikey': window.SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({ challenge_id: challenge.id, notify_only: true })
-            });
+            /* ЗОВ ЧЕРЕЗ ДОМ (30.10): адрес, ключ, заголовки и разбор — одно
+               место на продукт. Код ответа здесь нужен: по нему экран
+               показывает текст ошибки сервера. */
+            var о = await window.KSLT_ZOV.сТокеномОтвет(
+                session.access_token, 'battle-publish',
+                { challenge_id: challenge.id, notify_only: true });
 
-            var result = await res.json();
-            if (!res.ok) {
+            var result = о.данные;
+            if (!о.ok) {
                 A.showToast(result.error || 'Error', 'error');
                 return;
             }
@@ -2041,20 +2031,12 @@
 
     /** Объявление об отмене в группу клуба. Молчание — не ответ. */
     function announceCancelToTelegram(challengeId, reason) {
-        A.client.auth.getSession().then(function(sRes) {
-            var token = sRes.data.session ? sRes.data.session.access_token : '';
-            return fetch(window.SUPABASE_URL + '/functions/v1/battle-announce', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                    'apikey': window.SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({ challenge_id: challengeId, cancelled: true, reason: reason || null })
-            });
-        }).then(function(res) {
-            return res.json();
-        }).then(function(data) {
+        /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Молчаливый отказ здесь уже ловили
+           однажды — тем важнее, что дом отличает «не JSON» от отказа с
+           причиной и говорит о каждом в консоль. */
+        window.KSLT_ZOV.отИмени(A.client, 'battle-announce',
+            { challenge_id: challengeId, cancelled: true, reason: reason || null }
+        ).then(function(data) {
             // Молчаливый отказ мы уже ловили: функция отвечала «баттл не
             // опубликован» ровно на отмену, и никто об этом не узнавал
             if (!data || data.error || data.tg_sent === false) {

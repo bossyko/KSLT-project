@@ -2929,19 +2929,13 @@
             var btn = document.getElementById('ratSeasonResetBtn');
             if (btn) { btn.disabled = true; btn.textContent = '🗓 ...'; }
             try {
-                var session = await A.client.auth.getSession();
-                var token = session.data.session ? session.data.session.access_token : '';
-                var res = await fetch(A.client.supabaseUrl + '/functions/v1/season-reset', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ force: !isSeptember })
-                });
-                var result = await res.json();
-                if (!res.ok) throw new Error(result.error || 'HTTP ' + res.status);
+                /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Здесь адрес брался у клиента, а
+                   ключ — у настроек: ОДНО понятие из ДВУХ источников в
+                   одном зове. Дом берёт оба у настроек. */
+                var о = await window.KSLT_ZOV.сТокеномОтвет(
+                    await A.токенСессии(), 'season-reset', { force: !isSeptember });
+                var result = о.данные;
+                if (!о.ok) throw new Error(result.error || 'HTTP ' + о.статус);
 
                 A.showToast(
                     A.фраза(L.plrSeasonIzmenilosU, { season: result.season, changed: result.changed, notified: result.notified }),

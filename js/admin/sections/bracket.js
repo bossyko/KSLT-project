@@ -775,23 +775,17 @@
      */
     async function сообщитьОЗамене(tournamentId, regId, прежний, новый, имяГостя) {
         try {
-            var сессия = await A.client.auth.getSession();
-            await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + (сессия.data.session ? сессия.data.session.access_token : '')
-                },
-                body: JSON.stringify({
-                    replacement: {
-                        tournament_id: tournamentId,
-                        registration_id: regId,
-                        old_player_id: прежний || null,
-                        new_player_id: новый || null,
-                        new_name: имяГостя || null
-                    }
-                })
+            /* ЗОВ ЧЕРЕЗ ДОМ (30.10): адрес, ключ, заголовки и разбор —
+               одно место на продукт. Здесь остаётся своё: что именно
+               сказать серверу. */
+            await window.KSLT_ZOV.сТокеном(await A.токенСессии(), 'match-notify', {
+                replacement: {
+                    tournament_id: tournamentId,
+                    registration_id: regId,
+                    old_player_id: прежний || null,
+                    new_player_id: новый || null,
+                    new_name: имяГостя || null
+                }
             });
         } catch (e) {
             console.warn('[KSLT] уведомление о замене не ушло:', e.message);
@@ -810,16 +804,8 @@
      */
     async function сообщитьОЗаявке(regId, событие) {
         try {
-            var сессия = await A.client.auth.getSession();
-            await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + (сессия.data.session ? сессия.data.session.access_token : '')
-                },
-                body: JSON.stringify({ entry: { registration_id: regId, event: событие } })
-            });
+            await window.KSLT_ZOV.сТокеном(await A.токенСессии(), 'match-notify',
+                { entry: { registration_id: regId, event: событие } });
         } catch (e) {
             console.warn('[KSLT] уведомление о заявке не ушло:', e.message);
         }
@@ -3194,17 +3180,16 @@
 
                 btn.disabled = true;
                 try {
-                    var sess = await A.client.auth.getSession();
-                    var res = await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': 'Bearer ' + (sess.data.session ? sess.data.session.access_token : '')
-                        },
-                        body: JSON.stringify({ match_id: btn.dataset.match, kind: зовём ? 'go' : 'ready' })
-                    });
-                    var д = await res.json();
+                    /* ЗОВ ЧЕРЕЗ ДОМ, НО С КОДОМ ОТВЕТА: ниже экран гасит
+                       обе кнопки на 409 — «матч уже сыгран» и «матч уже
+                       идёт» (`supabase/functions/match-notify:469,474`).
+                       Код — договор, русский текст ошибки — нет, поэтому
+                       берём `сТокеномОтвет`, а не разбор слов. */
+                    var о = await window.KSLT_ZOV.сТокеномОтвет(
+                        await A.токенСессии(), 'match-notify',
+                        { match_id: btn.dataset.match, kind: зовём ? 'go' : 'ready' });
+                    var res = { ok: о.ok, status: о.статус };
+                    var д = о.данные;
                     if (!res.ok || д.error) {
                         A.showToast(д.error || 'Ошибка', 'error');
                         // Матч успели сыграть, пока страница висела открытой:
@@ -3324,20 +3309,12 @@
                     notifySchedBtn.disabled = true;
                     notifySchedBtn.textContent = '📢 ...';
                     try {
-                        var session = await A.client.auth.getSession();
-                        var token = session.data.session ? session.data.session.access_token : '';
-                        var res = await fetch(SUPABASE_URL + '/functions/v1/match-notify', {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                'Content-Type': 'application/json',
-                                'apikey': SUPABASE_ANON_KEY
-                            },
-                            body: JSON.stringify({ tournament_id: tournamentId })
-                        });
-                        var result = await res.json();
-                        if (!res.ok) {
-                            throw new Error(result.error || 'HTTP ' + res.status);
+                        var о = await window.KSLT_ZOV.сТокеномОтвет(
+                            await A.токенСессии(), 'match-notify',
+                            { tournament_id: tournamentId });
+                        var result = о.данные;
+                        if (!о.ok) {
+                            throw new Error(result.error || 'HTTP ' + о.статус);
                         }
                         if (result.sent === 0 && result.noTelegram > 0) {
                             A.showToast(L.schedNotifyNone, 'warning');
@@ -14137,19 +14114,11 @@
                         кнТГ.disabled = true;
                         кнТГ.textContent = '\uD83D\uDCE2 ...';
                         try {
-                            var сессия = await A.client.auth.getSession();
-                            var токен = сессия.data.session ? сессия.data.session.access_token : '';
-                            var ответ = await fetch(SUPABASE_URL + '/functions/v1/tournament-results-notify', {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': 'Bearer ' + токен,
-                                    'Content-Type': 'application/json',
-                                    'apikey': SUPABASE_ANON_KEY
-                                },
-                                body: JSON.stringify({ tournament_id: tournament.id })
-                            });
-                            var итог = await ответ.json();
-                            if (!ответ.ok) throw new Error(итог.error || 'HTTP ' + ответ.status);
+                            var о = await window.KSLT_ZOV.сТокеномОтвет(
+                                await A.токенСессии(), 'tournament-results-notify',
+                                { tournament_id: tournament.id });
+                            var итог = о.данные;
+                            if (!о.ok) throw new Error(итог.error || 'HTTP ' + о.статус);
                             A.showToast('Отправлено в Telegram!', 'success');
                             if (initNewsPanel.перерисовать) initNewsPanel.перерисовать();
                         } catch (e) {

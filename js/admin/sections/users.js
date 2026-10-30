@@ -1132,20 +1132,16 @@
 
 
     function notifyMembershipTg(action, profileId, expiresAt) {
-        A.client.auth.getSession().then(function(res) {
-            if (!res.data || !res.data.session) return;
-            var token = res.data.session.access_token;
-            var body = { action: action, profile_id: profileId };
-            if (expiresAt) body.expires_at = expiresAt;
-            fetch(SUPABASE_URL + '/functions/v1/membership-tg-notify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify(body)
-            }).catch(function() { /* fire and forget */ });
-        }).catch(function() { /* ignore */ });
+        var body = { action: action, profile_id: profileId };
+        if (expiresAt) body.expires_at = expiresAt;
+        /* ЗОВ ЧЕРЕЗ ДОМ (30.10). Это место шло БЕЗ `apikey` — одно из
+           двух таких на всю админку; остальные двенадцать ключ ставили.
+           Отправил и забыл — НАМЕРЕНО: уведомление в Telegram не должно
+           ломать саму операцию, она уже прошла. Но «забыл» теперь значит
+           «не показываю человеку», а не «не узнаю сам»: дом пишет в
+           консоль и код ответа, и тело, если оно не JSON. */
+        window.KSLT_ZOV.отИмени(A.client, 'membership-tg-notify', body)
+            .catch(function() { /* сказано в консоль домом */ });
     }
 
     async function changeUserRole(userId, newRole) {

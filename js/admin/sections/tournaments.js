@@ -2028,20 +2028,12 @@ function обновитьРасклад() {
                     notifyBtn.textContent = '📢 ...';
                     (async function() {
                         try {
-                            var session = await A.client.auth.getSession();
-                            var token = session.data.session ? session.data.session.access_token : '';
-                            var res = await fetch(SUPABASE_URL + '/functions/v1/tournament-notify', {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': 'Bearer ' + token,
-                                    'Content-Type': 'application/json',
-                                    'apikey': SUPABASE_ANON_KEY
-                                },
-                                body: JSON.stringify({ tournament_id: trnEditingId })
-                            });
-                            var result = await res.json();
-                            if (!res.ok) {
-                                throw new Error(result.error || 'HTTP ' + res.status);
+                            var о = await window.KSLT_ZOV.сТокеномОтвет(
+                                await A.токенСессии(), 'tournament-notify',
+                                { tournament_id: trnEditingId });
+                            var result = о.данные;
+                            if (!о.ok) {
+                                throw new Error(result.error || 'HTTP ' + о.статус);
                             }
                             A.showToast('Рассылка отправлена!', 'success');
                             var today = KSLT_VREMYA.сегодня();
