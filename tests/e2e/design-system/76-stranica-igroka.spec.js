@@ -249,23 +249,26 @@ async function найтиНапарника(page) {
 
 async function открыть(page, хвост, id) {
     await page.goto('/pages/player' + хвост + '.html?id=' + id);
-    await page.waitForFunction(
-        () => document.querySelector('.pp-name') !== null, null, { timeout: 25000 });
-    /* СПИСКИ ДОРИСОВЫВАЮТСЯ ПОСЛЕ ШАПКИ. Прогон 09.10: на одном виде из пяти
-       отсечка ушла в пропуск «списки короче отсечки» при тех же данных —
-       проверка успела заглянуть до того, как матчи легли в разметку. */
-    await page.waitForFunction(
-        () => document.querySelectorAll('.pp-match, .pp-tournament').length > 0,
-        null, { timeout: 25000 });
-    /* Дождаться, пока тело страницы перестанет меняться: списки матчей и
-       турниров дорисовываются после шапки, и замер до этого врёт. */
-    await page.waitForFunction(() => {
-        const к = document.querySelector('.pp-container');
-        const было = window.__слепок;
-        const стало = к ? к.innerHTML.length : -1;
-        window.__слепок = стало;
-        return стало > 0 && стало === было;
-    }, null, { timeout: 25000, polling: 400 });
+    /* ЖДЁМ ПРИЗНАК, КОТОРЫЙ СТАВИТ САМ ПРОДУКТ (31.10).
+       ЧТО БЫЛО: три ожидания по 25 секунд при пределе теста 30, и
+       последнее — «innerHTML контейнера той же длины, что и в прошлый
+       опрос». Это ТИШИНА, а не признак: под нагрузкой списки
+       дорисовываются порциями, каждый опрос видит новую длину, и
+       ожидание не кончается никогда. Ночной прогон 30.10 дал семь
+       падений `waitForFunction: Timeout 25000ms`, и ни одно не про свою
+       беду.
+       ЧТО СТАЛО: `js/player.js` ставит `body[data-kslt-vid]`, когда
+       дорисованы ВСЕ три списка (матчи, турниры, вызовы), и признак
+       НАЗЫВАЕТ исход: `profil`, `net-igroka`, `gostyam-zakryto`,
+       `profil-s-bedoy`. Поэтому проба, которой нужен профиль, падает со
+       словами «нарисовано другое», а не по безымянному сроку. */
+    const вид = await page.waitForFunction(
+        () => document.body.dataset.ksltVid || null,
+        null, { timeout: 25000 }).then(р => р.jsonValue());
+    if (вид !== 'profil') {
+        throw new Error('ПОРОГ: нужен профиль игрока, а страница нарисовала «' +
+            вид + '» (id=' + id + ')');
+    }
     /* Появление доигрывает трансформом: без этого замер верха врёт на 24. */
     await page.evaluate(() => document.querySelectorAll('.pp-fade-in').forEach(e => {
         e.style.transition = 'none'; e.style.transform = 'none'; e.style.opacity = 1;

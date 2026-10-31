@@ -30,6 +30,23 @@ const ПРВ = 'js/kslt-rules.js';
 const EN  = 'pages/player-en.html';
 
 const ОТКАТЫ = [
+  /* ── признак «страница дорисована» (31.10) ── */
+  [JSФ, "        видНарисован('net-igroka');\n",
+       '',
+   'у каждого исхода страницы есть признак вида'],
+
+  [JSФ, `        return Promise.all([
+            loadRealMatches(data),
+            loadRealTournaments(data),
+            loadPlayerChallenges()
+        ]).then(function () {
+            видНарисован('profil');`,
+       `        loadRealTournaments(data);
+        loadPlayerChallenges();
+        return loadRealMatches(data).then(function () {
+            видНарисован('profil');`,
+   'признак профиля ставится после ВСЕХ списков, а не после первого'],
+
   /* ── одна мера страницы ── */
   [CSS, '.pp-hero,\n.pp-container { --pp-gutter: 24px; }',
         '.pp-hero { --pp-gutter: 24px; }\n.pp-container { --pp-gutter: 20px; }',
