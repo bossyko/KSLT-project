@@ -18,7 +18,7 @@
  *     влезала, может перестать. Меряется прямоугольником текста против
  *     доступной ширины, а не «на глаз».
  */
-const { test, expect, открытьЗакрытую } = require('../../fixtures');
+const { test, expect, открытьЗакрытую, нажать } = require('../../fixtures');
 /* ══════════════════════════════════════════════════════════════════════
    ПРЕДЕЛ ЭТОГО ФАЙЛА — 75 секунд, А НЕ ОБЩИЕ 30 СЕКУНД (31.10).
 
@@ -238,7 +238,7 @@ test('кнопка QR в карточке видна и ведёт в окно',
         'на телефоне: боковое меню там скрыто (' + состав.боковушка + ')').toBe('виден');
 
     await page.locator('#dbProfileQr').focus();
-    await page.locator('#dbProfileQr').click();
+    await нажать(page, page.locator('#dbProfileQr'), 'кнопка QR в карточке');
     const окно = page.locator('.db-qr-modal');
     await окно.waitFor({ state: 'visible', timeout: 10000 });
 

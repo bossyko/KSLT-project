@@ -22,7 +22,7 @@
  * тот же боевой код, что в продукте. Правда, которую проверяет проба, —
  * геометрия и лестница; про содержимое базы она ничего не утверждает.
  */
-const { test, expect, открытьЗакрытую } = require('../../fixtures');
+const { test, expect, открытьЗакрытую, нажать } = require('../../fixtures');
 /* ══════════════════════════════════════════════════════════════════════
    ПРЕДЕЛ ЭТОГО ФАЙЛА — 60 секунд, А НЕ ОБЩИЕ 30 СЕКУНД (31.10).
 
@@ -253,7 +253,7 @@ test('приход и расход красятся системой, а не Ma
    ══════════════════════════════════════════════════════════════════════ */
 test('окно обмена называет себя окном и держит фокус', async ({ page }) => {
     await открыть(page, '', 'loyalty');
-    await page.locator('#dbLoyRedeemBtn').click();
+    await нажать(page, page.locator('#dbLoyRedeemBtn'), 'кнопка обмена баллов');
     const окно = page.locator('.db-redeem-modal');
     await окно.waitFor({ timeout: 5000 });
 
@@ -270,7 +270,7 @@ test('окно обмена называет себя окном и держит
 
 test('окно обмена выходит по Escape и возвращает фокус', async ({ page }) => {
     await открыть(page, '', 'loyalty');
-    await page.locator('#dbLoyRedeemBtn').click();
+    await нажать(page, page.locator('#dbLoyRedeemBtn'), 'кнопка обмена баллов');
     await page.locator('.db-redeem-modal').waitFor({ timeout: 5000 });
     await page.keyboard.press('Escape');
     await expect(page.locator('.db-redeem-modal'), 'окно не закрылось по Escape').toHaveCount(0);
@@ -280,7 +280,7 @@ test('окно обмена выходит по Escape и возвращает �
 
 test('у кнопок окна обмена есть настоящая цель 44', async ({ page }) => {
     await открыть(page, '', 'loyalty');
-    await page.locator('#dbLoyRedeemBtn').click();
+    await нажать(page, page.locator('#dbLoyRedeemBtn'), 'кнопка обмена баллов');
     await page.locator('.db-redeem-modal').waitFor({ timeout: 5000 });
 
     const числа = await page.evaluate(() => {
