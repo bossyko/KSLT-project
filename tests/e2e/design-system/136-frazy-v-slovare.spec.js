@@ -13,7 +13,7 @@
  * прямо на экране. Эта ошибка за день дважды сломала мои приборы и один
  * раз — сам дом.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/pustoe-sostoyanie-zamer.html';
 

@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * СЛУЧАЙНЫЙ ПОРЯДОК И ВОСЕМЬ ДОМОВ. Кусок 155, 24.10.

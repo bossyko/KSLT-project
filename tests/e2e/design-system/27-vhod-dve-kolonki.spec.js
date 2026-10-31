@@ -1,8 +1,7 @@
 // @ts-check
 const fs = require('fs');
 const path = require('path');
-const { test } = require('../../fixtures');
-const { expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ВХОД — геометрия после закрытия экрана 21.09.2026.

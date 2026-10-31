@@ -1,6 +1,5 @@
 // @ts-check
-const { test } = require('../../fixtures');
-const { expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * РЕГИСТРАЦИЯ ПО ВАРИАНТУ B — узор целиком, а не половина.

@@ -24,7 +24,7 @@
  * Кабинет за входом, поэтому зовы проверяются на стенде ваучерного блока
  * — на настоящем доме, а не на копии.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/stend-vaucher-blok.html?sost=istoriya&pr=co&yaz=';
 const ЯЗЫКИ = [

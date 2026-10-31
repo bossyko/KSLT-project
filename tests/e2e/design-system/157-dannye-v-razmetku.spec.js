@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ДАННЫЕ НЕ УХОДЯТ В РАЗМЕТКУ МИМО ДОМА. Кусок 157, 24.10.

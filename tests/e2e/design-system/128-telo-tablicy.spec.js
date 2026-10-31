@@ -13,7 +13,7 @@
  *
  * Админка — десктоп и планшет (решение Кости 29.09).
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const ТЕЛЕФОННЫЕ = ['mobile', 'phone-landscape'];
 const СТЕНД = '/maket/telo-tablicy-zamer.html';

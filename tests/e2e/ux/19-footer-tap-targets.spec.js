@@ -28,7 +28,7 @@
  * Запуск:  npx playwright test tests/e2e/ux/19-footer-tap-targets.spec.js
  */
 
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const НОРМА = 44;
 

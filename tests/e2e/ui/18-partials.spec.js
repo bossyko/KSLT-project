@@ -11,7 +11,7 @@
 // чтобы они оставались собранными: забыл пересобрать после правки образца —
 // тест скажет об этом сразу, а не через месяц.
 
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 const { execFileSync } = require('child_process');
 const path = require('path');
 

@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ЗНАЧОК РОЛИ — ОДИН ДОМ, И ОН ЭКРАНИРУЕТ ОБА КОНЦА. Кусок 167, 25.10.

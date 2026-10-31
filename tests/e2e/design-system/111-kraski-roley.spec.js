@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * КРАСКИ РОЛЕЙ: ЧТО ВИДНО, А НЕ ЧТО НАПИСАНО. Круг 21 ветки D.

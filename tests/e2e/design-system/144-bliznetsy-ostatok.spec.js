@@ -18,7 +18,7 @@
  * верх первой карточки стоит ровно на 390 — ниже сгиба, и пересекать
  * наблюдателю нечего. Код был прав, неправа была проба.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const ВИТРИНЫ = [
     ['Корты',   '/pages/courts.html',  'ct', 'courtsHero',  'courtsFilters',  '.ct-grid', '--ct-ryadov'],

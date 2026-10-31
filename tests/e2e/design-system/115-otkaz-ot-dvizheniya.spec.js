@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ОТКАЗ ОТ ДВИЖЕНИЯ — НА ВСЕХ СТРАНИЦАХ И ПОСЛЕ НАЖАТИЙ. 19.10.

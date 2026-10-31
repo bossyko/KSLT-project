@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ПЕЧАТНАЯ КАРТОЧКА: ЧТО НА НЕЙ НАРИСОВАНО. Круг 18 ветки D, находка 96е.

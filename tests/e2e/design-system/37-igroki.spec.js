@@ -23,7 +23,7 @@
  * Тест ждёт ПРИЗНАКИ, а не тишину сети: лендинг опрашивает базу и тянет
  * чужие картинки, networkidle там может не наступить вовсе.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТРАНИЦЫ = [
     { имя: 'ru', адрес: '/index.html' },

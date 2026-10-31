@@ -17,7 +17,7 @@
  * ПОДСТАВЛЯЕТСЯ: `window.ksltUser` с заведомо несуществующим id. Это
  * чтение, в базу ничего не пишется.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const ВИТРИНЫ = [
     ['Корты',   '/pages/courts.html'],

@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ВАЖНОСТЬ ТАМ, ГДЕ ОНА ОБЯЗАТЕЛЬНА. Пункт 80а, 19.10.

@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ЗАПИРАНИЕ ФОКУСА В ОКНАХ САЙТА — ЧЕТЫРЕ КОПИИ УШЛИ В ДОМ. Кусок 153, 24.10.

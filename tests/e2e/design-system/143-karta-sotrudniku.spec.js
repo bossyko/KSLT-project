@@ -11,7 +11,7 @@
  * СТЕНД НЕУДОБНЫЙ НАМЕРЕНО: роли подаются пустая, чужая, с заглавной и
  * по-русски — на них предикат, написанный поиском подстроки, врёт молча.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/stend-admin-sotrudnik.html';
 

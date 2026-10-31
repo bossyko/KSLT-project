@@ -20,7 +20,7 @@
  * получения фокуса, а `:hover` не включается событием. В браузере через
  * расширение оба врут — здесь клавиши и мышь настоящие.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/turniry-zamer.html';
 

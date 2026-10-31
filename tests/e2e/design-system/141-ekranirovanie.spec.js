@@ -10,7 +10,7 @@
  * имена игроков и названия клубов из базы, то есть то, что вводит
  * человек. Апостроф в фамилии О'Коннор и есть самый обычный случай.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТРАНИЦЫ = ['/index.html', '/pages/courts.html', '/pages/players.html'];
 

@@ -14,7 +14,7 @@
  * все три ответа совпали бы, не заметило бы сломанного дома, молча
  * отдающего русский.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const ЯЗЫКИ = [
     ['русская',    '/index.html',    'ru', 'ru'],

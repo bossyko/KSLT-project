@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * СТАТУС ТУРНИРА — ОДИН ОТВЕТ НА ВСЕХ СТРАНИЦАХ. 19.10.

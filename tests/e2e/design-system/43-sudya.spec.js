@@ -17,7 +17,7 @@
  *
  * Тест ждёт ПРИЗНАКИ, а не тишину сети: признак — что табло отрисовано.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = v => '/maket/sudya-zamer.html?key=stend&v=' + v;
 

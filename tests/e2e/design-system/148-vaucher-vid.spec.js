@@ -26,7 +26,7 @@
  * тренеров. Починено `flex-start` + `overflow-y: auto` + `margin: auto`,
  * без новых чисел.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/stend-vaucher-blok.html';
 const адрес = (сост, пр, яз) => СТЕНД + '?sost=' + сост + '&pr=' + пр + '&yaz=' + яз;

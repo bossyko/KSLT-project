@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ПОЛЕ, ПОЛОЖЕННОЕ В ПЕРЕМЕННУЮ, ТОЖЕ ЭКРАНИРУЕТСЯ. Кусок 159, 25.10.

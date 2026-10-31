@@ -21,7 +21,7 @@
  * держит обе: `<b>` в заголовке остаётся текстом, `<span>` в разбивке
  * остаётся тегом.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/stend-pechatnyy-list.html';
 

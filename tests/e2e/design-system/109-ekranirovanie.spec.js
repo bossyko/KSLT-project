@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ЭКРАНИРОВАНИЕ: ЧТО ДОХОДИТ ДО АТРИБУТА. Круг 19 ветки D.

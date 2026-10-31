@@ -21,7 +21,7 @@
  * нет. Стенд `maket/chekboks-zamer.html` рисует НАСТОЯЩИМИ функциями
  * продукта — если их разметка уедет, стенд уедет вместе с ней.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/chekboks-zamer.html';
 

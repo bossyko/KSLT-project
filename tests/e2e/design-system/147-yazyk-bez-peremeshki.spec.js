@@ -10,7 +10,7 @@
  * кусок 138 замерил, что сокращения месяцев и порядок даты в кыргызском
  * те же, что в русском. Поэтому «15 окт.», а не «Oct 15».
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const МЕСЯЦЫ_АНГЛ = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/;
 

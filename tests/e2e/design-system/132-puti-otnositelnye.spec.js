@@ -22,7 +22,7 @@
  * узла — `state: 'attached'`, и для головы страницы он единственно
  * верный. ТАЙМАУТ ОЖИДАНИЯ — НЕ ПАДЕНИЕ КОДА, А ОШИБКА ПРИБОРА.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /* Подставной корень с подпапкой — ровно та форма, что на боевой. */
 const БАЗА = 'https://example.org/podpapka/';

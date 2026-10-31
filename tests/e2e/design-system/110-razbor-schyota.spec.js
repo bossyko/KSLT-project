@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * РАЗБОР СЧЁТА В НАСТОЯЩЕЙ АДМИНКЕ. Круг 20 ветки D.

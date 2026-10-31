@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ОТСЧЁТ ДО НАЧАЛА — ОДНО ТЕЛО И ОДИН ТИКЕР. Кусок 163, 25.10.

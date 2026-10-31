@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * БЕЙДЖ РОЛИ: ОДНА ФОРМА, А НЕ ЧЕТЫРЕ. Находка 96в, 19.10.

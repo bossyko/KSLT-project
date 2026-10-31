@@ -20,7 +20,7 @@
  *
  * Тест ждёт ПРИЗНАКИ, а не тишину сети.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТРАНИЦЫ = [
     { имя: 'ru', адрес: '/index.html',    суф: '' },

@@ -12,7 +12,7 @@
  *
  * Прогон: npx playwright test tests/e2e/design-system/31-razdel-live.spec.js
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТРАНИЦЫ = [
     { имя: 'ru', адрес: '/index.html' },

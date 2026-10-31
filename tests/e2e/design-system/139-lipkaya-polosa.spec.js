@@ -25,7 +25,7 @@
  * вычисленный `top` элемента и требует, чтобы ИЗМЕРЕННОЕ положение
  * совпало с ОБЪЯВЛЕННЫМ.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 test.describe('липкая полоса фильтров', () => {
 

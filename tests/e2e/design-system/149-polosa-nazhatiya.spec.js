@@ -21,7 +21,7 @@
  * сегодня одна, поэтому беда не выстреливала — и именно поэтому её
  * держит проба, а не память.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/stend-polosa-nazhatiya.html';
 

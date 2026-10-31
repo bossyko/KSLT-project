@@ -15,7 +15,7 @@
  * АДМИНКА — ДЕСКТОП И ПЛАНШЕТ: телефонной раскладки в ней нет, решение
  * Кости 29.09. ПРИНЯТОЕ НЕ ПЕРЕОТКРЫВАЕТСЯ.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const ТЕЛЕФОННЫЕ = ['mobile', 'phone-landscape'];
 const СТЕНД = '/maket/setka-zamer.html?r=1';

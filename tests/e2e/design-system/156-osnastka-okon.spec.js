@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ОСНАСТКА ОКОН — ОДИН ЗОВ ВМЕСТО ЧЕТЫРЁХ ПРАВОК. Кусок 156, 24.10.

@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ПРОГОН ЦЕПОЧКИ ЭТАПОВ — все годные настройки турнира, от жеребьёвки до

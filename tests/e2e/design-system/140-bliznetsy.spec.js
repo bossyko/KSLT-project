@@ -18,7 +18,7 @@
  * а карточек девять, и проба упала. Упала ПО ДЕЛУ СВОЕГО НЕЗНАНИЯ, а не
  * по коду: ЧИСЛО КАРТОЧЕК РЕШАЕТ НЕ ШАГ, А ТО, КТО СМОТРИТ.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const ВИТРИНЫ = [
     ['Корты',    '/pages/courts.html',   '.ct-grid', '--ct-ryadov'],

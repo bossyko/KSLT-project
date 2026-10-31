@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * КРАСКИ ХОЛСТА ДОХОДЯТ ДО ХОЛСТА. Круг 17 ветки D, находка 96б.

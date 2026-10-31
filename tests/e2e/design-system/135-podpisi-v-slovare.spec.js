@@ -12,7 +12,7 @@
  * ЧИСЛО БЕРЁТСЯ У ПРИБОРА, А НЕ ИЗ ПАМЯТИ: образцы ниже — это настоящие
  * значения из словаря на 22.10, и каждое стояло в коде зашитым.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/pustoe-sostoyanie-zamer.html';
 

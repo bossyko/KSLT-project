@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ДОМА ВМЕСТО КОПИЙ: КАРТА И УВЕДОМЛЕНИЕ. 19.10.

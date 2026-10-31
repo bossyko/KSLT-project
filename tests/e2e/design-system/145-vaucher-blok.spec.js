@@ -17,7 +17,7 @@
  * длиннее строки, лимиты, отказ базы, история из трёх состояний и
  * отсутствие библиотеки QR.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 const СТЕНД = '/maket/stend-vaucher-blok.html';
 const адрес = (сост, пр, яз) => СТЕНД + '?sost=' + сост + '&pr=' + пр + '&yaz=' + яз;

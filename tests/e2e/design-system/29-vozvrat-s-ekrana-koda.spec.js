@@ -1,6 +1,5 @@
 // @ts-check
-const { test } = require('../../fixtures');
-const { expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ВОЗВРАТ С ЭКРАНА КОДА — на тот экран, где вводили адрес.

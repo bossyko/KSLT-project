@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures');
 
 /**
  * ОФОРМЛЕНИЕ ИМЕНЕМ, СОСТОЯНИЕ КЛАССОМ. Кусок 175, 26.10. Круг 4 ветки C.
