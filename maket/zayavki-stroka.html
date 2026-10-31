@@ -83,7 +83,11 @@ var ШАПКА = ['', '#', 'МЕСТО', 'КАТЕГОРИЯ', 'ФИО', 'РЕГ
 /* --- КАК ЕСТЬ: разметка и инлайн-стили из renderRegRow как они есть --- */
 function рядБыло(р) {
   var знач = '';
-  if (р.посев) знач += ' <span class="ad-badge ad-badge-accent">[' + р.посев + ']</span>';
+  /* ТОН `ad-badge-accent` СНЯТ ИЗ CSS 22.10, и прежний вид им уже не
+     нарисовать: без класса бейдж выходит базовым серым, то есть картинка
+     «было» перестала быть правдой. Оставлен базовый класс и названа
+     причина — честнее, чем зов в пустоту. */
+  if (р.посев) знач += ' <span class="ad-badge">[' + р.посев + ']</span>';
   if (р.долг)  знач += ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(244,67,54,0.15);color:#f44336;margin-left:4px;">ДОЛГ</span>';
   if (р.ext)   знач += ' <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:700;background:rgba(33,150,243,0.15);color:#2196f3;margin-left:4px;">' + р.ext + '</span>';
   var кл = р.ждёт ? ' class="ad-reg-row-reshenie"' : (р.долг ? ' class="ad-reg-row-dolg"' : '');

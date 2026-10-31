@@ -37,7 +37,13 @@
 <h2>A · тона бейджа на карте админки</h2>
 <div class="st-karta">
     <div class="st-ryad" id="ряд">
-        <span class="ad-badge ad-badge-accent">акцент</span>
+        <!-- АКЦЕНТНОГО ТОНА БОЛЬШЕ НЕТ (поправлено 30.10). `.ad-badge-accent`
+             снят из `css/admin.css` 22.10 уборкой мёртвых классов: продукт
+             его не зовёт ни разу — посев рисуется `ad-reg-mark-seed`, а
+             размер `ad-badge-sm`. Стенд же продолжал его показывать, и
+             бейдж выходил БАЗОВЫМ СЕРЫМ: проба 118 падала на пяти видах с
+             «фон ad-badge-accent не равен базовому серому». Тонов четыре —
+             столько и показываем. -->
         <span class="ad-badge ad-badge-danger">12</span>
         <span class="ad-badge ad-badge-warning">7</span>
         <span class="ad-badge ad-badge-success">сыгран</span>

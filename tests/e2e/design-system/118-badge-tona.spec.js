@@ -31,7 +31,13 @@ const { test, expect } = require('@playwright/test');
  */
 
 const ПОРОГ = 4.5;
-const ТОНА = ['ad-badge-accent', 'ad-badge-danger', 'ad-badge-warning',
+/* ТОНОВ ЧЕТЫРЕ, А НЕ ПЯТЬ — ПОПРАВКА 30.10. `ad-badge-accent` снят из
+   `css/admin.css` 22.10 уборкой мёртвых классов, и это было ВЕРНО:
+   продукт его не зовёт ни разу (посев рисуется `ad-reg-mark-seed`,
+   размер — `ad-badge-sm`). А проба продолжала его требовать и падала на
+   пяти видах: без класса бейдж выходит базовым серым, что она и
+   сообщала. ПРОБА, СПОРЯЩАЯ С ПРИНЯТЫМ РЕШЕНИЕМ, — СГНИВШАЯ ПРОБА. */
+const ТОНА = ['ad-badge-danger', 'ad-badge-warning',
               'ad-badge-success', 'ad-badge-info'];
 
 async function стенд(page) {

@@ -63,6 +63,21 @@ function всеJS(дир, итог) {
     return итог;
 }
 
+/* РАЗМЕТКА — ВТОРОЙ ЯЗЫК, В КОТОРОМ ЖИВЁТ ИМЯ КЛАССА. Стенды считаются
+   наравне со страницами: зов из стенда — такой же зов. */
+function всеHtml(д, итог) {
+    итог = итог || [];
+    д = д || КОРЕНЬ;
+    for (const э of fs.readdirSync(д, { withFileTypes: true })) {
+        const п = path.join(д, э.name);
+        if (э.isDirectory()) {
+            if (!/^(node_modules|\.git|android|ios|build|test-results|playwright-report|slepki|_figma|_bazovy)$/
+                .test(э.name) && !э.name.startsWith('.')) всеHtml(п, итог);
+        } else if (э.name.endsWith('.html')) итог.push(п);
+    }
+    return итог;
+}
+
 const ошибки = [];
 let держится = 0;
 function правило(имя, годно, подсказка) {
@@ -158,9 +173,21 @@ for (const п of всеJS(path.join(КОРЕНЬ, 'js'))) {
    мёртвых классов, а не это правило. Тон без зова — это не беда на экране,
    а обещание, которого никто не просил: следующий читатель решит, что
    акцентный бейдж в админке есть. */
+/* ЗОВЫ СЧИТАЮТСЯ И В РАЗМЕТКЕ — ПОПРАВКА 30.10, И ЦЕНА БЫЛА ВИДНА.
+   Правило смотрело только `js/`, а `.ad-badge-accent` звали ДВА СТЕНДА
+   разметкой (`maket/badge-tona-zamer.html`,
+   `maket/zayavki-stroka.html`). После уборки 22.10 класса в css не стало,
+   бейдж на стенде выходил БАЗОВЫМ СЕРЫМ, и проба 118 падала на пяти
+   видах — а это правило оставалось зелёным, потому что в разметку не
+   смотрело. ПРИБОР, СМОТРЯЩИЙ ЧАСТЬ, НЕ СТОРОЖИТ НИЧЕГО: класс живёт в
+   двух языках сразу, и считать его надо в обоих. */
 const зовутся = new Set();
 for (const п of всеJS(path.join(КОРЕНЬ, 'js'))) {
     const т = чисто(fs.readFileSync(п, 'utf8'));
+    (т.match(/ad-badge-[a-z]+/g) || []).forEach(к => зовутся.add(к));
+}
+for (const п of всеHtml()) {
+    const т = fs.readFileSync(п, 'utf8').replace(/<!--[\s\S]*?-->/g, ' ');
     (т.match(/ad-badge-[a-z]+/g) || []).forEach(к => зовутся.add(к));
 }
 const безЗова = [];
