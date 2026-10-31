@@ -154,7 +154,27 @@ test.describe('Live Match Page', () => {
         page.on('pageerror', e => errors.push(e.message));
 
         await page.goto('/pages/live-match.html', { waitUntil: 'domcontentloaded' });
-        await expect(page.locator('header')).toBeVisible();
+
+        /* ШАПКА ЖИВОГО МАТЧА УХОДИТ НА НИЗКОМ ГОРИЗОНТАЛЬНОМ НАМЕРЕННО.
+           Решение Кости: окно видео на весь экран — с шапкой и подвалом
+           страница остаётся прокручиваемой, и за кадром во весь рост стоит
+           подвал. Правило живёт в `css/live-match.css:1032`
+           (`@media (orientation: landscape) and (max-height: 500px)`).
+           Проба проверяет ПРИНЯТОЕ решение, а не то, что было до него:
+           спорящая с решением проба — сгнившая проба, а не находка.
+           Признак решения берётся из css, а не из данных: подвинутого
+           `main` хватает, живого матча на стенде нет. */
+        const в = page.viewportSize();
+        const полныйЭкран = v => v.height <= 500 && v.width > v.height;
+        if (полныйЭкран(в)) {
+            await expect(page.locator('header')).toBeHidden();
+            const отступ = await page.locator('main').evaluate(
+                э => getComputedStyle(э).paddingTop);
+            expect(отступ, 'полный экран: main не подвинут под снятую шапку')
+                .toBe('0px');
+        } else {
+            await expect(page.locator('header')).toBeVisible();
+        }
 
         const critical = errors.filter(e => !e.includes('supabase') && !e.includes('fetch') && !e.includes('CORS') && !e.includes('NetworkError'));
         expect(critical).toEqual([]);
