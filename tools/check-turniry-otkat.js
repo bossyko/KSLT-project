@@ -111,9 +111,15 @@ const ОТКАТЫ = [
         `    font-size: clamp(1.9rem, 4.4vw, 3.1rem);\n    font-weight: 800;\n    line-height: 1.1;`,
    'заголовок и подзаголовок обложки стоят на ступенях, а не на clamp'],
 
-  [CSS, `.to-hero .tournament-hero-stats .hero-stat-value {\n    font-size: var(--fs-3xl);\n}`,
+  [CSS, `.to-hero .tournament-hero-stats .hero-stat-value {\n    font-size: var(--fs-hero-num);\n}`,
         `.to-hero .tournament-hero-stats .hero-stat-value {\n    font-weight: 800;\n}`,
-   'цифры обложки получили ступени в своём разделе'],
+   'цифры обложки взяты у токена, а не долей ширины и не своим числом'],
+
+  /* ДОБАВЛЕНО 31.10: своя ступень вместо токена — ровно та беда, что
+     развела пару 31.10 (цифра 40 вместо 32 и 21). */
+  [CSS, `.to-hero .tournament-hero-stats .hero-stat-value {\n    font-size: var(--fs-hero-num);\n}`,
+        `.to-hero .tournament-hero-stats .hero-stat-value {\n    font-size: var(--fs-3xl);\n}`,
+   'цифры обложки взяты у токена, а не долей ширины и не своим числом'],
 
   /* Переписан 31.10 вместе со своим правилом. Было: отнять у обзорной
      одну из СВОИХ перебивок в медиа. Теперь перебивок нет вовсе, и
