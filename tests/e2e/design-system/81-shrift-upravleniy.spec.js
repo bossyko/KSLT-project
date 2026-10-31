@@ -18,7 +18,7 @@
  *     влезала, может перестать. Меряется прямоугольником текста против
  *     доступной ширины, а не «на глаз».
  */
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 const { playerState } = require('../../auth-setup');
 
 test.use({ storageState: playerState });
@@ -40,8 +40,7 @@ async function открытьПрофиль(page, хвост) {
     await page.addInitScript(() => {
         try { localStorage.setItem('kslt_onboarding_done', '1'); } catch (e) {}
     });
-    await page.goto('/pages/dashboard' + хвост + '.html#profile');
-    await page.waitForLoadState('networkidle');
+    await открытьЗакрытую(page, '/pages/dashboard' + хвост + '.html#profile');
     await погаситьНакладки(page);
     await page.locator('#dbProfileQr').waitFor({ state: 'visible', timeout: 20000 });
     await page.waitForTimeout(400);

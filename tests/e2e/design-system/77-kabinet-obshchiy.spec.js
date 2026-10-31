@@ -23,7 +23,7 @@
  * ПОРОГ: кабинет не открылся или в нём нет ни одного раздела — проверка
  * ПАДАЕТ, а не проходит вхолостую.
  */
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 const { playerState } = require('../../auth-setup');
 
 test.use({ storageState: playerState });
@@ -116,8 +116,7 @@ async function открыть(page, хвост) {
            загрузки: окно знакомства — отдельный кусок, и этот файл не о нём. */
         try { localStorage.setItem('kslt_onboarding_done', '1'); } catch (e) {}
     });
-    await page.goto('/pages/dashboard' + хвост + '.html');
-    await page.waitForLoadState('networkidle');
+    await открытьЗакрытую(page, '/pages/dashboard' + хвост + '.html');
     await погаситьПоздравление(page);
     const разделов = await page.locator('.db-section').count();
     expect(разделов, 'ПОРОГ: кабинет не открылся — ни одного раздела на странице')

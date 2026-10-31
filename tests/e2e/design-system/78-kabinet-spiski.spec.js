@@ -37,7 +37,7 @@
  * ПОРОГ: таблицы баттлов нет на странице — проверка ПАДАЕТ, а не проходит
  * вхолостую.
  */
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 const { playerState } = require('../../auth-setup');
 
 test.use({ storageState: playerState });
@@ -129,8 +129,7 @@ async function открыть(page, хвост) {
         try { localStorage.setItem('kslt_onboarding_done', '1'); } catch (e) {}
     });
     await подставитьСтроки(page);
-    await page.goto('/pages/dashboard' + хвост + '.html#games');
-    await page.waitForLoadState('networkidle');
+    await открытьЗакрытую(page, '/pages/dashboard' + хвост + '.html#games');
     await погаситьНакладки(page);
 
     /* ЖДЁМ ПРИЗНАК, А НЕ ТИШИНУ СЕТИ: строки рисует js после ответа

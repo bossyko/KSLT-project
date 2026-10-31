@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 
 /**
  * TC-ADMIN: разметка админки.
@@ -7,6 +7,16 @@ const { test, expect } = require('../../fixtures');
  * Админка закрыта для всех, кроме сотрудников: без входа страница уводит на
  * форму авторизации. Проверки идут под сессией тестового администратора —
  * её готовит tests/auth-setup.js.
+ *
+ * ОТКРЫВАЕТСЯ ДОМОМ `открытьЗакрытую`, А НЕ `domcontentloaded` (31.10).
+ * Ночной прогон 30.10 уронил здесь 35 проверок на узких видах и ни одной
+ * на широких — подпись нагрузки, а не вёрстки. Причина читается в
+ * `js/auth-guard.js`: охрана висит на `load` и делает сетевые запросы
+ * (`getSession` → `getUser` → профиль); до её конца разделов на странице
+ * нет вовсе, а при сбое она УВОДИТ НА ВХОД. Пробы спрашивали `count()`
+ * раньше, чем охрана решала, пускать ли, и мерили форму входа.
+ * Признак `body.auth-ready` ставит сам продукт — дом его и ждёт, а отказ
+ * называет состояние («увело на вход»), а не «ожидали 1, получили 0».
  */
 
 // Все проверки в файле идут от лица тестового администратора
@@ -50,7 +60,7 @@ test.describe('Admin Page — Load without crash', () => {
             const jsErrors = [];
             page.on('pageerror', err => jsErrors.push(err.message));
 
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             await page.waitForTimeout(1000);
 
             const critical = filterCriticalErrors(jsErrors);
@@ -62,31 +72,31 @@ test.describe('Admin Page — Load without crash', () => {
 test.describe('Admin Page — Structure', () => {
     for (const adminPage of ADMIN_PAGES) {
         test(`${adminPage.name}: Has header element`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             await expect(page.locator('header')).toBeVisible();
         });
 
         test(`${adminPage.name}: Has KSLT logo`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             await expect(page.locator('.logo-img').first()).toBeVisible();
         });
 
         test(`${adminPage.name}: Has sidebar element`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             const sidebar = page.locator('#adSidebar, .ad-sidebar');
             expect(await sidebar.count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has mobile tabs element`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             const mobileTabs = page.locator('#adMobileTabs, .ad-mobile-tabs');
             expect(await mobileTabs.count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has ad-layout container`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             const layout = page.locator('.ad-layout');
             expect(await layout.count()).toBe(1);
@@ -97,72 +107,72 @@ test.describe('Admin Page — Structure', () => {
 test.describe('Admin Page — Section Containers', () => {
     for (const adminPage of ADMIN_PAGES) {
         test(`${adminPage.name}: Has dashboard section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-dashboard').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has users section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-users').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has tournaments section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-tournaments').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has players section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-players').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has courts section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-courts').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has coaches section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-coaches').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has content section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-content').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has finances section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-finances').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has vouchers section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-vouchers').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has loyalty section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-loyalty').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has sponsors section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-sponsors').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has challenges section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-challenges').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has live section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-live').count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has settings section`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
             expect(await page.locator('#ad-settings').count()).toBe(1);
         });
     }
@@ -171,7 +181,7 @@ test.describe('Admin Page — Section Containers', () => {
 test.describe('Admin Page — Navigation Elements', () => {
     for (const adminPage of ADMIN_PAGES) {
         test(`${adminPage.name}: Has nav-links in header`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             const navLinks = page.locator('.nav-links');
             expect(await navLinks.count()).toBeGreaterThanOrEqual(1);
@@ -179,21 +189,21 @@ test.describe('Admin Page — Navigation Elements', () => {
 
         // Админка ведётся только на русском, выбора языка в ней быть не должно
         test(`${adminPage.name}: Нет переключателя языка`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             const langDropdown = page.locator('#langDropdown, .lang-dropdown');
             expect(await langDropdown.count()).toBe(0);
         });
 
         test(`${adminPage.name}: Has burger menu button`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             const burgerMenu = page.locator('#burgerMenu, .burger-menu');
             expect(await burgerMenu.count()).toBe(1);
         });
 
         test(`${adminPage.name}: Has logout button`, async ({ page }) => {
-            await page.goto(adminPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, adminPage.path);
 
             // Logout button with ksltLogout onclick
             const logoutBtn = page.locator('button[onclick*="ksltLogout"], .btn-auth[onclick*="ksltLogout"]');
@@ -215,7 +225,7 @@ test.describe('Карточка игрока в админке', () => {
         const errors = [];
         page.on('pageerror', e => errors.push(e.message));
 
-        await page.goto('/pages/admin.html#players/edit/test-player', { waitUntil: 'domcontentloaded' });
+        await открытьЗакрытую(page, '/pages/admin.html#players/edit/test-player');
         await page.waitForTimeout(7000);
 
         expect(errors).toEqual([]);

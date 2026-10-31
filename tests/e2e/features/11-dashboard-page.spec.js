@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 
 /**
  * TC-DASHBOARD: разметка кабинета.
@@ -7,6 +7,16 @@ const { test, expect } = require('../../fixtures');
  * Кабинет закрыт: без входа страница уводит на форму авторизации, и искать
  * в ней разделы кабинета бессмысленно. Поэтому проверки идут под сессией
  * тестового игрока — её готовит tests/auth-setup.js.
+ *
+ * ОТКРЫВАЕТСЯ ДОМОМ `открытьЗакрытую`, А НЕ `domcontentloaded` (31.10).
+ * Ночной прогон 30.10 уронил здесь 44 проверок на узких видах и ни одной
+ * на широких — подпись нагрузки, а не вёрстки. Причина читается в
+ * `js/auth-guard.js`: охрана висит на `load` и делает сетевые запросы
+ * (`getSession` → `getUser` → профиль); до её конца разделов на странице
+ * нет вовсе, а при сбое она УВОДИТ НА ВХОД. Пробы спрашивали `count()`
+ * раньше, чем охрана решала, пускать ли, и мерили форму входа.
+ * Признак `body.auth-ready` ставит сам продукт — дом его и ждёт, а отказ
+ * называет состояние («увело на вход»), а не «ожидали 1, получили 0».
  */
 
 // Все проверки в файле идут от лица тестового игрока
@@ -48,7 +58,7 @@ test.describe('Dashboard Page — Load without crash', () => {
             const jsErrors = [];
             page.on('pageerror', err => jsErrors.push(err.message));
 
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
             await page.waitForTimeout(1000);
 
             const critical = filterCriticalErrors(jsErrors);
@@ -60,80 +70,80 @@ test.describe('Dashboard Page — Load without crash', () => {
 test.describe('Dashboard Page — Structure', () => {
     for (const dashPage of DASHBOARD_PAGES) {
         test(`${dashPage.name}: Has header element`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
             await expect(page.locator('header')).toBeVisible();
         });
 
         test(`${dashPage.name}: Has KSLT logo`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
             await expect(page.locator('.logo-img').first()).toBeVisible();
         });
 
         test(`${dashPage.name}: Has profile section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const profileSection = page.locator('#db-profile');
             expect(await profileSection.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has stats section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const statsSection = page.locator('#db-stats');
             expect(await statsSection.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has games section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const gamesSection = page.locator('#db-games');
             expect(await gamesSection.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has sidebar element`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const sidebar = page.locator('#dbSidebar, .db-sidebar');
             expect(await sidebar.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has mobile tabs element`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const mobileTabs = page.locator('#dbMobileTabs, .db-mobile-tabs');
             expect(await mobileTabs.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has layout container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const layout = page.locator('.db-layout');
             expect(await layout.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has vouchers section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const vouchersSection = page.locator('#db-vouchers');
             expect(await vouchersSection.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has loyalty section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const loyaltySection = page.locator('#db-loyalty');
             expect(await loyaltySection.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has payments section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const paymentsSection = page.locator('#db-payments');
             expect(await paymentsSection.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has settings section container`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const settingsSection = page.locator('#db-settings');
             expect(await settingsSection.count()).toBe(1);
@@ -144,21 +154,21 @@ test.describe('Dashboard Page — Structure', () => {
 test.describe('Dashboard Page — Navigation Elements', () => {
     for (const dashPage of DASHBOARD_PAGES) {
         test(`${dashPage.name}: Has nav-links in header`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const navLinks = page.locator('.nav-links');
             expect(await navLinks.count()).toBeGreaterThanOrEqual(1);
         });
 
         test(`${dashPage.name}: Has language dropdown`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const langDropdown = page.locator('#langDropdown, .lang-dropdown');
             expect(await langDropdown.count()).toBe(1);
         });
 
         test(`${dashPage.name}: Has burger menu button`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const burgerMenu = page.locator('#burgerMenu, .burger-menu');
             expect(await burgerMenu.count()).toBe(1);
@@ -178,7 +188,7 @@ test.describe('Dashboard Page — Navigation Elements', () => {
 test.describe('Dashboard Page — My Games subsections', () => {
     for (const dashPage of DASHBOARD_PAGES) {
         test(`${dashPage.name}: Five subsections in fixed order`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             const bodies = page.locator('#db-games .db-subsection-body');
             await expect(bodies.first()).toBeAttached({ timeout: 15000 });
@@ -193,7 +203,7 @@ test.describe('Dashboard Page — My Games subsections', () => {
 
         // Пустой блок «Предстоящие турниры» висел бы девять месяцев в году
         test(`${dashPage.name}: Upcoming block is shown only when it has rows`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             // Ждём, пока отрисуются прошедшие турниры — к этому моменту
             // предстоящие уже решили, показываться им или нет
@@ -215,7 +225,7 @@ test.describe('Dashboard Page — My Games subsections', () => {
          * матчи и баттлы не отображались вовсе.
          */
         test(`${dashPage.name}: Every subsection finishes loading`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             for (const id of ['dbGamesTournaments', 'dbGamesMatches', 'dbGamesBattles', 'dbGamesInvites']) {
                 await expect(page.locator(`#${id} .db-subsection-loading`),
@@ -226,7 +236,7 @@ test.describe('Dashboard Page — My Games subsections', () => {
         });
 
         test(`${dashPage.name}: No separate Invitations tab`, async ({ page }) => {
-            await page.goto(dashPage.path, { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path);
 
             await expect(page.locator('.db-sidebar-link').first()).toBeAttached({ timeout: 15000 });
             expect(await page.locator('[data-tab="invitations"]').count()).toBe(0);
@@ -234,7 +244,7 @@ test.describe('Dashboard Page — My Games subsections', () => {
         });
 
         test(`${dashPage.name}: Old #invitations link lands on My Games`, async ({ page }) => {
-            await page.goto(dashPage.path + '#invitations', { waitUntil: 'domcontentloaded' });
+            await открытьЗакрытую(page, dashPage.path + '#invitations');
 
             // Раздел «Мои игры» помечен активным ещё в разметке, так что сам
             // по себе он ничего не доказывает: ждём, пока отработает скрипт

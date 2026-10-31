@@ -17,7 +17,7 @@
  *     ответ запроса подменяется: у аккаунта проб истории рейтинга нет;
  *   • ОКНО QR ИЩЕТСЯ НАЖАТИЕМ — в списке элементов его нет.
  */
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 const { playerState } = require('../../auth-setup');
 
 test.use({ storageState: playerState });
@@ -57,8 +57,7 @@ async function открыть(page, хвост, раздел, сИсторией
             status: 200, contentType: 'application/json', body: JSON.stringify(ИСТОРИЯ)
         }));
     }
-    await page.goto('/pages/dashboard' + хвост + '.html#' + раздел);
-    await page.waitForLoadState('networkidle');
+    await открытьЗакрытую(page, '/pages/dashboard' + хвост + '.html#' + раздел);
     await погаситьНакладки(page);
     await page.locator('#db-' + раздел).waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForTimeout(500);

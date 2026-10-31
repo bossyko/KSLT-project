@@ -22,7 +22,7 @@
  * тот же боевой код, что в продукте. Правда, которую проверяет проба, —
  * геометрия и лестница; про содержимое базы она ничего не утверждает.
  */
-const { test, expect } = require('../../fixtures');
+const { test, expect, открытьЗакрытую } = require('../../fixtures');
 const { playerState } = require('../../auth-setup');
 
 test.use({ storageState: playerState });
@@ -76,8 +76,7 @@ async function открыть(page, хвост, раздел, настройки
         try { localStorage.setItem('kslt_onboarding_done', '1'); } catch (e) {}
     });
     await подставить(page, настройки);
-    await page.goto('/pages/dashboard' + хвост + '.html#' + раздел);
-    await page.waitForLoadState('networkidle');
+    await открытьЗакрытую(page, '/pages/dashboard' + хвост + '.html#' + раздел);
     await погаситьНакладки(page);
     const признак = раздел === 'loyalty'
         ? '#db-loyalty .db-loy-balance-value'
