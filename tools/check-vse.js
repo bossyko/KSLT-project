@@ -331,7 +331,10 @@ const КУСКИ = [
      'check-tokeny-iz-js.js', 'check-tokeny-iz-js-otkat.js'],
 
     ['выход из аккаунта только по ответу сервера',
-     'check-vyhod-po-otvetu.js', 'check-vyhod-po-otvetu-otkat.js']
+     'check-vyhod-po-otvetu.js', 'check-vyhod-po-otvetu-otkat.js'],
+
+    ['пробы идут через обвязку, а не мимо неё',
+     'check-proby-cherez-obvyazku.js', 'check-proby-cherez-obvyazku-otkat.js']
 ];
 
 function прогнать(файл) {
