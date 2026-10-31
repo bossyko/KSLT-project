@@ -28,16 +28,45 @@ const ПОИСК   = '/pages/partners.html';
 const УСЛУГИ  = '/pages/services.html';
 const ТУРНИРЫ = '/pages/tournaments-overview.html';
 
+/**
+ * ВОШЕДШИЙ ЧЕЛОВЕК — ПОДСТАВОЙ ДОМА ДОСТУПА.
+ *
+ * ПОПРАВКА 30.10, И ЭТО ТРЕТИЙ СЛУЧАЙ ОДНОГО РОДА ЗА СУТКИ.
+ * Подстава изображала СТАРЫЙ способ: `KSLT_INVITE.access()`. А уровень
+ * доступа переехал в дом `js/kslt-dostup.js` — в самом `partners.js` об
+ * этом написано прямо: «УРОВЕНЬ ДОСТУПА — У ДОМА, здесь было ДВЕ записи
+ * одного понятия». Переезд случился, подставу не поправили: страница
+ * спрашивала `KSLT_DOSTUP.уровень()`, получала `guest`, слоя-ссылки не
+ * рисовала — и ДВАДЦАТЬ проверок этого файла падали «слоя-ссылки нет».
+ * Сверка со старым продуктом подтвердила: беда старше правок 30.10.
+ *
+ * ПРАВИЛО: ПЕРЕЕЗД В ДОМ ЗАБЫВАЕТ НЕ ТОЛЬКО СТЕНДЫ, НО И ПОДСТАВЫ В
+ * ПРОБАХ. За сутки это ударило трижды — стенд сетки (35 падений), стенд
+ * графика (15) и подставной ответ зова (4).
+ *
+ * `KSLT_INVITE` подставляется ТОЖЕ, и не для доступа: гостю страница
+ * открывает им окно регистрации, а в пробе никакие окна не нужны.
+ */
 async function войти(page, уровень) {
     await page.addInitScript(у => {
-        const подстава = {
+        const домДоступа = {
+            уровень: function () { return Promise.resolve(у); },
+            мойИгрок: function () { return null; },
+            сотрудникПоРоли: function () { return false; },
+            подписьРоли: function () { return ''; },
+            значокРоли: function () { return ''; }
+        };
+        Object.defineProperty(window, 'KSLT_DOSTUP', {
+            value: домДоступа, writable: false, configurable: false
+        });
+        const приглашения = {
             access: function () { return Promise.resolve(у); },
             myPlayerId: function () { return null; },
             окноРегистрации: function () {},
             click: function () {}
         };
         Object.defineProperty(window, 'KSLT_INVITE', {
-            value: подстава, writable: false, configurable: false
+            value: приглашения, writable: false, configurable: false
         });
     }, уровень || 'member');
 }
