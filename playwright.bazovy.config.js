@@ -43,7 +43,11 @@ module.exports = defineConfig({
     retries: 0,
     workers: 3,
     reporter: [
-        ['json', { outputFile: 'tests/reports/results-bazovy.json' }],
+        /* ОТЧЁТ ИМЕНУЕТСЯ ПО СРЕЗУ, иначе второй прогон затрёт первый, и
+           сравнивать станет нечего — ровно так же, как `test-results/`
+           затирается каждым прогоном. */
+        ['json', { outputFile: 'tests/reports/results-' +
+            (process.env.KSLT_SREZ === '.' ? 'nyneshniy' : 'bazovy') + '.json' }],
         ['list']
     ],
     use: {
@@ -72,8 +76,21 @@ module.exports = defineConfig({
         { name: 'phone-landscape', use: { viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true } },
         { name: 'tablet-landscape', use: { viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true } }
     ],
+    /* ЧТО ОТДАЁМ БРАУЗЕРУ — ВЫБИРАЕТСЯ ОДНОЙ ПЕРЕМЕННОЙ.
+       По умолчанию `_bazovy` — старый срез. `KSLT_SREZ=.` отдаёт
+       НЫНЕШНЕЕ дерево, и тогда прибор мерит тот же набор файлов, в тех
+       же видах, с теми же `retries: 0` — меняется ТОЛЬКО продукт.
+       ЗАЧЕМ ЭТО НУЖНО, И ЭТО ЗАМЕР, А НЕ ОСТОРОЖНОСТЬ. Сверка показала:
+       `11-dashboard` и `12-admin` на старом срезе зелёные целиком (198 и
+       78 проверок), а в ночном прогоне дали 35 и 35 падений с
+       мерцанием. Но ночной прогон шёл ПОЛНЫМ набором в три работника —
+       то есть под нагрузкой, с `retries: 1`. Сравнивать его со сверкой
+       нельзя: разные условия, и вывод «значит это моя правка» был бы
+       сделан по разнице приборов, а не продуктов.
+       ОДИН ПРИБОР, ОДНИ УСЛОВИЯ — МЕНЯЕТСЯ ТОЛЬКО ПРОДУКТ. */
     webServer: {
-        command: 'python3 -m http.server 8000 --directory _bazovy',
+        command: 'python3 -m http.server 8000 --directory ' +
+                 (process.env.KSLT_SREZ || '_bazovy'),
         port: 8000,
         reuseExistingServer: false,
         timeout: 15000

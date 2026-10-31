@@ -30,6 +30,7 @@ tests/reports/html/
 tests/reports/html-*/
 tests/reports/results.json
 tests/reports/results-bazovy.json
+tests/reports/results-nyneshniy.json
 tests/reports/zamer-*.txt
 .playwright/
 
