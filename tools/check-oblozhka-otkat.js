@@ -20,6 +20,24 @@ const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-oblozhka.js')
 /* [имя, файл, что ищем, на что меняем, какое правило должно упасть] */
 const ОТКАТЫ = [
 
+/* ДОБАВЛЕНО 31.10: кегли обложки — одно определение. */
+['вернуть обзорной свою ступень заголовка', 'css/tournaments-overview.css',
+ `    font-size: var(--fs-hero);`,
+ `    font-size: var(--fs-3xl);`,
+ 'обзорная берёт кегли обложки у токенов, а не своим набором'],
+
+/* ЯКОРЬ НА ЖИВОМ КОДЕ, А НЕ В КОММЕНТАРИИ. Первая редакция этого отката
+   цеплялась за строку подписи — и сторож её не видел, потому что
+   снимает комментарии перед чтением. Откат «проходил незамеченным», то
+   есть доказывал не правило, а слепоту якоря.
+   ПРАВИЛО: ЯКОРЬ ВНУТРИ КОММЕНТАРИЯ — ЭТО ЯКОРЬ, КОТОРОГО СТОРОЖ НЕ
+   ВИДИТ. */
+['вернуть обзорной перебивку кегля в медиа', 'css/tournaments-overview.css',
+ '    .to-card-grid {\n        grid-template-columns: 1fr;',
+ '    .to-hero h1 { font-size: var(--fs-2xl); }\n    .to-card-grid {\n        grid-template-columns: 1fr;',
+ 'у обзорной не осталось своих ступеней обложки в медиа'],
+
+
 /* ДОБАВЛЕНО 31.10: одна высота обложки на низком горизонтальном. */
 ['вернуть прежний пол раздела на низкий горизонтальный', 'css/tokens.css',
  `    --oblozhka-pol: 180px;`,
@@ -308,7 +326,11 @@ fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(ВРЕМ, 'tools
 fs.writeFileSync(path.join(ВРЕМ, 'tools', 'check-oblozhka.js'), ПРАВИЛО);
 
 const исходник = {};
-['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournament-detail.css', 'js/tournament-detail.js'].forEach(ф => {
+/* ОБЗОРНАЯ ДОБАВЛЕНА 31.10: её кегли свелись к токенам, и откаты теперь
+   трогают и её файл. Прувер, не читающий файла, об который спотыкается
+   откат, падает на `undefined.split` — ПЕСОЧНИЦА БЕДНЕЕ СТОРОЖА. */
+['css/tokens.css', 'css/tournaments.css', 'css/style.css', 'css/tournament-detail.css',
+ 'css/tournaments-overview.css', 'js/tournament-detail.js'].forEach(ф => {
     исходник[ф] = fs.readFileSync(path.join(ВРЕМ, ф), 'utf8');
 });
 
