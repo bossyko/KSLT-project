@@ -20,9 +20,21 @@ const CSS = 'css/courts.css';
 const СТИ = 'css/style.css';
 const JS  = 'js/courts.js';
 const ПОЛ = 'js/polosa-stranic.js';
+/* Главная рисует ряд кортов своим файлом (31.10). */
+const ГЛАВ = 'js/home-courts-coaches.js';
 const EN  = 'pages/courts-en.html';
 
 const ОТКАТЫ = [
+
+/* ДОБАВЛЕНО 31.10: вторая ступень картинки корта. */
+[ГЛАВ, '    var ПОКРЫТИЯ_ЕСТЬ = false;',
+       '    var ПОКРЫТИЯ_ЕСТЬ = true;',
+ 'вторая ступень картинки корта включена ровно тогда, когда есть файлы'],
+
+[ГЛАВ, '        if (!ПОКРЫТИЯ_ЕСТЬ) return COURT_PHOTO;\n',
+       '',
+ 'выключенная ступень не зовёт таблицу покрытий'],
+
 
   [CSS, `    min-height: var(--oblozhka-pol);`, `    min-height: 460px;`,
    'пол обложки берётся из общей крутилки раздела'],
