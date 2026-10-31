@@ -329,8 +329,16 @@ test('окно кабинета называет себя, держит Tab и �
     expect((await заголовок.textContent()).trim().length,
         'заголовок окна пуст').toBeGreaterThan(0);
 
-    expect(await page.evaluate(() => document.activeElement.className),
-        'окно открылось, не взяв фокус').toContain('db-modal-close');
+    /* ФОКУС ЖДЁТСЯ, А НЕ СНИМАЕТСЯ С ПЕРВОЙ ПОПЫТКИ (31.10). Окно берёт
+       фокус синхронно (`js/dashboard.js:4585`, `кнопкаЗакрыть.focus()`),
+       но рядом всплывает поздравление ответом базы и может забрать его
+       обратно — проба мерцала на трёх видах из пяти. Опрос беду не
+       скрывает: окно, которое фокуса НЕ берёт, не возьмёт его и за
+       пять секунд, и правило упадёт с тем же именем. */
+    await expect.poll(
+        () => page.evaluate(() => document.activeElement.className),
+        { timeout: 5000, message: 'окно открылось, не взяв фокус' }
+    ).toContain('db-modal-close');
 
     const фокусных = await окно.evaluate(к => к.querySelectorAll(
         'button:not([disabled]), a[href], input:not([disabled]), ' +
