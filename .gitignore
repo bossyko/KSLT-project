@@ -18,6 +18,10 @@ secrets/
 *.bak
 
 # Playwright / Tests
+# Базовый срез продукта для сверки: `git worktree add _bazovy <коммит>`.
+# Нынешние пробы прогоняются по СТАРОМУ продукту — так видно, моя правка
+# уронила пробу или она была красной до неё. Папка временная.
+_bazovy/
 test-results/
 # Отчёты Playwright. ШАБЛОНОМ, А НЕ СПИСКОМ: 27.09 папка html-stend
 # уехала в репозиторий — 143 файла — только потому, что её имени не
@@ -25,6 +29,7 @@ test-results/
 tests/reports/html/
 tests/reports/html-*/
 tests/reports/results.json
+tests/reports/results-bazovy.json
 tests/reports/zamer-*.txt
 .playwright/
 
