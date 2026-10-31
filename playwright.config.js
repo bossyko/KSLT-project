@@ -15,10 +15,18 @@ module.exports = defineConfig({
     fullyParallel: true,
     retries: 1,
     workers: 3,
+    /* ВИДНО, КАКОЙ ТЕСТ ИДЁТ И СКОЛЬКО ОСТАЛОСЬ (31.10).
+       Было `list`: строка на каждый тест, и в большом прогоне их
+       полторы тысячи — вперемешку со строками веб-сервера, который
+       печатал по строке НА КАЖДЫЙ ЗАПРОС. Костя 31.10: «не могу
+       понять сейчас где на каком тест идёт или закончился».
+       `line` держит одну строку `[N/M] файл › название` и оставляет в
+       выводе только падения. Полный список по тесту возвращается на
+       один прогон переменной: `KSLT_SPISOK=1 npx playwright test`. */
     reporter: [
         ['html', { outputFolder: 'tests/reports/html', open: 'never' }],
         ['json', { outputFile: 'tests/reports/results.json' }],
-        ['list']
+        [process.env.KSLT_SPISOK ? 'list' : 'line']
     ],
     use: {
         baseURL: 'http://localhost:8000',
@@ -71,7 +79,16 @@ module.exports = defineConfig({
         }
     ],
     webServer: {
-        command: 'python3 -m http.server 8000',
+        /* ТИХИЙ СЕРВЕР: МОЛЧИТ ПРО УСПЕХ, ГОВОРИТ ПРО БЕДУ (31.10).
+           `python3 -m http.server` печатает строку на КАЖДЫЙ запрос и
+           пишет их в stderr, который Playwright подмешивает в свой
+           вывод: на прогоне каждая страница тянет по сорок файлов, и
+           за этими строками не видно ни номера теста, ни его исхода.
+           `stderr: 'ignore'` заглушило бы и настоящие беды сервера —
+           отказ порта, права, падение. Поэтому свой обработчик:
+           2xx и 3xx молчат, 4xx и 5xx печатаются (ненайденный файл —
+           это обычно опечатка в теге скрипта, и видеть её надо). */
+        command: 'python3 tools/server-tihiy.py 8000',
         port: 8000,
         reuseExistingServer: true,
         timeout: 10000

@@ -28,6 +28,29 @@ const ЛЕНД = 'index.html';
 /* [файл, что ищем, на что меняем, какое правило обязано упасть] */
 const ОТКАТЫ = [
 
+  /* ── низкий горизонтальный: полоса в два ряда (31.10) ── */
+  [CSS, `    @media (orientation: landscape) and (max-height: 500px) {
+        .trn-back {
+            flex: 0 0 auto;
+        }
+    }`,
+          `    @media (orientation: landscape) and (max-height: 500px) {
+        .trn-back {
+            flex: 1 1 100%;
+        }
+    }`,
+   'на низком горизонтальном «назад» не занимает целую строку'],
+
+  [CSS, `@media (max-width: 992px) {
+    .trn-filters {`,
+          `@media (max-width: 900px) {
+    .trn-back { flex: 1 1 100%; }
+}
+
+@media (max-width: 992px) {
+    .trn-filters {`,
+   'условие — поворот и высота, а не третья ширина'],
+
   [ЛЕНД, `<body`, `<body data-trn-filters="завелась на лендинге"`,
    'лента есть на всех трёх языках и нигде не на лендинге'],
 
