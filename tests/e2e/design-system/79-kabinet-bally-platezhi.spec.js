@@ -170,16 +170,31 @@ for (const я of ЯЗЫКИ) {
    ══════════════════════════════════════════════════════════════════════ */
 test('баланс и плитки платежей стоят на ОДНОЙ ступени', async ({ page }) => {
     await открыть(page, '', 'loyalty');
-    const баланс = await page.evaluate(() =>
-        parseFloat(getComputedStyle(document.querySelector('#db-loyalty .db-loy-balance-value')).fontSize));
-    const подпись = await page.evaluate(() =>
-        parseFloat(getComputedStyle(document.querySelector('#db-loyalty .db-loy-balance-label')).fontSize));
+    const кегльБаланса = (сел) => page.evaluate(с => {
+        const э = document.querySelector(с);
+        return э ? parseFloat(getComputedStyle(э).fontSize) : null;
+    }, сел);
+    const баланс = await кегльБаланса('#db-loyalty .db-loy-balance-value');
+    const подпись = await кегльБаланса('#db-loyalty .db-loy-balance-label');
+    expect(баланс, 'ПОРОГ: баланса баллов нет').not.toBeNull();
+    expect(подпись, 'ПОРОГ: подписи баланса нет').not.toBeNull();
 
     await открыть(page, '', 'payments');
-    const плитка = await page.evaluate(() =>
-        parseFloat(getComputedStyle(document.querySelector('#db-payments .db-stat-value')).fontSize));
-    const заголовок = await page.evaluate(() =>
-        parseFloat(getComputedStyle(document.querySelector('#db-payments .db-section-title')).fontSize));
+    /* ИМЯ КЛАССА УШЛО ЗА ПЛИТКОЙ В ДОМ (поправлено 31.10): 29.10 плитка
+       числа с подписью переехала в `js/kslt-plitki.js`, приставка `kst-`,
+       и `db-stat-value` в продукте не осталось.
+       И СПРАШИВАЕМ ЧЕРЕЗ ПРОВЕРКУ, А НЕ ВСЛЕПУЮ: прежняя запись звала
+       `getComputedStyle` сразу на найденном узле, и при пропавшем имени
+       падала не своим словом, а «parameter 1 is not of type Element» —
+       проба врала о том, ЧТО сломалось. */
+    const кегль = (сел) => page.evaluate(с => {
+        const э = document.querySelector(с);
+        return э ? parseFloat(getComputedStyle(э).fontSize) : null;
+    }, сел);
+    const плитка = await кегль('#db-payments .kst-value');
+    const заголовок = await кегль('#db-payments .db-section-title');
+    expect(плитка, 'ПОРОГ: плитки платежей нет').not.toBeNull();
+    expect(заголовок, 'ПОРОГ: заголовка раздела платежей нет').not.toBeNull();
 
     expect(ШКАЛА_КЕГЛЕЙ, 'кегль цифры ' + баланс + ' мимо шкалы').toContain(баланс);
     /* ОТНОШЕНИЕ, А НЕ ЧИСЛО: оба крупных числа куска равны между собой */
