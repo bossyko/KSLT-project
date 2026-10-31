@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>КСЛТ — проба: один договор на имя участника</title>
-<link rel="stylesheet" href="../css/tokens.css?v=76">
+<link rel="stylesheet" href="../css/tokens.css?v=77">
 <link rel="stylesheet" href="../css/style.css?v=462">
 <link rel="stylesheet" href="../css/tournament-detail.css?v=158">
 <style>body{background:#0A0A0A;color:#fff;font-family:Inter,system-ui,sans-serif;margin:0;padding:24px;}
@@ -50,6 +50,19 @@ var supabaseClient = {
 <script src="../js/tournament-generator.js?v=4"></script>
 <script src="../js/tournament-slots.js?v=6"></script>
 <script src="../js/kslt-zov.js?v=2"></script>
+<!-- ДОМ КЛЕТКИ МАТЧА И ЕГО ЗАВИСИМОСТЬ (добавлено 30.10).
+     ЗАЧЕМ. `renderMatch` 28.10 (кусок 217) переехал на общий дом
+     `KSLT_SETKA.матч` — тот же, что рисует сетку в приложении, — и зовёт
+     его БЕЗ ОХРАНЫ. На стенд дом не добавили, поэтому первый же вызов
+     (`renderLeagueBracketPublic` зовёт клетку дважды) падал на
+     `KSLT_SETKA is not defined`, признак готовности не ставился, и ВСЕ
+     СЕМЬ проверок файла `176-dogovor-imeni` вываливались по таймауту —
+     35 падений на пяти видах. Сверка со старым продуктом подтвердила:
+     это не правка 30.10, беда жила с 28-го.
+     `group-standings.js` нужен дому: он считает места и доли геймов
+     (`KSLT_GROUPS`). Порядок тот же, что на боевой странице турнира. -->
+<script src="../js/group-standings.js?v=9"></script>
+<script src="../js/kslt-setka.js?v=7"></script>
 <script src="../js/tournament-detail.js?v=139"></script>
 <script>
 /* ── ДАННЫЕ. Крайние, а не удобные ──────────────────────────────────── */

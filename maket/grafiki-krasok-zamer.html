@@ -3,13 +3,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Замер: графики рейтинга и NTRP</title>
-<link rel="stylesheet" href="../css/tokens.css?v=76">
+<link rel="stylesheet" href="../css/tokens.css?v=77">
 <link rel="stylesheet" href="../css/style.css?v=462">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="../js/kslt-vremya.js?v=2"></script>
 <script src="../js/kslt-kraska.js?v=5"></script>
 <script src="../js/kslt-rules.js?v=39"></script>
 <script src="../js/kslt-yazyk.js?v=4"></script>
+<!-- ДОМ ДАННЫХ ГРАФИКА (добавлено 30.10).
+     ЗАЧЕМ. `rating-chart.js:71` зовёт `window.KSLT_GRAFIK_DANNYE.rows`
+     БЕЗ ОХРАНЫ — окно сезона, второй ключ сортировки и `ntrp_after`
+     живут в общем доме. На стенд дом не добавили, и рисование падало на
+     `Cannot read properties of undefined (reading 'rows')`: ПЯТНАДЦАТЬ
+     падений пробы `107-kraski-holsta` на пяти видах и трёх языках.
+     Сверка со старым продуктом подтвердила: беда не от правок 30.10.
+     Порядок тот же, что на `pages/player.html`: дом раньше графика. -->
+<script src="../js/kslt-grafik-dannye.js?v=2"></script>
 <script src="../js/rating-chart.js?v=19"></script>
 <style>
   body { background: var(--bg-base); color: var(--text-primary); font: 14px/1.5 Inter, sans-serif; padding: 20px; margin: 0; }
