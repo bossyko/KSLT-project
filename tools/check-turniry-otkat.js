@@ -32,12 +32,32 @@ const СТАТ = 'js/stats.js';
 const ДОМ_ЧИСЕЛ = 'js/kslt-chisla-kluba.js';
 const HTMLen = 'pages/tournaments-overview-en.html';
 const СТЕНД = 'maket/turniry-zamer.html';
+/* Общий лист сайта: в нём живёт лента турниров главной (31.10). */
+const СТИЛЬ = 'css/style.css';
 const ТЕСТ  = 'tests/e2e/design-system/44-turniry.spec.js';
 const КРУПФ = 'js/tournament-featured.js';
 const ДОМСЛОЙ = 'js/kslt-sloy.js';
 const БЛОКФ = 'js/tournament-blocks.js';
 
 const ОТКАТЫ = [
+
+/* ДОБАВЛЕНО 31.10: боковая карточка и лента — размер по содержимому. */
+[CSS, `    padding-left: calc(var(--to-thumb) + var(--space-2));`,
+      `    padding-left: 144px;`,
+ 'место под афишу считается из ширины самой афиши'],
+
+[CSS, `    --to-thumb: 96px;\n    padding-left: calc(var(--to-thumb) + var(--space-2));`,
+      `    --to-thumb: 120px;\n    padding-left: calc(var(--to-thumb) + var(--space-2));`,
+ 'в боковом столбе афиша своей ступени, а не широкого вида'],
+
+[СТИЛЬ, `    .tournaments-grid > .tc:nth-child(n) { height: auto; min-height: 270px; }`,
+        `    .tournaments-grid > .tc:nth-child(-n+2) { min-height: 280px; }\n    .tournaments-grid > .tc:nth-child(n) { height: auto; min-height: 270px; }`,
+ 'мест, где размер карточки ленты решает номер, не больше трёх'],
+
+[СТИЛЬ, `    .tournaments-grid > .tc:nth-child(n) { height: auto; min-height: 270px; }`,
+        `    .tournaments-grid > .tc:nth-child(-n+3) { height: auto; min-height: 270px; }`,
+ 'у ленты телефона лёжа размер один на все карточки'],
+
   /* ── отношения ─────────────────────────────────────────────────────── */
   [CSS, `.to-categories .to-card-grid {\n    /* СТУПЕНЬ ВЫВЕДЕНА`,
         `.to-card-grid {\n    /* СТУПЕНЬ ВЫВЕДЕНА`,
