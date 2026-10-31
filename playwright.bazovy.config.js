@@ -55,11 +55,22 @@ module.exports = defineConfig({
         trace: 'off',
         viewport: { width: 1280, height: 800 }
     },
-    /* ТОЛЬКО ОДИН ВИД. Сверка отвечает на вопрос «падало ли до правки», и
-       для этого хватает одного вида: пять видов умножили бы время впятеро,
-       ничего не добавив к ответу. */
+    /* ПЯТЬ ВИДОВ, А НЕ ОДИН — ПОПРАВКА К СЕБЕ, И ЕЁ ПОКАЗАЛ ПЕРВЫЙ ЖЕ
+       ПРОГОН СВЕРКИ. Я написал «хватает одного вида» и прогнал только
+       desktop. Замер по следу: все 35 падений кабинета и 35 админки
+       лежат на `mobile`, `phone-landscape` и `tablet-landscape`, а на
+       desktop их НЕТ НИ ОДНОГО. То есть сверка одним видом про них не
+       сказала ничего, и я чуть не записал их в «моё» по пустому месту.
+       ПРИБОР, СМОТРЯЩИЙ ЧАСТЬ, НЕ МЕРИТ НИЧЕГО — четырнадцатый раз.
+       Виды перечислены все; какой нужен, выбирает зовущий:
+         --project=mobile --project=phone-landscape
+       Без `--project` пойдут все пять, и это дороже впятеро. */
     projects: [
-        { name: 'desktop', use: { viewport: { width: 1280, height: 800 } } }
+        { name: 'desktop', use: { viewport: { width: 1280, height: 800 } } },
+        { name: 'tablet', use: { viewport: { width: 768, height: 1024 }, hasTouch: true, isMobile: true } },
+        { name: 'mobile', use: { viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true } },
+        { name: 'phone-landscape', use: { viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true } },
+        { name: 'tablet-landscape', use: { viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true } }
     ],
     webServer: {
         command: 'python3 -m http.server 8000 --directory _bazovy',
