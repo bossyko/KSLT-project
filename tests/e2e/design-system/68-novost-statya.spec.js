@@ -291,13 +291,26 @@ test.describe('страница новости · ' + Я.имя, () => {
                     return { верх: Math.round(g.top * 10) / 10, низ: Math.round(g.bottom * 10) / 10,
                              лево: Math.round(g.left * 10) / 10, право: Math.round(g.right * 10) / 10 };
                 };
+                /* СТЕК В ТОЧКЕ, А НЕ ОДИН ЭЛЕМЕНТ. `elementFromPoint`
+                   вернул `sponsor-logo-img` с прямоугольником 37.5→61.5 на
+                   точке y=77.5 — то есть элемент, который эту точку НЕ
+                   СОДЕРЖИТ. Объяснить это чтением я не смог (у логотипа ни
+                   своего слоя, ни z-index), а догадки — не числа. Поэтому
+                   снимается ВЕСЬ стек: `elementsFromPoint` отдаёт всех, кто
+                   лежит в точке, сверху вниз, и спорить тут уже не о чем. */
                 const кто = сдвиг => {
-                    const n = document.elementFromPoint(
-                        r.left + r.width / 2, r.top + r.height / 2 + сдвиг);
-                    if (!n) return '(никто)';
-                    return { класс: (n.className || n.tagName) + '', место: пр(n),
-                             z: getComputedStyle(n).zIndex,
-                             position: getComputedStyle(n).position };
+                    const y = r.top + r.height / 2 + сдвиг;
+                    const x = r.left + r.width / 2;
+                    const стек = document.elementsFromPoint(x, y).slice(0, 6).map(n => ({
+                        класс: (n.className || n.tagName) + '',
+                        место: пр(n),
+                        z: getComputedStyle(n).zIndex,
+                        position: getComputedStyle(n).position,
+                        'pointer-events': getComputedStyle(n).pointerEvents,
+                        transform: getComputedStyle(n).transform
+                    }));
+                    return { точка: { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 },
+                             стек };
                 };
                 const шапка = document.querySelector('.floating-header, header');
                 const лх = parseFloat(getComputedStyle(back).lineHeight);
