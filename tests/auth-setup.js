@@ -90,3 +90,16 @@ module.exports = async function globalSetup() {
 
 module.exports.playerState = path.join(DIR, 'player.json');
 module.exports.adminState = path.join(DIR, 'admin.json');
+
+/* ВХОД НУЖЕН НЕ ТОЛЬКО ПЕРЕД ПРОГОНОМ, НО И ПОСРЕДИ НЕГО (01.11).
+   Токен Supabase живёт 3600 секунд, а полный прогон идёт 2.2 часа:
+   замер 01.11 — начало 16:19:01, срок токена 17:19:02, конец 18:30.
+   ЧАС ОДИННАДЦАТЬ ИЗ ДВУХ ЧАСОВ ДВЕНАДЦАТИ ПРОГОН ШЁЛ С МЁРТВЫМ
+   ТОКЕНОМ, и 187 падений из 252 — это охрана, честно уводившая на
+   форму входа.
+   Поэтому обвязка умеет войти ЗАНОВО. Таблица аккаунтов и сам вход —
+   здесь, одним определением: разводить их по двум файлам значило бы
+   завести два пароля на один аккаунт. */
+module.exports.STORAGE_KEY = STORAGE_KEY;
+module.exports.ACCOUNTS = ACCOUNTS;
+module.exports.signIn = signIn;
