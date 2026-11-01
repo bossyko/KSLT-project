@@ -281,12 +281,25 @@ test.describe('страница новости · ' + Я.имя, () => {
                    слой. Падало только на кыргызском, где подпись длиннее
                    всех, и без этих чисел разбирать было нечего. */
                 const r = back.getBoundingClientRect();
-                const до = getComputedStyle(back, '::before');
+                /* СЛОЙ ЦЕЛИ — `::after`, А НЕ `::before` (`css/style.css:8282`).
+                   Первая редакция следа смотрела `::before` и честно
+                   отвечала «content: none» — то есть НАЗЫВАЛА НЕ ТО. */
+                const до = getComputedStyle(back, '::after');
+                const пр = э => {
+                    if (!э || !э.getBoundingClientRect) return null;
+                    const g = э.getBoundingClientRect();
+                    return { верх: Math.round(g.top * 10) / 10, низ: Math.round(g.bottom * 10) / 10,
+                             лево: Math.round(g.left * 10) / 10, право: Math.round(g.right * 10) / 10 };
+                };
                 const кто = сдвиг => {
                     const n = document.elementFromPoint(
                         r.left + r.width / 2, r.top + r.height / 2 + сдвиг);
-                    return n ? (n.className || n.tagName) + '' : '(никто)';
+                    if (!n) return '(никто)';
+                    return { класс: (n.className || n.tagName) + '', место: пр(n),
+                             z: getComputedStyle(n).zIndex,
+                             position: getComputedStyle(n).position };
                 };
+                const шапка = document.querySelector('.floating-header, header');
                 const лх = parseFloat(getComputedStyle(back).lineHeight);
                 return {
                     назадКоробка: r.height,
@@ -299,9 +312,15 @@ test.describe('страница новости · ' + Я.имя, () => {
                         коробка: { ш: Math.round(r.width * 10) / 10,
                                    в: Math.round(r.height * 10) / 10,
                                    верх: Math.round(r.top * 10) / 10 },
-                        'слой::before': { content: до.content, верх: до.top, низ: до.bottom,
-                                          высота: до.height, лево: до.left, право: до.right,
-                                          position: до.position },
+                        'слой::after': { content: до.content, высота: до.height,
+                                         position: до.position, top: до.top },
+                        /* ВЕРХНЯЯ ГРАНИЦА СЛОЯ СЧИТАЕТСЯ, А НЕ УГАДЫВАЕТСЯ:
+                           слой центрирован по ссылке, значит он поднимается
+                           на половину своей высоты выше её середины. */
+                        'слой верх (посчитано)': Math.round(
+                            (r.top + r.height / 2 - parseFloat(до.height || 0) / 2) * 10) / 10,
+                        'шапка': пр(шапка),
+                        'шапка.position': шапка ? getComputedStyle(шапка).position : null,
                         'ловит выше': кто(-15),
                         'ловит ниже': кто(15),
                         'ловит в центре': кто(0)

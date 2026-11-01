@@ -124,47 +124,13 @@ test.describe('замер хвоста 01.11', () => {
         expect(з.витрина.length, 'витрины на главной нет — мерить нечего').toBeGreaterThan(0);
     });
 
-    test('вызов: заголовок, VS и имя игрока', async ({ page }, info) => {
-        test.setTimeout(90000);
-        /* АДРЕС И СЕЛЕКТОРЫ ВЗЯТЫ У ПРОБЫ, КОТОРАЯ ПАДАЕТ
-           (`86-battly.spec.js:292`): она мерит СТРАНИЦУ ВЫЗОВА, а не
-           обзорную баттлов. Первая редакция этого замера смотрела
-           `/pages/battles.html` и не нашла ни одного уровня — замер,
-           глядящий не туда, говорит «уровней нет» там, где беда есть. */
-        await page.goto('/pages/challenge.html?id=b1');
-        await page.waitForSelector('.ch-battle-title', { timeout: 20000 });
-        await page.evaluate(() => document.fonts && document.fonts.ready);
-        await page.waitForTimeout(300);
-
-        const з = await page.evaluate(() => {
-            const ч = e => e ? Math.round(parseFloat(getComputedStyle(e).fontSize) * 10) / 10 : null;
-            const вес = e => e ? getComputedStyle(e).fontWeight : null;
-            const у = с => {
-                const э = document.querySelector(с);
-                return э ? { кегль: ч(э), вес: вес(э),
-                             текст: (э.textContent || '').trim().slice(0, 24) } : null;
-            };
-            return {
-                окно: { ш: window.innerWidth, в: window.innerHeight },
-                низкийЛёжа: matchMedia('(max-height: 500px) and (orientation: landscape)').matches,
-                крутилки: {
-                    hero: getComputedStyle(document.documentElement).getPropertyValue('--fs-hero').trim(),
-                    fs2xl: getComputedStyle(document.documentElement).getPropertyValue('--fs-2xl').trim(),
-                    fsXl: getComputedStyle(document.documentElement).getPropertyValue('--fs-xl').trim(),
-                    fsLg: getComputedStyle(document.documentElement).getPropertyValue('--fs-lg').trim()
-                },
-                лестница: {
-                    заголовок: у('.ch-battle-title'),
-                    VS: у('.ch-vs-text'),
-                    имя: у('.ch-player-name'),
-                    мета: у('.ch-meta')
-                }
-            };
-        });
-        записать(info.project.name + ' · вызов', з);
-        expect(з.лестница.заголовок, 'заголовка баттла нет — мерить нечего').not.toBeNull();
-    });
-
+    /* ЗАМЕРА ПО СТРАНИЦЕ ВЫЗОВА ЗДЕСЬ ТОЖЕ НЕТ (01.11).
+       Баттла в тестовой базе нет вовсе: проба 86 ПОДМЕНЯЕТ ответ запроса
+       (`подменить(page, вызов)`) и мерит подставной баттл. Мой замер
+       открыл страницу напрямую и честно не дождался `.ch-battle-title` —
+       пять падений на ровном месте. А числа уже есть, и их дал сам отказ
+       пробы 86: «заголовок 26, VS 26, имя 18». ЗАМЕР, ДУБЛИРУЮЩИЙ
+       ГОВОРЛИВЫЙ ОТКАЗ, — ЛИШНЕЕ ЗВЕНО. */
     /* ЗАМЕРА ПО СТРАНИЦЕ НОВОСТИ ЗДЕСЬ НЕТ НАРОЧНО (01.11).
        Проба 68 открывает ЗАВЕДОМО ОТСУТСТВУЮЩИЙ slug, ждёт отрисованное
        «не найдено» и САМА вставляет подставную статью в DOM. Повторить
