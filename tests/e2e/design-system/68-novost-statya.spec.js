@@ -307,13 +307,34 @@ test.describe('страница новости · ' + Я.имя, () => {
                 const кто = сдвиг => {
                     const y = r.top + r.height / 2 + сдвиг;
                     const x = r.left + r.width / 2;
+                    /* ЭЛЕМЕНТ, НЕ СОДЕРЖАЩИЙ ТОЧКУ, НАКРЫВАЕТ ЕЁ ЧЕМ-ТО
+                       СВОИМ — своим слоем или своим предком. Прокрутка в
+                       прошлом следе совпала (830 = 830), значит страница
+                       НЕ ехала и дело не в движении. Поэтому у каждого в
+                       стеке снимаются оба псевдослоя и предок с его
+                       прямоугольником: догадок больше не остаётся. */
+                    const слой = (n, какой) => {
+                        const s = getComputedStyle(n, какой);
+                        if (!s || s.content === 'none' || s.content === 'normal') return null;
+                        return { content: s.content, position: s.position, height: s.height,
+                                 top: s.top, bottom: s.bottom, left: s.left, right: s.right,
+                                 inset: s.inset };
+                    };
                     const стек = document.elementsFromPoint(x, y).slice(0, 6).map(n => ({
                         класс: (n.className || n.tagName) + '',
                         место: пр(n),
                         z: getComputedStyle(n).zIndex,
                         position: getComputedStyle(n).position,
                         'pointer-events': getComputedStyle(n).pointerEvents,
-                        transform: getComputedStyle(n).transform
+                        transform: getComputedStyle(n).transform,
+                        'свой ::after': слой(n, '::after'),
+                        'свой ::before': слой(n, '::before'),
+                        предок: n.parentElement ? {
+                            класс: (n.parentElement.className || n.parentElement.tagName) + '',
+                            место: пр(n.parentElement),
+                            position: getComputedStyle(n.parentElement).position,
+                            'его ::after': слой(n.parentElement, '::after')
+                        } : null
                     }));
                     return { точка: { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 },
                              стек };
