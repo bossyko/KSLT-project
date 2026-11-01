@@ -359,6 +359,40 @@ test.describe('страница новости · ' + Я.имя, () => {
                            на половину своей высоты выше её середины. */
                         'слой верх (посчитано)': Math.round(
                             (r.top + r.height / 2 - parseFloat(до.height || 0) / 2) * 10) / 10,
+                        /* ПЕРЕХВАТЧИК ЦЕЛИКОМ: ЧТО ЭТО ЗА УЗЕЛ И ВЫХОДИТ
+                           ЛИ ЕГО СОДЕРЖИМОЕ ЗА СВОЙ БОКС.
+                           Профиль показал, что до 84 всё забирает
+                           `sponsor-logo-img` с прямоугольником 38→62, то
+                           есть достаёт на 22 ниже себя. Воспроизвести это
+                           на своём стенде не удалось ТРИЖДЫ, значит
+                           спрашиваем сам узел: тег (у спонсора БЕЗ
+                           логотипа продукт вешает класс картинки на SPAN
+                           С ТЕКСТОМ — `js/sponsors-loader.js:418`),
+                           раскладку, межстрочный, число строчных боксов и
+                           главное — `scrollHeight` против `clientHeight`:
+                           их расхождение и есть прямой признак того, что
+                           содержимое вылезло из бокса. */
+                        'перехватчик': (function () {
+                            const n = document.elementFromPoint(
+                                r.left + r.width / 2, r.top + r.height / 2 - 15);
+                            if (!n) return null;
+                            const s = getComputedStyle(n);
+                            return {
+                                тег: n.tagName,
+                                класс: (n.className || '') + '',
+                                текст: (n.textContent || '').trim().slice(0, 30),
+                                место: пр(n),
+                                display: s.display, overflow: s.overflow,
+                                'line-height': s.lineHeight, 'font-size': s.fontSize,
+                                height: s.height, 'max-width': s.maxWidth,
+                                clientHeight: n.clientHeight, scrollHeight: n.scrollHeight,
+                                offsetHeight: n.offsetHeight,
+                                строчныхБоксов: n.getClientRects
+                                    ? n.getClientRects().length : null,
+                                предокDisplay: n.parentElement
+                                    ? getComputedStyle(n.parentElement).display : null
+                            };
+                        })(),
                         'шапка': пр(шапка),
                         'шапка.position': шапка ? getComputedStyle(шапка).position : null,
                         'ловит выше': кто(-15),
