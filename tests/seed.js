@@ -1453,7 +1453,17 @@ async function upsert(table, rows, onConflict) {
         id: 'test-court',
         name: 'Тестовый корт КСЛТ',
         name_en: 'KSLT Test Court',
-        photo: 'https://placehold.co/800x450/111111/CCFF00?text=KSLT',
+        /* ФОТО ПУСТОЕ, А НЕ С ЧУЖОГО CDN (31.10). Здесь стоял адрес
+           `placehold.co` — ровно тот, который из ПРОДУКТА вычищали в пяти
+           местах (`js/kslt-lico.js:25`, `js/news-covers.js:6`,
+           `js/rankings-data.js:130`, `js/battles-overview.js:474`,
+           `js/player.js:1060`): серый прямоугольник и внешний запрос на
+           каждую карточку. Посев тащил его обратно, и проба 31 честно
+           падала: «страница ходит за картинками наружу».
+           ПОСЕВ — ЭТО ТОЖЕ ПРОДУКТ ДЛЯ ПРОБЫ: что он положит, то она и
+           померит. Пусто — и работает запасной путь, инициалы, как у
+           живого корта без снимка. */
+        photo: null,
         gallery: [],
         street: 'ул. Тестовая',
         street_en: 'Testovaya St',

@@ -9,8 +9,11 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
+/* ПОСЕВ ДОБАВЛЕН 31.10 вместе с расширением области правила «чужого CDN
+   нет»: откат возвращает placehold.co именно туда, откуда его убрали. */
 const ФАЙЛЫ = ['js/kslt-lico.js', 'js/players.js', 'js/battles-overview.js',
-               'js/player.js', 'js/auth-nav.js', 'pages/players.html'];
+               'js/player.js', 'js/auth-nav.js', 'pages/players.html',
+               'tests/seed.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -19,6 +22,14 @@ const Л = 'js/kslt-lico.js', И = 'js/players.js',
       Г = 'js/player.js', Н = 'js/auth-nav.js';
 
 const ОТКАТЫ = [
+  /* ДОБАВЛЕНО 31.10: посев входит в область правила «чужого CDN нет».
+     Он клал фото с placehold.co в тестовую базу, продукт честно его
+     показывал, проба падала — а сторож был зелёный. */
+  ['вернуть чужой CDN в посев', 'tests/seed.js',
+   '        photo: null,',
+   "        photo: 'https://placehold.co/800x450/111111/CCFF00?text=KSLT',",
+   'заглушки с чужого сайта нет'],
+
 
 ['завести второй модуль лица', Л,
  '    window.KSLT_LICO = {',
@@ -130,7 +141,11 @@ const ОТКАТЫ = [
 
 
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-lico-'));
-['css', 'js', 'pages', 'maket', 'tools'].forEach(д =>
+/* ПЕСОЧНИЦА ВИДИТ РОВНО ТО, ЧТО ВИДИТ СТОРОЖ (31.10): раз правило
+   «чужого CDN нет» теперь читает и посев, песочница обязана его
+   копировать — иначе откат уткнётся в несуществующий файл.
+   ПЕСОЧНИЦА БЕДНЕЕ СТОРОЖА — четвёртый раз за месяц. */
+['css', 'js', 'pages', 'maket', 'tools', 'tests'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 
 function прогон(замена) {
