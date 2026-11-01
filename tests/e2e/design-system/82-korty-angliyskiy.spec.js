@@ -38,6 +38,23 @@ const ЭТО_ДАННЫЕ = [
     'ct-card-name', 'co-card-name', 'ct-hero-title', 'ct-detail-type'
 ];
 
+/* ОБЛАСТЬ ДАННЫХ НАДЁЖНЕЕ СПИСКА КЛАССОВ (01.11).
+   ПРИБОР, ЗНАЮЩИЙ ИМЯ КЛАССА НАИЗУСТЬ, ОТСТАЁТ ОТ РАЗМЕТКИ. В списке
+   выше стояли `sponsor-logo-link` и `logo-img`, а полный прогон 01.11
+   поймал `sponsor-logo-img` и просто `SPAN` — имя спонсора лежит и в
+   узле без класса вовсе (`js/sponsors-loader.js:304`). Двадцать падений
+   на трёх языках и пяти видах, и ни одно не про перевод интерфейса.
+   Поэтому целые блоки, которые ЦЕЛИКОМ состоят из данных, исключаются
+   предком: имя класса внутри может быть любым, а область остаётся.
+
+   ИМЯ СПОНСОРА — ДАННЫЕ, И ЭТО НЕ ОТГОВОРКА: схема `sponsors` вообще не
+   держит имени на языках (одно `name` на все три), потому что название
+   спонсора — имя собственное. Что трёхъязычному сайту этого мало —
+   отдельная находка, она в трекере, и чинится она схемой с админкой, а
+   не пробой. */
+const ОБЛАСТИ_ДАННЫХ = ['#sponsors', '.sponsor-badge', '.sponsors-section',
+                        '[data-sponsor-id]'];
+
 /* ПРОБА НА ПОДСТАВНЫХ ДАННЫХ ПАДАЕТ НА ПУСТОТЕ, А НЕ НА ПРОДУКТЕ.
    Первый прогон 12.10 уронил шесть щупов по 21 секунде каждый: в тестовой
    базе тренеров нет вовсе, а щуп ждал карточку до таймаута. Это уже
@@ -129,7 +146,7 @@ const СТРАНИЦЫ = [
 for (const С of СТРАНИЦЫ) {
     test('английская витрина «' + С.имя + '» не говорит по-русски', async ({ page }) => {
         await открыть(page, С.адрес, С.признак);
-        const найдено = await page.evaluate((данные) => {
+        const найдено = await page.evaluate(({ данные, области }) => {
             const кир = /[А-Яа-яЁё]/;
             const из = [];
             const обход = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
@@ -144,10 +161,11 @@ for (const С of СТРАНИЦЫ) {
                 if (!э.getBoundingClientRect().width) continue;
                 const к = typeof э.className === 'string' ? э.className.split(' ') : [];
                 if (к.some(x => данные.indexOf(x) >= 0)) continue;
+                if (области.some(s => э.closest(s))) continue;
                 из.push((к[0] || э.tagName) + ' :: ' + t.slice(0, 32));
             }
             return из;
-        }, ЭТО_ДАННЫЕ);
+        }, { данные: ЭТО_ДАННЫЕ, области: ОБЛАСТИ_ДАННЫХ });
         expect(найдено, 'на английской странице остались РУССКИЕ подписи интерфейса:\n  ' +
             найдено.join('\n  ') + '\n(ветка isEn в словаре — js/courts.js, js/coaches.js)')
             .toEqual([]);
@@ -155,19 +173,20 @@ for (const С of СТРАНИЦЫ) {
 
     test('английская витрина «' + С.имя + '» не говорит по-русски в атрибутах', async ({ page }) => {
         await открыть(page, С.адрес, С.признак);
-        const найдено = await page.evaluate((данные) => {
+        const найдено = await page.evaluate(({ данные, области }) => {
             const кир = /[А-Яа-яЁё]/;
             const из = [];
             document.querySelectorAll('[placeholder],[aria-label],[title]').forEach(э => {
                 const к = typeof э.className === 'string' ? э.className.split(' ') : [];
                 if (к.some(x => данные.indexOf(x) >= 0)) return;
+                if (области.some(s => э.closest(s))) return;
                 ['placeholder', 'aria-label', 'title'].forEach(a => {
                     const v = э.getAttribute(a);
                     if (v && кир.test(v)) из.push(a + '="' + v.slice(0, 30) + '"');
                 });
             });
             return из;
-        }, ЭТО_ДАННЫЕ);
+        }, { данные: ЭТО_ДАННЫЕ, области: ОБЛАСТИ_ДАННЫХ });
         expect(найдено, 'русские атрибуты: ' + найдено.join(' · ') +
             '\n(плейсхолдер поиска и aria-label полосы страниц тоже из словаря)')
             .toEqual([]);

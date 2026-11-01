@@ -1600,18 +1600,32 @@ async function upsert(table, rows, onConflict) {
        ИМЕНА РАЗНЫЕ НАРОЧНО: проба сравнивает ПЕРВУЮ карточку до и после
        нажатия «вперёд», и на одинаковых названиях она не отличила бы
        листание от его отсутствия. */
-    const РАЙОНЫ = ['Асанбай', 'Джал', 'Восток-5', 'Тунгуч', 'Кок-Жар',
-                    'Арча-Бешик', 'Аламедин', 'Кара-Жыгач', 'Чон-Арык',
-                    'Орто-Сай', 'Кызыл-Аскер', 'Ак-Орго', 'Балыкчы',
-                    'Токмок', 'Кант', 'Ош-Базар'];
-    await upsert('courts', РАЙОНЫ.map(function (район, i) {
+    /* ДВА НАПИСАНИЯ, А НЕ ОДНО: английская витрина проверяется на
+       кириллицу (`tests/e2e/design-system/82-korty-angliyskiy.spec.js`), и
+       `name_en` вида «"Асанбай" Court» — это русский текст на английской
+       странице, то есть ровно та беда, которую проба и стережёт.
+       ПОСЕВ — ЭТО ТОЖЕ ПРОДУКТ ДЛЯ ПРОБЫ: что он положит, то она и
+       померит. */
+    const РАЙОНЫ = [
+        ['Асанбай', 'Asanbai'],     ['Джал', 'Djal'],
+        ['Восток-5', 'Vostok-5'],   ['Тунгуч', 'Tunguch'],
+        ['Кок-Жар', 'Kok-Jar'],     ['Арча-Бешик', 'Archa-Beshik'],
+        ['Аламедин', 'Alamedin'],   ['Кара-Жыгач', 'Kara-Jygach'],
+        ['Чон-Арык', 'Chon-Aryk'],  ['Орто-Сай', 'Orto-Sai'],
+        ['Кызыл-Аскер', 'Kyzyl-Asker'], ['Ак-Орго', 'Ak-Orgo'],
+        ['Балыкчы', 'Balykchy'],    ['Токмок', 'Tokmok'],
+        ['Кант', 'Kant'],           ['Ош-Базар', 'Osh-Bazar']
+    ];
+    await upsert('courts', РАЙОНЫ.map(function (пара, i) {
+        var район = пара[0], лат = пара[1];
         return {
             id: 'test-court-' + (i + 1),
             name: 'Корт «' + район + '»',
-            name_en: '"' + район + '" Court',
+            name_en: лат + ' Court',
             photo: null,
             gallery: [],
             street: 'ул. ' + район,
+            street_en: лат + ' St',
             building: String(i + 1),
             city: 'Бишкек',
             city_en: 'Bishkek',
@@ -1619,6 +1633,7 @@ async function upsert(table, rows, onConflict) {
             country_en: 'Kyrgyzstan',
             phone: '+996 555 000 ' + String(100 + i),
             short_desc: 'Корт «' + район + '»: площадки, свет, раздевалки.',
+            short_desc_en: лат + ' Court: courts, lights, changing rooms.',
             lat: 42.84 + i * 0.004,
             lng: 74.56 + i * 0.004,
             court_types: [{ type: 'outdoor', count: '2', price: String(1000 + i * 50),
@@ -1652,12 +1667,35 @@ async function upsert(table, rows, onConflict) {
        и отсутствие полосы; вторая страница у тренеров не проверяется —
        её проверяют корты. */
     try {
+    /* ДОЛЖНОСТЬ ЖИВЁТ В `position`, А НЕ В `specialization` — ЗАМЕРЕНО
+       01.11, И Я ПОЛОЖИЛ НЕ ТУДА. Весь продукт читает `position` /
+       `position_en` / `position_kg` (`js/services.js:295`,
+       `js/coaches.js:276`, `js/admin/sections/coaches.js:609`), а
+       `coaches.js:288` лишь переименовывает его во внутреннее поле
+       `specialization`. Колонка `specialization` в базе для продукта
+       МЁРТВАЯ. Посев заполнял её — и подпись в ленте не рисовалась вовсе,
+       отчего карточка тренера была на 26 ниже карточки корта (18 подпись
+       плюс 8 её отступа). ПОЛЕ, КОТОРОЕ НИКТО НЕ ЧИТАЕТ, — НЕ ДАННЫЕ, А
+       МУСОР.
+       ПЕРЕВОД НАСТОЯЩИЙ, А НЕ ТО ЖЕ СЛОВО ТРИЖДЫ: на английской витрине
+       проба ищет кириллицу, и русский текст в `position_en` — это та же
+       беда, что непереведённая подпись. */
     const ТРЕНЕРЫ = [
-        { имя: 'Азамат Турсунов',  en: 'Azamat Tursunov',  спец: 'Техника удара',    опыт: '12' },
-        { имя: 'Гульнара Садыкова', en: 'Gulnara Sadykova', спец: 'Дети 6–12 лет',   опыт: '9'  },
-        { имя: 'Марат Абдиев',     en: 'Marat Abdiev',     спец: 'Подача и приём',   опыт: '15' },
-        { имя: 'Айпери Усенова',   en: 'Aiperi Usenova',   спец: 'Парная игра',      опыт: '7'  },
-        { имя: 'Эрлан Жумабеков',  en: 'Erlan Zhumabekov', спец: 'Физподготовка',    опыт: '20' }
+        { имя: 'Азамат Турсунов',   en: 'Azamat Tursunov',
+          спец: 'Техника удара',  спецEn: 'Stroke technique',   спецKg: 'Сокку техникасы',
+          опыт: '12' },
+        { имя: 'Гульнара Садыкова', en: 'Gulnara Sadykova',
+          спец: 'Дети 6–12 лет',  спецEn: 'Kids 6–12',          спецKg: 'Балдар 6–12 жаш',
+          опыт: '9'  },
+        { имя: 'Марат Абдиев',      en: 'Marat Abdiev',
+          спец: 'Подача и приём', спецEn: 'Serve and return',   спецKg: 'Берүү жана кабыл алуу',
+          опыт: '15' },
+        { имя: 'Айпери Усенова',    en: 'Aiperi Usenova',
+          спец: 'Парная игра',    спецEn: 'Doubles play',       спецKg: 'Жуптук оюн',
+          опыт: '7'  },
+        { имя: 'Эрлан Жумабеков',   en: 'Erlan Zhumabekov',
+          спец: 'Физподготовка',  спецEn: 'Fitness training',   спецKg: 'Дене тарбия',
+          опыт: '20' }
     ];
     await upsert('coaches', ТРЕНЕРЫ.map(function (т, i) {
         return {
@@ -1668,16 +1706,18 @@ async function upsert(table, rows, onConflict) {
             /* ФОТО ПУСТОЕ, А НЕ С ЧУЖОГО CDN — то же правило, что у корта
                выше: запасной путь (инициалы) должен работать. */
             photo: null,
-            specialization: т.спец,
-            specialization_en: т.спец,
+            /* ЖИВЫЕ КОЛОНКИ ДОЛЖНОСТИ — РАЗБОР ВЫШЕ. */
+            position: т.спец,
+            position_en: т.спецEn,
+            position_kg: т.спецKg,
             experience: т.опыт,
             experience_en: т.опыт,
             phone: '+996 555 100 ' + String(100 + i),
             price: String(800 + i * 100),
             rating: 4.5,
             short_desc: 'Тренер КСЛТ: ' + т.спец + '.',
-            short_desc_en: 'KSLT coach: ' + т.спец + '.',
-            short_desc_kg: 'КСЛТ машыктыруучусу: ' + т.спец + '.',
+            short_desc_en: 'KSLT coach: ' + т.спецEn + '.',
+            short_desc_kg: 'КСЛТ машыктыруучусу: ' + т.спецKg + '.',
             tags: [],
             achievements: [],
             achievements_en: [],
