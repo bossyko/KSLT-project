@@ -275,17 +275,45 @@ test.describe('страница новости · ' + Я.имя, () => {
                 };
                 const back = document.querySelector('.kslt-back');
                 const zoom = document.querySelector('.news-hero-zoom');
+                /* ОТКАЗ ИМЕНУЕТ СОСТОЯНИЕ. 01.11 эта проба упала пятнадцать
+                   раз словами «цель „назад“ не достаёт вверх» — и больше
+                   ничем: ни кто поймал нажатие, ни где лежит прозрачный
+                   слой. Падало только на кыргызском, где подпись длиннее
+                   всех, и без этих чисел разбирать было нечего. */
+                const r = back.getBoundingClientRect();
+                const до = getComputedStyle(back, '::before');
+                const кто = сдвиг => {
+                    const n = document.elementFromPoint(
+                        r.left + r.width / 2, r.top + r.height / 2 + сдвиг);
+                    return n ? (n.className || n.tagName) + '' : '(никто)';
+                };
+                const лх = parseFloat(getComputedStyle(back).lineHeight);
                 return {
-                    назадКоробка: back.getBoundingClientRect().height,
+                    назадКоробка: r.height,
                     назадВверх: попал(back, -15),
                     назадВниз: попал(back, 15),
-                    афиша: zoom ? zoom.getBoundingClientRect().height : null
+                    афиша: zoom ? zoom.getBoundingClientRect().height : null,
+                    след: {
+                        текст: (back.textContent || '').trim(),
+                        строк: лх ? Math.round(r.height / лх * 10) / 10 : null,
+                        коробка: { ш: Math.round(r.width * 10) / 10,
+                                   в: Math.round(r.height * 10) / 10,
+                                   верх: Math.round(r.top * 10) / 10 },
+                        'слой::before': { content: до.content, верх: до.top, низ: до.bottom,
+                                          высота: до.height, лево: до.left, право: до.right,
+                                          position: до.position },
+                        'ловит выше': кто(-15),
+                        'ловит ниже': кто(15),
+                        'ловит в центре': кто(0)
+                    }
                 };
             });
             /* Высоту ссылке не давали — цель даёт прозрачный слой */
             expect(ц.назадКоробка).toBeLessThan(44);
-            expect(ц.назадВверх, 'цель «назад» не достаёт вверх').toBe(true);
-            expect(ц.назадВниз, 'цель «назад» не достаёт вниз').toBe(true);
+            expect(ц.назадВверх, 'цель «назад» не достаёт вверх:\n' +
+                JSON.stringify(ц.след, null, 2)).toBe(true);
+            expect(ц.назадВниз, 'цель «назад» не достаёт вниз:\n' +
+                JSON.stringify(ц.след, null, 2)).toBe(true);
             expect(ц.афиша, 'высота «Афиши целиком»').toBeGreaterThanOrEqual(44);
         });
 
