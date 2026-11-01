@@ -58,7 +58,34 @@ const ОТКАТЫ = [
       ждём: 'обвязка объявляет то, ради чего в неё ходят',
       файл: 'tests/fixtures.js',
       было: 'const type = req.resourceType();',
-      станет: "const type = 'document';" }
+      станет: "const type = 'document';" },
+
+    { имя: 'вернуть пробе асинхронное ожидание',
+      ждём: 'ожидание не бывает асинхронным',
+      файл: ВТОРАЯ,
+      было: "const { test, expect } = require('../../fixtures');",
+      станет: "const { test, expect } = require('../../fixtures');\n" +
+              'async function лишнее(page) {\n' +
+              '    return await page.waitForFunction(async () => {\n' +
+              '        return (await caches.keys()).length > 0;\n' +
+              '    });\n' +
+              '}\nif (false) лишнее();' },
+
+    /* ОТКАТ НА МОЛЧАНИЕ: тот же образец, но В КОММЕНТАРИИ. Прибор читает
+       код, а не рассказ о беде, — и обязан МОЛЧАТЬ. Поймано на себе:
+       первая редакция правила упала на подписи к починенному файлу. */
+    { имя: 'МОЛЧАНИЕ: асинхронное ожидание, процитированное в подписи',
+      ждём: null,
+      файл: ВТОРАЯ,
+      было: "const { test, expect } = require('../../fixtures');",
+      станет: "/* так ждать нельзя: page.waitForFunction(async () => {}) */\n" +
+              "const { test, expect } = require('../../fixtures');" },
+
+    { имя: 'дом ожидания переписан обратно через waitForFunction',
+      ждём: 'дом ожидания на месте и ждёт циклом',
+      файл: 'tests/fixtures.js',
+      было: '        последнее = await page.evaluate(замер);',
+      станет: '        последнее = await page.evaluate(функция(замер));' }
 ];
 
 function копия() {

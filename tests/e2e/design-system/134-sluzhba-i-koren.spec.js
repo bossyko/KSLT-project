@@ -13,8 +13,16 @@
  * УСТАНОВКЕ НУЖНО ВРЕМЯ, И ЗАМЕР ЖДЁТ ПРИЗНАКА, А НЕ ТИШИНЫ. Первый
  * ручной замер показал «кэшей ноль» просто потому, что был сделан раньше,
  * чем установка закончилась. Здесь кэш ожидается циклом с признаком.
+ *
+ * ОЖИДАНИЕ ЗДЕСЬ НЕ `waitForFunction`, И ЭТО НЕ ВКУС (01.11). Всё, что
+ * проверяет служба и кэш, — асинхронно, а `page.waitForFunction(async …)`
+ * асинхронную проверку НЕ ЖДЁТ: промис истинен, и ожидание заканчивается
+ * на первом проходе тем, чем промис разрешится. Отсюда «received value
+ * must be a string» — читали поле у `false`. Ожидание и замер разделены
+ * домом `дождатьсяЗамера` (`tests/fixtures.js`), где это и доказано
+ * опытом.
  */
-const { test, expect } = require('../../fixtures');
+const { test, expect, дождатьсяЗамера } = require('../../fixtures');
 
 /* Служба живёт на всём сайте, а не на виде: одного прогона довольно. */
 const ТОЛЬКО_ОДИН = ['desktop'];
@@ -36,13 +44,13 @@ test.describe('офлайн-служба', () => {
         });
         await page.reload();
 
-        const рег = await page.waitForFunction(async () => {
+        const рег = await дождатьсяЗамера(page, async () => {
             const сп = await navigator.serviceWorker.getRegistrations();
             if (!сп.length) return false;
             const р = сп[0];
             if (!р.active) return false;
             return { область: р.scope, адрес: р.active.scriptURL };
-        }, null, { timeout: 30000 }).then(h => h.jsonValue());
+        }, 30000);
 
         expect(рег.адрес, 'служба поднялась не из корня проекта').toMatch(/\/sw\.js$/);
         /* ОБЛАСТЬ — ЭТО ПАПКА СЛУЖБЫ. Она обязана покрывать страницу,
@@ -63,7 +71,7 @@ test.describe('офлайн-служба', () => {
         /* ЖДЁМ ПРИЗНАК: кэш с нужным именем и семью записями. Семь — это
            замеренная длина PRE_CACHE; addAll атомарен, поэтому либо все
            семь, либо ни одной. */
-        const в = await page.waitForFunction(async () => {
+        const в = await дождатьсяЗамера(page, async () => {
             const имена = await caches.keys();
             const моё = имена.filter(и => и.indexOf('kslt-v') === 0);
             if (!моё.length) return false;
@@ -72,7 +80,7 @@ test.describe('офлайн-служба', () => {
             if (k.length < 7) return false;
             return { имя: моё[0], записей: k.length,
                      пути: k.map(x => new URL(x.url).pathname) };
-        }, null, { timeout: 30000 }).then(h => h.jsonValue());
+        }, 30000);
 
         expect(в.имя, 'имя кэша не поднято вместе с правкой службы').toMatch(/^kslt-v([7-9]|\d{2,})$/);
         expect(в.записей, 'в кэше меньше семи записей — addAll упал бы целиком')
@@ -93,10 +101,13 @@ test.describe('офлайн-служба', () => {
             for (const к of await caches.keys()) await caches.delete(к);
         });
         await page.reload();
-        await page.waitForFunction(async () => {
+        /* ЭТА ПРОБА ЗЕЛЕНЕЛА ВСЛЕПУЮ: асинхронное ожидание отдавало `false`
+           на первом проходе, и дальше шли на удачу — служба успевала
+           подняться сама. Теперь ждём по-настоящему. */
+        await дождатьсяЗамера(page, async () => {
             const сп = await navigator.serviceWorker.getRegistrations();
             return сп.length > 0 && !!сп[0].active;
-        }, null, { timeout: 30000 });
+        }, 30000);
         /* Чистим предзагрузку — меряем ПОВЕДЕНИЕ службы на запросах,
            а не то, что она положила при установке. */
         await page.evaluate(async () => { for (const к of await caches.keys()) await caches.delete(к); });
