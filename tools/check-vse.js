@@ -337,7 +337,10 @@ const КУСКИ = [
      'check-proby-cherez-obvyazku.js', 'check-proby-cherez-obvyazku-otkat.js'],
 
     ['предел пробы больше суммы её ожиданий',
-     'check-predely-prob.js', 'check-predely-prob-otkat.js']
+     'check-predely-prob.js', 'check-predely-prob-otkat.js'],
+
+    ['класс картинки не носит данные',
+     'check-klass-kartinki.js', 'check-klass-kartinki-otkat.js']
 ];
 
 function прогнать(файл) {

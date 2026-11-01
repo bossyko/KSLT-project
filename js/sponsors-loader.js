@@ -412,9 +412,23 @@
 
             var label = KSLT_YAZYK.выбрать('supported by', 'колдоосу менен', 'при поддержке');
             var href = hero.url ? ' href="' + KSLT_экранировать(hero.url) + '" target="_blank" rel="noopener"' : '';
+            /* КЛАСС КАРТИНКИ НА ТЕКСТЕ — ЭТО ЛОВУШКА, И ОНА СРАБОТАЛА
+               (01.11). У `.sponsor-logo-img` стоят `height: 24px` и
+               `max-width: 120px` (`css/style.css:245`): картинке это
+               рамка, а НАДПИСИ — выпуск содержимого наружу. Замер на
+               живой странице: `clientHeight 24` при `scrollHeight` **48**,
+               то есть «Ала-Тоо Спорт» в 120 не влез и встал ДВУМЯ
+               строками, а при `overflow: visible` вторая строка
+               отрисовалась НИЖЕ бокса — до 85.5 при боксе 37.5→61.5.
+               Эта строка невидимо накрывала ссылку «Назад к новостям» под
+               шапкой и забирала её нажатия: проба 68 ловила это на
+               кыргызском, где подпись «назад» длиннее и её центр
+               приходится ровно под логотип.
+               У надписи теперь СВОЙ класс: та же ступень высоты, но одна
+               строка и честное многоточие. ОДНО ПОНЯТИЕ — ОДИН КЛАСС. */
             var logoHtml = hero.logo
                 ? '<img src="' + KSLT_экранировать(hero.logo) + '" alt="' + KSLT_экранировать(hero.name) + '" class="sponsor-logo-img">'
-                : '<span class="sponsor-logo-img" style="font-weight:600;color:var(--accent)">' + KSLT_экранировать(hero.name) + '</span>';
+                : '<span class="sponsor-logo-text">' + KSLT_экранировать(hero.name) + '</span>';
 
             badge.innerHTML =
                 '<span class="sponsor-label">' + label + '</span>' +
