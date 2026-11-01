@@ -46,6 +46,10 @@ test.describe('по языкам, а не вперемешку', () => {
     for (const [имя, кг, ан] of СТРАНИЦЫ) {
 
         test(имя + ': на кыргызской странице английских месяцев нет', async ({ page }) => {
+            /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 15000 + 15000 = 30000.
+               Иначе отказ приходит без имени — «Test timeout», и чего не
+               дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+            test.setTimeout(45000);
             await page.goto(кг);
             await page.waitForFunction(() => !!window.KSLT_YAZYK, null, { timeout: 15000 });
             /* ДАННЫЕ ПРИХОДЯТ ИЗ БАЗЫ: ждём не тишины сети, а признака —
@@ -76,6 +80,10 @@ test.describe('по языкам, а не вперемешку', () => {
         });
 
         test(имя + ': на английской странице месяцы английские', async ({ page }) => {
+            /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 15000 + 15000 = 30000.
+               Иначе отказ приходит без имени — «Test timeout», и чего не
+               дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+            test.setTimeout(45000);
             await page.goto(ан);
             await page.waitForFunction(() => !!window.KSLT_YAZYK, null, { timeout: 15000 });
             await page.waitForFunction(() =>

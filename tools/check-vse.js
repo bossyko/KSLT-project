@@ -334,7 +334,10 @@ const КУСКИ = [
      'check-vyhod-po-otvetu.js', 'check-vyhod-po-otvetu-otkat.js'],
 
     ['пробы идут через обвязку, а не мимо неё',
-     'check-proby-cherez-obvyazku.js', 'check-proby-cherez-obvyazku-otkat.js']
+     'check-proby-cherez-obvyazku.js', 'check-proby-cherez-obvyazku-otkat.js'],
+
+    ['предел пробы больше суммы её ожиданий',
+     'check-predely-prob.js', 'check-predely-prob-otkat.js']
 ];
 
 function прогнать(файл) {

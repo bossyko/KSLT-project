@@ -169,6 +169,11 @@ const ЯЗЫКИ = [['ru', '/pages/news.html'], ['en', '/pages/news-en.html'], [
 test.describe('полоса «Новостей» на живом экране', () => {
     for (const [яз, адрес] of ЯЗЫКИ) {
         test('язык ' + яз + ': полоса листает, счётчик меняется, список едет', async ({ page }) => {
+            /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ.
+               Иначе отказ приходит без имени: «Test timeout of 30000ms
+               exceeded» вместо того ожидания, которое не дождалось.
+               Сумма здесь 15000 + 20000 + 15000 + 15000 = 65000, замер — tools/zamer-predelov-proby.js. */
+            test.setTimeout(75000);
             await page.goto(адрес);
             await page.waitForFunction(
                 () => !!(window.KSLT_полосаСтраниц && window.KSLT_полосаСтраниц.нажатия),

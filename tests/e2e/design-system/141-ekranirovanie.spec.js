@@ -46,6 +46,10 @@ test.describe('экранирование одно на продукт', () => {
     }
 
     test('страница, собранная зовами дома, цела', async ({ page }) => {
+        /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 15000 + 15000 = 30000.
+           Иначе отказ приходит без имени — «Test timeout», и чего не
+           дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+        test.setTimeout(45000);
         await page.goto('/pages/courts.html');
         await page.waitForFunction(() => typeof window.KSLT_экранировать === 'function',
             null, { timeout: 15000 });

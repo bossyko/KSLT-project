@@ -68,6 +68,10 @@ async function попадания(page, селектор, номер) {
 test.describe('кусок 174 — вид живёт в css', () => {
 
     test('пометка исхода в сетке одинакова до и после открытия окна счёта', async ({ page }) => {
+        /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 20000 + 10000 = 30000.
+           Иначе отказ приходит без имени — «Test timeout», и чего не
+           дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+        test.setTimeout(45000);
         const ошибки = await беды(page);
         await page.goto(СТЕНД);
         await page.waitForFunction(() => !!document.querySelector('.ad-grp-cell-click'), null, { timeout: 20000 });
@@ -104,6 +108,10 @@ test.describe('кусок 174 — вид живёт в css', () => {
     });
 
     test('ни одно окно не вписывает <style> в голову страницы', async ({ page }) => {
+        /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 20000 + 10000 = 30000.
+           Иначе отказ приходит без имени — «Test timeout», и чего не
+           дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+        test.setTimeout(45000);
         const ошибки = await беды(page);
         await page.goto(СТЕНД);
         await page.waitForFunction(() => !!document.querySelector('.ad-grp-cell-click'), null, { timeout: 20000 });
@@ -116,6 +124,10 @@ test.describe('кусок 174 — вид живёт в css', () => {
     });
 
     test('чипы исхода: состояние для диктора, ступень и видимый фокус', async ({ page }) => {
+        /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 20000 + 10000 = 30000.
+           Иначе отказ приходит без имени — «Test timeout», и чего не
+           дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+        test.setTimeout(45000);
         const ошибки = await беды(page);
         await page.goto(СТЕНД);
         await page.waitForFunction(() => !!document.querySelector('.ad-grp-cell-click'), null, { timeout: 20000 });
@@ -174,6 +186,11 @@ test.describe('кусок 174 — вид живёт в css', () => {
 
     for (const я of ЯЗЫКИ) {
         test('окно записи на ' + я.имя + ': ступени, цели и один заголовок', async ({ page }) => {
+            /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ.
+               Иначе отказ приходит без имени: «Test timeout of 30000ms
+               exceeded» вместо того ожидания, которое не дождалось.
+               Сумма здесь 20000 + 10000 × 2 = 40000, замер — tools/zamer-predelov-proby.js. */
+            test.setTimeout(45000);
             const ошибки = await беды(page);
             await page.goto(я.адрес);
             await page.waitForFunction(() => !!window.KSLT_REG && !!window.KSLT_REG.showModal,
@@ -231,6 +248,10 @@ test.describe('кусок 174 — вид живёт в css', () => {
         });
 
         test('окно парной заявки на ' + я.имя + ': поле 44 и кегль не мельче 16', async ({ page }) => {
+            /* ПРЕДЕЛ ТЕСТА БОЛЬШЕ СУММЫ ЕГО ИМЕНОВАННЫХ ОЖИДАНИЙ: 20000 + 10000 = 30000.
+               Иначе отказ приходит без имени — «Test timeout», и чего не
+               дождались, не сказано. Сторож: tools/check-predely-prob.js. */
+            test.setTimeout(45000);
             const ошибки = await беды(page);
             await page.goto(я.адрес);
             await page.waitForFunction(() => !!window.KSLT_DOUBLES && !!window.KSLT_DOUBLES.открыть,
