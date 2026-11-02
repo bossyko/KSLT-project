@@ -484,12 +484,21 @@
   }
 
   function renderMatches(container, matches) {
-    var LIMIT = 10;
-    var showAll = matches.length <= LIMIT;
-    var visible = showAll ? matches : matches.slice(0, LIMIT);
+    /* ОТСЕЧКУ ДЕЛАЕТ ДОМ `js/kslt-otsechka.js` — тот же, что на сайте
+       («10 везде», слово Кости 06.10). Здесь она была написана заново,
+       и написана НЕВЕРНО: кнопка звала `renderMatches` с тем же полным
+       списком, а он снова отрезал первые десять. Нажатие убирало кнопку
+       и НЕ ПОКАЗЫВАЛО НИЧЕГО НОВОГО — обещание без содержания.
+
+       Дом работает иначе: строки рисуются ВСЕ, лишние получают класс,
+       кнопка его снимает. СТРОКА СКРЫТА, А НЕ ВЫБРОШЕНА — её находит
+       поиск по странице и читает диктор. */
+    var О = window.KSLT_OTSECHKA;
+    var всего = matches.length;
+    var visible = matches;
 
     var html = '<div class="pd-matches-list">';
-    visible.forEach(function(m) {
+    visible.forEach(function(m, номер) {
       var isP1 = m.player1_id === _playerId;
       var oppId = isP1 ? m.player2_id : m.player1_id;
       var result = m.winner_id === _playerId ? 'W' : 'L';
@@ -502,7 +511,8 @@
       // а состав пары меняется от турнира к турниру
       var pairGame = kind === 'doubles' || kind === 'mixed';
 
-      html += '<div class="pd-match' + (pairGame ? '' : ' pd-match-clickable') + '"' +
+      html += '<div class="pd-match' + (pairGame ? '' : ' pd-match-clickable') +
+              О.класс(номер, всего) + '"' +
               (pairGame ? '' : ' data-opponent-id="' + esc(oppId) + '"') + '>';
       html += '<div class="pd-match-date">' + formatDateShort(m.played_at) + '</div>';
       html += '<div class="pd-match-info">';
@@ -515,12 +525,12 @@
       html += '</div>';
     });
     html += '</div>';
-
-    if (!showAll) {
-      html += '<button class="pd-show-all" id="pdShowAllMatches">' + I18N.t('pd.showAll') + ' (' + matches.length + ')</button>';
-    }
+    /* Кнопка стоит ВНУТРИ коробки списка: дом раскрывает свою коробку,
+       а не все на странице — у игрока списков два, матчи и турниры. */
+    html += О.кнопка(всего, I18N.lang);
 
     container.innerHTML = html;
+    О.включить(container);
 
     // Load opponent names
     var oppIds = [];
@@ -529,15 +539,6 @@
       if (oppIds.indexOf(oppId) === -1) oppIds.push(oppId);
     });
     loadOpponentNames(oppIds);
-
-    // Show all button
-    var showAllBtn = document.getElementById('pdShowAllMatches');
-    if (showAllBtn) {
-      showAllBtn.addEventListener('click', function() {
-        renderMatches(container, matches.slice(0, matches.length)); // show all
-        showAllBtn.remove();
-      });
-    }
 
     // Match click → H2H. У парных строк обработчика нет: там встречались
     // не двое, и «личная встреча» была бы неправдой

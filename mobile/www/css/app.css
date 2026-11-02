@@ -3758,12 +3758,23 @@ select:-webkit-autofill {
 .pd-match-result.win { background: rgba(46,213,115,0.15); color: var(--green); }
 .pd-match-result.loss { background: rgba(255,71,87,0.15); color: var(--red); }
 
-.pd-show-all {
+/* ОДЕЖДА ОТСЕЧКИ (02.11). Класс `.pd-show-all` носила своя кнопка
+   «показать все», написанная в приложении заново; теперь список режет
+   дом `js/kslt-otsechka.js`, и кнопка у него своя — `.kslt-more`.
+   Числа и краски перенесены без изменений: вид тот же.
+   `.kslt-skryta` ставится домом на строки ниже десятой. */
+.kslt-skryta { display: none !important; }
+.kslt-more {
   display: block; width: 100%; margin-top: 8px;
   padding: 12px; text-align: center;
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius-md); color: var(--accent-text);
+  font-family: inherit;
   font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.kslt-more:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Tournaments list */
