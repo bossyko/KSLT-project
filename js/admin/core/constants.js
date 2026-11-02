@@ -1646,6 +1646,8 @@
         livePlayer1: 'Игрок 1',
         livePlayer2: 'Игрок 2',
         liveYoutube: 'YouTube URL',
+        liveYoutubeOk: 'Ссылка разобрана, ролик:',
+        liveYoutubeBad: 'Ссылку не разобрали — кадр откроется пустым. Нужна ссылка YouTube: live, watch, youtu.be или shorts.',
         liveBestOf: 'Кол-во сетов',
         liveSetFormat: 'Формат сета',
         liveTournLabel: 'Турнир',

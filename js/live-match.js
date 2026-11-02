@@ -673,10 +673,13 @@
        атрибута (`title=`, `src=`, `alt=`) — там кавычка в имени игрока
        или в адресе логотипа закрывает атрибут. Эталон взят дословно у
        `js/kslt-lenta.js`. */
+    /* ИМЯ РОЛИКА РАЗБИРАЕТ ДОМ `js/kslt-video.js` (02.11). Здесь стоял
+       свой разборщик, и он знал НЕ ТО ЖЕ, что дом: дом понимал
+       `shorts/`, но не `live/`, этот — наоборот. Трансляция, вставленная
+       в новость, не открылась бы ни разу, и узнали бы мы об этом в
+       эфире. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. */
     function extractYoutubeId(url) {
-        if (!url) return null;
-        var m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        return m ? m[1] : null;
+        return window.KSLT_VIDEO ? window.KSLT_VIDEO.ytId(url) : null;
     }
 
     if (document.readyState === 'loading') {

@@ -365,10 +365,10 @@
     return esc(name);
   }
 
+  /* ИМЯ РОЛИКА РАЗБИРАЕТ ДОМ `js/kslt-video.js` (02.11) — тот же, что на
+     сайте и в админке. Свой разборщик знал не то же, что дом. */
   function extractYoutubeId(url) {
-    if (!url) return null;
-    var m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    return m ? m[1] : null;
+    return window.KSLT_VIDEO ? window.KSLT_VIDEO.ytId(url) : null;
   }
 
   function esc(s) {

@@ -329,6 +329,12 @@
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">' + L.liveYoutube + '</label>' +
                         '<input type="text" class="ad-field-input" id="liveYoutube" placeholder="https://youtube.com/live/...">' +
+                        /* ССЫЛКА ПРОВЕРЯЕТСЯ ПРИ ВВОДЕ, А НЕ В ЭФИРЕ (02.11).
+                           Прежде поле принимало что угодно и молчало: ошибку
+                           было видно только зрителям, когда вместо матча
+                           открывался пустой кадр. Теперь строка под полем
+                           говорит, разобрана ссылка или нет. */
+                        '<div id="liveYoutubeHint" class="ad-field-hint" style="margin-top:6px;"></div>' +
                     '</div>' +
                     // Best of + Set format + Tournament label row
                     '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
@@ -443,8 +449,42 @@
             });
         });
 
+        /* Подсказка под полем: читает ту же функцию дома, что и зритель.
+           ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: если админка сочла ссылку
+           годной, а зритель нет — виновата разница между ними, и её
+           здесь попросту нет. */
+        var ytПоле = document.getElementById('liveYoutube');
+        var ytПодсказка = document.getElementById('liveYoutubeHint');
+        function ytПроверить() {
+            var знач = ytПоле.value.trim();
+            if (!знач) {
+                ytПодсказка.textContent = '';
+                ytПоле.classList.remove('ad-input-error');
+                return true;
+            }
+            var имя = window.KSLT_VIDEO ? window.KSLT_VIDEO.ytId(знач) : null;
+            if (имя) {
+                ytПодсказка.textContent = L.liveYoutubeOk + ' ' + имя;
+                ytПодсказка.style.color = 'var(--accent-text)';
+                ytПоле.classList.remove('ad-input-error');
+                return true;
+            }
+            ytПодсказка.textContent = L.liveYoutubeBad;
+            ytПодсказка.style.color = 'var(--danger)';
+            ytПоле.classList.add('ad-input-error');
+            return false;
+        }
+        if (ytПоле) {
+            ytПоле.addEventListener('input', ytПроверить);
+            ytПоле.addEventListener('blur', ytПроверить);
+        }
+
         // Save
         document.getElementById('liveModalSave').addEventListener('click', function() {
+            /* НЕРАЗОБРАННАЯ ССЫЛКА В БАЗУ НЕ ПОПАДАЕТ. Пустое поле —
+               законно: трансляции может не быть вовсе, тогда её место
+               занимает ход матча. */
+            if (!ytПроверить()) return A.showToast(L.liveYoutubeBad, 'error');
             var mode = sourceSelect.value;
             var row = {
                 youtube_url: document.getElementById('liveYoutube').value.trim() || null,
