@@ -334,7 +334,7 @@
                            было видно только зрителям, когда вместо матча
                            открывался пустой кадр. Теперь строка под полем
                            говорит, разобрана ссылка или нет. */
-                        '<div id="liveYoutubeHint" class="ad-field-hint" style="margin-top:6px;"></div>' +
+                        '<div id="liveYoutubeHint" class="ad-field-hint ad-yt-hint"></div>' +
                     '</div>' +
                     // Best of + Set format + Tournament label row
                     '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
@@ -459,20 +459,19 @@
             var знач = ytПоле.value.trim();
             if (!знач) {
                 ytПодсказка.textContent = '';
+                ytПодсказка.classList.remove('is-ok', 'is-bad');
                 ytПоле.classList.remove('ad-input-error');
                 return true;
             }
             var имя = window.KSLT_VIDEO ? window.KSLT_VIDEO.ytId(знач) : null;
-            if (имя) {
-                ytПодсказка.textContent = L.liveYoutubeOk + ' ' + имя;
-                ytПодсказка.style.color = 'var(--accent-text)';
-                ytПоле.classList.remove('ad-input-error');
-                return true;
-            }
-            ytПодсказка.textContent = L.liveYoutubeBad;
-            ytПодсказка.style.color = 'var(--danger)';
-            ytПоле.classList.add('ad-input-error');
-            return false;
+            /* СОСТОЯНИЕ ПОМЕЧАЕТСЯ КЛАССОМ, А НЕ КРАСКОЙ НА МЕСТЕ:
+               инлайн сильнее любого правила css и невидим для сторожей
+               одежды — за этим следит `check-admin-sloy.js`. */
+            ytПодсказка.classList.toggle('is-ok', !!имя);
+            ytПодсказка.classList.toggle('is-bad', !имя);
+            ytПоле.classList.toggle('ad-input-error', !имя);
+            ytПодсказка.textContent = имя ? (L.liveYoutubeOk + ' ' + имя) : L.liveYoutubeBad;
+            return !!имя;
         }
         if (ytПоле) {
             ytПоле.addEventListener('input', ytПроверить);

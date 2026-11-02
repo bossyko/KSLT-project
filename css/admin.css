@@ -8971,3 +8971,12 @@ select.ad-field-input {
     color: var(--text-secondary);
     font-size: var(--fs-sm);
 }
+
+
+/* ПОДСКАЗКА ПОД ПОЛЕМ ССЫЛКИ ТРАНСЛЯЦИИ (02.11).
+   Говорит, разобрана ли ссылка, ТОЙ ЖЕ проверкой, которой пользуется
+   зритель. Состояние — класс, а не краска на месте: инлайн сильнее
+   любого правила и невидим для сторожей одежды. */
+.ad-yt-hint { margin-top: var(--space-2); }
+.ad-yt-hint.is-ok { color: var(--accent-text); }
+.ad-yt-hint.is-bad { color: var(--danger); }
