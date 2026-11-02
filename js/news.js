@@ -1456,23 +1456,20 @@ function renderNewsList() {
     // поиске игрока: пять чипов занимали на телефоне две строки
     var всеКатегории = [{ key: 'all', label: labels.filterAll }].concat(categories);
 
+    /* РАЗМЕТКУ СТРОИТ ДОМ `js/kslt-vypadashka.js` (02.11). Здесь она была
+       написана своими руками — одна из четырёх копий, — и без
+       доступности и галочки выбранного, как и две соседние.
+       Пункт «все» ставит дом, поэтому из списка он исключается: две
+       записи с одним значением дали бы двойную строку. */
     function разметкаКатегорий() {
-        var подпись = labels.filterAll;
-        всеКатегории.forEach(function(c) { if (c.key === currentFilter) подпись = c.label; });
-
-        var пункты = '';
-        всеКатегории.forEach(function(c) {
-            пункты += '<button class="f-dd-item news-filter-btn' + (c.key === currentFilter ? ' active' : '') +
-                '" data-cat="' + c.key + '" data-dd-value="' + c.key + '">' + KSLT_экранировать(c.label) + '</button>';
+        return KSLT_VYPADASHKA.разметка({
+            вид: 'category',
+            подпись: labels.filterAll,
+            текущее: currentFilter,
+            пункты: всеКатегории
+                .filter(function (c) { return c.key !== 'all'; })
+                .map(function (c) { return { значение: c.key, подпись: c.label }; })
         });
-
-        return '<div class="f-dd" data-dd="category">' +
-            '<button class="trn-chip f-dd-toggle' + (currentFilter !== 'all' ? ' active' : '') + '">' +
-                подпись +
-                '<svg class="f-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
-            '</button>' +
-            '<div class="f-dd-menu">' + пункты + '</div>' +
-        '</div>';
     }
 
     var chipsHtml = разметкаКатегорий();
@@ -1667,34 +1664,18 @@ function renderNewsList() {
         renderGrid();
     });
 
-    // Filters
-    document.getElementById('newsFilters').addEventListener('click', function(e) {
-        var кнопка = e.target.closest('.f-dd-toggle');
-        var пункт = e.target.closest('.news-filter-btn');
-
-        if (кнопка) {
-            var список = кнопка.closest('.f-dd');
-            var былОткрыт = список.classList.contains('open');
-            document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
-            if (!былОткрыт) список.classList.add('open');
-            return;
-        }
-
-        if (!пункт) return;
-
-        currentFilter = пункт.dataset.cat;
+    /* Открытие, закрытие мимо и по Escape — дело дома. Здесь остаётся
+       то, что знают только новости: что делать с выбранной категорией.
+       Прежних обработчиков было ДВА, и Escape не было ни в одном. */
+    KSLT_VYPADASHKA.включить(function(вид, значение) {
+        if (вид !== 'category') return;
+        currentFilter = значение;
         currentPage = 1;
         // Перерисовываем только сам список: полоса целиком унесла бы с собой
         // поле поиска вместе с набранным текстом
         var полоса = document.querySelector('#newsFilters .trn-chips');
         if (полоса) полоса.innerHTML = разметкаКатегорий();
         renderGrid();
-    });
-
-    // Закрыть открытый список, если нажали мимо
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.f-dd')) return;
-        document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
     });
 
     /* НАЖАТИЯ ПОЛОСЫ — У ДОМА ПОЛОСЫ (кусок 149), там же, где полоса

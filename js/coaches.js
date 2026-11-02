@@ -396,26 +396,21 @@
         }).length;
     }
 
+    /* РАЗМЕТКУ СТРОИТ ДОМ `js/kslt-vypadashka.js` (02.11). Здесь она была
+       написана своими руками — третья копия из четырёх, — и у неё не
+       было НИ `aria-haspopup`, НИ `aria-expanded`, НИ `role="listbox"`,
+       НИ галочки у выбранного пункта: диктор читал просто кнопку с
+       непонятным словом, а человек, не различающий два серых, не видел
+       своего выбора. Всё это есть у дома. */
     function ddРазметка(g) {
-        var выбрано = _ddFilters[g.kind];
-        var подпись = g.title;
-        g.options.forEach(function(o) { if (o.value === выбрано) подпись = o.label; });
-
-        var пункты = '<button class="f-dd-item' + (выбрано === 'all' ? ' active' : '') +
-            '" data-dd-value="all">' + L.filterAll + '</button>';
-        g.options.forEach(function(o) {
-            пункты += '<button class="f-dd-item' + (o.value === выбрано ? ' active' : '') +
-                '" data-dd-value="' + o.value + '">' + o.label +
-                '<span class="f-dd-count">' + ddСчёт(o.value) + '</span></button>';
+        return KSLT_VYPADASHKA.разметка({
+            вид: g.kind,
+            подпись: g.title,
+            текущее: _ddFilters[g.kind],
+            пункты: g.options.map(function(o) {
+                return { значение: o.value, подпись: o.label, счёт: ddСчёт(o.value) };
+            })
         });
-
-        return '<div class="f-dd" data-dd="' + g.kind + '">' +
-            '<button class="trn-chip f-dd-toggle' + (выбрано !== 'all' ? ' active' : '') + '">' +
-                подпись +
-                '<svg class="f-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
-            '</button>' +
-            '<div class="f-dd-menu">' + пункты + '</div>' +
-        '</div>';
     }
 
     function renderFilters() {
@@ -693,33 +688,18 @@
     // Открыть список, выбрать значение, закрыть по клику мимо —
     // тот же порядок, что у фильтров на кортах
     function initFilterClicks() {
-        document.addEventListener('click', function(e) {
-            var кнопка = e.target.closest ? e.target.closest('.f-dd-toggle') : null;
-            var пункт = e.target.closest ? e.target.closest('.f-dd-item') : null;
-
-            if (кнопка) {
-                var список = кнопка.closest('.f-dd');
-                var былОткрыт = список.classList.contains('open');
-                document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
-                if (!былОткрыт) список.classList.add('open');
-                return;
-            }
-
-            if (пункт) {
-                var обёртка = пункт.closest('.f-dd');
-                var вид = обёртка.getAttribute('data-dd');
-                _ddFilters[вид] = пункт.getAttribute('data-dd-value');
-                обёртка.classList.remove('open');
-                _currentPage = 1;
-                // Перерисовываем только сами списки: полоса целиком унесла бы
-                // с собой поле поиска — вместе с набранным текстом и его
-                // обработчиком, привязанным при первой отрисовке
-                перерисоватьСписки();
-                renderGrid();
-                return;
-            }
-
-            document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
+        /* Открытие, закрытие мимо и по Escape — дело дома. Здесь
+           остаётся то, что знают только тренеры: что делать с выбором.
+           Прежний обработчик закрывал списки в ТРЁХ местах, и Escape
+           среди них не было вовсе. */
+        KSLT_VYPADASHKA.включить(function(вид, значение) {
+            _ddFilters[вид] = значение;
+            _currentPage = 1;
+            // Перерисовываем только сами списки: полоса целиком унесла бы
+            // с собой поле поиска — вместе с набранным текстом и его
+            // обработчиком, привязанным при первой отрисовке
+            перерисоватьСписки();
+            renderGrid();
         });
     }
 

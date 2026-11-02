@@ -238,25 +238,26 @@
         };
     }
 
+    /* РАЗМЕТКУ СТРОИТ ДОМ `js/kslt-vypadashka.js` (02.11) — четвёртая из
+       четырёх копий, и, как две соседние, без доступности и без галочки
+       у выбранного пункта.
+
+       ПЕРВЫЙ ПУНКТ ЗДЕСЬ НЕ ДОБАВЛЯЕТСЯ ОТДЕЛЬНО: «все» уже лежит
+       внутри `g.options` у обеих групп, и дом ставит свой пункт «все»
+       сам — две записи подряд с одним значением сделали бы в списке
+       двойную строку. */
     function ddРазметка(kind) {
         var g = ддГруппа(kind);
-        var подпись = g.title;
-        g.options.forEach(function(o) { if (o.value === g.current) подпись = o.label; });
-
-        var пункты = '';
-        g.options.forEach(function(o) {
-            пункты += '<button class="f-dd-item' + (o.value === g.current ? ' active' : '') +
-                '" data-dd-value="' + o.value + '">' + o.label + '</button>';
+        var пункты = g.options.filter(function (o) { return o.value !== 'all'; })
+            .map(function (o) { return { значение: o.value, подпись: o.label }; });
+        var всеПодпись = (g.options.filter(function (o) { return o.value === 'all'; })[0] || {}).label
+            || g.title;
+        return KSLT_VYPADASHKA.разметка({
+            вид: kind,
+            подпись: всеПодпись,
+            текущее: g.current,
+            пункты: пункты
         });
-
-        var выбрано = (kind === 'gender') ? (_currentFilter !== 'all') : !!_ntrpValue;
-        return '<div class="f-dd" data-dd="' + kind + '">' +
-            '<button class="trn-chip f-dd-toggle' + (выбрано ? ' active' : '') + '">' +
-                подпись +
-                '<svg class="f-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
-            '</button>' +
-            '<div class="f-dd-menu">' + пункты + '</div>' +
-        '</div>';
     }
 
     function ддРазметкаВсех() {
@@ -302,45 +303,24 @@
             renderGrid();
         });
 
-        el.addEventListener('click', function(e) {
-            var кнопка = e.target.closest('.f-dd-toggle');
-            var пункт = e.target.closest('.f-dd-item');
-
-            if (кнопка) {
-                var список = кнопка.closest('.f-dd');
-                var былОткрыт = список.classList.contains('open');
-                document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
-                if (!былОткрыт) список.classList.add('open');
-                return;
-            }
-
-            if (!пункт) return;
-
-            var обёртка = пункт.closest('.f-dd');
-            var вид = обёртка.getAttribute('data-dd');
-            var значение = пункт.getAttribute('data-dd-value');
-
+        /* Открытие, закрытие мимо и по Escape — дело дома. Здесь
+           остаётся то, что знает только поиск игрока: как превратить
+           выбор в отбор. Прежних обработчиков было ДВА — один на полосе,
+           второй на документе, — и Escape не было ни в одном. */
+        KSLT_VYPADASHKA.включить(function(вид, значение) {
             if (вид === 'gender') {
                 _currentFilter = значение;
             } else {
                 var найден = _ntrpRanges.filter(function(r) { return r.value === значение; })[0];
-                _ntrpValue = значение;
+                _ntrpValue = значение === 'all' ? '' : значение;
                 _ntrpFilter = (найден && найден.min != null) ? { min: найден.min, max: найден.max } : null;
             }
-
-            обёртка.classList.remove('open');
             _currentPage = 1;
             // Перерисовываем только списки: полоса целиком унесла бы с собой
             // поле поиска вместе с набранным текстом и его обработчиком
             var полоса = el.querySelector('.trn-chips');
             if (полоса) полоса.innerHTML = ддРазметкаВсех();
             renderGrid();
-        });
-
-        // Закрыть открытый список, если нажали мимо него
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.f-dd')) return;
-            document.querySelectorAll('.f-dd.open').forEach(function(d) { d.classList.remove('open'); });
         });
 
         // Detect stuck state
