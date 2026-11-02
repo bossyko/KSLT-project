@@ -236,9 +236,18 @@
       videoEl.innerHTML =
         '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1&mute=1&rel=0&playsinline=1" ' +
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
-        'allowfullscreen style="width:100%;height:100%;border:none;border-radius:var(--radius-lg)"></iframe>';
+        'allowfullscreen class="live-full-frame"></iframe>';
+      videoEl.hidden = false;
     } else {
-      videoEl.innerHTML = '<span>' + I18N.t('live.noVideo') + '</span>';
+      /* ПУСТАЯ РАМКА НЕ ЗАНИМАЕТ ЭКРАН (02.11). Прежде здесь рисовалась
+         надпись «Нет трансляции» внутри рамки 16:9 — на экране 390 это
+         358 x 201 пиксель, отданные сообщению об ОТСУТСТВИИ, а табло со
+         счётом уезжало за сгиб. СКРЫТОЕ — НЕ СХЛОПНУТОЕ: `hidden` снимает
+         и место, и чтение диктором, а `innerHTML = ''` оставил бы рамку
+         с полями и границей. Счёт при этом никуда не делся: он в табло,
+         которое теперь и встречает человека первым. */
+      videoEl.innerHTML = '';
+      videoEl.hidden = true;
     }
 
     // ---- Status badge ----

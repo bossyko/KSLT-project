@@ -513,8 +513,12 @@
     'live.subtitle':       { ru: 'Матчи в реальном времени', en: 'Live matches',  kg: 'Реалдуу убакыт матчтары' },
     'live.empty':          { ru: 'Нет матчей',             en: 'No matches',      kg: 'Матч жок' },
     'live.emptyText':      { ru: 'Сейчас нет live-трансляций. Следите за расписанием турниров.', en: 'No live streams right now. Follow the tournament schedule.', kg: 'Азырынча live-трансляция жок. Мелдеш расписаниесин байкаңыз.' },
+    /* ОДНО ПОНЯТИЕ — ОДИН КЛЮЧ (02.11). Надпись «нет трансляции» жила в
+       словаре ДВАЖДЫ, и по-русски они совпадали, а по-английски уже
+       разошлись: «No stream» против «No broadcast». Разметка звала
+       первый, скрипт — второй, и англичанин видел два разных слова об
+       одном. Остался `live.noStream`. */
     'live.noStream':       { ru: 'Нет трансляции',         en: 'No stream',       kg: 'Трансляция жок' },
-    'live.noVideo':        { ru: 'Нет трансляции',         en: 'No broadcast',    kg: 'Трансляция жок' },
     'live.warmup':         { ru: 'РАЗМИНКА',               en: 'WARM-UP',         kg: 'ДАЯРДОО' },
     'live.paused':         { ru: 'ПАУЗА',                  en: 'PAUSED',          kg: 'ТЫНЫМ' },
     'live.completed':      { ru: 'ЗАВЕРШЁН',               en: 'COMPLETED',       kg: 'АЯКТАГАН' },
