@@ -384,7 +384,11 @@
     document.getElementById('app').appendChild(overlay);
     requestAnimationFrame(function() { overlay.classList.add('open'); });
 
-    document.getElementById('infoBack').addEventListener('click', function() {
+    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
+       отдаёт первый подходящий узел ДОКУМЕНТА: пока окно одно,
+       ответы совпадают, и беда ждёт второго — а второе бывает,
+       пока старое ещё висит в доме после закрытия. */
+    overlay.querySelector('#infoBack').addEventListener('click', function() {
       overlay.classList.remove('open');
       setTimeout(function() { overlay.remove(); }, 300);
     });

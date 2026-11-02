@@ -532,7 +532,11 @@
     document.getElementById('app').appendChild(overlay);
     requestAnimationFrame(function() { overlay.classList.add('open'); });
 
-    document.getElementById('profSubBack').addEventListener('click', function() {
+    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
+       отдаёт первый подходящий узел ДОКУМЕНТА: пока окно одно,
+       ответы совпадают, и беда ждёт второго — а второе бывает,
+       пока старое ещё висит в доме после закрытия. */
+    overlay.querySelector('#profSubBack').addEventListener('click', function() {
       overlay.classList.remove('open');
       setTimeout(function() { overlay.remove(); }, 300);
     });
@@ -1240,7 +1244,11 @@
     document.getElementById('app').appendChild(modal);
     requestAnimationFrame(function() { modal.classList.add('open'); });
 
-    document.getElementById('qrClose').addEventListener('click', function() {
+    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
+       отдаёт первый подходящий узел ДОКУМЕНТА: пока окно одно,
+       ответы совпадают, и беда ждёт второго — а второе бывает,
+       пока старое ещё висит в доме после закрытия. */
+    modal.querySelector('#qrClose').addEventListener('click', function() {
       modal.classList.remove('open');
       setTimeout(function() { modal.remove(); }, 300);
     });

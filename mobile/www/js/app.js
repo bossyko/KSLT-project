@@ -458,8 +458,29 @@
   };
 
   // === Onboarding ===
+  /**
+   * ЗНАКОМСТВО ПРИ ПЕРВОМ ЗАПУСКЕ.
+   *
+   * ЗВАТЬ ЭТО МОЖНО ДВАЖДЫ, И ЭТО НЕ ОПИСКА: один зов стоит в
+   * `checkSession().then` (вошедший открывает приложение), второй — в
+   * `APP.onAuthChange` (вход только что произошёл). Какой сработает
+   * первым, зависит от того, лежала ли сессия в памяти.
+   *
+   * ДО 02.11 ЗАЩИТЫ ОТ ВТОРОГО ОКНА НЕ БЫЛО, и когда срабатывали оба,
+   * в доме оказывалось ДВА узла с одним и тем же `id`. Человек видел
+   * верхний, а `document.getElementById('onbNext')` отдавал кнопку
+   * НИЖНЕГО — обработчики вешались не на то, что нажимают. Кнопки
+   * «Далее» и «Пропустить» не отвечали вовсе, и из знакомства нельзя
+   * было выйти: приложение запиралось на первом экране.
+   *
+   * Отметка в `localStorage` ставится только при закрытии и от второго
+   * зова не спасает — её ещё нет.
+   */
   function showOnboarding() {
     if (localStorage.getItem('kslt_onboarding_done')) return;
+    /* ОДНО ОКНО, А НЕ ДВА: узел в доме и есть признак того, что
+       знакомство уже идёт. */
+    if (document.getElementById('onboardingOverlay')) return;
     var I18N = window.KSLT_I18N;
 
     var steps = [
@@ -492,7 +513,12 @@
           '<button class="onb-skip" id="onbSkip">' + I18N.t('onb.skip') + '</button>' +
         '</div>';
 
-      document.getElementById('onbNext').addEventListener('click', function() {
+      /* ЧАСТИ ИЩУТСЯ ВНУТРИ СВОЕГО УЗЛА, А НЕ ПО ВСЕМУ ДОМУ.
+         `document.getElementById` отдаёт ПЕРВЫЙ подходящий узел во всём
+         документе — не обязательно наш. Узел, собранный кодом, обязан
+         искать своё в себе: тогда даже два таких окна не мешают друг
+         другу, и беда не зависит от того, уникален ли `id`. */
+      overlay.querySelector('#onbNext').addEventListener('click', function() {
         if (isLast) {
           closeOnboarding();
         } else {
@@ -500,7 +526,7 @@
           renderStep();
         }
       });
-      document.getElementById('onbSkip').addEventListener('click', closeOnboarding);
+      overlay.querySelector('#onbSkip').addEventListener('click', closeOnboarding);
     }
 
     function closeOnboarding() {

@@ -632,7 +632,11 @@
     overlay.appendChild(modal);
     requestAnimationFrame(function() { modal.classList.add('open'); });
 
-    document.getElementById('pdH2HClose').addEventListener('click', function() {
+    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
+       отдаёт первый подходящий узел ДОКУМЕНТА: пока окно одно,
+       ответы совпадают, и беда ждёт второго — а второе бывает,
+       пока старое ещё висит в доме после закрытия. */
+    modal.querySelector('#pdH2HClose').addEventListener('click', function() {
       modal.classList.remove('open');
       setTimeout(function() { modal.remove(); }, 300);
     });

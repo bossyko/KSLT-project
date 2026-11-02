@@ -222,7 +222,13 @@
     document.getElementById('app').appendChild(overlay);
     requestAnimationFrame(function() { overlay.classList.add('open'); });
 
-    document.getElementById('coachDetailBack').addEventListener('click', function() {
+    /* ЧАСТИ ИЩУТСЯ ВНУТРИ СВОЕГО УЗЛА (02.11). `getElementById`
+       отдаёт ПЕРВЫЙ подходящий узел во всём документе — не
+       обязательно наш: окно собирается кодом и старое остаётся в
+       доме ещё 300 мс после закрытия. На знакомстве при первом
+       запуске это уже стоило запертого приложения: обработчики
+       навесились на кнопки нижнего окна, а нажимали верхнее. */
+    overlay.querySelector('#coachDetailBack').addEventListener('click', function() {
       overlay.classList.remove('open');
       setTimeout(function() { overlay.remove(); }, 300);
     });
