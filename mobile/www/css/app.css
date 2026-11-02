@@ -6927,3 +6927,70 @@ select.prof-field-input { color: var(--text); }
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   СКЛАДКА — РАЗДЕЛ, КОТОРЫЙ СВОРАЧИВАЕТСЯ (02.11).
+
+   Разметку даёт `js/kslt-skladka.js` на `<details>`: сворачивание,
+   клавиатура и голос диктора достаются от платформы. Здесь только вид.
+
+   ПОЧЕМУ ЗДЕСЬ, А НЕ В ОБЩЕМ `tokens.css`. Складку пока носит одно
+   приложение: на сайте те же разделы живут на отсечке «первые десять»
+   (`js/kslt-otsechka.js`). КЛАСС, ЖИВУЩИЙ В ОБЩЕМ ФАЙЛЕ, ОБЯЗАН БЫТЬ
+   ЖИВЫМ У ОБОИХ — иначе сторож мёртвых классов справедливо назовёт его
+   мёртвым, как это уже случилось с глазом пароля.
+
+   ЧИСЛА: шапка 44 — ступень шкалы кнопок и нижняя граница цели
+   нажатия; отступы со шкалы 8 · 12 · 16.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.kslt-skladka {
+  border-top: 1px solid var(--border);
+}
+
+.kslt-skladka-shapka {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Свой маркер у `<summary>` убираем в обоих написаниях: webkit держит
+   собственное, и без второго правила рядом со стрелкой остаётся
+   треугольник. */
+.kslt-skladka-shapka::-webkit-details-marker { display: none; }
+.kslt-skladka-shapka::marker { content: ''; }
+
+.kslt-skladka-podpis { flex: 1; }
+
+.kslt-skladka-znak { font-size: 16px; }
+
+/* Счёт тише подписи: он отвечает на вопрос, а не задаёт его. */
+.kslt-skladka-schyot {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.kslt-skladka-strelka {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.kslt-skladka[open] .kslt-skladka-strelka { transform: rotate(180deg); }
+
+.kslt-skladka-telo { padding-top: 12px; }
+
+.kslt-skladka-shapka:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

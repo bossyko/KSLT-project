@@ -313,23 +313,33 @@
     html += '<div id="pdRatingChart"></div>';
     html += '</div>';
 
-    // ---- Matches section ----
-    html += '<div class="pd-section">';
-    html += '<h3 class="pd-section-title">⚔️ ' + I18N.t('pd.matches') + '</h3>';
-    html += '<div id="pdMatches"><div class="loading-center"><div class="spinner"></div></div></div>';
-    html += '</div>';
+    /* ТРИ РАЗДЕЛА — СКЛАДКИ (02.11, слово Кости: «достижения — надо
+       раскрывашку сделать, матчи тоже и в турнирах тоже»). Каждый из
+       них в десятки строк: сетка значков на шесть рядов, десять матчей,
+       список турниров. Складка прячет раздел за его заголовком, а счёт
+       рядом с подписью отвечает, что внутри, не открывая.
 
-    // ---- Tournaments section ----
-    html += '<div class="pd-section">';
-    html += '<h3 class="pd-section-title">🏆 ' + I18N.t('pd.tournaments') + '</h3>';
-    html += '<div id="pdTournaments"><div class="loading-center"><div class="spinner"></div></div></div>';
-    html += '</div>';
+       МАТЧИ ОТКРЫТЫ, ОСТАЛЬНЫЕ СВЁРНУТЫ — ПРЕДПОЛОЖЕНИЕ, И ОНО
+       ПОМЕЧЕНО: за матчами на страницу игрока и ходят, а свернуть всё
+       значит встретить человека списком заголовков. Скажешь иначе —
+       меняется одно слово `открыта`. */
+    var С = window.KSLT_SKLADKA;
+    var грузится = '<div class="loading-center"><div class="spinner"></div></div>';
 
-    // ---- Achievements section ----
-    html += '<div class="pd-section">';
-    html += '<h3 class="pd-section-title">🏅 ' + I18N.t('pd.badges') + '</h3>';
-    html += '<div id="pdAchievements"></div>';
-    html += '</div>';
+    html += '<div class="pd-section">' + С.разметка({
+        знак: '⚔️', подпись: I18N.t('pd.matches'), открыта: true,
+        id: 'pdMatches', содержимое: грузится
+    }) + '</div>';
+
+    html += '<div class="pd-section">' + С.разметка({
+        знак: '🏆', подпись: I18N.t('pd.tournaments'),
+        id: 'pdTournaments', содержимое: грузится
+    }) + '</div>';
+
+    html += '<div class="pd-section">' + С.разметка({
+        знак: '🏅', подпись: I18N.t('pd.badges'),
+        id: 'pdAchievements'
+    }) + '</div>';
 
     // ---- Contact info (member only, if player allows) ----
     if (access === 'member') {
@@ -461,10 +471,14 @@
       .order('played_at', { ascending: false })
       .limit(20)
       .then(function(r) {
+        /* СЧЁТ СТАВИТСЯ В ШАПКУ ДАЖЕ ПРИ ПУСТОМ РАЗДЕЛЕ: ноль — такой
+           же ответ, как двадцать, и ради него не надо открывать. */
         if (r.error || !r.data || r.data.length === 0) {
           container.innerHTML = '<div class="pd-empty-small">' + I18N.t('pd.noMatches') + '</div>';
+          if (window.KSLT_SKLADKA) KSLT_SKLADKA.счёт(container, 0);
           return;
         }
+        if (window.KSLT_SKLADKA) KSLT_SKLADKA.счёт(container, r.data.length);
         renderMatches(container, r.data);
       });
   }
@@ -566,8 +580,10 @@
       .then(function(r) {
         if (r.error || !r.data || r.data.length === 0) {
           container.innerHTML = '<div class="pd-empty-small">' + I18N.t('pd.noTournaments') + '</div>';
+          if (window.KSLT_SKLADKA) KSLT_SKLADKA.счёт(container, 0);
           return;
         }
+        if (window.KSLT_SKLADKA) KSLT_SKLADKA.счёт(container, r.data.length);
         var html = '<div class="pd-tournaments-list">';
         r.data.forEach(function(reg) {
           if (!reg.tournament) return;
@@ -591,6 +607,7 @@
 
     if (_allBadges.length === 0 && _earnedBadges.length === 0) {
       container.innerHTML = '<div class="pd-empty-small">' + I18N.t('pd.noBadges') + '</div>';
+      if (window.KSLT_SKLADKA) KSLT_SKLADKA.счёт(container, 0);
       return;
     }
 
@@ -612,6 +629,12 @@
     });
     html += '</div>';
     container.innerHTML = html;
+    /* У ЗНАЧКОВ СЧЁТ — ЭТО ДРОБЬ, А НЕ ЧИСЛО: показаны все, что есть в
+       клубе, и часть из них под замком. «3 / 24» отвечает на вопрос
+       «сколько у него», а «24» ответило бы на «сколько бывает». */
+    if (window.KSLT_SKLADKA) {
+      KSLT_SKLADKA.счёт(container, _earnedBadges.length + ' / ' + _allBadges.length);
+    }
   }
 
   /** Название значка на языке приложения: раньше всегда бралось русское. */
