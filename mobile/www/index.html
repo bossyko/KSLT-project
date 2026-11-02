@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=35">
-<link rel="stylesheet" href="css/app.css?v=52">
+<link rel="stylesheet" href="css/app.css?v=53">
 </head>
 <body>
 
@@ -277,6 +277,15 @@
   <!-- SIDE MENU -->
   <div class="menu-overlay" id="menuOverlay">
     <div class="side-menu">
+      <!-- ПРОКРУЧИВАЕТСЯ ВНУТРЕННИЙ БЛОК, А НЕ САМО ОКНО (02.11).
+           Прежде `overflow-y: auto` стоял на `.side-menu`, и его
+           `padding-top` с безопасной зоной прокручивался ВМЕСТЕ с
+           содержимым: пункты заезжали под часы и значки Android. Костя
+           увидел это как «повтор почты сверху после скрола» — на самом
+           деле там был не повтор, а строки меню, уехавшие в зону
+           статусной строки. ОТСТУП, КОТОРЫЙ ЕДЕТ ВМЕСТЕ С СОДЕРЖИМЫМ,
+           НЕ ОТСТУП. -->
+      <div class="menu-scroll">
       <button class="menu-close" id="menuClose">
         <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
@@ -399,6 +408,7 @@
         <img src="img/kslt-logo.svg" alt="KSLT" class="menu-footer-logo-img">
         <div class="menu-footer-ver"><span data-i18n="menu.version">Версия</span> <span id="menuVersion">1.1</span></div>
       </div>
+      </div><!-- /.menu-scroll -->
     </div>
   </div>
 
