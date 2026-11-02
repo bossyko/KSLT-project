@@ -104,18 +104,56 @@
         return стопка.length ? стопка[стопка.length - 1].окно : null;
     }
 
+    /**
+     * Закрыть верхнее окно. Отдаёт true, если было что закрывать.
+     *
+     * Нажимаем СВОЮ кнопку закрытия, а не снимаем класс руками: у окна
+     * может быть уборка (отписка, сброс полей, удаление из дома через
+     * 300 мс), и обойти её значит завести второй путь закрытия.
+     */
+    function закрытьВерхнее() {
+        var узел = верхнее();
+        if (!узел) return false;
+        var кнопка = узел.querySelector(ЗАКРЫТЬ);
+        if (кнопка) { кнопка.click(); return true; }
+        узел.classList.remove('open');
+        return true;
+    }
+
     /* ── Esc закрывает ── */
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape' || e.defaultPrevented) return;
-        var узел = верхнее();
-        if (!узел) return;
-        /* Нажимаем СВОЮ кнопку закрытия, а не снимаем класс руками: у окна
-           может быть уборка (отписка, сброс полей), и обойти её значит
-           завести второй путь закрытия. */
-        var кнопка = узел.querySelector(ЗАКРЫТЬ);
-        if (кнопка) { кнопка.click(); return; }
-        узел.classList.remove('open');
+        закрытьВерхнее();
     });
+
+    /* ── АППАРАТНАЯ КНОПКА «НАЗАД» ЗАКРЫВАЕТ ОКНО, А НЕ ПРИЛОЖЕНИЕ ──
+       (02.11, слово Кости: «кнопка назад она сверху, и закрыть
+       уведомление, которое выходит боковым окном, тяжело»).
+
+       ПРОЧИТАНО, А НЕ ПРЕДПОЛОЖЕНО: в `node_modules/@capacitor/android`
+       обработки этой кнопки НЕТ ВОВСЕ — ни `onBackPressed`, ни
+       `OnBackInvokedCallback`, ни `KEYCODE_BACK`, ноль совпадений по
+       всем 60 файлам java. Значит нажатие доставалось Activity, и она
+       закрывалась: человек открыл уведомления, нажал «назад» — вышел из
+       приложения. На Android это ГЛАВНЫЙ способ вернуться, и у нас он
+       не возвращал, а выбрасывал.
+
+       Событие в веб отдаёт только плагин `@capacitor/app`; без него
+       слушатель не ставится и поведение остаётся прежним. Esc делает то
+       же самое на столе — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: обе кнопки
+       зовут `закрытьВерхнее`, а не повторяют его. */
+    function аппаратнаяНазад() {
+        var П = global.Capacitor && global.Capacitor.Plugins;
+        if (!П || !П.App || !П.App.addListener) return;
+        П.App.addListener('backButton', function (д) {
+            if (закрытьВерхнее()) return;
+            /* Окон нет — решает история, а не мы: внутри экрана человек
+               ждёт возврата на предыдущий, на первом — выхода.
+               `canGoBack` отдаёт сам плагин. */
+            if (д && д.canGoBack) global.history.back();
+            else if (П.App.exitApp) П.App.exitApp();
+        });
+    }
 
     /* ── Tab не уходит из окна ── */
     document.addEventListener('keydown', function (e) {
@@ -156,6 +194,7 @@
             attributes: true, attributeFilter: ['class']
         });
         Array.prototype.forEach.call(document.querySelectorAll(ОКНА), осмотреть);
+        аппаратнаяНазад();
     }
 
     if (document.readyState === 'loading') {
@@ -164,5 +203,8 @@
         завести();
     }
 
-    global.KSLT_OKNO = { открытые: function () { return стопка.length; } };
+    global.KSLT_OKNO = {
+        открытые: function () { return стопка.length; },
+        закрытьВерхнее: закрытьВерхнее
+    };
 })(window);
