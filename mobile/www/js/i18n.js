@@ -519,6 +519,21 @@
        первый, скрипт — второй, и англичанин видел два разных слова об
        одном. Остался `live.noStream`. */
     'live.noStream':       { ru: 'Нет трансляции',         en: 'No stream',       kg: 'Трансляция жок' },
+    /* ПОДПИСИ ЖУРНАЛА ХОДА МАТЧА (02.11). Слова взяты у сайта
+       (`js/live-match.js` L) дословно: журнал один на два продукта, и
+       называться в них одинаково он обязан не меньше, чем выглядеть. */
+    'live.feedTitle':      { ru: 'Ход матча',            en: 'Match progress', kg: 'Матчтын жүрүшү' },
+    'live.feedEmptyTitle': { ru: 'Матч ещё не начался',  en: 'The match has not started yet', kg: 'Матч азырынча башталган жок' },
+    'live.feedEmptyText':  { ru: 'Ход матча появится здесь с первым розыгрышем.', en: 'Match progress will appear here with the first point.', kg: 'Матчтын жүрүшү биринчи розыгрыштан кийин ушул жерде чыгат.' },
+    'live.allSets':        { ru: 'Все',                  en: 'All',            kg: 'Баары' },
+    'live.setN':           { ru: 'сет',                  en: 'set',            kg: 'сет' },
+    'live.game':           { ru: 'гейм',                 en: 'game',           kg: 'гейм' },
+    'live.gameCell':       { ru: 'гейм',                 en: 'game',           kg: 'гейм' },
+    'live.gameLive':       { ru: 'идёт',                 en: 'live',           kg: 'жүрүүдө' },
+    'live.gameNow':        { ru: 'Текущий гейм',         en: 'Current game',   kg: 'Учурдагы гейм' },
+    'live.break':          { ru: 'брейк',                en: 'break',          kg: 'брейк' },
+    'live.ace':            { ru: 'эйс',                  en: 'ace',            kg: 'эйс' },
+    'live.double':         { ru: 'двойная',              en: 'double',         kg: 'кош ката' },
     'live.warmup':         { ru: 'РАЗМИНКА',               en: 'WARM-UP',         kg: 'ДАЯРДОО' },
     'live.paused':         { ru: 'ПАУЗА',                  en: 'PAUSED',          kg: 'ТЫНЫМ' },
     'live.completed':      { ru: 'ЗАВЕРШЁН',               en: 'COMPLETED',       kg: 'АЯКТАГАН' },

@@ -139,19 +139,7 @@
 
     /* Розыгрыши в геймы. Гейм закрыт тем розыгрышем, у которого стоит
        game_won; последний незакрытый — текущий. */
-    function groupGames(list) {
-        var games = [];
-        var cur = null;
-        list.forEach(function(pt) {
-            if (!cur || cur.set_no !== pt.set_no || cur.game_no !== pt.game_no) {
-                cur = { set_no: pt.set_no, game_no: pt.game_no, points: [], won: null, is_break: false };
-                games.push(cur);
-            }
-            cur.points.push(pt);
-            if (pt.game_won) { cur.won = pt.game_won; cur.is_break = !!pt.is_break; cur.g1 = pt.g1; cur.g2 = pt.g2; }
-        });
-        return games;
-    }
+    /* РОЗЫГРЫШИ В ГЕЙМЫ собирает дом (`KSLT_ZHURNAL.геймы`). */
 
     function render(m) {
         var container = document.getElementById('lmContainer');
@@ -397,7 +385,7 @@
             avatarHtml(p, name) +
             '<div class="lm-name-block"><div class="lm-player-name" title="' + KSLT_экранировать(name) + '">' +
                 (serving ? '<span class="lm-serve-indicator" aria-hidden="true"></span>' : '') +
-                KSLT_экранировать(короткоеИмя(name)) +
+                KSLT_экранировать(window.KSLT_ZHURNAL.короткоеИмя(name)) +
             '</div></div>' +
             '<div class="lm-scores">' + scoresHtml + '</div>' +
         '</div>';
@@ -422,221 +410,49 @@
      * Переключение сетов — ЧИП, а не таб. Описание Filter chip 49:77:
      * «a chip filters a list in place, a Tab switches the whole view».
      */
+    /**
+     * ЖУРНАЛ СТРОИТ ДОМ `js/kslt-zhurnal-matcha.js` (02.11).
+     *
+     * Здесь он был написан целиком — и был единственным: в приложении
+     * журнала не было вовсе, на месте видео стояла надпись «Нет
+     * трансляции». Продукты показывают ОДИН И ТОТ ЖЕ матч, и писать
+     * ленту во второй раз значило бы развести их на пятистах строках.
+     *
+     * Снаружи остаётся то, что знает только эта страница: язык подписей
+     * и выбранный сет.
+     */
     function feedHtml(m, setsData, isWarmup) {
-        var games = groupGames(points);
-
-        /* ЖУРНАЛА НЕТ — ЭТО ТРИ РАЗНЫХ СЛУЧАЯ, И ОНИ НЕ ОДИН.
-           Первым заходом я показывал на все три «Матч ещё не начался», и
-           Костя это поймал на живом матче: справа шёл счёт 1 : 0 и статус
-           LIVE, а слева стояло, что матч не начался. Подпись врала.
-
-           Разминка — да, не начался. Идёт или завершён, а журнала нет
-           (судейский модуль ещё не пишет, запись не дошла, матч начат до
-           того, как журнал завели) — показываем то, что база даёт наверняка:
-           сыгранные сеты и текущий гейм. Меньше, чем розыгрыш за розыгрышем,
-           но правда. */
-        if (!games.length) {
-            if (isWarmup) {
-                return '<div class="lm-empty">' +
-                    '<p class="lm-empty-title">' + L.emptyTitle + '</p>' +
-                    '<p class="lm-empty-text">' + L.emptyText + '</p>' +
-                '</div>';
-            }
-            return грубаяЛента(m, setsData);
-        }
-
-        var наборы = [];
-        games.forEach(function(g) { if (наборы.indexOf(g.set_no) === -1) наборы.push(g.set_no); });
-        var чипы = '';
-        if (наборы.length > 1) {
-            чипы += chip(null, L.allSets, selectedSet === null);
-            наборы.forEach(function(n) {
-                чипы += chip(n, n + '-й ' + L.setN, selectedSet === n);
-            });
-            чипы = '<div class="lm-feed-chips">' + чипы + '</div>';
-        }
-
-        var видимые = games.filter(function(g) {
-            return selectedSet === null || g.set_no === selectedSet;
+        return window.KSLT_ZHURNAL.разметка({
+            очки: points,
+            сеты: setsData,
+            имя: function (n) { return nameOf(m, n); },
+            подающий: m.serving_player,
+            выбранСет: selectedSet,
+            разминка: isWarmup,
+            завершён: m.status === 'completed',
+            тайбрейк: m.is_tiebreak,
+            тб1: m.tiebreak_p1, тб2: m.tiebreak_p2,
+            очки1: m.points_p1, очки2: m.points_p2,
+            гейм1: m.current_game_p1, гейм2: m.current_game_p2,
+            подписи: L
         });
-
-        /* ГЕЙМЫ ИДУТ НОВЫМ СВЕРХУ. Внутри гейма очки слева направо, и у
-           каждого гейма написан номер — направление времени нигде не
-           гадается. До 25.09 закрытый гейм схлопывался в одну строку и
-           терял все свои очки: Костя открыл матч после гейма и увидел
-           пустую панель. Теперь гейм уносит свои розыгрыши с собой. */
-        var показать = видимые.slice().reverse();
-
-        /* Заголовок и чипы сетов стоят НЕПОДВИЖНО, прокручивается только
-           список геймов. Иначе, уехав к первому сету, человек теряет и
-           подпись панели, и переключатель, которым он туда шёл. */
-        var html = '<div class="lm-feed">' +
-            '<p class="lm-feed-title">' + L.feedTitle + '</p>' + чипы +
-            '<div class="lm-feed-games">' +
-                показать.map(function(g) { return играHtml(m, g); }).join('') +
-            '</div>' +
-        '</div>';
-        return html;
     }
 
-    /**
-     * ОДИН ГЕЙМ — ДВЕ СТРОКИ, ВЫРОВНЕННЫЕ ПО КОЛОНКАМ.
-     * Решение Кости 25.09 по макету.
-     *
-     * Было: один ряд чипов «15–0 · 30–0 · 30–15», где не сказано, ЧЕЙ
-     * счёт первый, а победитель очка закодирован дугой в три пикселя без
-     * подписи. Костя: «не понятно».
-     *
-     * Стало: верхняя строка — очки первого, нижняя — второго. Выигравший
-     * очко виден по тому, ЧЬЁ ЧИСЛО СДВИНУЛОСЬ: оно белое и на подложке,
-     * второе на --text-muted. Краска больше ничего не кодирует — осталась
-     * рельсом слева, тем же, что на табло. Так показывают пойнт-бай-пойнт
-     * Уимблдон, ATP и Flashscore.
-     *
-     * ПОЧЕМУ НЕ КРАСИТЬ ГЕЙМЫ, как предлагал Костя: синий и оранжевый уже
-     * значат «кто взял ОЧКО». Та же пара красок за «кто взял ГЕЙМ» — это
-     * одно определение на два понятия, и оба перестают читаться.
-     */
-    function играHtml(m, g) {
-        var очки = g.points;
-        var ячеек1 = '', ячеек2 = '';
+    /* ГЕЙМ, СТРОКА ИГРОКА И ЯЧЕЙКА СЧЁТА переехали в дом
+       `js/kslt-zhurnal-matcha.js` 02.11 вместе со всеми решениями по
+       ним: краска не кодирует победителя гейма, последнее очко
+       приходит со сброшенным счётом, точка подачи только на идущем
+       гейме. Снято отсюда, а не скопировано. */
 
-        for (var i = 0; i < очки.length; i++) {
-            var pt = очки[i];
-            var последнее = (i === очки.length - 1) && g.won;
-
-            if (последнее) {
-                /* ДЕФЕКТ ЗАПИСИ, НЕ ВИДА. Очко, которым выигран гейм,
-                   приходит из базы уже со сброшенным счётом — 0 : 0.
-                   Настоящий счёт розыгрыша (40–AD) потерян. Пишет его
-                   судейский модуль; там и чинить. Здесь не показываю
-                   нули, которые ничего не значат: у победителя стоит
-                   слово, у второго — ничего. */
-                ячеек1 += ячейка(g.won === 1 ? L.gameCell : '\u00b7', g.won === 1, true);
-                ячеек2 += ячейка(g.won === 2 ? L.gameCell : '\u00b7', g.won === 2, true);
-            } else {
-                var метка = pt.mark === 'ace' ? L.ace : pt.mark === 'double' ? L.doubleF : '';
-                ячеек1 += ячейка(pt.p1, pt.winner === 1, false, pt.winner === 1 ? метка : '');
-                ячеек2 += ячейка(pt.p2, pt.winner === 2, false, pt.winner === 2 ? метка : '');
-            }
-        }
-
-        /* Точка подачи ставится ТОЛЬКО на идущем гейме: подающего на
-           прошлых геймах база не хранит, а выводить его чередованием
-           нельзя — на тай-брейке подача меняется каждые два очка.
-           Число, которого не могу померить, не выдумываю.
-           Брейк база знает сама и отдаёт флагом. */
-        var идёт = !g.won;
-        var подаёт1 = идёт && m.serving_player === 1;
-        var подаёт2 = идёт && m.serving_player === 2;
-
-        var итог;
-        if (!g.won) {
-            итог = '<span class="lm-game-res is-now">' + L.gameLive + '</span>';
-        } else if (g.is_break) {
-            итог = '<span class="lm-break">' + L.breakLabel + '</span>';
-        } else {
-            итог = '<span class="lm-game-res">' +
-                KSLT_экранировать(короткоеИмя(nameOf(m, g.won)) + ' \u2014 ' + (g.g1 + ' : ' + g.g2)) +
-                '</span>';
-        }
-
-        return '<div class="lm-game' + (идёт ? ' is-now' : '') + '"' +
-                (идёт ? ' aria-live="polite"' : '') + '>' +
-            '<div class="lm-game-head">' +
-                '<span class="lm-game-no">' + KSLT_экранировать(L.game + ' ' + g.game_no) + '</span>' +
-                итог +
-            '</div>' +
-            строкаИгрока(m, 1, подаёт1, ячеек1) +
-            строкаИгрока(m, 2, подаёт2, ячеек2) +
-        '</div>';
-    }
-
-    function строкаИгрока(m, n, подаёт, ячейки) {
-        return '<div class="lm-game-row lm-row-' + n + '">' +
-            '<span class="lm-row-name">' +
-                (подаёт ? '<i class="lm-row-serve" aria-hidden="true"></i>' : '') +
-                KSLT_экранировать(короткоеИмя(nameOf(m, n))) +
-            '</span>' +
-            '<span class="lm-row-cells">' + ячейки + '</span>' +
-        '</div>';
-    }
-
-    /**
-     * ЯЧЕЙКА СЧЁТА. Взявший очко — белым на подложке, второй —
-     * на --text-muted.
-     *
-     * ПОЧЕМУ ИМЕННО --text-muted, А НЕ ТИШЕ. В макете стояло 38 % белого,
-     * и это померено: 3.54 при пороге 4.5. Тусклая цифра — не украшение,
-     * это СЧЁТ, его обязаны прочитать. На --text-muted (50 %) выходит
-     * 5.33. Своего числа не завожу, ступень уже есть.
-     */
-    function ячейка(текст, взял, гейм, метка) {
-        return '<span class="lm-cell' + (взял ? ' is-won' : '') +
-            (гейм ? ' is-game' : '') + '">' + KSLT_экранировать(String(текст)) +
-            (метка ? '<i class="lm-cell-mark">' + метка + '</i>' : '') +
-        '</span>';
-    }
-
-    /**
-     * ЛЕНТА ИЗ ТОГО, ЧТО БАЗА ПИШЕТ ВСЕГДА — сеты и текущий гейм.
-     * Запасной путь, когда журнала розыгрышей нет. Не притворяется
-     * подробной: показывает ровно столько, сколько знает.
-     */
-    function грубаяЛента(m, setsData) {
-        var строки = (setsData || []).map(function(s, i) {
-            return { lead: (i + 1) + '-й ' + L.setN + ' — ' + s.g1 + ' : ' + s.g2, note: '', now: false };
-        });
-        if (m.status !== 'completed') {
-            /* Счёт очков стоит СРАЗУ за геймом, а не улетает к дальнему краю:
-               в списке геймов справа живёт «брейк» и счёт по геймам, а в
-               одной строке разрыв на три четверти ширины читается так же
-               плохо, как растянутое табло. */
-            var очки = m.is_tiebreak ? (m.tiebreak_p1 || 0) + ' : ' + (m.tiebreak_p2 || 0)
-                                     : (m.points_p1 || '0') + ' : ' + (m.points_p2 || '0');
-            строки.push({
-                lead: L.gameNow + ' — ' + (m.current_game_p1 || 0) + ' : ' + (m.current_game_p2 || 0) +
-                      '   ·   ' + очки,
-                note: '',
-                now: true
-            });
-        }
-        if (!строки.length) return '';
-        return '<div class="lm-feed">' +
-            '<p class="lm-feed-title">' + L.feedTitle + '</p>' +
-            '<ul class="lm-feed-list">' +
-            строки.map(function(it) {
-                return '<li class="lm-feed-item' + (it.now ? ' is-now' : '') + '">' +
-                    '<span>' + KSLT_экранировать(it.lead) + '</span>' +
-                    (it.note ? '<span class="lm-feed-note">' + KSLT_экранировать(it.note) + '</span>' : '') +
-                '</li>';
-            }).join('') +
-            '</ul></div>';
-    }
-
-    function chip(value, label, active) {
-        return '<button type="button" class="lm-chip' + (active ? ' is-active' : '') +
-            '" data-set="' + (value === null ? '' : value) + '"' +
-            (active ? ' aria-pressed="true"' : ' aria-pressed="false"') + '>' +
-            KSLT_экранировать(label) + '</button>';
-    }
+    /* ЗАПАСНАЯ ЛЕНТА и ЧИП СЕТА — там же, в доме журнала. */
 
     function nameOf(m, n) {
         var p = n === 1 ? (m.player1 || {}) : (m.player2 || {});
         return getPlayerName(p, n === 1 ? m.player1_name : m.player2_name);
     }
 
-    /**
-     * «Иван Корабельников» → «Иван К.» — по просьбе Кости 24.09.
-     * В ленте имя стоит в строке гейма рядом со счётом, и полное имя её
-     * разрывает. Первое слово целиком, от второго — буква с точкой.
-     * Одно слово («Петя») остаётся как есть: сокращать нечего.
-     */
-    function короткоеИмя(полное) {
-        var части = String(полное || '').trim().split(/\s+/);
-        if (части.length < 2) return части[0] || '—';
-        return части[0] + ' ' + части[1].charAt(0).toUpperCase() + '.';
-    }
+    /* КОРОТКОЕ ИМЯ — в доме журнала (`KSLT_ZHURNAL.короткоеИмя`): оно
+       нужно ленте, а лента теперь общая. */
 
     function getPlayerName(p, fallbackName) {
         if (isEn && p && p.name_en) return p.name_en;

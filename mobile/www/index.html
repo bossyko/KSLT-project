@@ -8,8 +8,8 @@
 <title>KSLT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/tokens.css?v=37">
-<link rel="stylesheet" href="css/app.css?v=60">
+<link rel="stylesheet" href="css/tokens.css?v=38">
+<link rel="stylesheet" href="css/app.css?v=61">
 </head>
 <body>
 
@@ -646,6 +646,11 @@
     <span style="width:60px"></span>
   </div>
   <div class="live-full-video" id="liveVideo" data-i18n="live.noStream">Нет трансляции</div>
+  <!-- ЖУРНАЛ ХОДА МАТЧА (02.11). Занимает место видео, когда трансляции
+       нет — решение Кости по макету Б2 от 25.09. На сайте так было с
+       сентября, в приложении счёт жил только в табло. Рисует общий дом
+       `js/kslt-zhurnal-matcha.js`. -->
+  <div class="live-full-feed" id="liveFeed"></div>
   <div class="live-full-scoreboard" id="liveScoreboard"></div>
   <div class="live-full-info" id="liveInfo"></div>
 </div>
@@ -705,13 +710,14 @@
 
 <!-- App JS -->
 <script src="js/group-standings.js?v=1"></script>
-<script src="js/i18n.js?v=23"></script>
+<script src="js/i18n.js?v=24"></script>
 <script src="js/kslt-yazyk.js?v=1"></script>
 <script src="js/phone.js?v=1"></script>
 <script src="js/kslt-vypadashka.js?v=1"></script>
 <script src="js/kslt-skladka.js?v=1"></script>
 <script src="js/kslt-parol.js?v=1"></script>
 <script src="js/kslt-otsechka.js?v=1"></script>
+<script src="js/kslt-zhurnal-matcha.js?v=1"></script>
 <script src="js/kslt-glaz-parolya.js?v=1"></script>
 <script src="js/kslt-baza.js?v=2"></script>
 <script src="js/supabase-config.js?v=5"></script>
@@ -756,7 +762,7 @@
 <script src="js/screens/rating.js?v=5"></script>
 <script src="js/screens/news.js?v=2"></script>
 <script src="js/screens/profile.js?v=19"></script>
-<script src="js/screens/live.js?v=5"></script>
+<script src="js/screens/live.js?v=6"></script>
 <script src="js/screens/battles.js?v=3"></script>
 <script src="js/kslt-grafik-dannye.js?v=2"></script>
 <script src="js/rating-chart.js?v=4"></script>

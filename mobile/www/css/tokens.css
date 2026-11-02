@@ -1298,3 +1298,308 @@ input, button, select, textarea {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЖУРНАЛ ХОДА МАТЧА `.lm-feed` / `.lm-game` / `.lm-cell` (02.11).
+
+   Разметку строит `js/kslt-zhurnal-matcha.js`. Одежда переехала сюда из
+   `css/live-match.css` — 45 блоков, 256 строк, — потому что журнал
+   теперь показывают ОБА продукта: страница матча на сайте и накладка
+   Live в приложении. `tokens.css` — единственный css, который
+   копируется в приложение с проверкой.
+
+   ЧИСЛА И КРАСКИ ПЕРЕНЕСЕНЫ БЕЗ ИЗМЕНЕНИЙ: вид на сайте прежний, и это
+   условие переноса, а не пожелание — правило 22.10 запрещает менять
+   вид работающего экрана заодно с починкой внутренностей.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* СТУПЕНЬ МЕТКИ РОЗЫГРЫША. Девять пикселей — решение 25.09 (почему
+   именно столько и почему не жирным, см. у `.lm-cell-mark` ниже). Это
+   число МИМО ШКАЛЫ КЕГЛЕЙ, и до переноса его видел `check-shkala`:
+   тот ищет сырой `font-size` ВНЕ `tokens.css`. Переезд спрятал бы его
+   от сторожа молча — поэтому число получило имя здесь, а присмотр за
+   ним вернул `check-zhurnal-matcha`. ЧИСЛО МИМО ШКАЛЫ НЕЛЬЗЯ НИ
+   ПОМЕРИТЬ, НИ ПОВТОРИТЬ, пока у него нет имени. */
+:root {
+    --lm-mark-fs: 9px;
+}
+
+/* `.lm-feed { display: flex }` стояла в `css/live-match.css` ДВАЖДЫ —
+   на 179 и 451, — и переехала сюда дубликатом вместе с остальным. Первая
+   снята 02.11: в каскаде работает последняя (ниже, у `::before`), вид не
+   меняется. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ; сторож журнала теперь
+   роняет правило, если объявление заведётся второй раз. */
+.lm-feed {
+    background: var(--bg-card);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    /* Воздух снизу тот же, что сверху и по бокам. Было 8: последняя
+       строка гейма упиралась в край коробки. Решение Кости 25.09:
+       «дать воздуха снизу». */
+    padding: var(--space-4);
+    /* ФОН ПАНЕЛИ — решение Кости 25.09, снимок «арена».
+       ПОЧЕМУ СНИЗУ И С РАСТВОРЕНИЕМ, А НЕ ПРОСТО ПОГАШЕННЫЙ.
+       Костя спросил, на сколько процентов гасить. Померил: чтобы самая
+       тусклая цифра держала 4.5 В ЛЮБОЙ точке панели, гасить надо на 84 %
+       — и от снимка остаётся 0.4 % яркости, то есть не видно вовсе. Одна
+       яркая точка прожектора тянет вниз весь слой. Числа сказали, что
+       фотографию нельзя класть ПОД строки, сколько её ни гаси.
+       Поэтому она живёт внизу и растворяется вверх: пока журнал пустой,
+       виден корт и пустого окна нет; чем длиннее матч, тем больше строк и
+       тем меньше снимка. Под строками его нет, и контраста он не трогает.
+       Снимок выбрал Костя — ракетка и мяч. Подробности и поправку к
+       моему же счёту см. у .lm-feed::before ниже. */
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    /* ВЛИТО ИЗ ТРЕТЬЕГО ОБЪЯВЛЕНИЯ 02.11. `.lm-feed` была объявлена в
+       `css/live-match.css` ТРИЖДЫ: 179 и 451 — один и тот же
+       `display: flex`, 385 — этот блок. Между ними стоял только
+       `.lm-feed > *`, к самой коробке не относящийся, так что каскад и
+       вид прежние. Осталось одно объявление. */
+    display: flex;
+    flex-direction: column;
+}
+.lm-feed > * { position: relative; z-index: 1; }
+.lm-feed::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('../images/live-fony/panel-raketka.webp');
+    background-size: cover;
+    background-position: 50% 100%;
+    -webkit-mask-image: linear-gradient(to top, var(--neutral-black) 0%, rgba(0,0,0,.62) 58%, rgba(0,0,0,.34) 100%);
+    mask-image: linear-gradient(to top, var(--neutral-black) 0%, rgba(0,0,0,.62) 58%, rgba(0,0,0,.34) 100%);
+}
+.lm-feed-title {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-4);
+}
+.lm-feed-list { list-style: none; margin: 0; padding: 0; position: relative; }
+.lm-feed-item {
+    position: relative;
+    display: flex; justify-content: space-between; gap: var(--space-4);
+    padding: 0 0 var(--space-4) var(--space-6);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+.lm-feed-item::before {
+    content: '';
+    position: absolute; left: 0; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: var(--radius-full);
+    background: var(--surface-glass-hover);
+}
+.lm-feed-item::after {
+    content: '';
+    position: absolute; left: 5px; top: 18px; bottom: 0;
+    width: 2px;
+    background: var(--border-subtle);
+}
+.lm-feed-item:last-child::after { display: none; }
+.lm-feed-item.is-now { color: var(--accent); font-weight: var(--fw-bold); }
+.lm-feed-item.is-now::before { background: var(--accent); }
+/* `.lm-feed-note` снят 02.11 вместе с переносом журнала: заметку у
+   строки запасной ленты не рисовал никто — поле `note` всегда было
+   пустым. МЁРТВЫМ КОД НАЗЫВАЕТСЯ ПОСЛЕ ПРОВЕРКИ. */
+.lm-feed-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
+.lm-chip {
+    height: var(--btn-h-sm);
+    padding: 0 var(--space-4);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background: var(--surface-glass);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+.lm-chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-on);
+    font-weight: var(--fw-semibold);
+}
+.lm-chip:focus-visible { outline: var(--bw-heavy) solid var(--accent); outline-offset: 3px; }
+.lm-game {
+    padding: var(--space-4) 0 var(--space-2);
+    border-top: var(--bw-hair) solid var(--border-subtle);
+}
+.lm-game:first-of-type { border-top: none; padding-top: 0; }
+.lm-game-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+.lm-game-no::first-letter { text-transform: uppercase; }
+.lm-game-no {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+}
+.lm-game-res {
+    margin-left: auto;
+    font-size: var(--fs-2xs);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.lm-game-res.is-now {
+    color: var(--danger);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.lm-game-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 28px;
+}
+.lm-row-name {
+    flex: 0 0 104px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-left: 10px;
+    font-size: var(--fs-2xs);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lm-row-1 .lm-row-name { box-shadow: inset 3px 0 0 var(--player-1); }
+.lm-row-2 .lm-row-name { box-shadow: inset 3px 0 0 var(--player-2); }
+.lm-row-serve {
+    flex: 0 0 6px;
+    width: 6px; height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+}
+.lm-row-cells {
+    display: flex;
+    gap: 4px;
+    /* flex: 1 1 0 и min-width: 0 ОБЯЗАТЕЛЬНЫ. Без них ряд ячеек в узкой
+       колонке схлопывался до 32 — одна ячейка вместо семи: у flex-элемента
+       с прокруткой минимальная ширина равна нулю, и он отдавал всё место
+       соседу. Померено при переезде журнала в колонку 400. */
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    /* ПОЛЕ СВЕРХУ — ПОД МЕТКУ, А НЕ ДЛЯ КРАСОТЫ. Найдено Костей 25.09, когда
+       метка впервые доехала до ленты: «эйс не помещается, его не видно».
+       Померено: `.lm-cell-mark` висит на top: -7px, то есть СНАРУЖИ своей
+       коробки, а этот ряд — горизонтальный скроллер. Всё, что выше края,
+       он срезает. `overflow-y: visible` не спасает: при `overflow-x: auto`
+       браузер принудительно делает `auto` и по второй оси — в замере так и
+       вышло, auto/auto. Поэтому метке отдаётся поле внутри коробки.
+       ПЛАТИМ ВЫСОТОЙ: два ряда на гейм, по 8 — ступень --lm-game-h выросла
+       со 112 до 128. Число поднято в компоненте, а не зашито в секцию. */
+    padding-top: var(--space-2);
+}
+.lm-cell {
+    position: relative;
+    flex: 0 0 32px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-xs);
+    font-variant-numeric: tabular-nums;
+    /* ПОМЕРЕНО: 38 % белого дало 3.54 при пороге 4.5 — тусклая цифра
+       проваливалась. Это не украшение, это СЧЁТ. На --text-muted 5.33. */
+    color: var(--text-muted);
+}
+.lm-cell.is-won {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-weight: var(--fw-bold);
+}
+.lm-cell.is-game {
+    flex: 0 0 32px;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: normal;
+}
+.lm-cell.is-game.is-won {
+    background: var(--accent);
+    color: var(--accent-on);
+}
+.lm-cell-mark {
+    position: absolute;
+    top: -7px; right: -2px;
+    font-size: var(--lm-mark-fs);
+    /* НЕ ЖИРНАЯ И НЕ КУРСИВ. Решение 25.09, вечер, по просьбе Кости
+       «сделай не жирным и курсивом может» — беру первое, отказываюсь от
+       второго, и вот чем это обосновано.
+       НЕ ЖИРНАЯ: у метки было ТРИ признака сразу — лайм, плашка и Bold, —
+       и она спорила с цифрой счёта, которую подписывает. У подписи признак
+       должен быть один; здесь он цвет. Вес уходит на Medium: ниже 500 на
+       девяти пикселях лайм начинает «звенеть» тонкими штрихами.
+       НЕ КУРСИВ: девять пикселей прописью по-русски курсивом читаются хуже
+       прямого — наклон съедает и без того малые просветы, а «эйс» и
+       «двойная» судья и зритель ловят боковым зрением. Курсив здесь дал бы
+       четвёртый признак вместо того, чтобы убрать третий.
+       ПРОПИСНЫЕ СНЯТЫ по той же причине: это подпись, а не заголовок. */
+    font-style: normal;
+    font-weight: var(--fw-medium);
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    background: var(--bg-card);
+    padding: 0 3px;
+    border-radius: var(--radius-full);
+}
+.lm-break {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    color: var(--accent);
+    background: var(--accent-subtle);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+}
+.lm-empty {
+    padding: var(--space-12) var(--space-5);
+    text-align: center;
+    border: var(--bw-hair) dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+.lm-empty-title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-2);
+}
+.lm-empty-text { font-size: var(--fs-sm); color: var(--text-muted); margin: 0; }
+/* ПРОКРУЧИВАЕТСЯ ВНУТРЕННИЙ СПИСОК, А НЕ ВСЯ ПАНЕЛЬ. Прокрутка на самой
+   .lm-feed уносит снимок, лежащий на её ::before, вместе со строками.
+   Фон обязан стоять; заодно стоят заголовок и чипы сетов. */
+.lm-feed-games {
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+}
+
+/* УЗКИЕ СТУПЕНИ ЖУРНАЛА. Ячейка уже, кегль НЕ мельчает: 14 и 12 уже
+   нижние ступени, на которых счёт ещё читается. Граница 640 — одна из
+   двух, что есть у продукта.
+   ПОРЯДОК НА ТЕЛЕФОНЕ ЗДЕСЬ НЕ ЖИВЁТ: `order` у `.lm-feed` — свойство
+   СТРАНИЦЫ, где журнал стоит между кадром и табло, и остался в
+   `css/live-match.css`. В приложении журнал стоит один, и порядка ему
+   не нужно. ОТСТУП, КОТОРЫЙ ЕДЕТ ВМЕСТЕ С СОДЕРЖИМЫМ, НЕ ОТСТУП. */
+@media (max-width: 640px) {
+    .lm-row-name { flex: 0 0 84px; }
+    .lm-cell { flex: 0 0 28px; }
+    .lm-cell.is-game { flex: 0 0 28px; }
+}

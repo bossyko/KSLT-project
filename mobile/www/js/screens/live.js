@@ -12,6 +12,11 @@
   var _pollTimer = null;
   var _realtimeOk = false;
   var _currentMatchId = null;
+  /* Журнал розыгрышей и выбранный сет: то, что знает только этот экран.
+     Разметку по ним строит общий дом `js/kslt-zhurnal-matcha.js`. */
+  var _points = [];
+  var _selectedSet = null;
+  var _lastMatch = null;
 
   // ====== LIST ======
 
@@ -192,6 +197,72 @@
     }
   }
 
+  /* ЖУРНАЛ РОЗЫГРЫШЕЙ. Таблица `live_match_points`, пишет судейский
+     модуль; здесь только чтение. Столбцы перечислены явно — тот же
+     список, что на сайте. */
+  function loadPoints(matchId) {
+    supabaseClient.from('live_match_points')
+      .select('seq,set_no,game_no,winner,p1,p2,g1,g2,game_won,is_break,is_tiebreak,mark')
+      .eq('match_id', matchId)
+      .order('seq', { ascending: true })
+      .then(function(res) {
+        if (res.error) {
+          /* ОШИБКА БЕЗ ИМЕНИ — ЭТО ПОТЕРЯННЫЙ ЧАС: пустой журнал и
+             отказ в правах выглядят одинаково. */
+          console.warn('[KSLT] журнал матча не прочитан:', res.error.message || res.error);
+          return;
+        }
+        _points = res.data || [];
+        if (_lastMatch) renderFeed(_lastMatch);
+      });
+  }
+
+  /**
+   * ЖУРНАЛ ЗАНИМАЕТ МЕСТО ВИДЕО, КОГДА ТРАНСЛЯЦИИ НЕТ — решение Кости по
+   * макету Б2 от 25.09. Идёт трансляция — журнал не рисуется вовсе: на
+   * телефоне два длинных блока подряд не помещаются, и видео главнее.
+   */
+  function renderFeed(m) {
+    var место = document.getElementById('liveFeed');
+    if (!место || !window.KSLT_ZHURNAL) return;
+    if (extractYoutubeId(m.youtube_url)) {
+      место.innerHTML = '';
+      место.hidden = true;
+      return;
+    }
+    место.hidden = false;
+    место.innerHTML = KSLT_ZHURNAL.разметка({
+      очки: _points,
+      сеты: m.sets_data || [],
+      имя: function (n) {
+        var p = n === 1 ? (m.player1 || {}) : (m.player2 || {});
+        return pName(p, n === 1 ? m.player1_name : m.player2_name);
+      },
+      подающий: m.serving_player,
+      выбранСет: _selectedSet,
+      разминка: m.status === 'warmup',
+      завершён: m.status === 'completed',
+      тайбрейк: m.is_tiebreak,
+      тб1: m.tiebreak_p1, тб2: m.tiebreak_p2,
+      очки1: m.points_p1, очки2: m.points_p2,
+      гейм1: m.current_game_p1, гейм2: m.current_game_p2,
+      подписи: {
+        feedTitle: I18N.t('live.feedTitle'),
+        emptyTitle: I18N.t('live.feedEmptyTitle'),
+        emptyText: I18N.t('live.feedEmptyText'),
+        allSets: I18N.t('live.allSets'),
+        setN: I18N.t('live.setN'),
+        game: I18N.t('live.game'),
+        gameCell: I18N.t('live.gameCell'),
+        gameLive: I18N.t('live.gameLive'),
+        gameNow: I18N.t('live.gameNow'),
+        breakLabel: I18N.t('live.break'),
+        ace: I18N.t('live.ace'),
+        doubleF: I18N.t('live.double')
+      }
+    });
+  }
+
   function loadMatchDetail(matchId) {
     supabaseClient.from('live_matches')
       .select('*, player1:players!live_matches_player1_id_fkey(id, name, name_en, name_kg, photo), player2:players!live_matches_player2_id_fkey(id, name, name_en, name_kg, photo)')
@@ -201,6 +272,7 @@
         if (res.error || !res.data) return;
         renderMatchDetail(res.data);
       });
+    loadPoints(matchId);
   }
 
   function subscribeMatch(matchId) {
@@ -220,6 +292,7 @@
   }
 
   function renderMatchDetail(m) {
+    _lastMatch = m;
     var p1 = m.player1 || {};
     var p2 = m.player2 || {};
     var p1Name = pName(p1, m.player1_name);
@@ -248,6 +321,18 @@
          которое теперь и встречает человека первым. */
       videoEl.innerHTML = '';
       videoEl.hidden = true;
+    }
+
+    renderFeed(m);
+    /* Чип сета фильтрует ленту на месте: состояние и перерисовка — у
+       экрана, дом только говорит, что нажали. */
+    var feedEl = document.getElementById('liveFeed');
+    if (feedEl && !feedEl.dataset.связан && window.KSLT_ZHURNAL) {
+      feedEl.dataset.связан = '1';
+      KSLT_ZHURNAL.включить(feedEl, function (сет) {
+        _selectedSet = сет;
+        if (_lastMatch) renderFeed(_lastMatch);
+      });
     }
 
     // ---- Status badge ----

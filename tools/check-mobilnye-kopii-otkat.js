@@ -53,8 +53,11 @@ const ОТКАТЫ = [
         имя: 'в приложении завелась новая копия файла сайта',
         ждём: 'новых копий без записи в таблицу не заводится',
         сломать() {
-            const откуда = path.join(ВРЕМ, 'js/kslt-otsechka.js');
-            const куда = path.join(ВРЕМ, 'mobile/www/js/kslt-otsechka.js');
+            /* ЯКОРЬ ПЕРЕЕХАЛ 02.11: `kslt-otsechka.js` СТАЛ законной копией
+               и попал в таблицу — откат на нём перестал быть нарушением.
+               `kslt-tasovka.js` приложению не нужен: жребий считает сайт. */
+            const откуда = path.join(ВРЕМ, 'js/kslt-tasovka.js');
+            const куда = path.join(ВРЕМ, 'mobile/www/js/kslt-tasovka.js');
             fs.copyFileSync(откуда, куда);
             return () => fs.unlinkSync(куда);
         }

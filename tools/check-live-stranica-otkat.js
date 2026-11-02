@@ -135,9 +135,13 @@ const ОТКАТЫ = [
    '    function loadList() { return null; }\n\n    function loadPoints() {',
    'режим списка убран из скрипта'],
 
+  /* ЯКОРЬ ПЕРЕСТАВЛЕН 02.11: прежний стоял на `.lm-feed` — она уехала
+     вместе с журналом в `css/tokens.css`. Новый держится на раскладке
+     колонок, которая остаётся у страницы всегда.
+     ЯКОРЬ ДЕРЖИТСЯ НА СОДЕРЖИМОМ, КОТОРОЕ ЖИВЁТ В ФАЙЛЕ ПОСТОЯННО. */
   ['css/live-match.css',
-   '\n.lm-feed {\n    background: var(--bg-card);',
-   '\n.lm-card { display: block; }\n.lm-feed {\n    background: var(--bg-card);',
+   '.lm-left, .lm-right { height: 100%; }',
+   '.lm-card { display: block; }\n.lm-left, .lm-right { height: 100%; }',
    'раскладка списка убрана из стилей'],
 
   ['js/live-match.js',
@@ -145,37 +149,18 @@ const ОТКАТЫ = [
    "        client.from('live_matches_history_stub')",
    'лента читает журнал розыгрышей, а не судейский стек отмены'],
 
-  ['css/live-match.css',
-   '.lm-chip {\n    height: var(--btn-h-sm);',
-   '.lm-tab {\n    height: var(--btn-h-sm);',
-   'сеты переключаются ЧИПОМ, а не табом'],
-
-  ['css/live-match.css',
-   '.lm-feed-item:last-child::after { display: none; }',
-   '.lm-feed-item:last-child::after { opacity: 0.5; }',
-   'у грубой ленты рельс обрывается на последней записи'],
-
-  /* Два правила — два отката. Один роняет «цвет значит кто есть кто»,
-     другой — «победителя очка видно без цвета». */
+  /* ВТОРОЙ ОТКАТ ЭТОЙ ПАРЫ УЕХАЛ 02.11 в `check-zhurnal-matcha-otkat.js`
+     вместе с журналом: «победителя очка видно без цвета» — решение о
+     ячейке журнала, а ячейка теперь в доме. Здесь остался рельс ТАБЛО. */
   ['css/live-match.css',
    '.lm-player-row { box-shadow: inset 3px 0 0 var(--player-1); }',
    '.lm-player-row { opacity: 1; }',
    'краска игрока значит ровно одно — кто есть кто'],
 
   ['css/live-match.css',
-   '.lm-cell.is-won {\n    background: var(--bg-elevated);',
-   '.lm-cell.is-won {\n    background: var(--player-1);',
-   'кто взял очко, видно БЕЗ цвета — весом и подложкой'],
-
-  ['css/live-match.css',
    '.lm-right .lm-score-panel { flex: 0 0 auto; }',
    '.lm-right .lm-score-panel { flex: 1 1 auto; }',
    'табло в колонке НЕ сжимается'],
-
-  ['css/live-match.css',
-   '    flex: 1 1 0;\n    min-width: 0;\n    overflow-x: auto;',
-   '    overflow-x: auto;',
-   'ряд ячеек в узкой колонке не схлопывается'],
 
   ['css/live-match.css',
    '    align-self: center;\n    width: auto;',
