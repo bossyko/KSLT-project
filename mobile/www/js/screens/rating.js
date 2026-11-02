@@ -202,7 +202,7 @@
         // Берём только то, что видно на экране. Строка целиком весила
         // вчетверо больше — половину съедали created_at и updated_at,
         // которые здесь никому не нужны
-        return supabaseClient.from('players')
+        return supabaseClient.from('players_public')
           .select('id, name, name_en, photo, category_id, ntrp_singles, ntrp_doubles, wins, losses, is_member, is_guest')
           .eq('gender', currentGender)
           .then(function(r) {
@@ -253,7 +253,7 @@
 
     if (_clubTotal !== null) { paint(_clubTotal); return; }
 
-    supabaseClient.from('players')
+    supabaseClient.from('players_public')
       .select('id', { count: 'exact', head: true })
       .then(function(r) {
         _clubTotal = r.count || allPlayers.length;

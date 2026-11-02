@@ -829,7 +829,7 @@
           });
         });
 
-        supabaseClient.from('players').select('id, name, photo').in('id', ids).then(function (pr) {
+        supabaseClient.from('players_public').select('id, name, photo').in('id', ids).then(function (pr) {
           var byId = {};
           (pr.data || []).forEach(function (p) { byId[p.id] = p; });
 
@@ -952,7 +952,7 @@
           });
 
           Promise.all([
-            supabaseClient.from('players').select('id, name').in('id', oppIds),
+            supabaseClient.from('players_public').select('id, name').in('id', oppIds),
             dblTournaments.length
               ? supabaseClient.from('tournament_registrations')
                   .select('tournament_id, player_id, partner_id, partner_external_name')

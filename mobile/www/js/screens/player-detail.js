@@ -102,12 +102,28 @@
 
     // Load player data
     ensureCategories();
-    supabaseClient.from('players')
+    /* ВИТРИНА, А НЕ ТАБЛИЦА. `players` открыта ПО СТОЛБЦАМ
+       (`sql/доступ/players-public-view.sql`): почта, телефон и бан
+       закрыты, и `select('*')` упирается в отказ — так и было написано
+       в том файле: «`select=*` от анонима упирается в отказ».
+       Приложение просило звёздочку и получало ошибку, а человек видел
+       «Игрок не найден»: страница игрока не открывалась НИ РАЗУ.
+       ЗВЁЗДОЧКА ПРОСИТ ВСЁ, А ОТКРЫТО НЕ ВСЁ — то же правило, на
+       котором утром 02.11 стоял пустой кабинет.
+       `players_public` отдаёт ровно разрешённый набор, и звёздочка по
+       ней законна: перечислять тридцать столбцов руками значит завести
+       второй список, который разойдётся с первым. */
+    supabaseClient.from('players_public')
       .select('*')
       .eq('id', playerId)
       .single()
       .then(function(r) {
         if (r.error || !r.data) {
+          /* ОШИБКА БЕЗ ИМЕНИ — ЭТО ПОТЕРЯННЫЙ ЧАС. «Не найден» говорит
+             человеку правду о том, что он видит, но прячет причину от
+             того, кто чинит: отказ в правах выглядит точно так же, как
+             несуществующий игрок. */
+          if (r.error) console.warn('[KSLT] игрок не прочитан:', r.error.message || r.error);
           detail.innerHTML = '<div class="pd-empty"><div class="pd-empty-icon">🔍</div><div class="pd-empty-title">' + I18N.t('pd.notFound') + '</div></div>';
           return;
         }
@@ -117,7 +133,7 @@
           : (_player.category_id || '');
 
         // Load rank (count players with more points in same category)
-        supabaseClient.from('players')
+        supabaseClient.from('players_public')
           .select('id', { count: 'exact', head: true })
           .eq('category_id', _player.category_id)
           .gt('points', _player.points || 0)
@@ -521,7 +537,7 @@
 
   function loadOpponentNames(ids) {
     if (!ids.length) return;
-    supabaseClient.from('players')
+    supabaseClient.from('players_public')
       .select('id, name, photo')
       .in('id', ids)
       .then(function(r) {
@@ -658,7 +674,7 @@
     // Load opponent info
     var oppPromise = _playerCache[opponentId]
       ? Promise.resolve(_playerCache[opponentId])
-      : supabaseClient.from('players').select('id, name, photo, points, wins, losses').eq('id', opponentId).single().then(function(r) {
+      : supabaseClient.from('players_public').select('id, name, photo, points, wins, losses').eq('id', opponentId).single().then(function(r) {
           if (r.data) _playerCache[opponentId] = r.data;
           return r.data;
         });

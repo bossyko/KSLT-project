@@ -534,7 +534,7 @@
         return;
       }
 
-      supabaseClient.from('players').select('id, name, photo').in('id', pIds).then(function(pRes) {
+      supabaseClient.from('players_public').select('id, name, photo').in('id', pIds).then(function(pRes) {
         var playersMap = {};
         (pRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
         // Список своих карточек нужен до отрисовки: в паре в матче стоит
@@ -972,7 +972,7 @@
         var rows = r.data;
         var pIds = rows.map(function(row) { return row.player_id; });
 
-        supabaseClient.from('players').select('id, name').in('id', pIds).then(function(pRes) {
+        supabaseClient.from('players_public').select('id, name').in('id', pIds).then(function(pRes) {
           var playersMap = {};
           (pRes.data || []).forEach(function(p) { playersMap[p.id] = p; });
 
@@ -1051,7 +1051,7 @@
         var idArr = Object.keys(pIds);
 
         var дальше = idArr.length
-          ? supabaseClient.from('players')
+          ? supabaseClient.from('players_public')
               .select('id, name, name_en, name_kg, photo, ntrp_singles, ntrp_doubles')
               .in('id', idArr)
           : Promise.resolve({ data: [] });

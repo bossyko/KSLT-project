@@ -492,6 +492,12 @@
         .eq('tournament_id', t.id)
         .eq('player_id', playerId)
         .limit(1),
+      /* ЗДЕСЬ ИМЕННО ТАБЛИЦА, И ЭТО НАМЕРЕНО: нужны `banned_until` и
+         `ban_reason` — ими объясняют отказ в записи на турнир. В витрине
+         `players_public` их нет нарочно (гостю бан не показывают), а
+         вошедшему таблица их отдаёт — так и выдан грант в
+         `sql/доступ/players-public-view.sql`. Остальные карточки
+         приложение читает из витрины. */
       supabaseClient.from('players')
         .select('category_id, banned_until, ban_reason, ntrp_singles, ntrp_doubles, gender')
         .eq('id', playerId)
@@ -748,7 +754,7 @@
       if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
 
       searchTimeout = setTimeout(function() {
-        supabaseClient.from('players')
+        supabaseClient.from('players_public')
           .select('id, name, name_en, name_kg, gender, ntrp_singles, ntrp_doubles')
           .or('name.ilike.%' + q + '%,name_en.ilike.%' + q + '%')
           .neq('id', playerId)
@@ -788,7 +794,7 @@
 
                 // Gender validation for mixed doubles
                 if (isMixed) {
-                  supabaseClient.from('players').select('gender').eq('id', playerId).single().then(function(captRes) {
+                  supabaseClient.from('players_public').select('gender').eq('id', playerId).single().then(function(captRes) {
                     var captGender = captRes.data ? captRes.data.gender : '';
                     var partGender = item.dataset.gender;
                     if (captGender && partGender && captGender === partGender) {

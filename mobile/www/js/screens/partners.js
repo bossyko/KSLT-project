@@ -44,7 +44,7 @@
       // NTRP в запросе нет — он живёт в карточке игрока
       var ids = rows.map(function(p) { return p.id; });
       var withNtrp = ids.length
-        ? supabaseClient.from('players').select('id, ntrp_singles, category_id').in('id', ids)
+        ? supabaseClient.from('players_public').select('id, ntrp_singles, category_id').in('id', ids)
         : Promise.resolve({ data: [] });
 
       return withNtrp.then(function(nr) {
