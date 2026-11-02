@@ -56,7 +56,19 @@
   AUTH.loadProfile = function(uid, retries) {
     retries = retries || 0;
     return supabaseClient.from('profiles')
-      .select('*, players(*)')
+      /* ЗВЁЗДОЧКА ПРОСИТ ВСЁ, А ОТКРЫТО НЕ ВСЁ (01.11).
+         Здесь стояло `players(*)`, и кабинет приложения умирал с
+         «permission denied for table players». Таблица `players` закрыта
+         НАРОЧНО: в ней живут `email`, `phone`, `show_phone`,
+         `banned_until`, `ban_reason` и `account_deleted_at`
+         (`sql/доступ/players-public-view.sql`). Вошедшему выдан
+         `GRANT SELECT` ПО СТОЛБЦАМ — поэтому шесть других мест
+         приложения, просящих `id, name, photo`, работают, а `*` упирается
+         в отказ целиком.
+         Столбцы ниже — ровно те, что перечислены в гранте и в витрине
+         `players_public`; лишнего здесь просить нельзя, а недостающее
+         сломает кабинет молча. */
+      .select('*, players(id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, is_online, is_member, is_guest, has_account)')
       .eq('id', uid)
       .single()
       .then(function(r) {
@@ -107,7 +119,10 @@
             phone: meta.phone || '',
             role: 'user'
           })
-          .select('*, players(*)')
+              /* ТЕ ЖЕ СТОЛБЦЫ, ЧТО ВЫШЕ: ЗВЁЗДОЧКА ПРОСИТ ВСЁ, А ОТКРЫТО НЕ
+             ВСЁ. Два места на один запрос — и если список разойдётся,
+             беда родится ровно на шве. */
+          .select('*, players(id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, is_online, is_member, is_guest, has_account)')
           .single()
           .then(function(ins) {
             if (ins.data) {
