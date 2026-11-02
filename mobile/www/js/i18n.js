@@ -595,6 +595,13 @@
     'auth.submit':       { ru: 'Войти',                en: 'Log in',            kg: 'Кирүү' },
     'auth.forgot':       { ru: 'Забыли пароль?',       en: 'Forgot password?',  kg: 'Сырсөздү унуттуңузбу?' },
     'auth.showPassword':    { ru: 'Показать пароль',      en: 'Show password',     kg: 'Сырсөздү көрсөтүү' },
+    /* Объяснение перед системным запросом уведомлений. Системное окно
+       рисует Android своим текстом и на языке СИСТЕМЫ — перевести его
+       нельзя, поэтому всё, что человек должен понять, сказано здесь. */
+    'push.primeTitle':      { ru: 'Включить уведомления?', en: 'Turn on notifications?', kg: 'Эскертмелерди күйгүзөлүбү?' },
+    'push.primeText':       { ru: 'Будете сразу видеть заявки на турниры, вызовы на матч и счёт игр.', en: 'You will see tournament entries, match challenges and live scores right away.', kg: 'Турнирге арыздарды, матчка чакырууларды жана эсепти дароо көрөсүз.' },
+    'push.primeYes':        { ru: 'Включить',             en: 'Turn on',               kg: 'Күйгүзүү' },
+    'push.primeNo':         { ru: 'Не сейчас',            en: 'Not now',               kg: 'Азыр эмес' },
     'auth.hidePassword':    { ru: 'Скрыть пароль',        en: 'Hide password',     kg: 'Сырсөздү жашыруу' },
     'auth.forgotText':   { ru: 'Введите email и мы отправим ссылку для сброса пароля', en: 'Enter your email and we\'ll send a reset link', kg: 'Email жазыңыз, биз сырсөздү калыбына келтирүү шилтемесин жөнөтөбүз' },
     'auth.sendReset':    { ru: 'Отправить ссылку',    en: 'Send reset link',   kg: 'Шилтеме жөнөтүү' },

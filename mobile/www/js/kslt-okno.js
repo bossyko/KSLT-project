@@ -41,9 +41,11 @@
     var ОКНА = '.td-overlay, .otp-overlay, .notif-overlay, .bottom-sheet-overlay,' +
                ' .menu-overlay, .live-full, .nm-viewer, .msa-overlay,' +
                ' .ar-overlay, .onboarding-overlay, .otp-pw-overlay,' +
-               ' .tg-reg-overlay, .gi-overlay, .pd-h2h-modal';
+               ' .tg-reg-overlay, .gi-overlay, .pd-h2h-modal,' +
+               ' .push-prime-overlay';
     var ПОДПИСЬ = 'h1, h2, h3, .bs-title, .td-title, .notif-title, .otp-title,' +
-                  ' .ar-title, .gi-title, .prof-sub-title, .tg-reg-title';
+                  ' .ar-title, .gi-title, .prof-sub-title, .tg-reg-title,' +
+                  ' .push-prime-title';
     var ЗАКРЫТЬ = '[data-okno-zakryt], .td-back, .notif-back, .otp-close,' +
                   ' .live-back, .nm-viewer-close, .menu-close,' +
                   ' .ar-close, .gi-close, .prof-sub-back, .tg-reg-close';

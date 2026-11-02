@@ -106,16 +106,75 @@
    * отдаёт `denied` и спрашивать нечего — ведём в настройки словом, а не
    * окном.
    */
-  PUSH.спросить = function() {
+  /* «НЕ СЕЙЧАС» В ЭТОМ ЗАПУСКЕ. Держим в памяти, а не в localStorage:
+     отказ от объяснения — не решение навсегда, а «не мешай сейчас».
+     Следующий запуск спросит снова, и это честно: системную попытку
+     отказ не тратит. */
+  var отложено = false;
+
+  function системный(plugin) {
+    return plugin.requestPermissions().then(function(permResult) {
+      if (permResult && permResult.receive === 'granted') plugin.register();
+    });
+  }
+
+  /**
+   * Спрашивает разрешение на уведомления.
+   *
+   * У ANDROID ОДНА ПОПЫТКА: нажал «Не разрешать» — системное окно больше
+   * не покажется никогда, только настройки телефона. Поэтому сперва своё
+   * объяснение своими словами и на своём языке, и лишь по согласию —
+   * системное окно. Системное рисует Android: его текст, язык и цвет
+   * берутся от СИСТЕМЫ, и перевести его нельзя.
+   *
+   * `опции.сразу` — для мест, где человек уже сказал, чего хочет: тумблер
+   * «Уведомления» в кабинете сам по себе и есть согласие, и объяснять
+   * ему то, что он только что нажал, — это спросить дважды.
+   */
+  PUSH.спросить = function(опции) {
+    опции = опции || {};
     var plugin = getPlugin();
     if (!plugin) return;
     plugin.checkPermissions().then(function(permResult) {
-      if (!permResult || permResult.receive !== 'prompt') return permResult;
-      return plugin.requestPermissions();
-    }).then(function(permResult) {
-      if (permResult && permResult.receive === 'granted') plugin.register();
+      /* Решение уже принято — системное окно не покажется, и своё
+         показывать незачем. */
+      if (!permResult || permResult.receive !== 'prompt') return;
+      if (опции.сразу) return системный(plugin);
+      if (отложено) return;
+      объяснить(plugin);
     }).catch(function() {});
   };
+
+  /** Своё окно: вопрос, объяснение и две кнопки. */
+  function объяснить(plugin) {
+    var окно = document.getElementById('pushPrimeOverlay');
+    /* Нет разметки — не выдумываем её из кода, просим системное
+       напрямую: лучше спросить без объяснения, чем не спросить вовсе. */
+    if (!окно) return системный(plugin);
+
+    var да = document.getElementById('pushPrimeYes');
+    var нет = document.getElementById('pushPrimeNo');
+
+    function закрыть() { окно.classList.remove('open'); }
+
+    if (!окно.dataset.связан) {
+      окно.dataset.связан = '1';
+      да.addEventListener('click', function() {
+        закрыть();
+        системный(plugin).catch(function() {});
+      });
+      нет.addEventListener('click', function() {
+        отложено = true;
+        закрыть();
+      });
+      /* Нажатие по затемнению — тот же отказ: окно поверх экрана
+         обязано закрываться мимо него. */
+      окно.addEventListener('click', function(e) {
+        if (e.target === окно) { отложено = true; закрыть(); }
+      });
+    }
+    окно.classList.add('open');
+  }
 
   // Remove token on logout
   PUSH.clearToken = function() {

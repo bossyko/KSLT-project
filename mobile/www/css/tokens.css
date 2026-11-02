@@ -173,6 +173,14 @@
   /* Акцент — лайм. ТОЛЬКО светлое на тёмном или заливка с чёрным текстом.
      Белый текст на лайме даёт контраст 1.17:1 — не читается. */
   --accent:        var(--lime-500);
+  /* АКЦЕНТНЫЙ ТЕКСТ — СВОЁ ИМЯ, А НЕ ТОТ ЖЕ АКЦЕНТ (переехал сюда из
+     `mobile/www/css/app.css` 02.11). По умолчанию равен заливочному:
+     лайм на чёрном читается. В светлой теме приложение переопределяет
+     его на ступень темнее — там лайм на светлом фоне падает ниже планки
+     WCAG. Жил он только в одежде приложения, а зовут его теперь и общие
+     компоненты (`.kslt-cc`, `.kslt-dd`), которые есть у обоих
+     продуктов: на сайте имя оказалось бы пустым. */
+  --accent-text: var(--accent);
   --accent-hover:  var(--lime-400);
   --accent-dim:    var(--lime-600);      /* сплошной, приглушённый */
   --accent-subtle: var(--alpha-lime-15); /* полупрозрачная подложка */
@@ -1102,7 +1110,7 @@ input, button, select, textarea {
 }
 
 .kslt-cc-item.active {
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 .kslt-cc-name {
@@ -1114,7 +1122,7 @@ input, button, select, textarea {
 }
 
 .kslt-cc-item.active .kslt-cc-code {
-    color: var(--accent);
+    color: var(--accent-text);
     opacity: 0.7;
 }
 
@@ -1247,20 +1255,20 @@ input, button, select, textarea {
 
 .kslt-dd-item:hover {
     background: var(--alpha-lime-06);
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 /* ВЫБРАННЫЙ ПУНКТ НЕСЁТ ГАЛОЧКУ, А НЕ ТОЛЬКО КРАСКУ. `Menu item 32:44`
    требует этого прямо: «never rely on the tint alone, it is invisible to
    anyone who cannot separate the two greys». */
 .kslt-dd-item.is-selected {
-    color: var(--accent);
+    color: var(--accent-text);
     font-weight: 600;
 }
 
 .kslt-dd-tick {
     flex-shrink: 0;
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 .kslt-dd-count {
@@ -1271,7 +1279,7 @@ input, button, select, textarea {
 }
 
 .kslt-dd-item.is-selected .kslt-dd-count {
-    color: var(--accent);
+    color: var(--accent-text);
     opacity: 0.7;
 }
 

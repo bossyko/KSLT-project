@@ -8,8 +8,8 @@
 <title>KSLT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/tokens.css?v=35">
-<link rel="stylesheet" href="css/app.css?v=53">
+<link rel="stylesheet" href="css/tokens.css?v=36">
+<link rel="stylesheet" href="css/app.css?v=55">
 </head>
 <body>
 
@@ -513,6 +513,26 @@
     <span data-i18n="auth.terms">Регистрируясь, вы соглашаетесь с</span><br><button type="button" class="auth-doc-link" data-doc="terms" data-i18n="auth.linkTerms">условиями использования</button><span data-i18n="auth.linkAnd"> и </span><button type="button" class="auth-doc-link" data-doc="privacy" data-i18n="auth.linkPrivacy">политикой конфиденциальности</button>
   </div>
 
+  <!-- ОБЪЯСНЕНИЕ ПЕРЕД СИСТЕМНЫМ ЗАПРОСОМ УВЕДОМЛЕНИЙ (02.11).
+       У Android ОДНА попытка: нажал «Не разрешать» — системное окно
+       больше не покажется никогда, только настройки телефона. Поэтому
+       сперва своими словами и на своём языке, и только по согласию —
+       системное. «Не сейчас» закрывает это окно и системную попытку НЕ
+       ТРАТИТ. Системное окно рисует Android: его текст, язык и цвет
+       берутся от системы, и перевести его нельзя — это ещё одна причина
+       сказать всё здесь. -->
+  <div class="push-prime-overlay" id="pushPrimeOverlay">
+    <div class="push-prime-modal">
+      <div class="push-prime-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <h3 class="push-prime-title" data-i18n="push.primeTitle">Включить уведомления?</h3>
+      <p class="push-prime-text" data-i18n="push.primeText">Будете сразу видеть заявки на турниры, вызовы на матч и счёт игр.</p>
+      <button type="button" class="push-prime-yes" id="pushPrimeYes" data-i18n="push.primeYes">Включить</button>
+      <button type="button" class="push-prime-no" id="pushPrimeNo" data-okno-zakryt data-i18n="push.primeNo">Не сейчас</button>
+    </div>
+  </div>
+
   <!-- Telegram Registration Modal -->
   <div class="tg-reg-overlay" id="tgRegOverlay">
     <div class="tg-reg-modal">
@@ -685,7 +705,7 @@
 
 <!-- App JS -->
 <script src="js/group-standings.js?v=1"></script>
-<script src="js/i18n.js?v=20"></script>
+<script src="js/i18n.js?v=21"></script>
 <script src="js/kslt-yazyk.js?v=1"></script>
 <script src="js/phone.js?v=1"></script>
 <script src="js/kslt-vypadashka.js?v=1"></script>
@@ -732,7 +752,7 @@
 <script src="js/kslt-znachki.js?v=1"></script>
 <script src="js/screens/rating.js?v=4"></script>
 <script src="js/screens/news.js?v=2"></script>
-<script src="js/screens/profile.js?v=15"></script>
+<script src="js/screens/profile.js?v=16"></script>
 <script src="js/screens/live.js?v=3"></script>
 <script src="js/screens/battles.js?v=3"></script>
 <script src="js/kslt-grafik-dannye.js?v=2"></script>
@@ -742,8 +762,8 @@
 <script src="js/screens/courts.js?v=5"></script>
 <script src="js/screens/partners.js?v=4"></script>
 <script src="js/badge-celebration.js?v=2"></script>
-<script src="js/push.js?v=2"></script>
-<script src="js/kslt-okno.js?v=3"></script>
+<script src="js/push.js?v=3"></script>
+<script src="js/kslt-okno.js?v=4"></script>
 <script src="js/app.js?v=11"></script>
 </body>
 </html>
