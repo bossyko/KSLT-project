@@ -588,6 +588,8 @@
     'auth.password':     { ru: 'Пароль',               en: 'Password',          kg: 'Сырсөз' },
     'auth.submit':       { ru: 'Войти',                en: 'Log in',            kg: 'Кирүү' },
     'auth.forgot':       { ru: 'Забыли пароль?',       en: 'Forgot password?',  kg: 'Сырсөздү унуттуңузбу?' },
+    'auth.showPassword':    { ru: 'Показать пароль',      en: 'Show password',     kg: 'Сырсөздү көрсөтүү' },
+    'auth.hidePassword':    { ru: 'Скрыть пароль',        en: 'Hide password',     kg: 'Сырсөздү жашыруу' },
     'auth.forgotText':   { ru: 'Введите email и мы отправим ссылку для сброса пароля', en: 'Enter your email and we\'ll send a reset link', kg: 'Email жазыңыз, биз сырсөздү калыбына келтирүү шилтемесин жөнөтөбүз' },
     'auth.sendReset':    { ru: 'Отправить ссылку',    en: 'Send reset link',   kg: 'Шилтеме жөнөтүү' },
     'auth.checkEmail':   { ru: 'Проверьте почту! Ссылка для сброса отправлена.', en: 'Check your email! Reset link has been sent.', kg: 'Почтаңызды текшериңиз! Калыбына келтирүү шилтемеси жөнөтүлдү.' },

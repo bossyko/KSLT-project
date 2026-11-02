@@ -7248,102 +7248,11 @@ select.ad-field-input {
     .ad-table-sponsors td:nth-child(8) { display: none; }
 }
 
-/* ===== ВЫБОР КОДА СТРАНЫ ===== */
-/* Компактная кнопка с флагом и кодом; названия стран видны в раскрытом
-   списке. Нативный select показывал бы «Кыргызстан +996» и занимал
-   половину строки. */
+/* ВЫБОР КОДА СТРАНЫ (`.kslt-cc`) ПЕРЕЕХАЛ В `css/tokens.css` 02.11:
+   его просят админка, вход и приложение — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО
+   ПОНЯТИЕ, а `tokens.css` единственный css, который копируется в
+   приложение с проверкой (`tools/check-mobilnye-kopii.js`). */
 
-.kslt-cc {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.kslt-cc-toggle {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    height: 44px;
-    padding: 0 var(--space-3);
-    background: var(--bg-elevated);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: border-color var(--transition-fast);
-}
-
-.kslt-cc-toggle:hover {
-    border-color: var(--border-light);
-}
-
-.kslt-cc-toggle svg {
-    opacity: 0.6;
-    transition: transform var(--transition-fast);
-}
-
-.kslt-cc.open .kslt-cc-toggle svg {
-    transform: rotate(180deg);
-}
-
-.kslt-cc-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    z-index: 80;
-    min-width: 230px;
-    max-height: 300px;
-    overflow-y: auto;
-    padding: var(--space-1);
-    background: var(--bg-elevated);
-    border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    box-shadow: 0 12px 32px var(--alpha-black-50);
-    display: none;
-}
-
-.kslt-cc.open .kslt-cc-menu {
-    display: block;
-}
-
-.kslt-cc-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    width: 100%;
-    padding: var(--space-2) var(--space-2);
-    background: none;
-    border: none;
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-    text-align: left;
-    cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.kslt-cc-item:hover {
-    background: var(--alpha-white-08);
-    color: var(--text-primary);
-}
-
-.kslt-cc-item.active {
-    color: var(--accent);
-}
-
-.kslt-cc-name {
-    flex: 1;
-}
-
-.kslt-cc-code {
-    color: var(--text-muted);
-}
-
-.kslt-cc-item.active .kslt-cc-code {
-    color: var(--accent);
-    opacity: 0.7;
-}
 
 /* Поле с неверным вводом: подсветка и строка-объяснение под ним */
 .ad-field-input.ad-input-error {

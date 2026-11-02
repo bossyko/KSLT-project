@@ -995,3 +995,133 @@ input, button, select, textarea {
         scroll-behavior: auto !important;
     }
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   ВЫБОР КОДА СТРАНЫ `.kslt-cc` — ОДИН ОРГАН НА ВЕСЬ ПРОДУКТ (02.11).
+
+   ПЕРЕЕХАЛ СЮДА ИЗ `admin.css`. Выбор страны просят четыре места:
+   админка (корты), вход на сайте, вход в приложении и кабинет
+   приложения. Пока разметка жила в `admin.css`, остальным троим
+   доставался нативный `<select>` — и каждый обзавёлся своим списком.
+   `tokens.css` — единственный css, который копируется в приложение
+   с проверкой (`tools/check-mobilnye-kopii.js`), поэтому компонент,
+   нужный обоим продуктам, живёт здесь.
+
+   ПОЧЕМУ НЕ НАТИВНЫЙ `<select>`. Три причины, и все три померены:
+   · КАЗАХСТАН И РОССИЮ НЕ РАЗЛИЧИТЬ: у обоих `+7`, а в закрытом поле
+     нативный показывает ту же строку, что в списке. Названия стран
+     туда не помещаются — обрезаются на полуслове.
+   · СПИСОК РИСУЕТ ANDROID, А НЕ МЫ. В приложении он открывался
+     системным окном во весь экран, и в каждой его строке справа от
+     кода стоял знак КСЛТ — Костя увидел это глазами 02.11. Что бы его
+     туда ни приводило, внутрь системного окна css не достаёт.
+   · ВЫСОТА. Нативному нельзя назначить цель нажатия 44 надёжно.
+
+   Стоит на общих токенах, своих чисел не заводит.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ===== ВЫБОР КОДА СТРАНЫ ===== */
+/* Компактная кнопка с флагом и кодом; названия стран видны в раскрытом
+   списке. Нативный select показывал бы «Кыргызстан +996» и занимал
+   половину строки. */
+
+.kslt-cc {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.kslt-cc-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 44px;
+    padding: 0 var(--space-3);
+    background: var(--bg-elevated);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+}
+
+.kslt-cc-toggle:hover {
+    border-color: var(--border-light);
+}
+
+.kslt-cc-toggle svg {
+    opacity: 0.6;
+    transition: transform var(--transition-fast);
+}
+
+.kslt-cc.open .kslt-cc-toggle svg {
+    transform: rotate(180deg);
+}
+
+.kslt-cc-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 80;
+    min-width: 230px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--space-1);
+    background: var(--bg-elevated);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 12px 32px var(--alpha-black-50);
+    display: none;
+}
+
+.kslt-cc.open .kslt-cc-menu {
+    display: block;
+}
+
+.kslt-cc-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-2);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.kslt-cc-item:hover {
+    background: var(--alpha-white-08);
+    color: var(--text-primary);
+}
+
+.kslt-cc-item.active {
+    color: var(--accent);
+}
+
+.kslt-cc-name {
+    flex: 1;
+}
+
+.kslt-cc-code {
+    color: var(--text-muted);
+}
+
+.kslt-cc-item.active .kslt-cc-code {
+    color: var(--accent);
+    opacity: 0.7;
+}
+
+/* ОБВОДКА ФОКУСА — ОТДЕЛЬНАЯ ОТ НАВЕДЕНИЯ: тот, кто ходит клавишами,
+   обязан видеть, где он, а `:hover` ему недоступен. */
+.kslt-cc-toggle:focus-visible,
+.kslt-cc-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}

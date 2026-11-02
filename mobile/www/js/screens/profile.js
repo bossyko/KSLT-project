@@ -327,6 +327,10 @@
     bindRowOverlays();
     loadLoyaltyBalance();
     bindLangControl();
+    /* Один обработчик на все пикеры страны; защищён от повторного зова
+       изнутри (`P._pickersReady`), поэтому звать можно при каждой
+       отрисовке кабинета. */
+    if (window.KSLT_PHONE && KSLT_PHONE.initPickers) KSLT_PHONE.initPickers();
   };
 
   // ---- Membership card ----
@@ -1319,8 +1323,15 @@
     html += '<div class="prof-field">';
     html += '<label class="prof-field-label">' + I18N.t('profile.phoneLbl') + '</label>';
     html += '<div class="prof-phone-row">';
+    /* ОРГАН ВЫБОРА СТРАНЫ ОДИН НА ПРИЛОЖЕНИЕ — `pickerHtml`.
+       Нативный `<select>` здесь стоял до 02.11 и показывал в закрытом
+       поле только флаг с кодом: Казахстан и Россию с общим +7 по нему
+       не различить, а на Android он открывается системным окном, в
+       которое css не достаёт. */
     if (window.KSLT_PHONE) {
-        html += KSLT_PHONE.selectHtml('profPhoneCountry', phoneParts.iso, I18N.lang, 'prof-field-input prof-phone-country');
+        html += '<span id="profPhoneCountryBox">' +
+                KSLT_PHONE.pickerHtml(phoneParts.iso, I18N.lang, 'prof-phone-country') +
+                '</span>';
     }
     html += '<input class="prof-field-input prof-phone-number" type="tel" id="profPhone" value="' +
             esc(phoneParts.rest) + '" placeholder="555 123 456" inputmode="tel">';
@@ -1340,7 +1351,9 @@
     html += '<label class="prof-field-label">WhatsApp</label>';
     html += '<div class="prof-phone-row">';
     if (window.KSLT_PHONE) {
-        html += KSLT_PHONE.selectHtml('profWhatsappCountry', waParts.iso, I18N.lang, 'prof-field-input prof-phone-country');
+        html += '<span id="profWhatsappCountryBox">' +
+                KSLT_PHONE.pickerHtml(waParts.iso, I18N.lang, 'prof-phone-country') +
+                '</span>';
     }
     html += '<input class="prof-field-input prof-phone-number" type="tel" id="profWhatsapp" value="' +
             esc(waStored ? waParts.rest : '') + '" placeholder="' + I18N.t('profile.whatsappSame') + '" inputmode="tel">';
@@ -1394,14 +1407,16 @@
     document.getElementById('profSaveBtn').addEventListener('click', function() {
       var ln = document.getElementById('profLastName').value.trim();
       var fn = document.getElementById('profFirstName').value.trim();
-      var phoneCountryEl = document.getElementById('profPhoneCountry');
-      var phoneCountry = phoneCountryEl ? phoneCountryEl.value : null;
+      /* СТРАНА ЧИТАЕТСЯ ИЗ `data-iso` КОРНЯ ПИКЕРА, а не из `.value`
+         селекта: органа-селекта здесь больше нет. */
+      var phoneCountryEl = document.querySelector('#profPhoneCountryBox .kslt-cc');
+      var phoneCountry = phoneCountryEl ? phoneCountryEl.dataset.iso : null;
       var phone = window.KSLT_PHONE
         ? KSLT_PHONE.join(phoneCountry, document.getElementById('profPhone').value)
         : document.getElementById('profPhone').value.trim();
 
-      var waCountryEl = document.getElementById('profWhatsappCountry');
-      var waCountry = waCountryEl ? waCountryEl.value : null;
+      var waCountryEl = document.querySelector('#profWhatsappCountryBox .kslt-cc');
+      var waCountry = waCountryEl ? waCountryEl.dataset.iso : null;
       var waRaw = (document.getElementById('profWhatsapp') || {}).value || '';
       var waNumber = waRaw.trim() && window.KSLT_PHONE
         ? KSLT_PHONE.join(waCountry, waRaw)
@@ -1708,7 +1723,10 @@
   function showPasswordChange() {
     var html = '<div class="prof-edit-form">';
     html += profField(I18N.t('profile.newPass'), 'profNewPass', '', 'password');
-    html += profField(I18N.t('profile.confirmPass'), 'profConfirmPass', '', 'password');
+    /* ПОЛЯ ПОДТВЕРЖДЕНИЯ ЗДЕСЬ БОЛЬШЕ НЕТ (02.11, решение сайта 21.09):
+       у поля пароля есть глаз показа, а подтверждение — приём из времён,
+       когда посмотреть на введённое было нельзя. Приложение шло на этом
+       приёме ровно потому, что глаза не было. */
     html += '<div class="prof-pass-rules" id="profPassRules">';
     html += '<div class="prof-pass-rule" data-rule="length">' + I18N.t('profile.passRule') + '</div>';
     html += '</div>';
@@ -1718,18 +1736,17 @@
     var ov = openSubOverlay(I18N.t('profile.changePass'), html);
 
     var newPass = document.getElementById('profNewPass');
-    var confirmPass = document.getElementById('profConfirmPass');
     var btn = document.getElementById('profChangePassBtn');
 
+    /* Поле нарисовано ТОЛЬКО ЧТО — глаз ставится по готовой разметке.
+       Признак стоит на самом поле, поэтому повторный зов безвреден. */
+    if (window.KSLT_GLAZ) KSLT_GLAZ.применить(ov || document);
+
     function validate() {
-      var pass = newPass.value;
-      var confirm = confirmPass.value;
-      var ok = pass.length >= 6 && pass === confirm;
-      btn.disabled = !ok;
+      btn.disabled = newPass.value.length < 6;
     }
 
     newPass.addEventListener('input', validate);
-    confirmPass.addEventListener('input', validate);
 
     btn.addEventListener('click', function() {
       btn.disabled = true;

@@ -562,6 +562,17 @@
       }
     }
 
+    /* ВЫБОР СТРАНЫ БЕРЁТСЯ ИЗ ДОМА, А НЕ ПИШЕТСЯ ЗДЕСЬ ЗАНОВО.
+       Дом `js/phone.js` знает 13 стран, их названия на трёх языках,
+       длину номера и разбивку; он же единственный умеет отличить
+       Казахстан от России, у которых общий код +7. */
+    var forgotCountryBox = document.getElementById('forgotCountryBox');
+    if (forgotCountryBox && window.KSLT_PHONE) {
+      var _lang = (window.KSLT_I18N && KSLT_I18N.lang) || 'ru';
+      forgotCountryBox.innerHTML = KSLT_PHONE.pickerHtml(null, _lang, 'otp-cc');
+      KSLT_PHONE.initPickers();
+    }
+
     // Method tabs for forgot password
     var fMethodTabs = document.querySelectorAll('#authForgot .otp-method-tab');
     var fEmailField = document.getElementById('forgotEmailField');
@@ -590,10 +601,18 @@
         var identifier, identifierType;
 
         if (method === 'phone') {
-          var country = document.getElementById('forgotCountry').value;
+          /* НОМЕР СОБИРАЕТ ДОМ, А НЕ СКЛЕЙКА СТРОК. Прежде здесь стояло
+             `код + номер`: ноль в начале местной записи (0555…) уезжал
+             в базу вместе с кодом страны, и восстановление человека не
+             находило. `KSLT_PHONE.join` этот ноль снимает. */
+          var ccBox = document.querySelector('#forgotCountryBox .kslt-cc');
+          var iso = ccBox ? ccBox.dataset.iso : 'KG';
           var phone = document.getElementById('forgotPhone').value.trim();
           if (!phone) return;
-          identifier = country + phone.replace(/[\s\-()]/g, '');
+          identifier = window.KSLT_PHONE
+            ? KSLT_PHONE.join(iso, phone)
+            : phone.replace(/[^0-9+]/g, '');
+          if (!identifier) return;
           identifierType = 'phone';
         } else {
           identifier = document.getElementById('forgotEmail').value.trim();
@@ -647,7 +666,6 @@
       otpPwForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         var newPw = document.getElementById('otpNewPassword').value;
-        var confirmPw = document.getElementById('otpConfirmPassword').value;
         var errEl = document.getElementById('otpPwError');
         errEl.className = 'auth-error';
         errEl.textContent = '';
@@ -657,11 +675,10 @@
           errEl.className = 'auth-error show';
           return;
         }
-        if (newPw !== confirmPw) {
-          errEl.textContent = I18N.t('otp.passwordMismatch');
-          errEl.className = 'auth-error show';
-          return;
-        }
+        /* ПРОВЕРКА СОВПАДЕНИЯ СНЯТА ВМЕСТЕ С ПОЛЕМ ПОДТВЕРЖДЕНИЯ
+           (02.11, решение сайта от 21.09): сверять пароль не с чем, его
+           показывает глаз. Ключ `otp.passwordMismatch` в словаре
+           оставлен — его просит экран смены пароля в кабинете. */
 
         var btn = otpPwForm.querySelector('.auth-submit');
         btn.disabled = true;

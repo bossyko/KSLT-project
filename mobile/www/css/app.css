@@ -3192,13 +3192,10 @@ select:-webkit-autofill {
   background: rgba(204,255,0,0.12); color: var(--accent-text); font-weight: 600;
 }
 .otp-phone-row { display: flex; gap: 8px; }
-.otp-country-select {
-  width: 104px; min-width: 104px; padding: 12px 8px;
-  background: var(--input-bg, rgba(255,255,255,0.06));
-  border: 1px solid var(--border); border-radius: 10px;
-  color: var(--text-primary); font-size: 14px; font-family: var(--font);
-  -webkit-appearance: none; appearance: none;
-}
+/* `.otp-country-select` снят 02.11 ВМЕСТЕ С НАТИВНЫМ СЕЛЕКТОМ, который
+   он одевал. Мёртвым назван после проверки: класса нет больше ни в
+   разметке, ни в скриптах приложения. Выбор страны одевает `.kslt-cc`
+   в `tokens.css`. */
 .otp-phone-row .auth-input { flex: 1; }
 
 /* ===== LOADING SPINNER ===== */
@@ -5610,7 +5607,11 @@ select.prof-field-input { color: var(--text); }
 /* Телефон: страна списком, номер рядом. Код подставляется по выбору, а не
    угадывается по номеру — у России и Казахстана он общий, +7. */
 .prof-phone-row { display: flex; gap: 8px; }
-.prof-phone-country { flex: 0 0 46%; min-width: 0; }
+/* 46% ширины просил нативный `<select>`: ему нужно было место под
+   системную стрелку и обрезанный текст. Пикер меряется содержимым —
+   флаг, код и уголок, — поэтому ширина у него своя, а строке остаётся
+   всё прочее. */
+.prof-phone-country { flex: 0 0 auto; }
 .prof-phone-number { flex: 1 1 auto; min-width: 0; }
 
 /* Переключатель «показывать» у каждого способа связи */
@@ -6735,3 +6736,64 @@ select.prof-field-input { color: var(--text); }
 /* ==========================================================================
    /ОКНО ЗАЯВКИ
    ========================================================================== */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   ГЛАЗ У ПОЛЯ ПАРОЛЯ `.pw-wrap` / `.pw-eye` (02.11).
+
+   Разметку ставит `js/kslt-glaz-parolya.js` — по признаку «это поле
+   пароля», а не по списку имён.
+
+   ПОЧЕМУ ЗДЕСЬ, А НЕ В ОБЩЕМ `tokens.css`, КУДА ПРОСИЛСЯ. Орган пока
+   носит одно приложение: на сайте живут ДВА своих глаза (`.auth-eye`
+   в `js/auth.js` и `.db-pw-eye` в `js/dashboard.js`), и сведение их
+   на этот — отдельный кусок. Положи одежду в общий файл сейчас — и
+   сторож мёртвых классов справедливо назовёт её мёртвой: в сайтовой
+   половине продукта такого класса нет ни в одной разметке. КЛАСС,
+   ЖИВУЩИЙ В ОБЩЕМ ФАЙЛЕ, ОБЯЗАН БЫТЬ ЖИВЫМ У ОБОИХ. Сведём сайт —
+   переедет и это.
+
+   ЧИСЛА. Кнопка 44 — ступень шкалы кнопок (28 · 36 · 44 · 52) и нижняя
+   граница цели нажатия. Отступ поля справа ровно 44: это место под
+   кнопку, а не отступ между блоками, поэтому число берётся из шкалы
+   кнопок, а не из шкалы отступов.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.pw-wrap {
+    position: relative;
+    display: block;
+}
+
+.pw-wrap > input {
+    padding-right: 44px;
+}
+
+.pw-eye {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.pw-eye:hover {
+    color: var(--text-primary);
+}
+
+/* Обводка внутрь: кнопка стоит вплотную к краю поля, и наружная
+   обводка срезалась бы его рамкой. */
+.pw-eye:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: var(--radius-sm);
+}
