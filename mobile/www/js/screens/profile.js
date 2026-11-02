@@ -253,16 +253,14 @@
     html += '<div class="profile-section">';
     html += '<div class="profile-section-title">' + I18N.t('profile.settings') + '</div>';
 
-    // Theme switcher
-    var currentTheme = window.KSLT_APP.getTheme();
-    html += '<div class="profile-row">';
-    html += '<div class="profile-row-icon purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>';
-    html += '<div class="profile-row-text"><div class="profile-row-label">' + I18N.t('profile.theme') + '</div></div>';
-    html += '<div class="seg-control" id="themeControl">';
-    html += '<button class="seg-btn' + (currentTheme === 'light' ? ' active' : '') + '" data-theme="light">☀️</button>';
-    html += '<button class="seg-btn' + (currentTheme === 'dark' ? ' active' : '') + '" data-theme="dark">🌙</button>';
-    html += '<button class="seg-btn' + (currentTheme === 'system' ? ' active' : '') + '" data-theme="system">📱</button>';
-    html += '</div></div>';
+    /* ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ЗДЕСЬ НЕ РИСУЕТСЯ: он живёт в боковом меню
+       (`index.html` #menuThemeControl, обвязка `js/app.js:296`).
+       ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ — беда рождалась ровно на шве:
+       обе подсветки снимаются ОДИН раз (меню — в `initMenuControls`
+       при старте, кабинет — при первой отрисовке, дальше экран лежит
+       в `loadedScreens`), поэтому переключение в одном месте оставляло
+       другое показывать прежнее. Слово Кости 02.11: «убрать, у нас есть
+       оно в боковом окне меню». */
 
     // Language switcher
     /* РЯД ЯЗЫКА НЕ РИСУЕТСЯ ВОВСЕ, пока язык заперт (слово Кости 29.10).
@@ -328,7 +326,6 @@
     loadCategories();
     bindRowOverlays();
     loadLoyaltyBalance();
-    bindThemeControl();
     bindLangControl();
   };
 
@@ -1753,19 +1750,6 @@
             }
           }
         });
-    });
-  }
-
-  // ---- Theme control ----
-  function bindThemeControl() {
-    var control = document.getElementById('themeControl');
-    if (!control) return;
-    control.querySelectorAll('.seg-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        control.querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        window.KSLT_APP.setTheme(btn.getAttribute('data-theme'));
-      });
     });
   }
 
