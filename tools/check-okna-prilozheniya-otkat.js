@@ -75,6 +75,13 @@ function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-okna-'));
   for (const о of ['mobile/www', 'tools'])
     fs.cpSync(path.join(КОРЕНЬ, о), path.join(к, о), { recursive: true });
+  /* `mobile/package.json` — не папка, а один файл, и в копию он не
+     попадал: сторож с 02.11 читает его (плагин аппаратной кнопки), и
+     прувер падал с ENOENT ещё до первого отката. КОПИЯ ОБЯЗАНА СОДЕРЖАТЬ
+     ВСЁ, ЧТО ЧИТАЕТ СТОРОЖ, иначе доказывается не правило, а нехватка
+     файла. */
+  fs.copyFileSync(path.join(КОРЕНЬ, 'mobile/package.json'),
+                  path.join(к, 'mobile/package.json'));
   return к;
 }
 function прогон(к) {
