@@ -670,7 +670,11 @@
         errEl.className = 'auth-error';
         errEl.textContent = '';
 
-        if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[0-9]/.test(newPw) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPw)) {
+        /* ПРАВИЛО ПАРОЛЯ ЖИВЁТ В ОДНОМ МЕСТЕ — `js/kslt-parol.js`.
+           Здесь оно было написано заново одной строкой, и таких строк в
+           продукте было четыре, причём в кабинете правило оказалось
+           вдвое слабее. */
+        if (!window.KSLT_PAROL.годится(newPw)) {
           errEl.textContent = I18N.t('otp.passwordRule');
           errEl.className = 'auth-error show';
           return;
@@ -794,7 +798,7 @@
         return;
       }
 
-      if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) {
+      if (!window.KSLT_PAROL.годится(pass)) {
         errEl.textContent = I18N.t('otp.passwordRule');
         errEl.className = 'auth-error show';
         return;

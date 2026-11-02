@@ -1754,8 +1754,27 @@
        Признак стоит на самом поле, поэтому повторный зов безвреден. */
     if (window.KSLT_GLAZ) KSLT_GLAZ.применить(ov || document);
 
+    /* ШЕСТЬ ЗНАКОВ ЗДЕСЬ БЫЛО ВДВОЕ СЛАБЕЕ, ЧЕМ ВЕЗДЕ (02.11). Человек,
+       сменивший пароль в кабинете, получал «123456» там, где при
+       регистрации у него потребовали бы восемь со знаком препинания:
+       дверь заперта, а окно открыто. Правило одно и живёт в
+       `js/kslt-parol.js`. */
     function validate() {
-      btn.disabled = newPass.value.length < 6;
+      var нет = window.KSLT_PAROL.чегоНеХватает(newPass.value);
+      btn.disabled = нет.length > 0;
+      var подсказка = document.getElementById('profPassRules');
+      if (подсказка) {
+        var ряд = подсказка.querySelector('.prof-pass-rule');
+        if (ряд) {
+          /* Говорим, ЧЕГО не хватает, а не просто «пароль плохой»:
+             человек, которому называют беду по одной, правит пароль
+             четырежды. */
+          ряд.textContent = нет.length
+            ? I18N.t('profile.passRule')
+            : I18N.t('profile.passRuleOk');
+          ряд.classList.toggle('is-ok', нет.length === 0);
+        }
+      }
     }
 
     newPass.addEventListener('input', validate);

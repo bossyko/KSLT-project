@@ -172,10 +172,15 @@
   --border: rgba(0,0,0,0.12);
   --border-light: rgba(0,0,0,0.16);
   --glass: rgba(0,0,0,0.04);
-  --red: #D42E40;
-  --green: #1B8F4D;
-  --blue: #1D4FCC;
-  --orange: #C87A25;
+  /* ТЕ ЖЕ ЧЕТЫРЕ КРАСКИ, НО ИЗ ПАЛИТРЫ (02.11). Здесь стояли числа, и
+     это было их ЕДИНСТВЕННОЕ место в продукте: яркие 400/500 из палитры
+     на светлом фоне не читаются, а тёмных ступеней не было вовсе.
+     Теперь они заведены в `tokens.css` как 600-е, и светлая тема их
+     зовёт. Значения не изменились — вид прежний. */
+  --red: var(--red-600);
+  --green: var(--green-600);
+  --blue: var(--blue-600);
+  --orange: var(--orange-600);
   --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
 
   --tab-bg: rgba(236,238,240,0.95);
@@ -6988,6 +6993,10 @@ select.prof-field-input { color: var(--text); }
 .kslt-skladka[open] .kslt-skladka-strelka { transform: rotate(180deg); }
 
 .kslt-skladka-telo { padding-top: 12px; }
+
+/* Подсказка о правиле пароля зеленеет, когда правило выполнено: человек
+   видит ответ до того, как нажмёт кнопку. */
+.prof-pass-rule.is-ok { color: var(--accent-text); }
 
 .kslt-skladka-shapka:focus-visible {
   outline: 2px solid var(--accent);

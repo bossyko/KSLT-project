@@ -720,7 +720,12 @@
     'profile.notifTgOff':       { ru: 'Telegram-бот не подключён — сюда ничего не придёт. Подключить его можно в Профиле.', en: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.', kg: 'Telegram-ботко байланган эмес — билдирүүлөр келбейт. Профилден байласаңыз болот.' },
     'profile.newPass':        { ru: 'Новый пароль', en: 'New password', kg: 'Жаңы сырсөз' },
     'profile.confirmPass':    { ru: 'Подтверждение', en: 'Confirm', kg: 'Ырастоо' },
-    'profile.passRule':       { ru: 'Минимум 6 символов', en: 'Min 6 characters', kg: 'Жок дегенде 6 белги' },
+    /* ПОДПИСЬ ГОВОРИТ ТО ЖЕ, ЧТО ПРОВЕРЯЕТ КОД (02.11). Здесь стояло
+       «минимум 6 символов», а проверка в кабинете и правда пускала
+       шесть — вдвое слабее, чем на регистрации. Правило сведено в
+       `js/kslt-parol.js`, и подпись переписана под него. */
+    'profile.passRule':       { ru: '8 символов, заглавная, цифра и знак', en: '8 characters, uppercase, digit and symbol', kg: '8 белги, баш тамга, сан жана белги' },
+    'profile.passRuleOk':     { ru: 'Пароль подходит',      en: 'Password is fine',  kg: 'Сырсөз туура келет' },
     'profile.changePassBtn':  { ru: 'Изменить пароль', en: 'Change password', kg: 'Сырсөздү өзгөртүү' },
     'profile.changingPass':   { ru: 'Сохраняем...', en: 'Saving...', kg: 'Сакталууда...' },
     'profile.passChanged':    { ru: 'Пароль изменён!', en: 'Password changed!', kg: 'Сырсөз өзгөрдү!' },
