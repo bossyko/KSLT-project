@@ -419,7 +419,12 @@
       var endDate = new Date(mem.end_date);
       var now = new Date();
       var daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-      var pct = 100;
+      /* УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ (01.11).
+         Здесь стояло `pct = 100`, и при истёкшем членстве без `start_date`
+         полоса рисовалась ПОЛНОЙ: орган говорил «всё цело» над надписью
+         «Истекло». Нечего считать — полосы нет вовсе, и это честнее
+         выдуманной сотни. */
+      var pct = null;
       if (mem.start_date) {
         var startDate = new Date(mem.start_date);
         var total = Math.max(1, (endDate - startDate) / (1000 * 60 * 60 * 24));
@@ -431,12 +436,27 @@
       var statusText = daysLeft > 0 ? I18N.t('profile.memActive') : I18N.t('profile.memExpired');
       var subText = daysLeft > 0 ? I18N.t('profile.memDaysLeft') + ' ' + daysLeft + ' ' + I18N.t('profile.daysShort') : I18N.t('profile.memRenew');
 
+      /* ЗНАЧОК ГОВОРИТ ТО ЖЕ, ЧТО НАДПИСЬ. Здесь был зашит один `✅` на
+         ВСЕ ТРИ состояния: зелёная галочка успеха стояла и над «Истекло».
+         ОРГАН, ГОВОРЯЩИЙ НЕ ТО, ЧТО НАДПИСЬ, ХУЖЕ ОТСУТСТВУЮЩЕГО ОРГАНА —
+         человек верит картинке быстрее, чем тексту. */
+      var значок = statusClass === 'active' ? '✅'
+                 : statusClass === 'expiring' ? '⏳' : '⚠️';
+
+      /* ПОЛОСА ПОКАЗЫВАЕТ ОСТАТОК, А У ИСТЁКШЕГО ОСТАТКА НЕТ. Рисовать её
+         нулём тоже незачем: пустой жёлоб ничего не сообщает, а место
+         занимает. Заодно карточка становится ниже на 16 — ровно столько
+         весит полоса со своим отступом (8 + 8), о чём Костя и сказал
+         глазами: «слишком большой получился». */
+      var полоса = (pct === null || statusClass === 'expired') ? ''
+        : '<div class="prof-mem-bar"><div class="prof-mem-bar-fill" style="width:' + pct + '%"></div></div>';
+
       container.innerHTML = '<div class="prof-membership ' + statusClass + '">' +
-        '<div class="prof-mem-icon">✅</div>' +
+        '<div class="prof-mem-icon">' + значок + '</div>' +
         '<div class="prof-mem-info">' +
           '<div class="prof-mem-status">' + statusText + '</div>' +
           '<div class="prof-mem-sub">' + subText + '</div>' +
-          '<div class="prof-mem-bar"><div class="prof-mem-bar-fill" style="width:' + pct + '%"></div></div>' +
+          полоса +
         '</div>' +
       '</div>';
     });
