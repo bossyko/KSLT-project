@@ -1125,3 +1125,158 @@ input, button, select, textarea {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   ВЫПАДАЮЩИЙ ФИЛЬТР `.kslt-dd` — ОДИН ОРГАН НА ВЕСЬ ПРОДУКТ (02.11).
+
+   Разметку строит `js/kslt-vypadashka.js`. До него выпадающий фильтр был
+   написан ЧЕТЫРЕЖДЫ (корты, тренеры, партнёры, новости), и доступность
+   с галочкой выбранного оказались только в одной копии из четырёх.
+
+   ЧИСЛА ВЗЯТЫ С ДОСКИ, А НЕ ПРИДУМАНЫ. `Dropdown 34:55`: панель 240 для
+   фильтров, 320 для списка уведомлений, радиус md, рамка 1px
+   border/subtle, внутренний отступ 4, тень как у Toast. `Menu item
+   32:44`: высота 36 (`--btn-h-sm`), боковые отступы 12, радиус sm,
+   подпись 14, у выбранного галочка.
+
+   ДВА РАСХОЖДЕНИЯ С ДОСКОЙ, И ОБА НАЗВАНЫ, А НЕ ЗАМОЛЧАНЫ:
+   · ЗАЛИВКА. Компонент велит `bg/surface`; здесь `--bg-elevated`, потому
+     что НАШ ЖЕ токен подписан «модалка, дропдаун, поповер» (строка 171),
+     и на нём стоят все четыре живые выпадашки. Менять заливку — менять
+     вид работающего сайта, а правило 22.10 это запрещает. Расхождение
+     идёт в отчёт фигма: решать, кто прав, доске.
+   · ТЕНЬ. Компонент велит 45% чёрного, в палитре есть ступень 50%
+     (`--alpha-black-50`), на ней стоит весь продукт. Заводить ступень
+     ради пяти процентов — это новое число мимо шкалы.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.kslt-dd {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.kslt-dd-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--btn-h-md, 44px);
+    padding: 0 var(--space-4);
+    background: var(--glass, var(--bg-surface));
+    border: var(--bw-hair) solid var(--border);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+/* ВЫБРАННЫЙ ФИЛЬТР ВИДЕН ПО КНОПКЕ, А НЕ ТОЛЬКО ВНУТРИ СПИСКА:
+   закрытая выпадашка — единственное, что человек видит, пока не нажал. */
+.kslt-dd-toggle.is-selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--neutral-black);
+}
+
+.kslt-dd-arrow {
+    opacity: 0.7;
+    transition: transform var(--transition-fast);
+}
+
+.kslt-dd.open .kslt-dd-arrow {
+    transform: rotate(180deg);
+}
+
+.kslt-dd-menu {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    left: 0;
+    z-index: 60;
+    min-width: 240px;
+    max-width: calc(100vw - 40px);
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 4px;
+    background: var(--bg-elevated);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 32px var(--alpha-black-50);
+    display: none;
+}
+
+.kslt-dd--wide .kslt-dd-menu {
+    min-width: 320px;
+}
+
+/* Последняя выпадашка в ряду держится своей кнопки: иначе её список
+   уезжает за край экрана, и на телефоне это половина пунктов. */
+.kslt-dd:last-child:not(:first-child) .kslt-dd-menu {
+    left: auto;
+    right: 0;
+}
+
+.kslt-dd.open .kslt-dd-menu {
+    display: block;
+}
+
+.kslt-dd-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-3);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: var(--fs-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.kslt-dd-label {
+    flex: 1;
+}
+
+.kslt-dd-item:hover {
+    background: var(--alpha-lime-06);
+    color: var(--accent);
+}
+
+/* ВЫБРАННЫЙ ПУНКТ НЕСЁТ ГАЛОЧКУ, А НЕ ТОЛЬКО КРАСКУ. `Menu item 32:44`
+   требует этого прямо: «never rely on the tint alone, it is invisible to
+   anyone who cannot separate the two greys». */
+.kslt-dd-item.is-selected {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.kslt-dd-tick {
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.kslt-dd-count {
+    flex-shrink: 0;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.kslt-dd-item.is-selected .kslt-dd-count {
+    color: var(--accent);
+    opacity: 0.7;
+}
+
+.kslt-dd-toggle:focus-visible,
+.kslt-dd-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}

@@ -5132,8 +5132,13 @@ h2 {
    ВЫПАДАЮЩИЙ ФИЛЬТР В ПОЛОСЕ — один на весь сайт
    Кнопка выглядит как чип, по нажатию — список значений со счётчиками.
    Пользуются корты (город, покрытие), тренеры (возраст, занятия,
-   уровень), поиск игрока и новости. Классы .ct-dd оставлены как
-   синонимы: так размечены корты.
+   уровень), поиск игрока и новости.
+
+   КОРТЫ С 02.11 ЗДЕСЬ НЕ ОДЕВАЮТСЯ: они перешли на общий `.kslt-dd` в
+   `tokens.css` — дом `js/kslt-vypadashka.js`, одежда по компонентам
+   `Dropdown 34:55` и `Menu item 32:44`. Сюда остались тренеры, партнёры
+   и новости, и это ДОЛГ, а не решение: три копии одного понятия ждут
+   того же переезда.
 
    Написано mobile-first: база описывает телефон, широкий экран
    добавляется через min-width. На телефоне список выравнивается по краям
@@ -5141,26 +5146,22 @@ h2 {
    вылезал за экран
    ======================================== */
 
-.f-dd,
-.ct-dd {
+.f-dd {
     position: static;
 }
 
-.f-dd-toggle,
-.ct-dd-toggle {
+.f-dd-toggle {
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
-.f-dd-arrow,
-.ct-dd-arrow {
+.f-dd-arrow {
     transition: transform var(--transition-fast);
     opacity: 0.7;
 }
 
-.f-dd.open .f-dd-arrow,
-.ct-dd.open .ct-dd-arrow {
+.f-dd.open .f-dd-arrow {
     transform: rotate(180deg);
 }
 
@@ -5171,8 +5172,7 @@ h2 {
     width: 100%;
 }
 
-.f-dd-menu,
-.ct-dd-menu {
+.f-dd-menu {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
@@ -5192,19 +5192,16 @@ h2 {
 
 /* Влево раскрывается только список с соседями слева: когда он в полосе
    один, кнопка стоит слева, и меню должно держаться её */
-.f-dd:last-child:not(:first-child) .f-dd-menu,
-.ct-dd:last-child:not(:first-child) .ct-dd-menu {
+.f-dd:last-child:not(:first-child) .f-dd-menu {
     left: auto;
     right: 0;
 }
 
-.f-dd.open .f-dd-menu,
-.ct-dd.open .ct-dd-menu {
+.f-dd.open .f-dd-menu {
     display: block;
 }
 
-.f-dd-item,
-.ct-dd-item {
+.f-dd-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5221,27 +5218,23 @@ h2 {
     cursor: pointer;
 }
 
-.f-dd-item:hover,
-.ct-dd-item:hover {
+.f-dd-item:hover {
     background: var(--alpha-lime-06);
     color: var(--accent);
 }
 
-.f-dd-item.active,
-.ct-dd-item.active {
+.f-dd-item.active {
     color: var(--accent);
     font-weight: 600;
 }
 
-.f-dd-count,
-.ct-dd-count {
+.f-dd-count {
     font-size: var(--fs-xs);
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
 
-.f-dd-item.active .f-dd-count,
-.ct-dd-item.active .ct-dd-count {
+.f-dd-item.active .f-dd-count {
     color: var(--accent);
     opacity: 0.7;
 }
@@ -5252,15 +5245,6 @@ h2 {
    greys». До 12.10 выбранный пункт отличался ТОЛЬКО краской, и человек,
    не различающий два серых, не видел своего выбора вовсе.
    Галочка встаёт перед счётчиком, а не вместо него. */
-.ct-dd-tick {
-    flex-shrink: 0;
-    margin-left: auto;
-    color: var(--accent);
-}
-
-.ct-dd-item .ct-dd-count {
-    margin-left: 0;
-}
 
                                                         
                                                                         
@@ -5270,8 +5254,6 @@ h2 {
                                                                        
                                                  
                                                                         
-.ct-dd-toggle:focus-visible,
-.ct-dd-item:focus-visible,
 .f-dd-item:focus-visible,
 .ct-card:focus-visible,
 .co-card:focus-visible,
@@ -5282,8 +5264,7 @@ h2 {
 
 /* Шире телефона: место есть, и список держится своей кнопки */
 @media (min-width: 641px) {
-    .f-dd,
-    .ct-dd {
+    .f-dd {
         position: relative;
     }
 
@@ -5292,9 +5273,7 @@ h2 {
     }
 
     .f-dd-menu,
-    .ct-dd-menu,
-    .f-dd:last-child:not(:first-child) .f-dd-menu,
-    .ct-dd:last-child:not(:first-child) .ct-dd-menu {
+    .f-dd:last-child:not(:first-child) .f-dd-menu {
         left: 0;
         right: auto;
         max-width: none;

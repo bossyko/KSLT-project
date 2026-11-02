@@ -231,17 +231,11 @@
     if (window.KSLT_PARTNERS) window.KSLT_PARTNERS.filterGender(val);
   });
 
-  setupChipFilter('courtTypeChips', function(val) {
-    if (window.KSLT_COURTS) window.KSLT_COURTS.filter(val);
-  });
-
-  setupChipFilter('courtCityChips', function(val) {
-    if (window.KSLT_COURTS) window.KSLT_COURTS.filterCity(val);
-  });
-
-  setupChipFilter('courtSurfaceChips', function(val) {
-    if (window.KSLT_COURTS) window.KSLT_COURTS.filterSurface(val);
-  });
+  /* У КОРТОВ ЧИПОВ БОЛЬШЕ НЕТ: с 02.11 там три выпадашки, и нажатия в
+     них ловит один обработчик дома `KSLT_VYPADASHKA`, включаемый из
+     `js/screens/courts.js`. Три `setupChipFilter` сняты вместе с рядами:
+     МЁРТВЫМ КОД НАЗЫВАЕТСЯ ПОСЛЕ ПРОВЕРКИ — ни одного из трёх id в
+     разметке не осталось. */
 
   // Gender toggle — handled in rating.js (initGenderToggle)
 

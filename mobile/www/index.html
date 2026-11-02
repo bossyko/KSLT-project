@@ -8,7 +8,7 @@
 <title>KSLT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/tokens.css?v=34">
+<link rel="stylesheet" href="css/tokens.css?v=35">
 <link rel="stylesheet" href="css/app.css?v=51">
 </head>
 <body>
@@ -229,14 +229,13 @@
         <h1 data-i18n="courts.title">Корты</h1>
         <p data-i18n="courts.subtitle">Теннисные площадки Бишкека</p>
       </div>
-      <div class="filters-row" id="courtTypeChips" role="group" data-i18n-aria="a11y.fCourtType" aria-label="Тип корта">
-        <button class="filter-chip active" data-filter="all" aria-pressed="true" data-i18n="courts.all">Все</button>
-        <button class="filter-chip" data-filter="indoor" aria-pressed="false">Indoor</button>
-        <button class="filter-chip" data-filter="outdoor" aria-pressed="false">Outdoor</button>
-      </div>
-      <!-- Город и покрытие — как на сайте. Собираются из самих кортов -->
-      <div class="filters-row" id="courtCityChips" role="group" data-i18n-aria="a11y.fCity" aria-label="Город"></div>
-      <div class="filters-row" id="courtSurfaceChips" role="group" data-i18n-aria="a11y.fSurface" aria-label="Покрытие"></div>
+      <!-- ТРИ РЯДА ЧИПОВ СТАЛИ ТРЕМЯ ВЫПАДАШКАМИ В ОДНОЙ ПОЛОСЕ (02.11,
+           слово Кости: «фильтры наверно надо будет сделать выпадающем
+           меню, а не так как сейчас»). Рисует `js/screens/courts.js`
+           домом `KSLT_VYPADASHKA` — тем же, что на сайте. Три ряда
+           занимали три полосы под три признака, а список кортов
+           начинался ниже сгиба. -->
+      <div class="filters-row kslt-dd-row" id="courtsFilters" role="group" data-i18n-aria="a11y.fCourtType" aria-label="Фильтры кортов"></div>
       <div class="animate-in" id="courtsList"></div>
     </div>
 
@@ -676,9 +675,10 @@
 
 <!-- App JS -->
 <script src="js/group-standings.js?v=1"></script>
-<script src="js/i18n.js?v=19"></script>
+<script src="js/i18n.js?v=20"></script>
 <script src="js/kslt-yazyk.js?v=1"></script>
 <script src="js/phone.js?v=1"></script>
+<script src="js/kslt-vypadashka.js?v=1"></script>
 <script src="js/kslt-glaz-parolya.js?v=1"></script>
 <script src="js/kslt-baza.js?v=2"></script>
 <script src="js/supabase-config.js?v=5"></script>
@@ -729,11 +729,11 @@
 <script src="js/rating-chart.js?v=4"></script>
 <script src="js/screens/player-detail.js?v=7"></script>
 <script src="js/screens/coaches.js?v=45"></script>
-<script src="js/screens/courts.js?v=4"></script>
+<script src="js/screens/courts.js?v=5"></script>
 <script src="js/screens/partners.js?v=4"></script>
 <script src="js/badge-celebration.js?v=2"></script>
 <script src="js/push.js?v=2"></script>
 <script src="js/kslt-okno.js?v=2"></script>
-<script src="js/app.js?v=10"></script>
+<script src="js/app.js?v=11"></script>
 </body>
 </html>

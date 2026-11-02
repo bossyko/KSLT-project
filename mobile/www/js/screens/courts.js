@@ -101,44 +101,79 @@
     render();
   };
 
-  // Город и покрытие — как на сайте: там их два выпадающих списка,
-  // здесь полосы кнопок, потому что на телефоне так удобнее
   CT.filterCity = function(v) { currentCity = v; render(); };
   CT.filterSurface = function(v) { currentSurface = v; render(); };
 
-  /** Полосы города и покрытия собираем из самих кортов, а не задаём списком:
-   *  появится корт в новом городе — кнопка появится сама. */
+  /**
+   * ТРИ ВЫПАДАШКИ ВМЕСТО ТРЁХ РЯДОВ ЧИПОВ (02.11).
+   *
+   * Строятся домом `KSLT_VYPADASHKA` — тем же, что на сайте: ОДНО
+   * ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. Пункты по-прежнему собираются из самих
+   * кортов, а не задаются списком: появится корт в новом городе —
+   * появится и пункт.
+   *
+   * СЧЁТ СЧИТАЕТСЯ ПО ОСТАЛЬНЫМ ФИЛЬТРАМ, А НЕ ПО ВСЕМ КОРТАМ. Число
+   * рядом с пунктом отвечает на вопрос «сколько будет, если выбрать
+   * это», а не «сколько всего в базе»: иначе выбор показывал бы семь,
+   * а список — два.
+   */
+  function бассейн(кроме) {
+    return allCourts.filter(function(c) {
+      if (кроме !== 'type' && currentCourtFilter === 'indoor' && !c.hasIndoor) return false;
+      if (кроме !== 'type' && currentCourtFilter === 'outdoor' && !c.hasOutdoor) return false;
+      if (кроме !== 'city' && currentCity !== 'all' && c.city !== currentCity) return false;
+      if (кроме !== 'surface' && currentSurface !== 'all' &&
+          (c.surfaces || []).indexOf(currentSurface) === -1) return false;
+      return true;
+    });
+  }
+
   function renderExtraChips() {
-    var cityBox = document.getElementById('courtCityChips');
-    var surfBox = document.getElementById('courtSurfaceChips');
-    if (!cityBox || !surfBox) return;
+    var box = document.getElementById('courtsFilters');
+    if (!box || !window.KSLT_VYPADASHKA) return;
 
-    function chips(box, values, current, labelOf) {
-      if (values.length < 2) { box.innerHTML = ''; return; }   // выбирать не из чего
-      var html = '<button class="filter-chip' + (current === 'all' ? ' active' : '') +
-                 '" aria-pressed="' + (current === 'all') +
-                 '" data-filter="all">' + I18N.t('courts.all') + '</button>';
-      values.forEach(function(v) {
-        html += '<button class="filter-chip' + (current === v ? ' active' : '') +
-                '" aria-pressed="' + (current === v) +
-                '" data-filter="' + esc(v) + '">' + esc(labelOf(v)) + '</button>';
-      });
-      box.innerHTML = html;
-    }
+    var типы = бассейн('type');
+    var пунктыТипа = [];
+    var крытых = типы.filter(function(c) { return c.hasIndoor; }).length;
+    var открытых = типы.filter(function(c) { return c.hasOutdoor; }).length;
+    if (крытых) пунктыТипа.push({ значение: 'indoor', подпись: 'Indoor', счёт: крытых });
+    if (открытых) пунктыТипа.push({ значение: 'outdoor', подпись: 'Outdoor', счёт: открытых });
 
-    var cities = [];
-    var surfaces = [];
-    allCourts.forEach(function(c) {
-      if (c.city && cities.indexOf(c.city) === -1) cities.push(c.city);
+    var городаПул = бассейн('city');
+    var счётГорода = {};
+    городаПул.forEach(function(c) {
+      if (!c.city) return;
+      счётГорода[c.city] = (счётГорода[c.city] || 0) + 1;
+    });
+    var пунктыГорода = Object.keys(счётГорода).sort().map(function(г) {
+      return { значение: г, подпись: г, счёт: счётГорода[г] };
+    });
+
+    var покрытияПул = бассейн('surface');
+    var счётПокрытия = {};
+    покрытияПул.forEach(function(c) {
       (c.surfaces || []).forEach(function(sf) {
-        if (sf && surfaces.indexOf(sf) === -1) surfaces.push(sf);
+        if (!sf) return;
+        счётПокрытия[sf] = (счётПокрытия[sf] || 0) + 1;
       });
     });
-    cities.sort();
-    surfaces.sort();
+    var пунктыПокрытия = Object.keys(счётПокрытия).sort().map(function(sf) {
+      return { значение: sf, подпись: покрытие(sf) || sf, счёт: счётПокрытия[sf] };
+    });
 
-    chips(cityBox, cities, currentCity, function(v) { return v; });
-    chips(surfBox, surfaces, currentSurface, function(v) { return покрытие(v) || v; });
+    box.innerHTML =
+      KSLT_VYPADASHKA.разметка({ вид: 'type', подпись: I18N.t('courts.typeAll'),
+                                 текущее: currentCourtFilter, пункты: пунктыТипа }) +
+      KSLT_VYPADASHKA.разметка({ вид: 'city', подпись: I18N.t('courts.cityAll'),
+                                 текущее: currentCity, пункты: пунктыГорода }) +
+      KSLT_VYPADASHKA.разметка({ вид: 'surface', подпись: I18N.t('courts.surfaceAll'),
+                                 текущее: currentSurface, пункты: пунктыПокрытия });
+
+    KSLT_VYPADASHKA.включить(function(вид, значение) {
+      if (вид === 'type') CT.filter(значение);
+      else if (вид === 'city') CT.filterCity(значение);
+      else CT.filterSurface(значение);
+    });
   }
 
   function render() {

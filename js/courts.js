@@ -581,8 +581,8 @@
            Слово Кости 07.10. Стоял ряд из трёх чипов плюс разделитель —
            четыре места в полосе под ОДИН признак, тогда как два других
            признака занимали по одному. Выпадающий фильтр — компонент на
-           весь сайт (css/style.css:5420, `.f-dd` / `.ct-dd`): им уже
-           пользуются корты, тренеры, поиск игрока и новости. */
+           весь продукт: дом `js/kslt-vypadashka.js`, одежда `.kslt-dd`
+           в `tokens.css` по доскам `Dropdown 34:55` и `Menu item 32:44`. */
         if (kind === 'type') {
             var типы = { indoor: L_labels.filterIndoor, outdoor: L_labels.filterOutdoor };
             var бассейн = applyFilters('type');
@@ -614,6 +614,16 @@
         return order;
     }
 
+    /**
+     * Разметку строит ДОМ `js/kslt-vypadashka.js` (02.11). Здесь
+     * остаётся только то, что знают корты: откуда берутся пункты, как
+     * они подписаны и что сейчас выбрано.
+     *
+     * ПОЧЕМУ ВЫНЕСЛИ. Тот же выпадающий фильтр был написан ЧЕТЫРЕЖДЫ —
+     * здесь, у тренеров, у партнёров и в новостях, — и доступность с
+     * галочкой выбранного оказались только в этой копии. Остальным трём
+     * диктор читал просто кнопку. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ.
+     */
     function dropdownHtml(kind) {
         var options = dropdownOptions(kind);
         if (!options.length) return '';
@@ -623,6 +633,9 @@
         var current = kind === 'type' ? currentTypeFilter
             : (kind === 'city' ? currentCityFilter : currentSurfaceFilter);
 
+        /* ВЫБРАННОЕ, КОТОРОГО НЕТ В СПИСКЕ, ВСЁ РАВНО ПОКАЗЫВАЕТСЯ.
+           Иначе кнопка молча возвращается к «Все», а отбор остаётся
+           прежним: человек видит одно, список показывает другое. */
         if (current !== 'all' && !options.some(function(o) { return o.value === current; })) {
             var labelsMap = {
                 hard: ПОКРЫТИЯ.hard, clay: ПОКРЫТИЯ.clay,
@@ -632,41 +645,14 @@
             options = options.concat([{ value: current, label: labelsMap[current] || current, count: 0 }]);
         }
 
-        var title = allLabel;
-        options.forEach(function(o) { if (o.value === current) title = o.label; });
-
-        /* ГАЛОЧКА У ВЫБРАННОГО — ТРЕБОВАНИЕ КОМПОНЕНТА, А НЕ УКРАШЕНИЕ.
-           `Menu item 32:44`: «Selected carries a tick and goes
-           accent/default — never rely on the tint alone, it is invisible
-           to anyone who cannot separate the two greys». До 12.10 выбранный
-           пункт отличался ТОЛЬКО краской. */
-        var ГАЛКА = '<svg class="ct-dd-tick" width="14" height="14" viewBox="0 0 24 24" ' +
-            'fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">' +
-            '<path d="M20 6L9 17l-5-5"/></svg>';
-
-        var items = '<button class="ct-dd-item' + (current === 'all' ? ' active' : '') +
-            '" data-dd-value="all"' + (current === 'all' ? ' aria-current="true"' : '') + '>' +
-            allLabel + (current === 'all' ? ГАЛКА : '') + '</button>';
-        options.forEach(function(o) {
-            var выбран = o.value === current;
-            items += '<button class="ct-dd-item' + (выбран ? ' active' : '') +
-                '" data-dd-value="' + KSLT_экранировать(o.value) + '"' + (выбран ? ' aria-current="true"' : '') + '>' +
-                KSLT_экранировать(o.label) + (выбран ? ГАЛКА : '') +
-                '<span class="ct-dd-count">' + o.count + '</span></button>';
+        return KSLT_VYPADASHKA.разметка({
+            вид: kind,
+            подпись: allLabel,
+            текущее: current,
+            пункты: options.map(function(o) {
+                return { значение: o.value, подпись: o.label, счёт: o.count };
+            })
         });
-
-        /* ЧТО ЧИТАЕТ ДИКТОР. Раскрывашка обязана сказать, что она
-           раскрывашка и открыта ли она: без `aria-haspopup` и
-           `aria-expanded` это просто кнопка с непонятным словом.
-           `aria-expanded` переключается при открытии — `initDropdowns`. */
-        return '<div class="ct-dd" data-dd="' + kind + '">' +
-            '<button class="trn-chip ct-dd-toggle' + (current !== 'all' ? ' active' : '') + '"' +
-                ' aria-haspopup="listbox" aria-expanded="false">' +
-                KSLT_экранировать(title) +
-                '<svg class="ct-dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
-            '</button>' +
-            '<div class="ct-dd-menu" role="listbox">' + items + '</div>' +
-        '</div>';
     }
 
     function renderFilters() {
@@ -954,61 +940,23 @@
         var chips = document.getElementById('courtsChips');
         if (!chips) return;
 
-        chips.querySelectorAll('.ct-dd').forEach(function(el) { el.remove(); });
+        chips.querySelectorAll('.kslt-dd').forEach(function(el) { el.remove(); });
         chips.insertAdjacentHTML('beforeend',
             dropdownHtml('type') + dropdownHtml('city') + dropdownHtml('surface'));
     }
 
     function initDropdowns() {
-        document.addEventListener('click', function(e) {
-            var toggle = e.target.closest('.ct-dd-toggle');
-            var item = e.target.closest('.ct-dd-item');
-
-            // Клик мимо — закрываем открытое
-            /* `aria-expanded` ходит ВМЕСТЕ с классом open, и обновляется в
-               одном месте — иначе диктор и экран разойдутся на первом же
-               закрытии «кликом мимо» */
-            var закрытьВсе = function() {
-                document.querySelectorAll('.ct-dd.open').forEach(function(d) {
-                    d.classList.remove('open');
-                    var к = d.querySelector('.ct-dd-toggle');
-                    if (к) к.setAttribute('aria-expanded', 'false');
-                });
-            };
-
-            if (!toggle && !item) {
-                закрытьВсе();
-                return;
-            }
-
-            if (toggle) {
-                var dd = toggle.closest('.ct-dd');
-                var wasOpen = dd.classList.contains('open');
-                закрытьВсе();
-                dd.classList.toggle('open', !wasOpen);
-                toggle.setAttribute('aria-expanded', String(!wasOpen));
-                return;
-            }
-
-            var wrap = item.closest('.ct-dd');
-            var kind = wrap.getAttribute('data-dd');
-            var value = item.getAttribute('data-dd-value');
+        /* Нажатия ловит ОДИН обработчик дома. Прежде их было два своих —
+           нажатие мимо и клавиша Escape, — и второе забывало сбросить
+           `aria-expanded`: экран закрывался, диктор продолжал говорить
+           «открыто». Закрытие живёт в доме, в одном месте. */
+        KSLT_VYPADASHKA.включить(function(kind, value) {
             if (kind === 'type') currentTypeFilter = value;
             else if (kind === 'city') currentCityFilter = value;
             else currentSurfaceFilter = value;
-
-            wrap.classList.remove('open');
-            var кнопкаWrap = wrap.querySelector('.ct-dd-toggle');
-            if (кнопкаWrap) кнопкаWrap.setAttribute('aria-expanded', 'false');
             _currentPage = 1;
             refreshDropdowns();
             renderGrid();
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.ct-dd.open').forEach(function(d) { d.classList.remove('open'); });
-            }
         });
     }
 

@@ -462,6 +462,12 @@
     'courts.title':        { ru: 'Корты',                 en: 'Courts',           kg: 'Корттор' },
     'courts.subtitle':     { ru: 'Теннисные площадки Бишкека', en: 'Tennis courts of Bishkek', kg: 'Бишкектин теннис корттору' },
     'courts.all':          { ru: 'Все',                    en: 'All',             kg: 'Баары' },
+    /* Подписи закрытых выпадашек фильтров. Слова взяты у сайта
+       (`js/courts.js` L_labels), чтобы один и тот же фильтр не назывался
+       в двух продуктах по-разному. */
+    'courts.typeAll':    { ru: 'Тип корта',  en: 'Court type', kg: 'Корт түрү' },
+    'courts.cityAll':    { ru: 'Город',      en: 'City',       kg: 'Шаар' },
+    'courts.surfaceAll': { ru: 'Покрытие',   en: 'Surface',    kg: 'Жабуу' },
     'courts.empty':        { ru: 'Нет кортов',            en: 'No courts',        kg: 'Корт жок' },
     'courts.court':        { ru: 'корт',                   en: 'court',           kg: 'корт' },
     'courts.courts':       { ru: 'кортов',                 en: 'courts',          kg: 'корт' },
