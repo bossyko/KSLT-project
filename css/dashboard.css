@@ -386,7 +386,7 @@ textarea.db-field-input:read-only {
 
 .db-btn-primary {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
 }
 
 .db-btn-primary:hover {
@@ -401,13 +401,13 @@ textarea.db-field-input:read-only {
 }
 
 .db-btn-saved {
-    background: #22c55e;
-    color: #fff;
+    background: var(--success);
+    color: var(--neutral-white);
     transform: none;
 }
 
 .db-btn-saved:hover {
-    background: #22c55e;
+    background: var(--success);
     transform: none;
 }
 
@@ -424,7 +424,7 @@ textarea.db-field-input:read-only {
 
 .db-btn-danger {
     background: rgba(255, 59, 48, 0.1);
-    color: #ff6b6b;
+    color: var(--danger);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
 }
 
@@ -461,14 +461,14 @@ textarea.db-field-input:read-only {
 .db-toast-success {
     background: rgba(34, 197, 94, 0.2);
     border: var(--bw-hair) solid rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    color: var(--success);
     box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
 }
 
 .db-toast-error {
     background: rgba(255, 59, 48, 0.15);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
-    color: #ff6b6b;
+    color: var(--danger);
     box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15);
 }
 
@@ -485,8 +485,8 @@ textarea.db-field-input:read-only {
 
 /* Card flash on save */
 @keyframes db-card-flash {
-    0%   { border-color: #22c55e; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3); }
-    50%  { border-color: #22c55e; box-shadow: 0 0 12px 0 rgba(34, 197, 94, 0.15); }
+    0%   { border-color: var(--success); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3); }
+    50%  { border-color: var(--success); box-shadow: 0 0 12px 0 rgba(34, 197, 94, 0.15); }
     100% { border-color: var(--border-subtle); box-shadow: none; }
 }
 
@@ -534,7 +534,7 @@ textarea.db-field-input:read-only {
 
 /* ---- Required ---- */
 .db-required {
-    color: #ff6b6b;
+    color: var(--danger);
     font-weight: 700;
 }
 
@@ -581,7 +581,7 @@ select.db-field-input {
 }
 
 .db-withdraw-btn:hover {
-    color: #ff6b6b;
+    color: var(--danger);
     border-color: rgba(255, 107, 107, 0.5);
 }
 
@@ -598,7 +598,7 @@ select.db-field-input {
 
 
 .db-tournament-winner {
-    color: #FFD700;
+    color: var(--warning);
 }
 
 /* ---- Stats Grid ---- */
@@ -638,8 +638,8 @@ select.db-field-input {
     border-radius: var(--radius-full);
     white-space: nowrap;
 }
-.db-pair-tag-dbl { background: rgba(59,130,246,0.16); color: #6EA8FE; }
-.db-pair-tag-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
+.db-pair-tag-dbl { background: var(--info-subtle); color: var(--info); }
+.db-pair-tag-mix { background: rgba(168,85,247,0.18); color: var(--role-manager); }
 /* Первая колонка у категорий отведена под очки — здесь её нет, колонок три */
 .db-pair-grid {
     grid-template-columns: repeat(3, 96px);
@@ -657,8 +657,8 @@ select.db-field-input {
 .kst-grid-pay { margin-bottom: var(--space-md); }
 
 .kst-change { font-size: var(--fs-2xs); font-weight: 600; margin-top: 2px; }
-.kst-change.up { color: var(--success, #2ecc71); }
-.kst-change.down { color: var(--danger, #e74c3c); }
+.kst-change.up { color: var(--success, var(--success)); }
+.kst-change.down { color: var(--danger, var(--danger)); }
 
 .kst-note {
     margin: -8px 0 16px;
@@ -819,8 +819,8 @@ select.db-field-input {
     transition: width 0.6s ease;
 }
 
-.kst-cat-bar-w { background: #4ade80; }
-.kst-cat-bar-l { background: #ff6b62; }
+.kst-cat-bar-w { background: var(--success); }
+.kst-cat-bar-l { background: var(--danger); }
 
 .kst-cat-legend {
     display: flex;
@@ -848,8 +848,8 @@ select.db-field-input {
 
 /* Второй квадратик отделяем от предыдущего числа */
 .kst-cat-record .kst-cat-mark + * { margin-right: 2px; }
-.kst-cat-mark-w { background: #4ade80; }
-.kst-cat-mark-l { background: #ff6b62; margin-left: 6px; }
+.kst-cat-mark-w { background: var(--success); }
+.kst-cat-mark-l { background: var(--danger); margin-left: 6px; }
 
 /* ---- Settings ---- */
 .db-settings-section {
@@ -890,7 +890,7 @@ select.db-field-input {
     height: 16px;
     left: 3px;
     bottom: 3px;
-    background: #fff;
+    background: var(--neutral-white);
     border-radius: 50%;
     transition: transform 0.2s;
 }
@@ -908,7 +908,7 @@ select.db-field-input {
 }
 
 .db-danger-zone .db-card-title {
-    color: #ff6b6b;
+    color: var(--danger);
 }
 
 /* ---- Password Fields ---- */
@@ -1033,7 +1033,7 @@ select.db-field-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #000;
+    background: var(--neutral-black);
 }
 
 .db-crop-body img {
@@ -1061,7 +1061,7 @@ select.db-field-input {
 }
 
 .cropper-modal {
-    background-color: #000;
+    background-color: var(--neutral-black);
     opacity: 0.6;
 }
 
@@ -1108,13 +1108,13 @@ select.db-field-input {
 
 .db-membership-badge-active {
     background: rgba(34, 197, 94, 0.12);
-    color: #22c55e;
+    color: var(--success);
     border: var(--bw-hair) solid rgba(34, 197, 94, 0.25);
 }
 
 .db-membership-badge-expired {
     background: rgba(255, 59, 48, 0.1);
-    color: #ff6b6b;
+    color: var(--danger);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.2);
 }
 
@@ -1133,7 +1133,7 @@ select.db-field-input {
 
 .db-membership-progress-bar {
     height: 100%;
-    background: #22c55e;
+    background: var(--success);
     border-radius: 3px;
     transition: width 0.5s ease;
 }
@@ -1144,7 +1144,7 @@ select.db-field-input {
 }
 
 .db-membership-days strong {
-    color: #22c55e;
+    color: var(--success);
 }
 
 .db-membership-text {
@@ -1388,13 +1388,13 @@ select.db-field-input {
 .db-match-result.win {
     background: rgba(52,199,89,0.18);
     border-color: rgba(52,199,89,0.4);
-    color: #4ade80;
+    color: var(--success);
 }
 
 .db-match-result.loss {
     background: rgba(255,59,48,0.18);
     border-color: rgba(255,59,48,0.4);
-    color: #ff6b62;
+    color: var(--danger);
 }
 
 .db-match-tournament {
@@ -2228,7 +2228,7 @@ select.db-field-input {
 .db-onboarding-btn {
     display: inline-block;
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: none;
     border-radius: 8px;
     padding: 12px 40px;
@@ -2244,7 +2244,7 @@ select.db-field-input {
     align-items: center;
     gap: 6px;
     background: #2AABEE;
-    color: #fff;
+    color: var(--neutral-white);
     border-radius: 8px;
     padding: 10px 20px;
     font-size: var(--fs-sm);
@@ -2391,7 +2391,7 @@ select:-webkit-autofill {
     height: 12px;
     left: 3px;
     bottom: 3px;
-    background: #fff;
+    background: var(--neutral-white);
     border-radius: 50%;
     transition: transform 0.2s;
 }
@@ -2472,7 +2472,7 @@ select:-webkit-autofill {
 .db-tg-state {
     font-size: var(--fs-sm);
     font-weight: 500;
-    color: #4caf50;
+    color: var(--success);
     white-space: nowrap;
 }
 
@@ -2486,7 +2486,7 @@ select:-webkit-autofill {
     cursor: pointer;
 }
 
-.db-tg-off:hover { color: #ff6b6b; }
+.db-tg-off:hover { color: var(--danger); }
 
 /* Столбец телеграма без подключённого бота: ползунок бесполезен, и это
    должно быть видно, а не выясняться отсутствием сообщений */
@@ -2624,7 +2624,7 @@ select:-webkit-autofill {
 
 @keyframes dbSpin { to { transform: rotate(360deg); } }
 
-.db-modal-done { color: #4caf50; }
+.db-modal-done { color: var(--success); }
 
 /* Ключевые слова в окнах выделяем — сплошной серый текст не читается */
 .db-modal-done { font-weight: 600; }
@@ -2719,12 +2719,12 @@ select:-webkit-autofill {
 
 .db-invite-outcome.win {
     background: rgba(52,199,89,0.18);
-    color: #4ade80;
+    color: var(--success);
 }
 
 .db-invite-outcome.loss {
     background: rgba(255,59,48,0.18);
-    color: #ff6b62;
+    color: var(--danger);
 }
 
 .db-invite-battle {
@@ -2772,8 +2772,8 @@ select:-webkit-autofill {
 .db-tag-rating   { background: var(--alpha-lime-12); color: var(--accent); }
 .db-tag-friendly { background: var(--alpha-white-12); color: var(--text-muted); }
 .db-tag-battle   { background: rgba(255,159,67,0.16); color: #FF9F43; }
-.db-tag-doubles  { background: rgba(59,130,246,0.16); color: #6EA8FE; }
-.db-tag-mixed    { background: rgba(168,85,247,0.18); color: #C084FC; }
+.db-tag-doubles  { background: var(--info-subtle); color: var(--info); }
+.db-tag-mixed    { background: rgba(168,85,247,0.18); color: var(--role-manager); }
 
 /* С кем игрок был в паре: своя половина пары в матче не записана, и без
    этой строки за ней приходилось идти в сетку турнира.
@@ -2865,7 +2865,7 @@ select:-webkit-autofill {
 /* Слой цели 44 ниже требует своей системы координат */
 .db-tour-link {
     position: relative;
-    color: var(--text-primary, #fff);
+    color: var(--text-primary, var(--neutral-white));
     text-decoration: none;
 }
 
@@ -3021,7 +3021,7 @@ select:-webkit-autofill {
 
 .db-chal-no:hover:not(:disabled),
 .db-chal-off:hover:not(:disabled) {
-    color: #ff6b6b;
+    color: var(--danger);
     border-color: rgba(255, 107, 107, 0.5);
 }
 
@@ -3315,7 +3315,7 @@ select:-webkit-autofill {
    кнопки заставляли выбирать между двумя равными, хотя выбор неравный */
 .db-invites-table .db-inv-accept {
     background: var(--accent);
-    color: #000;
+    color: var(--neutral-black);
     border: var(--bw-hair) solid var(--accent);
     font-weight: 600;
 }
@@ -3578,7 +3578,7 @@ select:-webkit-autofill {
 .db-link-rejected {
     background: rgba(255, 59, 48, 0.1);
     border: var(--bw-hair) solid rgba(255, 59, 48, 0.3);
-    color: #ff6b60;
+    color: var(--danger);
     border-radius: 8px;
     padding: 8px 12px;
     font-size: var(--fs-sm);
@@ -4359,7 +4359,7 @@ select:-webkit-autofill {
     padding: 4px 8px;
     font-size: var(--fs-xs);
     font-weight: 600;
-    color: #000;
+    color: var(--neutral-black);
     background: var(--accent);
     border: none;
     border-radius: 6px;
@@ -4501,7 +4501,7 @@ select:-webkit-autofill {
     font-size: var(--fs-sm);
     font-weight: 700;
     line-height: var(--lh-none);
-    color: #000;
+    color: var(--neutral-black);
     background: var(--accent);
     border: none;
     border-radius: 8px;
@@ -4672,7 +4672,7 @@ select:-webkit-autofill {
 .db-qr-code {
     display: inline-block;
     padding: 12px;
-    background: #fff;
+    background: var(--neutral-white);
     border-radius: 8px;
     margin-bottom: 16px;
 }
@@ -4739,7 +4739,7 @@ select:-webkit-autofill {
     margin: 0;
     font-size: var(--fs-md);
     line-height: var(--lh-tight);
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 /* ICON BUTTON 40:93: «Only lg (44) meets the 44pt minimum touch target»,
@@ -4795,7 +4795,7 @@ select:-webkit-autofill {
 .db-redeem-item-title {
     font-size: var(--fs-base);
     font-weight: 600;
-    color: #fff;
+    color: var(--neutral-white);
 }
 
 .db-redeem-item-cost {
@@ -4817,7 +4817,7 @@ select:-webkit-autofill {
     font-size: var(--fs-xs);
     font-weight: 700;
     line-height: var(--lh-none);
-    color: #000;
+    color: var(--neutral-black);
     background: var(--accent);
     border: none;
     border-radius: 8px;
@@ -5021,7 +5021,7 @@ select:-webkit-autofill {
 /* Поле с ошибкой: раньше человек видел только всплывашку у шапки и не
    понимал, к какому полю она относится */
 .db-field-input.db-field-bad {
-    border-color: #f44336;
+    border-color: var(--danger);
     box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.15);
 }
 

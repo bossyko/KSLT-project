@@ -254,7 +254,7 @@
     font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
-.ch-stat-w { color: #4ade80; }
+.ch-stat-w { color: var(--success); }
 .ch-stat-l { color: var(--danger); }
 
 /* VS divider */
@@ -399,7 +399,7 @@
 
 /* Счёт в парах вместо побед и поражений: рейтинговые одиночные числа рядом
    с парным матчем ничего не значат */
-.ch-pair-record { font-size: var(--fs-xs); color: #6EA8FE; font-weight: 600; }
+.ch-pair-record { font-size: var(--fs-xs); color: var(--info); font-weight: 600; }
 
 /* Прогноз по числам.
 
@@ -640,7 +640,7 @@
     background: rgba(248, 113, 113, 0.15);
     border: var(--bw-hair) solid rgba(248, 113, 113, 0.3);
     border-radius: var(--radius-sm);
-    color: #f87171;
+    color: var(--danger);
     font-size: var(--fs-sm);
     font-weight: 600;
     margin-top: var(--space-sm);

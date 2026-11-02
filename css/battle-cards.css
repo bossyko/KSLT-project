@@ -130,7 +130,7 @@
     padding: 2px 8px;
     font-size: var(--fs-xs);
     font-weight: 600;
-    color: #ff6b6b;
+    color: var(--danger);
     white-space: nowrap;
 }
 .bc-dt-item svg {

@@ -5,3 +5,14 @@ android/build/
 *.apk
 *.aab
 .idea/
+
+# ВЫХОД `cap sync` ЛЕЖИТ НЕ ТОЛЬКО В `build` (01.11).
+# Capacitor кладёт копию `mobile/www` прямо в ИСХОДНИКИ Android-проекта —
+# `android/app/src/main/assets/public` (76 файлов) — и туда же пишет
+# `capacitor.config.json` и `capacitor.plugins.json`. Это не исходники: они
+# пересоздаются каждым `npx cap sync android` и всегда повторяют `www`.
+# Поймано сторожем адреса сайта: он честно нашёл «зашитый kslt.netlify.app»
+# в копии, хотя в оригинале та же строка законна — там объявлен дом.
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json

@@ -1281,7 +1281,7 @@ body.ad-page {
     text-align: center;
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    color: #ce93d8;
+    color: var(--role-manager);
 }
 
 /* «ВПИСАТЬ ПАРНЫЙ РЕЙТИНГ» — КЛАССОМ. Было инлайном: кегль 0.75rem,
@@ -1402,7 +1402,7 @@ body.ad-page {
         display: inline-block;
         min-width: 34px;
         margin-right: var(--space-2);
-        color: #ce93d8;
+        color: var(--role-manager);
         font-weight: var(--fw-semibold);
     }
 }

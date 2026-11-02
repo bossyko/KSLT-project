@@ -38,7 +38,12 @@ const ФАЙЛЫ = [];
         const п = д + '/' + э.name;
         if (э.isDirectory()) {
             if (/node_modules|\.git|dist|test-results|tests|^build$/.test(э.name)) return;
+            /* ВЫХОД СБОРЩИКА ЛЕЖИТ НЕ ТОЛЬКО В `build`: `npx cap sync`
+               кладёт копию `mobile/www` в ИСХОДНИКИ Android-проекта —
+               `android/app/src/main/assets/public`. Сторож знал одно
+               место из двух и честно нашёл «зашитый адрес» в копии. */
             if (п.indexOf('mobile/android/app/build') !== -1) return;
+            if (п.indexOf('android/app/src/main/assets') !== -1) return;
             обойти(п);
         } else if (/\.(js|ts|html)$/.test(э.name)) ФАЙЛЫ.push(п.replace(/^\.\//, ''));
     });

@@ -2125,7 +2125,7 @@ tr.td-rr-row-highlight {
 
 /* Мест осталось мало — цифра в шапке турнира становится предупреждением */
 .hero-stat-tight .hero-stat-value {
-    color: #FFB020;
+    color: var(--warning);
 }
 
 /* ---- Свой матч в сетке: кнопка счёта или подпись ---- */
@@ -2401,7 +2401,7 @@ tr.td-rr-row-highlight {
     white-space: nowrap;
 }
 
-.td-sched-done { background: rgba(52, 199, 89, 0.12); color: #34c759; }
+.td-sched-done { background: rgba(52, 199, 89, 0.12); color: var(--success); }
 .td-sched-live { background: rgba(255, 179, 0, 0.15); color: #ffb300; }
 .td-sched-soon { background: var(--alpha-white-08); color: var(--text-secondary); }
 

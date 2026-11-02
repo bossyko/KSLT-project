@@ -306,7 +306,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #4caf50;
+    background: var(--success);
     border: var(--bw-heavy) solid var(--bg-card);
 }
 
@@ -354,7 +354,7 @@
 }
 
 .pt-status.online {
-    color: #4caf50;
+    color: var(--success);
 }
 
 .pt-status.offline {

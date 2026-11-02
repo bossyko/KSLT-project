@@ -695,7 +695,7 @@
 }
 
 .pl-form-win {
-    background: #22c55e;
+    background: var(--success);
 }
 
 .pl-form-loss {
@@ -704,7 +704,7 @@
 
 /* Change */
 .pl-change-up {
-    color: #22c55e;
+    color: var(--success);
     font-weight: 600;
     font-size: var(--fs-sm);
 }

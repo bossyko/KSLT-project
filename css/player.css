@@ -94,7 +94,7 @@
     right: 6px;
     width: 18px;
     height: 18px;
-    background: #22c55e;
+    background: var(--success);
     border-radius: 50%;
     border: var(--bw-heavy) solid var(--bg-primary);
     animation: pp-pulse 2s ease-in-out infinite;
@@ -165,7 +165,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #22c55e;
+    color: var(--success);
     font-weight: 600;
     font-size: var(--fs-sm);
 }
@@ -174,7 +174,7 @@
     content: '';
     width: 8px;
     height: 8px;
-    background: #22c55e;
+    background: var(--success);
     border-radius: 50%;
 }
 
@@ -317,7 +317,7 @@
 }
 
 .pp-stat-change.up {
-    color: #22c55e;
+    color: var(--success);
 }
 
 .pp-stat-change.down {
@@ -362,8 +362,8 @@
     border-radius: var(--radius-full);
     white-space: nowrap;
 }
-.pp-pair-tag-dbl { background: rgba(59,130,246,0.16); color: #6EA8FE; }
-.pp-pair-tag-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
+.pp-pair-tag-dbl { background: var(--info-subtle); color: var(--info); }
+.pp-pair-tag-mix { background: rgba(168,85,247,0.18); color: var(--role-manager); }
 /* Полоса идёт сразу под числами, без отступа сверху от блока категорий */
 .pp-pair-block .pp-stats { margin-bottom: 10px; }
 
@@ -631,8 +631,8 @@
 .pp-tag-rating   { background: var(--alpha-lime-12); color: var(--accent); }
 .pp-tag-friendly { background: var(--alpha-white-12); color: var(--text-muted); }
 .pp-tag-battle   { background: rgba(255,159,67,0.16); color: var(--orange-500); }
-.pp-tag-doubles  { background: rgba(59,130,246,0.16); color: #6EA8FE; }
-.pp-tag-mixed    { background: rgba(168,85,247,0.18); color: #C084FC; }
+.pp-tag-doubles  { background: var(--info-subtle); color: var(--info); }
+.pp-tag-mixed    { background: rgba(168,85,247,0.18); color: var(--role-manager); }
 
 .pp-match-tournament a {
     color: var(--text-secondary);
@@ -689,7 +689,7 @@
 
 .pp-match-result.win {
     background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
+    color: var(--success);
 }
 
 .pp-match-result.loss {
@@ -912,7 +912,7 @@ a.pp-tournament:hover {
 }
 
 .pp-tournament-winner {
-    color: #FFD700;
+    color: var(--warning);
 }
 
 .pp-tournament-upcoming {
@@ -1902,7 +1902,7 @@ a.pp-tournament:hover {
     height: 100%;
 }
 
-.pp-cat-bar-w { background: #4ade80; }
+.pp-cat-bar-w { background: var(--success); }
 .pp-cat-bar-l { background: var(--danger); }
 
 .pp-cat-legend {
@@ -1924,7 +1924,7 @@ a.pp-tournament:hover {
     vertical-align: middle;
 }
 
-.pp-cat-mark-w { background: #4ade80; }
+.pp-cat-mark-w { background: var(--success); }
 .pp-cat-mark-l { background: var(--danger); margin-left: 10px; }
 
 .pp-cat-rate {

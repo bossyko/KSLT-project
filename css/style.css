@@ -1091,7 +1091,7 @@ input, button, select, textarea {
     right: 0;
     min-width: 16px;
     height: 16px;
-    background: #f44336;
+    background: var(--danger);
     border-radius: 8px;
     font-size: var(--fs-2xs);
     font-weight: 700;
@@ -5967,7 +5967,7 @@ h2 {
    проведения; когда осталась треть, подсвечиваем: ради этого счётчик
    и завели, иначе цифру не замечают */
 .tc-slots-tight {
-    color: #FFB020;
+    color: var(--warning);
     font-weight: var(--fw-semibold);
 }
 
@@ -6770,7 +6770,7 @@ h2 {
     display: inline-block;
 }
 
-.pg-form .w { background: #22c55e; }
+.pg-form .w { background: var(--success); }
 .pg-form .l { background: var(--danger); }
 
 /* Приглушённая строка. --text-dim здесь давал те же 3.14 : 1, что и подпись
@@ -6802,8 +6802,8 @@ h2 {
     border-radius: var(--radius-full);
     white-space: nowrap;
 }
-.pg-pairs .pp-dbl { background: rgba(59,130,246,0.16); color: #6EA8FE; }
-.pg-pairs .pp-mix { background: rgba(168,85,247,0.18); color: #C084FC; }
+.pg-pairs .pp-dbl { background: var(--info-subtle); color: var(--info); }
+.pg-pairs .pp-mix { background: rgba(168,85,247,0.18); color: var(--role-manager); }
 
 /* Empty state 37:53. Поля те же, что у .rk-empty: одно пустое состояние на
    весь сайт, а не восьмое написание той же идеи. */
