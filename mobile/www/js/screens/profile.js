@@ -59,6 +59,40 @@
       return;
     }
 
+    /* ТРЕТЬЕ СОСТОЯНИЕ ЭКРАНА: ВХОД ЕСТЬ, А ПРОФИЛЯ НЕТ (01.11).
+       Его не было вовсе, и кабинет от этого УМИРАЛ ЦЕЛИКОМ. Костя вошёл,
+       открыл «Профиль» и увидел пустоту; лог молчал, потому что смотрели
+       не туда. DevTools сказал прямо:
+         TypeError: Cannot read properties of null (reading 'role')
+         at P.load (profile.js:82)
+       На :71 и :74 чтение профиля ЗАЩИЩЕНО (`_profile && …`), а на :82
+       голое: `_profile.role === 'admin'`. АВТОР ЗНАЛ, ЧТО ПРОФИЛЯ МОЖЕТ
+       НЕ БЫТЬ, И ЗАЩИТИЛ ДВА МЕСТА ИЗ ТРЁХ — та же беда, что была в
+       `js/auth.js:1934` на сайте, где защитили одно чтение и забыли
+       второе.
+       ЗАЩИТИТЬ ОДНУ СТРОКУ МАЛО: молча нарисовать «Член клуба» вместо
+       настоящей роли значит соврать человеку. Отсутствие профиля при
+       живом входе — это СОСТОЯНИЕ, и оно обязано себя назвать. */
+    if (!AUTH.currentProfile) {
+      el.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-icon">⚠️</div>' +
+          '<div class="empty-title">' + I18N.t('profile.noProfileTitle') + '</div>' +
+          '<div class="empty-text">' + I18N.t('profile.noProfileText') + '</div>' +
+          '<button class="btn-accent" style="margin-top:16px" id="profileRetryBtn">' +
+            I18N.t('profile.retry') + '</button>' +
+        '</div>';
+      var повтор = document.getElementById('profileRetryBtn');
+      if (повтор) {
+        повтор.addEventListener('click', function () {
+          повтор.disabled = true;
+          AUTH.loadProfile(AUTH.currentUser.id).then(function () { P.load(); })
+            .catch(function () { повтор.disabled = false; });
+        });
+      }
+      return;
+    }
+
     _profile = AUTH.currentProfile;
     _player = _profile && _profile.players ? _profile.players : null;
     var name = (_profile && _profile.full_name) || I18N.t('profile.user');

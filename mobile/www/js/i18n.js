@@ -329,6 +329,15 @@
     // === Profile screen ===
     'profile.title':        { ru: 'Профиль',              en: 'Profile',           kg: 'Профиль' },
     'profile.notAuth':      { ru: 'Вы не авторизованы',   en: 'Not logged in',     kg: 'Сиз кире элексиз' },
+    /* ВХОД ЕСТЬ, А ПРОФИЛЯ НЕТ — ТРЕТЬЕ СОСТОЯНИЕ КАБИНЕТА (01.11).
+       Без него экран падал на чтении роли у `null` и оставался пустым. */
+    'profile.noProfileTitle': { ru: 'Профиль не загрузился',
+                                en: 'Profile did not load',
+                                kg: 'Профиль жүктөлгөн жок' },
+    'profile.noProfileText':  { ru: 'Вход выполнен, но данные профиля получить не удалось. Проверьте связь и попробуйте снова.',
+                                en: 'You are signed in, but the profile data could not be loaded. Check your connection and try again.',
+                                kg: 'Сиз кирдиңиз, бирок профилдин маалыматын алуу мүмкүн болгон жок. Байланышты текшерип, кайра аракет кылыңыз.' },
+    'profile.retry':          { ru: 'Попробовать снова', en: 'Try again', kg: 'Кайра аракет кылуу' },
     'profile.loginText':    { ru: 'Войдите, чтобы увидеть свой профиль', en: 'Log in to see your profile', kg: 'Профилиңизди көрүү үчүн кириңиз' },
     'profile.login':        { ru: 'Войти',                en: 'Log in',            kg: 'Кирүү' },
     'profile.user':         { ru: 'Пользователь',         en: 'User',              kg: 'Колдонуучу' },
