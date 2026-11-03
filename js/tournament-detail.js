@@ -305,7 +305,8 @@ function getPlayer(tournament, playerId) {
     return tournament.players.find(p => p.id === playerId) || { name: 'TBD', seed: null, country: '' };
 }
 
-var TD_OUTCOMES = ['RET', 'W/O', 'DEF', 'NA'];
+/* ИСХОДЫ — У ДОМА `js/kslt-rules.js` (03.11). Четвёртая копия из четырёх. */
+function TD_OUTCOMES() { return window.KSLT_RULES.ИСХОДЫ; }
 
 
 /* СНЕСЕНО КУСКОМ 147, 23.10 — МЁРТВОЕ, И ЭТО ПРОВЕРЕНО, А НЕ ПО ВИДУ.
@@ -1767,7 +1768,7 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         var p1Score = '', p2Score = '', igOutcomeLabel = '';
                         if (isCompleted && m.score) {
                             var rawParts = m.score.split(' ');
-                            if (rawParts.length > 0 && TD_OUTCOMES.indexOf(rawParts[rawParts.length - 1]) !== -1) {
+                            if (rawParts.length > 0 && TD_OUTCOMES().indexOf(rawParts[rawParts.length - 1]) !== -1) {
                                 igOutcomeLabel = rawParts.pop();
                             }
                             var sets = rawParts;

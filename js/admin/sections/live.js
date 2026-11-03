@@ -20,11 +20,11 @@
         if (!container) return;
 
         container.innerHTML =
-            '<div class="ad-section-header" style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<div class="ad-section-header">' +
                 '<h2>' + L.liveSection + '</h2>' +
                 '<button class="ad-btn ad-btn-primary" id="liveCreateBtn">' + L.liveCreate + '</button>' +
             '</div>' +
-            '<div class="ad-rat-tabs" id="liveTabs" style="margin-bottom:20px;">' +
+            '<div class="ad-rat-tabs" id="liveTabs">' +
                 '<button class="ad-rat-tab' + (subTab === 'active' ? ' active' : '') + '" data-subtab="active">' + L.liveActive + '</button>' +
                 '<button class="ad-rat-tab' + (subTab === 'completed' ? ' active' : '') + '" data-subtab="completed">' + L.liveCompleted + '</button>' +
             '</div>' +
@@ -95,6 +95,15 @@
         return parts.join('  ') || '0-0';
     }
 
+    /* ОШИБКА УДАЛЕНИЯ — СЛОВОМ, А НЕ ТЕКСТОМ БАЗЫ (03.11). Код 23503 —
+       нарушение внешнего ключа: на матч ссылается вызов
+       (`challenges_live_match_id_fkey`), и база удаление запрещает. Это
+       защита, а не поломка; администратор должен прочитать причину, а не
+       английскую строку Postgres. Что делать с ключом — решение Кости. */
+    function ошибкаУдаления(err) {
+        return err && err.code === '23503' ? L.liveDeleteLinked : (err && err.message) || '';
+    }
+
     // ---- Active list ----
     function renderActiveList() {
         var content = document.getElementById('liveContent');
@@ -110,15 +119,19 @@
             '<th>' + L.chalScore + '</th>' +
             '<th>' + L.thStatus + '</th>' +
             '<th>YouTube</th>' +
-            '<th></th>' +
+            '<th class="ad-live-deystviya">' + L.liveActions + '</th>' +
             '</tr></thead><tbody>';
 
         activeList.forEach(function(m) {
             var p1 = playerName(m.player1_id, m.player1_name);
             var p2 = playerName(m.player2_id, m.player2_name);
             var score = buildScoreDisplay(m);
-            var statusLabel = m.status === 'warmup' ? 'Warmup' : m.status === 'paused' ? 'Paused' : 'LIVE';
-            var statusStyle = m.status === 'live' ? 'color:var(--danger);font-weight:700;' : 'color:var(--text-muted);';
+            /* СЛОВО СОСТОЯНИЯ — ИЗ ОБЩЕГО СЛОВАРЯ `js/live-texts.js`, А НЕ
+               СВОЁ (03.11). Стояло 'Warmup' / 'Paused' по-английски в русской
+               админке, и это было второе определение того, что зритель и судья
+               уже читают из словаря. Язык 'ru' передан явно: админка русская. */
+            var statusLabel = window.KSLTLiveTexts.слово(m.status, 'ru');
+            var statusClass = m.status === 'live' ? 'ad-live-status is-live' : 'ad-live-status';
 
             var baseUrl = window.location.origin;
             var umpireUrl = baseUrl + '/pages/umpire.html?key=' + m.umpire_key;
@@ -129,10 +142,15 @@
                 '<td><strong>' + A.esc(p1) + '</strong> vs <strong>' + A.esc(p2) + '</strong>' +
                     (m.tournament_label ? '<br><span class="ad-podpis">' + A.esc(m.tournament_label) + '</span>' : '') +
                 '</td>' +
-                '<td style="font-family:monospace;font-weight:600;">' + score + '</td>' +
-                '<td style="' + statusStyle + '">' + statusLabel + '</td>' +
-                '<td>' + (m.youtube_url ? '<span style="color:var(--accent);">✓</span>' : '—') + '</td>' +
-                '<td style="display:flex;gap:6px;flex-wrap:wrap;">' +
+                '<td class="ad-live-schet">' + score + '</td>' +
+                '<td class="' + statusClass + '">' + statusLabel + '</td>' +
+                '<td class="ad-live-yt' + (m.youtube_url ? ' is-est' : '') + '">' + (m.youtube_url ? L.liveYtEst : L.liveYtNet) + '</td>' +
+                /* КЛЕТКА ОСТАЁТСЯ КЛЕТКОЙ (03.11). Стояло `display:flex` прямо
+                   на <td>: клетка выпадала из таблицы, брала `width: 1%` от
+                   `.ad-table td:last-child` — 24 пикселя на 1512 — и четыре
+                   кнопки вставали столбиком, ряд 180 вместо 48. Строку держит
+                   `white-space: nowrap` класса, а не флекс. */
+                '<td class="ad-live-deystviya">' +
                     '<button class="ad-btn ad-btn-sm ad-btn-primary" data-copy-url="' + A.esc(umpireUrl) + '">' + L.liveUmpireLink + '</button>' +
                     '<a href="' + A.esc(pageUrl) + '" target="_blank" class="ad-btn ad-btn-sm ad-btn-outline">' + L.liveOpenPage + '</a>' +
                     '<a href="' + A.esc(scoreboardUrl) + '" target="_blank" class="ad-btn ad-btn-sm ad-btn-outline">' + L.liveScoreboard + '</a>' +
@@ -159,7 +177,7 @@
                 var id = this.dataset.deleteLive;
                 A.showConfirm(L.liveDelete + '?', '', function() {
                     A.client.from('live_matches').delete().eq('id', id).then(function(res) {
-                        if (res.error) return A.showToast(res.error.message, 'error');
+                        if (res.error) return A.showToast(ошибкаУдаления(res.error), 'error');
                         A.showToast(L.liveDeleted, 'success');
                         loadData();
                     });
@@ -182,7 +200,7 @@
             '<th>' + L.livePlayer1 + ' vs ' + L.livePlayer2 + '</th>' +
             '<th>' + L.chalScore + '</th>' +
             '<th>' + L.liveDate + '</th>' +
-            '<th></th>' +
+            '<th class="ad-live-deystviya">' + L.liveActions + '</th>' +
             '</tr></thead><tbody>';
 
         completedList.forEach(function(m) {
@@ -192,10 +210,10 @@
 
             html += '<tr>' +
                 '<td><strong>' + A.esc(p1) + '</strong> vs <strong>' + A.esc(p2) + '</strong></td>' +
-                '<td style="font-family:monospace;">' + A.esc(m.final_score || '—') + '</td>' +
+                '<td class="ad-live-schet">' + A.esc(m.final_score || '—') + '</td>' +
                 '<td>' + date + '</td>' +
-                '<td>' +
-                    (m.match_id ? '<button class="ad-btn ad-btn-sm ad-btn-primary" data-sync-live="' + m.id + '" data-match-id="' + m.match_id + '" data-score="' + A.esc(m.final_score || '') + '">' + L.liveSync + '</button> ' : '') +
+                '<td class="ad-live-deystviya">' +
+                    (m.match_id ? '<button class="ad-btn ad-btn-sm ad-btn-primary" data-sync-live="' + m.id + '" data-match-id="' + m.match_id + '" data-score="' + A.esc(m.final_score || '') + '">' + L.liveSync + '</button>' : '') +
                     '<button class="ad-btn ad-btn-sm ad-btn-danger" data-delete-live="' + m.id + '">' + L.liveDelete + '</button>' +
                 '</td>' +
             '</tr>';
@@ -223,7 +241,7 @@
                 var id = this.dataset.deleteLive;
                 A.showConfirm(L.liveDelete + '?', '', function() {
                     A.client.from('live_matches').delete().eq('id', id).then(function(res) {
-                        if (res.error) return A.showToast(res.error.message, 'error');
+                        if (res.error) return A.showToast(ошибкаУдаления(res.error), 'error');
                         A.showToast(L.liveDeleted, 'success');
                         loadData();
                     });

@@ -690,11 +690,11 @@
         playoffPreviewHint: 'Групп доиграно: {done} из {all}. Сетка на {size}, свободных мест {free}. Имена встают по мере готовности групп.',
         vsLabel: 'vs',
         matchOutcome: 'Исход матча',
-        outcomeNormal: 'Обычный',
-        outcomeRET: 'RET',
-        outcomeWO: 'W/O',
-        outcomeDEF: 'DEF',
-        outcomeNA: 'N/A',
+        /* ПОДПИСИ ИСХОДОВ УЕХАЛИ 03.11 в дом `js/kslt-rules.js` вместе с
+           расшифровками: кнопки строятся из него, и держать подпись
+           отдельно от объяснения значило бы развести их на первом же
+           изменении. `outcomeNA` был мёртв и до того — в разметке стояло
+           зашитое 'N/A' мимо словаря. */
         whoRetired: 'Кто выбыл?',
         tiedPlaceSaved: 'Места сохранены',
         roundR1: '1-й раунд',
@@ -1682,6 +1682,10 @@
         liveSearchPlayer: 'Поиск игрока...',
         liveScoreboard: 'Табло (OBS)',
         liveDelete: 'Удалить',
+        liveActions: 'Действия',
+        liveYtEst: 'Есть',
+        liveYtNet: 'Нет',
+        liveDeleteLinked: 'Матч привязан к вызову, поэтому удалить его нельзя',
 
         // Tournament News tab
         trnTabNews: 'Новости',

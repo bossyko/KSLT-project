@@ -8980,3 +8980,30 @@ select.ad-field-input {
 .ad-yt-hint { margin-top: var(--space-2); }
 .ad-yt-hint.is-ok { color: var(--accent-text); }
 .ad-yt-hint.is-bad { color: var(--danger); }
+
+/* РАЗДЕЛ LIVE — ТАБЛИЦА МАТЧЕЙ (03.11).
+   Действия ряда стоят ОДНОЙ СТРОКОЙ у правого края, как в таблицах Material,
+   GitHub, Linear. Строку держит `nowrap`, а не флекс на клетке: флекс на <td>
+   выбрасывает её из таблицы, и при `width: 1%` от `.ad-table td:last-child`
+   кнопки вставали столбиком (ряд 180 на 1512). Промежуток 8 — ступень. */
+.ad-table th.ad-live-deystviya,
+.ad-table td.ad-live-deystviya {
+    white-space: nowrap;
+    text-align: right;
+}
+.ad-table td.ad-live-deystviya > .ad-btn + .ad-btn {
+    margin-left: var(--space-2);
+}
+/* Счёт — Inter, как вся админка; цифры выровнены моноширинными цифрами
+   шрифта, а не чужим `monospace`. */
+.ad-table td.ad-live-schet {
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+}
+/* Состояние — класс, а не краска на месте. */
+.ad-table td.ad-live-status { color: var(--text-muted); }
+.ad-table td.ad-live-status.is-live {
+    color: var(--danger);
+    font-weight: var(--fw-bold);
+}
+.ad-table td.ad-live-yt.is-est { color: var(--accent-text); }

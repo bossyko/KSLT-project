@@ -11099,7 +11099,10 @@
     // Tennis score validation
     /* ГОДНОСТЬ СЕТА — У ДОМА `js/kslt-rules.js` (19.10). Вторая копия. */
     var isValidSet = function (a, b, формат) { return window.KSLT_RULES.сетГоден(a, b, формат); };
-    var MATCH_OUTCOMES = ['RET', 'W/O', 'DEF', 'NA'];
+    /* ИСХОДЫ — У ДОМА `js/kslt-rules.js` (03.11). Третья копия из четырёх.
+       Спрашивается лениво — одна форма на весь продукт, чтобы порядок
+       подключения нигде не был опорой. */
+    function MATCH_OUTCOMES() { return window.KSLT_RULES.ИСХОДЫ; }
 
     /**
      * СЧЁТ СЕТАМИ ДЛЯ ОТРИСОВКИ — ОДНО ОПРЕДЕЛЕНИЕ. До 19.10 эта функция
@@ -11135,7 +11138,7 @@
         if (!score || score === 'BYE') return { sets: score || '', outcome: '' };
         var parts = score.split(' ');
         var outcome = '';
-        if (parts.length > 0 && MATCH_OUTCOMES.indexOf(parts[parts.length - 1]) !== -1) {
+        if (parts.length > 0 && MATCH_OUTCOMES().indexOf(parts[parts.length - 1]) !== -1) {
             outcome = parts.pop();
         }
         return { sets: parts.join(' '), outcome: outcome };
@@ -11240,7 +11243,7 @@
         var existingOutcome = '';
         var rawScore = (match.score && match.score !== 'BYE') ? match.score : '';
         var existingSets = rawScore ? rawScore.split(' ') : [];
-        if (existingSets.length > 0 && MATCH_OUTCOMES.indexOf(existingSets[existingSets.length - 1]) !== -1) {
+        if (existingSets.length > 0 && MATCH_OUTCOMES().indexOf(existingSets[existingSets.length - 1]) !== -1) {
             existingOutcome = existingSets.pop();
         }
         var sv = [['','','',''],['','','',''],['','','','']];
@@ -11324,11 +11327,30 @@
                     '<div class="ad-score-block">' +
                         '<label class="ad-field-label ad-score-label-center">' + L.matchOutcome + '</label>' +
                         '<div id="adOutcomeChips" class="ad-score-chips">' +
-                            '<button type="button" class="ad-outcome-chip' + (!existingOutcome ? ' active' : '') + '" aria-pressed="' + (!existingOutcome ? 'true' : 'false') + '" data-outcome="">' + L.outcomeNormal + '</button>' +
-                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'RET' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'RET' ? 'true' : 'false') + '" data-outcome="RET">' + L.outcomeRET + '</button>' +
-                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'W/O' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'W/O' ? 'true' : 'false') + '" data-outcome="W/O">' + L.outcomeWO + '</button>' +
-                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'DEF' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'DEF' ? 'true' : 'false') + '" data-outcome="DEF">' + L.outcomeDEF + '</button>' +
-                            '<button type="button" class="ad-outcome-chip' + (existingOutcome === 'NA' ? ' active' : '') + '" aria-pressed="' + (existingOutcome === 'NA' ? 'true' : 'false') + '" data-outcome="NA">N/A</button>' +
+                            /* ЧИПЫ СТРОЯТСЯ ИЗ ДОМА (03.11), а не перечисляются
+                               руками. Каждый несёт РАСШИФРОВКУ: `title` для
+                               наведения и `aria-label` для диктора — иначе
+                               незрячий менеджер подсказки не получит вовсе.
+                               Замер базы: `W/O` выбран ноль раз, `N/A` —
+                               двадцать семь. Подпись без расшифровки МЕНЯЕТ
+                               ДАННЫЕ, а не просто неудобна.
+                               Старый исход показывается, даже если кнопку
+                               больше не предлагаем: иначе при правке счёта
+                               матча с `NA` исход молча сменился бы. */
+                            window.KSLT_RULES.исходыДляВвода()
+                                .concat(existingOutcome && window.KSLT_RULES.ИСХОД[existingOutcome] &&
+                                        !window.KSLT_RULES.ИСХОД[existingOutcome].предлагается
+                                            ? [existingOutcome] : [])
+                                .map(function (код) {
+                                    var и = window.KSLT_RULES.ИСХОД[код];
+                                    var активен = (existingOutcome || '') === код;
+                                    return '<button type="button" class="ad-outcome-chip' +
+                                        (активен ? ' active' : '') + '"' +
+                                        ' aria-pressed="' + (активен ? 'true' : 'false') + '"' +
+                                        ' title="' + A.esc(и.подпись + ' — ' + и.что) + '"' +
+                                        ' aria-label="' + A.esc(и.подпись + '. ' + и.что) + '"' +
+                                        ' data-outcome="' + A.esc(код) + '">' + A.esc(и.подпись) + '</button>';
+                                }).join('') +
                         '</div>' +
                     '</div>' +
                     '<div id="adRetiredBlock" class="ad-score-retired' + (existingOutcome ? ' ad-vidno' : '') + '">' +
