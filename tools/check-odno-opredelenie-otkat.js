@@ -54,6 +54,20 @@ const ОТКАТЫ = [
  "            reg: 'Reg', noRatingРяд: 'Unranked' }, { details: 'Толугураак'",
  'второго ключа на то же понятие нет'],
 
+/* ── hidden против display ── */
+/* ПРИШЁЛ 02.11 из `check-auth-otkat.js` вместе с правилом: `[hidden]`
+   переехал из `css/style.css` в общий `css/tokens.css`, потому что в
+   `style.css` его видел только сайт, а напоролось на это приложение. */
+['снять !important у hidden', T,
+ '[hidden] {\n    display: none !important;\n}',
+ '[hidden] {\n    opacity: 0;\n}',
+ '[hidden] прячет везде, и правило одно'],
+
+['вернуть hidden обратно в style.css', S,
+ '   ОТКУДА ЕГО ВИДНО ОБОИМ. */',
+ '   ОТКУДА ЕГО ВИДНО ОБОИМ. */\n[hidden] {\n    display: none !important;\n}',
+ '[hidden] прячет везде, и правило одно'],
+
 /* ── толщина рамки ── */
 ['убрать шкалу толщины', T,
  '--bw-hair:  1px;',

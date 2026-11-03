@@ -275,10 +275,9 @@ const ОТКАТЫ = [
    '    border-top: var(--bw-hair) solid var(--border-subtle);',
    'у сведений нет ни рамки, ни подложки'],
 
-  ['css/live-match.css',
-   '    --lm-game-h: 128px;',
-   '    --lm-game-h: 128px;\n    --lm-game-h: 128px;',
-   'ступени журнала заведены в компоненте и ровно один раз'],
+  /* ОТКАТ УЕХАЛ 02.11 в `check-zhurnal-matcha-otkat.js` вместе со
+     ступенями журнала: они теперь на `:root` в `css/tokens.css`, потому
+     что журнал показывают оба продукта. */
 
   ['css/live-match.css',
    '    .lm-video-idet .lm-feed { min-height: var(--lm-feed-min-video); }',

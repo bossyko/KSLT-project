@@ -68,8 +68,9 @@ const ОТКАТЫ = [
 ['пилюля рисуется внутрь рамки, а не растягивается до 44',
  'css/style.css', 'background-clip: padding-box;', 'background-clip: border-box;'],
 
-['атрибут hidden сильнее display в классе',
- 'css/style.css', '[hidden] {\n    display: none !important;\n}', '[hidden] {\n    opacity: 0;\n}'],
+/* ОТКАТ УЕХАЛ 02.11 в `check-odno-opredelenie-otkat.js` вместе с самим
+   правилом: `[hidden]` переехал в общий `css/tokens.css`, потому что в
+   `style.css` его видел только сайт. */
 
 ['флаг Apple можно переопределить снаружи',
  'js/supabase-config.js', 'window.KSLT_APPLE = window.KSLT_APPLE || false;', 'window.KSLT_APPLE = false;'],
