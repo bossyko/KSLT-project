@@ -115,6 +115,17 @@ const ОТКАТЫ = [
    '                    лечение: L.brkNoticeDupFix',
    'подсказка «снимите счёт» стоит только там, где счёт есть'],
 
+  /* ─── метка исхода не ложится на текст (03.11) ─── */
+  [CSS,
+   '    right: 8px;\n    bottom: 3px;',
+   '    right: 8px;\n    bottom: 24px;',
+   'метка исхода садится на полосу кнопки, а не на строку имени'],
+
+  [CSS,
+   '.ad-brk-match:has(.ad-brk-outcome):not(:has(.ad-brk-edit)) {\n    padding-bottom: 22px;\n}',
+   '',
+   'клетке без кнопки заводится полоса под метку'],
+
   /* ─── вид пометки ─── */
   [CSS,
    '.ad-brk-notice {\n    padding: var(--space-2) var(--space-3);',
