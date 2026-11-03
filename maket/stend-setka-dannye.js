@@ -531,59 +531,38 @@
         матчи = матчи.filter(function (m) { return m.group_number; });
 
         if (Р.лиги) {
+            /* СБОРКУ ЛИГИ ЗОВЁМ У ПРОДУКТА, А НЕ ДЕЛАЕМ СВОЮ (03.11).
+               Здесь лежала СВОЯ формула «сильнейший со слабейшим», и она
+               разошлась с продуктом в тот день, когда Костя решил сеять
+               ДВОИХ от каждой группы: стенд показывал бы расклад, которого
+               в админке нет. СТЕНД, НЕ ПОВТОРЯЮЩИЙ ПРОДУКТ, ВРЁТ — и врёт
+               убедительно: клетки на месте, имена верные, посев чужой.
+               Делит по лигам та же `лигаМеста`, собирает — та же
+               `собратьСеткуЛиги`, которой пользуется админка. */
             var вЛиги = { PL: [], CL: [] };
-            местаГрупп.forEach(function (места) {
+            местаГрупп.forEach(function (места, гИ) {
                 места.forEach(function (с) {
-                    вЛиги[A.лигаМеста(Р.турнир, с.place)].push(с.playerId);
+                    вЛиги[A.лигаМеста(Р.турнир, с.place)].push({
+                        playerId: с.playerId, groupIdx: гИ, place: с.place,
+                        wins: с.wins, setsWon: с.setsWon, setsLost: с.setsLost,
+                        gamesWon: с.gamesWon, gamesLost: с.gamesLost
+                    });
                 });
             });
 
             Object.keys(вЛиги).forEach(function (лига) {
                 var люди = вЛиги[лига];
                 if (люди.length < 2) return;
-                var размерЛ = 2; while (размерЛ < люди.length) размерЛ *= 2;
-                var круговЛ = Math.round(Math.log(размерЛ) / Math.LN2);
-
-                /* Первый круг: сильнейший со слабейшим, как в олимпийке.
-                   Не хватило людей до степени двойки — клетка остаётся с
-                   одним именем, и продукт сам зовёт это BYE. */
-                for (var кл = 0; кл < размерЛ / 2; кл++) {
-                    var п1 = люди[кл], п2 = люди[люди.length - 1 - кл];
-                    if (кл >= люди.length - 1 - кл) { п2 = null; }
-                    матчи.push({
-                        id: лига + '-r1-' + (кл + 1), tournament_id: 'stend',
-                        group_number: null, round: лига + '-R1',
-                        round_number: 1, match_order: кл + 1,
-                        player1_id: п1 || null, player2_id: п2 || null,
-                        status: п1 && !п2 ? 'completed' : 'upcoming',
-                        score: п1 && !п2 ? 'BYE' : null,
-                        winner_id: п1 && !п2 ? п1 : null,
-                        seed1: null, seed2: null
-                    });
-                }
-                for (var рЛ = 2; рЛ <= круговЛ; рЛ++) {
-                    var имяЛ = рЛ === круговЛ ? лига + '-F'
-                             : рЛ === круговЛ - 1 ? лига + '-SF'
-                             : рЛ === круговЛ - 2 ? лига + '-QF' : лига + '-R' + рЛ;
-                    var вКругеЛ = размерЛ / Math.pow(2, рЛ);
-                    for (var мЛ = 1; мЛ <= вКругеЛ; мЛ++) {
-                        матчи.push({
-                            id: лига + '-r' + рЛ + '-' + мЛ, tournament_id: 'stend',
-                            group_number: null, round: имяЛ,
-                            round_number: рЛ, match_order: мЛ,
-                            player1_id: null, player2_id: null,
-                            status: 'upcoming', score: null, winner_id: null,
-                            seed1: null, seed2: null
-                        });
-                    }
-                }
-                матчи.push({
-                    id: лига + '-3rd', tournament_id: 'stend',
-                    group_number: null, round: лига + '-3RD',
-                    round_number: круговЛ, match_order: 0,
-                    player1_id: null, player2_id: null,
-                    status: 'upcoming', score: null, winner_id: null,
-                    seed1: null, seed2: null
+                var свои = A.собратьСеткуЛиги(Р.турнир, люди, лига, Р.турнир.draw_seed || 1);
+                свои.forEach(function (m, и) {
+                    /* У стенда нет базы: номера клеток раздаём сами, а всё
+                       остальное — как отдал продукт. */
+                    m.id = лига + '-' + m.round_number + '-' + (m.match_order || 0) + '-' + и;
+                    m.tournament_id = 'stend';
+                    if (m.status === undefined) m.status = 'upcoming';
+                    if (m.score === undefined) m.score = null;
+                    if (m.winner_id === undefined) m.winner_id = null;
+                    матчи.push(m);
                 });
             });
         }
