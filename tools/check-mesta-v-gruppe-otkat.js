@@ -23,6 +23,10 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-mesta-'));
 ['js', 'tools', 'pages', 'maket'].forEach(д =>
   fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 fs.cpSync(path.join(КОРЕНЬ, 'mobile/www/js'), path.join(ВРЕМ, 'mobile/www/js'), { recursive: true });
+/* Прибор с 03.11 читает ещё и файл теста: место берётся из выпадашки, а не
+   из текста ячейки. Копируем только эту папку — в tests/ лежат отчёты. */
+fs.cpSync(path.join(КОРЕНЬ, 'tests/e2e/design-system'),
+          path.join(ВРЕМ, 'tests/e2e/design-system'), { recursive: true });
 
 const МЕСТА = 'js/group-standings.js';
 const МОБ   = 'mobile/www/js/group-standings.js';
@@ -30,6 +34,7 @@ const СЕТКА = 'js/admin/sections/bracket.js';
 const ПРАВ  = 'js/kslt-rules.js';
 const ТУРН  = 'js/admin/sections/tournaments.js';
 const СТР   = 'pages/admin.html';
+const ТЕСТФ = 'tests/e2e/design-system/45-mesta-v-gruppe.spec.js';
 
 const ОТКАТЫ = [
   /* ─── перестановка мест руками (03.11) ─── */
@@ -74,6 +79,12 @@ const ОТКАТЫ = [
    '                        напарники.push(pid);\n                        раскладка[pid] = prevPlace;',
    '                        раскладка[pid] = prevPlace;\n                        напарники.push(pid);',
    'журнал называет пару целиком, а не одного двинутого'],
+
+  /* ─── тест мерит место, а не список опций ─── */
+  [ТЕСТФ,
+   "            return s ? s.value : т(tr.querySelector('.ad-grp-place'));",
+   "            return т(tr.querySelector('.ad-grp-place'));",
+   'тест читает место из выпадашки, а не из текста ячейки'],
 
   /* ─── одно определение на одно понятие ─── */
   [МЕСТА,

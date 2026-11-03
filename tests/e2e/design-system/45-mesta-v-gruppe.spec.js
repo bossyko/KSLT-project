@@ -57,15 +57,25 @@ async function открыть(page, r) {
    отсечь, «претенденты» посчитаются лишней группой */
 const ГРУППЫ = '.ad-grp-matrix:not(.ad-qual-block .ad-grp-matrix)';
 
+/* МЕСТО ЧИТАЕТСЯ ИЗ ВЫПАДАШКИ, А НЕ ИЗ ТЕКСТА ЯЧЕЙКИ (03.11).
+   С 03.11 перестановка открыта у ЛЮБОЙ доигранной группы, а не только при
+   ничьей, и в `.ad-grp-place` теперь всегда стоит `<select>`. Его
+   `textContent` — это СКЛЕЙКА ВСЕХ ОПЦИЙ: у второго места «123», и
+   `parseInt` давал 123. Берём `value` выбранной опции; текст остаётся
+   запасным путём для случая, когда выпадашки нет вовсе. */
 async function строкиГрупп(page) {
     return page.evaluate((сел) => {
         const т = n => (n ? n.textContent.replace(/\s+/g, ' ').trim() : '');
+        const место = tr => {
+            const s = tr.querySelector('.ad-grp-place-select');
+            return s ? s.value : т(tr.querySelector('.ad-grp-place'));
+        };
         return [...document.querySelectorAll(сел)].map(tb =>
             [...tb.querySelectorAll('tbody tr')].map(tr => ({
                 имя: т(tr.querySelectorAll('td')[1]),
                 вне: !!tr.querySelector('.ad-badge-out'),
                 геймы: т(tr.querySelector('.ad-grp-games')),
-                место: т(tr.querySelector('.ad-grp-place')),
+                место: место(tr),
                 причина: т(tr.querySelector('.ad-grp-place .ad-grp-lot'))
             })));
     }, ГРУППЫ);
