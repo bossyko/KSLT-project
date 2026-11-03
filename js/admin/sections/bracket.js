@@ -4258,6 +4258,25 @@
                 var groupNum = sel.dataset.group;
                 var playerId = sel.dataset.player;
                 var newPlace = parseInt(sel.value, 10);
+                var прежнее = parseInt(sel.dataset.place, 10);
+
+                /* ПЕРЕСТАНОВКА ПРИ ОДНОЗНАЧНОМ РАСЧЁТЕ ПРОСИТ ПРИЧИНУ
+                   (03.11). Ничья — не просит: там расчёт сам ничего не
+                   утверждал, менеджер лишь выбирает из равных. А вот
+                   отмена результата, добытого на корте, обязана быть
+                   названа словами: иначе проигравший спор скажет
+                   «засудили», и возразить будет нечем.
+                   ПРИЧИНА СПРАШИВАЕТСЯ ДО ЗАПИСИ: откажется — место
+                   остаётся прежним, и поле возвращается на старое
+                   значение, а не висит показывая несохранённое. */
+                var причина = '';
+                if (!sel.dataset.ravenstvo && newPlace !== прежнее) {
+                    причина = (window.prompt(L.groupPlaceWhy) || '').trim();
+                    if (!причина) {
+                        sel.value = String(прежнее);
+                        return;
+                    }
+                }
 
                 // Load current manual_group_places
                 var mgp = JSON.parse(JSON.stringify(tournament.manual_group_places || {}));
@@ -4288,6 +4307,26 @@
                 Object.keys(раскладка).forEach(function(pid) {
                     mgp[groupNum][pid] = раскладка[pid];
                 });
+
+                /* СЛЕД ЛЕЖИТ В ТОМ ЖЕ ПОЛЕ, ОТДЕЛЬНЫМ КЛЮЧОМ.
+                   Отдельная таблица-журнал честнее, но это миграция базы;
+                   `manual_group_places` — уже JSON, и ключ `__журнал`
+                   верхнего уровня в расчёт не попадает: места читаются по
+                   НОМЕРУ группы (`mgp[String(г)]`), а такого номера не
+                   бывает. Цена названа: журнал живёт вместе с турниром и
+                   уйдёт вместе с ним. */
+                if (причина) {
+                    if (!Array.isArray(mgp.__журнал)) mgp.__журнал = [];
+                    mgp.__журнал.push({
+                        когда: new Date().toISOString(),
+                        кто: A.currentUserId || '',
+                        группа: groupNum,
+                        игрок: playerId,
+                        было: прежнее,
+                        стало: newPlace,
+                        почему: причина.slice(0, 300)
+                    });
+                }
 
                 // Save to DB
                 var { error } = await A.client.from('tournaments')
@@ -5384,6 +5423,16 @@
         var plMatches = matches.filter(isPlayoffMatch);
         var hasPlayoff = plMatches.length > 0;
         var hasIG = igMatches.length > 0;
+        /* СЕТКА СОБРАНА — ЕЩЁ НЕ ЗНАЧИТ «ПОЗДНО» (03.11, слово Кости:
+           «СЕ сетка рисуется, потом админ может поменять места»).
+           Пересобрать клетки нельзя не тогда, когда сетка НАРИСОВАНА, а
+           тогда, когда в ней УЖЕ ИГРАЛИ: иначе перестановка переносит
+           людей по пустым клеткам и ничего не рушит. Раньше запиралось по
+           самому факту сборки, и менеджер терял возможность в тот миг,
+           когда сетка появлялась на экране. */
+        var вСеткеИграли = plMatches.concat(igMatches).some(function (m) {
+            return m.status === 'completed' || (m.score && m.score !== 'BYE');
+        });
         var allIGCompleted = hasIG && igMatches.every(function(m) {
             return m.status === 'completed' || isCancelledIG(m);
         });
@@ -5712,33 +5761,52 @@
                 var значокЖребия = группаДоиграна ? почемуМесто(st) : '';
                 if (!groupHasResults) {
                     html += '<td class="ad-grp-place ad-grp-place-strong">—</td>';
-                } else if (st.жребий && tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {
-                    // Ничья по победам — место выбирает менеджер. Поле выбора
-                    // показываем только у доигранной группы: пока матчи идут,
-                    // равенство побед промежуточное, а лаймовая рамка поля
-                    // выглядела так, будто группа уже закончила
-                    var tiedGroup = tiedPlayerIds[st.playerId];
-                    // Только те, кого расчёт не развёл: остальным выбирать
-                    // нечего, их место обосновано
-                    var tiedStandings = standings.filter(function(s) {
-                        return s.жребий && tiedGroup.indexOf(s.playerId) !== -1;
-                    });
-                    // Выбирать можно только из мест самого равенства: их
-                    // ровно столько, сколько участников, и они не уезжают
-                    var местаРавных = tiedStandings
-                        .map(function(s) { return s.расчётноеМесто; })
-                        .sort(function(a, b) { return a - b; });
-                    // Сетка собрана — место больше не двигаем: перестановка
-                    // тасует людей по клеткам, а если доп. матч уже сыгран,
-                    // пересобрать не выйдет вовсе, и таблица разойдётся с
-                    // сеткой. Поле оставляем видимым, но запертым: менеджер
-                    // должен видеть, что место решала жеребьёвка
-                    var сеткаСобрана = hasPlayoff || hasIG;
+                } else if (!isTournamentCompleted && группаДоиграна) {
+                    /* МЕСТО МОЖНО ПЕРЕСТАВИТЬ У ЛЮБОЙ ДОИГРАННОЙ ГРУППЫ
+                       (03.11, слово Кости). До этого выбор показывался
+                       ТОЛЬКО при жеребьёвке — когда расчёт не развёл
+                       равных. Это разрешение НИЧЬЕЙ, а не защита от слива:
+                       игрок, сливший матч намеренно, в ничью и не
+                       попадает — он проигрывает честно и уезжает третьим.
+                       Замер группы D того же турнира: 3 победы, 2, 1, 0 —
+                       спора нет, и выбора не было ни у кого.
+
+                       ЧЕМ ПЛАТИМ, СКАЗАНО ВСЛУХ: перестановка при
+                       однозначном расчёте — это отмена результата,
+                       добытого на корте. Поэтому она просит ПРИЧИНУ и
+                       оставляет след, а ничья по-прежнему переставляется
+                       молча: там расчёт и сам ничего не утверждал. */
+                    var равенство = st.жребий && tiedPlayerIds[st.playerId];
+                    var местаРавных;
+                    if (равенство) {
+                        // Только те, кого расчёт не развёл: остальным выбирать
+                        // нечего, их место обосновано
+                        var tiedGroup = tiedPlayerIds[st.playerId];
+                        var tiedStandings = standings.filter(function(s) {
+                            return s.жребий && tiedGroup.indexOf(s.playerId) !== -1;
+                        });
+                        // Выбирать можно только из мест самого равенства: их
+                        // ровно столько, сколько участников, и они не уезжают
+                        местаРавных = tiedStandings
+                            .map(function(s) { return s.расчётноеМесто; })
+                            .sort(function(a, b) { return a - b; });
+                    } else {
+                        /* ТОЛЬКО СОСЕДНИЕ МЕСТА. Тасовать всю таблицу
+                           незачем: беда, ради которой это заведено, —
+                           слив ради третьего места, то есть обмен с
+                           соседом. Чем шире выбор, тем больше поводов
+                           спорить с менеджером. */
+                        местаРавных = [st.place - 1, st.place, st.place + 1]
+                            .filter(function (p) { return p >= 1 && p <= standings.length; });
+                    }
+                    /* ЗАПИРАЕТ НЕ СБОРКА СЕТКИ, А СЫГРАННЫЙ В НЕЙ МАТЧ.
+                       Поле остаётся видимым и запертым: менеджер должен
+                       видеть, что возможность была и почему её больше нет. */
                     html += '<td class="ad-grp-place">' +
                         '<select class="ad-grp-place-select" data-group="' + g + '" data-player="' + st.playerId + '" ' +
-                        'data-place="' + st.place + '" data-tip="' +
-                        (сеткаСобрана ? L.groupPlaceLockedHint : L.groupPlaceSwapHint) + '" ' +
-                        (сеткаСобрана ? 'disabled ' : '') +
+                        'data-place="' + st.place + '" data-ravenstvo="' + (равенство ? '1' : '') + '" data-tip="' +
+                        (вСеткеИграли ? L.groupPlaceLockedHint : L.groupPlaceSwapHint) + '" ' +
+                        (вСеткеИграли ? 'disabled ' : '') +
                         '>';
                     for (var pi = 0; pi < местаРавных.length; pi++) {
                         var placeVal = местаРавных[pi];
@@ -13384,24 +13452,36 @@
                 var значокЖребия = группаДоиграна ? почемуМесто(st) : '';
                 if (!groupHasResults) {
                     html += '<td class="ad-grp-place ad-grp-place-strong">—</td>';
-                } else if (st.жребий && tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {
-                    // Поле выбора места — только у доигранной группы: пока
-                    // матчи идут, равенство побед промежуточное
-                    var tiedGroup = tiedPlayerIds[st.playerId];
-                    // Только те, кого расчёт не развёл: остальным выбирать
-                    // нечего, их место обосновано
-                    var tiedStandings = standings.filter(function(s) {
-                        return s.жребий && tiedGroup.indexOf(s.playerId) !== -1;
-                    });
-                    var местаРавных = tiedStandings
-                        .map(function(s) { return s.расчётноеМесто; })
-                        .sort(function(a, b) { return a - b; });
+                } else if (!isTournamentCompleted && группаДоиграна) {
+                    /* ВТОРАЯ ОТРИСОВКА ТОЙ ЖЕ КЛЕТКИ (лиговая панель).
+                       Поймана сторожем 03.11: первую копию я поправил, а
+                       эта осталась на старом условии — и менеджер видел бы
+                       РАЗНОЕ поведение на двух экранах одного турнира.
+                       ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: клетка места
+                       рисуется здесь по тем же правилам, что и в основной
+                       таблице, — любая доигранная группа, только соседние
+                       места, причина при однозначном расчёте. */
+                    var равенствоЛ = st.жребий && tiedPlayerIds[st.playerId];
+                    var местаРавныхЛ;
+                    if (равенствоЛ) {
+                        var tiedGroupЛ = tiedPlayerIds[st.playerId];
+                        var tiedStandingsЛ = standings.filter(function(s) {
+                            return s.жребий && tiedGroupЛ.indexOf(s.playerId) !== -1;
+                        });
+                        местаРавныхЛ = tiedStandingsЛ
+                            .map(function(s) { return s.расчётноеМесто; })
+                            .sort(function(a, b) { return a - b; });
+                    } else {
+                        местаРавныхЛ = [st.place - 1, st.place, st.place + 1]
+                            .filter(function (p) { return p >= 1 && p <= standings.length; });
+                    }
                     html += '<td class="ad-grp-place">' +
                         '<select class="ad-grp-place-select" data-group="' + g + '" data-player="' + st.playerId + '" ' +
-                        'data-place="' + st.place + '" data-tip="' + L.groupPlaceSwapHint + '" ' +
+                        'data-place="' + st.place + '" data-ravenstvo="' + (равенствоЛ ? '1' : '') + '" ' +
+                        'data-tip="' + L.groupPlaceSwapHint + '" ' +
                         '>';
-                    for (var pi = 0; pi < местаРавных.length; pi++) {
-                        var placeVal = местаРавных[pi];
+                    for (var pi = 0; pi < местаРавныхЛ.length; pi++) {
+                        var placeVal = местаРавныхЛ[pi];
                         html += '<option value="' + placeVal + '"' + (placeVal === st.place ? ' selected' : '') + '>' + placeVal + '</option>';
                     }
                     html += '</select>' + значокЖребия + '</td>';

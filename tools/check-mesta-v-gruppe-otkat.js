@@ -32,6 +32,32 @@ const ТУРН  = 'js/admin/sections/tournaments.js';
 const СТР   = 'pages/admin.html';
 
 const ОТКАТЫ = [
+  /* ─── перестановка мест руками (03.11) ─── */
+  [СЕТКА,
+   '                } else if (!isTournamentCompleted && группаДоиграна) {\n                    /* МЕСТО МОЖНО ПЕРЕСТАВИТЬ',
+   '                } else if (st.жребий && tiedPlayerIds[st.playerId] && !isTournamentCompleted && группаДоиграна) {\n                    /* МЕСТО МОЖНО ПЕРЕСТАВИТЬ',
+   'место переставляется у любой доигранной группы, а не только при ничьей'],
+
+  [СЕТКА,
+   'местаРавных = [st.place - 1, st.place, st.place + 1]',
+   'местаРавных = standings.map(function (s) { return s.place; }); void [st.place - 1, st.place + 1]',
+   'при однозначном расчёте предлагаются только соседние места'],
+
+  [СЕТКА,
+   '        var вСеткеИграли = plMatches.concat(igMatches).some(function (m) {',
+   '        var сеткаСобрана = hasPlayoff || hasIG;\n        var вСеткеИграли = сеткаСобрана || plMatches.concat(igMatches).some(function (m) {',
+   'запирает сыгранный в сетке матч, а не сам факт её сборки'],
+
+  [СЕТКА,
+   '                if (!sel.dataset.ravenstvo && newPlace !== прежнее) {',
+   '                if (false && newPlace !== прежнее) {',
+   'перестановка при однозначном расчёте просит причину'],
+
+  [СЕТКА,
+   '                    mgp.__журнал.push({',
+   '                    [].push({',
+   'след перестановки ложится в журнал и не мешает расчёту'],
+
   /* ─── одно определение на одно понятие ─── */
   [МЕСТА,
    '    global.KSLT_GROUPS = {',
