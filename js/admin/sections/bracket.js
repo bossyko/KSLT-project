@@ -5444,7 +5444,15 @@
            людей по пустым клеткам и ничего не рушит. Раньше запиралось по
            самому факту сборки, и менеджер терял возможность в тот миг,
            когда сетка появлялась на экране. */
-        var вСеткеИграли = plMatches.concat(igMatches).some(function (m) {
+        /* ЛИГИ СЧИТАЮТСЯ НАРАВНЕ С СЕТКОЙ (03.11). `isPlayoffMatch`
+           ПРЯМО ИСКЛЮЧАЕТ `PL-*` и `CL-*` (`:5354`), поэтому в турнире с
+           лигами `вСеткеИграли` было ВСЕГДА false: перестановка мест не
+           запиралась никогда, даже когда в лигах уже отыграли. Матч на
+           корте одинаково необратим, в какой бы сетке он ни стоял. */
+        var сеткиИЛиги = matches.filter(function (m) {
+            return isPlayoffMatch(m) || isPLMatch(m) || isCLMatch(m);
+        });
+        var вСеткеИграли = сеткиИЛиги.concat(igMatches).some(function (m) {
             return m.status === 'completed' || (m.score && m.score !== 'BYE');
         });
         var allIGCompleted = hasIG && igMatches.every(function(m) {
@@ -9630,13 +9638,11 @@
                 if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
             });
             var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
-            var mgp = tournament.manual_group_places || {};
-            if (mgp[String(g)]) {
-                var ov = mgp[String(g)];
-                standings.forEach(function(st) {
-                    if (ov[st.playerId] !== undefined) st.place = ov[st.playerId];
-                });
-            }
+            /* ТРЕТЬЯ КОПИЯ ПРИМЕНЕНИЯ РУЧНЫХ МЕСТ — НАШЁЛ СТОРОЖ, НЕ Я
+               (03.11). Их было три: здесь, в генераторе лиг и общая в
+               `js/group-standings.js`. Окно выбора претендентов показывает
+               менеджеру, КОГО добирают, — и считало места по своей копии. */
+            применитьРучныеМеста(standings, (tournament.manual_group_places || {})[String(g)]);
             standings.sort(function(a, b) { return a.place - b.place; });
             groupStandings.push(standings);
         }
@@ -13005,14 +13011,12 @@
                 });
                 var standings = calculateGroupStandings(playerIds, groupMatchesG, playersMap);
 
-                // Apply manual overrides
-                var mgp = tournament.manual_group_places || {};
-                if (mgp[String(g)]) {
-                    var ov = mgp[String(g)];
-                    standings.forEach(function(st) {
-                        if (ov[st.playerId] !== undefined) st.place = ov[st.playerId];
-                    });
-                }
+                /* РУЧНЫЕ МЕСТА — ОДНО ОПРЕДЕЛЕНИЕ. Здесь лежала СВОЯ
+                   копия применения правок, и она уже расходилась с общей:
+                   общая живёт в `js/group-standings.js` и зовётся отсюда
+                   как `применитьРучныеМеста` (`:6502`). Два определения
+                   одного понятия — беда родится ровно на шве. */
+                применитьРучныеМеста(standings, (tournament.manual_group_places || {})[String(g)]);
                 standings.sort(function(a, b) { return a.place - b.place; });
 
                 // Top qualifiers → PL, rest → CL
@@ -13100,11 +13104,26 @@
         for (var i = 0; i < drawSize; i++) draw[i] = null;
 
         // Place seeds at ITF positions
+        /* МЕТКА СЛОТА — ТО ЖЕ «B2», ЧТО И В ОБЫЧНОЙ СЕТКЕ (03.11).
+           До этого куска лиги собирались БЕЗ меток вовсе: в клетку сразу
+           писался `player_id`. Поэтому пересборка их не видела —
+           `пересчитатьСоставСетки` снимает клетки С МЕТКОЙ (`:9004`), а
+           `заполнитьСлоты` ищет `slot1_label && !player1_id` (`:9455`).
+           Места в группе менялись, а сетка лиг стояла на старом раскладе.
+           Метка строится так же, как её кладёт `ктоПоМеткам` (`:9285`):
+           буква группы плюс место. СТАРЫЕ СОБРАННЫЕ ЛИГИ ЭТИМ НЕ
+           ТРОГАЮТСЯ — метка появляется только у того, что собирается
+           заново. */
+        function меткаМеста(q) {
+            return KSLT_RULES.букваГруппы(q.groupIdx + 1) + q.place;
+        }
+
         for (var s = 0; s < seeds.length && s < seedPositions.length; s++) {
             draw[seedPositions[s] - 1] = {
                 player_id: seeds[s].playerId,
                 seed: s + 1,
-                groupIdx: seeds[s].groupIdx
+                groupIdx: seeds[s].groupIdx,
+                label: меткаМеста(seeds[s])
             };
         }
 
@@ -13168,7 +13187,8 @@
             draw[emptySlots[bestSlotIdx]] = {
                 player_id: player.playerId,
                 seed: null,
-                groupIdx: player.groupIdx
+                groupIdx: player.groupIdx,
+                label: меткаМеста(player)
             };
             emptySlots.splice(bestSlotIdx, 1);
         }
@@ -13195,7 +13215,9 @@
                 group_number: null,
                 status: 'upcoming',
                 seed1: slot1 ? slot1.seed : null,
-                seed2: slot2 ? slot2.seed : null
+                seed2: slot2 ? slot2.seed : null,
+                slot1_label: slot1 ? slot1.label : null,
+                slot2_label: slot2 ? slot2.label : null
             };
 
             // Handle BYE
@@ -13521,7 +13543,7 @@
             var plDrawSize = 1;
             while (plDrawSize < plR1.length * 2) plDrawSize *= 2;
             if (plDrawSize < 2) plDrawSize = plMatches.length * 2;
-            html += renderLeagueBracketHtml(plMatches, playersMap, plDrawSize, 'PL', playerGroupLabel);
+            html += renderLeagueBracketHtml(plMatches, playersMap, plDrawSize, 'PL', playerGroupLabel, isDbl, regsMap);
             html += '</div>';
 
             // Consolation League
@@ -13531,7 +13553,7 @@
             var clDrawSize = 1;
             while (clDrawSize < clR1.length * 2) clDrawSize *= 2;
             if (clDrawSize < 2) clDrawSize = clMatches.length * 2;
-            html += renderLeagueBracketHtml(clMatches, playersMap, clDrawSize, 'CL', playerGroupLabel);
+            html += renderLeagueBracketHtml(clMatches, playersMap, clDrawSize, 'CL', playerGroupLabel, isDbl, regsMap);
             html += '</div>';
 
             html += '</div>'; // /ad-dual-league
@@ -13558,7 +13580,7 @@
     }
 
     // ---- Render SE bracket HTML for a league (PL or CL) ----
-    function renderLeagueBracketHtml(leagueMatches, playersMap, drawSize, prefix, playerGroupLabel) {
+    function renderLeagueBracketHtml(leagueMatches, playersMap, drawSize, prefix, playerGroupLabel, isDbl, regsMap) {
         // Filter out 3RD match, render as regular SE bracket
         var nonThird = leagueMatches.filter(function(m) { return m.round !== prefix + '-3RD'; });
         var totalRounds = Math.log2(drawSize);
@@ -13590,8 +13612,26 @@
                 var p2 = playersMap[match.player2_id];
                 var p1GrpLbl = match.player1_id && playerGroupLabel[match.player1_id] ? playerGroupLabel[match.player1_id] : '';
                 var p2GrpLbl = match.player2_id && playerGroupLabel[match.player2_id] ? playerGroupLabel[match.player2_id] : '';
-                var p1Name = p1 ? A.esc(p1.name) : (match.player1_id ? 'TBD' : '<span class="ad-reg-cell-muted">TBD</span>');
-                var p2Name = p2 ? A.esc(p2.name) : (match.player2_id ? 'TBD' : '<span class="ad-reg-cell-muted">TBD</span>');
+                /* ИМЯ СТОРОНЫ В КЛЕТКЕ — ОДНО ОПРЕДЕЛЕНИЕ (03.11).
+                   Здесь стояло ВТОРОЕ: обычная сетка зовёт
+                   `getTeamDisplayName` (`:6258`) и показывает пару
+                   целиком, а сетка лиг брала `p1.name` — одного капитана.
+                   В парном турнире с лигами напарник пропадал молча:
+                   числа верные, имя есть, а пары нет.
+                   Пустая клетка со своей меткой называет, кого ждёт:
+                   «B2» понятнее безликого TBD. */
+                function имяСтороныЛиги(playerId, p, метка) {
+                    if (playerId) {
+                        return (isDbl && regsMap)
+                            ? getTeamDisplayName(playerId, regsMap, playersMap, true)
+                            : (p ? A.esc(p.name) : 'TBD');
+                    }
+                    return метка
+                        ? '<span class="ad-grp-meta-sec">' + A.esc(метка) + '</span>'
+                        : '<span class="ad-reg-cell-muted">TBD</span>';
+                }
+                var p1Name = имяСтороныЛиги(match.player1_id, p1, match.slot1_label);
+                var p2Name = имяСтороныЛиги(match.player2_id, p2, match.slot2_label);
 
                 var isCompleted = match.status === 'completed';
                 var isBye = match.score === 'BYE';

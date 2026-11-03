@@ -49,7 +49,7 @@ const ОТКАТЫ = [
    'при однозначном расчёте предлагаются только соседние места'],
 
   [СЕТКА,
-   '        var вСеткеИграли = plMatches.concat(igMatches).some(function (m) {',
+   '        var вСеткеИграли = сеткиИЛиги.concat(igMatches).some(function (m) {',
    '        var сеткаСобрана = hasPlayoff || hasIG;\n        var вСеткеИграли = сеткаСобрана || plMatches.concat(igMatches).some(function (m) {',
    'запирает сыгранный в сетке матч, а не сам факт её сборки'],
 
@@ -85,6 +85,47 @@ const ОТКАТЫ = [
    "            return s ? s.value : т(tr.querySelector('.ad-grp-place'));",
    "            return т(tr.querySelector('.ad-grp-place'));",
    'тест читает место из выпадашки, а не из текста ячейки'],
+
+  /* ─── лиги живут по тем же правилам, что и сетка ─── */
+  [СЕТКА,
+   '                slot1_label: slot1 ? slot1.label : null,',
+   '',
+   'сетка лиг собирается с метками слотов'],
+
+  [СЕТКА,
+   '                label: меткаМеста(player)\n            };',
+   '            };',
+   'сетка лиг собирается с метками слотов'],
+
+  [СЕТКА,
+   '                var p1Name = имяСтороныЛиги(match.player1_id, p1, match.slot1_label);',
+   "                var p1Name = p1 ? A.esc(p1.name) : 'TBD';",
+   'имя стороны в клетке лиг берётся у общего дома'],
+
+  [СЕТКА,
+   "    function renderLeagueBracketHtml(leagueMatches, playersMap, drawSize, prefix, playerGroupLabel, isDbl, regsMap) {",
+   "    function renderLeagueBracketHtml(leagueMatches, playersMap, drawSize, prefix, playerGroupLabel) {",
+   'имя стороны в клетке лиг берётся у общего дома'],
+
+  [СЕТКА,
+   '            return isPlayoffMatch(m) || isPLMatch(m) || isCLMatch(m);',
+   '            return isPlayoffMatch(m);',
+   'перестановку запирает сыгранный матч ЛЮБОЙ сетки, лиг тоже'],
+
+  /* ТРЕТЬЯ КОПИЯ, КОТОРУЮ СТОРОЖ НАШЁЛ САМ: окно выбора претендентов. */
+  [СЕТКА,
+   '               менеджеру, КОГО добирают, — и считало места по своей копии. */\n' +
+   '            применитьРучныеМеста(standings, (tournament.manual_group_places || {})[String(g)]);',
+   /* ЗАКРЫВАЮЩИЙ `*​/` ОБЯЗАН ОСТАТЬСЯ В ЗАМЕНЕ. Сняв его вместе с зовом,
+      откат оставлял комментарий ОТКРЫТЫМ — и `безКом` съедал код до
+      следующего `*​/`, роняя два чужих правила вместо своего. ОТКАТ,
+      МЕНЯЮЩИЙ БОЛЬШЕ, ЧЕМ ОБЕЩАЛ, ДОКАЗЫВАЕТ НЕ ТО. */
+   '               менеджеру, КОГО добирают, — и считало места по своей копии. */\n' +
+   '            var ov = (tournament.manual_group_places || {})[String(g)] || {};\n' +
+   '            standings.forEach(function(st) {\n' +
+   '                if (ov[st.playerId] !== undefined) st.place = ov[st.playerId];\n' +
+   '            });',
+   'ручные места в генераторе лиг применяет общий дом'],
 
   /* ─── одно определение на одно понятие ─── */
   [МЕСТА,
