@@ -13119,28 +13119,57 @@
         while (drawSize < qualified.length) drawSize *= 2;
         var totalRounds = Math.log2(drawSize);
 
-        // Seeds: best place in each group gets seeded, rest are unseeded
-        // For PL: place=1 are seeds. For CL: the lowest place value = seeds
-        var minPlace = qualified.reduce(function(min, q) { return q.place < min ? q.place : min; }, 9999);
-        var seeds = qualified.filter(function(q) { return q.place === minPlace; });
-        var unseeded = qualified.filter(function(q) { return q.place !== minPlace; });
+        /* ДВОЕ СЕЯНЫХ ОТ КАЖДОЙ ГРУППЫ — РЕШЕНИЕ КОСТИ 03.11.
+           «Согласно от количества групп в каждой группе было 2 сеяных: если
+           общее количество групп 4, то будет 8 сеяных».
 
-        // Sort seeds by group performance: wins DESC → set% DESC → game% DESC
-        // Best performer = seed 1 → gets best BYE position
-        seeds.sort(function(a, b) {
-            if (b.wins !== a.wins) return b.wins - a.wins;
-            var aSetPct = a.setsWon + a.setsLost > 0 ? a.setsWon / (a.setsWon + a.setsLost) : 0;
-            var bSetPct = b.setsWon + b.setsLost > 0 ? b.setsWon / (b.setsWon + b.setsLost) : 0;
-            if (bSetPct !== aSetPct) return bSetPct - aSetPct;
-            var aGamePct = a.gamesWon + a.gamesLost > 0 ? a.gamesWon / (a.gamesWon + a.gamesLost) : 0;
-            var bGamePct = b.gamesWon + b.gamesLost > 0 ? b.gamesWon / (b.gamesWon + b.gamesLost) : 0;
-            return bGamePct - aGamePct;
+           БЫЛО: сеяным становился только ЛУЧШИЙ в лиге от группы —
+           `place === minPlace`, то есть по ОДНОМУ от группы. Остальные
+           раскладывались жребием.
+
+           СТАЛО: от каждой группы сеются ДВА лучших В ЭТОЙ ЛИГЕ. Номера:
+           сперва все первые по силе (1…G), затем все вторые по силе
+           (G+1…2G) — так 1-й встречает последнего, 2-й предпоследнего.
+
+           СИЛА СРАВНИВАЕТСЯ ОДНИМ ПОРЯДКОМ: победы → доля сетов → доля
+           геймов. Он уже стоял ниже для сеяных, и теперь это ОДНО
+           определение на оба эшелона, а не два похожих. */
+        var поГруппам = {};
+        qualified.forEach(function(q) {
+            (поГруппам[q.groupIdx] = поГруппам[q.groupIdx] || []).push(q);
         });
+        function посиле(a, b) {
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            var aS = a.setsWon + a.setsLost > 0 ? a.setsWon / (a.setsWon + a.setsLost) : 0;
+            var bS = b.setsWon + b.setsLost > 0 ? b.setsWon / (b.setsWon + b.setsLost) : 0;
+            if (bS !== aS) return bS - aS;
+            var aG = a.gamesWon + a.gamesLost > 0 ? a.gamesWon / (a.gamesWon + a.gamesLost) : 0;
+            var bG = b.gamesWon + b.gamesLost > 0 ? b.gamesWon / (b.gamesWon + b.gamesLost) : 0;
+            return bG - aG;
+        }
+        var первыеВЛиге = [], вторыеВЛиге = [], остальные = [];
+        Object.keys(поГруппам).forEach(function(г) {
+            var ряд = поГруппам[г].slice().sort(function(a, b) { return a.place - b.place; });
+            if (ряд[0]) первыеВЛиге.push(ряд[0]);
+            if (ряд[1]) вторыеВЛиге.push(ряд[1]);
+            остальные = остальные.concat(ряд.slice(2));
+        });
+        первыеВЛиге.sort(посиле);
+        вторыеВЛиге.sort(посиле);
+        var seeds = первыеВЛиге.concat(вторыеВЛиге);
+        var unseeded = остальные;
 
+        /* ПОРЯДОК ВНУТРИ ЭШЕЛОНОВ УЖЕ ЗАДАН ВЫШЕ: первые по силе, затем
+           вторые по силе. Общая пересортировка здесь СЛОМАЛА БЫ замысел —
+           сильный второй обошёл бы слабого победителя группы и встал
+           напротив другого победителя. */
         var seedCount = Math.min(seeds.length, drawSize);
 
-        // ОДНО ОПРЕДЕЛЕНИЕ: позиции сеяных живут в SEED_POSITIONS
-        var seedPositions = SEED_POSITIONS[drawSize] || [];
+        /* ПОЗИЦИИ ПОСЕВА — ОДНО ОПРЕДЕЛЕНИЕ, И ОНО ТЕПЕРЬ ФУНКЦИЯ.
+           `SEED_POSITIONS[8]` даёт ЧЕТЫРЕ позиции, а сеяных здесь до
+           восьми. `позицииПосева` продолжает ТОТ ЖЕ список — сверено со
+           всеми семью размерами до числа. */
+        var seedPositions = позицииПосева(drawSize, seedCount);
 
         // Build draw array
         var draw = new Array(drawSize);
@@ -13159,6 +13188,51 @@
            заново. */
         function меткаМеста(q) {
             return KSLT_RULES.букваГруппы(q.groupIdx + 1) + q.place;
+        }
+
+        /* ЗЕМЛЯКОВ НЕ СВОДИМ — И СРЕДИ СЕЯНЫХ ТОЖЕ (03.11).
+           Пока от группы сеялся ОДИН, столкнуться земляки могли только
+           среди несеяных, и там это уже разводится. С двумя от группы вся
+           сетка может стать сеяной, и первый круг даёт пары 1–8, 2–7,
+           3–6, 4–5: второе место группы легко попадает к СВОЕМУ же
+           победителю — к тому, с кем только что играло в группе.
+
+           ПОРЯДОК СИЛЫ ДЕРЖИТСЯ, ПОКА НЕ МЕШАЕТ — правило выведено на
+           претендентах (`разложитьПретендентов`) и применяется здесь без
+           нового разбора. Меняем местами только ВТОРЫЕ номера, и только
+           ту пару, что снимает столкновение и не заводит нового; выбираем
+           ближайшего по силе. Нельзя снять — оставляем как есть: выдумывать
+           расклад хуже, чем показать честный.
+
+           МЕНЯЮТСЯ ТОЛЬКО ВТОРЫЕ: двигать победителей групп значило бы
+           отнимать у них заслуженный номер из-за чужого соседства. */
+        var первых = первыеВЛиге.length;
+        function соперникПоСетке(номер) {
+            var слот = seedPositions[номер];
+            if (!слот) return -1;
+            var сосед = (слот % 2 === 1) ? слот + 1 : слот - 1;
+            return seedPositions.indexOf(сосед);
+        }
+        function землякиУ(номер) {
+            var с = соперникПоСетке(номер);
+            return с !== -1 && с < seeds.length && номер < seeds.length &&
+                   seeds[с].groupIdx === seeds[номер].groupIdx;
+        }
+        for (var з = первых; з < seedCount; з++) {
+            if (!землякиУ(з)) continue;
+            /* Ближайший по силе среди вторых: шаг вправо, шаг влево, и так
+               дальше — ближе по силе значит меньше сдвиг номера. */
+            var порядокОбхода = [];
+            for (var д = 1; д < seedCount; д++) {
+                if (з + д < seedCount && з + д >= первых) порядокОбхода.push(з + д);
+                if (з - д >= первых) порядокОбхода.push(з - д);
+            }
+            for (var о = 0; о < порядокОбхода.length; о++) {
+                var ц = порядокОбхода[о];
+                var т = seeds[з]; seeds[з] = seeds[ц]; seeds[ц] = т;
+                if (!землякиУ(з) && !землякиУ(ц)) break;
+                т = seeds[з]; seeds[з] = seeds[ц]; seeds[ц] = т;   /* не вышло — назад */
+            }
         }
 
         for (var s = 0; s < seeds.length && s < seedPositions.length; s++) {
