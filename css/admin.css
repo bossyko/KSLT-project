@@ -9024,3 +9024,79 @@ select.ad-field-input {
     font-weight: var(--fw-bold);
 }
 .ad-table td.ad-live-yt.is-est { color: var(--accent-text); }
+
+/* ГРУППА ПЕРЕСОБИРАЕТСЯ — ЭТО ВИДНО (04.11).
+   Приглушение говорит «сюда сейчас нельзя», курсор ожидания подтверждает,
+   что работа идёт. Нажатия не перехватываем: выпадашки заперты своим
+   `disabled`, а остальное в таблице читать не мешаем. */
+.ad-grp-busy {
+    opacity: 0.55;
+    cursor: progress;
+    transition: opacity 0.15s;
+}
+
+/* ============================================
+   ЖАЛОБЫ И БЛОКИРОВКИ (Apple 1.2), 04.11
+   ============================================
+   Вкладки и таблица взяты готовые (`.ad-tabs`, `.ad-tab`, `.ad-table`) —
+   своих не заведено. Новое здесь только то, чего в админке не было:
+   СРОК, ВИДНЫЙ ГЛАЗОМ. Трое суток — обещание из Правил и требование
+   Apple «timely responses»; строка, подошедшая к нему, красится сама,
+   чтобы разбирающий не считал часы в уме. */
+
+.ad-sft-sub {
+    margin: var(--space-2) 0 var(--space-4);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    max-width: 70ch;
+}
+.ad-sft-body { margin-top: var(--space-4); }
+.ad-sft-load,
+.ad-sft-empty {
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+.ad-sft-hint {
+    margin: 0 0 var(--space-4);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+.ad-sft-filters {
+    display: flex; flex-wrap: wrap; gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+.ad-sft-filter {
+    min-height: var(--btn-h-sm);
+    padding: 0 var(--space-4);
+    background: transparent;
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-none);
+    cursor: pointer;
+}
+.ad-sft-filter.active {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--neutral-black); font-weight: 600;
+}
+.ad-sft-filter:focus-visible {
+    outline: var(--bw-thick) solid var(--accent); outline-offset: 2px;
+}
+.ad-sft-hours { font-size: var(--fs-2xs); color: var(--text-muted); }
+/* ЦВЕТ НЕ ЕДИНСТВЕННЫЙ ПРИЗНАК: часы написаны числом в той же ячейке,
+   поэтому строку, подошедшую к сроку, видно и без различения оттенков. */
+.ad-sft-soon { background: var(--warning-faint); }
+.ad-sft-late { background: var(--danger-faint); }
+.ad-sft-note {
+    max-width: 32ch;
+    font-size: var(--fs-xs); color: var(--text-secondary);
+}
+.ad-sft-actions { white-space: nowrap; }
+.ad-sft-actions .ad-btn { margin-left: var(--space-2); }
+.ad-sft-actions .ad-btn:first-child { margin-left: 0; }
+/* Признак работы — тот же, что у перестановки мест 03.11: строка
+   приглушается и запирается, пока решение идёт в базу. */
+.ad-sft-busy { opacity: 0.55; cursor: progress; transition: opacity 0.15s; }

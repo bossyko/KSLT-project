@@ -146,12 +146,16 @@ Deno.serve(async (req) => {
         bannedUntil = dt.toISOString()
       }
 
-      // Update profile
+      /* КТО ЗАБАНИЛ — ПИШЕТСЯ И ЗДЕСЬ (04.11). У бана учётной записи
+         след нужен даже больше, чем у бана карточки: этот бан закрывает
+         человеку ВХОД, и вопрос «кто решил» встанет первым. */
       await db
         .from('profiles')
         .update({
           banned_until: bannedUntil,
-          ban_reason: reason || null
+          ban_reason: reason || null,
+          banned_by: user.id,
+          banned_at: new Date().toISOString()
         })
         .eq('id', user_id)
 
@@ -214,12 +218,15 @@ Deno.serve(async (req) => {
         return json({ error: 'Managers can only unban regular users' }, 403)
       }
 
-      // Clear ban in profile
+      // Clear ban in profile — вместе со следом: бана нет, значит нет
+      // ни автора, ни даты.
       await db
         .from('profiles')
         .update({
           banned_until: null,
-          ban_reason: null
+          ban_reason: null,
+          banned_by: null,
+          banned_at: null
         })
         .eq('id', user_id)
 
@@ -329,11 +336,18 @@ Deno.serve(async (req) => {
       if (!banned_until) return json({ error: 'banned_until required' }, 400)
 
       // Update player ban fields
+      /* КТО ЗАБАНИЛ — ПИШЕТСЯ ЗДЕСЬ И БОЛЬШЕ НИГДЕ (04.11).
+         До этого дня бан не нёс автора вовсе: человек спрашивал «кто и
+         за что», а в базе лежали только срок и причина. `user.id` —
+         тот, чей токен прошёл проверку роли выше, то есть настоящий
+         сотрудник, а не присланное клиентом значение. */
       const { error: upErr } = await db
         .from('players')
         .update({
           banned_until: banned_until,
-          ban_reason: reason || null
+          ban_reason: reason || null,
+          banned_by: user.id,
+          banned_at: new Date().toISOString()
         })
         .eq('id', player_id)
 
@@ -374,11 +388,16 @@ Deno.serve(async (req) => {
       const { player_id } = body
       if (!player_id) return json({ error: 'player_id required' }, 400)
 
+      /* СНЯТИЕ ЧИСТИТ И СЛЕД: бана нет — значит нет ни автора, ни даты.
+         Оставить их значило бы показывать в карточке «забанил Костя»
+         у человека, который давно разбанен. */
       const { error: upErr } = await db
         .from('players')
         .update({
           banned_until: null,
-          ban_reason: null
+          ban_reason: null,
+          banned_by: null,
+          banned_at: null
         })
         .eq('id', player_id)
 

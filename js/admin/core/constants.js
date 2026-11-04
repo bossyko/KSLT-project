@@ -445,7 +445,6 @@
         groupNotCounted: 'в зачёт не берётся',
         groupNotCountedHint: 'Дал неявку и не доиграл группу — по ст. 57 ITF все его матчи исключены из расчёта мест у остальных.',
         groupPlaceSwapHint: 'Места равных можно поменять — выбери номер',
-        groupPlaceWhy: 'Почему место меняется? Расчёт развёл этих игроков по результатам на корте, и перестановка его отменяет. Причина останется в журнале турнира.',
         groupPlaceLockedHint: 'Сетка собрана — места закреплены. Чтобы поменять, пересоберите плей-офф',
         groupMismatchTitle: 'Состав групп разошёлся с заявками:',
         groupSwapNote: 'Где победы, сеты и геймы равны, место можно поставить руками: выбери номер в колонке «Место». Подпись «жребий» стоит там, где расчёт не разводит никак.',
@@ -584,6 +583,7 @@
         regSeedNotEnough: 'Сеяных {n} из {m}. Проставь недостающих во вкладке «Заявки».',
         drawInProgress: 'Жеребьёвка уже идёт',
         drawRunning: 'Жеребим…',
+        groupPlaceSaving: 'Пересобираем сетку…',
         regGuest: 'Гость',
         regInQueue: '· в очереди',
         regQueueWarn: '{кто} стоит в листе ожидания. Та заявка будет снята, очередь подвинется.',
@@ -881,6 +881,48 @@
         crtAddByUrl: '+ По ссылке',
         chalPhoto: 'Фото',
         chalPhotoUploading: 'Загрузка…',
+
+        // ---- Жалобы и блокировки (Apple 1.2), 04.11 ----
+        sftTitle:      'Жалобы и блокировки',
+        sftSub:        'Срок ответа по жалобе — трое суток. Это записано в Правилах и этого требует Apple (правило 1.2).',
+        sftTabReports: 'Жалобы',
+        sftTabBlocks:  'Блокировки',
+        sftLoading:    'Читаем…',
+        sftAll:        'Все',
+        sftHours:      'ч',
+        sftThWhen:     'Когда',
+        sftThWho:      'Кто',
+        sftThOnWhom:   'На кого',
+        sftThWhat:     'Что',
+        sftThReason:   'Причина',
+        sftThNote:     'Заметка',
+        sftThBlocker:  'Кто заблокировал',
+        sftThBlocked:  'Кого',
+        sftRemove:     'Снять содержимое',
+        sftReviewed:   'Разобрана',
+        sftReject:     'Отклонить',
+        sftDone:       'Решение записано',
+        sftDoneError:  'Не удалось записать решение',
+        sftNoNew:      'Новых жалоб нет',
+        sftNoneHere:   'С этим состоянием жалоб нет',
+        sftNoBlocks:   'Блокировок пока нет',
+        sftBlocksHint: 'Только чтение. Снять чужую блокировку нельзя — это выбор человека, а не наш.',
+        sftForbidden:  'Раздел виден администратору и менеджеру',
+        sftLoadError:  'Не удалось прочитать раздел',
+        sftTabBans:    'Баны клуба',
+        sftThPlayer:   'Игрок',
+        sftThUntil:    'До какого числа',
+        sftForever:    'Навсегда',
+        sftNoBans:     'Забаненных игроков нет',
+        sftBansHint:   'Это наказание клуба, а не личная блокировка между людьми. Бан входа закрывает приложение целиком, бан карточки — только её. Снять можно здесь или там, где ставили.',
+        sftUnban:      'Снять бан',
+        sftThWhatClosed: 'Что закрыто',
+        sftThByWhom:   'Кто забанил',
+        sftBanAccount: 'Вход в приложение',
+        sftBanCard:    'Карточка игрока',
+        sftUnknownWho: 'не записано',
+        sftUnbanDone:  'Бан снят',
+        sftUnbanError: 'Не удалось снять бан',
         chalPhotoError: 'Не удалось загрузить снимок',
         translateAllBtn: 'Перевести в пустые',
         allFieldsFilled: 'Все поля уже заполнены',
@@ -2070,7 +2112,8 @@
         tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>',
         handshake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17a1 1 0 01-1 1H6l-4-4 6.768-6.768A2 2 0 0110.18 6.8l.292.124a2 2 0 001.83-.164L14.5 5l5 5-3.5 3.5"/><path d="M15 11l4 4-5 5-4-4"/><path d="M14 21a1 1 0 001-1v-1a1 1 0 00-1-1 1 1 0 01-1-1v-1a1 1 0 00-1-1 1 1 0 01-1-1 1 1 0 00-1-1"/><path d="M5 11l4-4"/></svg>',
         bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
-        analytics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>'
+        analytics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>',
+        shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
     };
 
     var SECTION_ICONS = {
@@ -2092,8 +2135,8 @@
 
 
     var ROLE_SECTIONS = {
-        admin:   ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'analytics', 'users', 'finances', 'vouchers', 'loyalty', 'notifications', 'settings'],
-        manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'analytics', 'users', 'finances', 'vouchers', 'loyalty']
+        admin:   ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'analytics', 'users', 'safety', 'finances', 'vouchers', 'loyalty', 'notifications', 'settings'],
+        manager: ['dashboard', 'content', 'tournaments', 'challenges', 'live', 'players', 'courts', 'coaches', 'sponsors', 'analytics', 'users', 'safety', 'finances', 'vouchers', 'loyalty']
     };
 
     /**

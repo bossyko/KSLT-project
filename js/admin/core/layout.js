@@ -38,6 +38,9 @@
             { key: 'notifications', icon: A.ICONS.bell, label: L.pushNotifications, badge: false },
             { key: '_divider' },
             { key: 'users',     icon: A.ICONS.users,  label: L.users,     badge: false },
+            /* ЩИТ СТОИТ РЯДОМ С ЛЮДЬМИ, А НЕ В НАСТРОЙКАХ: разбирают тут
+               не настройку, а чужую беду, и приходят сюда от человека. */
+            { key: 'safety',   icon: A.ICONS.shield, label: L.sftTitle,  badge: false },
             { key: 'finances', icon: A.ICONS.wallet, label: L.finances, badge: false },
             { key: 'vouchers', icon: A.ICONS.ticket, label: L.vouchers, badge: false },
             { key: 'loyalty', icon: A.ICONS.star, label: L.loyalty, badge: false },
@@ -225,7 +228,8 @@
             live: A.renderLiveSection,
             sponsors: A.renderSponsorsList,
             analytics: A.renderAnalyticsSection,
-            notifications: A.renderNotificationsSection
+            notifications: A.renderNotificationsSection,
+            safety: A.renderSafetyList
         };
         if (resetMap[tab]) {
             resetMap[tab]();

@@ -34,6 +34,7 @@
         A.renderVouchersSection();
         A.renderLoyaltySection();
         A.renderUsersSection();
+        A.renderSafetySection();
         A.renderSettingsSection();
         A.initTabs();
     };
