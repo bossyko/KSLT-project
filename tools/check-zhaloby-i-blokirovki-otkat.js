@@ -15,6 +15,10 @@ const ПРИБОР = 'tools/check-zhaloby-i-blokirovki.js';
 const ФУНКЦИИ = 'sql/схема/apple-1-2-funkcii.sql';
 const ЗАСЛОН  = 'sql/схема/apple-1-2-zaslon.sql';
 const КОНТАКТЫ= 'sql/схема/apple-1-2-kontakty.sql';
+const ВИТРИНА = 'sql/доступ/players-public-zakryt-04nov.sql';
+const СПИСОК  = 'js/players.js';
+const РЕЙТИНГ = 'js/rankings-data.js';
+const РЕЙТПРИЛ= 'mobile/www/js/screens/rating.js';
 const ПРАВА   = 'sql/схема/apple-1-2-prava.sql';
 const БАНЫ    = 'sql/схема/apple-1-2-bany-vse.sql';
 const КАРТОЧКА= 'mobile/www/js/screens/player-detail.js';
@@ -197,6 +201,46 @@ const ОТКАТЫ = [
       было: "supabaseClient.rpc('kslt_kontakty', { p_player_id: playerId })",
       станет: "supabaseClient.from('profiles').select('phone, show_phone').eq('player_id', playerId).maybeSingle()" },
 
+    { имя: 'кабинет сайта снова показывает сырую ошибку базы',
+      ждём: 'кабинет сайта объясняет отказ фильтра', файл: КАБСАЙТА,
+      было: "errMsg = L.errStopWord;",
+      станет: "errMsg = L.errPhoneTaken;" },
+
+    { имя: 'кабинет приложения снова показывает безымянный отказ',
+      ждём: 'кабинет приложения объясняет отказ фильтра', файл: КАБИНЕТ,
+      было: "var стоп = String(r.error.message || '').indexOf('KSLT_STOP_WORD') !== -1;",
+      станет: "var стоп = false;" },
+
+    { имя: 'витрина снова считает только бан карточки',
+      ждём: 'витрина считает признак из обоих видов бана', файл: ВИТРИНА,
+      было: 'EXISTS (SELECT 1 FROM public.profiles pr',
+      станет: 'EXISTS (SELECT 1 FROM public.players pr' },
+
+    { имя: 'список снова считает метку из срока бана',
+      ждём: 'список читает готовый признак, а не срок бана', файл: СПИСОК,
+      было: 'if (!p || !p.zakryt) return \'\';',
+      станет: 'if (!p || !(p.banned_until && new Date(p.banned_until) > new Date())) return \'\';' },
+
+    { имя: 'рейтинг снова дочитывает сроки отдельным запросом',
+      ждём: 'рейтинг не дочитывает сроки бана отдельным запросом', файл: РЕЙТИНГ,
+      было: 'zakryt: !!p.zakryt,',
+      станет: 'banned_until: p.banned_until || null,' },
+
+    { имя: 'метка снова нарисована инлайном',
+      ждём: 'метка бана живёт классом, а не инлайном', файл: СПИСОК,
+      было: '<span class="pl-zakryt">',
+      станет: '<span style="padding:1px 6px">' },
+
+    { имя: 'в рейтинге приложения метка считает бан сама',
+      ждём: 'рейтинг приложения показывает метку тем же признаком', файл: РЕЙТПРИЛ,
+      было: "if (!p || !p.zakryt) return '';",
+      станет: "if (!p || !(p.banned_until && new Date(p.banned_until) > new Date())) return '';" },
+
+    { имя: 'рейтинг приложения перестал просить признак у витрины',
+      ждём: 'рейтинг приложения просит признак у витрины', файл: РЕЙТПРИЛ,
+      было: "is_member, is_guest, zakryt'",
+      станет: "is_member, is_guest'" },
+
     /* ── ОТКАТ НА МОЛЧАНИЕ ── подпись это не код. */
     { имя: 'МОЛЧАНИЕ: подпись к тихой отмене переписана',
       ждём: null, файл: ФУНКЦИИ,
@@ -204,7 +248,8 @@ const ОТКАТЫ = [
       станет: "-- Тихая отмена. Решено так" }
 ];
 
-const НУЖНЫ = [ФУНКЦИИ, ЗАСЛОН, ПРАВА, БАНЫ, КОНТАКТЫ, КАРТОЧКА, КАБИНЕТ, ВХОД,
+const НУЖНЫ = [ФУНКЦИИ, ЗАСЛОН, ПРАВА, БАНЫ, КОНТАКТЫ, ВИТРИНА, СПИСОК, РЕЙТИНГ, РЕЙТПРИЛ,
+               КАРТОЧКА, КАБИНЕТ, ВХОД,
                СЛОВАРЬ, СТРАНИЦА, КАБСАЙТА, АДМИНКА, ОДЕЖДА,
                ПРИБОР, 'tools/bez-kommentariev.js'];
 

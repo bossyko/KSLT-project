@@ -168,6 +168,25 @@
         return 'Профили игроков и статистика открываются после входа';
     }
 
+    /**
+     * МЕТКА «ЗАКРЫТ» — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ (04.11).
+     *
+     * Она стояла в файле ДВУМЯ одинаковыми копиями (:631 и :1001), и обе
+     * были написаны инлайн-стилями мимо шкалы. Прувер это и поймал:
+     * якорь отката встречался дважды. Две копии одного понятия — беда,
+     * которая родится ровно на шве, когда поправят только одну.
+     *
+     * Признак `zakryt` считает БАЗА и считает из ОБОИХ видов бана —
+     * закрытая учётная запись и закрытая карточка
+     * (`sql/доступ/players-public-zakryt-04nov.sql`). Здесь его только
+     * читают. СЛОВО КОСТИ 04.11: никого не прячем, показываем статус.
+     */
+    function меткаЗакрыт(p) {
+        if (!p || !p.zakryt) return '';
+        var слово = isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.');
+        return '<span class="pl-zakryt">' + слово + '</span>';
+    }
+
     function isEnPage() {
         return KSLT_YAZYK.en;
     }
@@ -628,7 +647,7 @@
                             (isBg ? '<span class="pl-guest-mark" title="' +
                                 (isEnPage() ? 'In the club database, membership not paid' : (isKgPage() ? 'Клубдун базасында бар, мүчөлүк төлөнгөн эмес' : 'Есть в базе клуба, членство не оплачено')) + '">' +
                                 (isEnPage() ? 'not a member' : (isKgPage() ? 'мүчө эмес' : 'не член клуба')) + '</span>' : '') +
-                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
+                            меткаЗакрыт(p) +
                         '</div>' +
                         catLabel +
                     '</div>' +
@@ -998,7 +1017,7 @@
                         '<div class="pl-player-name-row">' +
                             nameHtml +
                             (badgesHtml ? '<span class="pl-player-badges">' + badgesHtml + '</span>' : '') +
-                            (p.banned_until && new Date(p.banned_until) > new Date() ? '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.65rem;font-weight:600;background:var(--danger-subtle);color:var(--danger);margin-left:4px;">' + (isEnPage() ? 'Banned' : (isKgPage() ? 'Бөгөт.' : 'Заблок.')) + '</span>' : '') +
+                            меткаЗакрыт(p) +
                         '</div>' +
                     '</div>' +
                 '</div>' +

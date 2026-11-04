@@ -203,7 +203,7 @@
         // вчетверо больше — половину съедали created_at и updated_at,
         // которые здесь никому не нужны
         return supabaseClient.from('players_public')
-          .select('id, name, name_en, photo, category_id, ntrp_singles, ntrp_doubles, wins, losses, is_member, is_guest')
+          .select('id, name, name_en, photo, category_id, ntrp_singles, ntrp_doubles, wins, losses, is_member, is_guest, zakryt')
           .eq('gender', currentGender)
           .then(function(r) {
             if (r.error) console.error('Rating load error:', r.error);
@@ -385,7 +385,7 @@
         '<span class="rr-rank' + (rank && rank <= 3 ? ' top' : '') + '" role="cell">' + (rank || '—') + '</span>' +
         '<div class="rr-player" role="cell">' +
           (p.photo ? '<img class="rr-avatar-img" src="' + esc(p.photo) + '" alt="" aria-hidden="true">' : '<div class="rr-avatar" aria-hidden="true">' + initials(p.name) + '</div>') +
-          '<span class="rr-name">' + esc(p.name) + значкиСтрокой(p.id) +
+          '<span class="rr-name">' + esc(p.name) + значкиСтрокой(p.id) + меткаЗакрыт(p) +
             (isBg ? '<span class="rr-guest-mark">' + I18N.t('rating.notMember') + '</span>' : '') +
           '</span>' +
         '</div>' +
@@ -463,6 +463,20 @@
    * `name` — текстовые столбцы, которые пишет человек. Куском A3.7б уже
    * закрывалась дыра, где значок вставлялся сырым.
    */
+  /**
+   * МЕТКА «ЗАКРЫТ» В РЕЙТИНГЕ ПРИЛОЖЕНИЯ — ОДНО ОПРЕДЕЛЕНИЕ (04.11).
+   *
+   * Признак `zakryt` считает БАЗА и считает из ОБОИХ видов бана: закрыта
+   * учётная запись или закрыта карточка
+   * (`sql/доступ/players-public-zakryt-04nov.sql`). Здесь его только
+   * читают — ровно так же, как в списке на сайте.
+   * СЛОВО КОСТИ 04.11: никого не прячем, показываем статус.
+   */
+  function меткаЗакрыт(p) {
+    if (!p || !p.zakryt) return '';
+    return '<span class="rr-zakryt">' + esc(I18N.t('rating.banned')) + '</span>';
+  }
+
   function значкиСтрокой(игрокId) {
     var Z = window.KSLT_ZNACHKI;
     if (!Z || !_значки) return '';

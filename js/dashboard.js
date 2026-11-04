@@ -306,6 +306,7 @@
         notifEmail: 'Email',
         notifSaved: 'Notification settings saved',
         errPhoneTaken: 'This phone number is already linked to another account',
+        errStopWord: 'This text contains a word we do not allow. Please reword it.',
         // Loyalty
         loyaltyTab: 'Points',
         loyBalance: 'Balance',
@@ -625,6 +626,7 @@
         notifEmail: 'Email',
         notifSaved: 'Билдирме жөндөөлөрү сакталды',
         errPhoneTaken: 'Бул телефон башка аккаунтка катталган',
+        errStopWord: 'Бул жазууда уруксат берилбеген сөз бар. Башкача жазыңыз.',
         // Loyalty
         loyaltyTab: 'Баллдар',
         loyBalance: 'Баланс',
@@ -941,6 +943,7 @@
         notifEmail: 'Email',
         notifSaved: 'Настройки уведомлений сохранены',
         errPhoneTaken: 'Этот номер телефона уже привязан к другому аккаунту',
+        errStopWord: 'В тексте есть слово, которое мы не пропускаем. Напишите иначе.',
         // Loyalty
         loyaltyTab: 'Баллы',
         loyBalance: 'Баланс',
@@ -4741,6 +4744,15 @@
             var errMsg = result.error.message;
             if (result.error.code === '23505' && errMsg.indexOf('phone') !== -1) {
                 errMsg = L.errPhoneTaken;
+            }
+            /* СТОП-СЛОВО ГОВОРИТСЯ ПО-ЧЕЛОВЕЧЕСКИ (04.11). Фильтр стоит
+               триггером в базе и отказывает с меткой `KSLT_STOP_WORD`,
+               чтобы его отказ можно было отличить от прочих. Без этой
+               ветки человек видел сырую строку базы и не понимал, что
+               именно от него хотят. ОТКАЗ, КОТОРЫЙ НЕ ОБЪЯСНЁН, РАВЕН
+               ПОЛОМКЕ — человек будет жать «Сохранить» снова и снова. */
+            if (errMsg.indexOf('KSLT_STOP_WORD') !== -1) {
+                errMsg = L.errStopWord;
             }
             showMessage('profileMessage', errMsg, true);
             btn.textContent = L.save;

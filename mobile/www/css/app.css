@@ -6058,6 +6058,19 @@ select.prof-field-input { color: var(--text); }
   border-radius: var(--radius-full); padding: 1px var(--space-2); vertical-align: middle;
 }
 
+/* ── МЕТКА «ЗАКРЫТ» В РЕЙТИНГЕ (04.11) ────────────────────────────────
+   Та же ступень и та же форма, что у соседней метки «не член клуба»:
+   пара читается как пара и должна ехать одной границей. Отличается
+   только краской — это статус, а не приписка.
+   Признак считает база из ОБОИХ видов бана; слово Кости 04.11: никого
+   не прячем, показываем статус. */
+.rr-zakryt {
+  display: inline-block; margin-left: var(--space-2);
+  font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .3px;
+  color: var(--danger); border: 1px solid var(--danger);
+  border-radius: var(--radius-full); padding: 1px var(--space-2); vertical-align: middle;
+}
+
 /* Кнопка приглашения на карточке поиска игрока. Карточка выложена в строку,
    поэтому кнопка прижимается к правому краю и не растягивает её по высоте */
 .partner-invite-btn {

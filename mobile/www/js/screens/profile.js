@@ -1522,7 +1522,13 @@
           if (!r) return;   // номер занят — сообщение уже показано
           if (r.error) {
             var dup = r.error.code === '23505' && String(r.error.message || '').indexOf('phone') !== -1;
-            window.KSLT_APP.toast(I18N.t(dup ? 'profile.phoneTaken' : 'profile.savedErr'));
+            /* СТОП-СЛОВО ГОВОРИТСЯ ПО-ЧЕЛОВЕЧЕСКИ (04.11). Фильтр стоит
+               триггером в базе и помечает свой отказ `KSLT_STOP_WORD`
+               нарочно — чтобы его можно было отличить от прочих ошибок.
+               ОТКАЗ, КОТОРЫЙ НЕ ОБЪЯСНЁН, РАВЕН ПОЛОМКЕ. */
+            var стоп = String(r.error.message || '').indexOf('KSLT_STOP_WORD') !== -1;
+            window.KSLT_APP.toast(I18N.t(
+              стоп ? 'profile.stopWord' : (dup ? 'profile.phoneTaken' : 'profile.savedErr')));
           } else {
             _profile.full_name = fullName;
             _profile.phone = phone;

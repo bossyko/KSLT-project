@@ -1765,3 +1765,23 @@
         justify-self: end;
     }
 }
+
+/* ── МЕТКА «ЗАКРЫТ» В СПИСКЕ ИГРОКОВ (04.11) ──────────────────────────
+   Здесь стоял инлайн-стиль в двух местах `js/players.js`, и числа в нём
+   шли мимо шкалы: 1px 6px, 3px, 0.65rem. Метка показывает ОБА вида бана
+   разом — признак `zakryt` считает база
+   (`sql/доступ/players-public-zakryt-04nov.sql`).
+   СЛОВО КОСТИ 04.11: никого не прячем, показываем статус.
+   Кегль 11 — нижняя ступень шкалы; отступ 8 — её же; радиус и краски из
+   общих значений, своих чисел нет. */
+.pl-zakryt {
+    display: inline-block;
+    margin-left: var(--space-2);
+    padding: var(--space-05) var(--space-2);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    background: var(--danger-subtle);
+    color: var(--danger);
+}

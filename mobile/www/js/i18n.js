@@ -292,6 +292,7 @@
     'rating.doubles':    { ru: 'Парный',              en: 'Doubles',        kg: 'Жуп' },
     'rating.playersCount': { ru: 'игроков',           en: 'players',        kg: 'оюнчу' },
     'rating.notMember':  { ru: 'не член клуба',       en: 'not a member',    kg: 'мүчө эмес' },
+    'rating.banned':          { ru: 'Заблок.', en: 'Banned', kg: 'Бөгөт.' },
     'coaches.emptySoon': { ru: 'Список тренеров скоро появится',
                            en: 'The list of coaches will appear soon',
                            kg: 'Машыктыруучулардын тизмеси жакында пайда болот' },
@@ -762,6 +763,7 @@
     'restore.done':           { ru: 'Аккаунт восстановлен', en: 'Account restored', kg: 'Аккаунт калыбына келтирилди' },
     'restore.fail':           { ru: 'Не получилось вернуть аккаунт', en: 'Could not restore the account', kg: 'Аккаунтту кайтаруу мүмкүн болгон жок' },
     'profile.phoneTaken':     { ru: 'Этот номер уже привязан к другому аккаунту', en: 'This phone number is already linked to another account', kg: 'Бул номер башка аккаунтка байланган' },
+    'profile.stopWord':       { ru: 'В тексте есть слово, которое мы не пропускаем. Напишите иначе.', en: 'This text contains a word we do not allow. Please reword it.', kg: 'Бул жазууда уруксат берилбеген сөз бар. Башкача жазыңыз.' },
     'profile.deleteTitle':    { ru: 'Удаление аккаунта', en: 'Delete Account', kg: 'Аккаунтту өчүрүү' },
     'profile.deleteText':     { ru: 'Аккаунт скроется сразу. У вас будет 30 дней, чтобы передумать — просто войдите, и мы предложим его вернуть. Потом он удалится навсегда.', en: 'Your account is hidden right away. You have 30 days to change your mind — just sign in and we will offer to bring it back. After that it is gone for good.', kg: 'Аккаунт дароо жашырылат. Ойлонууга 30 күнүңүз бар — жөн эле кириңиз, биз аны кайтарууну сунуштайбыз. Андан кийин биротоло өчөт.' },
     // Не «навсегда»: рядом написано, что 30 дней можно передумать, и
