@@ -1156,7 +1156,7 @@ input, button, select, textarea {
    обязан видеть, где он, а `:hover` ему недоступен. */
 .kslt-cc-toggle:focus-visible,
 .kslt-cc-item:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -1200,7 +1200,6 @@ input, button, select, textarea {
     border: var(--bw-hair) solid var(--border);
     border-radius: var(--radius-full);
     color: var(--text-secondary);
-    font-family: inherit;
     font-size: var(--fs-xs);
     font-weight: 500;
     white-space: nowrap;
@@ -1268,7 +1267,6 @@ input, button, select, textarea {
     border: none;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-family: inherit;
     font-size: var(--fs-sm);
     text-align: left;
     cursor: pointer;
@@ -1311,7 +1309,7 @@ input, button, select, textarea {
 
 .kslt-dd-toggle:focus-visible,
 .kslt-dd-item:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: 2px;
 }
 

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: раздел «Жалобы и блокировки» в админке</title>
+<!--
+  СТЕНД, А НЕ СХЕМА. Подключены настоящие файлы админки в тех же версиях,
+  что в `pages/admin.html`: ../css/tokens.css, ../css/admin.css.
+  Разметку печатает `js/admin/sections/safety.js` — здесь она повторена
+  ТЕМИ ЖЕ классами (`ad-tabs`, `ad-tab`, `ad-table`, `ad-btn`), чтобы
+  стенд показывал продукт, а не свою выдумку. Своих правил стенд НЕ
+  держит: `.ad-sft-*` приходят из `admin.css`.
+
+  СТЕНД ОБЯЗАН БЫТЬ НЕУДОБНЫМ. Поэтому в очереди стоят:
+    · жалоба, ПРОСРОЧЕННАЯ на 19 часов (81 час против обещанных 72);
+    · жалоба, которой до срока осталось меньше суток;
+    · заметка длиной в экран — её обрезает `ad-sft-note`, и это видно;
+    · жалоба на баттл, а не на игрока;
+    · уже разобранная — у неё вместо кнопок метка;
+    · имена настоящей длины, а не «Иван И.».
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=86">
+<link rel="stylesheet" href="../css/admin.css?v=312">
+<style>
+  body { margin: 0; background: var(--bg-primary, #0a0a0a); font-family: Inter, system-ui, sans-serif; }
+  .обвязка { padding: 24px; max-width: 1400px; }
+  .подпись { color: #cf0; font: 700 12px/1.4 Inter, system-ui, sans-serif;
+             letter-spacing: .08em; text-transform: uppercase; margin: 32px 0 8px; }
+</style>
+</head>
+<body>
+<div class="обвязка" id="где"></div>
+<script>
+var ПРИЧИНЫ = {
+  offensive: 'Оскорбление или угрозы', spam: 'Реклама или спам',
+  fake: 'Выдаёт себя за другого', foreign_photo: 'Чужая фотография', other: 'Другое'
+};
+var ОБЪЕКТЫ = { player: 'Игрок', battle: 'Баттл', avatar: 'Фотография', bio: 'О себе' };
+var СТАТУСЫ = { new: 'Новая', reviewed: 'Разобрана', removed: 'Содержимое снято', rejected: 'Отклонена' };
+
+var ЖАЛОБЫ = [
+  { когда: '1 ноя, 09:14', часов: 81, kto: 'Жапаркулова Айпери Бакытбековна',
+    na: 'Ы. Токтогулов', kind: 'bio', reason: 'offensive', status: 'new',
+    note: 'В поле «о себе» написал про меня оскорбление, я просила убрать — не убрал. Пишу второй раз, потому что в прошлый раз никто не ответил, и это видно всем, кто открывает его карточку.' },
+  { когда: '2 ноя, 20:40', часов: 58, kto: 'Костя Хан', na: 'Б. Садыков',
+    kind: 'avatar', reason: 'foreign_photo', status: 'new',
+    note: 'На фотографии чужой человек — это снимок из интернета.' },
+  { когда: '4 ноя, 08:02', часов: 3, kto: 'А. Иванова', na: 'Баттл «Осенний вызов»',
+    kind: 'battle', reason: 'spam', status: 'new', note: '' },
+  { когда: '30 окт, 11:20', часов: 120, kto: 'М. Орозбеков', na: 'Ы. Токтогулов',
+    kind: 'player', reason: 'fake', status: 'removed', note: 'Выдаёт себя за тренера клуба.' }
+];
+
+var БЛОКИРОВКИ = [
+  { когда: '4 ноя, 10:51', kto: 'Жапаркулова Айпери Бакытбековна', kogo: 'Ы. Токтогулов' },
+  { когда: '28 окт, 19:02', kto: 'Б. Садыков', kogo: 'М. Орозбеков' }
+];
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+function действия(ж) {
+  if (ж.status !== 'new') {
+    return '<span class="ad-badge">' + esc(СТАТУСЫ[ж.status]) + '</span>';
+  }
+  return '<button class="ad-btn ad-btn-sm ad-btn-danger" type="button">Снять содержимое</button>' +
+         '<button class="ad-btn ad-btn-sm" type="button">Разобрана</button>' +
+         '<button class="ad-btn ad-btn-sm" type="button">Отклонить</button>';
+}
+
+function таблицаЖалоб() {
+  var h = '<p class="ad-sft-sub">Срок ответа по жалобе — трое суток. Это записано ' +
+          'в Правилах и этого требует Apple (правило 1.2).</p>' +
+          '<div class="ad-sft-filters">' +
+    ['Новая', 'Разобрана', 'Содержимое снято', 'Отклонена', 'Все'].map(function(п, i) {
+      return '<button class="ad-sft-filter' + (i === 0 ? ' active' : '') + '" type="button">' + п + '</button>';
+    }).join('') + '</div>';
+
+  h += '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
+    '<th>Когда</th><th>Кто</th><th>На кого</th><th>Что</th>' +
+    '<th>Причина</th><th>Заметка</th><th></th></tr></thead><tbody>';
+  ЖАЛОБЫ.forEach(function(ж) {
+    var просрок = ж.status === 'new' && ж.часов >= 72;
+    var близко  = ж.status === 'new' && ж.часов >= 48 && ж.часов < 72;
+    h += '<tr class="' + (просрок ? 'ad-sft-late' : близко ? 'ad-sft-soon' : '') + '">' +
+      '<td>' + esc(ж.когда) + '<div class="ad-sft-hours">' + ж.часов + ' ч</div></td>' +
+      '<td>' + esc(ж.kto) + '</td>' +
+      '<td>' + esc(ж.na) + '</td>' +
+      '<td>' + esc(ОБЪЕКТЫ[ж.kind]) + '</td>' +
+      '<td>' + esc(ПРИЧИНЫ[ж.reason]) + '</td>' +
+      '<td class="ad-sft-note">' + esc(ж.note || '—') + '</td>' +
+      '<td class="ad-sft-actions">' + действия(ж) + '</td>' +
+    '</tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+
+function таблицаБлокировок() {
+  var h = '<p class="ad-sft-hint">Только чтение. Снять чужую блокировку нельзя — ' +
+          'это выбор человека, а не наш.</p>' +
+    '<div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
+    '<th>Когда</th><th>Кто заблокировал</th><th>Кого</th></tr></thead><tbody>';
+  БЛОКИРОВКИ.forEach(function(б) {
+    h += '<tr><td>' + esc(б.когда) + '</td><td>' + esc(б.kto) + '</td><td>' + esc(б.kogo) + '</td></tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+
+function раздел(активна) {
+  return '<h2 class="ad-section-title">Жалобы и блокировки</h2>' +
+    '<div class="ad-tabs ad-sft-tabs">' +
+      '<button class="ad-tab' + (активна === 'z' ? ' active' : '') + '" type="button">Жалобы</button>' +
+      '<button class="ad-tab' + (активна === 'b' ? ' active' : '') + '" type="button">Блокировки</button>' +
+    '</div>' +
+    '<div class="ad-sft-body">' + (активна === 'z' ? таблицаЖалоб() : таблицаБлокировок()) + '</div>';
+}
+
+document.getElementById('где').innerHTML =
+  '<div class="подпись">вкладка «жалобы» · очередь, старые сверху</div>' + раздел('z') +
+  '<div class="подпись">вкладка «блокировки» · только чтение</div>' + раздел('b') +
+  '<div class="подпись">пусто — говорит словами, а не пустотой</div>' +
+  '<h2 class="ad-section-title">Жалобы и блокировки</h2>' +
+  '<div class="ad-sft-body"><div class="ad-sft-empty">Новых жалоб нет</div></div>';
+</script>
+</body>
+</html>

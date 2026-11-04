@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: жалоба и блокировка на САЙТЕ</title>
+<!--
+  СТЕНД, А НЕ СХЕМА. Подключены НАСТОЯЩИЕ файлы продукта и те же версии,
+  что в `pages/player.html:28-32`:
+      ../css/tokens.css?v=86 · style.css?v=468 · kslt-otsechka.css?v=34
+      ../css/player.css?v=106 · kslt-toast.css?v=36
+  Классы разметки печатает `js/player.js:717-828` (`pp-hero`, `pp-hero-bg`,
+  `pp-hero-content`, `pp-header`, `pp-photo-wrap`, `pp-info`, `pp-name`,
+  `pp-meta`, `pp-ratings`, `pp-actions`, `pp-action-btn`). Окна стоят на
+  уже живущей оболочке `h2h-overlay` / `h2h-modal` / `h2h-close`
+  (`css/player.css:1208-1266`) — нового компонента не заведено.
+
+  ПРАВКА ВНЕСЕНА 04.11 по слову Кости: правила живут в `css/player.css`,
+  а стенд их ОТТУДА и берёт.
+
+  РЕШЕНИЕ, КОТОРОЕ ВИДНО ГЛАЗАМИ: на сайте кнопки НЕ встают в `pp-actions`
+  рядом с «Вызвать» — в обложке они оказались бы того же веса, что призыв
+  играть. Они стоят отдельной тихой строкой под обложкой, справа.
+
+  СТЕНД ОБЯЗАН БЫТЬ НЕУДОБНЫМ: имя длинное настоящее, в четвёртом виде —
+  карточка человека, который удалил учётную запись (метка `pp-account-gone`),
+  потому что именно на ней вопрос «а результаты?» и становится настоящим.
+-->
+<script>
+  var ВИД = new URLSearchParams(location.search).get('vid');
+</script>
+<link rel="stylesheet" href="../css/tokens.css?v=86">
+<link rel="stylesheet" href="../css/style.css?v=468">
+<link rel="stylesheet" href="../css/kslt-otsechka.css?v=34">
+<link rel="stylesheet" href="../css/player.css?v=106">
+<link rel="stylesheet" href="../css/kslt-toast.css?v=36">
+<style>
+/* ===== обвязка стенда, в продукт НЕ идёт ===== */
+html, body { margin: 0; }
+body.ряд { background: #07070a; font-family: Inter, system-ui, sans-serif; }
+.рейка { display: flex; gap: 24px; padding: 16px; align-items: flex-start; }
+.шапка { font: 700 13px/1.4 Inter, system-ui, sans-serif; letter-spacing: .08em;
+         text-transform: uppercase; padding: 6px 2px 10px; color: #cf0; }
+.шапка span { display: block; text-transform: none; letter-spacing: 0;
+              font-weight: 400; font-size: 12px; color: rgba(255,255,255,.5); }
+.рейка iframe { border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+                background: var(--bg-primary, #0a0a0a); display: block; }
+.у390 iframe { width: 390px; height: 900px; }
+.у390 { width: 390px; flex: 0 0 390px; }
+.широкий { padding: 0 16px 32px; }
+.широкий iframe { width: 100%; height: 760px; }
+.пояснение { max-width: 1000px; margin: 8px 16px 40px; color: rgba(255,255,255,.7);
+             font: 400 14px/1.6 Inter, system-ui, sans-serif; }
+.пояснение code { color: #cf0; font-size: 13px; }
+.пояснение h2 { color: #fff; font-size: 16px; letter-spacing: .04em;
+                text-transform: uppercase; margin: 24px 0 8px; }
+
+/* ===== ПРАВИЛА УЕХАЛИ В ПРОДУКТ 04.11 =====
+   Своей копии здесь больше НЕТ: `.pp-safety`, `.pp-rep-*`, `.pp-blk-*`
+   приходят из `../css/player.css`, подключённого выше. Стенд этим и
+   проверяет перенос: разъехался вид — значит перенос неверен.
+   ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. */
+
+</style>
+</head>
+<body>
+<script>
+var ИМЯ = 'Жапаркулова Айпери Бакытбековна';
+
+function обложка(опции) {
+  var о = опции || {};
+  var h = '<section class="pp-hero"><div class="pp-hero-bg"></div><div class="pp-hero-content">';
+  h += '<div class="pp-header">';
+  h +=   '<div class="pp-photo-wrap"><span class="pp-photo pp-photo-ph">ЖА</span>' +
+         '<div style="text-align:center;font-style:italic;color:var(--text-secondary);' +
+         'font-size:0.85rem;margin-top:10px;opacity:0.8;">«Играю с 2016, грунт»</div></div>';
+  h +=   '<div class="pp-info">';
+  h +=     '<h1 class="pp-name">' + ИМЯ + '</h1>';
+  if (о.ушёл) h += '<div class="pp-account-gone">Аккаунт удалён</div>';
+  h +=     '<div class="pp-meta"><span class="pp-meta-country">🇰🇬 Кыргызстан</span></div>';
+  h +=     '<div class="pp-ratings">' +
+             '<div class="pp-rating-row"><span class="pp-rating-label">Женщины 3.5–4.0</span>' +
+             '<span class="pp-rating-value">1842 · #7</span></div>' +
+             '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span>' +
+             '<span class="pp-rating-value">4.0 одиночн. · 4.5 парн.</span></div>' +
+           '</div>';
+  h +=   '</div>';
+  h +=   '<div class="pp-actions">';
+  if (!о.ушёл) {
+    h += '<button class="pp-action-btn pp-action-primary"><span class="pp-action-icon">🔥</span> Вызвать на матч</button>';
+    h += '<button class="pp-action-btn pp-action-secondary"><span class="pp-action-icon">🎾</span> Пригласить поиграть</button>';
+  }
+  h +=   '</div>';
+  h += '</div>';
+  /* НОВОЕ — тихая строка, которой на странице не было вовсе.
+     У КАРТОЧКИ БЕЗ ХОЗЯИНА БЛОКИРОВКИ НЕТ, И ЭТО НЕ ЗАБЫВЧИВОСТЬ: блокировка
+     закрывает вызовы, приглашения и контакты — всё, чего от удалённой учётной
+     записи прийти уже не может. А ЖАЛОБА ОСТАЁТСЯ: фотография и «о себе»
+     остались на экране, и пожаловаться на них по-прежнему есть на что.
+     Признак тот же, по которому карточка несёт метку «Аккаунт удалён»:
+     `player.account_deleted_at` (`js/player.js:807`). */
+  h += '<div class="pp-safety">' +
+         '<button class="pp-safety-btn" type="button">Пожаловаться</button>' +
+         (о.ушёл ? '' :
+         '<button class="pp-safety-btn pp-safety-btn--block" type="button">Заблокировать</button>') +
+       '</div>';
+  h += '</div></section>';
+  return h;
+}
+
+function окноЖалобы() {
+  var причины = [
+    ['offensive', 'Оскорбление или угрозы', true],
+    ['spam', 'Реклама или спам', false],
+    ['fake', 'Выдаёт себя за другого', false],
+    ['foreign_photo', 'Чужая фотография', false],
+    ['other', 'Другое', false]
+  ].map(function(р) {
+    return '<label class="pp-rep-reason">' +
+             '<input type="radio" name="prichina" value="' + р[0] + '"' + (р[2] ? ' checked' : '') + '>' +
+             '<span class="pp-rep-tick" aria-hidden="true">✓</span>' +
+             '<span>' + р[1] + '</span></label>';
+  }).join('');
+  return '<div class="h2h-overlay visible">' +
+    '<div class="h2h-modal" role="dialog" aria-modal="true" aria-labelledby="repT">' +
+      '<button class="h2h-close" aria-label="Закрыть">✕</button>' +
+      '<div class="h2h-header"><div class="h2h-label" id="repT">Жалоба на игрока</div></div>' +
+      '<div class="pp-rep-reasons" role="radiogroup" aria-label="Причина жалобы">' + причины + '</div>' +
+      '<label class="pp-rep-note-label" for="repNote">Что случилось — необязательно</label>' +
+      '<textarea class="pp-rep-note" id="repNote" maxlength="1000" ' +
+        'placeholder="Например: написал оскорбление в описании баттла"></textarea>' +
+      '<button class="pp-rep-send">Отправить жалобу</button>' +
+      '<p class="pp-rep-srok">Разбираем в течение трёх суток.</p>' +
+    '</div></div>';
+}
+
+function окноБлокировки() {
+  return '<div class="h2h-overlay visible">' +
+    '<div class="h2h-modal" role="dialog" aria-modal="true" aria-labelledby="blkT">' +
+      '<button class="h2h-close" aria-label="Закрыть">✕</button>' +
+      '<div class="h2h-header"><div class="h2h-label" id="blkT">Заблокировать</div></div>' +
+      '<ul class="pp-blk-what">' +
+        '<li>не сможет вызвать вас на матч</li>' +
+        '<li>не сможет позвать вас поиграть</li>' +
+        '<li>и вы его тоже — пока блокировка стоит</li>' +
+        '<li>не увидит ваши контакты в карточке</li>' +
+        '<li>назначенные одиночные матчи между вами отменятся</li>' +
+        '<li>парный матч не отменится: его назначали четверо</li>' +
+      '</ul>' +
+      '<div class="pp-blk-keep"><strong>Турнирные результаты останутся</strong>' +
+        '<span>Матчи, в которых вы уже играли друг с другом, остаются в сетке, ' +
+        'в таблице группы и в истории обоих. Это результат соревнования: он ' +
+        'принадлежит турниру, а не двум людям — ровно по той же причине, по ' +
+        'которой карточка остаётся после удаления учётной записи.</span></div>' +
+      '<button class="pp-blk-do">Заблокировать</button>' +
+      '<button class="pp-blk-cancel">Отмена</button>' +
+    '</div></div>';
+}
+
+if (ВИД) {
+  var ядро = обложка({ ушёл: ВИД === 'ushel' });
+  var окно = ВИД === 'zhaloba' ? окноЖалобы()
+           : ВИД === 'blok' ? окноБлокировки() : '';
+  document.body.innerHTML = ядро + окно;
+} else {
+  document.body.className = 'ряд';
+  var узкие = [
+    ['net', '390 · строка на месте', 'телефон: кнопки на всю полосу'],
+    ['zhaloba', '390 · окно жалобы', 'причина выбрана, заметка пуста'],
+    ['blok', '390 · окно блокировки', 'что изменится + плашка результатов']
+  ];
+  document.body.innerHTML =
+    '<div class="рейка">' + узкие.map(function(с) {
+      return '<div class="у390"><div class="шапка">' + с[1] + '<span>' + с[2] +
+             '</span></div><iframe src="?vid=' + с[0] + '" title="' + с[1] + '"></iframe></div>';
+    }).join('') + '</div>' +
+    '<div class="широкий"><div class="шапка">десктоп · строка справа под обложкой' +
+      '<span>крайний случай: учётная запись удалена — вызова нет, блокировки ' +
+      'нет (некого), жалоба есть: фотография и «о себе» остались</span></div>' +
+      '<iframe src="?vid=ushel" title="десктоп"></iframe></div>' +
+    '<div class="пояснение">' +
+      '<h2>что здесь настоящее</h2>' +
+      '<p>Пять файлов css продукта в тех же версиях, что в ' +
+      '<code>pages/player.html:28-32</code>. Классы обложки печатает ' +
+      '<code>js/player.js:717-828</code>. Окна — оболочка ' +
+      '<code>h2h-overlay</code>/<code>h2h-modal</code> ' +
+      '(<code>css/player.css:1208</code>).</p>' +
+      '<h2>что здесь предложение</h2>' +
+      '<p><code>.pp-safety</code>, <code>.pp-rep-*</code>, <code>.pp-blk-*</code> — ' +
+      'только в <code>&lt;style&gt;</code> этого файла. В <code>player.css</code> ' +
+      'ЭТОГО ПОКА НЕТ.</p>' +
+      '<h2>чем платим</h2>' +
+      '<p>Под обложкой появляется строка высотой 44 плюс отступ 16 — ПОСЧИТАНО ' +
+      'по ступеням, в браузере не замерено. На 390 строка занимает всю ширину, ' +
+      'и обложка вырастает на 56. Пять видов на трёх языках мерим ПОСЛЕ твоего ' +
+      '«да», на шаге 10, — не на стенде.</p>' +
+      '<h2>что ещё открыто</h2>' +
+      '<p>Баттл в ходу при блокировке — доска 1030:155, раздел H. ' +
+      'Отдельно: <code>css/player.css:39</code> — обложка игрока тянет ' +
+      'фотографию с <code>images.unsplash.com</code>. Это третья сторона в ' +
+      'анкете Data safety и ровно та беда, что была с QR и ' +
+      '<code>placehold.co</code>. Находка записана, маршрут не меняет.</p>' +
+    '</div>';
+}
+</script>
+</body>
+</html>

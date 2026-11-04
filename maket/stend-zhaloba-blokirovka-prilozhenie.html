@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: жалоба и блокировка в ПРИЛОЖЕНИИ, 390</title>
+<!--
+  СТЕНД, А НЕ СХЕМА. Доска 1030:155 показывала вид словами и рамками; здесь
+  тот же вид собран НАСТОЯЩИМИ файлами продукта:
+      ../mobile/www/css/fonts.css · tokens.css · app.css
+  Классы в разметке — те самые, что печатает `mobile/www/js/screens/player-detail.js`
+  (`pd-hero`, `pd-avatar-fallback`, `pd-name`, `pd-meta`, `pd-challenge-wrap`,
+  `pd-challenge-btn`, `pd-invite-btn`), а окна стоят на уже живущей оболочке
+  `pd-h2h-modal` / `pd-h2h-content` / `pd-h2h-header` / `pd-h2h-body`
+  (app.css:3868-3900). Нового компонента не заведено — ровно как решено
+  на доске, раздел F.
+
+  ПРАВКА ВНЕСЕНА 04.11 по слову Кости: правила живут в `app.css` (v65), а
+  стенд их ОТТУДА и берёт. Своей копии в стенде не осталось.
+
+  СТЕНД ОБЯЗАН БЫТЬ НЕУДОБНЫМ (правило куска 139): имя взято длинное
+  настоящее, а не «Иван И.», и четвёртый столбец — парная карточка, где
+  строка имени несёт ДВА имени.
+
+  Каждый столбец — iframe этого же файла с ?okno=…, поэтому окна стоят
+  `position: fixed` внутри своего экрана 390×844, а не поверх всей страницы.
+-->
+<script>
+  var ОКНО = new URLSearchParams(location.search).get('okno');
+</script>
+<link rel="stylesheet" href="../mobile/www/css/fonts.css?v=1">
+<link rel="stylesheet" href="../mobile/www/css/tokens.css?v=40">
+<link rel="stylesheet" href="../mobile/www/css/app.css?v=66">
+<style>
+/* ===== только обвязка стенда, в продукт НЕ идёт ===== */
+html, body { margin: 0; }
+body.ряд { background: #07070a; font-family: Inter, system-ui, sans-serif; }
+.рейка { display: flex; gap: 24px; padding: 16px; align-items: flex-start; }
+.стопка { width: 390px; flex: 0 0 390px; }
+.шапка { font: 700 13px/1.4 Inter, system-ui, sans-serif; letter-spacing: .08em;
+         text-transform: uppercase; padding: 6px 2px 10px; color: #cf0; }
+.шапка span { display: block; text-transform: none; letter-spacing: 0;
+              font-weight: 400; font-size: 12px; color: rgba(255,255,255,.5); }
+.рейка iframe { width: 390px; height: 844px; border: 1px solid rgba(255,255,255,.12);
+                border-radius: 8px; background: var(--bg); display: block; }
+.пояснение { max-width: 1000px; margin: 8px 16px 40px; color: rgba(255,255,255,.7);
+             font: 400 14px/1.6 Inter, system-ui, sans-serif; }
+.пояснение code { color: #cf0; font-size: 13px; }
+.пояснение h2 { color: #fff; font-size: 16px; letter-spacing: .04em;
+                text-transform: uppercase; margin: 24px 0 8px; }
+body.экран { background: var(--bg); color: var(--text); }
+.экран-телефон { width: 390px; min-height: 844px; overflow: hidden; }
+
+/* ===== ПРАВИЛА УЕХАЛИ В ПРОДУКТ 04.11 =====
+   Своей копии здесь больше НЕТ: `.pd-safety-row`, `.pd-rep-*`, `.pd-blk-*`
+   приходят из `../mobile/www/css/app.css?v=66`, подключённого выше. Стенд
+   этим и проверяет перенос: разъехался вид — значит перенос неверен.
+   Держать копию правил в стенде нельзя — ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. */
+
+</style>
+</head>
+<body>
+<script>
+/* ---- Содержимое: КРАЙНЕЕ, а не удобное ----
+   Имя настоящей длины: 31 знак, три слова, как в базе КСЛТ.
+   Парная карточка несёт два имени одной строкой — именно там ломается
+   `pd-name`, если кегль заголовка не сходит на виде 390.                */
+var ИМЯ_ДЛИННОЕ = 'Жапаркулова Айпери Бакытбековна';
+var ИМЯ_ПАРА = 'Жапаркулова А. / Токтогулов Э.';
+
+function карточка(имя, мета) {
+  return '' +
+  '<div class="pd-hero">' +
+    '<div class="pd-avatar-wrap"><div class="pd-avatar-fallback">ЖА</div></div>' +
+    '<h2 class="pd-name">' + имя + '</h2>' +
+    '<div class="pd-meta">' +
+      '<span class="pd-country">🇰🇬</span>' +
+      '<span class="pd-category">' + мета + '</span>' +
+    '</div>' +
+    '<div class="pd-ntrp">NTRP <strong>4.0 / 4.5</strong></div>' +
+    '<div class="pd-bio">«Играю с 2016, предпочитаю грунт. Ищу пару на выходные.»</div>' +
+  '</div>' +
+  '<div class="kst-grid">' +
+    плитка('1842', 'Рейтинг') + плитка('37', 'Победы') +
+    плитка('19', 'Поражения') + плитка('66%', 'Побед') +
+  '</div>' +
+  '<div class="pd-challenge-wrap">' +
+    '<button class="pd-challenge-btn">⚔️ Вызвать на матч</button>' +
+    '<button class="pd-invite-btn">🎾 Пригласить поиграть</button>' +
+  '</div>' +
+  /* НОВОЕ — две кнопки, которых на экране не было вовсе */
+  '<div class="pd-safety-row">' +
+    '<button class="pd-safety-btn" type="button">Пожаловаться</button>' +
+    '<button class="pd-safety-btn pd-safety-btn--block" type="button">Заблокировать</button>' +
+  '</div>';
+}
+
+function плитка(ч, п) {
+  return '<div class="kst-card"><div class="kst-value">' + ч +
+         '</div><div class="kst-label">' + п + '</div></div>';
+}
+
+function окноЖалобы(имя) {
+  var причины = [
+    ['offensive', 'Оскорбление или угрозы', true],
+    ['spam', 'Реклама или спам', false],
+    ['fake', 'Выдаёт себя за другого', false],
+    ['foreign_photo', 'Чужая фотография', false],
+    ['other', 'Другое', false]
+  ];
+  var п = причины.map(function(р) {
+    return '<label class="pd-rep-reason">' +
+             '<input type="radio" name="prichina" value="' + р[0] + '"' + (р[2] ? ' checked' : '') + '>' +
+             '<span class="pd-rep-tick" aria-hidden="true">✓</span>' +
+             '<span class="pd-rep-label">' + р[1] + '</span>' +
+           '</label>';
+  }).join('');
+  return '' +
+  '<div class="pd-h2h-modal open" role="dialog" aria-modal="true" aria-labelledby="repTitle">' +
+    '<div class="pd-h2h-content">' +
+      '<div class="pd-h2h-header">' +
+        '<h3 id="repTitle">Жалоба на игрока</h3>' +
+        '<button class="pd-h2h-close" aria-label="Закрыть">✕</button>' +
+      '</div>' +
+      '<div class="pd-h2h-body">' +
+        '<div class="pd-rep-reasons" role="radiogroup" aria-label="Причина жалобы">' + п + '</div>' +
+        '<label class="pd-rep-note-label" for="repNote">Что случилось — необязательно</label>' +
+        '<textarea class="pd-rep-note" id="repNote" maxlength="1000" ' +
+          'placeholder="Например: написал оскорбление в описании баттла"></textarea>' +
+        '<button class="pd-rep-send">Отправить жалобу</button>' +
+        '<p class="pd-rep-srok">Разбираем в течение трёх суток.</p>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function экранБлокировок(пусто) {
+  if (пусто) {
+    return '<div class="pd-empty"><div class="pd-empty-icon">🙂</div>' +
+           '<div class="pd-empty-title">Вы никого не заблокировали</div></div>';
+  }
+  var люди = [
+    ['Жапаркулова Айпери Бакытбековна', '4 ноября 2026 г.'],
+    ['Ы. Токтогулов', '28 октября 2026 г.']
+  ];
+  return '<div style="padding:16px">' + люди.map(function(ч) {
+    return '<div class="prof-blk-row">' +
+             '<div class="prof-blk-text">' +
+               '<div class="prof-blk-name">' + ч[0] + '</div>' +
+               '<div class="prof-blk-date">' + ч[1] + '</div>' +
+             '</div>' +
+             '<button class="prof-blk-off" type="button">Разблокировать</button>' +
+           '</div>';
+  }).join('') +
+  '<p class="prof-blk-note">Отменённые матчи не возвращаются — их назначают заново.</p>' +
+  '</div>';
+}
+
+function окноБлокировки(имя) {
+  return '' +
+  '<div class="pd-h2h-modal open" role="dialog" aria-modal="true" aria-labelledby="blkTitle">' +
+    '<div class="pd-h2h-content">' +
+      '<div class="pd-h2h-header">' +
+        '<h3 id="blkTitle">Заблокировать</h3>' +
+        '<button class="pd-h2h-close" aria-label="Закрыть">✕</button>' +
+      '</div>' +
+      '<div class="pd-h2h-body">' +
+        '<ul class="pd-blk-what">' +
+          '<li>не сможет вызвать вас на матч</li>' +
+          '<li>не сможет позвать вас поиграть</li>' +
+          '<li>и вы его тоже — пока блокировка стоит</li>' +
+          '<li>не увидит ваши контакты в карточке</li>' +
+          '<li>назначенные одиночные матчи между вами отменятся</li>' +
+          '<li>парный матч не отменится: его назначали четверо</li>' +
+        '</ul>' +
+        '<div class="pd-blk-keep">' +
+          '<strong>Турнирные результаты останутся</strong>' +
+          '<span>Матчи, в которых вы уже играли друг с другом, остаются в сетке, ' +
+          'в таблице группы и в истории обоих. Это результат соревнования: он ' +
+          'принадлежит турниру, а не двум людям.</span>' +
+        '</div>' +
+        /* БЕЗ ИМЕНИ НА КНОПКЕ, И ЭТО РЕШЕНИЕ, А НЕ ЛЕНЬ. Первый снимок
+             показал «Заблокировать Жапаркулова» — фамилия в именительном там,
+             где нужен винительный. Склонять имена на трёх языках мы не умеем
+             и не будем: имя уже стоит в заголовке карточки. */
+          '<button class="pd-blk-do">Заблокировать</button>' +
+        '<button class="pd-blk-cancel">Отмена</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+if (ОКНО) {
+  document.body.className = 'экран';
+  var ядро = ОКНО === 'para'
+    ? карточка(ИМЯ_ПАРА, 'Смешанные пары · #12')
+    : ОКНО === 'spisok' ? экранБлокировок(false)
+    : ОКНО === 'pusto'  ? экранБлокировок(true)
+    : карточка(ИМЯ_ДЛИННОЕ, 'Женщины 3.5–4.0 · #7');
+  var окно = ОКНО === 'zhaloba' ? окноЖалобы(ИМЯ_ДЛИННОЕ)
+           : ОКНО === 'blok' ? окноБлокировки(ИМЯ_ДЛИННОЕ) : '';
+  document.body.innerHTML = '<div class="экран-телефон">' + ядро + '</div>' + окно;
+} else {
+  document.body.className = 'ряд';
+  var столбцы = [
+    ['net', 'карточка · полоса на месте', 'длинное настоящее имя, 31 знак'],
+    ['zhaloba', 'окно жалобы', 'причина выбрана, заметка пуста'],
+    ['blok', 'окно блокировки', 'говорит что изменится, не «вы уверены»'],
+    ['para', 'парная карточка', 'строка имени несёт ДВА имени'],
+    ['spisok', 'кабинет · заблокированные', 'длинное имя в строке с кнопкой 44'],
+    ['pusto', 'кабинет · пусто', 'пусто говорит словами, а не пустотой']
+  ];
+  document.body.innerHTML =
+    '<div class="рейка">' + столбцы.map(function(с) {
+      return '<div class="стопка"><div class="шапка">' + с[1] +
+             '<span>' + с[2] + '</span></div>' +
+             '<iframe src="?okno=' + с[0] + '" title="' + с[1] + '"></iframe></div>';
+    }).join('') + '</div>' +
+    '<div class="пояснение">' +
+      '<h2>что здесь настоящее</h2>' +
+      '<p>Подключены <code>mobile/www/css/fonts.css</code>, ' +
+      '<code>tokens.css</code>, <code>app.css</code> — те же файлы и те же ' +
+      'версии, что в <code>mobile/www/index.html</code>. Классы карточки ' +
+      'печатает <code>js/screens/player-detail.js:228-250, 379-386</code>. ' +
+      'Окна стоят на оболочке <code>pd-h2h-modal</code> (<code>app.css:3868</code>) — ' +
+      'нового компонента не заведено.</p>' +
+      '<h2>что здесь предложение</h2>' +
+      '<p>Всё под заголовком «ЛИСТ ПРАВОК» в <code>&lt;style&gt;</code> этого ' +
+      'файла: <code>.pd-safety-row</code>, <code>.pd-rep-*</code>, ' +
+      '<code>.pd-blk-*</code>. В <code>app.css</code> ЭТОГО ПОКА НЕТ.</p>' +
+      '<h2>чем платим</h2>' +
+      '<p>Карточка игрока удлиняется на 68&nbsp;px (44 кнопка + 24 отступ) — ' +
+      'ПОСЧИТАНО по ступеням, не замерено в браузере. Две кнопки стоят ниже ' +
+      'вызова и приглашения, то есть ниже сгиба на 390: до них надо ' +
+      'доскроллить. Это НАМЕРЕНО — жалоба не то, зачем открывают карточку.</p>' +
+    '</div>';
+}
+</script>
+</body>
+</html>
