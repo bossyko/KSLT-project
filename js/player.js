@@ -366,15 +366,23 @@
     async function loadPlayerContacts(playerId) {
         if (!client) return null;
         try {
-            var res = await client.from('profiles')
-                .select('phone, show_phone, whatsapp_phone, show_whatsapp, ' +
-                        'telegram, show_telegram, instagram, show_instagram, deleted_at')
-                .eq('player_id', playerId)
-                .maybeSingle();
-            // Человек уходит из клуба — контактов не даём, даже если
-            // разрешения на показ остались включёнными
-            if (res.data && res.data.deleted_at) return null;
-            return res.data || null;
+            /* КОНТАКТЫ ПРЯЧЕТ БАЗА, А НЕ РАЗМЕТКА (04.11).
+               Здесь стоял прямой запрос к `profiles`, а блокировку
+               учитывали уже при отрисовке — то есть обещание окна
+               блокировки «он не увидит твоих контактов» держала КАРТИНКА.
+               Кто умеет послать запрос руками, получал телефон человека,
+               который его заблокировал.
+               Теперь решает одна серверная функция: она сама смотрит, кто
+               спрашивает, прячет в ОБЕ стороны и при уходе из клуба
+               (`sql/схема/apple-1-2-kontakty.sql`). ОДНО ОПРЕДЕЛЕНИЕ НА
+               ОДНО ПОНЯТИЕ: приложение зовёт её же. */
+            var res = await client.rpc('kslt_kontakty', { p_player_id: playerId });
+            if (res.error) return null;
+            var о = res.data || {};
+            /* ОТКАЗ — ЭТО ОТВЕТ, А НЕ ПУСТОТА: база назвала причину, и
+               каждая из них значит одно — контактов не показываем. */
+            if (о.error) return null;
+            return о;
         } catch(e) { return null; }
     }
 

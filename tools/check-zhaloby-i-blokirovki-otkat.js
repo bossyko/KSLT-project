@@ -14,6 +14,7 @@ const ПРИБОР = 'tools/check-zhaloby-i-blokirovki.js';
 
 const ФУНКЦИИ = 'sql/схема/apple-1-2-funkcii.sql';
 const ЗАСЛОН  = 'sql/схема/apple-1-2-zaslon.sql';
+const КОНТАКТЫ= 'sql/схема/apple-1-2-kontakty.sql';
 const ПРАВА   = 'sql/схема/apple-1-2-prava.sql';
 const БАНЫ    = 'sql/схема/apple-1-2-bany-vse.sql';
 const КАРТОЧКА= 'mobile/www/js/screens/player-detail.js';
@@ -174,6 +175,28 @@ const ОТКАТЫ = [
       было: "toast(слово);\n          PD.open(_playerId);",
       станет: "toast(слово);\n          location.reload();" },
 
+    /* ── 04.11: КОНТАКТЫ СНОВА ПРЯЧЕТ РАЗМЕТКА ──
+       Ровно то, что висело долгом: прямой запрос телефона к таблице. */
+    { имя: 'функция контактов открыта анониму',
+      ждём: 'функция контактов заведена и закрыта анониму', файл: КОНТАКТЫ,
+      было: 'REVOKE ALL ON FUNCTION public.kslt_kontakty(text) FROM anon;',
+      станет: '' },
+
+    { имя: 'функция контактов смотрит блокировку в одну сторону',
+      ждём: 'функция контактов смотрит блокировку в обе стороны', файл: КОНТАКТЫ,
+      было: 'public.kslt_est_blokirovka(v_me, v_him)',
+      станет: 'EXISTS (SELECT 1 FROM user_blocks b WHERE b.blocker_profile_id = v_me AND b.blocked_profile_id = v_him)' },
+
+    { имя: 'сайт вернулся к прямому запросу телефона',
+      ждём: 'сайт просит контакты у функции, а не у таблицы', файл: СТРАНИЦА,
+      было: "var res = await client.rpc('kslt_kontakty', { p_player_id: playerId });",
+      станет: "var res = await client.from('profiles').select('phone, show_phone').eq('player_id', playerId).maybeSingle();" },
+
+    { имя: 'приложение вернулось к прямому запросу телефона',
+      ждём: 'приложение просит контакты у функции, а не у таблицы', файл: КАРТОЧКА,
+      было: "supabaseClient.rpc('kslt_kontakty', { p_player_id: playerId })",
+      станет: "supabaseClient.from('profiles').select('phone, show_phone').eq('player_id', playerId).maybeSingle()" },
+
     /* ── ОТКАТ НА МОЛЧАНИЕ ── подпись это не код. */
     { имя: 'МОЛЧАНИЕ: подпись к тихой отмене переписана',
       ждём: null, файл: ФУНКЦИИ,
@@ -181,7 +204,7 @@ const ОТКАТЫ = [
       станет: "-- Тихая отмена. Решено так" }
 ];
 
-const НУЖНЫ = [ФУНКЦИИ, ЗАСЛОН, ПРАВА, БАНЫ, КАРТОЧКА, КАБИНЕТ, ВХОД,
+const НУЖНЫ = [ФУНКЦИИ, ЗАСЛОН, ПРАВА, БАНЫ, КОНТАКТЫ, КАРТОЧКА, КАБИНЕТ, ВХОД,
                СЛОВАРЬ, СТРАНИЦА, КАБСАЙТА, АДМИНКА, ОДЕЖДА,
                ПРИБОР, 'tools/bez-kommentariev.js'];
 

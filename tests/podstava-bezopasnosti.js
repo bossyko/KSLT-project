@@ -107,6 +107,15 @@ async function поставить(контекст, о) {
             kslt_razblokirovat: { ok: true },
             kslt_pozhalovatsya: { ok: true },
             kslt_moi_blokirovki: д.блокировки,
+            /* Контакты теперь отдаёт функция, а не таблица: подстава
+               обязана уметь то же, что настоящая база. Заблокирован —
+               функция сама вернула бы отказ. */
+            kslt_kontakty: д.заблокирован
+                ? { error: 'blocked' }
+                : { phone: '+996700111222', show_phone: true,
+                    whatsapp_phone: null, show_whatsapp: false,
+                    telegram: '@kslt_test', show_telegram: true,
+                    instagram: null, show_instagram: false },
             get_player_challenges: [],
             increment_player_view: null,
             get_player_avatar: null
