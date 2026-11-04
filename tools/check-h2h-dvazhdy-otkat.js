@@ -94,7 +94,10 @@ const ОТКАТЫ = [
      'совпавших знак в знак не становится меньше'],
 
     ['отнять у страницы игрока рисование окна',
-     [[JPL, "overlay.className = 'h2h-overlay';", "overlay.className = 'h2h-okno';"]],
+     [[JPL, "overlay.className = 'h2h-overlay';\n        // ОКНО НАЗЫВАЕТ СЕБЯ ОКНОМ",
+            "overlay.className = 'h2h-okno';\n        // ОКНО НАЗЫВАЕТ СЕБЯ ОКНОМ"],
+      [JPL, "overlay.className = 'h2h-overlay';\n        overlay.setAttribute('role', 'dialog');\n        overlay.setAttribute('aria-modal', 'true');\n        overlay.setAttribute('aria-label', заголовок);",
+            "overlay.className = 'h2h-okno';\n        overlay.setAttribute('role', 'dialog');\n        overlay.setAttribute('aria-modal', 'true');\n        overlay.setAttribute('aria-label', заголовок);"]],
      'окно H2H рисуют ровно два дома'],
 
     ['вернуть зелёный iOS в кабинет',

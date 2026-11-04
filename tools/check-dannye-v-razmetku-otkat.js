@@ -221,10 +221,13 @@ const ОТКАТЫ = [
        места (причина паузы и род перерыва). Якорь переехал в куске 166
        вместе с содержимым списка: `umpire.js`, на котором откат стоял
        раньше, с этого куска заперт и названных мест больше не имеет.
+       04.11 переехал снова: `coaches.js` потерял своё названное имя
+       (`o.label` уехал в объект и стал мёртвым), поэтому берём файл с
+       живым именем — `tournament-detail.js` и его `rd.name`.
        ЯКОРЬ ПЕРЕЕЗЖАЕТ ВМЕСТЕ С СОДЕРЖИМЫМ. */
     ['запереть файл, у которого есть названное место', 'tools/check-dannye-v-razmetku.js',
      "    'js/admin/sections/finances.js', 'js/admin/sections/live.js',",
-     "    'js/admin/sections/finances.js', 'js/admin/sections/live.js', 'js/coaches.js',",
+     "    'js/admin/sections/finances.js', 'js/admin/sections/live.js', 'js/tournament-detail.js',",
      'запертые файлы не отпираются'],
 
     /* ── КУСОК 166: значок награды и значение словаря по ключу ── */

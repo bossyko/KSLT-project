@@ -23,6 +23,8 @@ fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(ВРЕМ, 'node_modules', 'acorn'), { recursive: true });
 
 const K = 'js/courts.js';
+/* Раскрывашку держит ОБЩИЙ ДОМ: туда же уехали aria и галочка. */
+const ДД = 'js/kslt-vypadashka.js';
 const T = 'js/coaches.js';
 const ОБЩ = 'css/style.css';
 const CSS = 'css/courts.css';
@@ -73,13 +75,13 @@ const ОТКАТЫ = [
    'карточка берёт короткую подпись, страница — полную'],
 
   /* ── что читает диктор ── */
-  [K, ' aria-haspopup="listbox" aria-expanded="false"', '',
+  [ДД, ' aria-haspopup="listbox" aria-expanded="false"', '',
    'раскрывашка называет себя раскрывашкой'],
 
-  [K, "                toggle.setAttribute('aria-expanded', String(!wasOpen));\n", '',
+  [ДД, "                кнопка.setAttribute('aria-expanded', String(!былоОткрыто));\n", '',
    'aria-expanded переключается при открытии И при закрытии'],
 
-  [K, "        var ГАЛКА = '<svg class=\"ct-dd-tick\"", "        var ГАЛКА = '<svg class=\"ct-dd-nothing\"",
+  [ДД, "    var ГАЛКА = '<svg class=\"kslt-dd-tick\"", "    var ГАЛКА = '<svg class=\"kslt-dd-nothing\"",
    'у выбранного пункта меню есть галочка, а не только краска'],
 
   /* ── фокус ── */

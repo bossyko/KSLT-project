@@ -171,7 +171,7 @@ const ОТКАТЫ = [
  'карточка стоит на геометрии Card 29:65'],
 
 ['вернуть плашке ваучера кегль 12', ВАУ,
- '    font-size: 11px;\n    font-weight: var(--fw-medium);\n    line-height: var(--lh-none);\n    letter-spacing: 0.5px;\n    text-transform: uppercase;\n    margin-bottom: var(--space-5);',
+ '    font-size: var(--fs-2xs);\n    font-weight: var(--fw-medium);\n    line-height: var(--lh-none);\n    letter-spacing: 0.5px;\n    text-transform: uppercase;\n    margin-bottom: var(--space-5);',
  '    font-size: var(--fs-xs);\n    font-weight: var(--fw-medium);\n    line-height: var(--lh-none);\n    letter-spacing: 0.5px;\n    text-transform: uppercase;\n    margin-bottom: var(--space-5);',
  'плашка ваучера стоит на геометрии Badge 27:53'],
 ['снять общий отказ от движения', 'css/tokens.css',

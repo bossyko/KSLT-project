@@ -39,8 +39,8 @@ const ОТКАТЫ = [
  'цифра обложки баттлов стоит в списке семейств токенов'],
 
 ['сравнять перебивку с заголовком на телефоне', В,
- '    .ch-vs-text { font-size: var(--fs-lg); }',
- '    .ch-vs-text { font-size: var(--fs-xl); }',
+ '    .ch-vs-text { font-size: var(--fs-lg); }\n\n    .ch-vs-container {',
+ '    .ch-vs-text { font-size: var(--fs-xl); }\n\n    .ch-vs-container {',
  'перебивка VS объявлена ступенью ниже заголовка на всех трёх видах'],
 
 ['вернуть VS карточки прежний кегль', О,

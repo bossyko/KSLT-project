@@ -136,8 +136,8 @@ const ОТКАТЫ = [
   [CSS, '.db-loy-redeem-item::after {', '.db-loy-redeem-item::before {',
    'у кнопки награды есть прозрачный слой цели 44'],
 
-  [CSS, '    font-weight: 700;\n    line-height: var(--lh-none);\n    color: #000;\n    background: var(--accent);\n    border: none;\n    border-radius: 8px;\n    cursor: pointer;\n    white-space: nowrap;\n}',
-        '    font-weight: 700;\n    color: #000;\n    background: var(--accent);\n    border: none;\n    border-radius: 8px;\n    cursor: pointer;\n    white-space: nowrap;\n}',
+  [CSS, '    font-weight: 700;\n    line-height: var(--lh-none);\n    color: var(--neutral-black);\n    background: var(--accent);\n    border: none;\n    border-radius: 8px;\n    cursor: pointer;\n    white-space: nowrap;\n}',
+        '    font-weight: 700;\n    color: var(--neutral-black);\n    background: var(--accent);\n    border: none;\n    border-radius: 8px;\n    cursor: pointer;\n    white-space: nowrap;\n}',
    'у кнопок куска межстрочный назван значением, а не ссылкой на шрифт'],
 
   /* ── окно: ступени компонента ── */

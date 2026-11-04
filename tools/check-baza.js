@@ -48,7 +48,7 @@ const ДОМ = 'js/kslt-baza.js';
 const ДОМ_П = 'mobile/www/js/kslt-baza.js';
 const дом = безКом(чит(ДОМ));
 
-const ПРОПУСК = /^(node_modules|\.git|android|ios|build|test-results|playwright-report|slepki|_figma|tools|tests|maket)$/;
+const ПРОПУСК = /^(node_modules|\.git|android|ios|build|test-results|playwright-report|slepki|_figma|tools|tests|maket|vendor)$/;
 function всеJs(д, вых) {
     вых = вых || [];
     fs.readdirSync(path.join(КОРЕНЬ, д || '.'), { withFileTypes: true }).forEach(э => {

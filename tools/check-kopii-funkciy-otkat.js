@@ -103,7 +103,7 @@ const ОТКАТЫ = [
        запирание. Копия, которую возвращает откат, остаётся БЕДНОЙ —
        копия опасна не тем, что копия, а тем, что расходится. */
     ['вернуть свою ловушку фокуса, и бедную', PL,
-     '        var снять = window.KSLT_FOKUS.запереть(overlay, {',
+     '        var снять = window.KSLT_FOKUS.запереть(overlay, {\n            поEsc: function() { closeH2H(overlay); }',
      '        var ловушка = function(e) {\n' +
      "            if (e.key !== 'Tab') return;\n" +
      '            var сп = overlay.querySelectorAll(\'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])\');\n' +

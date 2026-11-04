@@ -53,10 +53,14 @@ const ОТКАТЫ = [
    '        var сеткаСобрана = hasPlayoff || hasIG;\n        var вСеткеИграли = сеткаСобрана || plMatches.concat(igMatches).some(function (m) {',
    'запирает сыгранный в сетке матч, а не сам факт её сборки'],
 
+  /* ПЕРЕВЯЗАН 04.11: прежний откат ломал спрос причины, а спроса больше
+     нет — слово Кости «никто не будет писать причину». Якоря не стало, и
+     откат молча перестал что-либо доказывать. Теперь он ВОЗВРАЩАЕТ спрос:
+     правило обязано упасть на его возвращении. */
   [СЕТКА,
-   '                if (!sel.dataset.ravenstvo && newPlace !== прежнее) {',
-   '                if (false && newPlace !== прежнее) {',
-   'перестановка при однозначном расчёте просит причину'],
+   '                var mgp = JSON.parse(JSON.stringify(tournament.manual_group_places || {}));',
+   '                var причина = (window.prompt(L.groupPlaceWhy) || "").trim();\n                void причина;\n                var mgp = JSON.parse(JSON.stringify(tournament.manual_group_places || {}));',
+   'причина больше не спрашивается, но след остаётся'],
 
   [СЕТКА,
    '                    mgp.__журнал.push({',

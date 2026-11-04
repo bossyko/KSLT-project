@@ -34,6 +34,10 @@ const безКом = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\
 const КОРТЫ = безКом(чит('js/courts.js'));
 const ТРЕНЕРЫ = безКом(чит('js/coaches.js'));
 const ОБЩИЙ = безКом(чит('css/style.css'));
+/* Выпадашку кортов и тренеров держит ОБЩИЙ ДОМ (переезд до 04.11):
+   разметка, aria и галочка живут там, а фокус — в `tokens.css`. */
+const ДОМ_ДД = безКом(чит('js/kslt-vypadashka.js'));
+const ТОКЕНЫ = безКом(чит('css/tokens.css'));
 const CSS_К = безКом(чит('css/courts.css'));
 
 const ошибки = [];
@@ -146,24 +150,26 @@ const веткиТренеров = ветки(ТРЕНЕРЫ, 'L');
 /* ══ 4. ЧТО ЧИТАЕТ ДИКТОР ══════════════════════════════════════════════ */
 
 правило('раскрывашка называет себя раскрывашкой',
-    /aria-haspopup="listbox" aria-expanded="false"/.test(КОРТЫ),
+    /aria-haspopup="listbox"/.test(ДОМ_ДД) && /aria-expanded="false"/.test(ДОМ_ДД),
     'без aria-haspopup и aria-expanded это просто кнопка с непонятным словом');
 
 правило('aria-expanded переключается при открытии И при закрытии',
-    /toggle\.setAttribute\('aria-expanded', String\(!wasOpen\)\)/.test(КОРТЫ) &&
-    /к\.setAttribute\('aria-expanded', 'false'\)/.test(КОРТЫ),
+    /setAttribute\('aria-expanded', *String\(/.test(ДОМ_ДД) &&
+    /setAttribute\('aria-expanded', *'false'\)/.test(ДОМ_ДД),
     'состояние обновляется не везде: диктор и экран разойдутся на первом же\n' +
     '          закрытии «кликом мимо» или выбором пункта');
 
 правило('у выбранного пункта меню есть галочка, а не только краска',
-    /ct-dd-tick/.test(КОРТЫ) && /aria-current="true"/.test(КОРТЫ),
+    /kslt-dd-tick/.test(ДОМ_ДД) && /aria-selected="/.test(ДОМ_ДД),
     'Menu item 32:44: «never rely on the tint alone, it is invisible to\n' +
-    '          anyone who cannot separate the two greys»');
+    '          anyone who cannot separate the two greys».\n' +
+    '          Галочка и признак для диктора живут в доме `kslt-vypadashka`;\n' +
+    '          внутри `role="listbox"` верное имя — `aria-selected`.');
 
 /* ══ 5. ФОКУС ВИДЕН, И ПРАВИЛО ЖИВЁТ В ОБЩЕМ ФАЙЛЕ ═════════════════════ */
 
 правило('фокус виден у чипов, карточек и ОБЩЕЙ полосы страниц',
-    /\.ct-dd-toggle:focus-visible/.test(ОБЩИЙ) &&
+    /\.kslt-dd-toggle:focus-visible/.test(ТОКЕНЫ) &&
     /\.pl-page-btn:focus-visible/.test(ОБЩИЙ) &&
     /\.ct-card:focus-visible/.test(ОБЩИЙ) &&
     /\.co-card:focus-visible/.test(ОБЩИЙ),

@@ -146,15 +146,15 @@ const ОТКАТЫ = [
 
   
   /* ── окно H2H ── */
-  [JSФ, "        overlay.setAttribute('role', 'dialog');",
+  [JSФ, "        overlay.className = 'h2h-overlay';\n        // ОКНО НАЗЫВАЕТ СЕБЯ ОКНОМ. Замер 09.10: ни role, ни aria-modal, и\n        // фокус оставался на body — с клавиатуры окно было невидимо вовсе\n        overlay.setAttribute('role', 'dialog');",
         "        overlay.className = 'h2h-overlay';",
-   'окно H2H называет себя окном'],
+   'каждое окно страницы называет себя окном'],
 
   /* ОТКАТ ПЕРЕВЯЗАН КУСКОМ 152: навешивание переехало в дом, и откат,
      державшийся за `overlay.addEventListener`, МОЛЧА перестал что-либо
      доказывать — узнали об этом только когда прувера позвали. */
-  [JSФ, "        var снять = window.KSLT_FOKUS.запереть(overlay, {",
-        "        var снять = function () {}; var неТот = (function (overlay, о) { return function () {}; })(overlay, {",
+  [JSФ, "        var снять = window.KSLT_FOKUS.запереть(overlay, {\n            поEsc: function() { closeH2H(overlay); }\n        });",
+        "        var снять = function () {};",
    'окно запирает фокус домом, снимает запирание и возвращает фокус'],
 
   /* ── портрет ── */

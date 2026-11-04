@@ -119,9 +119,11 @@ const сколько = (текст, ре) => (текст.match(ре) || []).leng
 правило('плашка перерыва стоит на геометрии Badge 27:53',
     /height: 24px/.test(скобка(ТАБ, '.sb-pause')) &&
     /padding: 0 var\(--space-2\)/.test(скобка(ТАБ, '.sb-pause')) &&
-    /font-size: 11px/.test(скобка(ТАБ, '.sb-pause')) &&
+    /font-size: var\(--fs-2xs\)/.test(скобка(ТАБ, '.sb-pause')) &&
     /letter-spacing: 0\.5px/.test(скобка(ТАБ, '.sb-pause')),
-    'компонент: высота 24, поля 8, 11 Medium uppercase, 0.5');
+    'компонент: высота 24, поля 8, кегль ступенью --fs-2xs (11) Medium\n' +
+    'uppercase, 0.5. ПОПРАВЛЕНО 04.11: ждали сырые 11px, а шкала требует\n' +
+    'ступень — правило пускало число мимо шкалы.');
 
 правило('доска не вылезает за узкий экран',
     /max-width: calc\(100% - var\(--space-10\)\)/.test(скобка(ТАБ, '#sb-wrapper')),
@@ -193,7 +195,7 @@ const сколько = (текст, ре) => (текст.match(ре) || []).leng
 
 правило('плашка ваучера стоит на геометрии Badge 27:53',
     /height: 24px/.test(скобка(ВАУ, '.vr-badge')) &&
-    /font-size: 11px/.test(скобка(ВАУ, '.vr-badge')) &&
+    /font-size: var\(--fs-2xs\)/.test(скобка(ВАУ, '.vr-badge')) &&
     /letter-spacing: 0\.5px/.test(скобка(ВАУ, '.vr-badge')),
     'было 12/600, высота 30, поля 6/16, letter-spacing 1, радиус 20');
 

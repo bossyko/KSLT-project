@@ -46,7 +46,7 @@ function файлы(д, вых) {
     if (!fs.existsSync(п)) return вых;
     for (const э of fs.readdirSync(п, { withFileTypes: true })) {
         const о = д + '/' + э.name;
-        if (э.isDirectory()) файлы(о, вых);
+        if (э.isDirectory()) { if (э.name !== 'vendor') файлы(о, вых); }
         else if (э.name.endsWith('.js')) вых.push(о);
     }
     return вых;
