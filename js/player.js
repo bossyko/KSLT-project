@@ -17,6 +17,12 @@
     var CU = window.KSLT_COUNTRY;
     var lang = KSLT_YAZYK.код;
     var client = window.supabaseClient;
+    /* Заблокирован ли этот игрок МНОЙ. Спрашивается у базы, а не
+       вычисляется на месте: заслон стоит триггером
+       (`sql/схема/apple-1-2-zaslon.sql`), и страница обязана показывать
+       то же, что решит база, иначе кнопка обещает одно, а отказ
+       приходит другой. */
+    var _заблокирован = false;
     var _playerId = null;
     var _playerName = '';
     var _playerPhoto = '';
@@ -109,7 +115,38 @@
         challengeLoginText: 'You need to sign in to send a challenge',
         challengeMemberRequired: 'Get a membership',
         challengeMemberText: 'A KSLT membership is required to send a challenge',
-        challengeNoPlayer: 'Link a player profile to send challenges'
+        challengeNoPlayer: 'Link a player profile to send challenges',
+        sftReport: 'Report', sftBlock: 'Block', sftUnblock: 'Unblock',
+        repTitle: 'Report player',
+        repOffensive: 'Insults or threats', repSpam: 'Ads or spam',
+        repFake: 'Impersonation', repForeignPhoto: 'Someone else\'s photo',
+        repOther: 'Other',
+        repNoteLabel: 'What happened — optional',
+        repNotePlaceholder: 'For example: wrote an insult in the battle description',
+        repSend: 'Send report', repSending: 'Sending…',
+        repSrok: 'We review within three days.',
+        repDone: 'Report sent',
+        repAlready: 'You have already reported this player',
+        repError: 'Could not send the report',
+        blkTitle: 'Block',
+        blkW1: 'cannot challenge you to a match',
+        blkW2: 'cannot invite you to play',
+        blkW3: 'and neither can you, while the block is on',
+        blkW4: 'will not see your contacts on the card',
+        blkW5: 'scheduled singles matches between you will be cancelled',
+        blkW6: 'a doubles match stays: four people arranged it',
+        blkKeepTitle: 'Tournament results stay',
+        blkKeepText: 'Matches you have already played against each other stay in the draw, in the group table and in both histories. A result belongs to the tournament, not to two people.',
+        blkDo: 'Block', blkDoing: 'Blocking…', blkCancel: 'Cancel',
+        blkDone: 'Player blocked',
+        blkDoneMatches: 'Player blocked. Scheduled matches cancelled: ',
+        blkDoneParnyh: 'The doubles match stays: four people arranged it.',
+        blkNoAccount: 'This card has no account — there is nobody to block',
+        blkError: 'Could not block',
+        blkBlockedHint: 'You have blocked this player',
+        blkUnblockDone: 'Block removed',
+        blkUnblockError: 'Could not remove the block',
+        blkNotLogged: 'Sign in to report or block'
     }, {
         online: 'Онлайн',
         message: 'Жазуу',
@@ -157,7 +194,38 @@
         challengeLoginText: 'Чакырык жөнөтүү үчүн авторизациядан өтүү керек',
         challengeMemberRequired: 'Мүчөлүктү тариздеңиз',
         challengeMemberText: 'Чакырык жөнөтүү үчүн KSLT мүчөлүгү керек',
-        challengeNoPlayer: 'Чакырык жөнөтүү үчүн оюнчу профилин байлаңыз'
+        challengeNoPlayer: 'Чакырык жөнөтүү үчүн оюнчу профилин байлаңыз',
+        sftReport: 'Арыздануу', sftBlock: 'Бөгөттөө', sftUnblock: 'Бөгөттү алуу',
+        repTitle: 'Оюнчуга арыз',
+        repOffensive: 'Кемсинтүү же коркутуу', repSpam: 'Жарнак же спам',
+        repFake: 'Башка адам катары көрсөтүү', repForeignPhoto: 'Бөтөн сүрөт',
+        repOther: 'Башка',
+        repNoteLabel: 'Эмне болду — милдеттүү эмес',
+        repNotePlaceholder: 'Мисалы: баттлдын сүрөттөмөсүндө кемсинтүү жазды',
+        repSend: 'Арыз жөнөтүү', repSending: 'Жөнөтүлүүдө…',
+        repSrok: 'Үч күндүн ичинде карайбыз.',
+        repDone: 'Арыз жөнөтүлдү',
+        repAlready: 'Бул оюнчуга мурун арызданган экенсиз',
+        repError: 'Арыз жөнөтүлгөн жок',
+        blkTitle: 'Бөгөттөө',
+        blkW1: 'сизди матчка чакыра албайт',
+        blkW2: 'сизди ойноого чакыра албайт',
+        blkW3: 'сиз да аны чакыра албайсыз — бөгөт турганда',
+        blkW4: 'картадагы байланыштарыңызды көрбөйт',
+        blkW5: 'белгиленген жеке матчтар жокко чыгарылат',
+        blkW6: 'жуптук матч калат: аны төртөө макулдашкан',
+        blkKeepTitle: 'Мелдеш жыйынтыктары калат',
+        blkKeepText: 'Бири-бириңиз менен ойногон матчтар торчодо, топ таблицасында жана экөөңүздүн тарыхыңызда калат. Бул — мелдештин жыйынтыгы, эки адамдыкы эмес.',
+        blkDo: 'Бөгөттөө', blkDoing: 'Бөгөттөлүүдө…', blkCancel: 'Жокко чыгаруу',
+        blkDone: 'Оюнчу бөгөттөлдү',
+        blkDoneMatches: 'Оюнчу бөгөттөлдү. Жокко чыгарылган матчтар: ',
+        blkDoneParnyh: 'Жуптук матч калды: аны төртөө макулдашкан.',
+        blkNoAccount: 'Бул картанын аккаунту жок — бөгөттөөгө эч ким жок',
+        blkError: 'Бөгөттөө мүмкүн болгон жок',
+        blkBlockedHint: 'Бул оюнчуну бөгөттөгөнсүз',
+        blkUnblockDone: 'Бөгөт алынды',
+        blkUnblockError: 'Бөгөттү алуу мүмкүн болгон жок',
+        blkNotLogged: 'Арыздануу же бөгөттөө үчүн кириңиз'
     }, {
         online: 'Онлайн',
         message: 'Написать',
@@ -205,7 +273,38 @@
         challengeLoginText: 'Для отправки вызова необходимо авторизоваться',
         challengeMemberRequired: 'Оформите членство',
         challengeMemberText: 'Для отправки вызова необходимо членство KSLT',
-        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов'
+        challengeNoPlayer: 'Привяжите профиль игрока для отправки вызовов',
+        sftReport: 'Пожаловаться', sftBlock: 'Заблокировать', sftUnblock: 'Разблокировать',
+        repTitle: 'Жалоба на игрока',
+        repOffensive: 'Оскорбление или угрозы', repSpam: 'Реклама или спам',
+        repFake: 'Выдаёт себя за другого', repForeignPhoto: 'Чужая фотография',
+        repOther: 'Другое',
+        repNoteLabel: 'Что случилось — необязательно',
+        repNotePlaceholder: 'Например: написал оскорбление в описании баттла',
+        repSend: 'Отправить жалобу', repSending: 'Отправляем…',
+        repSrok: 'Разбираем в течение трёх суток.',
+        repDone: 'Жалоба отправлена',
+        repAlready: 'Вы уже жаловались на этого игрока',
+        repError: 'Не удалось отправить жалобу',
+        blkTitle: 'Заблокировать',
+        blkW1: 'не сможет вызвать вас на матч',
+        blkW2: 'не сможет позвать вас поиграть',
+        blkW3: 'и вы его тоже — пока блокировка стоит',
+        blkW4: 'не увидит ваши контакты в карточке',
+        blkW5: 'назначенные одиночные матчи между вами отменятся',
+        blkW6: 'парный матч не отменится: его назначали четверо',
+        blkKeepTitle: 'Турнирные результаты останутся',
+        blkKeepText: 'Матчи, в которых вы уже играли друг с другом, остаются в сетке, в таблице группы и в истории обоих. Это результат соревнования: он принадлежит турниру, а не двум людям.',
+        blkDo: 'Заблокировать', blkDoing: 'Блокируем…', blkCancel: 'Отмена',
+        blkDone: 'Игрок заблокирован',
+        blkDoneMatches: 'Игрок заблокирован. Назначенных матчей отменено: ',
+        blkDoneParnyh: 'Парный матч остался: его назначали четверо.',
+        blkNoAccount: 'У этой карточки нет учётной записи — блокировать некого',
+        blkError: 'Не удалось заблокировать',
+        blkBlockedHint: 'Вы заблокировали этого игрока',
+        blkUnblockDone: 'Блокировка снята',
+        blkUnblockError: 'Не удалось снять блокировку',
+        blkNotLogged: 'Войдите, чтобы пожаловаться или заблокировать'
     }));
 
     // ---- H2H Labels ----
@@ -589,6 +688,23 @@
         _myPlayerId = KSLT_DOSTUP.мойИгрок();
     }
 
+    /** Блокировка спрашивается у базы — та же функция, что в приложении.
+        ОТКАЗ НЕ ГАСИТ СТРАНИЦУ: не смогли спросить — считаем, что
+        блокировки нет. Соврать в сторону «заблокирован» хуже: это
+        спрятало бы кнопки без причины. */
+    async function узнатьБлокировку(playerId) {
+        if (!client || !playerId || !_myPlayerId || _myPlayerId === playerId) {
+            _заблокирован = false;
+            return;
+        }
+        try {
+            var r = await client.rpc('kslt_zablokirovan_li', { p_player_id: playerId });
+            _заблокирован = !!(r && r.data === true);
+        } catch (e) {
+            _заблокирован = false;
+        }
+    }
+
     // ---- Guest block ----
     /**
      * ПРИЗНАК «СТРАНИЦА ДОРИСОВАНА», И ОН НАЗЫВАЕТ, ЧТО ИМЕННО (31.10).
@@ -808,7 +924,12 @@
         // платить сейчас не за что.
         var естьЧеловек = player.has_account === true;
         var isBackground = !естьЧеловек && !_бесплатныйПериод;
-        if ((!_myPlayerId || _myPlayerId !== player.id) && естьЧеловек) {
+        if ((!_myPlayerId || _myPlayerId !== player.id) && естьЧеловек && _заблокирован) {
+            /* КНОПКА, КОТОРАЯ ГАРАНТИРОВАННО ОТКАЖЕТ, — ЭТО ЛОВУШКА.
+               Заслон в базе стоит в обе стороны: заблокировав, ты и сам
+               не позовёшь. Значит здесь стоит правда, а не кнопка. */
+            hero += '<div class="pp-not-member">' + L.blkBlockedHint + '</div>';
+        } else if ((!_myPlayerId || _myPlayerId !== player.id) && естьЧеловек) {
             // Огонь, а не мяч: кнопка залита лаймом, и жёлто-зелёный мяч на
             // ней растворяется. Тем же знаком помечены баттлы в кабинете
             hero += '<button class="pp-action-btn pp-action-primary" id="ppChallengeBtn">' +
@@ -827,6 +948,24 @@
         hero += '</div>';
 
         hero += '</div>'; // .pp-header
+
+        /* ---- Жалоба и блокировка (Apple 1.2) ----
+           НЕ В `pp-actions`, И ЭТО РЕШЕНИЕ: обложка несёт призыв играть,
+           и жалоба рядом с ним получила бы ту же громкость. Она обязана
+           БЫТЬ (правило 1.2), но не обязана кричать.
+           У КАРТОЧКИ БЕЗ ХОЗЯИНА БЛОКИРОВКИ НЕТ: блокировать некого,
+           вызовов и контактов оттуда прийти не может. Жалоба остаётся —
+           фотография и «о себе» на экране. */
+        if (_myPlayerId && _myPlayerId !== player.id && естьЧеловек) {
+            hero += '<div class="pp-safety">';
+            hero += '<button class="pp-safety-btn" type="button" id="ppReportBtn">' +
+                    L.sftReport + '</button>';
+            if (!player.account_deleted_at) {
+                hero += '<button class="pp-safety-btn pp-safety-btn--block" type="button" id="ppBlockBtn">' +
+                        (_заблокирован ? L.sftUnblock : L.sftBlock) + '</button>';
+            }
+            hero += '</div>';
+        }
 
         var heroEl = document.getElementById('playerHero');
         if (heroEl) {
@@ -987,6 +1126,13 @@
                 handleChallengeClick(data.player);
             });
         }
+
+        var repBtn = document.getElementById('ppReportBtn');
+        if (repBtn) repBtn.addEventListener('click', function() { открытьЖалобу(data.player); });
+        var blkBtn = document.getElementById('ppBlockBtn');
+        if (blkBtn) blkBtn.addEventListener('click', function() {
+            if (_заблокирован) снятьБлокировку(data); else открытьБлокировку(data);
+        });
 
         // Приглашение поиграть — общий механизм из invite-player.js: он же
         // проверяет уровень доступа и показывает окно гостю
@@ -1803,6 +1949,174 @@
         attachH2HCloseBtn(overlay);
     }
 
+    /* =========================================================
+       ЖАЛОБА И БЛОКИРОВКА НА САЙТЕ (Apple 1.2), 04.11
+       =========================================================
+       ОКНО СТРОИТСЯ ТОЙ ЖЕ ДОРОГОЙ, ЧТО H2H, И ЗАПИРАЕТСЯ ТЕМ ЖЕ ДОМОМ
+       `KSLT_FOKUS.запереть`: ловушка Tab, Escape и возврат фокуса —
+       всё куплено 23.10 и переписывать его здесь значило бы завести
+       второе определение запирания. Закрытие шлёт то же событие
+       `h2h-closed`, потому что снятие ловушки висит на нём. */
+    function окноБезопасности(заголовок, тело) {
+        var старое = document.querySelector('.h2h-overlay');
+        if (старое) старое.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'h2h-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', заголовок);
+        overlay.innerHTML =
+            '<div class="h2h-modal">' +
+                '<button class="h2h-close" aria-label="' + KSLT_экранировать(L.blkCancel) + '">&times;</button>' +
+                '<div class="h2h-header"><div class="h2h-label">' +
+                    KSLT_экранировать(заголовок) + '</div></div>' +
+                тело +
+            '</div>';
+        document.body.appendChild(overlay);
+        requestAnimationFrame(function() { overlay.classList.add('visible'); });
+
+        var закрыть = function() { closeH2H(overlay); };
+        overlay.querySelector('.h2h-close').addEventListener('click', закрыть);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) закрыть(); });
+
+        var фокусДоОкна = document.activeElement;
+        overlay.querySelector('.h2h-close').focus();
+        var снять = window.KSLT_FOKUS.запереть(overlay, { поEsc: закрыть });
+        overlay.addEventListener('h2h-closed', function() {
+            снять();
+            if (фокусДоОкна && фокусДоОкна.focus) фокусДоОкна.focus();
+        });
+
+        overlay.закрыть = закрыть;
+        return overlay;
+    }
+
+    function сказать(текст, тон) {
+        if (window.KSLT_TOAST) window.KSLT_TOAST.показать(текст, { тон: тон || 'info' });
+    }
+
+    /** Пять причин — одним списком, коды те же, что в ограничении базы. */
+    var ПРИЧИНЫ_ЖАЛОБЫ = [
+        ['offensive', 'repOffensive'], ['spam', 'repSpam'], ['fake', 'repFake'],
+        ['foreign_photo', 'repForeignPhoto'], ['other', 'repOther']
+    ];
+
+    function открытьЖалобу(player) {
+        var тело = '<div class="pp-rep-reasons" role="radiogroup" aria-label="' +
+                   KSLT_экранировать(L.repTitle) + '">';
+        ПРИЧИНЫ_ЖАЛОБЫ.forEach(function(пара, i) {
+            тело += '<label class="pp-rep-reason">' +
+                      '<input type="radio" name="kslt-prichina" value="' + пара[0] + '"' +
+                        (i === 0 ? ' checked' : '') + '>' +
+                      '<span class="pp-rep-tick" aria-hidden="true">\u2713</span>' +
+                      '<span>' + KSLT_экранировать(L[пара[1]]) + '</span>' +
+                    '</label>';
+        });
+        тело += '</div>' +
+            '<label class="pp-rep-note-label" for="ppRepNote">' +
+                KSLT_экранировать(L.repNoteLabel) + '</label>' +
+            '<textarea class="pp-rep-note" id="ppRepNote" maxlength="1000" placeholder="' +
+                KSLT_экранировать(L.repNotePlaceholder) + '"></textarea>' +
+            '<button class="pp-rep-send" type="button">' + KSLT_экранировать(L.repSend) + '</button>' +
+            '<p class="pp-rep-srok">' + KSLT_экранировать(L.repSrok) + '</p>';
+
+        var окно = окноБезопасности(L.repTitle, тело);
+        var кнопка = окно.querySelector('.pp-rep-send');
+        кнопка.addEventListener('click', function() {
+            var выбран = окно.querySelector('input[name="kslt-prichina"]:checked');
+            кнопка.disabled = true;
+            кнопка.textContent = L.repSending;
+            client.rpc('kslt_pozhalovatsya', {
+                p_target_kind: 'player',
+                p_target: player.id,
+                p_reason: выбран ? выбран.value : 'other',
+                p_note: окно.querySelector('#ppRepNote').value
+            }).then(function(r) {
+                if (r.error) { throw r.error; }
+                var о = r.data || {};
+                if (о.error === 'already') { сказать(L.repAlready, 'warn'); окно.закрыть(); return; }
+                if (о.error === 'not_logged_in') { сказать(L.blkNotLogged, 'warn'); окно.закрыть(); return; }
+                if (!о.ok) { throw new Error(о.error || 'unknown'); }
+                сказать(L.repDone, 'ok');
+                окно.закрыть();
+            }).catch(function(e) {
+                console.warn('[KSLT] жалоба не ушла:', (e && e.message) || e);
+                сказать(L.repError, 'err');
+                кнопка.disabled = false;
+                кнопка.textContent = L.repSend;
+            });
+        });
+    }
+
+    function открытьБлокировку(data) {
+        var player = data.player;
+        var пункты = ['blkW1', 'blkW2', 'blkW3', 'blkW4', 'blkW5', 'blkW6']
+            .map(function(к) { return '<li>' + KSLT_экранировать(L[к]) + '</li>'; }).join('');
+        var тело =
+            '<ul class="pp-blk-what">' + пункты + '</ul>' +
+            '<div class="pp-blk-keep"><strong>' + KSLT_экранировать(L.blkKeepTitle) + '</strong>' +
+              '<span>' + KSLT_экранировать(L.blkKeepText) + '</span></div>' +
+            '<button class="pp-blk-do" type="button">' + KSLT_экранировать(L.blkDo) + '</button>' +
+            '<button class="pp-blk-cancel" type="button">' + KSLT_экранировать(L.blkCancel) + '</button>';
+
+        var окно = окноБезопасности(L.blkTitle, тело);
+        окно.querySelector('.pp-blk-cancel').addEventListener('click', function() { окно.закрыть(); });
+
+        var кнопка = окно.querySelector('.pp-blk-do');
+        кнопка.addEventListener('click', function() {
+            кнопка.disabled = true;
+            кнопка.textContent = L.blkDoing;
+            client.rpc('kslt_zablokirovat', { p_player_id: player.id }).then(function(r) {
+                if (r.error) { throw r.error; }
+                var о = r.data || {};
+                if (о.error === 'no_account') { сказать(L.blkNoAccount, 'warn'); окно.закрыть(); return; }
+                if (о.error === 'not_logged_in') { сказать(L.blkNotLogged, 'warn'); окно.закрыть(); return; }
+                if (!о.ok) { throw new Error(о.error || 'unknown'); }
+                _заблокирован = true;
+                окно.закрыть();
+                /* ЧИСЛО ОТМЕНЁННЫХ ГОВОРИТСЯ ВСЛУХ: про потерю матча
+                   человек должен узнать от нас, а не обнаружить сам. */
+                var слово = о.otmeneno > 0 ? L.blkDoneMatches + о.otmeneno : L.blkDone;
+                /* Парный матч остаётся — его назначали четверо. */
+                if (о.parnyh > 0) слово += ' ' + L.blkDoneParnyh;
+                сказать(слово, 'ok');
+                /* ПЕРЕРИСОВКА, А НЕ ПЕРЕЗАГРУЗКА (04.11).
+                   Здесь стояло `location.reload()`, и оно съедало ровно
+                   то сообщение, ради которого всё затевалось: тост о
+                   числе отменённых матчей жил доли секунды до ухода
+                   страницы. ОДНО ПОНЯТИЕ — ОДИН СПОСОБ: в приложении это
+                   `PD.open(_playerId)`, перерисовка
+                   (`mobile/www/js/screens/player-detail.js:610`), и тост
+                   там остаётся. Теперь и здесь та же функция, что рисует
+                   страницу при входе. */
+                renderProfile(data);
+            }).catch(function(e) {
+                console.warn('[KSLT] блокировка не прошла:', (e && e.message) || e);
+                сказать(L.blkError, 'err');
+                кнопка.disabled = false;
+                кнопка.textContent = L.blkDo;
+            });
+        });
+    }
+
+    function снятьБлокировку(data) {
+        var player = data.player;
+        var кнопка = document.getElementById('ppBlockBtn');
+        if (кнопка) { кнопка.disabled = true; кнопка.textContent = L.blkDoing; }
+        client.rpc('kslt_razblokirovat', { p_player_id: player.id }).then(function(r) {
+            if (r.error) { throw r.error; }
+            _заблокирован = false;
+            сказать(L.blkUnblockDone, 'ok');
+            /* ТОТ ЖЕ СПОСОБ, ЧТО У БЛОКИРОВКИ ВЫШЕ. */
+            renderProfile(data);
+        }).catch(function(e) {
+            console.warn('[KSLT] блокировка не снята:', (e && e.message) || e);
+            сказать(L.blkUnblockError, 'err');
+            if (кнопка) { кнопка.disabled = false; кнопка.textContent = L.sftUnblock; }
+        });
+    }
+
     function closeH2H(overlay) {
         overlay.classList.remove('visible');
         // Возврат фокуса слушает сам оверлей: закрыть окно можно тремя
@@ -2187,6 +2501,11 @@
             renderGuestBlock(data);
             return;
         }
+
+        /* БЛОКИРОВКА СПРАШИВАЕТСЯ ДО ОТРИСОВКИ, А НЕ ПОСЛЕ: иначе
+           кнопка «Вызвать на матч» мелькнёт и пропадёт, и человек
+           успеет её нажать. */
+        await узнатьБлокировку(playerId);
 
         document.title = data.player.name + ' \u2014 KSLT';
         renderProfile(data);
