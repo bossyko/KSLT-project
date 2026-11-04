@@ -287,7 +287,15 @@
       var i = order[oi];
       if (!top3[i]) continue;
       var p = top3[i];
-      var photo = p.photo || 'https://placehold.co/60x60/1a1a2e/888?text=' + initials(p.name);
+      /* ПОДИУМ И СПИСОК РИСОВАЛИ ОТСУТСТВИЕ ФОТО ПО-РАЗНОМУ (04.11).
+         Ряд ниже (`rr-avatar`) уже рисовал инициалы своими руками, а
+         подиум шёл за картинкой на `placehold.co` — и УНОСИЛ ТУДА ИМЯ
+         ИГРОКА в адресе ссылки. Чужой сервер получал, кто у нас в
+         тройке; упади он — тройка осталась бы с битыми кружками.
+         Решение не новое: взято то, что в этом же файле уже принято. */
+      var фото = p.photo
+        ? '<img class="rp-photo" src="' + esc(p.photo) + '" alt="" aria-hidden="true">'
+        : '<div class="rp-photo rp-photo--letters" aria-hidden="true">' + esc(initials(p.name)) + '</div>';
       /* Медаль — картинка смысла, а не текст: диктору читается место
          словами, сам значок от него скрыт. */
       html += '<div class="rp-card ' + sizeClass[i] + '" role="listitem"' +
@@ -295,7 +303,7 @@
             (p[pts] || 0) + ' ' + I18N.t('rating.ptsShort')) + '">' +
         '<div class="rp-medal" aria-hidden="true">' + medals[i] + '</div>' +
         '<div class="rp-photo-wrap">' +
-          '<img class="rp-photo" src="' + esc(photo) + '" alt="" aria-hidden="true">' +
+          фото +
         '</div>' +
         '<div class="rp-name">' + esc(shortName(p.name)) + '</div>' +
         '<div class="rp-pts">' + (p[pts] || 0) + ' ' + I18N.t('rating.ptsShort') + '</div>' +

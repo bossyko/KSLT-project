@@ -1290,7 +1290,7 @@ tr.td-rr-row-highlight {
     padding: 0 16px;
 }
 .td-results-title {
-    font-size: 14px;
+    font-size: var(--fs-sm);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1303,7 +1303,7 @@ tr.td-rr-row-highlight {
     border-collapse: collapse;
 }
 .td-results-table th {
-    font-size: 11px;
+    font-size: var(--fs-2xs);
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1315,7 +1315,7 @@ tr.td-rr-row-highlight {
     border-bottom: var(--bw-hair) solid var(--alpha-white-12);
 }
 .td-results-table td {
-    font-size: 14px;
+    font-size: var(--fs-sm);
     padding: 12px;
     border-bottom: var(--bw-hair) solid var(--alpha-white-08);
 }

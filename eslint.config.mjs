@@ -71,7 +71,8 @@ export default [
             'mobile/ios/**',
             'mobile/node_modules/**',
             '**/*.min.js',
-            'js/vendor/**'
+            'js/vendor/**',
+            'mobile/www/js/vendor/**'
         ]
     },
     {
