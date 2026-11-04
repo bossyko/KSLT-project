@@ -68,7 +68,7 @@
          Столбцы ниже — ровно те, что перечислены в гранте и в витрине
          `players_public`; лишнего здесь просить нельзя, а недостающее
          сломает кабинет молча. */
-      .select('*, players(id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, is_online, is_member, is_guest, has_account)')
+      .select('*, players!profiles_player_id_fkey(id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, is_online, is_member, is_guest, has_account)')
       .eq('id', uid)
       .single()
       .then(function(r) {
@@ -122,7 +122,7 @@
               /* ТЕ ЖЕ СТОЛБЦЫ, ЧТО ВЫШЕ: ЗВЁЗДОЧКА ПРОСИТ ВСЁ, А ОТКРЫТО НЕ
              ВСЁ. Два места на один запрос — и если список разойдётся,
              беда родится ровно на шве. */
-          .select('*, players(id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, is_online, is_member, is_guest, has_account)')
+          .select('*, players!profiles_player_id_fkey(id, name, name_en, name_kg, photo, country, category_id, points, wins, losses, rank_change, form, doubles_wins, doubles_losses, mixed_wins, mixed_losses, ntrp_singles, ntrp_doubles, gender, is_online, is_member, is_guest, has_account)')
           .single()
           .then(function(ins) {
             if (ins.data) {
@@ -182,6 +182,24 @@
         redirectTo: window.location.origin + '/index.html',
         queryParams: { prompt: 'select_account' }
       }
+    });
+  };
+
+  /**
+   * ВХОД ЧЕРЕЗ APPLE.
+   *
+   * Поток тот же, что у Google: Supabase уводит в браузер и возвращает
+   * на `index.html`. Отличие одно и оно в пользу человека — Apple даёт
+   * СКРЫТЬ ПОЧТУ, и именно за это условие правило 4.8 и держится: свой
+   * вход по письму его не закрывает, потому что адрес там виден всегда.
+   *
+   * `prompt` здесь не передаётся: у Apple такого довода нет, а лишний
+   * параметр в запросе провайдер встречает отказом.
+   */
+  AUTH.loginApple = function() {
+    return supabaseClient.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: window.location.origin + '/index.html' }
     });
   };
 
@@ -332,6 +350,22 @@
       regGoogleBtn.addEventListener('click', function() {
         AUTH.loginGoogle();
       });
+    }
+
+    /* КНОПКИ APPLE ПОКАЗЫВАЮТСЯ, ТОЛЬКО КОГДА ПРОВАЙДЕР НАСТРОЕН.
+       Разметка их держит спрятанными, а снимает прятки этот кусок — по
+       тому же флагу, что и на сайте. Одно понятие, один выключатель. */
+    if (window.KSLT_APPLE) {
+      var appleBtn = document.getElementById('authApple');
+      var regAppleBtn = document.getElementById('regApple');
+      if (appleBtn) {
+        appleBtn.hidden = false;
+        appleBtn.addEventListener('click', function() { AUTH.loginApple(); });
+      }
+      if (regAppleBtn) {
+        regAppleBtn.hidden = false;
+        regAppleBtn.addEventListener('click', function() { AUTH.loginApple(); });
+      }
     }
 
     // Register Telegram → same as login Telegram

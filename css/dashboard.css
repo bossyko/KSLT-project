@@ -5572,3 +5572,25 @@ select:-webkit-autofill {
         min-height: 44px;
     }
 }
+
+/* ---- Заблокированные в кабинете (Apple 1.2), 04.11 ----
+   СТРОКА, А НЕ КАРТОЧКА: это перечень, из которого выходят одним
+   нажатием. Цель нажатия 44 — та же, что у всех остальных. */
+.db-blk-row {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+.db-blk-row:last-of-type { border-bottom: none; }
+.db-blk-text { flex: 1 1 auto; min-width: 0; }
+.db-blk-name {
+    font-size: var(--fs-base); font-weight: 600; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-blk-date { font-size: var(--fs-xs); color: var(--text-muted); }
+.db-blk-off { flex: 0 0 auto; min-height: 44px; }
+.db-blk-off:disabled { opacity: .5; cursor: progress; }
+.db-blk-note {
+    margin: var(--space-4) 0 0;
+    font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted);
+}

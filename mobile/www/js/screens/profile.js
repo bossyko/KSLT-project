@@ -297,6 +297,14 @@
       '<svg viewBox="0 0 24 24"><path d="M21.2 4.4L2.4 11.4c-.5.2-.5.8 0 1l4.8 1.8 1.8 5.8c.1.4.6.5.9.3l2.7-2.2 4.8 3.5c.4.3 1 .1 1.1-.4l3.3-15c.1-.6-.4-1-.6-.8z"/></svg>',
       I18N.t('profile.telegram'), tgLinked ? I18N.t('profile.tgLinked') : I18N.t('profile.tgLink'), '', true, 'profTelegramRow');
 
+    /* ЗАБЛОКИРОВАННЫЕ — НАСТРОЙКА ОБЩЕНИЯ, А НЕ ОПАСНОЕ ДЕЙСТВИЕ,
+       поэтому ряд стоит ДО «Удалить аккаунт» и покрашен нейтрально.
+       Без этого экрана блокировка была бы дорогой в один конец:
+       нажал — и снять негде. */
+    html += profileRow('blue',
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>',
+      I18N.t('blk.listTitle'), '', '', true, 'profBlockedRow');
+
     // Delete account
     html += profileRow('red',
       '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
@@ -494,6 +502,7 @@
     bindRowClick('profPasswordRow', showPasswordChange);
     bindRowClick('profTelegramRow', showTelegramConnect);
     bindRowClick('profDocsRow', showDocuments);
+    bindRowClick('profBlockedRow', showBlocked);
     bindRowClick('profDeleteRow', showDeleteAccount);
   }
 
@@ -1224,6 +1233,38 @@
       });
   }
 
+  /* QR РИСУЕТСЯ В ТЕЛЕФОНЕ, А НЕ НА ЧУЖОМ СЕРВЕРЕ (03.11).
+     Здесь стоял `<img src="https://api.qrserver.com/...?data=<код>">`:
+     КОД ВАУЧЕРА УХОДИЛ В АДРЕСЕ ССЫЛКИ НА ЧУЖУЮ МАШИНУ — и в её журналы.
+     Два следствия, и оба замерены, а не предположены: упадёт сервис —
+     исчезнут ВСЕ ваучеры разом, запасного пути не было; и для анкеты
+     Data safety в Play это передача данных третьей стороне, которую
+     пришлось бы объявлять.
+     Рисует `js/vendor/qrcode.js` (Kazuhiko Arase, MIT) — наружу не
+     уходит ничего. SVG, а не картинка: чёток на любой плотности экрана,
+     и показывать его администратору корта будут именно с экрана.
+     ЗАПАСНОЙ ПУТЬ — САМ КОД СЛОВАМИ. Дом не загрузился — человек
+     прочитает код вслух, и скидку всё равно получит. Пустое окно
+     вместо ваучера оставлять нельзя: оно выглядит поломкой. */
+  function рисоватьQR(узел, код) {
+    if (!узел) return;
+    if (typeof window.qrcode !== 'function') {
+      узел.style.cssText += ';display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:14px;color:#000;word-break:break-all';
+      узел.textContent = String(код);
+      return;
+    }
+    var q = window.qrcode(0, 'M');
+    q.addData(String(код));
+    q.make();
+    узел.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+    var svg = узел.querySelector('svg');
+    if (svg) {
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', '100%');
+      svg.style.display = 'block';
+    }
+  }
+
   function showVoucherQR(code) {
     var existing = document.getElementById('voucherQRModal');
     if (existing) existing.remove();
@@ -1235,13 +1276,14 @@
       '<div class="pd-h2h-content" style="max-width:300px;text-align:center">' +
         '<div class="pd-h2h-header"><button class="pd-h2h-close" id="qrClose">✕</button><h3>' + I18N.t('profile.vQRTitle') + '</h3></div>' +
         '<div style="padding:24px">' +
-          '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(code) + '" alt="QR" style="width:200px;height:200px;border-radius:8px;background:#fff;padding:8px">' +
+          '<div id="voucherQRBox" style="width:200px;height:200px;margin:0 auto;border-radius:8px;background:#fff;padding:8px;box-sizing:border-box"></div>' +
           '<div style="margin-top:12px;font-family:monospace;font-size:18px;color:var(--accent);letter-spacing:2px">' + code + '</div>' +
           '<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">' + I18N.t('profile.vQRText') + '</div>' +
         '</div>' +
       '</div>';
 
     document.getElementById('app').appendChild(modal);
+    рисоватьQR(modal.querySelector('#voucherQRBox'), code);
     requestAnimationFrame(function() { modal.classList.add('open'); });
 
     /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
@@ -1983,6 +2025,91 @@
   }
 
   // ---- Helper ----
+  /* =========================================================
+     ЗАБЛОКИРОВАННЫЕ (Apple 1.2), 04.11
+     =========================================================
+     Список приходит ОДНИМ запросом `kslt_moi_blokirovki()`: имя живёт в
+     `players`, блокировка — в `user_blocks`, связывает их
+     `profiles.player_id`. Собирать это тремя запросами в приложении
+     значит завести порядок между ними и беду на шве. */
+  function showBlocked() {
+    var overlay = openSubOverlay(I18N.t('blk.listTitle'),
+      '<div id="profBlkList"><div class="loading-center"><div class="spinner"></div></div></div>');
+    if (!overlay) return;
+    рисоватьБлокировки(overlay);
+  }
+
+  function рисоватьБлокировки(overlay) {
+    var где = overlay.querySelector('#profBlkList');
+    if (!где) return;
+    supabaseClient.rpc('kslt_moi_blokirovki').then(function(r) {
+      if (r && r.error) { throw r.error; }
+      var список = (r && r.data) || [];
+      if (!список.length) {
+        /* ПУСТО — ЭТО ТОЖЕ ОТВЕТ. Пустой экран человек читает как
+           поломку, поэтому говорим словами. */
+        где.innerHTML = '<div class="pd-empty"><div class="pd-empty-icon">🙂</div>' +
+          '<div class="pd-empty-title">' + esc(I18N.t('blk.listEmpty')) + '</div></div>';
+        return;
+      }
+      var h = '';
+      список.forEach(function(б) {
+        var имя = I18N.lang === 'en' ? (б.name_en || б.name)
+                : I18N.lang === 'kg' ? (б.name_kg || б.name)
+                : б.name;
+        h += '<div class="prof-blk-row" data-player="' + esc(б.player_id || '') + '">' +
+               '<div class="prof-blk-text">' +
+                 '<div class="prof-blk-name">' + esc(имя || б.player_id || '') + '</div>' +
+                 '<div class="prof-blk-date">' + esc(датаКоротко(б.created_at)) + '</div>' +
+               '</div>' +
+               '<button class="prof-blk-off" type="button">' + esc(I18N.t('blk.unblock')) + '</button>' +
+             '</div>';
+      });
+      h += '<p class="prof-blk-note">' + esc(I18N.t('blk.unblockNote')) + '</p>';
+      где.innerHTML = h;
+
+      где.querySelectorAll('.prof-blk-row').forEach(function(строка) {
+        var кнопка = строка.querySelector('.prof-blk-off');
+        кнопка.addEventListener('click', function() {
+          кнопка.disabled = true;
+          кнопка.textContent = I18N.t('blk.unblocking');
+          supabaseClient.rpc('kslt_razblokirovat', {
+            p_player_id: строка.getAttribute('data-player')
+          }).then(function(о) {
+            if (о && о.error) { throw о.error; }
+            if (window.KSLT_APP && window.KSLT_APP.toast) {
+              window.KSLT_APP.toast(I18N.t('blk.unblockDone'));
+            }
+            /* СПИСОК ПЕРЕЧИТЫВАЕТСЯ, А НЕ ПРАВИТСЯ НА МЕСТЕ: снятие
+               могло не дойти, и строка, убранная руками, соврала бы. */
+            рисоватьБлокировки(overlay);
+          }).catch(function(e) {
+            console.warn('[KSLT] блокировка не снята:', (e && e.message) || e);
+            if (window.KSLT_APP && window.KSLT_APP.toast) {
+              window.KSLT_APP.toast(I18N.t('blk.unblockError'));
+            }
+            кнопка.disabled = false;
+            кнопка.textContent = I18N.t('blk.unblock');
+          });
+        });
+      });
+    }).catch(function(e) {
+      console.warn('[KSLT] блокировки не прочитаны:', (e && e.message) || e);
+      где.innerHTML = '<div class="pd-empty"><div class="pd-empty-title">' +
+        esc(I18N.t('blk.unblockError')) + '</div></div>';
+    });
+  }
+
+  /** Дата без времени: когда именно в тот день — человеку не нужно. */
+  function датаКоротко(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString(
+        I18N.lang === 'en' ? 'en-GB' : 'ru-RU',
+        { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) { return String(iso).slice(0, 10); }
+  }
+
   function profileRow(colorClass, iconSvg, label, sub, value, hasArrow, id) {
     return '<div class="profile-row"' + (id ? ' id="' + id + '" style="cursor:pointer"' : '') + '>' +
       '<div class="profile-row-icon ' + colorClass + '">' + iconSvg + '</div>' +

@@ -2348,3 +2348,115 @@ a.pp-tournament:hover {
 }
 
 
+/* ===== ЖАЛОБА И БЛОКИРОВКА НА СТРАНИЦЕ ИГРОКА (Apple 1.2), 04.11 =====
+ *
+ * ПОЧЕМУ ЭТО ЕСТЬ: правило App Store 1.2 требует четырёх вещей от
+ * приложения с пользовательским содержимым; у КСЛТ была одна —
+ * опубликованные контакты. Сайт и приложение показывают одно и то же,
+ * иначе человек, заблокировавший с телефона, не поймёт, почему на сайте
+ * кнопка другая.
+ *
+ * Вид принят по стенду `maket/stend-zhaloba-blokirovka-sayt.html` 04.11.
+ * Стенд после переноса берёт правила ОТСЮДА, своей копии не держит.
+ *
+ * Числа — ступени: отступы 8·12·16·24, кегли `--fs-*`, цель нажатия 44.
+ */
+
+
+/* --- тихая строка под обложкой ---
+   ПОЧЕМУ НЕ В `pp-actions`: обложка несёт призыв играть. Жалоба рядом с ним
+   получила бы ту же громкость, а она обязана БЫТЬ (Apple 1.2), не кричать.
+   ПОЧЕМУ 44 ПРИ КЕГЛЕ 12: цель нажатия от высоты строки не зависит —
+   `min-height` держит 44 отступами, как `.pp-action-btn` держит 12/24. */
+.pp-safety {
+  display: flex; justify-content: flex-end; gap: 8px;
+  max-width: 900px; margin: 0 auto;
+  padding: 16px var(--pp-gutter, 24px) 0;
+}
+.pp-safety-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 12px 16px;
+  background: none; border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  font-size: var(--fs-xs); font-weight: 500;
+  cursor: pointer;
+}
+.pp-safety-btn:hover { color: var(--text-primary); border-color: var(--border-light); }
+.pp-safety-btn:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }
+.pp-safety-btn--block:hover { color: var(--danger); border-color: var(--danger-border); }
+
+/* --- причины жалобы: ГАЛОЧКА, А НЕ ПОДСВЕТКА (правило `Menu item 32:44`) --- */
+.pp-rep-reasons { display: flex; flex-direction: column; gap: 8px; margin: 24px 0 16px; }
+.pp-rep-reason {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 44px; padding: 8px 16px;
+  border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary); font-size: var(--fs-base); cursor: pointer;
+}
+.pp-rep-reason input { position: absolute; opacity: 0; width: 0; height: 0; }
+.pp-rep-tick {
+  flex: 0 0 auto; width: 20px; height: 20px;
+  border-radius: var(--radius-full);
+  border: var(--bw-hair) solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-xs); color: var(--neutral-black);
+}
+.pp-rep-reason:has(input:checked) { border-color: var(--accent); }
+.pp-rep-reason:has(input:checked) .pp-rep-tick { background: var(--accent); border-color: var(--accent); }
+.pp-rep-reason:has(input:focus-visible) { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }
+.pp-rep-note-label { display: block; margin-bottom: 8px;
+  font-size: var(--fs-xs); color: var(--text-muted); }
+.pp-rep-note {
+  width: 100%; box-sizing: border-box; min-height: 96px; padding: 12px;
+  background: var(--neutral-900, #121212);
+  border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-md); color: var(--text-primary);
+  font-size: var(--fs-base); resize: vertical;
+}
+.pp-rep-note:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: 2px; }
+.pp-rep-send {
+  width: 100%; min-height: 44px; margin-top: 24px; padding: 12px 24px;
+  background: var(--accent); color: var(--neutral-black); border: none;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+}
+.pp-rep-send:disabled { opacity: .45; cursor: not-allowed; }
+.pp-rep-srok { margin: 12px 0 0; text-align: center;
+  font-size: var(--fs-xs); color: var(--text-muted); }
+
+/* --- окно блокировки: ГОВОРИТ ЧТО ИЗМЕНИТСЯ, А НЕ «ВЫ УВЕРЕНЫ»
+       (`Gate modal 51:60`, взято и повёрнуто) --- */
+.pp-blk-what { margin: 24px 0 16px; padding: 0; list-style: none; }
+.pp-blk-what li {
+  display: flex; gap: 12px; padding: 8px 0;
+  font-size: var(--fs-base); line-height: 1.5; color: var(--text-primary);
+}
+.pp-blk-what li::before { content: '—'; color: var(--text-muted); flex: 0 0 auto; }
+.pp-blk-keep {
+  padding: 16px; margin-bottom: 24px;
+  background: var(--neutral-900, #121212);
+  border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+.pp-blk-keep strong { display: block; margin-bottom: 8px;
+  font-size: var(--fs-sm); color: var(--text-primary); }
+.pp-blk-keep span { font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted); }
+.pp-blk-do {
+  width: 100%; min-height: 44px; padding: 12px 24px;
+  background: var(--danger); color: var(--danger-on); border: none;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+}
+.pp-blk-cancel {
+  width: 100%; min-height: 44px; margin-top: 8px; padding: 12px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: var(--fs-xs); cursor: pointer;
+}
+/* на телефоне строка распускается во всю ширину: две кнопки по 44
+   в 390 минус 48 отступов сходятся, но жмутся — отдаём им всю полосу */
+@media (max-width: 640px) {
+  .pp-safety { justify-content: stretch; padding-top: 12px; }
+  .pp-safety-btn { flex: 1 1 0; justify-content: center; }
+}

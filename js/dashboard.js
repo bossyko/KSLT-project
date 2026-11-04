@@ -15,6 +15,12 @@
         stats: 'Statistics', invitations: 'Invitations', settings: 'Settings',
         profileTitle: 'My Profile', tournamentsTitle: 'My Tournaments',
         statsTitle: 'Statistics', settingsTitle: 'Settings',
+        blkListTitle: 'Blocked players',
+        blkListEmpty: 'You have not blocked anyone',
+        blkUnblock: 'Unblock', blkUnblocking: 'Removing…',
+        blkUnblockDone: 'Block removed',
+        blkUnblockError: 'Could not remove the block',
+        blkUnblockNote: 'Cancelled matches do not come back — they are arranged again.',
         membership: 'Membership',
         memberActive: 'Active',
         memberExpired: 'Expired',
@@ -337,6 +343,12 @@
         stats: 'Статистика', invitations: 'Чакыруулар', settings: 'Жөндөөлөр',
         profileTitle: 'Менин профилим', tournamentsTitle: 'Менин мелдештерим',
         statsTitle: 'Статистика', settingsTitle: 'Жөндөөлөр',
+        blkListTitle: 'Бөгөттөлгөндөр',
+        blkListEmpty: 'Эч кимди бөгөттөй элексиз',
+        blkUnblock: 'Бөгөттү алуу', blkUnblocking: 'Алынууда…',
+        blkUnblockDone: 'Бөгөт алынды',
+        blkUnblockError: 'Бөгөттү алуу мүмкүн болгон жок',
+        blkUnblockNote: 'Жокко чыгарылган матчтар кайтпайт — аларды кайра белгилешет.',
         membership: 'Мүчөлүк',
         memberActive: 'Активдүү',
         memberExpired: 'Мөөнөтү бүттү',
@@ -650,6 +662,12 @@
         stats: 'Статистика', invitations: 'Приглашения', settings: 'Настройки',
         profileTitle: 'Мой профиль', tournamentsTitle: 'Мои турниры',
         statsTitle: 'Статистика', settingsTitle: 'Настройки',
+        blkListTitle: 'Заблокированные',
+        blkListEmpty: 'Вы никого не заблокировали',
+        blkUnblock: 'Разблокировать', blkUnblocking: 'Снимаем…',
+        blkUnblockDone: 'Блокировка снята',
+        blkUnblockError: 'Не удалось снять блокировку',
+        blkUnblockNote: 'Отменённые матчи не возвращаются — их назначают заново.',
         membership: 'Членство',
         memberActive: 'Активно',
         memberExpired: 'Истекло',
@@ -6274,6 +6292,91 @@
      */
     var ПОКАЗЫВАЕМ = 5;
 
+    /* =========================================================
+       ЗАБЛОКИРОВАННЫЕ (Apple 1.2), 04.11
+       =========================================================
+       Список приходит ОДНИМ запросом `kslt_moi_blokirovki()`: имя живёт
+       в `players`, блокировка — в `user_blocks`, связывает их
+       `profiles.player_id`. Три запроса в кабинете — это порядок между
+       ними и беда на шве.
+
+       ТОТ ЖЕ ЭКРАН ЕСТЬ В ПРИЛОЖЕНИИ (`mobile/www/js/screens/profile.js`).
+       Два места, одна функция базы: расходиться нечему. */
+    async function рисоватьБлокировки() {
+        var место = document.getElementById('dbBlockedCard');
+        if (!место || !client) return;
+
+        место.innerHTML = '<div class="db-card-title">' + L.blkListTitle + '</div>' +
+                          '<div id="dbBlockedList"></div>';
+        var где = место.querySelector('#dbBlockedList');
+
+        var r;
+        try {
+            r = await client.rpc('kslt_moi_blokirovki');
+            if (r.error) { throw r.error; }
+        } catch (e) {
+            console.warn('[KSLT] блокировки не прочитаны:', (e && e.message) || e);
+            где.innerHTML = '<p class="db-empty-text">' + L.blkUnblockError + '</p>';
+            return;
+        }
+
+        var список = r.data || [];
+        if (!список.length) {
+            /* ПУСТО — ЭТО ТОЖЕ ОТВЕТ: пустую карточку человек читает
+               как поломку, поэтому говорим словами. */
+            где.innerHTML = '<p class="db-empty-text">' + L.blkListEmpty + '</p>';
+            return;
+        }
+
+        var h = '';
+        список.forEach(function(б) {
+            var имя = KSLT_YAZYK.выбрать(б.name_en || б.name, б.name_kg || б.name, б.name);
+            h += '<div class="db-blk-row" data-player="' + KSLT_экранировать(б.player_id || '') + '">' +
+                   '<div class="db-blk-text">' +
+                     '<div class="db-blk-name">' + KSLT_экранировать(имя || б.player_id || '') + '</div>' +
+                     '<div class="db-blk-date">' + KSLT_экранировать(датаБлокировки(б.created_at)) + '</div>' +
+                   '</div>' +
+                   '<button class="db-btn db-btn-sm db-blk-off" type="button">' +
+                     L.blkUnblock + '</button>' +
+                 '</div>';
+        });
+        h += '<p class="db-blk-note">' + L.blkUnblockNote + '</p>';
+        где.innerHTML = h;
+
+        где.querySelectorAll('.db-blk-row').forEach(function(строка) {
+            var кнопка = строка.querySelector('.db-blk-off');
+            кнопка.addEventListener('click', function() {
+                кнопка.disabled = true;
+                кнопка.textContent = L.blkUnblocking;
+                client.rpc('kslt_razblokirovat', {
+                    p_player_id: строка.getAttribute('data-player')
+                }).then(function(о) {
+                    if (о && о.error) { throw о.error; }
+                    if (window.KSLT_TOAST) KSLT_TOAST.показать(L.blkUnblockDone, { тон: 'ok' });
+                    /* СПИСОК ПЕРЕЧИТЫВАЕТСЯ, А НЕ ПРАВИТСЯ НА МЕСТЕ:
+                       снятие могло не дойти, и строка, убранная руками,
+                       соврала бы. */
+                    рисоватьБлокировки();
+                }).catch(function(e) {
+                    console.warn('[KSLT] блокировка не снята:', (e && e.message) || e);
+                    if (window.KSLT_TOAST) KSLT_TOAST.показать(L.blkUnblockError, { тон: 'err' });
+                    кнопка.disabled = false;
+                    кнопка.textContent = L.blkUnblock;
+                });
+            });
+        });
+    }
+
+    /** Дата без времени: когда именно в тот день — человеку не нужно. */
+    function датаБлокировки(iso) {
+        if (!iso) return '';
+        try {
+            return new Date(iso).toLocaleDateString(
+                KSLT_YAZYK.код === 'en' ? 'en-GB' : 'ru-RU',
+                { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch (e) { return String(iso).slice(0, 10); }
+    }
+
     async function рисоватьУстройства() {
         var место = document.getElementById('dbDevicesCard');
         if (!место || !client) return;
@@ -6489,6 +6592,12 @@
 
             buildNotifySection() +
 
+            /* ЗАБЛОКИРОВАННЫЕ — НАСТРОЙКА ОБЩЕНИЯ, поэтому стоит ДО
+               опасной зоны и выглядит как обычная карточка. Без этого
+               экрана блокировка была бы дорогой в один конец: нажал на
+               странице игрока — и снять негде. */
+            '<div class="db-card db-settings-section" id="dbBlockedCard"></div>' +
+
             '<div class="db-card db-danger-zone">' +
                 '<div class="db-card-title">' + L.dangerZone + '</div>' +
                 '<p class="db-danger-text">' + L.deleteConfirm + '</p>' +
@@ -6496,6 +6605,7 @@
             '</div>';
 
         рисоватьУстройства();
+        рисоватьБлокировки();
 
         // Password rules validation
         var pwRules = {

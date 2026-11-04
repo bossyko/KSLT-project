@@ -14,6 +14,12 @@
   var _earnedBadges = [];
   var _allBadges = [];
   var _playerCache = {};
+  /* Заблокирован ли этот игрок МНОЙ. Спрашивается у базы вместе с
+     карточкой, а не вычисляется на месте: заслон стоит триггером
+     (`sql/схема/apple-1-2-zaslon.sql`), и приложение обязано показывать
+     ТО ЖЕ, что решит база, иначе кнопка обещает одно, а отказ приходит
+     другой. */
+  var _zablokirovan = false;
 
   function esc(s) {
     if (!s) return '';
@@ -155,11 +161,19 @@
                               'telegram, show_telegram, instagram, show_instagram')
                       .eq('player_id', playerId).maybeSingle()
                       .then(function(r) { return r.data; })
-                  : Promise.resolve(null)
+                  : Promise.resolve(null),
+                /* ОТКАЗ БАЗЫ НЕ ДОЛЖЕН ГАСИТЬ КАРТОЧКУ: не смогли
+                   спросить — считаем, что блокировки нет, и человек
+                   увидит обычный экран. Соврать в сторону «заблокирован»
+                   хуже: это спрятало бы кнопки без причины. */
+                supabaseClient.rpc('kslt_zablokirovan_li', { p_player_id: playerId })
+                  .then(function(r) { return r && r.data === true; })
+                  .catch(function() { return false; })
               ]).then(function(results) {
                 _earnedBadges = results[0];
                 _allBadges = results[1];
                 _contacts = results[2];
+                _zablokirovan = results[3] === true;
                 renderFullProfile(access);
               });
             }
@@ -347,7 +361,13 @@
       // разрешает показ. Колонки players.phone/show_phone никто не заполнял.
       // Каждый способ связи открывается отдельно: телеграм может быть рабочий,
       // WhatsApp личный. WhatsApp живёт на своём номере, если он указан.
-      var contacts = _contacts || {};
+      /* ЗАБЛОКИРОВАЛ — КОНТАКТОВ НЕ ВИДИШЬ. Это обещание окна
+         блокировки, и держать его обязано то же место, что рисует
+         контакты. ЧЕСТНО О ПРЕДЕЛЕ: прячет ПРИЛОЖЕНИЕ, то есть от
+         прямого запроса к базе это не защищает — настоящий заслон
+         здесь потребовал бы правил строк на `profiles`, и он записан
+         долгом, а не сделан молча. */
+      var contacts = _zablokirovan ? {} : (_contacts || {});
       var cPhone = contacts.show_phone ? (contacts.phone || '') : '';
       var cWa = contacts.show_whatsapp ? (contacts.whatsapp_phone || contacts.phone || '') : '';
       var cTg = contacts.show_telegram ? (contacts.telegram || '') : '';
@@ -377,16 +397,37 @@
     // Звать можно только того, у кого есть учётная запись: карточка из
     // списков клуба вызова и приглашения не получит — по ту сторону никого нет
     var естьЧеловек = _player.has_account === true;
-    if (access === 'member' && естьЧеловек) {
+    if (access === 'member' && естьЧеловек && !_zablokirovan) {
       html += '<div class="pd-challenge-wrap">';
       html += '<button class="pd-challenge-btn" id="pdChallengeBtn">⚔️ ' + I18N.t('pd.challenge') + '</button>';
       // Баттл зовёт на поединок того, кого ты уже знаешь. Приглашение решает
       // другую задачу — найти, с кем вообще выйти на корт
       html += '<button class="pd-invite-btn" id="pdInviteBtn">🎾 ' + I18N.t('inv.btn') + '</button>';
       html += '</div>';
+    } else if (access === 'member' && естьЧеловек && _zablokirovan) {
+      /* КНОПКА, КОТОРАЯ ГАРАНТИРОВАННО ОТКАЖЕТ, — ЭТО ЛОВУШКА.
+         Заслон в базе стоит в обе стороны: заблокировав, ты и сам не
+         позовёшь. Значит вместо «Вызвать» здесь стоит правда о том,
+         что происходит, и выход из положения. */
+      html += '<div class="pd-cta-membership"><p>' + I18N.t('blk.blockedHint') + '</p></div>';
     } else if (access === 'registered') {
       html += '<div class="pd-cta-membership">';
       html += '<p>' + I18N.t('pd.memberCta') + '</p>';
+      html += '</div>';
+    }
+
+    /* ---- Жалоба и блокировка (Apple 1.2) ----
+       СТОЯТ ПОСЛЕДНИМИ И ТИХО. Правило 1.2 требует, чтобы они БЫЛИ, а не
+       чтобы кричали: за карточкой приходят играть, а не жаловаться.
+       Показываются вошедшему и только там, где по ту сторону есть
+       человек: у карточки из списков клуба нет учётной записи, и
+       блокировать там некого (функция ответит `no_account`). */
+    if (access !== 'guest' && естьЧеловек) {
+      html += '<div class="pd-safety-row">';
+      html += '<button class="pd-safety-btn" type="button" id="pdReportBtn">' +
+              I18N.t('sft.report') + '</button>';
+      html += '<button class="pd-safety-btn pd-safety-btn--block" type="button" id="pdBlockBtn">' +
+              (_zablokirovan ? I18N.t('blk.unblock') : I18N.t('sft.block')) + '</button>';
       html += '</div>';
     }
 
@@ -413,6 +454,191 @@
         });
       }
     }
+
+    // ---- Жалоба и блокировка ----
+    var repBtn = document.getElementById('pdReportBtn');
+    if (repBtn) repBtn.addEventListener('click', openReport);
+    var blkBtn = document.getElementById('pdBlockBtn');
+    if (blkBtn) blkBtn.addEventListener('click', function() {
+      if (_zablokirovan) снятьБлокировку(); else openBlock();
+    });
+  }
+
+  /* =========================================================
+     ЖАЛОБА И БЛОКИРОВКА (Apple 1.2), 04.11
+     =========================================================
+     ОКНА СТРОЯТСЯ ТОЙ ЖЕ ДОРОГОЙ, ЧТО H2H (`openH2H` ниже): узел
+     кладётся в `playerOverlay`, класс `open` вешается следующим кадром,
+     снимается с задержкой под переход. Нового компонента не заведено —
+     так решено на доске 1030:155, раздел F.
+
+     ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (правило 02.11): `getElementById`
+     отдаёт первый узел ДОКУМЕНТА, и пока окно одно — ответы совпадают,
+     а беда ждёт второго. */
+
+  function окно(id, заголовок, тело) {
+    var overlay = document.getElementById('playerOverlay');
+    if (!overlay) return null;
+    var прежнее = document.getElementById(id);
+    if (прежнее) прежнее.remove();
+
+    var узел = document.createElement('div');
+    узел.id = id;
+    узел.className = 'pd-h2h-modal';
+    узел.setAttribute('role', 'dialog');
+    узел.setAttribute('aria-modal', 'true');
+    узел.innerHTML =
+      '<div class="pd-h2h-content">' +
+        '<div class="pd-h2h-header">' +
+          '<button class="pd-h2h-close" type="button" aria-label="' + esc(I18N.t('blk.cancel')) + '">✕</button>' +
+          '<h3>' + esc(заголовок) + '</h3>' +
+        '</div>' +
+        '<div class="pd-h2h-body">' + тело + '</div>' +
+      '</div>';
+
+    overlay.appendChild(узел);
+    requestAnimationFrame(function() { узел.classList.add('open'); });
+
+    var закрыть = function() {
+      узел.classList.remove('open');
+      setTimeout(function() { узел.remove(); }, 300);
+    };
+    узел.querySelector('.pd-h2h-close').addEventListener('click', закрыть);
+    узел.addEventListener('click', function(e) { if (e.target === узел) закрыть(); });
+    узел.закрыть = закрыть;
+    return узел;
+  }
+
+  /** Пять причин живут ОДНИМ списком: добавится шестая — правится одно
+      место, а не разметка и перевод по отдельности. Коды — те же, что в
+      ограничении базы `content_reports.reason`. */
+  var ПРИЧИНЫ = [
+    ['offensive',     'rep.offensive'],
+    ['spam',          'rep.spam'],
+    ['fake',          'rep.fake'],
+    ['foreign_photo', 'rep.foreignPhoto'],
+    ['other',         'rep.other']
+  ];
+
+  function openReport() {
+    var тело = '<div class="pd-rep-reasons" role="radiogroup" aria-label="' +
+               esc(I18N.t('rep.title')) + '">';
+    ПРИЧИНЫ.forEach(function(пара, i) {
+      тело += '<label class="pd-rep-reason">' +
+                '<input type="radio" name="kslt-prichina" value="' + пара[0] + '"' +
+                  (i === 0 ? ' checked' : '') + '>' +
+                '<span class="pd-rep-tick" aria-hidden="true">✓</span>' +
+                '<span class="pd-rep-label">' + esc(I18N.t(пара[1])) + '</span>' +
+              '</label>';
+    });
+    тело += '</div>' +
+      '<label class="pd-rep-note-label" for="pdRepNote">' + esc(I18N.t('rep.noteLabel')) + '</label>' +
+      '<textarea class="pd-rep-note" id="pdRepNote" maxlength="1000" placeholder="' +
+        esc(I18N.t('rep.notePlaceholder')) + '"></textarea>' +
+      '<button class="pd-rep-send" type="button">' + esc(I18N.t('rep.send')) + '</button>' +
+      '<p class="pd-rep-srok">' + esc(I18N.t('rep.srok')) + '</p>';
+
+    var у = окно('pdReportModal', I18N.t('rep.title'), тело);
+    if (!у) return;
+
+    var кнопка = у.querySelector('.pd-rep-send');
+    кнопка.addEventListener('click', function() {
+      var выбран = у.querySelector('input[name="kslt-prichina"]:checked');
+      var заметка = у.querySelector('#pdRepNote').value;
+      /* РАБОТА, КОТОРАЯ НЕ ВИДНА, НЕОТЛИЧИМА ОТ БЕЗДЕЙСТВИЯ — правило
+         03.11 с перестановки мест. Кнопка запирается на время запроса. */
+      кнопка.disabled = true;
+      кнопка.textContent = I18N.t('rep.sending');
+      supabaseClient.rpc('kslt_pozhalovatsya', {
+        p_target_kind: 'player',
+        p_target: _player.id,
+        p_reason: выбран ? выбран.value : 'other',
+        p_note: заметка
+      }).then(function(r) {
+        var о = (r && r.data) || {};
+        if (r && r.error) { throw r.error; }
+        if (о.error === 'already') { toast(I18N.t('rep.already')); у.закрыть(); return; }
+        if (о.error === 'not_logged_in') { toast(I18N.t('blk.notLogged')); у.закрыть(); return; }
+        if (о.ok) { toast(I18N.t('rep.done')); у.закрыть(); return; }
+        throw new Error(о.error || 'unknown');
+      }).catch(function(e) {
+        console.warn('[KSLT] жалоба не ушла:', (e && e.message) || e);
+        toast(I18N.t('rep.error'));
+        кнопка.disabled = false;
+        кнопка.textContent = I18N.t('rep.send');
+      });
+    });
+  }
+
+  function openBlock() {
+    var пункты = ['blk.w1', 'blk.w2', 'blk.w3', 'blk.w4', 'blk.w5', 'blk.w6']
+      .map(function(к) { return '<li>' + esc(I18N.t(к)) + '</li>'; }).join('');
+    var тело =
+      '<ul class="pd-blk-what">' + пункты + '</ul>' +
+      '<div class="pd-blk-keep"><strong>' + esc(I18N.t('blk.keepTitle')) + '</strong>' +
+        '<span>' + esc(I18N.t('blk.keepText')) + '</span></div>' +
+      '<button class="pd-blk-do" type="button">' + esc(I18N.t('blk.do')) + '</button>' +
+      '<button class="pd-blk-cancel" type="button">' + esc(I18N.t('blk.cancel')) + '</button>';
+
+    var у = окно('pdBlockModal', I18N.t('blk.title'), тело);
+    if (!у) return;
+
+    у.querySelector('.pd-blk-cancel').addEventListener('click', function() { у.закрыть(); });
+
+    var кнопка = у.querySelector('.pd-blk-do');
+    кнопка.addEventListener('click', function() {
+      кнопка.disabled = true;
+      кнопка.textContent = I18N.t('blk.doing');
+      supabaseClient.rpc('kslt_zablokirovat', { p_player_id: _player.id })
+        .then(function(r) {
+          var о = (r && r.data) || {};
+          if (r && r.error) { throw r.error; }
+          if (о.error === 'no_account') { toast(I18N.t('blk.noAccount')); у.закрыть(); return; }
+          if (о.error === 'not_logged_in') { toast(I18N.t('blk.notLogged')); у.закрыть(); return; }
+          if (!о.ok) { throw new Error(о.error || 'unknown'); }
+          _zablokirovan = true;
+          у.закрыть();
+          /* ЧИСЛО ОТМЕНЁННЫХ ГОВОРИТСЯ ВСЛУХ: человек должен узнать о
+             потере матча от нас, а не обнаружить её сам в кабинете. */
+          /* ПРО ПАРНЫЙ МАТЧ ГОВОРИМ ОТДЕЛЬНО: он НЕ отменяется, и
+             человек должен узнать это сразу, а не в день игры. */
+          var слово = о.otmeneno > 0
+            ? I18N.t('blk.doneMatches') + о.otmeneno
+            : I18N.t('blk.done');
+          if (о.parnyh > 0) слово += ' ' + I18N.t('blk.doneParnyh');
+          toast(слово);
+          PD.open(_playerId);
+        })
+        .catch(function(e) {
+          console.warn('[KSLT] блокировка не прошла:', (e && e.message) || e);
+          toast(I18N.t('blk.error'));
+          кнопка.disabled = false;
+          кнопка.textContent = I18N.t('blk.do');
+        });
+    });
+  }
+
+  function снятьБлокировку() {
+    var кнопка = document.getElementById('pdBlockBtn');
+    if (кнопка) { кнопка.disabled = true; кнопка.textContent = I18N.t('blk.unblocking'); }
+    supabaseClient.rpc('kslt_razblokirovat', { p_player_id: _player.id })
+      .then(function(r) {
+        if (r && r.error) { throw r.error; }
+        _zablokirovan = false;
+        toast(I18N.t('blk.unblockDone'));
+        PD.open(_playerId);
+      })
+      .catch(function(e) {
+        console.warn('[KSLT] блокировка не снята:', (e && e.message) || e);
+        toast(I18N.t('blk.unblockError'));
+        if (кнопка) { кнопка.disabled = false; кнопка.textContent = I18N.t('blk.unblock'); }
+      });
+  }
+
+  /** Одно место, где приложение говорит с человеком всплывашкой. */
+  function toast(текст) {
+    if (window.KSLT_APP && window.KSLT_APP.toast) window.KSLT_APP.toast(текст);
+    else console.log('[KSLT]', текст);
   }
 
   /* ПЛИТКУ СТРОИТ ОБЩИЙ ДОМ `js/kslt-plitki.js` (шаг A3.5, 29.10).
