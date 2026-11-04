@@ -65,7 +65,6 @@ const КУСКИ = [
     ['цвет статусов',       'check-turniry-cvet.js', 'check-turniry-cvet-otkat.js'],
     ['узкие виды турниров', 'check-turniry-vidy.js', 'check-turniry-vidy-otkat.js'],
     ['новости',             'check-novosti.js',      'check-novosti-otkat.js'],
-    ['значки',              'check-znachki.js',      'check-znachki-otkat.js'],
     ['коробка-гейт',        'check-korobka.js',      'check-korobka-otkat.js'],
     ['рейтинг',             'check-reyting.js',      'check-reyting-otkat.js'],
     ['давай сыграем',       'check-igroki.js',       'check-igroki-otkat.js'],
@@ -340,7 +339,58 @@ const КУСКИ = [
      'check-predely-prob.js', 'check-predely-prob-otkat.js'],
 
     ['класс картинки не носит данные',
-     'check-klass-kartinki.js', 'check-klass-kartinki-otkat.js']
+     'check-klass-kartinki.js', 'check-klass-kartinki-otkat.js'],
+
+    /* ── 04.11: ДОГНАТЬ СПИСОК ────────────────────────────────────────────
+       Двадцать пар лежали на диске и НЕ стояли в этом списке — значит общий
+       бегунок их не гонял ни разу. Это ровно та беда, про которую написано
+       в check-vse-srezom.js: БЕГУНОК, КОТОРЫЙ НЕ ЗАПУСКАЮТ, МОЛЧА ГНИЁТ.
+       Теперь за полнотой списка следит правило `check-spisok-par.js`. */
+    ['бекап заперт',
+     'check-bekap-zaperto.js', 'check-bekap-zaperto-otkat.js'],
+    ['безопасная зона',
+     'check-bezopasnaya-zona.js', 'check-bezopasnaya-zona-otkat.js'],
+    ['исход матча',
+     'check-ishod-matcha.js', 'check-ishod-matcha-otkat.js'],
+    ['лиги с первого дня',
+     'check-ligi-s-pervogo-dnya.js', 'check-ligi-s-pervogo-dnya-otkat.js'],
+    ['один переключатель темы',
+     'check-odin-pereklyuchatel-temy.js', 'check-odin-pereklyuchatel-temy-otkat.js'],
+    ['отсечка',
+     'check-otsechka.js', 'check-otsechka-otkat.js'],
+    ['перестановка места',
+     'check-perestanovka-mesta.js', 'check-perestanovka-mesta-otkat.js'],
+    ['посев двое от группы',
+     'check-posev-dvoe-ot-gruppy.js', 'check-posev-dvoe-ot-gruppy-otkat.js'],
+    ['правило пароля',
+     'check-pravilo-parolya.js', 'check-pravilo-parolya-otkat.js'],
+    ['приложение само себе',
+     'check-prilozhenie-samo-sebe.js', 'check-prilozhenie-samo-sebe-otkat.js'],
+    ['свой QR',
+     'check-qr-svoy.js', 'check-qr-svoy-otkat.js'],
+    ['складка',
+     'check-skladka.js', 'check-skladka-otkat.js'],
+    ['страна и глаз',
+     'check-strana-i-glaz.js', 'check-strana-i-glaz-otkat.js'],
+    ['свой узел',
+     'check-svoy-uzel.js', 'check-svoy-uzel-otkat.js'],
+    ['вход с Apple',
+     'check-vhod-s-apple.js', 'check-vhod-s-apple-otkat.js'],
+    ['витрина игроков',
+     'check-vitrina-igrokov.js', 'check-vitrina-igrokov-otkat.js'],
+    ['выпадашка',
+     'check-vypadashka.js', 'check-vypadashka-otkat.js'],
+    ['youtube — один разбор',
+     'check-youtube-odin-razbor.js', 'check-youtube-odin-razbor-otkat.js'],
+    ['жалобы и блокировки',
+     'check-zhaloby-i-blokirovki.js', 'check-zhaloby-i-blokirovki-otkat.js'],
+    ['журнал матча',
+     'check-zhurnal-matcha.js', 'check-zhurnal-matcha-otkat.js'],
+
+    /* СТОРОЖ НАД ЭТИМ САМЫМ СПИСКОМ: он падает, когда пара заведена, а в
+       список не внесена, и когда одна пара стоит в нём дважды. */
+    ['список пар полон',
+     'check-spisok-par.js', 'check-spisok-par-otkat.js']
 ];
 
 function прогнать(файл) {

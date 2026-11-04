@@ -41,6 +41,14 @@ const ПЕР = 'mobile/android/variables.gradle';
 const МАН = 'mobile/android/app/src/main/AndroidManifest.xml';
 const НАС = 'mobile/capacitor.config.ts';
 
+/* ЧИСЛО БЕРЁТСЯ ИЗ ПРИБОРА, УСТНЫЙ СЧЁТ ЗАПРЕЩЁН: номер выпуска читается из
+   сборки, пол — из самого правила. Якорь с зашитым числом ломался на каждом
+   подъёме versionCode. */
+const ТЕК_НОМЕР = (fs.readFileSync(path.join(КОРЕНЬ, СБ), 'utf8')
+    .match(/versionCode\s+(\d+)/) || [])[1];
+const ПОЛ_НОМЕРА = Number((fs.readFileSync(path.join(КОРЕНЬ, 'tools', 'check-vypusk-prilozheniya.js'), 'utf8')
+    .match(/ПОЛ_НОМЕРА\s*=\s*(\d+)/) || [])[1]);
+
 console.log('');
 const база = прогон();
 if (база.код !== 0) {
@@ -52,7 +60,8 @@ if (база.код !== 0) {
 console.log('  база    копия проходит все правила\n');
 
 const ОТКАТЫ = [
-    ['номер выпуска опущен', СБ, 'versionCode 4', 'versionCode 3',
+    ['номер выпуска опущен', СБ,
+     'versionCode ' + ТЕК_НОМЕР, 'versionCode ' + (ПОЛ_НОМЕРА - 1),
      'номер выпуска не опускается ниже уже загруженного'],
 
     ['целевой уровень откатили на 35', ПЕР,

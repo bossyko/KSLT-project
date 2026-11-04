@@ -28,7 +28,7 @@ function копировать(отн) {
         fs.readdirSync(ист).forEach(ф => копировать(path.join(отн, ф)));
     } else fs.copyFileSync(ист, цель);
 }
-['js', 'css', 'data', 'pages', 'partials', 'maket'].forEach(д => {
+['js', 'css', 'data', 'pages', 'partials', 'maket', 'mobile/www'].forEach(д => {
     if (fs.existsSync(path.join(КОРЕНЬ, д))) копировать(д);
 });
 ['index.html', 'index-en.html', 'index-kg.html'].forEach(ф => {
@@ -91,13 +91,13 @@ const ОТКАТЫ = [
 /* ВЕРНУТЬ ПУТЬ В ПУСТОТУ — ровно та беда, что жила до 03.11: дом базы
    лежит в `js/`, а стенд звал его из `js/admin/sections/`. */
 ['вернуть подключение на несуществующий путь', path.join('maket', 'setka-zamer.html'),
- т => т.replace('"../js/kslt-baza.js?v=2"', '"../js/admin/sections/kslt-baza.js?v=2"'),
+ т => т.replace(/"\.\.\/js\/kslt-baza\.js(\?v=\d+)"/, '"../js/admin/sections/kslt-baza.js$1"'),
  'подключённый файл существует на диске'],
 
 /* ПОДСТАВА РЯДОМ С HTML — не в `СВОИ`, но существует: правило не смеет
    кричать на неё. Если закричит — оно меряет список, а не диск. */
 ['увести подставу стенда в пустоту', path.join('maket', 'setka-zamer.html'),
- т => т.replace('"stend-setka-dannye.js?v=20"', '"stend-setka-dannyh.js?v=20"'),
+ т => т.replace(/"stend-setka-dannye\.js(\?v=\d+)"/, '"stend-setka-dannyh.js$1"'),
  'подключённый файл существует на диске'],
 
 /* ── ОБМАН, КОТОРЫЙ НЕ ПРОЙДЁТ ──
