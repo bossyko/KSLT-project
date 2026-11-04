@@ -55,7 +55,19 @@ function открыть(page, баттл, язык) {
             if (имя === 'get_battle_votes') return Promise.resolve({ data: [] });
             return Promise.resolve({ data: null });
         };
-        if (window.KSLT_I18N.set) window.KSLT_I18N.set(язык);
+        /* ЯЗЫК СТАВИТСЯ `setLang`, А НЕ `set` (04.11).
+           Здесь стояло `if (window.KSLT_I18N.set) ... .set(язык)`, а
+           метода `set` у дома слов НЕТ вовсе — он зовётся `setLang`
+           (`mobile/www/js/i18n.js:1060`). Условие было ложно всегда,
+           язык не переключался, и три «языка» этого файла проверяли один
+           и тот же: проверка «у отмены есть слово на этом языке» три
+           раза смотрела на русское слово.
+           ПРОБА, ЗАЩИЩЁННАЯ `if`, МОЛЧА ПРОПУСКАЕТ САМУ СЕБЯ — поэтому
+           здесь не `if`, а отказ с именем. */
+        if (typeof window.KSLT_I18N.setLang !== 'function') {
+            throw new Error('у дома слов нет setLang — проба проверяла бы один язык трижды');
+        }
+        window.KSLT_I18N.setLang(язык);
 
         try {
             window.KSLT_HOME.openBattleDetail(баттл.id);
