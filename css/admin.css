@@ -1075,10 +1075,16 @@ body.ad-page {
    кегли 0.6rem (9.6), 0.65rem (10.4), 0.85rem (13.6): со шкалы ни
    одного, ступень 11 и 14. */
 .ad-grp-th-num   { width: 30px; }
-.ad-grp-th-score { width: 60px; text-align: center; }
-.ad-grp-th-wins  { width: 40px; text-align: center; }
-.ad-grp-th-games { width: 56px; text-align: center; }
-.ad-grp-th-place { width: 64px; text-align: center; }
+.ad-grp-th-score { width: 60px; }
+.ad-grp-th-wins  { width: 40px; }
+/* Колонка подсчёта несёт ДВЕ строки — числа и долю со словами, — и
+   56 на неё не рассчитаны: при узкой ширине доля переносится, и строка
+   таблицы растёт вдвое. */
+.ad-grp-th-games { width: 160px; }
+/* МЕСТО — ОДНА ШИРИНА НА ОБЕ ПАНЕЛИ. Под числом стоит подпись, чем
+   развели равных («по доле геймов», «жребий»), и 64 ей мало: при
+   `fixed` она ломалась на три строки и раздувала ряд. */
+.ad-grp-th-place { width: 104px; }
 .ad-qual-th-wins  { width: 104px; text-align: center; }
 .ad-qual-th-sets  { width: 66px;  text-align: center; }
 .ad-qual-th-games { width: 66px;  text-align: center; }
@@ -1114,6 +1120,65 @@ body.ad-page {
     cursor: pointer;
 }
 .ad-grp-place-select[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* ПЕРЕКЛЮЧАТЕЛЬ ЛИГИ — на месте значка «Высшая»/«Утешительная».
+   Стоит у групп из трёх пар и меньше, когда игры в группе окончены
+   (слово Кости 05.11). Геометрия взята у значка, а не придумана: он
+   стоит в той же ячейке, в одной строке с именем, и ряд не должен
+   подпрыгнуть от того, что значок стал выпадашкой. Кегль и отступы —
+   ступени шкалы, своих чисел здесь нет. */
+/* ПЕРЕКЛЮЧАТЕЛЬ ЛИГИ НОСИТ ВИД СВОЕГО ЗНАЧКА, А НЕ СИСТЕМНОГО СПИСКА.
+   ДВЕ БЕДЫ, НАЙДЕННЫЕ КОСТЕЙ 05.11 НА ЖИВОМ ТУРНИРЕ, И ОБЕ ОТСЮДА:
+   1. «там чёрная и почему-то другого цвета подписи» — без `appearance:
+      none` браузер рисует `select` СВОИМ видом: светлая подложка и
+      ЧЁРНЫЙ текст, и в тёмной теме он спорит с соседним значком, у
+      которого те же слова;
+   2. «не понятно, что можно нажимать на лиги» — у значка и выпадашки
+      был один вид, и нажимаемость ничем не называлась.
+   Поэтому: краски берутся ОТ ЗНАЧКА (`ad-league-pl` / `ad-league-cl` —
+   одно определение на оба места), а нажимаемость называется стрелкой,
+   рамкой и курсором. ОДИН И ТОТ ЖЕ ЗНАК НА ДВА СМЫСЛА НЕ ГОДИТСЯ. */
+.ad-league-side-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--alpha-white-08);
+    color: var(--text-secondary);
+    border: var(--bw-hair) solid var(--border-color);
+    border-radius: var(--radius-xs);
+    font-weight: 600;
+    font-size: var(--fs-2xs);
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    padding: var(--space-05) var(--space-5) var(--space-05) var(--space-2);
+    margin-left: var(--space-2);
+    cursor: pointer;
+    vertical-align: middle;
+    /* Стрелка — своей разметкой, а не картинкой: она должна перекраситься
+       вместе с текстом, когда выбрана Высшая. */
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: right var(--space-2) center, right var(--space-1) center;
+    background-size: 4px 4px, 4px 4px;
+    background-repeat: no-repeat;
+}
+/* Высшая — акцентом продукта, тем же, что у значка. */
+.ad-league-side-select.ad-league-side--pl {
+    background-color: var(--accent);
+    color: var(--accent-on);
+    border-color: var(--accent);
+}
+.ad-league-side-select:hover { border-color: var(--accent); }
+.ad-league-side-select:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: var(--space-1);
+}
+.ad-league-side-select[disabled] { opacity: 0.45; cursor: not-allowed; }
+/* Список раскрывается системным, и в нём краски наши не действуют:
+   задаём их явно, иначе в тёмной теме строки остаются белыми. */
+.ad-league-side-select option {
+    background: var(--bg-card);
+    color: var(--text);
+}
 
 /* Полоса действий под сеткой и широкая кнопка-действие */
 .ad-brk-actions {
@@ -1165,7 +1230,9 @@ body.ad-page {
     margin-bottom: var(--space-4);
 }
 .ad-league-actions--top { margin-top: var(--space-4); margin-bottom: 0; }
-.ad-league-th-place { width: 50px; text-align: center; }
+/* Таблица лиг носит тот же набор колонок, что круговая (05.11), и
+   ширина места у них теперь одна — своя была уже вторым определением. */
+.ad-league-th-place { width: 104px; }
 /* Строка утешительной лиги на общем экране: подложка ещё слабее, чем у
    выбранной строки группы — она лишь разделяет два списка. */
 .ad-league-row-cl { background: var(--alpha-white-04); }
@@ -5786,9 +5853,21 @@ select.ad-field-input {
     margin-bottom: var(--space-3);
 }
 
+/* ШИРИНЫ СТОЛБЦОВ ОДИНАКОВЫ У ВСЕХ ГРУПП — `table-layout: fixed`.
+   Костя 05.11, увидев шесть групп подряд: «ширина столбцов плывёт, надо
+   чтобы у всех групп была одинаковая, а не кто в лес кто по дрова».
+   И правда: при раскладке по содержимому (`auto`) браузер считает
+   ширины ОТДЕЛЬНО для каждой таблицы. У групп, где равных не было,
+   подсчёт стоит прочерком, у остальных — числами и долей со словами;
+   от этого и ехало.
+   `width` на `th` при `auto` — ПОДСКАЗКА, А НЕ ЗАКОН; законом он
+   становится только здесь. Имя остаётся без ширины намеренно: при
+   `fixed` колонки без ширины делят остаток, и длинная пара получает
+   всё, что не занято числами. */
 .ad-grp-matrix {
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
 }
 
 .ad-grp-matrix th,
@@ -5798,11 +5877,22 @@ select.ad-field-input {
     font-size: var(--fs-xs);
 }
 
+/* ШАПКА ЦЕНТРУЕТСЯ ОДНИМ ПРАВИЛОМ, А НЕ ЧЕТЫРЬМЯ (05.11).
+   Костя на живом турнире: «название колонок съезжало — посмотри, как в
+   других групповых, и сделай так же». Центровка стояла по отдельности
+   на каждой колонке (`.ad-grp-th-score`, `-wins`, `-games`, `-place`), и
+   стоило завести новую — она про неё не знала. ПРАВИЛО, КОТОРОЕ НАДО
+   ПОВТОРЯТЬ НА КАЖДОМ НОВОМ СТОЛБЦЕ, РАНО ИЛИ ПОЗДНО ЗАБУДУТ.
+   Теперь центр — умолчание шапки, а влево уходят только два столбца,
+   где текст: номер и имя. */
 .ad-grp-matrix th {
     background: var(--alpha-white-04);
     font-weight: 600;
     white-space: nowrap;
+    text-align: center;
 }
+.ad-grp-matrix th.ad-grp-th-num,
+.ad-grp-matrix th.ad-grp-th-name { text-align: left; }
 
 .ad-grp-diag {
     background: var(--alpha-white-04) !important;
@@ -5845,11 +5935,13 @@ select.ad-field-input {
 
 /* Геймы: справочная колонка, поэтому приглушена — цифры места и побед
    должны читаться первыми */
+/* Подсчёт и место переносятся ВНУТРИ своей ширины, а не растягивают
+   таблицу: при `table-layout: fixed` ширина задана, и `nowrap` здесь
+   только выдавил бы текст за край. */
 .ad-grp-games {
     text-align: center;
     font-size: var(--fs-xs);
     color: var(--text-secondary);
-    white-space: nowrap;
 }
 
 /* Отменённый доп. матч: карточка остаётся, чтобы в сетке было видно,

@@ -300,12 +300,12 @@ const ОТКАТЫ = [
 
   /* ─── кто в какую лигу ─── */
   [СЕТКА,
-   '    function лигаМеста(tournament, place) {',
-   '    function лигаМеста(tournament, place) { return "CL"; }\n    function лигаМеста(tournament, place) {',
+   '    function лигаПары(tournament, regId, place) {',
+   '    function лигаПары(tournament, regId, place) { return "CL"; }\n    function лигаПары(tournament, regId, place) {',
    'деление по лигам объявлено один раз'],
 
   [СЕТКА,
-   "                    if (лигаМеста(tournament, st.place) === 'PL') {",
+   "                    if (лигаПары(tournament,\n                            заявкаПары(st.playerId, null, groupMatchesG),\n                            st.place) === 'PL') {",
    '                    if (st.place <= qualifiers) {',
    'генератор лиг и групповая таблица делят одинаково'],
 
@@ -316,8 +316,8 @@ const ОТКАТЫ = [
 
   /* ─── словом, а не цветом ─── */
   [СЕТКА,
-   "                    (isPLRow ? ' <span class=\"ad-badge ad-league-go ad-league-pl\">' + L.leagueGoPL + '</span>' : '') +",
-   "                    (isPLRow ? ' <span style=\"color:var(--accent);font-size:0.65rem;\">&#9654;</span>' : '') +",
+   "                        : ((isPLRow ? ' <span class=\"ad-badge ad-league-go ad-league-pl\">' + L.leagueGoPL + '</span>' : '') +",
+   "                        : ((isPLRow ? ' <span style=\"color:var(--accent);font-size:0.65rem;\">&#9654;</span>' : '') +",
    'в строке стоит название лиги, а не значок'],
 
   [СЕТКА,
