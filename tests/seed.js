@@ -1387,6 +1387,170 @@ async function upsert(table, rows, onConflict) {
         console.log('  ВНИМАНИЕ: две лиги не завелись — ' + String(e.message));
     }
 
+    /* ───────── РУЧНОЙ ВЫБОР ЛИГИ: ТРИ СЛУЧАЯ ИЗ ОДНОГО ПРАВИЛА ─────────
+       Кусок 05.11, слово Кости: «в группе из 3 игроков админ-менеджер сам
+       определяет, кто куда идёт», и «переключатель нужен, когда игры
+       окончены в группе».
+
+       ЗАМОРОЗКА ЧИТАЕТ ФАЙЛ КАК ТЕКСТ И НЕ ЗНАЕТ, ЧТО ВЫШЛО В БРАУЗЕРЕ.
+       Поэтому здесь заводятся ровно те три расклада, которые различают
+       правило, и ни одного лишнего:
+
+         `test-vybor-ligi`        — тройка ДОИГРАНА (выбор должен быть)
+                                    и четвёрка доиграна (выбора быть не
+                                    должно: слово Кости — четвёрки как есть);
+         `test-vybor-ligi-rano`   — тройка НЕ доиграна (выбора нет: мест
+                                    ещё нет, и выбирать не из чего);
+         `test-vybor-ligi-schyot` — тройка доиграна, но в лигах УЖЕ ЕСТЬ
+                                    счёт (выбора нет: пересборка стёрла бы
+                                    сыгранное).
+
+       ЗАЯВКИ ОБЯЗАТЕЛЬНЫ, И ЭТО НЕ УКРАШЕНИЕ СЕВА. Выбор лиги лежит НА
+       ЗАЯВКЕ, а не на игроке, и строка таблицы находит её через
+       `reg1_id`/`reg2_id` своих же матчей. Без заявок переключателя не
+       будет вовсе — и проба показала бы «нет кнопки» там, где на самом
+       деле нет данных. */
+    try {
+        var ВЛ = function (н) { return 'dd000007-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
+        var ВЛЗ = function (н) { return 'ef000007-0000-4000-8000-0000000000' + String(н).padStart(2, '0'); };
+
+        function турнирВЛ(ид, имя, групп) {
+            return {
+                id: ид, title: имя, category_id: 'tour', status: 'ongoing',
+                bracket_type: 'group_league', draw_size: 8,
+                group_count: групп, qualifiers_per_group: 2,
+                date_start: today.toISOString().slice(0, 10),
+                date_end: today.toISOString().slice(0, 10),
+                max_participants: 8, gender: 'men'
+            };
+        }
+        await upsert('tournaments', [
+            турнирВЛ('test-vybor-ligi',        'Тестовый: выбор лиги',             2),
+            турнирВЛ('test-vybor-ligi-rano',   'Тестовый: выбор лиги — рано',      1),
+            турнирВЛ('test-vybor-ligi-schyot', 'Тестовый: выбор лиги — есть счёт', 1)
+        ], 'id');
+
+        /* Заявка на турнир одна на человека, поэтому одни и те же шесть
+           карточек свободно повторяются в РАЗНЫХ турнирах. */
+        function заявкаВЛ(ид, турнир, игрок, группа) {
+            return {
+                id: ид, tournament_id: турнир, player_id: игрок,
+                status: 'draw', group_number: группа, seed_number: null
+            };
+        }
+        await upsert('tournament_registrations', [
+            // выбор лиги: тройка (группа 1) и четвёрка (группа 2)
+            заявкаВЛ(ВЛЗ(1),  'test-vybor-ligi', 'mr-alpha',    1),
+            заявкаВЛ(ВЛЗ(2),  'test-vybor-ligi', 'mr-bravo',    1),
+            заявкаВЛ(ВЛЗ(3),  'test-vybor-ligi', 'mr-charlie',  1),
+            заявкаВЛ(ВЛЗ(4),  'test-vybor-ligi', 'mr-delta',    2),
+            заявкаВЛ(ВЛЗ(5),  'test-vybor-ligi', 'mr-echo',     2),
+            заявкаВЛ(ВЛЗ(6),  'test-vybor-ligi', 'mr-guest',    2),
+            заявкаВЛ(ВЛЗ(7),  'test-vybor-ligi', 'test-player', 2),
+            // рано: та же тройка, свой турнир
+            заявкаВЛ(ВЛЗ(11), 'test-vybor-ligi-rano', 'mr-alpha',   1),
+            заявкаВЛ(ВЛЗ(12), 'test-vybor-ligi-rano', 'mr-bravo',   1),
+            заявкаВЛ(ВЛЗ(13), 'test-vybor-ligi-rano', 'mr-charlie', 1),
+            // есть счёт: та же тройка, свой турнир
+            заявкаВЛ(ВЛЗ(21), 'test-vybor-ligi-schyot', 'mr-alpha',   1),
+            заявкаВЛ(ВЛЗ(22), 'test-vybor-ligi-schyot', 'mr-bravo',   1),
+            заявкаВЛ(ВЛЗ(23), 'test-vybor-ligi-schyot', 'mr-charlie', 1)
+        ], 'id');
+
+        /* Матч знает и игрока, и заявку: по `reg1_id` строка таблицы
+           находит, чей это выбор. */
+        function грВЛ(ид, турнир, группа, порядок, п1, р1, п2, р2, счёт, победитель, состояние) {
+            return {
+                id: ид, tournament_id: турнир,
+                player1_id: п1, player2_id: п2, reg1_id: р1, reg2_id: р2,
+                score: счёт, winner_id: победитель,
+                group_number: группа, round: null,
+                round_number: порядок, match_order: порядок,
+                /* ПУСТЫЕ КЛЮЧИ СТОЯТ НАМЕРЕННО. Вставка массивом требует
+                   ОДИНАКОВОГО набора ключей у всех объектов: PostgREST
+                   строит один INSERT на весь массив и отвечает
+                   `PGRST102 All object keys must match`. Групповой матч
+                   меток не несёт, матч лиги несёт — значит оба ключа есть
+                   у ОБОИХ, просто здесь они пустые.
+                   ПОЙМАНО ПРОГОНОМ 05.11: без этих двух строк весь массив
+                   не лёг, матчей у турнира не стало, экран сказал «сетка
+                   ещё не сгенерирована», и девять проверок упали на
+                   пустоте. Сев предупреждал об этом же на `test-metka` —
+                   я прочитал предупреждение и повторил ошибку рядом. */
+                slot1_label: null, slot2_label: null,
+                played_at: состояние === 'completed' ? played : null,
+                status: состояние, match_type: 'tournament'
+            };
+        }
+        function лигаВЛ(ид, турнир, круг, порядок, м1, м2, счёт, состояние) {
+            return {
+                id: ид, tournament_id: турнир,
+                player1_id: null, player2_id: null, reg1_id: null, reg2_id: null,
+                score: счёт, winner_id: null,
+                group_number: null, round: круг,
+                round_number: порядок, match_order: порядок,
+                slot1_label: м1, slot2_label: м2,
+                played_at: null, status: состояние, match_type: 'tournament'
+            };
+        }
+
+        await upsert('matches', [
+            // ── test-vybor-ligi: тройка доиграна
+            грВЛ(ВЛ(1), 'test-vybor-ligi', 1, 1, 'mr-alpha', ВЛЗ(1), 'mr-bravo',   ВЛЗ(2), '6/1 6/1', 'mr-alpha', 'completed'),
+            грВЛ(ВЛ(2), 'test-vybor-ligi', 1, 2, 'mr-alpha', ВЛЗ(1), 'mr-charlie', ВЛЗ(3), '6/2 6/2', 'mr-alpha', 'completed'),
+            грВЛ(ВЛ(3), 'test-vybor-ligi', 1, 3, 'mr-bravo', ВЛЗ(2), 'mr-charlie', ВЛЗ(3), '6/3 6/3', 'mr-bravo', 'completed'),
+            // ── и четвёрка доиграна: шесть встреч каждого с каждым
+            грВЛ(ВЛ(4), 'test-vybor-ligi', 2, 1, 'mr-delta', ВЛЗ(4), 'mr-echo',     ВЛЗ(5), '6/1 6/1', 'mr-delta', 'completed'),
+            грВЛ(ВЛ(5), 'test-vybor-ligi', 2, 2, 'mr-delta', ВЛЗ(4), 'mr-guest',    ВЛЗ(6), '6/2 6/2', 'mr-delta', 'completed'),
+            грВЛ(ВЛ(6), 'test-vybor-ligi', 2, 3, 'mr-delta', ВЛЗ(4), 'test-player', ВЛЗ(7), '6/3 6/3', 'mr-delta', 'completed'),
+            грВЛ(ВЛ(7), 'test-vybor-ligi', 2, 4, 'mr-echo',  ВЛЗ(5), 'mr-guest',    ВЛЗ(6), '6/4 6/4', 'mr-echo',  'completed'),
+            грВЛ(ВЛ(8), 'test-vybor-ligi', 2, 5, 'mr-echo',  ВЛЗ(5), 'test-player', ВЛЗ(7), '6/0 6/0', 'mr-echo',  'completed'),
+            грВЛ(ВЛ(9), 'test-vybor-ligi', 2, 6, 'mr-guest', ВЛЗ(6), 'test-player', ВЛЗ(7), '6/5 6/5', 'mr-guest', 'completed'),
+            // ── пустые сетки лиг: счёта нет, метки на местах
+            лигаВЛ(ВЛ(10), 'test-vybor-ligi', 'PL-R1', 1, 'A1', 'B2', null, 'upcoming'),
+            лигаВЛ(ВЛ(11), 'test-vybor-ligi', 'PL-R1', 2, 'B1', 'A2', null, 'upcoming'),
+            лигаВЛ(ВЛ(12), 'test-vybor-ligi', 'PL-F',  1, null, null, null, 'upcoming'),
+            лигаВЛ(ВЛ(13), 'test-vybor-ligi', 'CL-R1', 1, 'A3', 'B3', null, 'upcoming'),
+            лигаВЛ(ВЛ(14), 'test-vybor-ligi', 'CL-F',  1, null, null, null, 'upcoming'),
+
+            // ── test-vybor-ligi-rano: ТРЕТИЙ МАТЧ НЕ СЫГРАН
+            грВЛ(ВЛ(20), 'test-vybor-ligi-rano', 1, 1, 'mr-alpha', ВЛЗ(11), 'mr-bravo',   ВЛЗ(12), '6/1 6/1', 'mr-alpha', 'completed'),
+            грВЛ(ВЛ(21), 'test-vybor-ligi-rano', 1, 2, 'mr-alpha', ВЛЗ(11), 'mr-charlie', ВЛЗ(13), '6/2 6/2', 'mr-alpha', 'completed'),
+            грВЛ(ВЛ(22), 'test-vybor-ligi-rano', 1, 3, 'mr-bravo', ВЛЗ(12), 'mr-charlie', ВЛЗ(13), null,      null,       'upcoming'),
+            лигаВЛ(ВЛ(23), 'test-vybor-ligi-rano', 'PL-R1', 1, 'A1', 'A2', null, 'upcoming'),
+            лигаВЛ(ВЛ(24), 'test-vybor-ligi-rano', 'CL-R1', 1, 'A3', null, null, 'upcoming'),
+
+            // ── test-vybor-ligi-schyot: тройка доиграна, а в лигах уже счёт
+            грВЛ(ВЛ(30), 'test-vybor-ligi-schyot', 1, 1, 'mr-alpha', ВЛЗ(21), 'mr-bravo',   ВЛЗ(22), '6/1 6/1', 'mr-alpha', 'completed'),
+            грВЛ(ВЛ(31), 'test-vybor-ligi-schyot', 1, 2, 'mr-alpha', ВЛЗ(21), 'mr-charlie', ВЛЗ(23), '6/2 6/2', 'mr-alpha', 'completed'),
+            грВЛ(ВЛ(32), 'test-vybor-ligi-schyot', 1, 3, 'mr-bravo', ВЛЗ(22), 'mr-charlie', ВЛЗ(23), '6/3 6/3', 'mr-bravo', 'completed'),
+            лигаВЛ(ВЛ(33), 'test-vybor-ligi-schyot', 'PL-R1', 1, 'A1', 'A2', '6/4 6/4', 'completed'),
+            лигаВЛ(ВЛ(34), 'test-vybor-ligi-schyot', 'CL-R1', 1, 'A3', null, null, 'upcoming')
+        ], 'id');
+
+        /* ПЕРЕЧИТКА СПРАШИВАЕТ РОВНО ТО, ЧТО РАЗЛИЧАЕТ ПРОВЕРКУ. Если у
+           матчей не легли `reg1_id`, переключателя не будет ни у кого — и
+           проба соврёт «правило держит», не проверив ничего. */
+        var свёлВЛ = await call('GET', '/rest/v1/matches' +
+            '?tournament_id=eq.test-vybor-ligi&group_number=not.is.null&select=id,reg1_id,reg2_id,status');
+        if (!свёлВЛ.ok) {
+            console.log('  ВНИМАНИЕ: не смог перечитать групповые матчи выбора лиги');
+        } else {
+            var рядыВЛ = свёлВЛ.data || [];
+            var безЗаявки = рядыВЛ.filter(function (м) { return !м.reg1_id || !м.reg2_id; }).length;
+            if (рядыВЛ.length !== 9) {
+                console.log('  ВНИМАНИЕ: у выбора лиги ' + рядыВЛ.length + ' групповых матчей вместо девяти');
+            } else if (безЗаявки) {
+                console.log('  ВНИМАНИЕ: у ' + безЗаявки + ' матчей выбора лиги нет заявки — ' +
+                            'переключателя не будет, и проба проверит пустоту');
+            } else {
+                console.log('  выбор лиги: 9 групповых матчей, у всех есть заявка');
+            }
+        }
+    } catch (e) {
+        console.log('  ВНИМАНИЕ: турниры выбора лиги не завелись — ' + String(e.message));
+    }
+
     /* --- Пол турнира: ОТКАЗ, а не пометка -------------------------------
        Решение Кости 30.09: в рейтинговом одиночном несовпадение пола —
        отказ 403, в парных и дружеских заявка идёт на рассмотрение. Признак
