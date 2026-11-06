@@ -3874,10 +3874,17 @@ select:-webkit-autofill {
   pointer-events: none;
 }
 .pd-h2h-modal.open { opacity: 1; pointer-events: auto; }
+/* ПОВЕРХНОСТЬ ОКНА — ТОТ ТОКЕН, ЧТО САМ СЕБЯ ПОДПИСЫВАЕТ. В
+   `tokens.css` у `--bg-elevated` стоит пояснение «модалка, дропдаун,
+   поповер», и из трёх окон приложения его читало ОДНО. Шторка стояла на
+   `--bg` — ровно том же цвете, что страница под ней: поднятости не было
+   вовсе, граница окна читалась только по скруглению. Замер 06.11:
+   10,10,10 у шторки, 17,17,17 у окна возврата, 30,30,30 у онбординга —
+   три определения одного понятия. */
 .pd-h2h-content {
   width: 100%; max-width: 440px;
   max-height: 85vh; overflow-y: auto;
-  background: var(--bg); border-radius: 20px 20px 0 0;
+  background: var(--bg-elevated); border-radius: 20px 20px 0 0;
   transform: translateY(100%);
   transition: transform 0.3s ease;
 }
@@ -3891,13 +3898,19 @@ select:-webkit-autofill {
 .pd-h2h-header h3 {
   margin: 0; font-size: 16px; font-weight: 700; color: var(--text);
 }
+/* ЦЕЛЬ НАЖАТИЯ 44 ПРИ ТОМ ЖЕ ВИДЕ. Кружок остаётся 28 — это ступень
+   шкалы кнопок и так он нарисован, — а нажимается область 44: рамка
+   прозрачная, фон красится только под кружком через `background-clip`.
+   Замер 06.11: было 28x28, то есть вдвое меньше нижней ступени цели. */
 .pd-h2h-close {
-  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-  background: var(--bg-card); border: none; color: var(--text-muted);
-  width: 28px; height: 28px; border-radius: 50%;
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: var(--bg-card); border: 8px solid transparent; color: var(--text-muted);
+  width: 44px; height: 44px; border-radius: 50%;
+  background-clip: padding-box;
   font-size: 14px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
+.pd-h2h-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pd-h2h-body { padding: 16px; }
 
 /* H2H VS block */
@@ -5093,12 +5106,18 @@ select.prof-field-input { color: var(--text); }
   cursor: pointer;
 }
 .onb-btn:active { background: var(--accent-hover); }
+/* ЦЕЛЬ НАЖАТИЯ 44. Замер 06.11: кнопка «Пропустить» была высотой 33 —
+   и ниже нижней ступени, и мимо шкалы кнопок (28 · 36 · 44 · 52).
+   Высота не задавалась, а складывалась из отступа 8 и строки. */
 .onb-skip {
   background: none; border: none;
   color: var(--text-muted); font-size: 14px;
   margin-top: 12px; cursor: pointer;
-  padding: 8px;
+  padding: 8px 16px;
+  min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
 }
+.onb-skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .onb-skip:active { color: var(--text-sec); }
 
 /* ===== SEGMENTED CONTROL (theme/lang) ===== */
@@ -5917,7 +5936,7 @@ select.prof-field-input { color: var(--text); }
 }
 .ar-overlay.open { opacity: 1; visibility: visible; }
 .ar-modal {
-  background: var(--bg-card); border-radius: 16px; padding: 32px 24px;
+  background: var(--bg-elevated); border-radius: 16px; padding: 32px 24px;
   width: 90%; max-width: 360px; text-align: center;
   transform: scale(0.9); transition: transform 0.3s ease;
 }
