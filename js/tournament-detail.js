@@ -3488,7 +3488,7 @@ function renderNotFoundPage() {
        дал «Tournament not found — КСЛТ» — кириллица в английском титуле.
        ЧИСЛО, ПОМЕРЕННОЕ НА ОДНОМ ЯЗЫКЕ, НЕ ЯВЛЯЕТСЯ ЧИСЛОМ; к подписям это
        относится так же. */
-    document.title = (isEn || isKg ? 'KSLT' : 'КСЛТ') + ' — ' + texts.title;
+    document.title = KSLT_YAZYK.заголовок(texts.title);
 }
 
 function renderLockedPage(tournamentId) {

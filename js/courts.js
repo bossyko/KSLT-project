@@ -346,7 +346,7 @@
                     if (dbCourts[i].id === id) { found = dbCourts[i]; break; }
                 }
                 if (found) {
-                    document.title = 'KSLT \u2014 ' + found.name;
+                    document.title = KSLT_YAZYK.заголовок(found.name);
                     renderDetailHero(found);
                     renderDetail(found);
                     initScrollAnimations();
@@ -986,7 +986,7 @@
             return;
         }
 
-        document.title = 'KSLT \u2014 ' + court.name;
+        document.title = KSLT_YAZYK.заголовок(court.name);
         renderDetailHero(court);
         renderDetail(court);
         initScrollAnimations();
@@ -1002,7 +1002,7 @@
         var текст = KSLT_YAZYK.выбрать('It may be in preparation or removed from the site.', 'Ал даярдалууда же сайттан алынган болушу мүмкүн.', 'Возможно, он готовится или снят с сайта.');
         var кнопка = KSLT_YAZYK.выбрать('All courts', 'Бардык корттор', 'Все корты');
         var адрес = KSLT_YAZYK.выбрать('courts-en.html', 'courts-kg.html', 'courts.html');
-        document.title = 'KSLT \u2014 ' + заголовок;
+        document.title = KSLT_YAZYK.заголовок(заголовок);
         container.innerHTML =
             '<div class="ct-empty">' +
                 '<h2 class="ct-empty-title">' + заголовок + '</h2>' +

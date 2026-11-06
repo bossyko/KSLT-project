@@ -729,7 +729,7 @@
             return;
         }
 
-        document.title = 'KSLT — ' + coach.name;
+        document.title = KSLT_YAZYK.заголовок(coach.name);
         renderDetailHero(coach);
 
         // Load court map links if coach has court field

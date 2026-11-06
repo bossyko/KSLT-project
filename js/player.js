@@ -757,7 +757,7 @@
         var btnText = KSLT_YAZYK.выбрать('Sign In / Register', 'Кирүү / Каттоо', 'Войти / Регистрация');
         var back = getBackLink(null);
 
-        document.title = player.name + ' \u2014 KSLT';
+        document.title = player.name + ' — ' + KSLT_YAZYK.имя;
 
         // Пустую обложку гостю не показываем: надписей в ней нет, а первый
         // экран она съедает целиком — и заглушка уезжает вниз
@@ -2515,7 +2515,7 @@
            успеет её нажать. */
         await узнатьБлокировку(playerId);
 
-        document.title = data.player.name + ' \u2014 KSLT';
+        document.title = data.player.name + ' — ' + KSLT_YAZYK.имя;
         renderProfile(data);
         // Контакты грузим после определения доступа: гостям и просто
         // зарегистрированным они не показываются, значит и запрашивать незачем

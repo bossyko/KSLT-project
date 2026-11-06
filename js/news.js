@@ -180,7 +180,7 @@ async function initFromSupabase(client, slug) {
                 article.relatedSlugs = relResult.data.map(function(r) { return r.slug; });
             }
 
-            document.title = 'KSLT — ' + article.title;
+            document.title = KSLT_YAZYK.заголовок(article.title);
             var readTime = calculateReadTime(article);
 
             renderProgressBar();
@@ -223,7 +223,7 @@ function initFromStatic(slug) {
     }
 
     var article = newsArticleData[slug];
-    document.title = 'KSLT — ' + article.title;
+    document.title = KSLT_YAZYK.заголовок(article.title);
     var readTime = calculateReadTime(article);
 
     renderProgressBar();
@@ -1370,7 +1370,7 @@ function renderNewsList() {
        одна), поэтому число приходит из живой сетки крутилкой --novostey. */
     var PER_PAGE = 9;
 
-    document.title = 'KSLT — ' + labels.newsListTitle;
+    document.title = KSLT_YAZYK.заголовок(labels.newsListTitle);
 
     // Hide article-only sections
     var body = document.getElementById('newsArticleBody');
@@ -1699,7 +1699,7 @@ function renderNetPerevoda(article) {
     var labels = getLabels();
     var ruUrl = 'news.html?slug=' + encodeURIComponent(article.slug);
 
-    document.title = 'KSLT — ' + labels.noTranslationTitle;
+    document.title = KSLT_YAZYK.заголовок(labels.noTranslationTitle);
 
     ['newsHero', 'newsArticleBody', 'newsTags', 'newsReactions', 'newsRelated']
         .forEach(function (id) {
