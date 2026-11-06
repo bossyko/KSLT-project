@@ -1,0 +1,215 @@
+// ============================================
+// Состав баттла: кто играет и как это назвать
+// ============================================
+//
+// Баттл бывает одиночным, парным и смешанным. В парном и смешанном у каждой
+// стороны двое, и участник может быть как членом клуба, так и гостем —
+// у гостя есть только имя, карточки игрока у него нет.
+//
+// Собирать это в каждом месте заново — верный способ получить четыре разных
+// ответа на один вопрос. Здесь одно место.
+//
+// Состав называем словами, а не форматом: «мужские пары», «женские пары»,
+// «микст». Пол участников база знает, она же по нему проверяет состав при
+// заведении, — значит подпись собирается сама, спрашивать нечего.
+//
+// Если состав неровный — такое бывает у показательных игр, где проверку
+// сняли галочкой, — пишем просто «пары», без пола. Соврать нельзя,
+// промолчать можно.
+
+(function() {
+    'use strict';
+
+    var BF = window.KSLT_BATTLE_FORMAT = {};
+
+    var L = {
+        ru: { doubles: 'пары', men: 'мужские пары', women: 'женские пары', mixed: 'микст' },
+        en: { doubles: 'doubles', men: "men's doubles", women: "women's doubles", mixed: 'mixed' },
+        kg: { doubles: 'жуптук', men: 'эркектер жуптугу', women: 'аялдар жуптугу', mixed: 'аралаш' }
+    };
+
+    /* Язык — у дома (js/kslt-yazyk.js). */
+    function lang() { return KSLT_YAZYK.код; }
+
+    BF.isPair = function(b) {
+        return !!b && b.format && b.format !== 'singles';
+    };
+
+    /**
+     * Подпись состава. Пустая строка у одиночного: там называть нечего.
+     * @param {Object} b запись баттла
+     * @param {Object} [genders] пол четверых, если он известен вызывающему
+     */
+    BF.label = function(b, genders) {
+        if (!BF.isPair(b)) return '';
+        var t = L[lang()];
+        if (b.format === 'mixed_doubles') return t.mixed;
+
+        var g = genders || {
+            c: b.challenger_gender, cm: b.challenger_partner_gender,
+            o: b.opponent_gender,   om: b.opponent_partner_gender
+        };
+        var all = [g.c, g.cm, g.o, g.om];
+        if (all.indexOf(undefined) !== -1 || all.indexOf(null) !== -1 || all.indexOf('') !== -1) {
+            return t.doubles;
+        }
+        if (all.every(function(x) { return x === 'men'; })) return t.men;
+        if (all.every(function(x) { return x === 'women'; })) return t.women;
+        return t.doubles;
+    };
+
+    /**
+     * Имена стороны: основной участник и напарник.
+     *
+     * @param {Object} b запись баттла
+     * @param {number} side 1 или 2
+     * @param {Object} players справочник игроков по идентификатору
+     * @param {Function} nameOf как достать имя из записи игрока
+     * @returns {{names: string[], photos: string[]}}
+     */
+    BF.side = function(b, side, players, nameOf) {
+        players = players || {};
+        nameOf = nameOf || function(p) { return p && p.name; };
+
+        var mainId = side === 1 ? b.challenger_player_id : b.opponent_player_id;
+        var mainExt = side === 1 ? b.challenger_external_name : b.opponent_external_name;
+        var mateId = side === 1 ? b.challenger_partner_id : b.opponent_partner_id;
+        var mateExt = side === 1 ? b.challenger_partner_name : b.opponent_partner_name;
+
+        // Введённый вручную человек в базе не заводится — его снимок и страна
+        // лежат в самом вызове. Для игрока клуба берём из профиля
+        var mainPhoto = side === 1 ? b.challenger_photo : b.opponent_photo;
+        var matePhoto = side === 1 ? b.challenger_partner_photo : b.opponent_partner_photo;
+        var mainCountry = side === 1 ? b.challenger_country : b.opponent_country;
+        var mateCountry = side === 1 ? b.challenger_partner_country : b.opponent_partner_country;
+
+        var out = { names: [], photos: [], countries: [] };
+
+        function push(id, ext, ownPhoto, ownCountry) {
+            var p = id ? players[id] : null;
+            var n = (p && nameOf(p)) || ext || '';
+            if (!n) return;
+            out.names.push(n);
+            out.photos.push((p && p.photo) || ownPhoto || '');
+            out.countries.push((p && p.country) || ownCountry || '');
+        }
+
+        push(mainId, mainExt, mainPhoto, mainCountry);
+        if (BF.isPair(b)) push(mateId, mateExt, matePhoto, mateCountry);
+        return out;
+    };
+
+    /**
+     * Короткая подпись стороны для кнопки голосования: «Хан / Асанов».
+     *
+     * Полные имена в кнопку не помещаются ни на карточке, ни в Telegram,
+     * поэтому берём последнее слово — фамилию.
+     */
+    BF.shortSide = function(names) {
+        return (names || []).map(function(n) {
+            var parts = String(n).trim().split(/\s+/);
+            return parts[parts.length - 1] || n;
+        }).join(' / ');
+    };
+
+    /**
+     * Состояние баттла. Одно правило на весь сайт: 'upcoming', 'live', 'done'.
+     *
+     * Раньше главная считала по одной только дате, страница баттлов — по дате
+     * со временем, и баттл, назначенный на сегодня в 10:00, в полдень висел
+     * на главной как предстоящий и лежал в архиве на своей странице.
+     *
+     * Завершённым считаем только тот, где введён счёт. Наступившее время
+     * матча означает «идёт»: пока судья не сохранил результат, баттл никуда
+     * не должен пропадать — раньше он в этот промежуток исчезал отовсюду.
+     */
+    BF.state = function(b) {
+        if (!b) return 'upcoming';
+        /* ОТМЕНА — СОСТОЯНИЕ, А НЕ ОСОБЫЙ СЛУЧАЙ ТРЁХ ЭКРАНОВ (06.11).
+           До сегодня дом знал три состояния, и слова `cancelled` среди
+           них не было — при том, что в продукте этот статус проверяется
+           двадцать четыре раза. Поэтому три списка брали всё
+           опубликованное, карточка молчала об отмене, и человек нажимал
+           на живую с виду карточку, чтобы попасть на «Баттл отменён».
+           Состояние стоит ПЕРВЫМ: отменённый баттл не становится
+           сыгранным оттого, что его время прошло. */
+        if (b.status === 'cancelled') return 'cancelled';
+        if (b.status === 'completed') return 'done';
+
+        var date = b.proposed_date || '';
+        if (!date) return 'upcoming';
+
+        // Время матча по Бишкеку; без времени считаем от конца дня
+        var when = new Date(date + 'T' + (b.proposed_time || '23:59') + ':00+06:00');
+        if (isNaN(when.getTime())) return 'upcoming';
+
+        return Date.now() >= when.getTime() ? 'live' : 'upcoming';
+    };
+
+    /** Матч отыгран и счёт сохранён */
+    BF.isPlayed = function(b) {
+        return BF.state(b) === 'done';
+    };
+
+    /**
+     * Закрыто ли голосование. ОДНО ПРАВИЛО НА ДВА ЭКРАНА.
+     *
+     * До 13.10 это условие было написано дважды — в js/battles-overview.js
+     * и в js/challenge-detail.js, — и второй файл сам об этом говорил
+     * комментарием «same logic as challenge-detail.js». Два определения
+     * одного понятия расходятся не сразу, а на первой же правке одного из
+     * них: закрытое на карточке голосование оставалось открытым на
+     * странице, и наоборот.
+     *
+     * Закрыто, когда закрыл судья (`voting_closed`), когда счёт сохранён
+     * (`status === 'completed'`) или когда время матча наступило —
+     * последнее считает BF.state, по тем же часам Бишкека.
+     */
+    BF.votingClosed = function(b) {
+        if (!b) return false;
+        return !!b.voting_closed || BF.state(b) !== 'upcoming';
+    };
+
+    /**
+     * Отменён ли баттл. Отдельное имя, потому что зовущему не нужно
+     * знать всю лестницу состояний, чтобы задать один вопрос, а
+     * сравнение со строкой в двадцати местах — это двадцать мест, где
+     * можно опечататься.
+     */
+    BF.isCancelled = function(b) {
+        return BF.state(b) === 'cancelled';
+    };
+
+    /**
+     * Сторона победителя: 1, 2 или null.
+     *
+     * ПОЧЕМУ ПО СТОРОНЕ, А НЕ ПО ИГРОКУ. Приглашённый со стороны человек в
+     * базе не заведён, и `matches.winner_id` указать на него НЕ МОЖЕТ.
+     * Сравнение `winner_id === challenger_player_id` у такого баттла
+     * сравнивало два пустых значения и отвечало «да»: страница объявляла
+     * победителем гостя при любом исходе, а история встреч отдавала все
+     * победы второму игроку и писала счёт «0 : 2» при пяти матчах.
+     * Проверено на стенде 13.10 (maket/stend-vyzov.html?sluchay=gost).
+     *
+     * Сторона известна всегда: их ровно две, и голоса считаются по ним же.
+     */
+    BF.winnerSide = function(b, winnerId) {
+        if (!b || !winnerId) return null;
+        if (b.challenger_player_id && winnerId === b.challenger_player_id) return 1;
+        if (b.opponent_player_id && winnerId === b.opponent_player_id) return 2;
+        return null;
+    };
+
+    /**
+     * Подпись состояния словами. Считает состояние этот модуль, НАЗЫВАЕТ —
+     * js/tournament-status.js, где лестница состояний выбрана Костей 28.09
+     * и переведена на три языка. Свой набор слов здесь не заводится.
+     */
+    BF.stateLabel = function(b) {
+        var S = window.KSLT_STATUS;
+        if (!S) return '';
+        var ключ = { upcoming: 'upcoming', live: 'ongoing', done: 'completed',
+                     cancelled: 'cancelled' }[BF.state(b)];
+        return S.подпись(ключ, lang());
+    };
+})();

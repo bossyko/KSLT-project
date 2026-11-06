@@ -46,8 +46,13 @@
   function render() {
     var el = document.getElementById('battleList');
     var filtered = allBattles.filter(function(b) {
-      if (currentFilter === 'active') return !b.voting_closed;
-      return !!b.voting_closed;
+      var BF = window.KSLT_BATTLE_FORMAT;
+      /* ОТМЕНЁННЫЙ НЕ «АКТИВНЫЙ»: голосовать в нём нельзя, и среди
+         живых он обещал бы то, чего не будет. Из ленты не пропадает —
+         уходит во вторую вкладку с меткой. */
+      var отменён = BF && BF.isCancelled && BF.isCancelled(b);
+      if (currentFilter === 'active') return !b.voting_closed && !отменён;
+      return !!b.voting_closed || отменён;
     });
 
     if (filtered.length === 0) {
@@ -112,9 +117,20 @@
         return h + '</div></div>';
       }
 
-      html += '<div class="battle-card" data-battle-id="' + b.id + '"' +
+      /* ОТМЕНА ГОВОРИТСЯ, А НЕ ПРЯЧЕТСЯ (06.11). Состояние считает общий
+         дом `js/battle-format.js` — тот же, что на сайте; до сегодня в
+         приложении правила состояния не было ВОВСЕ, и карточка
+         отменённого баттла выглядела как живая. Слово берёт словарь. */
+      var BF = window.KSLT_BATTLE_FORMAT;
+      var отменён = BF && BF.isCancelled && BF.isCancelled(b);
+
+      html += '<div class="battle-card' + (отменён ? ' battle-card-cancelled' : '') +
+        '" data-battle-id="' + b.id + '"' +
         ' role="listitem" tabindex="0" aria-label="' +
-        esc(b.battle_title || I18N.t('battles.battle')) + '">' +
+        esc(b.battle_title || I18N.t('battles.battle')) +
+        (отменён ? ', ' + esc(I18N.t('battles.cancelled')) : '') + '">' +
+        (отменён ? '<div class="battle-badge-cancelled">' +
+          esc(I18N.t('battles.cancelled')) + '</div>' : '') +
         '<div class="battle-title">' + esc(b.battle_title || I18N.t('battles.battle')) + '</div>' +
         (fmtLabel ? '<div class="battle-format">' + esc(fmtLabel) + '</div>' : '') +
         '<div class="battle-vs">' +

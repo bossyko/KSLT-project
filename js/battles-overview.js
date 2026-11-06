@@ -518,7 +518,14 @@
 
         /* Те же слова, что на крупной карточке: состояние называет
            tournament-status, а не свой словарь этого файла. */
-        var right = isCompleted
+        /* ОТМЕНА ГОВОРИТСЯ, А НЕ ПРЯЧЕТСЯ (06.11). Человек, который ждал
+           баттл и пошёл его искать, должен увидеть «Отменён»: спрятанная
+           карточка не объясняет ничего, и он решит, что потерял её сам.
+           Слово берёт `stateLabel` из общей лестницы состояний. */
+        var отменён = BF.isCancelled && BF.isCancelled(b);
+        var right = отменён
+            ? '<span class="bo-strip-badge bo-strip-cancelled">' + KSLT_экранировать(BF.stateLabel(b)) + '</span>'
+            : isCompleted
             ? '<span class="bo-strip-badge bo-strip-done">' + KSLT_экранировать(BF.stateLabel(b) || L.completedBadge) + '</span>'
             : '<span class="bo-strip-badge bo-strip-live">' + L.voteBadge + '</span>';
 
@@ -615,7 +622,11 @@
            называет tournament-status: лестница слов выбрана Костей 28.09 и
            переведена на три языка. Свой, третий набор слов не заводим. */
         var состояние = BF.state(b);
-        var statusClass = состояние === 'done' ? 'completed' : 'active';
+        /* Три состояния — три вида значка. До 06.11 их было два, и
+           отменённый баттл получал тот же вид, что живой: зелёную
+           рамку «идёт голосование». */
+        var statusClass = состояние === 'cancelled' ? 'cancelled'
+                        : состояние === 'done' ? 'completed' : 'active';
         var statusText = BF.stateLabel(b) || L.heroBadge;
 
         var bgHtml = b.banner_url

@@ -146,20 +146,28 @@
   }
 
   function renderBattleCard(b) {
+    var BF = window.KSLT_BATTLE_FORMAT;
+    var отменён = BF && BF.isCancelled && BF.isCancelled(b);
     var chName = b.challenger ? b.challenger.name : I18N.t('home.player') + ' 1';
     var opName = b.opponent ? b.opponent.name : I18N.t('home.player') + ' 2';
     var imgStyle = b.banner_url
       ? 'background-image:url(' + b.banner_url + ');background-size:cover;background-position:center'
       : 'background:linear-gradient(135deg,#2d1b4e,#1a0a2e)';
 
-    return '<div class="tournament-card-v" data-battle-id="' + b.id + '">' +
+    return '<div class="tournament-card-v' + (отменён ? ' battle-card-cancelled' : '') +
+      '" data-battle-id="' + b.id + '">' +
       '<div class="tcv-img" style="' + imgStyle + '">' +
         (b.banner_url ? '' : '<div class="battle-vs-mini">' +
           '<div class="bvm-avatar">' + initials(chName) + '</div>' +
           '<span class="bvm-vs">VS</span>' +
           '<div class="bvm-avatar">' + initials(opName) + '</div>' +
         '</div>') +
-        '<span class="tcv-badge">' + I18N.t('battles.battle') + '</span>' +
+        /* ОТМЕНА ГОВОРИТСЯ И НА ГЛАВНОЙ (06.11). Значок здесь был один
+           на все баттлы — слово «Баттл», то есть название раздела,
+           повторённое на каждой карточке. У отменённого на его месте
+           стоит состояние, и его считает общий дом, а не этот файл. */
+        '<span class="tcv-badge' + (отменён ? ' tcv-badge-cancelled' : '') + '">' +
+          (отменён ? esc(I18N.t('battles.cancelled')) : I18N.t('battles.battle')) + '</span>' +
       '</div>' +
       '<div class="tcv-body">' +
         '<div class="tcv-name">' + esc(b.battle_title || chName + ' vs ' + opName) + '</div>' +
@@ -1661,7 +1669,8 @@
          игру, которой не будет.
          ЗАПРЕТ НА СТОРОНЕ СЕРВЕРА — отдельный кусок и твоё слово: это
          правило о данных. Здесь закрыт экран. */
-      if (_battleData.status === 'cancelled') {
+      var BFэкран = window.KSLT_BATTLE_FORMAT;
+      if (BFэкран && BFэкран.isCancelled(_battleData)) {
         document.getElementById('battleDetail').innerHTML =
           '<div class="bd-cancelled">' +
             '<h2>🚫 ' + I18N.t('battles.cancelled') + '</h2>' +
