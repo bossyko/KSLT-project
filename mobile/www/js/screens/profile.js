@@ -1163,9 +1163,20 @@
         card.addEventListener('click', function() {
           var rewardId = card.getAttribute('data-reward-id');
           var cost = parseInt(card.getAttribute('data-cost'));
-          if (confirm(cost + ' ' + I18N.t('profile.redeemConfirm'))) {
-            redeemReward(rewardId, content);
-          }
+          // СИСТЕМНОЕ ОКНО УБРАНО 05.11. `confirm` рисует Android: белое
+          // на тёмной теме, без перевода, и держит экран, пока его не
+          // закроют. То же правило стоит рядом, у удаления учётной записи.
+          window.KSLT_VOPROS.окно({
+            title: I18N.t('profile.redeemTitle'),
+            body: '<p class="gi-text">' + cost + ' ' + I18N.t('profile.redeemConfirm') + '</p>',
+            actions: [
+              { label: I18N.t('common.cancel') },
+              { label: I18N.t('common.redeem'), primary: true, onClick: function (закрыть) {
+                закрыть();
+                redeemReward(rewardId, content);
+              } }
+            ]
+          });
         });
       });
     });
@@ -1989,8 +2000,8 @@
       var btn = this;
       // Спрашиваем своим окном, а не системным: то выглядит чужим и в
       // приложении способно подвесить экран, пока его не закроют
-      if (!window.KSLT_INVITES) return;
-      window.KSLT_INVITES.modal({
+      if (!window.KSLT_VOPROS) return;
+      window.KSLT_VOPROS.окно({
         title: I18N.t('profile.deleteAsk'),
         body: '<p class="gi-text">' + I18N.t('profile.deleteConfirm') + '</p>',
         actions: [

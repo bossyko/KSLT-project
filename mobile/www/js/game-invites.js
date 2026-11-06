@@ -36,54 +36,14 @@
 
   // ---- Единое окно ----------------------------------------------------
   /**
-   * Окно приложения выглядит так же, как на сайте: тёмная подложка, лаймовая
-   * главная кнопка, второстепенная — прозрачная с рамкой. Выбор в таком окне
-   * почти всегда неравный, и одинаковые кнопки заставляют вчитываться.
+   * ОКНО ПЕРЕЕХАЛО В СВОЙ ДОМ 05.11 — `js/kslt-vopros.js`.
    *
-   * actions: [{ label, primary, onClick(close) }]
+   * Оно звалось `KSLT_INVITES.modal`, то есть жило под именем, которое
+   * обещало приглашения, а звали его отовсюду: удаление учётной записи,
+   * отказы при выборе напарника, подтверждение обмена баллов. Здесь не
+   * осталось даже обёртки: ОБЁРТКА — ЭТО ВТОРОЕ ИМЯ ОДНОГО ПОНЯТИЯ, и
+   * половина мест звала бы старое, половина новое.
    */
-  INV.modal = function (opts) {
-    var old = document.getElementById('giModal');
-    if (old) old.remove();
-
-    var overlay = document.createElement('div');
-    overlay.id = 'giModal';
-    overlay.className = 'gi-overlay';
-
-    var btns = (opts.actions || [{ label: I('common.ok'), primary: true }]).map(function (a, i) {
-      return '<button class="gi-btn' + (a.primary ? ' gi-btn-primary' : ' gi-btn-ghost') +
-             '" data-act="' + i + '">' + esc(a.label) + '</button>';
-    }).join('');
-
-    overlay.innerHTML =
-      '<div class="gi-box" role="dialog" aria-modal="true">' +
-        '<div class="gi-title">' + esc(opts.title || '') + '</div>' +
-        '<div class="gi-body">' + (opts.body || '') + '</div>' +
-        '<div class="gi-actions">' + btns + '</div>' +
-      '</div>';
-
-    document.getElementById('app').appendChild(overlay);
-
-    // Свёрнутое приложение кадры не рисует, и requestAnimationFrame может не
-    // прийти вовсе — окно тогда остаётся невидимым. Отсчёт по часам надёжнее
-    setTimeout(function () { overlay.classList.add('open'); }, 20);
-
-    function close() {
-      overlay.classList.remove('open');
-      setTimeout(function () { overlay.remove(); }, 250);
-    }
-
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) { close(); return; }
-      var b = e.target.closest('.gi-btn');
-      if (!b) return;
-      var act = (opts.actions || [])[Number(b.dataset.act)];
-      if (act && act.onClick) act.onClick(close);
-      else close();
-    });
-
-    return { close: close };
-  };
 
   // ---- Контакты -------------------------------------------------------
   /**
@@ -119,7 +79,7 @@
   };
 
   INV.showContacts = function (contacts) {
-    INV.modal({
+    window.KSLT_VOPROS.окно({
       title: I('inv.contactsTitle'),
       body: INV.contactsHtml(contacts),
       actions: [{ label: I('inv.close'), primary: true }]
@@ -134,7 +94,7 @@
    * доступно.
    */
   INV.send = function (playerId) {
-    INV.modal({
+    window.KSLT_VOPROS.окно({
       title: I('inv.confirmTitle'),
       body: '<p class="gi-text">' + I('inv.confirmText') + '</p>',
       actions: [
@@ -203,7 +163,7 @@
 
   /** Согласие спрашиваем отдельно: человек отдаёт свои контакты тоже. */
   INV.confirmAccept = function (inviteId, done) {
-    INV.modal({
+    window.KSLT_VOPROS.окно({
       title: I('inv.accept'),
       body: '<p class="gi-text">' + I('inv.shareWarn') + '</p>',
       actions: [
@@ -223,7 +183,7 @@
   function answer(inviteId, accept, done) {
     INV.respond(inviteId, accept).then(function (res) {
       if (res && res.error) {
-        INV.modal({
+        window.KSLT_VOPROS.окно({
           title: I('inv.title'),
           body: '<p class="gi-text">' + esc(res.error) + '</p>',
           actions: [{ label: I('inv.close'), primary: true }]
@@ -368,7 +328,7 @@
       } else if (show) {
         supabaseClient.rpc('get_invite_contacts', { p_invite_id: show.dataset.inv }).then(function (r) {
           if (r.error || (r.data && r.data.error)) {
-            INV.modal({
+            window.KSLT_VOPROS.окно({
               title: I('inv.contactsTitle'),
               body: '<p class="gi-text">' + esc((r.error && r.error.message) || (r.data && r.data.error)) + '</p>',
               actions: [{ label: I('inv.close'), primary: true }]

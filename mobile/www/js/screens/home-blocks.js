@@ -313,7 +313,7 @@
    * вовсе.
    */
   HB.showSponsor = function (s) {
-    if (!s || !window.KSLT_INVITES) return;
+    if (!s || !window.KSLT_VOPROS) return;
 
     var ICON = window.KSLT_CONTACT_ICONS || {};
     var body = '';
@@ -349,7 +349,7 @@
       } });
     }
 
-    window.KSLT_INVITES.modal({ title: I18N.t('home.sponsorTitle'), body: body, actions: actions });
+    window.KSLT_VOPROS.окно({ title: I18N.t('home.sponsorTitle'), body: body, actions: actions });
   };
 
 })();

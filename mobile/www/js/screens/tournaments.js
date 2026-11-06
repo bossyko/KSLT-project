@@ -787,7 +787,9 @@
                   var partnerNtrp = parseFloat(item.dataset.ntrp) || 0;
                   var combined = captainNtrp + partnerNtrp;
                   if (combined > tournament.ntrp_combined_max) {
-                    alert(I18N.t('trn.ntrpExceed') + ': ' + combined.toFixed(1) + ' > ' + tournament.ntrp_combined_max);
+                    // СИСТЕМНОЕ ОКНО УБРАНО 05.11 — см. kslt-vopros.js
+                    window.KSLT_VOPROS.сказать(I18N.t('trn.ntrpExceed'),
+                      combined.toFixed(1) + ' > ' + tournament.ntrp_combined_max);
                     return;
                   }
                 }
@@ -798,7 +800,7 @@
                     var captGender = captRes.data ? captRes.data.gender : '';
                     var partGender = item.dataset.gender;
                     if (captGender && partGender && captGender === partGender) {
-                      alert(I18N.t('trn.mixedGender'));
+                      window.KSLT_VOPROS.сказать(I18N.t('trn.mixedGender'), '');
                       return;
                     }
                     selectPartner(item);

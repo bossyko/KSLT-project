@@ -906,6 +906,7 @@
     'common.login':      { ru: 'Войти',     en: 'Log in',   kg: 'Кирүү' },
     'common.save':       { ru: 'Сохранить', en: 'Save',     kg: 'Сактоо' },
     'common.cancel':     { ru: 'Отмена',    en: 'Cancel',   kg: 'Жокко чыгаруу' },
+    'common.redeem':     { ru: 'Обменять',  en: 'Redeem',   kg: 'Алмаштыруу' },
     'common.loading':    { ru: 'Загрузка...', en: 'Loading...', kg: 'Жүктөлүүдө...' },
     'common.error':      { ru: 'Ошибка',    en: 'Error',    kg: 'Ката' },
     'common.ok':         { ru: 'Понятно',   en: 'Got it',   kg: 'Түшүндүм' },
