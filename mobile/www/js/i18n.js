@@ -82,10 +82,10 @@
     'home.badgesShort': { ru: 'Достижения', en: 'Achievements', kg: 'Жетишкендиктер' },
     'home.badgesCta':   { ru: 'Начать путь к победе', en: 'Start your path to victory', kg: 'Жеңишке жол баштаңыз' },
 
-    'home.aboutTitle':  { ru: 'О проекте КСЛТ', en: 'About KSLT', kg: 'KSLT жөнүндө' },
+    'home.aboutTitle':  { ru: 'О проекте КСЛТ', en: 'About KSLT', kg: 'КСЛТ жөнүндө' },
     'home.aboutText':   { ru: 'КСЛТ объединяет игроков всех уровней — от новичков до опытных любителей. С 2021 года мы проводим турниры, помогаем находить партнёров по игре и растим большое живое теннисное сообщество.',
                           en: 'KSLT brings together players of all levels — from beginners to seasoned amateurs. Since 2021 we have been running tournaments, helping players find partners and growing a large, living tennis community.',
-                          kg: 'KSLT бардык деңгээлдеги оюнчуларды бириктирет — жаңы баштагандан тажрыйбалуу ышкыбоздорго чейин. 2021-жылдан бери мелдеш өткөрүп, оюн боюнча өнөктөш табууга жардам берип, чоң теннис коомчулугун өстүрүп келебиз.' },
+                          kg: 'КСЛТ бардык деңгээлдеги оюнчуларды бириктирет — жаңы баштагандан тажрыйбалуу ышкыбоздорго чейин. 2021-жылдан бери мелдеш өткөрүп, оюн боюнча өнөктөш табууга жардам берип, чоң теннис коомчулугун өстүрүп келебиз.' },
 
     'home.about1':      { ru: 'Турниры',   en: 'Tournaments', kg: 'Мелдештер' },
     'home.about1Text':  { ru: 'Регулярные соревнования для всех уровней', en: 'Regular competitions for all levels', kg: 'Бардык деңгээлдер үчүн туруктуу мелдештер' },
@@ -98,12 +98,12 @@
     'home.about5':      { ru: 'Тренеры',   en: 'Coaches',     kg: 'Машыктыруучулар' },
     'home.about5Text':  { ru: 'Найди тренера под свой уровень', en: 'Find a coach for your level', kg: 'Деңгээлиңизге ылайык машыктыруучу табыңыз' },
     'home.about6':      { ru: 'Скидки',    en: 'Discounts',   kg: 'Арзандатуулар' },
-    'home.about6Text':  { ru: 'Членам КСЛТ — специальные цены на корты и тренировки', en: 'Special prices on courts and training for KSLT members', kg: 'KSLT мүчөлөрүнө корт жана машыгуу боюнча атайын баа' },
+    'home.about6Text':  { ru: 'Членам КСЛТ — специальные цены на корты и тренировки', en: 'Special prices on courts and training for KSLT members', kg: 'КСЛТ мүчөлөрүнө корт жана машыгуу боюнча атайын баа' },
 
     'pd.doubles':    { ru: 'Парный',      en: 'Doubles',       kg: 'Жуптук' },
     'pd.mixed':      { ru: 'Микст',       en: 'Mixed',         kg: 'Микст' },
     'pd.winsLosses': { ru: 'побед / поражений', en: 'wins / losses', kg: 'жеңиш / жеңилүү' },
-    'coach.priceMember': { ru: 'членам КСЛТ', en: 'KSLT members', kg: 'KSLT мүчөлөрүнө' },
+    'coach.priceMember': { ru: 'членам КСЛТ', en: 'KSLT members', kg: 'КСЛТ мүчөлөрүнө' },
     'coach.students':    { ru: 'учеников',     en: 'students',     kg: 'окуучу' },
     'court.schedule': { ru: 'Часы работы', en: 'Opening hours', kg: 'Иш убактысы' },
     'court.services': { ru: 'Дополнительно', en: 'Additional services', kg: 'Кошумча кызматтар' },
@@ -145,9 +145,9 @@
     'home.stTournaments': { ru: 'Турниров',         en: 'Tournaments',    kg: 'Мелдештер' },
     'home.stCourts':      { ru: 'Теннисных центров', en: 'Tennis centres', kg: 'Теннис борборлору' },
     'home.stCoaches':     { ru: 'Тренеров',         en: 'Coaches',        kg: 'Машыктыруучулар' },
-    'home.sponsorTitle': { ru: 'Спонсор КСЛТ', en: 'KSLT Sponsor', kg: 'KSLT демөөрчүсү' },
+    'home.sponsorTitle': { ru: 'Спонсор КСЛТ', en: 'KSLT Sponsor', kg: 'КСЛТ демөөрчүсү' },
     'home.sponsorSite':  { ru: 'Перейти на сайт', en: 'Open website', kg: 'Сайтка өтүү' },
-    'home.sponsorsTitle': { ru: 'Спонсоры КСЛТ', en: 'KSLT Sponsors', kg: 'KSLT демөөрчүлөрү' },
+    'home.sponsorsTitle': { ru: 'Спонсоры КСЛТ', en: 'KSLT Sponsors', kg: 'КСЛТ демөөрчүлөрү' },
 
     'home.upcoming':        { ru: 'Турниры',          en: 'Tournaments',        kg: 'Мелдештер' },
     'home.latestNews':      { ru: 'Новости',         en: 'News',             kg: 'Жанылыктар' },
@@ -188,7 +188,7 @@
     'td.som':           { ru: 'сом',               en: 'KGS',             kg: 'сом' },
     'td.max':           { ru: 'макс.',             en: 'max',              kg: 'макс.' },
     'td.loginToReg':    { ru: 'Войдите, чтобы записаться на турнир', en: 'Log in to register for the tournament', kg: 'Мелдешке жазылуу үчүн кириңиз' },
-    'td.needMembership':{ ru: 'Для участия нужно членство КСЛТ', en: 'KSLT membership required to participate', kg: 'Катышуу үчүн KSLT мүчөлүгү керек' },
+    'td.needMembership':{ ru: 'Для участия нужно членство КСЛТ', en: 'KSLT membership required to participate', kg: 'Катышуу үчүн КСЛТ мүчөлүгү керек' },
     'td.getMembership': { ru: 'Оформить членство',  en: 'Get membership',   kg: 'Мүчөлүк алуу' },
     'td.register':      { ru: 'Записаться на турнир', en: 'Register for tournament', kg: 'Мелдешке жазылуу' },
     'td.bracketEmpty':  { ru: 'Сетка пока не сформирована', en: 'Bracket not yet formed', kg: 'Тор азырынча түзүлө элек' },
@@ -199,7 +199,7 @@
     'trn.register':       { ru: 'Записаться на турнир', en: 'Register for tournament', kg: 'Мелдешке жазылуу' },
     'trn.registered':     { ru: 'Вы записаны ✓',       en: 'You are registered ✓',   kg: 'Сиз жазылдыңыз ✓' },
     'trn.needAuth':       { ru: 'Войдите, чтобы записаться на турнир', en: 'Log in to register for the tournament', kg: 'Мелдешке жазылуу үчүн кириңиз' },
-    'trn.needMembership': { ru: 'Для участия необходимо членство КСЛТ', en: 'KSLT membership required to participate', kg: 'Катышуу үчүн KSLT мүчөлүгү керек' },
+    'trn.needMembership': { ru: 'Для участия необходимо членство КСЛТ', en: 'KSLT membership required to participate', kg: 'Катышуу үчүн КСЛТ мүчөлүгү керек' },
     'trn.needPlayer':     { ru: 'Ваш профиль не привязан к карточке игрока. Обратитесь к администратору.', en: 'Your profile is not linked to a player card. Contact admin.', kg: 'Профилиңиз оюнчу картасына байланган эмес. Администраторго кайрылыңыз.' },
     'trn.banned':         { ru: 'Вы отстранены от участия в турнирах', en: 'You are banned from tournaments', kg: 'Сиз мелдештерден четтетилдиңиз' },
     'trn.waitlist':       { ru: 'Лист ожидания — ожидает одобрения', en: 'Waitlist — awaiting approval', kg: 'Күтүү тизмеси — бекитүүнү күтүүдө' },
@@ -247,7 +247,7 @@
     'reg.stBlocked':      { ru: 'Заявка не прошла правила допуска.', en: 'The application did not pass the entry rules.', kg: 'Арыз катышуу эрежелеринен өткөн жок.' },
 
     'reg.errNoPlayer':    { ru: 'Ваш аккаунт не связан с карточкой игрока', en: 'Your account is not linked to a player profile', kg: 'Аккаунтуңуз оюнчу картасына байланган эмес' },
-    'reg.errNoMember':    { ru: 'Требуется активное членство КСЛТ', en: 'Active KSLT membership required', kg: 'KSLT активдүү мүчөлүгү талап кылынат' },
+    'reg.errNoMember':    { ru: 'Требуется активное членство КСЛТ', en: 'Active KSLT membership required', kg: 'КСЛТ активдүү мүчөлүгү талап кылынат' },
     'reg.errNotPaid':     { ru: 'Сначала оплатите членство', en: 'Please pay your membership first', kg: 'Адегенде мүчөлүк төлөмүн төлөңүз' },
     'reg.errBanned':      { ru: 'Ваш аккаунт временно заблокирован', en: 'Your account is temporarily blocked', kg: 'Аккаунтуңуз убактылуу бөгөттөлгөн' },
     'reg.errClosed':      { ru: 'Регистрация на этот турнир закрыта', en: 'Registration for this tournament is closed', kg: 'Бул мелдешке каттоо жабык' },
@@ -313,7 +313,7 @@
 
     // === News screen ===
     'news.title':       { ru: 'Новости',              en: 'News',            kg: 'Жанылыктар' },
-    'news.subtitle':    { ru: 'Последние события КСЛТ', en: 'Latest KSLT events', kg: 'KSLT акыркы окуялар' },
+    'news.subtitle':    { ru: 'Последние события КСЛТ', en: 'Latest KSLT events', kg: 'КСЛТ акыркы окуялар' },
     'news.search':      { ru: 'Поиск новости...',     en: 'Search news...',   kg: 'Жанылык издөө...' },
     'news.all':         { ru: 'Все',                   en: 'All',             kg: 'Баары' },
     'news.tournaments': { ru: 'Турниры',              en: 'Tournaments',      kg: 'Мелдештер' },
@@ -446,7 +446,7 @@
 
     // === Coaches screen ===
     'coaches.title':       { ru: 'Тренеры',              en: 'Coaches',           kg: 'Машыктыруучулар' },
-    'coaches.subtitle':    { ru: 'Профессиональные тренеры КСЛТ', en: 'Professional KSLT coaches', kg: 'KSLT профессионал машыктыруучулар' },
+    'coaches.subtitle':    { ru: 'Профессиональные тренеры КСЛТ', en: 'Professional KSLT coaches', kg: 'КСЛТ профессионал машыктыруучулар' },
     'coaches.empty':       { ru: 'Нет тренеров',         en: 'No coaches',        kg: 'Машыктыруучу жок' },
     'coaches.years':       { ru: 'лет',                   en: 'years',            kg: 'жыл' },
     'coaches.perHour':     { ru: 'сом/час',               en: 'KGS/h',           kg: 'сом/саат' },
@@ -458,7 +458,7 @@
     'coach.about':         { ru: 'О тренере',             en: 'About',            kg: 'Тренер жөнүндө' },
     'coach.achievements':  { ru: 'Достижения',            en: 'Achievements',     kg: 'Жетишкендиктер' },
     'coach.contacts':      { ru: 'Контакты',              en: 'Contacts',         kg: 'Байланыштар' },
-    'coach.contactsLocked':{ ru: 'Контакты тренера доступны для членов КСЛТ', en: 'Coach contacts available for KSLT members', kg: 'Тренер байланыштары KSLT мүчөлөрү үчүн жеткиликтүү' },
+    'coach.contactsLocked':{ ru: 'Контакты тренера доступны для членов КСЛТ', en: 'Coach contacts available for KSLT members', kg: 'Тренер байланыштары КСЛТ мүчөлөрү үчүн жеткиликтүү' },
 
     // === Courts screen ===
     'courts.title':        { ru: 'Корты',                 en: 'Courts',           kg: 'Корттор' },
@@ -504,7 +504,7 @@
     'court.description':   { ru: 'Описание',              en: 'Description',      kg: 'Сүрөттөмө' },
     'court.amenities':     { ru: 'Удобства',              en: 'Amenities',        kg: 'Ыңгайлуулуктар' },
     'court.contact':       { ru: 'Контакт',               en: 'Contact',          kg: 'Байланыш' },
-    'court.contactLocked': { ru: 'Контакты корта доступны для членов КСЛТ', en: 'Court contacts available for KSLT members', kg: 'Корт байланыштары KSLT мүчөлөрү үчүн жеткиликтүү' },
+    'court.contactLocked': { ru: 'Контакты корта доступны для членов КСЛТ', en: 'Court contacts available for KSLT members', kg: 'Корт байланыштары КСЛТ мүчөлөрү үчүн жеткиликтүү' },
 
     // === Sponsors screen ===
     'sponsors.title':      { ru: 'Спонсоры',              en: 'Sponsors',         kg: 'Демөөрчүлөр' },
@@ -576,7 +576,7 @@
     'pd.guestTitle':     { ru: 'Хотите узнать больше?', en: 'Want to know more?', kg: 'Көбүрөөк билгиңиз келеби?' },
     'pd.guestText':      { ru: 'Зарегистрируйтесь, чтобы видеть полную статистику, матчи и достижения', en: 'Register to see full stats, matches and achievements', kg: 'Толук статистика, матчтар жана жетишкендиктерди көрүү үчүн катталыңыз' },
     'pd.guestBtn':       { ru: 'Регистрация',         en: 'Register',        kg: 'Каттоо' },
-    'pd.memberCta':      { ru: 'Для вызовов нужно членство КСЛТ', en: 'KSLT membership required for challenges', kg: 'Чакыруулар үчүн KSLT мүчөлүгү керек' },
+    'pd.memberCta':      { ru: 'Для вызовов нужно членство КСЛТ', en: 'KSLT membership required for challenges', kg: 'Чакыруулар үчүн КСЛТ мүчөлүгү керек' },
     'pd.h2h':            { ru: 'Личные встречи',      en: 'Head to Head',     kg: 'Жеке жолугушуулар' },
 
     // === Коды подтверждения ===
@@ -640,11 +640,11 @@
 
     // === Onboarding ===
     'onb.step1.title':   { ru: 'Добро пожаловать!',     en: 'Welcome!',          kg: 'Кош келиңиз!' },
-    'onb.step1.text':    { ru: 'КСЛТ — теннисное сообщество Кыргызстана. Рейтинги, турниры и баттлы в одном приложении.', en: 'KSLT — tennis community of Kyrgyzstan. Rankings, tournaments and battles in one app.', kg: 'KSLT — Кыргызстандын теннис коому. Рейтингдер, мелдештер жана баттлдар бир тиркемеде.' },
+    'onb.step1.text':    { ru: 'КСЛТ — теннисное сообщество Кыргызстана. Рейтинги, турниры и баттлы в одном приложении.', en: 'KSLT — tennis community of Kyrgyzstan. Rankings, tournaments and battles in one app.', kg: 'КСЛТ — Кыргызстандын теннис коому. Рейтингдер, мелдештер жана баттлдар бир тиркемеде.' },
     'onb.step2.title':   { ru: 'Турниры и рейтинг',     en: 'Tournaments & Rating', kg: 'Мелдештер жана рейтинг' },
     'onb.step2.text':    { ru: 'Участвуйте в турнирах, поднимайтесь в рейтинге и бросайте вызов другим игрокам.', en: 'Participate in tournaments, climb the rankings and challenge other players.', kg: 'Мелдештерге катышыңыз, рейтингде көтөрүлүңүз жана башка оюнчуларга чакыруу жөнөтүңүз.' },
     'onb.step3.title':   { ru: 'Оформите членство',     en: 'Get Membership',      kg: 'Мүчөлүк алыңыз' },
-    'onb.step3.text':    { ru: 'Члены КСЛТ получают полный доступ: турниры, вызовы, скидки и баллы лояльности.', en: 'KSLT members get full access: tournaments, challenges, discounts and loyalty points.', kg: 'KSLT мүчөлөрү толук мүмкүнчүлүк алышат: мелдештер, чакыруулар, арзандатуулар жана лоялдуулук упайлары.' },
+    'onb.step3.text':    { ru: 'Члены КСЛТ получают полный доступ: турниры, вызовы, скидки и баллы лояльности.', en: 'KSLT members get full access: tournaments, challenges, discounts and loyalty points.', kg: 'КСЛТ мүчөлөрү толук мүмкүнчүлүк алышат: мелдештер, чакыруулар, арзандатуулар жана лоялдуулук упайлары.' },
     'onb.next':          { ru: 'Далее',                  en: 'Next',              kg: 'Кийинки' },
     'onb.start':         { ru: 'Начать',                 en: 'Start',             kg: 'Баштоо' },
     'onb.skip':          { ru: 'Пропустить',             en: 'Skip',              kg: 'Өткөрүп жиберүү' },
@@ -889,11 +889,11 @@
                            kg: 'Оюнчунун картасын ачып, оюн сунуштаңыз' },
 
     // === Pricing ===
-    'pricing.title':             { ru: 'Членство КСЛТ',          en: 'KSLT Membership',       kg: 'KSLT мүчөлүгү' },
+    'pricing.title':             { ru: 'Членство КСЛТ',          en: 'KSLT Membership',       kg: 'КСЛТ мүчөлүгү' },
     'pricing.singlePlan':        { ru: 'Единый тариф',           en: 'Single plan',           kg: 'Бирдиктүү тариф' },
     'pricing.monthlyMembership': { ru: 'Ежемесячное членство',   en: 'Monthly membership',    kg: 'Ай сайын мүчөлүк' },
     'pricing.perMonth':          { ru: 'мес',                     en: 'mo',                   kg: 'ай' },
-    'pricing.feat1':             { ru: 'Участие во всех турнирах КСЛТ', en: 'Participate in all KSLT tournaments', kg: 'Бардык KSLT мелдештерине катышуу' },
+    'pricing.feat1':             { ru: 'Участие во всех турнирах КСЛТ', en: 'Participate in all KSLT tournaments', kg: 'Бардык КСЛТ мелдештерине катышуу' },
     'pricing.feat2':             { ru: 'Полный рейтинг и статистика',   en: 'Full rating & statistics',           kg: 'Толук рейтинг жана статистика' },
     'pricing.feat3':             { ru: 'Скидки на аренду кортов',       en: 'Discounts on court rental',          kg: 'Корт ижарасына арзандатуу' },
     'pricing.feat4':             { ru: 'Доступ к закрытым мероприятиям', en: 'Access to exclusive events',         kg: 'Жабык иш-чараларга жетүү' },
