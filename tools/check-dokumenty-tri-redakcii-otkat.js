@@ -17,34 +17,46 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ПРИБОР = 'tools/check-pravila-tri-redakcii.js';
+const ПРИБОР = 'tools/check-dokumenty-tri-redakcii.js';
 const EN = 'pages/rules-en.html';
 const KG = 'pages/rules-kg.html';
 
 const ОТКАТЫ = [
     { имя: 'пункт пропал в английском переводе',
-      ждём: 'три редакции держат одну структуру',
+      ждём: 'правила лиги: три редакции держат одну структуру',
       файл: EN,
       было: '                    <li>Official languages of the community: Russian, Kyrgyz, English.</li>\n',
       станет: '' },
 
     { имя: 'раздел пропал в кыргызском переводе',
-      ждём: 'три редакции держат одну структуру',
+      ждём: 'правила лиги: три редакции держат одну структуру',
       файл: KG,
       было: '<div class="ip-rules-section ip-fade-in" id="rules-match">',
       станет: '<div class="ip-rules-section-ubrana" id="rules-match-ubran">' },
 
     { имя: 'оглавление осталось со старым разделом',
-      ждём: 'оглавление отвечает разделам страницы',
+      ждём: 'правила лиги: оглавление отвечает разделам',
       файл: EN,
       было: '<li><a href="#rules-match">Match Format</a></li>',
       станет: '<li><a href="#rules-sanctions">Sanctions &amp; Disqualification</a></li>' },
 
     { имя: 'пункт остался пустым после правки',
-      ждём: 'ни один пункт не пуст',
+      ждём: 'правила лиги: ни один кусок не пуст',
       файл: KG,
       было: '                    <li>КСЛТ коммерциялык уюм эмес.</li>',
-      станет: '                    <li></li>' }
+      станет: '                    <li></li>' },
+
+    { имя: 'абзац условий пропал в английском переводе',
+      ждём: 'условия использования: три редакции держат одну структуру',
+      файл: 'pages/terms-en.html',
+      было: '                <p class="ip-about-text">\n                    KSLT sends a notification when your account is accessed from a new device.\n                </p>\n',
+      станет: '' },
+
+    { имя: 'пометка о черновике убрана из кыргызской редакции',
+      ждём: 'условия использования: пометка о черновике есть на всех языках',
+      файл: 'pages/terms-kg.html',
+      было: 'ip-draft-note ip-fade-in',
+      станет: 'ip-draft-note-ubrana ip-fade-in' }
 ];
 
 function копия() {
