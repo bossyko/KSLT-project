@@ -111,7 +111,12 @@ const ЖИВОЙ = {
     battle_title: 'Проба карты',
     challenger_name: 'Игрок А', opponent_name: 'Игрок Б',
     challenger_player_id: 'p1', opponent_player_id: 'p2',
-    proposed_date: '2026-12-01', proposed_time: '18:00',
+    /* ДАТА СЧИТАЕТСЯ ОТ СЕГОДНЯ. Здесь стояло `2026-12-01`: баттл был
+       «предстоящим» ровно до первого декабря, после чего дом считал бы
+       его идущим, и проба падала бы по календарю, а не по правке.
+       ЛЕЧИТЬ ДО ПАДЕНИЯ ДЕШЕВЛЕ, ЧЕМ ПОСЛЕ. */
+    proposed_date: new Date(Date.now() + 25 * 86400000).toISOString().slice(0, 10),
+    proposed_time: '18:00',
     proposed_venue: 'Корты у Ала-Арчи',
     court_google_maps: 'https://www.google.com/maps/place/Ala+Archa+Courts/@42.8746,74.6122,17z',
     court_twogis: 'https://2gis.kg/bishkek/geo/70000001006186201/74.612200%2C42.874600'

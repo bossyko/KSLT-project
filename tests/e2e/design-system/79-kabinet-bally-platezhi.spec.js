@@ -52,11 +52,25 @@ const ЯЗЫКИ = [{ имя: 'ru', хвост: '' }, { имя: 'en', хвост
 const ШКАЛА_КЕГЛЕЙ = [11, 12, 14, 16, 18, 21, 26, 32, 40];
 const ЛЕСТНИЦА_СТРОК = [1, 1.1, 1.3, 1.5, 1.65];
 
-const СЕГОДНЯ = '2026-10-08T10:00:00Z';
+/* ДАТЫ СЧИТАЮТСЯ ОТ СЕГОДНЯ, А НЕ ВПИСЫВАЮТСЯ ЛИТЕРАЛОМ (06.11).
+   Здесь стояло `СЕГОДНЯ = '2026-10-08'` — ИМЯ ВРАЛО НА МЕСЯЦ. Проба с
+   абсолютной датой гниёт по календарю: сегодня она ещё проходит, а
+   через месяц подписи «начислено сегодня» и «истекает через год»
+   становятся неправдой, и падение приходит не от правки, а от
+   наступившего числа.
+   Правило выведено 30.10 на `116-status-turnira` и применяется здесь
+   без нового разбора. */
+function сдвиг(дней) {
+    return new Date(Date.now() + дней * 86400000).toISOString().slice(0, 19) + 'Z';
+}
+const СЕГОДНЯ = сдвиг(0);
+const НЕДЕЛЮ_НАЗАД = сдвиг(-7);
+const МЕСЯЦ_НАЗАД = сдвиг(-30);
+const ЧЕРЕЗ_ГОД = сдвиг(365);
 const ОПЕРАЦИИ = [
-    { id: 'p1', type: 'earn',   action: 'tournament', points: 150, created_at: СЕГОДНЯ, expires_at: '2027-10-08T10:00:00Z' },
-    { id: 'p2', type: 'redeem', action: 'voucher',    points: -500, created_at: '2026-10-01T10:00:00Z' },
-    { id: 'p3', type: 'expire', action: 'expired',    points: -25,  created_at: '2026-09-20T10:00:00Z' }
+    { id: 'p1', type: 'earn',   action: 'tournament', points: 150, created_at: СЕГОДНЯ, expires_at: ЧЕРЕЗ_ГОД },
+    { id: 'p2', type: 'redeem', action: 'voucher',    points: -500, created_at: НЕДЕЛЮ_НАЗАД },
+    { id: 'p3', type: 'expire', action: 'expired',    points: -25,  created_at: МЕСЯЦ_НАЗАД }
 ];
 const НАГРАДЫ = [
     { id: 'r1', code: 'COURT1', title: 'Ваучер на корт — 1 час', title_en: 'Court voucher — 1 hour', cost: 500, active: true },
@@ -66,7 +80,7 @@ const ПЛАТЕЖИ = [
     { id: 'o1', amount: 1000000, currency: 'KGS', payment_method: 'transfer', status: 'completed',
       note: 'Взнос за турнир «Мастерс-этап», оплата на корте у администратора', created_at: СЕГОДНЯ },
     { id: 'o2', amount: 1000, currency: 'KGS', payment_method: 'cash', status: 'pending',
-      note: 'Членство', created_at: '2026-09-01T10:00:00Z' }
+      note: 'Членство', created_at: МЕСЯЦ_НАЗАД }
 ];
 
 /** Накладки кабинета — все три поимённо, см. пробу 77. */
