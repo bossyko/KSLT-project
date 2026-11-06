@@ -45,6 +45,22 @@ const ДОКУМЕНТЫ = [
         пометка: null
     },
     {
+        имя: 'публичная оферта', единица: 'пунктов',
+        файлы: { русская: 'pages/offer.html', английская: 'pages/offer-en.html', кыргызская: 'pages/offer-kg.html' },
+        раздел: () => /<div class="ip-rules-section[^"]*" id="([^"]+)">([\s\S]*?)(?=<div class="ip-rules-section|<section|<\/main)/g,
+        кусок: () => /<p[^>]*><strong>\d+(?:\.\d+)*\.<\/strong>/g,
+        пустой: () => /<p[^>]*><strong>\d+(?:\.\d+)*\.<\/strong>\s*<\/p>/g,
+        оглавление: null, пометка: null
+    },
+    {
+        имя: 'политика конфиденциальности', единица: 'пунктов',
+        файлы: { русская: 'pages/privacy-policy.html', английская: 'pages/privacy-policy-en.html', кыргызская: 'pages/privacy-policy-kg.html' },
+        раздел: () => /<div class="ip-rules-section[^"]*" id="([^"]+)">([\s\S]*?)(?=<div class="ip-rules-section|<section|<\/main)/g,
+        кусок: () => /<p[^>]*><strong>\d+(?:\.\d+)*\.<\/strong>/g,
+        пустой: () => /<p[^>]*><strong>\d+(?:\.\d+)*\.<\/strong>\s*<\/p>/g,
+        оглавление: null, пометка: null
+    },
+    {
         имя: 'условия использования', единица: 'абзацев',
         файлы: { русская: 'pages/terms.html', английская: 'pages/terms-en.html', кыргызская: 'pages/terms-kg.html' },
         раздел: () => /<div class="ip-about-section[^"]*">\s*<h2[^>]*>([\s\S]*?)<\/h2>([\s\S]*?)(?=<div class="ip-about-section|<section|<\/main)/g,
