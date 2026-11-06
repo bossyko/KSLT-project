@@ -317,16 +317,13 @@
         return файл;
     }
 
-    // ---- Populate birthday day select (1-31) ----
-    var daySelect = document.getElementById('signup-birth-day');
-    if (daySelect) {
-        for (var d = 1; d <= 31; d++) {
-            var opt = document.createElement('option');
-            opt.value = d;
-            opt.textContent = d;
-            daySelect.appendChild(opt);
-        }
-    }
+    /* ЗАПОЛНЕНИЕ ДНЕЙ РОЖДЕНИЯ СНЯТО 06.11 — ПОЛЯ НЕТ НИГДЕ.
+       Дата рождения ушла из формы 21.09 (`ff36dd3`), и `signup-birth-day`
+       с тех пор не существует ни в одной разметке обоих продуктов, ни в
+       одной строке js, которая бы его создавала — проверено поиском по
+       всем html и js.
+       Поля дозаполнения после Telegram зовутся ИНАЧЕ — `tg-birth-day` и
+       `tg-birth-month`, — и их заполняет свой код. */
 
     // ---- Clear forms on page load (security) ----
     window.addEventListener('pageshow', function() {
@@ -415,6 +412,28 @@
         }
     }
 
+    /**
+     * ПРАВИЛА ПАРОЛЯ — У ДОМА `js/kslt-parol.js` (06.11).
+     *
+     * Здесь жил свой набор из четырёх проверок (`rules`), и он был
+     * привязан к полю `signup-password`, которого нет с 21.09. Снимая
+     * мёртвое чтение, я снял и набор — а его ждали ЕЩЁ ДВА места:
+     * подробная ошибка и подсветка правил на форме сброса. Поймано
+     * чтением файла целиком, до прогона.
+     *
+     * ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: дом `KSLT_PAROL` был заведён
+     * раньше и до сегодня НЕ ЗВАЛСЯ НА САЙТЕ НИ РАЗУ — правила пароля
+     * жили в продукте дважды, и расходиться им мешало только то, что
+     * второе определение никто не трогал.
+     */
+    function чегоНеХватает(пароль) {
+        var P = window.KSLT_PAROL;
+        if (P && P.чегоНеХватает) return P.чегоНеХватает(пароль);
+        /* Дом не загрузился — не молчим и не придумываем своих правил:
+           пустой список означал бы «пароль годится», а это неправда. */
+        return ['length'];
+    }
+
     // Detailed password error — lists exactly which rules failed
     function showPwError(form, password) {
         var ruleLabels = {
@@ -424,11 +443,8 @@
             special: L.ruleSpecial
         };
 
-        var missing = [];
-        Object.keys(rules).forEach(function(key) {
-            if (!rules[key](password)) {
-                missing.push(ruleLabels[key] || key);
-            }
+        var missing = чегоНеХватает(password).map(function (key) {
+            return ruleLabels[key] || key;
         });
 
         var text = L.errPwRules + '\n' + missing.join(', ');
@@ -611,15 +627,15 @@
     if (resetPwInput) {
         resetPwInput.addEventListener('input', function() {
             var val = this.value;
-            Object.keys(rules).forEach(function(key) {
+            var нет = чегоНеХватает(val);
+            ['length', 'upper', 'digit', 'special'].forEach(function(key) {
                 var el = document.querySelector('.pw-rule-reset[data-rule="' + window.KSLT_селектор(key) + '"]');
-                if (el) {
-                    if (rules[key](val)) {
-                        el.classList.add('valid');
-                        el.classList.remove('pw-rule-error');
-                    } else {
-                        el.classList.remove('valid');
-                    }
+                if (!el) return;
+                if (нет.indexOf(key) === -1) {
+                    el.classList.add('valid');
+                    el.classList.remove('pw-rule-error');
+                } else {
+                    el.classList.remove('valid');
                 }
             });
             var detailMsg = resetForm.querySelector('.auth-pw-detail');
@@ -649,48 +665,18 @@
         });
     });
 
-    // ---- Password rules ----
-    var pwInput = document.getElementById('signup-password');
-    var rules = {
-        length: function(val) { return val.length >= 8; },
-        upper: function(val) { return /[A-Z]/.test(val); },
-        digit: function(val) { return /[0-9]/.test(val); },
-        special: function(val) { return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val); }
-    };
-
-    /* Подсказка о правилах пароля живёт только там, где есть само поле.
-       На регистрации поля больше нет (вариант B, 21.09), и без этой
-       проверки страница падала с «Cannot read properties of null» на
-       каждой загрузке — поймано прогоном, а не глазами. */
-    if (pwInput) {
-        pwInput.addEventListener('input', function() {
-            var val = this.value;
-            Object.keys(rules).forEach(function(key) {
-                var el = document.querySelector('.pw-rule[data-rule="' + window.KSLT_селектор(key) + '"]');
-                if (!el) return;
-                if (rules[key](val)) {
-                    el.classList.add('valid');
-                    el.classList.remove('pw-rule-error');
-                } else {
-                    el.classList.remove('valid');
-                }
-            });
-            // Clear detailed error message when user starts typing
-            var detailMsg = signupForm.querySelector('.auth-pw-detail');
-            if (detailMsg) detailMsg.remove();
-        });
-    }
-
-    /* Поля «Подтвердите пароль» на регистрации больше нет (решение 21.09):
-       у поля пароля есть глаз показа, а подтверждение — приём из времён,
-       когда посмотреть на введённое было нельзя. Обработчик оставлен
-       защищённым: те же элементы есть на экранах смены пароля. */
-    var подтвержд = document.getElementById('signup-confirm');
-    if (подтвержд) {
-        подтвержд.addEventListener('input', function() {
-            this.setCustomValidity('');
-        });
-    }
+    /* ПРАВИЛА ПАРОЛЯ И ПОДТВЕРЖДЕНИЕ СНЯТЫ 06.11 — ОБОИХ ПОЛЕЙ НЕТ.
+       Пароль ушёл из регистрации 21.09 (`7eaaef2`, вариант B: вход по
+       коду), и с тех пор `signup-password` и `signup-confirm` не
+       существуют ни в одной разметке.
+       ЗДЕСЬ СТОЯЛО ОБЪЯСНЕНИЕ, ПОЧЕМУ ЧТЕНИЕ ОСТАВЛЕНО: «те же элементы
+       есть на экранах смены пароля». ЗАМЕР 06.11 ЕГО ОПРОВЕРГ: на тех
+       экранах поля зовутся `otp-new-password`, `otp-confirm-password`,
+       `reset-password`, `signin-password` — ни одного `signup-*`.
+       ОБЪЯСНЕНИЕ, КОТОРОЕ НИКТО НЕ ПЕРЕМЕРИЛ, ВРЁТ ТАК ЖЕ, КАК НАДПИСЬ
+       БЕЗ ПРОВЕРКИ, и держало мёртвый код пять недель под видом
+       осмысленного. Проверка правил пароля жива там, где есть само поле:
+       общий дом `js/kslt-parol.js`. */
 
     // ---- Name script validation (allow Cyrillic + Kyrgyz + Latin on all versions) ----
     var _sRe = /^[a-zA-Zа-яА-ЯёЁңҢүҮөӨ\s\-'.]+$/;
@@ -813,28 +799,13 @@
         // Дата рождения при РЕГИСТРАЦИИ больше не спрашивается (решение
         // Кости 21.09). Она нужна промо-акции ко дню рождения, которой в
         // админке ещё нет (задача dr-kalendar), и собирать её впрок значит
-        // удлинять форму ради того, чего пока не существует.
-        //
-        // Чтение оставлено защищённым, а не выброшено: те же строки работают
-        // на экране дозаполнения после Telegram, где поля ДР есть.
-        // Год рождения не спрашивался ни на одной из трёх страниц уже давно —
-        // это записанная задача про мёртвое чтение (#90).
-        var деньЭл = document.getElementById('signup-birth-day');
-        var месяцЭл = document.getElementById('signup-birth-month');
-        var birthDay = деньЭл ? деньЭл.value : '';
-        var birthMonth = месяцЭл ? месяцЭл.value : '';
-        var birthYearEl = document.getElementById('signup-birth-year');
-        var birthYear = birthYearEl ? birthYearEl.value : '';
-        /* ПАРОЛЯ В ФОРМЕ РЕГИСТРАЦИИ БОЛЬШЕ НЕТ (решение Кости 21.09,
-           вариант B). Почта подтверждается кодом — это и есть дверь.
-           Пароль предлагаем ПОСЛЕ регистрации, на экране «Готово», с
-           возможностью пропустить; войти потом можно и по коду.
-           Чтение защищено, а не выброшено: те же элементы есть на экранах
-           смены пароля. */
-        var парольЭл = document.getElementById('signup-password');
-        var password = парольЭл ? парольЭл.value : '';
-        var подтверждЭл = document.getElementById('signup-confirm');
-        var confirmPw = подтверждЭл ? подтверждЭл.value : password;
+        // ЧТЕНИЯ ПОЛЕЙ, КОТОРЫХ НЕТ, СНЯТЫ 06.11. Здесь читались
+        // `signup-birth-day/month/year`, `signup-password` и
+        // `signup-confirm` — ни одного из них нет ни в одной разметке
+        // обоих продуктов (проверено поиском по всем html и js), и
+        // объяснение «те же поля есть на других экранах» замер
+        // опроверг: там они зовутся `tg-birth-*` и `otp-*-password`.
+        var birthDay = '', birthMonth = '', birthYear = '';
         var btn = signupForm.querySelector('.auth-btn');
 
         if (!похоже_на_почту(email)) {
@@ -843,29 +814,9 @@
             return;
         }
 
-        var allRulesPass = !парольЭл || Object.keys(rules).every(function(key) { return rules[key](password); });
-        if (!allRulesPass) {
-            showPwError(signupForm, password);
-            // Highlight unfulfilled rules
-            document.querySelectorAll('.pw-rule').forEach(function(el) {
-                var key = el.dataset.rule;
-                if (rules[key] && !rules[key](password)) {
-                    el.classList.add('pw-rule-error');
-                } else {
-                    el.classList.remove('pw-rule-error');
-                }
-            });
-            // Scroll to password field
-            pwInput.focus();
-            pwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-
-        if (подтверждЭл && password !== confirmPw) {
-            подтверждЭл.setCustomValidity(L.errPwMatch);
-            подтверждЭл.reportValidity();
-            return;
-        }
+        /* ПРОВЕРОК ПАРОЛЯ В РЕГИСТРАЦИИ БОЛЬШЕ НЕТ: самого пароля
+           там нет с 21.09, вход по коду. Проверка жива там, где поле
+           есть — на экранах смены пароля, и считает её дом. */
 
         if (!client) {
             showMessage(signupForm, L.errGeneric, true);
@@ -915,7 +866,9 @@
         // Cache form data for after OTP verification
         _otpFormData = {
             email: email,
-            password: парольЭл ? password : undefined,
+            /* Пароль в регистрации не спрашивается (21.09): его
+               предлагают ПОСЛЕ, на экране «Готово». */
+            password: undefined,
             full_name: firstName + ' ' + lastName,
             gender: gender ? gender.value : '',
             birth_day: birthDay ? parseInt(birthDay) : null,
@@ -1428,9 +1381,7 @@
                 if (pwDetail) {
                     pwDetail.querySelectorAll('li').forEach(function(li) {
                         var rule = li.dataset.rule;
-                        if (rule && rules[rule]) {
-                            li.classList.toggle('valid', rules[rule](val));
-                        }
+                        if (rule) li.classList.toggle('valid', чегоНеХватает(val).indexOf(rule) === -1);
                     });
                 }
             });
@@ -1444,7 +1395,7 @@
             var confirmPw = document.getElementById('otp-confirm-password').value;
             var btn = otpNewPasswordForm.querySelector('.auth-btn');
 
-            var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](newPw); });
+            var allRulesPass = чегоНеХватает(newPw).length === 0;
             if (!allRulesPass) {
                 showPwError(otpNewPasswordForm, newPw);
                 return;
@@ -1632,12 +1583,12 @@
             var confirmPw = document.getElementById('reset-confirm').value;
             var btn = resetForm.querySelector('.auth-btn');
 
-            var allRulesPass = Object.keys(rules).every(function(key) { return rules[key](newPw); });
+            var allRulesPass = чегоНеХватает(newPw).length === 0;
             if (!allRulesPass) {
                 showPwError(resetForm, newPw);
                 document.querySelectorAll('.pw-rule-reset').forEach(function(el) {
                     var key = el.dataset.rule;
-                    if (rules[key] && !rules[key](newPw)) {
+                    if (чегоНеХватает(newPw).indexOf(key) !== -1) {
                         el.classList.add('pw-rule-error');
                     } else {
                         el.classList.remove('pw-rule-error');
