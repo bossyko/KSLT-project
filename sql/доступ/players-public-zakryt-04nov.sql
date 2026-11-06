@@ -25,6 +25,11 @@ BEGIN;
 
 DROP VIEW IF EXISTS public.players_public;
 
+-- ОПРЕДЕЛЕНИЕ УСТАРЕЛО, И ИМЕННО ОНО ЗАКРЫЛО ГОСТЮ ВИТРИНУ. Признак
+-- `zakryt` здесь читает `p.banned_until` и `profiles`, а витрина стоит на
+-- `security_invoker` — гость получал 42501 на любой запрос. Заменено
+-- 06.11 на `sql/доступ/vitrina-zakryt-cherez-funkciyu-06nov.sql`.
+-- НЕ ПРОГОНЯТЬ.
 CREATE VIEW public.players_public
 WITH (security_invoker = on) AS
 SELECT p.id,

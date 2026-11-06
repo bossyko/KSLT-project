@@ -26,6 +26,10 @@ BEGIN;
 
 DROP VIEW IF EXISTS public.players_public;
 
+-- ОПРЕДЕЛЕНИЕ УСТАРЕЛО. Витрина пересоздана в
+-- `sql/доступ/vitrina-zakryt-cherez-funkciyu-06nov.sql` (признак `zakryt`
+-- через функцию). Здешний блок оставлен как история; живыми в этом файле
+-- остаются только гранты по столбцам — список того, что гостю выдано.
 CREATE VIEW public.players_public
 WITH (security_invoker = on) AS
 SELECT id,
