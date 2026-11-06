@@ -482,37 +482,16 @@
      отдаёт первый узел ДОКУМЕНТА, и пока окно одно — ответы совпадают,
      а беда ждёт второго. */
 
+  /* ОКНО ПЕРЕЕХАЛО В ДОМ 06.11 — `js/kslt-shtorka.js`. Здесь оно
+     собиралось руками, и ровно такое же собиралось ещё в двух местах:
+     ниже в `openH2H` и в кабинете, у кода ваучера. Три руки уже
+     разошлись — роль, подпись кнопки и язык заголовка были в разных
+     местах разными. ОБЁРТКИ НЕ ОСТАВЛЕНО: второе имя одного понятия
+     разводит вызовы по двум дорогам. */
   function окно(id, заголовок, тело) {
-    var overlay = document.getElementById('playerOverlay');
-    if (!overlay) return null;
-    var прежнее = document.getElementById(id);
-    if (прежнее) прежнее.remove();
-
-    var узел = document.createElement('div');
-    узел.id = id;
-    узел.className = 'pd-h2h-modal';
-    узел.setAttribute('role', 'dialog');
-    узел.setAttribute('aria-modal', 'true');
-    узел.innerHTML =
-      '<div class="pd-h2h-content">' +
-        '<div class="pd-h2h-header">' +
-          '<button class="pd-h2h-close" type="button" aria-label="' + esc(I18N.t('blk.cancel')) + '">✕</button>' +
-          '<h3>' + esc(заголовок) + '</h3>' +
-        '</div>' +
-        '<div class="pd-h2h-body">' + тело + '</div>' +
-      '</div>';
-
-    overlay.appendChild(узел);
-    requestAnimationFrame(function() { узел.classList.add('open'); });
-
-    var закрыть = function() {
-      узел.classList.remove('open');
-      setTimeout(function() { узел.remove(); }, 300);
-    };
-    узел.querySelector('.pd-h2h-close').addEventListener('click', закрыть);
-    узел.addEventListener('click', function(e) { if (e.target === узел) закрыть(); });
-    узел.закрыть = закрыть;
-    return узел;
+    var родитель = document.getElementById('playerOverlay');
+    if (!родитель) return null;
+    return window.KSLT_SHTORKA.окно({ id: id, заголовок: заголовок, тело: тело, родитель: родитель });
   }
 
   /** Пять причин живут ОДНИМ списком: добавится шестая — правится одно
@@ -880,51 +859,29 @@
 
   // ---- H2H Modal ----
   function openH2H(opponentId) {
-    var overlay = document.getElementById('playerOverlay');
-    if (!overlay) return;
+    /* ЗАГОЛОВОК БЕРЁТСЯ ИЗ СЛОВАРЯ. Здесь было зашито «Head-to-Head»
+       по-английски — при живом ключе `pd.h2h` («Личные встречи»).
+       НАДПИСЬ МИМО СЛОВАРЯ ПРИ ЖИВОМ КЛЮЧЕ — ЭТО НЕ ЭКОНОМИЯ, А ВТОРОЕ
+       определение одного понятия. */
+    var modal = окно('pdH2HModal', I18N.t('pd.h2h'),
+      '<div class="loading-center"><div class="spinner"></div></div>');
+    if (!modal) return;
 
-    // Create H2H modal
-    var existing = document.getElementById('pdH2HModal');
-    if (existing) existing.remove();
-
-    var modal = document.createElement('div');
-    modal.id = 'pdH2HModal';
-    modal.className = 'pd-h2h-modal';
-    modal.innerHTML =
-      '<div class="pd-h2h-content">' +
-        '<div class="pd-h2h-header">' +
-          '<button class="pd-h2h-close" id="pdH2HClose">✕</button>' +
-          '<h3>Head-to-Head</h3>' +
-        '</div>' +
-        '<div class="pd-h2h-body" id="pdH2HBody">' +
-          '<div class="loading-center"><div class="spinner"></div></div>' +
-        '</div>' +
-      '</div>';
-
-    overlay.appendChild(modal);
-    requestAnimationFrame(function() { modal.classList.add('open'); });
-
-    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
-       отдаёт первый подходящий узел ДОКУМЕНТА: пока окно одно,
-       ответы совпадают, и беда ждёт второго — а второе бывает,
-       пока старое ещё висит в доме после закрытия. */
-    modal.querySelector('#pdH2HClose').addEventListener('click', function() {
-      modal.classList.remove('open');
-      setTimeout(function() { modal.remove(); }, 300);
-    });
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        modal.classList.remove('open');
-        setTimeout(function() { modal.remove(); }, 300);
-      }
-    });
+    /* ЗАКРЫТИЕ ВЕШАЕТ ДОМ. Здесь висели свои два обработчика — по
+       кнопке и по подложке, — и они повторяли дом слово в слово. ДВА
+       ПУТИ ЗАКРЫТИЯ ОДНОГО ОКНА РАСХОДЯТСЯ НА ПЕРВОЙ ЖЕ ПРАВКЕ: один
+       снимет класс и уберёт узел, другой забудет про уборку. */
 
     // Load H2H data
     loadH2HData(opponentId);
   }
 
   function loadH2HData(opponentId) {
-    var body = document.getElementById('pdH2HBody');
+    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (правило 02.11): `getElementById`
+       отдаёт ПЕРВЫЙ подходящий узел документа, а окон с телом может
+       оказаться два — пока старое ещё доживает свой переход. */
+    var окноH2H = document.getElementById('pdH2HModal');
+    var body = окноH2H && окноH2H.querySelector('.pd-h2h-body');
     if (!body) return;
 
     // Load opponent info

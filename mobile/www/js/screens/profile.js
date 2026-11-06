@@ -1277,40 +1277,28 @@
   }
 
   function showVoucherQR(code) {
-    var existing = document.getElementById('voucherQRModal');
-    if (existing) existing.remove();
-
-    var modal = document.createElement('div');
-    modal.id = 'voucherQRModal';
-    modal.className = 'pd-h2h-modal';
-    modal.innerHTML =
-      '<div class="pd-h2h-content" style="max-width:300px;text-align:center">' +
-        '<div class="pd-h2h-header"><button class="pd-h2h-close" id="qrClose">✕</button><h3>' + I18N.t('profile.vQRTitle') + '</h3></div>' +
-        '<div style="padding:24px">' +
-          '<div id="voucherQRBox" style="width:200px;height:200px;margin:0 auto;border-radius:8px;background:#fff;padding:8px;box-sizing:border-box"></div>' +
-          '<div style="margin-top:12px;font-family:monospace;font-size:18px;color:var(--accent);letter-spacing:2px">' + code + '</div>' +
-          '<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">' + I18N.t('profile.vQRText') + '</div>' +
-        '</div>' +
-      '</div>';
-
-    document.getElementById('app').appendChild(modal);
-    рисоватьQR(modal.querySelector('#voucherQRBox'), code);
-    requestAnimationFrame(function() { modal.classList.add('open'); });
-
-    /* ЧАСТЬ ОКНА ИЩЕТСЯ В САМОМ ОКНЕ (02.11). `getElementById`
-       отдаёт первый подходящий узел ДОКУМЕНТА: пока окно одно,
-       ответы совпадают, и беда ждёт второго — а второе бывает,
-       пока старое ещё висит в доме после закрытия. */
-    modal.querySelector('#qrClose').addEventListener('click', function() {
-      modal.classList.remove('open');
-      setTimeout(function() { modal.remove(); }, 300);
+    /* ОКНО СОБИРАЕТ ДОМ `js/kslt-shtorka.js` (06.11). Здесь оно
+       строилось руками — третья копия одного и того же окна, и у этой
+       копии не было ни `type="button"` у кнопки закрытия, ни подписи
+       для диктора. БЕЛЫЙ КВАДРАТ ПОД КОДОМ ОСТАЁТСЯ БЕЛЫМ НАМЕРЕННО:
+       это поле самого QR, его читают камерой, и тёмный фон там ломает
+       распознавание. */
+    var окно = window.KSLT_SHTORKA.окно({
+      id: 'voucherQRModal',
+      заголовок: I18N.t('profile.vQRTitle'),
+      ширина: 300,
+      тело:
+        '<div style="padding:24px;text-align:center">' +
+          '<div id="voucherQRBox" style="width:200px;height:200px;margin:0 auto;' +
+            'border-radius:8px;background:#fff;padding:8px;box-sizing:border-box"></div>' +
+          '<div style="margin-top:12px;font-family:monospace;font-size:18px;' +
+            'color:var(--accent);letter-spacing:2px">' + code + '</div>' +
+          '<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">' +
+            I18N.t('profile.vQRText') + '</div>' +
+        '</div>'
     });
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        modal.classList.remove('open');
-        setTimeout(function() { modal.remove(); }, 300);
-      }
-    });
+    /* Часть окна ищется В САМОМ ОКНЕ, а не по всему документу. */
+    рисоватьQR(окно.querySelector('#voucherQRBox'), code);
   }
 
   // ---- Payments ----
