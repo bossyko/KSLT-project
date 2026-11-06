@@ -17,7 +17,7 @@ DECLARE
     v_match_dt TIMESTAMPTZ;
 BEGIN
     -- Get challenge
-    SELECT battle_published, voting_closed,
+    SELECT battle_published, voting_closed, status,
            COALESCE(counter_date, proposed_date) AS match_date,
            COALESCE(counter_time, proposed_time) AS match_time
     INTO v_challenge
@@ -25,6 +25,14 @@ BEGIN
 
     IF v_challenge IS NULL OR v_challenge.battle_published = false THEN
         RETURN json_build_object('ok', false, 'error', 'not_found');
+    END IF;
+
+    -- ОТМЕНЁННЫЙ БАТТЛ ГОЛОСОВ НЕ ПРИНИМАЕТ (06.11).
+    -- Экраны обоих продуктов такой баттл теперь помечают и в «активные»
+    -- не кладут, но ЭКРАН — НЕ ЗАПРЕТ: запрос можно послать и мимо
+    -- экрана, а голос ложится в challenge_predictions навсегда.
+    IF v_challenge.status = 'cancelled' THEN
+        RETURN json_build_object('ok', false, 'error', 'cancelled');
     END IF;
 
     IF v_challenge.voting_closed THEN
