@@ -26,8 +26,11 @@ test.describe('SEO — Title tags', () => {
             await page.goto(pg.path, { waitUntil: 'domcontentloaded' });
             const title = await page.title();
             expect(title.trim().length).toBeGreaterThan(0);
-            // Русская версия сайта пишет аббревиатуру кириллицей — КСЛТ
-            expect(title).toContain(pg.lang === 'ru' ? 'КСЛТ' : 'KSLT');
+            /* ИМЯ ЛИГИ ПО ЯЗЫКУ — слово Кости 06.11: по-русски и
+               по-кыргызски кириллицей, по-английски латиницей. Прежняя
+               проверка ждала латиницу на всех нерусских страницах и
+               держала отменённое решение. */
+            expect(title).toContain(pg.lang === 'en' ? 'KSLT' : 'КСЛТ');
         });
     }
 });

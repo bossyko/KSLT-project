@@ -10,7 +10,8 @@ const PUBLIC_PAGES = [
     // Root pages
     { path: '/', title: 'КСЛТ', lang: 'ru', name: 'Homepage RU' },
     { path: '/index-en.html', title: 'KSLT', lang: 'en', name: 'Homepage EN' },
-    { path: '/index-kg.html', title: 'KSLT', lang: 'kg', name: 'Homepage KG' },
+    /* Имя лиги по языку — слово Кости 06.11: кыргызский пишет кириллицей. */
+    { path: '/index-kg.html', title: 'КСЛТ', lang: 'kg', name: 'Homepage KG' },
 
     // Tournaments
     { path: '/pages/tournaments.html', name: 'Tournaments RU' },
