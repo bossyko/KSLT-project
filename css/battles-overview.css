@@ -353,6 +353,16 @@
     border: var(--bw-hair) solid var(--border-subtle);
 }
 
+/* ОТМЕНЁННЫЙ БАТТЛ ЧИТАЕТСЯ РАНЬШЕ, ЧЕМ ПРОЧИТАН (06.11). Он не
+   «завершённый» и не «живой»: завершённый сыгран и у него есть счёт, а
+   отменённый не состоялся вовсе. Краска берётся из роли предупреждения,
+   своего цвета не заводится. */
+.bo-strip-cancelled {
+    background: var(--alpha-white-08);
+    color: var(--danger);
+    border: var(--bw-hair) solid var(--danger);
+}
+
 .bo-strip-past .to-compact-date .to-day { color: var(--text-secondary); }
 
 .bo-strip-fmt {
@@ -623,6 +633,14 @@
     background: var(--alpha-black-60);
     border: var(--bw-hair) solid var(--alpha-white-12);
     color: var(--text-muted);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.bo-status.cancelled {
+    background: var(--alpha-black-60);
+    border: var(--bw-hair) solid var(--danger);
+    color: var(--danger);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
