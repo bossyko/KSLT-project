@@ -387,6 +387,41 @@ const КУСКИ = [
     ['журнал матча',
      'check-zhurnal-matcha.js', 'check-zhurnal-matcha-otkat.js'],
 
+    /* ВНЕСЕНЫ 07.11. Тринадцать сторожей, заведённых 05–07.11, лежали
+       СБОКУ от бегунка: их пруверы были написаны и ни разу не гонялись.
+       Ровно та беда, что записана выше про `check-auth` 27.10 — СТОРОЖ,
+       КОТОРОГО НЕ ГОНЯЮТ, НЕ СТОРОЖ, — и повторённая мной тринадцать
+       раз за три дня. Сторож над списком про это и говорил; я не гонял
+       и его. Пара заводится в тот же день, что и прувер. */
+    ['горизонтальный вид',
+     'check-gorizontalnyy-vid.js', 'check-gorizontalnyy-vid-otkat.js'],
+    ['три редакции документа',
+     'check-dokumenty-tri-redakcii.js', 'check-dokumenty-tri-redakcii-otkat.js'],
+    ['фокус в окне',
+     'check-fokus-v-okne.js', 'check-fokus-v-okne-otkat.js'],
+    ['имя лиги',
+     'check-imya-ligi.js', 'check-imya-ligi-otkat.js'],
+    ['окно-вопрос',
+     'check-okno-vopros.js', 'check-okno-vopros-otkat.js'],
+    ['отмена battle',
+     'check-otmena-battla.js', 'check-otmena-battla-otkat.js'],
+    ['шторка',
+     'check-shtorka.js', 'check-shtorka-otkat.js'],
+    ['витрина прав',
+     'check-vitrina-prava.js', 'check-vitrina-prava-otkat.js'],
+    ['скрытый номер',
+     'check-skrytyy-nomer.js', 'check-skrytyy-nomer-otkat.js'],
+    ['молчащие пробы',
+     'check-molchashchie-proby.js', 'check-molchashchie-proby-otkat.js'],
+    ['правовые документы',
+     'check-pravovye-dokumenty.js', 'check-pravovye-dokumenty-otkat.js'],
+    ['двойная связь',
+     'check-dvoynaya-svyaz.js', 'check-dvoynaya-svyaz-otkat.js'],
+    ['ключ заданий',
+     'check-cron-klyuch.js', 'check-cron-klyuch-otkat.js'],
+    ['кабинеты не расходятся',
+     'check-kabinety-ne-rashodyatsya.js', 'check-kabinety-ne-rashodyatsya-otkat.js'],
+
     /* СТОРОЖ НАД ЭТИМ САМЫМ СПИСКОМ: он падает, когда пара заведена, а в
        список не внесена, и когда одна пара стоит в нём дважды. */
     ['список пар полон',
