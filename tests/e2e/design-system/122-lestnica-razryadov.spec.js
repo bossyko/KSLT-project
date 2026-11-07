@@ -38,7 +38,11 @@ async function база(page) {
     await page.waitForFunction(() => !!(window.KSLT_DB && window.KSLT_DB.url), null, { timeout: 15000 });
     return page.evaluate(async () => {
         const { url, key } = window.KSLT_DB;
-        const r = await fetch(url + '/rest/v1/categories?select=id,name,sort_order&order=sort_order.desc',
+        /* `is_rating` БЕРЁТСЯ ВМЕСТЕ СО СТУПЕНЬЮ (07.11): признак
+           «нерейтинговая категория» перестал быть словом `friendly` и
+           стал свойством данных. Без него проба считает любую новую
+           дружескую категорию разрядом. */
+        const r = await fetch(url + '/rest/v1/categories?select=id,name,sort_order,is_rating&order=sort_order.desc',
             { headers: { apikey: key, Authorization: 'Bearer ' + key } });
         return { статус: r.status, строки: await r.json() };
     });
@@ -58,7 +62,14 @@ test('порядок разрядов в базе совпадает с домо
        отношение, расхождение которого даёт разный ответ на вопрос «какая
        категория выше» у посева и у публичного рейтинга — а оно ловится и
        на трёх разрядах, и на пяти. */
-    const рейтинговые = строки.filter(к => к.id !== 'friendly');
+    /* ОТСЕИВАЕТ ПРИЗНАК ИЗ ДАННЫХ, А НЕ СЛОВО (07.11). Проба держала
+       литерал `к.id !== 'friendly'` и на второй дружеской категории
+       («Open Friendly») честно упала: та попала в разряды, и её ступень
+       столкнулась с чужой. ПРОБА, ДЕРЖАЩАЯ СТРОКУ КОДА, ПЕРЕЖИВАЕТ
+       РЕШЕНИЕ, КОТОРОЕ ЕЮ ВЫРАЖЕНО — тот же случай, что сегодня у шести
+       сторожей. `is_rating` может быть пустым у старых строк: пустое
+       значит «как раньше», то есть рейтинговая. */
+    const рейтинговые = строки.filter(к => к.is_rating !== false && к.id !== 'friendly');
     expect(рейтинговые.length, 'ПОРОГ: рейтинговых разрядов в базе меньше двух — сверять нечего')
         .toBeGreaterThanOrEqual(2);
 
