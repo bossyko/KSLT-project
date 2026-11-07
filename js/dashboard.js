@@ -1290,9 +1290,96 @@
         // Карточка игрока: заводим или предлагаем свою, если её ещё нет
         if (!profile.player_id) карточкаИгрока(profile);
 
-        // Onboarding for first-time users
-        showOnboarding(profile);
+        /* СОГЛАСИЯ ИДУТ ПЕРЕД ПРИВЕТСТВИЕМ (Ю2, 07.11).
+           Приветствие — приятность, согласие — закон: пока человек не
+           ответил, мы не знаем, можем ли слать ему письма. Поэтому
+           сначала спрашиваем, а приветствие показываем следом, когда
+           ответ получен. Оба окна разом — это два слоя поверх друг
+           друга и выбор вслепую. */
+        if (window.KSLT_SOGLASIYA && window.KSLT_SOGLASIYA.показыватьПослеВхода(profile)) {
+            показатьСогласияПослеВхода(profile, function () { showOnboarding(profile); });
+        } else {
+            showOnboarding(profile);
+        }
     };
+
+    /**
+     * ЭКРАН СОГЛАСИЙ ПОСЛЕ ПЕРВОГО ВХОДА (Ю2).
+     *
+     * Всплывает, пока человек не нажмёт «Сохранить выбор» хотя бы раз —
+     * даже если не включил ничего. ПУСТОЙ ВЫБОР ЭТО ТОЖЕ ОТВЕТ: иначе
+     * мы либо потеряем его решение, либо будем спрашивать вечно.
+     * Закрыть окно мимо кнопки нельзя — ни крестиком, ни щелчком по
+     * подложке: вопрос не из тех, что откладывают молча.
+     *
+     * Оболочка берётся готовая, `db-onboarding-overlay`: второе
+     * устройство окон завело бы вторую лестницу слоёв и вторую отмену
+     * прокрутки.
+     */
+    function показатьСогласияПослеВхода(профиль, дальше) {
+        if (!window.KSLT_SOGLASIYA) { дальше(); return; }
+
+        var Т = {};
+        for (var к in L) { if (Object.prototype.hasOwnProperty.call(L, к)) Т[к] = L[к]; }
+        Т.sogPolicyHref = 'privacy-policy' + KSLT_YAZYK.суффикс + '.html';
+
+        var подложка = document.createElement('div');
+        подложка.className = 'db-onboarding-overlay db-consent-overlay';
+        подложка.innerHTML = window.KSLT_SOGLASIYA.разметка(Т, профиль);
+        document.body.appendChild(подложка);
+        requestAnimationFrame(function () { подложка.classList.add('visible'); });
+
+        /* ОСНАСТКА ОКНА: фокус внутрь, запирание Tab, подпись для
+           диктора. Окно без неё — ловушка для клавиатуры: Tab уезжает
+           на страницу под окном, и человек заполняет невидимое.
+           ESCAPE ЗДЕСЬ НАМЕРЕННО НЕ ЗАКРЫВАЕТ: ответ на согласие
+           нельзя отложить молча, иначе мы не узнаем решения и спросим
+           снова при следующем входе. Выход один — кнопка. */
+        var карточка = подложка.querySelector('.db-consent-card');
+        if (window.KSLT_FOKUS) {
+            подложка.__ksltСнять = window.KSLT_FOKUS.оснастить(карточка);
+        }
+
+        карточка.addEventListener('change', function (с) {
+            var поле = с.target.closest ? с.target.closest('input[data-sog]') : null;
+            if (!поле || поле.getAttribute('data-sog') !== '1') return;
+            var строка = карточка.querySelector('.db-consent-nomail');
+            if (строка) строка.classList.toggle('db-consent-hidden', поле.checked);
+        });
+
+        var кнопка = карточка.querySelector('.db-consent-save');
+        кнопка.addEventListener('click', async function () {
+            кнопка.disabled = true;
+            var правка = {};
+            карточка.querySelectorAll('input[data-sog]').forEach(function (поле) {
+                var ч = window.KSLT_SOGLASIYA.правка(
+                    parseInt(поле.getAttribute('data-sog'), 10), поле.checked);
+                for (var с in ч) {
+                    if (Object.prototype.hasOwnProperty.call(ч, с)) правка[с] = ч[с];
+                }
+            });
+            правка.notify_preferences = window.KSLT_SOGLASIYA.отметитьРешение(профиль);
+
+            var ответ = await window.supabaseClient
+                .from('profiles').update(правка).eq('id', профиль.id);
+
+            if (ответ.error) {
+                /* ОТКАЗ БАЗЫ НЕ ЗАКРЫВАЕТ ОКНО: закрой мы его — решение
+                   человека пропало бы молча, а спросить снова было бы
+                   уже нечем (отметки-то нет). */
+                кнопка.disabled = false;
+                showMessage('', ответ.error.message, true);
+                return;
+            }
+
+            for (var п in правка) {
+                if (Object.prototype.hasOwnProperty.call(правка, п)) профиль[п] = правка[п];
+            }
+            if (подложка.__ksltСнять) подложка.__ksltСнять();
+            подложка.classList.remove('visible');
+            setTimeout(function () { подложка.remove(); дальше(); }, 300);
+        });
+    }
 
     // ---- Render Membership Card ----
     var pricingUrl = KSLT_YAZYK.выбрать('pricing-en.html', 'pricing-kg.html', 'pricing.html');

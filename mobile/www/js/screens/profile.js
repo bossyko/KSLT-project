@@ -284,6 +284,13 @@
     html += profileRow('orange',
       '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
       I18N.t('profile.editProfile'), '', '', true, 'profEditRow');
+    /* СОГЛАСИЯ СТОЯТ ПЕРЕД УВЕДОМЛЕНИЯМИ (Ю12). Цель 1 — согласие на
+       канал вообще, а настройки уведомлений — разделы ВНУТРИ него.
+       Наоборот человек включал бы разделы у канала, на который не
+       согласился. Тот же порядок, что в кабинете сайта. */
+    html += profileRow('green',
+      '<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+      I18N.t('sog.title'), '', '', true, 'profConsentRow');
     html += profileRow('blue',
       '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>',
       I18N.t('profile.notifications'), '', '', true, 'profNotifyRow');
@@ -498,6 +505,7 @@
     bindRowClick('profVouchersRow', showVouchers);
     bindRowClick('profPaymentsRow', showPayments);
     bindRowClick('profEditRow', showEditProfile);
+    bindRowClick('profConsentRow', показатьСогласия);
     bindRowClick('profNotifyRow', showNotifications);
     bindRowClick('profPasswordRow', showPasswordChange);
     bindRowClick('profTelegramRow', showTelegramConnect);
@@ -1698,6 +1706,70 @@
    * Теперь всё как на сайте: `profiles.notify_preferences`, имена и
    * правило «включено ли» — из дома `js/kslt-uvedomleniya.js`.
    */
+  /**
+   * СОГЛАСИЯ В ПРИЛОЖЕНИИ (Ю12).
+   *
+   * Вид, порядок целей и правило «дано/не дано» берутся из общего дома
+   * `js/kslt-soglasiya.js` — он побайтово тот же, что на сайте, и это
+   * сторожит `check-kopii-js`. Здесь только словарь приложения и запись.
+   * ЖУРНАЛ ОТСЮДА НЕ ПИШЕТСЯ: его ведёт триггер базы.
+   */
+  function показатьСогласия() {
+    var S = window.KSLT_SOGLASIYA;
+    if (!S) return;
+
+    var Т = {
+      sogTitle: I18N.t('sog.title'),   sogIntro: I18N.t('sog.intro'),
+      sog1Name: I18N.t('sog.1name'),   sog1Desc: I18N.t('sog.1desc'),  sog1Meta: I18N.t('sog.1meta'),
+      sog2Name: I18N.t('sog.2name'),   sog2Desc: I18N.t('sog.2desc'),  sog2Meta: I18N.t('sog.2meta'),
+      sog3Name: I18N.t('sog.3name'),   sog3Desc: I18N.t('sog.3desc'),  sog3Meta: I18N.t('sog.3meta'),
+      sog4Name: I18N.t('sog.4name'),   sog4Desc: I18N.t('sog.4desc'),  sog4Meta: I18N.t('sog.4meta'),
+      sogFoot:  I18N.t('sog.foot'),    sogPolicy: I18N.t('sog.policy'),
+      sogSave:  I18N.t('sog.save'),    sogMinor: I18N.t('sog.minor'),
+      sogNoMail: I18N.t('sog.nomail'),
+      /* Политика живёт в базе и показывается своим экраном документов —
+         отдельной страницы у приложения нет. */
+      sogPolicyHref: '#documents'
+    };
+
+    var ov = openSubOverlay(I18N.t('sog.title'), S.разметка(Т, _profile));
+    var карточка = ov.querySelector('.db-consent-card');
+    if (!карточка) return;
+
+    карточка.addEventListener('change', function (с) {
+      var поле = с.target.closest ? с.target.closest('input[data-sog]') : null;
+      if (!поле || поле.getAttribute('data-sog') !== '1') return;
+      var строка = карточка.querySelector('.db-consent-nomail');
+      if (строка) строка.classList.toggle('db-consent-hidden', поле.checked);
+    });
+
+    var кнопка = карточка.querySelector('.db-consent-save');
+    кнопка.addEventListener('click', async function () {
+      кнопка.disabled = true;
+      var правка = {};
+      карточка.querySelectorAll('input[data-sog]').forEach(function (поле) {
+        var ч = S.правка(parseInt(поле.getAttribute('data-sog'), 10), поле.checked);
+        for (var с in ч) {
+          if (Object.prototype.hasOwnProperty.call(ч, с)) правка[с] = ч[с];
+        }
+      });
+      правка.notify_preferences = S.отметитьРешение(_profile);
+
+      var ответ = await window.supabaseClient
+        .from('profiles').update(правка).eq('id', _profile.id);
+
+      кнопка.disabled = false;
+      if (ответ.error) {
+        if (window.KSLT_APP) window.KSLT_APP.toast(ответ.error.message);
+        return;
+      }
+      for (var п in правка) {
+        if (Object.prototype.hasOwnProperty.call(правка, п)) _profile[п] = правка[п];
+      }
+      if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('sog.saved'));
+    });
+  }
+
   function showNotifications() {
     var U = window.KSLT_UVEDOMLENIYA;
     var ov = openSubOverlay(I18N.t('profile.notifications'), '<div class="loading-center"><div class="spinner"></div></div>');

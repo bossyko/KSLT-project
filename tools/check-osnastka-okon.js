@@ -184,7 +184,10 @@ const дом = чит('js/kslt-fokus.js');
 
 /* ── 2. ШЕСТНАДЦАТЬ ПУБЛИЧНЫХ ОКОН ЗОВУТ ОСНАСТКУ ── */
 const ОСНАЩЁННЫЕ = {
-    'js/tournament-register.js': 3, 'js/invite-player.js': 3, 'js/dashboard.js': 2,
+    'js/tournament-register.js': 3, 'js/invite-player.js': 3, /* 07.11: 2 → 3. Третье окно — согласия после первого входа (Ю2).
+       Escape в нём намеренно не закрывает: ответ на согласие нельзя
+       отложить молча. */
+    'js/dashboard.js': 3,
     'js/auth-nav.js': 1, 'js/doubles-entry.js': 1, 'js/account-restore.js': 1,
     'js/badge-celebration.js': 1, 'js/battle-cards.js': 1, 'js/match-score.js': 1,
     'js/news.js': 1, 'js/players.js': 1

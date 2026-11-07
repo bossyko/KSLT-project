@@ -7348,3 +7348,100 @@ select.prof-field-input { color: var(--text); }
   /* график рейтинга: 192 → 175 */
   .rc-svg { height: 45vh; }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   СОГЛАСИЯ (Ю12) — ВИД ТОТ ЖЕ, ЧТО В КАБИНЕТЕ САЙТА.
+   Разметку рисует общий дом `js/kslt-soglasiya.js`, побайтово тот же,
+   что на сайте, поэтому и имена классов те же: `db-consent-*` и
+   переключатель `db-notif-*`. Второй набор имён здесь означал бы, что
+   дом пришлось бы учить двум разметкам — а он один именно затем,
+   чтобы согласия на сайте и в телефоне не разошлись.
+   Все числа — ступени шкалы приложения, своих нет.
+   ───────────────────────────────────────────────────────────────── */
+.db-consent-card { padding: 0; }
+
+.db-consent-intro {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  margin: 0 0 var(--space-4);
+}
+
+.db-consent-list { list-style: none; margin: 0; padding: 0; }
+
+.db-consent-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+
+.db-consent-item:last-child { border-bottom: none; }
+
+.db-consent-name {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.db-consent-desc {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.db-consent-meta {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.db-consent-footnote,
+.db-consent-minor {
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: var(--space-4) 0;
+}
+
+.db-consent-nomail {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--warning);
+  margin: var(--space-3) 0 0;
+}
+
+.db-consent-hidden { display: none; }
+
+/* ПЕРЕКЛЮЧАТЕЛЬ — ТОТ ЖЕ ВИД, ЧТО У УВЕДОМЛЕНИЙ ПРИЛОЖЕНИЯ
+   (`prof-toggle-switch`), но под именами дома. Размеры взяты оттуда
+   знак в знак, чтобы на одном экране не оказалось двух разных
+   ползунков. Цель нажатия — 44, как требует планка. */
+.db-notif-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.db-notif-toggle input { display: none; }
+
+.db-notif-slider {
+  width: 40px; height: 24px; border-radius: 11px;
+  background: var(--border); position: relative;
+  transition: background 0.2s; flex-shrink: 0;
+}
+
+.db-notif-slider::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--neutral-white); transition: transform 0.2s;
+}
+
+.db-notif-toggle input:checked + .db-notif-slider { background: var(--accent); }
+
+.db-notif-toggle input:checked + .db-notif-slider::after {
+  transform: translateX(18px);
+}

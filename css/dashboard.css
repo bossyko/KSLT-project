@@ -5672,3 +5672,15 @@ select:-webkit-autofill {
 }
 
 .db-consent-hidden { display: none; }
+
+/* Окно согласий после первого входа. Оболочка общая с приветствием
+   (`db-onboarding-overlay`), здесь только ширина и прокрутка: целей
+   четыре, и на невысоком экране карточка должна прокручиваться сама,
+   а не уезжать кнопкой за край. */
+.db-consent-overlay { overflow-y: auto; padding: var(--space-4); }
+
+.db-consent-overlay .db-consent-card {
+    max-width: 640px;
+    width: 100%;
+    margin: auto;
+}
