@@ -178,6 +178,26 @@ test('у всего, что ниже 44, есть настоящий слой ц
                 if (!к.width || !к.height) return;
                 счёт++;
                 if (к.width >= 44 && к.height >= 44) return;
+                /* ССЫЛКА ВНУТРИ ФРАЗЫ — ИСКЛЮЧЕНИЕ САМОГО WCAG, А НЕ
+                   ПОСЛАБЛЕНИЕ (добавлено 07.11). WCAG 2.5.8 (Target Size
+                   Minimum, AA) не требует 44 от цели, которая стоит в
+                   предложении и чья высота задана межстрочным
+                   расстоянием окружающего текста: «the target is in a
+                   sentence... or its size is otherwise constrained by the
+                   line-height of non-target text». Растянуть такую
+                   ссылку слоем 44 нельзя - слой перехватил бы нажатия по
+                   строкам выше и ниже.
+                   Поймано прогоном 07.11 на `settings/A 187x15`: это
+                   ссылка на политику внутри абзаца окна согласий.
+                   ПРИЗНАК ИЗМЕРИМЫЙ, А НЕ НА СЛОВО: элемент идёт в
+                   строку (`display: inline`) и в его родителе есть текст
+                   помимо самой ссылки. */
+                const вСтроке = getComputedStyle(э).display === 'inline';
+                const родитель = э.parentElement;
+                const естьТекстРядом = !!родитель &&
+                    (родитель.textContent || '').trim().length >
+                    (э.textContent || '').trim().length;
+                if (вСтроке && естьТекстРядом) return;
                 const a = getComputedStyle(э, '::after');
                 const ш = Math.max(parseFloat(a.minWidth) || 0, parseFloat(a.width) || 0,
                     (a.left === '0px' && a.right === '0px') ? к.width : 0);
