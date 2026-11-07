@@ -185,6 +185,27 @@
                     localStorage.setItem('kslt_role', profileResult.data.role);
                     if (profileResult.data.full_name) localStorage.setItem('kslt_name', profileResult.data.full_name);
                     if (profileResult.data.avatar_url) localStorage.setItem('kslt_avatar', profileResult.data.avatar_url);
+
+                    /* ДВЕРЬ КАБИНЕТА: СОТРУДНИКУ ЕГО НЕТ (решение 27.02,
+                       починка 07.11). Кнопку в шапке подменял `auth-nav.js`,
+                       а сам экран не запирал никто: прямая ссылка, закладка,
+                       переключатель языка в кабинете и обратный адрес после
+                       входа вели сотрудника в кабинет игрока.
+
+                       РОЛЬ БЕРЁТСЯ ИЗ БАЗЫ, А НЕ ИЗ ХРАНИЛИЩА. `kslt_role`
+                       правится рукой из консоли, и дверь, запертая им, не
+                       заперта; здесь роль только что прочитана из
+                       `profiles` этим же запросом.
+
+                       УВОД СТОИТ ДО `auth-ready`: иначе кабинет мелькнёт на
+                       миг, и человек увидит экран, которого у него нет.
+                       `replace`, а не `href`: «назад» не должно возвращать
+                       в запертую комнату. */
+                    if (KSLT_DOSTUP.сотрудникПоРоли(profileResult.data.role)
+                        && KSLT_DOSTUP.кабинетИгрока(window.location.pathname)) {
+                        window.location.replace(KSLT_DOSTUP.домСотрудника());
+                        return;
+                    }
                 }
             } catch (e) {
                 console.error('Profile load error:', e);

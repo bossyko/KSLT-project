@@ -78,8 +78,17 @@
         }).catch(function() {});
     }
 
-    var btn = document.querySelector('.btn-auth');
-    if (!btn) return;
+    /* ВСЕ КНОПКИ, А НЕ ПЕРВАЯ (07.11). В кабинете их две — в шапке и в
+       мобильном меню (`pages/dashboard.html` строки 140 и 275), на остальных
+       страницах одна (замер 07.11 по всем страницам). `querySelector`
+       подменял первую, и в мобильном меню кабинета у сотрудника оставалось
+       «Выйти» без входа в админку — ровно это и было видно на телефоне.
+       ПОЧТИ ТОЧНЫЙ ПРИБОР — НЕТОЧНЫЙ ПРИБОР.
+       `btn` остаётся первой кнопкой: колокольчик уведомлений один на
+       страницу и встаёт перед ней. */
+    var кнопки = [].slice.call(document.querySelectorAll('.btn-auth'));
+    if (!кнопки.length) return;
+    var btn = кнопки[0];
 
     var isEn = KSLT_YAZYK.en;
     var isKg = KSLT_YAZYK.kg;
@@ -687,6 +696,11 @@
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> ' +
                         L.logout + '</button>';
 
+                    /* ПО КАЖДОЙ КНОПКЕ. Шапка и мобильное меню — два
+                       разных органа одного решения: подменить один и
+                       оставить другой значит показать сотруднику «Выйти»
+                       там, где должна быть «Админка». */
+                    кнопки.forEach(function (кнопка) {
                     var adminDd = document.createElement('div');
                     adminDd.className = 'admin-nav-dropdown';
                     adminDd.innerHTML =
@@ -698,7 +712,7 @@
                             menuItems +
                         '</div>';
 
-                    btn.parentNode.replaceChild(adminDd, btn);
+                    кнопка.parentNode.replaceChild(adminDd, кнопка);
 
                     // Logout handler
                     adminDd.querySelector('.admin-nav-logout').addEventListener('click', async function() {
@@ -710,6 +724,7 @@
                             await window.supabaseClient.auth.signOut();
                         }
                         window.location.href = prefix + (KSLT_YAZYK.выбрать('auth-en.html', 'auth-kg.html', 'auth.html'));
+                    });
                     });
 
                 } else {
