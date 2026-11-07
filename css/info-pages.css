@@ -969,7 +969,7 @@
 .ip-doc-approved {
     margin-bottom: var(--space-4);
     padding: var(--space-3) var(--space-4);
-    border-left: 2px solid var(--alpha-lime-30);
+    border-left: var(--bw-thick) solid var(--alpha-lime-30);
     background: var(--alpha-lime-06);
     border-radius: var(--radius-xs);
 }
@@ -1049,7 +1049,7 @@
 .ip-doc-fold-head:hover { color: var(--accent); }
 
 .ip-doc-fold-head:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--bw-thick) solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -1068,7 +1068,7 @@
     align-items: center;
     gap: var(--space-3);
     font-size: var(--fs-lg);
-    line-height: 1.25;
+    line-height: 1.3;
     padding-bottom: 0;
     border-bottom: none;
 }
@@ -1179,7 +1179,7 @@
 .ip-doc-print:hover { border-color: var(--accent); color: var(--accent); }
 
 .ip-doc-expand:focus-visible,
-.ip-doc-print:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ip-doc-print:focus-visible { outline: var(--bw-thick) solid var(--accent); outline-offset: var(--bw-thick); }
 
 /* ---- Узкий экран: таблица становится столбиком ────────────────────
    Четыре колонки на 360 точках нечитаемы, а горизонтальная прокрутка
@@ -1209,14 +1209,11 @@
     }
 }
 
-/* ---- Движение по желанию человека ---- */
-
-@media (prefers-reduced-motion: reduce) {
-    .ip-doc-fold-head,
-    .ip-doc-fold-head::after,
-    .ip-doc-expand,
-    .ip-doc-print { transition: none; }
-}
+/* ДВИЖЕНИЕ ПО ЖЕЛАНИЮ ЧЕЛОВЕКА — ОБЩИМ СБРОСОМ, А НЕ СВОИМ БЛОКОМ.
+   Здесь стоял свой `prefers-reduced-motion` на четыре селектора. Он не
+   нужен: `tokens.css` гасит переходы и анимации по `*`, а поимённый
+   список в каждом файле отстаёт от своего файла — ровно так 26
+   бесконечных анимаций из 38 не гасились вовсе (замер 15.10). */
 
 /* ---- Печать ───────────────────────────────────────────────────────
    Политика обещает в пункте 1.5, что её можно сохранить и распечатать.
@@ -1229,10 +1226,10 @@
     footer,
     .ip-doc-expand,
     .ip-doc-print,
-    .ip-toc { display: none !important; }
+    .ip-toc { display: none; }
 
     /* Раскрыть всё: `details` без `open` на печать не идёт. */
-    .ip-doc-fold .ip-rules-list { display: block !important; }
+    .ip-doc-fold .ip-rules-list { display: block; }
     .ip-doc-fold-head::after { display: none; }
 
     .ip-doc-fold {
@@ -1248,7 +1245,10 @@
     .ip-doc-fold .ip-rules-list { padding-left: 0; padding-right: 0; }
 
     .ip-doc-table { font-size: 10pt; }
-    .ip-doc-table th, .ip-doc-table td { border: 1px solid #999; }
+    .ip-doc-table th, .ip-doc-table td { border: var(--bw-hair) solid var(--border-subtle); }
 
-    .ip-fade-in { opacity: 1 !important; transform: none !important; }
+    /* ВЕС СЕЛЕКТОРА ВМЕСТО `!important`: имя класса, повторённое дважды,
+       даёт тот же вес, что `.ip-fade-in.visible`, и блок печати идёт
+       позже — побеждает он. Важность же не меряется и не отменяется. */
+    .ip-fade-in.ip-fade-in { opacity: 1; transform: none; }
 }
