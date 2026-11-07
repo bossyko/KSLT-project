@@ -16,12 +16,19 @@ const ДОМ_П = 'mobile/www/js/kslt-rules.js';
 const АДМИНКА = 'js/admin/sections/tournaments.js';
 const СЕРВЕР = 'supabase/functions/tournament-register/index.ts';
 
-function файлБазы(вид) {
+/* ОТКАТ ПРАВИТ ТОТ ФАЙЛ, В КОТОРОМ ЯКОРЬ ЕСТЬ (починка 07.11). У куска
+   стало два файла базы, и `.pop()` отдавал второй — откаты не находили
+   своих якорей и доказывали бы тишиной. */
+const ФАЙЛЫ_БАЗЫ = (function (вид) {
     const д = path.join(КОРЕНЬ, 'sql', 'схема');
-    const имя = fs.existsSync(д) ? fs.readdirSync(д).filter(и => вид.test(и)).sort().pop() : null;
-    return имя ? 'sql/схема/' + имя : null;
+    return fs.existsSync(д) ? fs.readdirSync(д).filter(и => вид.test(и)).sort()
+        .map(и => 'sql/схема/' + и) : [];
+})(/^open-friendly-.*\.sql$/);
+function файлСЯкорем(якорь) {
+    return ФАЙЛЫ_БАЗЫ.find(ф =>
+        fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8').split(якорь).length - 1 === 1) || null;
 }
-const SQL = файлБазы(/^open-friendly-.*\.sql$/);
+const SQL = ФАЙЛЫ_БАЗЫ[0] || null;
 
 const ОТКАТЫ = [
   { имя: 'дом перестал отдавать признак', ждём: 'дом правил найден и отдаёт признак',
@@ -117,6 +124,9 @@ function прогон(к) {
 console.log('\n  ПРУВЕР: БЕЗ РЕЙТИНГА\n');
 let беда = 0;
 for (const о of ОТКАТЫ) {
+    /* У КУСКА ДВА ФАЙЛА БАЗЫ: откат ищет тот, где его якорь встречается
+       ровно раз, а не тот, что оказался последним по имени. */
+    if (о.файл && о.файл.indexOf('sql/') === 0) о.файл = файлСЯкорем(о.было) || о.файл;
     if (!о.файл) { console.log('  ✗ ' + о.имя + ' — ФАЙЛ НЕ НАЙДЕН'); беда++; continue; }
     const к = копия();
     const п = path.join(к, о.файл);

@@ -38,7 +38,12 @@ const чит = ф => fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8');
 const ошибки = [];
 const правило = (имя, держится, почему) => { if (!держится) ошибки.push([имя, почему]); };
 
-const ПОТОЛОК_КОПИЙ = 3;   /* auth-guard.js, auth-nav.js, auth.js */
+/* ХРАПОВИК ОПУСКАЕТСЯ ДО ЗАМЕРЕННОГО (07.11): было 3, стало 2.
+   `js/auth.js` перестал сравнивать роли сам — `getRedirectUrl` зовёт
+   `KSLT_DOSTUP.сотрудникПоРоли` (кусок «вход админа»). Остались
+   `auth-guard.js` и `auth-nav.js`: они стоят на 80 страницах, где дома
+   нет, и их перевод — свой кусок. */
+const ПОТОЛОК_КОПИЙ = 2;   /* auth-guard.js, auth-nav.js */
 const КАБИНЕТЫ = ['pages/dashboard.html', 'pages/dashboard-en.html', 'pages/dashboard-kg.html'];
 
 /* обход дерева с родителями: правило держится на дереве, а не на тексте —
@@ -242,7 +247,7 @@ if (!ошибки.length) {
         (fs.readFileSync(__filename, 'utf8').match(/правило\('/g) || []).length + ' правил');
     console.log('          роль даёт доступ в админку, а не членство и не игру');
     console.log('          копий предиката вне дома: ' + копии.length + ' из ' + ПОТОЛОК_КОПИЙ +
-                ' (auth-guard, auth-nav, auth)');
+                ' (auth-guard, auth-nav)');
     console.log('');
 } else {
     console.log('');

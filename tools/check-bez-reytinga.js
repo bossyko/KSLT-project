@@ -46,11 +46,18 @@ const ДОМ_П  = 'mobile/www/js/kslt-rules.js';
 const АДМИНКА = 'js/admin/sections/tournaments.js';
 const СЕРВЕР = 'supabase/functions/tournament-register/index.ts';
 
+/* ВСЕ ФАЙЛЫ КУСКА, А НЕ ПОСЛЕДНИЙ ПО ИМЕНИ (починка 07.11). Первая
+   редакция брала `.sort().pop()` — то есть ОДИН файл. В тот же день у
+   куска появился второй, `open-friendly-stupen-07nov.sql`, и по алфавиту
+   он встал последним: прибор начал читать ступень вместо признака и
+   уронил три правила на коде, который не менялся.
+   КУСОК МОЖЕТ ЛЕЖАТЬ В НЕСКОЛЬКИХ ФАЙЛАХ, И ПРИБОР ОБЯЗАН ЧИТАТЬ ВСЕ:
+   иначе сторож стережёт то, что назвали последним. */
 function файлБазы(вид) {
     const д = path.join(КОРЕНЬ, 'sql', 'схема');
     if (!fs.existsSync(д)) return '';
-    const имя = fs.readdirSync(д).filter(и => вид.test(и)).sort().pop();
-    return имя ? fs.readFileSync(path.join(д, имя), 'utf8') : '';
+    return fs.readdirSync(д).filter(и => вид.test(и)).sort()
+        .map(и => fs.readFileSync(path.join(д, и), 'utf8')).join('\n');
 }
 /* SQL ЧИТАЕТСЯ БЕЗ ПРИМЕЧАНИЙ. Поймано на себе сразу: правило «слова не
    осталось» упало на ЦИТАТЕ в шапке файла, где объясняется, что именно
