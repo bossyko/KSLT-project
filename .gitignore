@@ -115,3 +115,8 @@ tmp/
 # css/players.css, css/podium.css, js/players.js.
 *.tgz
 *.tar.gz
+
+# Рабочие файлы, которые не относятся к сайту: Word на вычитку
+# и собранная обложка канала — исходник обложки лежит в maket/.
+kslt-kyrgyzskie-teksty-na-vychitku.docx
+kslt-youtube-oblozhka.png
