@@ -107,7 +107,7 @@ const ОТКАТЫ = [
    'версия battle-cards.js одна на все 6 ссылок'],
 
   ['сделать og:image относительным', IX,
-   '<meta property="og:image" content="https://bossyko.github.io/KSLT-project/images/KSLT.png">',
+   '<meta property="og:image" content="https://tennis.kg/images/KSLT.png">',
    '<meta property="og:image" content="images/KSLT.png">',
    'og:image остаётся полным URL — НАМЕРЕНО']
 ];
