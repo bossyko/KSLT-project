@@ -31,12 +31,34 @@
 --    Файл после прогона НЕ сохраняй с ключом внутри.
 -- ─────────────────────────────────────────────────────────────
 
-SELECT vault.update_secret(
-    (SELECT id FROM vault.secrets WHERE name = 'cron_secret'),
-    '<НОВЫЙ_ПАРОЛЬ>',
-    'cron_secret',
-    'Пароль заданий по расписанию. Совпадает с секретом CRON_SECRET у функций. Заведён заново 07.11.2026.'
-);
+-- ─────────────────────────────────────────────────────────────
+-- СТОРОЖ НАД ЭТИМ ЖЕ ФАЙЛОМ. Прогон 07.11 06:47 положил в Vault саму
+-- строку `<НОВЫЙ_ПАРОЛЬ>` — 14 знаков. ЗАГЛУШКА, КОТОРУЮ МОЖНО
+-- ПРОГНАТЬ КАК ЕСТЬ, — ЭТО НЕ ЗАГЛУШКА, А ЗНАЧЕНИЕ ПО УМОЛЧАНИЮ.
+-- Теперь файл падает, пока пароль не подставлен: 64 знака, hex, и
+-- не совпадает с отпечатком из панели.
+-- ─────────────────────────────────────────────────────────────
+DO $$
+DECLARE
+    пароль text := '<НОВЫЙ_ПАРОЛЬ>';
+BEGIN
+    IF пароль LIKE '<%>' THEN
+        RAISE EXCEPTION 'Пароль не подставлен: в файле осталась заглушка. Получи его командой openssl rand -hex 32, положи СНАЧАЛА в панель (Edge Functions -> Secrets -> CRON_SECRET), потом подставь сюда.';
+    END IF;
+    IF length(пароль) <> 64 OR пароль !~ '^[0-9a-f]{64}$' THEN
+        RAISE EXCEPTION 'Пароль не похож на вывод openssl rand -hex 32: ждём 64 знака из 0-9a-f, пришло % знаков.', length(пароль);
+    END IF;
+    IF пароль = 'be35be13f9b22acc43c3d521df3b0eb18ff07b8ec43848c4928f0e720edcf2b0' THEN
+        RAISE EXCEPTION 'Это ОТПЕЧАТОК из панели, а не секрет. Панель значения не показывает — заведи новый пароль.';
+    END IF;
+
+    PERFORM vault.update_secret(
+        (SELECT id FROM vault.secrets WHERE name = 'cron_secret'),
+        пароль,
+        'cron_secret',
+        'Пароль заданий по расписанию. Совпадает с секретом CRON_SECRET у функций. Заведён заново 07.11.2026.'
+    );
+END $$;
 
 -- Проверка — ЧТЕНИЕМ, а не ответом «Success». Сам пароль не виден:
 SELECT length(ds.decrypted_secret)                       AS dlina,
@@ -44,6 +66,8 @@ SELECT length(ds.decrypted_secret)                       AS dlina,
        (ds.decrypted_secret =
         'be35be13f9b22acc43c3d521df3b0eb18ff07b8ec43848c4928f0e720edcf2b0')
                                                          AS vsyo_eshchyo_otpechatok,
+       (ds.decrypted_secret LIKE '<%>')                  AS vsyo_eshchyo_zaglushka,
+       (ds.decrypted_secret ~ '^[0-9a-f]{64}$')          AS pohozh_na_parol,
        s.updated_at
   FROM vault.secrets s
   JOIN vault.decrypted_secrets ds ON ds.id = s.id
