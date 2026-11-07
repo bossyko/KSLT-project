@@ -42,11 +42,21 @@
 
   function I(key) { return global.KSLT_I18N ? global.KSLT_I18N.t(key) : key; }
 
+  /* ЭКРАНИРОВАНИЕ — ИЗ ОБЩЕГО ДОМА, А НЕ СВОЁ (07.11).
+     Здесь стояло своё тело через `createElement`. Оно верное, но это
+     ВТОРОЕ ОПРЕДЕЛЕНИЕ одного понятия: таких копий в приложении было
+     пятнадцать, и правило держит, чтобы их не прибавлялось, — а этот
+     файл и сосед `kslt-vopros.js` прибавили шестнадцатую и семнадцатую.
+     Дом подключён в `index.html` раньше этого файла (строка 747 против
+     758-759), так что он всегда есть. Запасной путь повторяет ТОТ ЖЕ
+     набор пяти знаков, что и дом, — как в `kslt-setka.js`.
+     `createElement` не годится запасным: он не экранирует кавычки, а у
+     нас значения атрибутов собираются строками. */
   function esc(s) {
+    if (global.KSLT_экранировать) return global.KSLT_экранировать(s);
     if (s === null || s === undefined) return '';
-    var d = document.createElement('div');
-    d.textContent = String(s);
-    return d.innerHTML;
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   /**
