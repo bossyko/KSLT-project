@@ -82,7 +82,7 @@ async function языкПрофиля(supabase: any, profileId: string): Promise
 // Адрес сайта в ссылках письма. Вынесен в настройку: при переезде на kslt.kg
 // достаточно поменять секрет SITE_URL, не трогая код девяти функций.
 
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://tennis.kg'
 // Отправитель обязан быть на домене, подтверждённом в Resend, иначе письма
 // отклоняются. Пока подтверждён tennis.kg; когда поднимется kslt.kg — сменить
 // секрет EMAIL_FROM, не трогая код.

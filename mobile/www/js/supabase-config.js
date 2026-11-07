@@ -38,8 +38,8 @@ var SUPABASE_ANON_KEY = window.KSLT_BAZA.ключ;
  * При переезде на свой домен правится ЭТА строка и только она.
  */
 window.KSLT_SAYT = window.KSLT_SAYT || {
-    адрес:   'https://kslt.netlify.app',
-    подпись: 'kslt.netlify.app'
+    адрес:   'https://tennis.kg',
+    подпись: 'tennis.kg'
 };
 
 window.KSLT_TG_BOT = 'KSLTennisBot';

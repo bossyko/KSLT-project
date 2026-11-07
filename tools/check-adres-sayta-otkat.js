@@ -10,7 +10,9 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-adres-'));
-['js', 'tools', 'supabase'].forEach(д =>
+/* `pages` добавлена 06.11: в песочнице должен лежать и документ,
+   иначе откату нечего портить. */
+['js', 'tools', 'supabase', 'pages'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 
 const ФАЙЛЫ = ['js/supabase-config.js', 'js/dashboard.js', 'js/courts.js',
@@ -18,7 +20,10 @@ const ФАЙЛЫ = ['js/supabase-config.js', 'js/dashboard.js', 'js/courts.js',
                 /* ДОБАВЛЕН 26.10: сюда переехала ссылка проверки ваучера —
                    её унёс кусок 145, а откат остался на `courts.js`. */
                 'js/kslt-vaucher-blok.js',
-                'supabase/functions/send-email/index.ts'];
+                'supabase/functions/send-email/index.ts',
+                /* ДОБАВЛЕН 06.11: правило «в документах адрес без `www`»
+                   стережёт оферту, и откат должен иметь что портить. */
+                'pages/offer.html'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -74,10 +79,22 @@ const ОТКАТЫ = [
      "get адрес() { return 'https://kslt.netlify.app'; }",
      'дом адреса объявлен и отдаёт адрес браузера'],
 
+    /* ЯКОРЬ ОБНОВЛЁН 06.11 ВМЕСТЕ С ПРАВКОЙ. Запасное значение в
+       одиннадцати функциях переведено с `kslt.netlify.app` на
+       `tennis.kg`, и прежний якорь перестал встречаться — прувер
+       показал «якорь встречается 0 раз», то есть откат одиннадцать
+       строк ничего не проверял бы молча. */
     ['убрать чтение окружения в письмах', E,
-     "const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'",
-     "const SITE_URL = 'https://kslt.netlify.app'",
+     "const SITE_URL = Deno.env.get('SITE_URL') || 'https://tennis.kg'",
+     "const SITE_URL = 'https://tennis.kg'",
      'адрес сайта нигде не зашит строкой'],
+    /* ВОСЬМОЙ ОТКАТ, 06.11: адрес в документе снова с `www`. Оферту и
+       политику печатают и подписывают — адрес, которым сайт не
+       отвечает, переживёт сам себя. */
+    ['вернуть `www` в адрес оферты', 'pages/offer.html',
+     'на сайте организатора по адресу: tennis.kg',
+     'на сайте организатора по адресу: www.tennis.kg',
+     'в документах адрес сайта написан без `www` и без `new`'],
 ];
 
 console.log('');

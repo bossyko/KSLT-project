@@ -2,7 +2,7 @@
 /* АДРЕС САЙТА — ИЗ ОКРУЖЕНИЯ, по образцу send-email/index.ts:85.
    Было зашито строкой; при переезде на свой домен такие места
    молчат: ссылка ведёт на старый адрес, пока он жив. */
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://kslt.netlify.app'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://tennis.kg'
         // ============================================
         // KSLT — Telegram Webhook Handler
         // Supabase Edge Function
