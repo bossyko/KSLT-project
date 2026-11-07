@@ -25,7 +25,20 @@
     line-height: 1;
     font-weight: 500;
     cursor: pointer;
-    transition: var(--transition-fast);
+    /* ПЕРЕЧИСЛЯЕМ, А НЕ «ALL» (07.11). Прогон страницы игрока на en и kg
+       замерил здесь то же, что 09.10 замерили на кнопке H2H:
+       `:focus-visible` — да, цвет лаймовый, стиль solid, а ШИРИНА 0px.
+       `transition: var(--transition-fast)` — это переход по ВСЕМ
+       свойствам, включая `outline-width`: контур у клавиатурного
+       пользователя не появлялся мгновенно, а наезжал от нуля, и прибор
+       честно ловил ноль. Переход нужен, но контур фокуса под него не
+       попадает.
+       На русской странице проба этого не видела: там список короче, и
+       кнопки «Показать все» на экране не бывает. ПРОБА ВИДИТ ТОЛЬКО ТО,
+       ЧТО ЕСТЬ В ДАННЫХ. */
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
 }
 
 .kslt-more:hover { border-color: var(--accent); color: var(--accent); }
