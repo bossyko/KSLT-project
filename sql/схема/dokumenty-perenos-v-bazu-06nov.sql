@@ -28,8 +28,10 @@
 -- ПОСЛЕ ПРОГОНА — перечитать базу: sql/схема/dokumenty-chto-v-baze-06nov.sql
 
 -- ---- offer ----------------------------------------------------
-UPDATE public.site_documents SET
-    body    = $kslt$
+INSERT INTO public.site_documents (slug, title, title_en, title_kg, body, body_en, body_kg)
+VALUES ('offer',
+        NULL, NULL, NULL,
+        $kslt$
             <!-- Preamble -->
             <div class="ip-rules-section ip-fade-in">
                 <p class="ip-doc-lead">Настоящая публичная оферта представляет собой предложение организатора (исполнителя услуг) заключить договор оказания услуг по организации участия в спортивных теннисных мероприятиях (соревнованиях) на условиях, изложенных в настоящей оферте.</p>
@@ -56,7 +58,7 @@ UPDATE public.site_documents SET
                 <div class="ip-rules-list" style="list-style:none;">
                     <p><strong>1.1.</strong> «Оферта», «Публичная оферта» — настоящее предложение организатора заключить в соответствии со статьями 396, 398 Гражданского кодекса Кыргызской Республики Договор оказания услуг по организации участия в спортивных теннисных мероприятиях на условиях, изложенных ниже.</p>
                     <p><strong>1.2.</strong> «Акцепт оферты» — ответ лица, которому адресована оферта, о ее принятии. Акцепт оферты означает полное и безоговорочное присоединение участника к условиям оферты.</p>
-                    <p><strong>1.3.</strong> «Организатор» — Общественный фонд «Кыргызстанское сообщество любителей тенниса», регистрационный No 197575-3301-ОФ, ИНН 01905202110030, юридический адрес: г. Бишкек, пр. Чуй, кв.26, в лице директора Чокоевой Айсулуу Эриковны, действующая на основании Устава, являющийся исполнителем услуг по организации участия в спортивных теннисных мероприятиях (соревнованиях), которое осуществляет организационное, финансовое и иное обеспечение его подготовки и проведения.</p>
+                    <p><strong>1.3.</strong> «Организатор» — Общественный фонд «Кыргызстанское сообщество любителей тенниса», регистрационный No 197575-3301-ОФ, ИНН 01905202110030, юридический адрес: Кыргызская Республика, г. Бишкек, Свердловский район, пр. Чуй, 127, кв. 26, в лице директора Чокоевой Айсулуу Эриковны, действующая на основании Устава, являющийся исполнителем услуг по организации участия в спортивных теннисных мероприятиях (соревнованиях), которое осуществляет организационное, финансовое и иное обеспечение его подготовки и проведения.</p>
                     <p><strong>1.4.</strong> «Договор» — возмездное соглашение об оказании организатором услуг по организации участия в соревновании на условиях оферты. Договор заключается между участником и организатором в отношении конкретного соревнования, на которое зарегистрирован участник. Для заключения договора организатор использует следующие ресурсы в сети Интернет: сайт tennis.kg</p>
                     <p><strong>1.5.</strong> «Участник» — физическое лицо, заключившее с организатором договор, путем акцепта настоящей оферты.</p>
                     <p><strong>1.6.</strong> «Соревнование» — спортивное теннисное мероприятие, по поводу которого заключен договор на условиях настоящей оферты.</p>
@@ -98,7 +100,7 @@ UPDATE public.site_documents SET
                 <div class="ip-rules-list">
                     <p><strong>3.1.</strong> Организатор обязуется оказать, а участник оплатить следующие услуги по организации участия в Соревновании:</p>
                     <p style="padding-left:20px;"><strong>3.1.1.</strong> предоставить участнику право на участие в соревновании, указанном в правилах проведения соревнования и размещенных на сайте tennis.kg;</p>
-                    <p style="padding-left:20px;"><strong>3.1.2.</strong> предоставить участнику информацию в группе WhatsApp или в личном кабинете на сайте tennis.kg о одобрении его заявки;</p>
+                    <p style="padding-left:20px;"><strong>3.1.2.</strong> предоставить участнику информацию в группе WhatsApp, в приложении «KSLT Tennis» или в личном кабинете на сайте tennis.kg о одобрении его заявки;</p>
                     <p style="padding-left:20px;"><strong>3.1.3.</strong> оказать иные сопутствующие услуги (обеспечение участника питьевой водой, мячами, перекусом в ходе проведения соревнования и др.), перечень которых указан в правилах проведения соревнования/Регламенте на сайте tennis.kg.</p>
                     <p><strong>3.2.</strong> Информация о дате, времени и месте проведения соревнования, программа соревнований и иная необходимая информация размещается на сайте организатора tennis.kg.</p>
                     <p><strong>3.3.</strong> Подробная информация о соревновании может быть доведена до участника иным доступным способом, в том числе путем рассылки по номеру телефона, указанному участником при регистрации.</p>
@@ -126,7 +128,7 @@ UPDATE public.site_documents SET
                     <p style="padding-left:20px;"><strong>4.3.6.</strong> уведомлять участника об изменении и/или дополнении условий настоящей оферты посредством размещения соответствующей информации на сайте tennis.kg.</p>
                     <p><strong>4.4.</strong> Организатор вправе:</p>
                     <p style="padding-left:20px;"><strong>4.4.1.</strong> изменять дату, время и место проведения и отменять соревнования при условии размещения соответствующей информации на сайте tennis.kg не позднее, чем за 24 часа до первоначальной даты проведения соревнования;</p>
-                    <p style="padding-left:20px;"><strong>4.4.2.</strong> вносить изменения в программу соревнований, в том числе изменять количество участников, уведомив об этом участника посредством размещения на сайте tennis.kg или закрытой группы WhatsApp;</p>
+                    <p style="padding-left:20px;"><strong>4.4.2.</strong> вносить изменения в программу соревнований, в том числе изменять количество участников, уведомив об этом участника посредством размещения на сайте tennis.kg, в приложении «KSLT Tennis» или в закрытой группе WhatsApp;</p>
                     <p style="padding-left:20px;"><strong>4.4.3.</strong> устанавливать и изменять правила проведения соревнований, правила нахождения посетителей в месте проведения соревнования, другие правила, связанные с организацией и проведением соревнования, требовать соблюдения указанных правил от участника и других лиц;</p>
                     <p style="padding-left:20px;"><strong>4.4.4.</strong> определять порядок проведения фото- и видео съемки во время соревнования;</p>
                     <p style="padding-left:20px;"><strong>4.4.5.</strong> не допустить участника к участию в соревновании: при отсутствии оплаты членских взносов Организатора; в случае неоплаты участником взноса за турнир; при нахождении участника в состоянии алкогольного, наркотического, токсического опьянения; в случае нарушения участником правил проведения соревнования, иных правил и инструкций организатора, а также положений действующего законодательства Кыргызской Республики.</p>
@@ -156,11 +158,11 @@ UPDATE public.site_documents SET
                     <p><strong>5.1.</strong> Участник вправе в одностороннем порядке отказаться от договора за 3 календарных дня до даты проведения соревнования, путем направления уведомления организатору турнира по номеру телефона WhatsApp.</p>
                     <p><strong>5.2.</strong> Организатор при возврате денежных средств, уплаченных в качестве стартового взноса, вправе удержать комиссию, уплаченную участником платежному агенту и (или) банку-посреднику за прием платежа.</p>
                     <p><strong>5.3.</strong> При отказе от договора, не известив организатора об этом за 3 дня, денежные средства, уплаченные в качестве стартового взноса, не возвращаются.</p>
-                    <p><strong>5.4.</strong> Организатор имеет право отказаться от договора (от проведения соревнования) путем направления участнику уведомления по номеру телефона в WhatsApp, за 48 часов до времени начала соревнования.</p>
+                    <p><strong>5.4.</strong> Организатор имеет право отказаться от договора (от проведения соревнования) путем направления участнику уведомления по номеру телефона в WhatsApp либо через приложение «KSLT Tennis», за 48 часов до времени начала соревнования.</p>
                 </div>
             </div>
 $kslt$,
-    body_en = $kslt$
+        $kslt$
             <div class="ip-toc ip-fade-in">
                 <div class="ip-toc-title">Table of Contents</div>
                 <ol class="ip-toc-list">
@@ -181,7 +183,7 @@ $kslt$,
                 <div class="ip-rules-list">
                     <p><strong>1.1.</strong> <strong>"Offer"</strong>, <strong>"Public Offer"</strong> — the present proposal by the Organizer to enter into a Service Agreement in accordance with Articles 396 and 398 of the Civil Code of the Kyrgyz Republic for services related to organizing participation in sports tennis events, under the terms set forth herein.</p>
                     <p><strong>1.2.</strong> <strong>"Acceptance of the Offer"</strong> — a person's response indicating acceptance thereof. Acceptance of the Offer signifies full and unconditional adherence by the Participant to the terms and conditions of the Offer.</p>
-                    <p><strong>1.3.</strong> <strong>"Organizer"</strong> — Public Foundation "Kyrgyzstan Social Lawn Tennis Community" (KSLT), Registration No. 197575-3301-PF, TIN 01905202110030, legal address: Bishkek city, Chuy Ave., apt. 26, represented by Director Chokoeva Aisuluu Erikovna, acting on the basis of the Charter, being the service provider for organizing participation in sports tennis events (competitions), which carries out organizational, financial and other support for their preparation and conduct.</p>
+                    <p><strong>1.3.</strong> <strong>"Organizer"</strong> — Public Foundation "Kyrgyzstan Social Lawn Tennis Community" (KSLT), Registration No. 197575-3301-PF, TIN 01905202110030, legal address: Kyrgyz Republic, Bishkek city, Sverdlovsky district, Chuy Ave. 127, apt. 26, represented by Director Chokoeva Aisuluu Erikovna, acting on the basis of the Charter, being the service provider for organizing participation in sports tennis events (competitions), which carries out organizational, financial and other support for their preparation and conduct.</p>
                     <p><strong>1.4.</strong> <strong>"Agreement"</strong> — a compensated agreement on the provision of services by the Organizer for organizing participation in a Competition under the terms of the Offer. The Agreement is concluded between the Participant and the Organizer in relation to a specific Competition for which the Participant has registered. To conclude the Agreement, the Organizer uses the following Internet resources: website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
                     <p><strong>1.5.</strong> <strong>"Participant"</strong> — an individual who has entered into the Agreement with the Organizer by accepting this Offer.</p>
                     <p><strong>1.6.</strong> <strong>"Competition"</strong> — a sports tennis event in relation to which the Agreement has been concluded under the terms of this Offer.</p>
@@ -223,7 +225,7 @@ $kslt$,
                 <div class="ip-rules-list">
                     <p><strong>3.1.</strong> The Organizer undertakes to provide, and the Participant undertakes to pay for, the following services for organizing participation in the Competition:</p>
                     <p style="padding-left:20px;"><strong>3.1.1.</strong> grant the Participant the right to participate in the Competition specified in the Competition Rules published on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>;</p>
-                    <p style="padding-left:20px;"><strong>3.1.2.</strong> provide the Participant with information via WhatsApp group or in the personal account on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> regarding the approval of their application;</p>
+                    <p style="padding-left:20px;"><strong>3.1.2.</strong> provide the Participant with information via WhatsApp group, in the «KSLT Tennis» application or in the personal account on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> regarding the approval of their application;</p>
                     <p style="padding-left:20px;"><strong>3.1.3.</strong> provide other related services (supply of drinking water, tennis balls, refreshments during the Competition, etc.), the list of which is specified in the Competition Rules/Regulations on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
                     <p><strong>3.2.</strong> Information about the date, time and venue of the Competition, the Competition program and other necessary information is published on the Organizer's website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
                     <p><strong>3.3.</strong> Detailed information about the Competition may be communicated to the Participant by other available means, including by messaging to the phone number provided by the Participant during registration.</p>
@@ -251,7 +253,7 @@ $kslt$,
                     <p style="padding-left:20px;"><strong>4.3.6.</strong> notify the Participant of amendments and/or additions to the terms of this Offer by publishing the relevant information on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
                     <p><strong>4.4.</strong> The Organizer has the right to:</p>
                     <p style="padding-left:20px;"><strong>4.4.1.</strong> change the date, time and venue, and cancel the Competition, provided that the relevant information is published on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> no later than 24 hours before the original date of the Competition;</p>
-                    <p style="padding-left:20px;"><strong>4.4.2.</strong> make changes to the Competition program, including changing the number of participants, by notifying the Participant through publication on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> or the private WhatsApp group;</p>
+                    <p style="padding-left:20px;"><strong>4.4.2.</strong> make changes to the Competition program, including changing the number of participants, by notifying the Participant through publication on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>, in the «KSLT Tennis» application or in the private WhatsApp group;</p>
                     <p style="padding-left:20px;"><strong>4.4.3.</strong> establish and change the Competition rules, rules for visitors at the Competition venue, and other rules related to organizing and conducting the Competition, and require compliance with said rules from the Participant and other persons;</p>
                     <p style="padding-left:20px;"><strong>4.4.4.</strong> determine the procedure for photo and video recording during the Competition;</p>
                     <p style="padding-left:20px;"><strong>4.4.5.</strong> deny the Participant access to the Competition: in the absence of payment of the Organizer's membership fees; in case of non-payment of the tournament entry fee by the Participant; if the Participant is in a state of alcohol, drug, or toxic intoxication; in case of violation by the Participant of the Competition Rules, other rules and instructions of the Organizer, as well as provisions of the current legislation of the Kyrgyz Republic.</p>
@@ -281,11 +283,11 @@ $kslt$,
                     <p><strong>5.1.</strong> The Participant has the right to unilaterally withdraw from the Agreement no later than 3 calendar days before the date of the Competition by sending a notification to the tournament Organizer via WhatsApp phone number.</p>
                     <p><strong>5.2.</strong> When refunding funds paid as the entry fee, the Organizer has the right to retain the commission paid by the Participant to the payment agent and/or intermediary bank for accepting the payment.</p>
                     <p><strong>5.3.</strong> In case of withdrawal from the Agreement without notifying the Organizer at least 3 days in advance, funds paid as the entry fee shall not be refunded.</p>
-                    <p><strong>5.4.</strong> The Organizer has the right to withdraw from the Agreement (cancel the Competition) by sending the Participant a notification via WhatsApp phone number, no later than 48 hours before the start of the Competition.</p>
+                    <p><strong>5.4.</strong> The Organizer has the right to withdraw from the Agreement (cancel the Competition) by sending the Participant a notification via WhatsApp phone number or through the «KSLT Tennis» application, no later than 48 hours before the start of the Competition.</p>
                 </div>
             </div>
 $kslt$,
-    body_kg = $kslt$
+        $kslt$
             <!-- Preamble -->
             <div class="ip-rules-section ip-fade-in">
                 <p class="ip-doc-lead">Бул ачык оферта уюштуруучунун (кызмат көрсөтүүчүнүн) ушул офертада баяндалган шарттарда спорттук теннис иш-чараларына (мелдештерге) катышууну уюштуруу боюнча кызмат көрсөтүү келишимин түзүү сунушу болуп саналат.</p>
@@ -312,7 +314,7 @@ $kslt$,
                 <div class="ip-rules-list" style="list-style:none;">
                     <p><strong>1.1.</strong> «Оферта», «Ачык оферта» — уюштуруучунун Кыргыз Республикасынын Жарандык кодексинин 396, 398-беренелерине ылайык төмөндө баяндалган шарттарда спорттук теннис иш-чараларына катышууну уюштуруу боюнча Кызмат көрсөтүү келишимин түзүү сунушу.</p>
                     <p><strong>1.2.</strong> «Оферта акцепти» — офертага багытталган адамдын аны кабыл алуу жөнүндө жообу. Оферта акцепти катышуучунун оферта шарттарына толук жана шартсыз кошулуусун билдирет.</p>
-                    <p><strong>1.3.</strong> «Уюштуруучу» — «Кыргызстандык теннис сүйүүчүлөрүнүн коомдоштугу» коомдук фонду, катталуу No 197575-3301-ОФ, ИНН 01905202110030, юридикалык дареги: Бишкек ш., Чүй пр., кв.26, директору Чокоева Айсулуу Эриковнанын жетектөөсүндө, Уставдын негизинде иш алып барат.</p>
+                    <p><strong>1.3.</strong> «Уюштуруучу» — «Кыргызстандык теннис сүйүүчүлөрүнүн коомдоштугу» коомдук фонду, катталуу No 197575-3301-ОФ, ИНН 01905202110030, юридикалык дареги: Кыргыз Республикасы, Бишкек ш., Свердлов району, Чүй пр., 127, 26-батир, директору Чокоева Айсулуу Эриковнанын жетектөөсүндө, Уставдын негизинде иш алып барат.</p>
                     <p><strong>1.4.</strong> «Келишим» — уюштуруучу тарабынан оферта шарттарында мелдешке катышууну уюштуруу боюнча кызмат көрсөтүү жөнүндө акы төлөмдүү макулдашуу. Келишим катышуучу менен уюштуруучу ортосунда катышуучу катталган конкреттүү мелдеш боюнча түзүлөт. Келишим түзүү үчүн уюштуруучу Интернет тармагында төмөнкү ресурстарды колдонот: tennis.kg сайты</p>
                     <p><strong>1.5.</strong> «Катышуучу» — ушул офертаны акцепттөө аркылуу уюштуруучу менен келишим түзгөн жеке адам.</p>
                     <p><strong>1.6.</strong> «Мелдеш» — ушул оферта шарттарында келишим түзүлгөн спорттук теннис иш-чарасы.</p>
@@ -354,7 +356,7 @@ $kslt$,
                 <div class="ip-rules-list">
                     <p><strong>3.1.</strong> Уюштуруучу Мелдешке катышууну уюштуруу боюнча төмөнкү кызматтарды көрсөтүүгө, ал эми катышуучу төлөөгө милдеттенет:</p>
                     <p style="padding-left:20px;"><strong>3.1.1.</strong> катышуучуга tennis.kg сайтында жайгаштырылган мелдештин эрежелеринде көрсөтүлгөн мелдешке катышуу укугун берүү;</p>
-                    <p style="padding-left:20px;"><strong>3.1.2.</strong> катышуучуга WhatsApp тобунда же tennis.kg сайтындагы жеке кабинетинде арызынын жактырылгандыгы жөнүндө маалымат берүү;</p>
+                    <p style="padding-left:20px;"><strong>3.1.2.</strong> катышуучуга WhatsApp тобунда, «KSLT Tennis» тиркемесинде же tennis.kg сайтындагы жеке кабинетинде арызынын жактырылгандыгы жөнүндө маалымат берүү;</p>
                     <p style="padding-left:20px;"><strong>3.1.3.</strong> башка коштомо кызматтарды көрсөтүү (катышуучуну ичүүчү суу, топтор, мелдеш учурунда тамак менен камсыз кылуу ж.б.), тизмеси tennis.kg сайтындагы мелдешти өткөрүү эрежелеринде/Регламентте көрсөтүлгөн.</p>
                     <p><strong>3.2.</strong> Мелдештин күнү, убактысы жана өткөрүлүүчү жери, мелдештердин программасы жана башка зарыл маалымат уюштуруучунун tennis.kg сайтында жайгаштырылат.</p>
                     <p><strong>3.3.</strong> Мелдеш жөнүндө толук маалымат катышуучуга башка жеткиликтүү ыкма менен, анын ичинде каттоо учурунда катышуучу көрсөткөн телефон номерине жөнөтүү аркылуу берилиши мүмкүн.</p>
@@ -382,7 +384,7 @@ $kslt$,
                     <p style="padding-left:20px;"><strong>4.3.6.</strong> ушул офертанын шарттарынын өзгөрүшү жана/же толукталышы жөнүндө тиешелүү маалыматты tennis.kg сайтына жайгаштыруу аркылуу катышуучуну кабарлоо.</p>
                     <p><strong>4.4.</strong> Уюштуруучу укуктуу:</p>
                     <p style="padding-left:20px;"><strong>4.4.1.</strong> мелдештин баштапкы күнүнөн кеминде 24 саат мурда tennis.kg сайтына тиешелүү маалыматты жайгаштыруу шартында мелдештин күнүн, убактысын жана жерин өзгөртүү жана мелдештерди жокко чыгаруу;</p>
-                    <p style="padding-left:20px;"><strong>4.4.2.</strong> мелдештердин программасына өзгөртүүлөрдү киргизүү, анын ичинде катышуучулардын санын өзгөртүү, бул тууралуу катышуучуну tennis.kg сайтына же жабык WhatsApp тобуна жайгаштыруу аркылуу билдирүү;</p>
+                    <p style="padding-left:20px;"><strong>4.4.2.</strong> мелдештердин программасына өзгөртүүлөрдү киргизүү, анын ичинде катышуучулардын санын өзгөртүү, бул тууралуу катышуучуну tennis.kg сайтына, «KSLT Tennis» тиркемесине же жабык WhatsApp тобуна жайгаштыруу аркылуу билдирүү;</p>
                     <p style="padding-left:20px;"><strong>4.4.3.</strong> мелдештерди өткөрүү эрежелерин, мелдеш өткөрүлгөн жерде көрүүчүлөрдүн болуу эрежелерин, мелдешти уюштуруу жана өткөрүү менен байланышкан башка эрежелерди белгилөө жана өзгөртүү, катышуучудан жана башка адамдардан көрсөтүлгөн эрежелерди сактоону талап кылуу;</p>
                     <p style="padding-left:20px;"><strong>4.4.4.</strong> мелдеш учурунда фото жана видео тартуу тартибин аныктоо;</p>
                     <p style="padding-left:20px;"><strong>4.4.5.</strong> катышуучуну мелдешке катышуудан четтетүү: Уюштуруучунун мүчөлүк акылары төлөнбөгөн учурда; мелдеш үчүн взнос катышуучу тарабынан төлөнбөгөн учурда; катышуучу алкоголдук, баңги, уулуу мас абалында болгондо; катышуучу мелдешти өткөрүү эрежелерин, уюштуруучунун башка эрежелерин жана нускамаларын, ошондой эле Кыргыз Республикасынын колдонулуучу мыйзамдарынын жоболорун бузган учурда.</p>
@@ -412,15 +414,23 @@ $kslt$,
                     <p><strong>5.1.</strong> Катышуучу мелдеш өткөрүлгөн күнгө чейин 3 календардык күн мурда WhatsApp телефон номери аркылуу уюштуруучуга билдирүү жөнөтүп, келишимден бир тараптуу баш тартууга укуктуу.</p>
                     <p><strong>5.2.</strong> Уюштуруучу старттык взнос катары төлөнгөн акча каражаттарды кайтарып бергенде, катышуучу төлөм агентине жана/же банк-ортомчуга төлөм кабыл алуу үчүн төлөгөн комиссияны алып калууга укуктуу.</p>
                     <p><strong>5.3.</strong> Уюштуруучуга 3 күн мурда билдирбей келишимден баш тарткан учурда, старттык взнос катары төлөнгөн акча каражаттар кайтарылбайт.</p>
-                    <p><strong>5.4.</strong> Уюштуруучу мелдештин башталуу убактысына чейин 48 саат мурда катышуучуга WhatsApp телефон номери аркылуу билдирүү жөнөтүп, келишимден (мелдешти өткөрүүдөн) баш тартууга укуктуу.</p>
+                    <p><strong>5.4.</strong> Уюштуруучу мелдештин башталуу убактысына чейин 48 саат мурда катышуучуга WhatsApp телефон номери аркылуу же «KSLT Tennis» тиркемеси аркылуу билдирүү жөнөтүп, келишимден (мелдешти өткөрүүдөн) баш тартууга укуктуу.</p>
                 </div>
             </div>
-$kslt$
-WHERE slug = 'offer';
+$kslt$)
+ON CONFLICT (slug) DO UPDATE SET
+    body    = EXCLUDED.body,
+    body_en = EXCLUDED.body_en,
+    body_kg = EXCLUDED.body_kg,
+    title    = COALESCE(public.site_documents.title,    EXCLUDED.title),
+    title_en = COALESCE(public.site_documents.title_en, EXCLUDED.title_en),
+    title_kg = COALESCE(public.site_documents.title_kg, EXCLUDED.title_kg);
 
 -- ---- terms ----------------------------------------------------
-UPDATE public.site_documents SET
-    body    = $kslt$            <div class="ip-doc-approved ip-fade-in">
+INSERT INTO public.site_documents (slug, title, title_en, title_kg, body, body_en, body_kg)
+VALUES ('terms',
+        NULL, NULL, NULL,
+        $kslt$            <div class="ip-doc-approved ip-fade-in">
                 <p class="ip-doc-approved-line">Утверждено приказом руководителя ОФ «КСЛТ» № 1 от 3 ноября 2026 г.</p>
                 <p class="ip-doc-approved-line">Редакция от 3 ноября 2026 г.</p>
             </div>
@@ -617,7 +627,7 @@ UPDATE public.site_documents SET
                 <p class="ip-doc-revision">Редакция от 3 ноября 2026 г. Утверждена приказом № 1 от 3 ноября 2026 г.</p>
                 <button type="button" class="ip-doc-print" data-doc-print>Распечатать или сохранить PDF</button>
             </div>$kslt$,
-    body_en = $kslt$            <div class="ip-doc-approved ip-fade-in">
+        $kslt$            <div class="ip-doc-approved ip-fade-in">
                 <p class="ip-doc-approved-line">Approved by Order No. 1 of the Head of the KSLT Public Foundation, 3 November 2026.</p>
                 <p class="ip-doc-approved-line">Edition of 3 November 2026.</p>
             </div>
@@ -814,7 +824,7 @@ UPDATE public.site_documents SET
                 <p class="ip-doc-revision">Edition of 3 November 2026. Approved by Order No. 1 of 3 November 2026.</p>
                 <button type="button" class="ip-doc-print" data-doc-print>Print or save as PDF</button>
             </div>$kslt$,
-    body_kg = $kslt$            <div class="ip-doc-approved ip-fade-in">
+        $kslt$            <div class="ip-doc-approved ip-fade-in">
                 <p class="ip-doc-approved-line">«КСЛТ» Коомдук фондунун жетекчисинин 2026-жылдын 3-ноябрындагы № 1 буйругу менен бекитилген.</p>
                 <p class="ip-doc-approved-line">2026-жылдын 3-ноябрындагы редакциясы.</p>
             </div>
@@ -1010,8 +1020,293 @@ UPDATE public.site_documents SET
                 <p class="ip-doc-sign-name">Чокоева А. Э.</p>
                 <p class="ip-doc-revision">2026-жылдын 3-ноябрындагы редакциясы. 2026-жылдын 3-ноябрындагы № 1 буйругу менен бекитилген.</p>
                 <button type="button" class="ip-doc-print" data-doc-print>Басып чыгаруу же PDF сактоо</button>
-            </div>$kslt$
-WHERE slug = 'terms';
+            </div>$kslt$)
+ON CONFLICT (slug) DO UPDATE SET
+    body    = EXCLUDED.body,
+    body_en = EXCLUDED.body_en,
+    body_kg = EXCLUDED.body_kg,
+    title    = COALESCE(public.site_documents.title,    EXCLUDED.title),
+    title_en = COALESCE(public.site_documents.title_en, EXCLUDED.title_en),
+    title_kg = COALESCE(public.site_documents.title_kg, EXCLUDED.title_kg);
+
+-- ---- delete-account ----------------------------------------------------
+INSERT INTO public.site_documents (slug, title, title_en, title_kg, body, body_en, body_kg)
+VALUES ('delete-account',
+        'Удаление аккаунта', 'Account deletion', 'Аккаунтту өчүрүү',
+        $kslt$            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">Редакция от 3 ноября 2026 г.</p>
+                <p class="ip-doc-approved-line">Эта страница открывается без входа в аккаунт. Её адрес указывается в Google Play Console («Безопасность данных» → «Удаление аккаунта») и в App Store Connect.</p>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    Кто удаляет данные
+                </h2>
+                <div class="ip-rules-list">
+                    <p>Общественный фонд «Кыргызстанское сообщество любителей тенниса» (рег. № 197575-3301-ОФ, г. Бишкек, пр. Чуй, 127, кв. 26), владелец сайта <a href="https://tennis.kg">tennis.kg</a> и приложений «KSLT Tennis» для Android и iOS.</p>
+                    <p>Вопросы: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a></p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    Как удалить аккаунт
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>2.1.</strong> <strong>В приложении:</strong> Профиль → Настройки → «Удалить аккаунт» → подтвердите удаление.</p>
+                    <p><strong>2.2.</strong> <strong>На сайте:</strong> войдите в <a href="dashboard.html">личный кабинет</a> → Настройки → «Удалить аккаунт» и подтвердите в появившемся окне.</p>
+                    <p><strong>2.3.</strong> <strong>Без входа в аккаунт:</strong> напишите на <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> с адреса, указанного в учётной записи, тема «Удаление аккаунта». Мы удалим аккаунт в течение 7 рабочих дней и сообщим об этом.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    Что происходит сразу
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> Профиль перестаёт быть виден другим пользователям, аккаунт скрывается из общих списков в тот же момент.</p>
+                    <p><strong>3.2.</strong> Вход в аккаунт блокируется, рассылки прекращаются.</p>
+                    <p><strong>3.3.</strong> Тридцать дней аккаунт можно вернуть: просто войдите, и мы предложим восстановить. Пока срок не вышел, ничего не стирается безвозвратно.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    Что удаляется через 30 дней
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> <strong>Учётная запись входа</strong> — имя и фамилия в профиле, почта, дата рождения, пол, телефон, фото, пароль и привязки Google и Telegram.</p>
+                    <p><strong>4.2.</strong> <strong>Токены уведомлений и технические данные о входах.</strong></p>
+                    <p><strong>4.3.</strong> <strong>Баллы лояльности и выданные скидки.</strong></p>
+                    <p><strong>4.4.</strong> <strong>Настройки уведомлений и все согласия.</strong></p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    Что остаётся и почему
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> <strong>Карточка игрока с результатами матчей и набранными очками остаётся.</strong> Эти результаты принадлежат турнирам, в которых вы играли: они часть истории чужих матчей, сеток и рейтинга, и стереть их значило бы изменить итоги прошедших соревнований. В турнирной истории они хранятся в обезличенном виде или только с именем и фамилией в протоколах турниров (архивные и статистические цели, п. 2 ч. 2 ст. 83 Цифрового кодекса КР).</p>
+                    <p><strong>5.2.</strong> Связи с учётной записью у карточки больше нет — на ней появляется метка «Аккаунт удалён».</p>
+                    <p><strong>5.3.</strong> <strong>Записи о принятии Пользовательского соглашения и согласий</strong> — 3 года после удаления (ч. 4 ст. 114 Цифрового кодекса КР).</p>
+                    <p><strong>5.4.</strong> <strong>Сведения о платежах</strong> — в течение срока, установленного законодательством о бухгалтерском учёте.</p>
+                    <p><strong>5.5.</strong> Фамилия, имя и почта остаются в служебном журнале удалённых: по нему клуб может ответить, если вы вернётесь с вопросом о своём аккаунте.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">06</span>
+                    Как вернуть в течение 30 дней
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>6.1.</strong> Войдите тем же способом, которым входили раньше.</p>
+                    <p><strong>6.2.</strong> Мы покажем предложение восстановить аккаунт — подтвердите, и всё вернётся: рейтинг, баллы и настройки.</p>
+                    <p><strong>6.3.</strong> После тридцати дней восстановить нельзя.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">07</span>
+                    Удалить не всё, а часть
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>7.1.</strong> Отдельные данные — фото, телефон, ссылки на соцсети — можно убрать в <a href="dashboard.html">личном кабинете</a>, не удаляя аккаунт.</p>
+                    <p><strong>7.2.</strong> Там же выключается показ телефона и Telegram другим игрокам.</p>
+                </div>
+            </div>$kslt$,
+        $kslt$            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">Edition of 3 November 2026.</p>
+                <p class="ip-doc-approved-line">This page opens without signing in. Its address is given in Google Play Console («Data safety» → «Account deletion») and in App Store Connect.</p>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    Who deletes the data
+                </h2>
+                <div class="ip-rules-list">
+                    <p>The Public Foundation «Kyrgyzstan Community of Tennis Enthusiasts» (reg. No. 197575-3301-ОФ, Bishkek, Chuy Avenue 127, apt. 26), owner of the <a href="https://tennis.kg">tennis.kg</a> website and of the «KSLT Tennis» applications for Android and iOS.</p>
+                    <p>Questions: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a></p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    How to delete your account
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>2.1.</strong> <strong>In the app:</strong> Profile → Settings → «Delete account» → confirm the deletion.</p>
+                    <p><strong>2.2.</strong> <strong>On the website:</strong> sign in to your <a href="dashboard-en.html">account area</a> → Settings → «Delete account» and confirm in the dialog.</p>
+                    <p><strong>2.3.</strong> <strong>Without signing in:</strong> write to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> from the address registered to the account, subject «Account deletion». We will delete the account within 7 working days and confirm it.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    What happens immediately
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> The profile stops being visible to other users and disappears from public lists at once.</p>
+                    <p><strong>3.2.</strong> Signing in is blocked and mailings stop.</p>
+                    <p><strong>3.3.</strong> For thirty days the account can be restored: just sign in and we will offer to bring it back. Until that period ends, nothing is erased permanently.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    What is deleted after 30 days
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> <strong>The sign-in account</strong> — first and last name in the profile, e-mail, date of birth, gender, phone, photo, password and the Google and Telegram links.</p>
+                    <p><strong>4.2.</strong> <strong>Notification tokens and technical sign-in data.</strong></p>
+                    <p><strong>4.3.</strong> <strong>Loyalty points and issued discounts.</strong></p>
+                    <p><strong>4.4.</strong> <strong>Notification settings and all consents.</strong></p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    What remains and why
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> <strong>The player card with match results and points earned remains.</strong> Those results belong to the tournaments you played in: they are part of the history of other people's matches, draws and the rating, and erasing them would change the outcome of past competitions. In the tournament history they are kept anonymised or with first and last name only in tournament protocols (archival and statistical purposes, clause 2 part 2 Article 83 of the Digital Code of the KR).</p>
+                    <p><strong>5.2.</strong> The card is no longer linked to the account — it is marked «Account deleted».</p>
+                    <p><strong>5.3.</strong> <strong>Records of acceptance of the User Agreement and of consents</strong> — 3 years after deletion (part 4 Article 114 of the Digital Code of the KR).</p>
+                    <p><strong>5.4.</strong> <strong>Payment details</strong> — for the period established by accounting legislation.</p>
+                    <p><strong>5.5.</strong> Last name, first name and e-mail remain in the internal log of deleted accounts, so that the club can answer if you come back with a question about your account.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">06</span>
+                    How to restore within 30 days
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>6.1.</strong> Sign in the same way you did before.</p>
+                    <p><strong>6.2.</strong> We will offer to restore the account — confirm, and everything comes back: rating, points and settings.</p>
+                    <p><strong>6.3.</strong> After thirty days restoration is not possible.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">07</span>
+                    Deleting part of your data instead
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>7.1.</strong> Individual items — photo, phone, social media links — can be removed in your <a href="dashboard-en.html">account area</a> without deleting the account.</p>
+                    <p><strong>7.2.</strong> The same place switches off showing your phone and Telegram to other players.</p>
+                </div>
+            </div>$kslt$,
+        $kslt$            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">2026-жылдын 3-ноябрындагы редакциясы.</p>
+                <p class="ip-doc-approved-line">Бул барак аккаунтка кирбестен ачылат. Анын дареги Google Play Console'до («Маалымат коопсуздугу» → «Аккаунтту өчүрүү») жана App Store Connect'те көрсөтүлөт.</p>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    Маалыматтарды ким өчүрөт
+                </h2>
+                <div class="ip-rules-list">
+                    <p>«Кыргызстан теннис сүйүүчүлөрүн коомчулугу» Коомдук фонду (кат. № 197575-3301-ОФ, Бишкек шаары, Чүй проспекти, 127, 26-батир), <a href="https://tennis.kg">tennis.kg</a> сайтынын жана Android менен iOS үчүн «KSLT Tennis» тиркемелеринин ээси.</p>
+                    <p>Суроолор: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a></p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    Аккаунтту кантип өчүрүү керек
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>2.1.</strong> <strong>Тиркемеде:</strong> Профиль → Жөндөөлөр → «Аккаунтту өчүрүү» → өчүрүүнү ырастаңыз.</p>
+                    <p><strong>2.2.</strong> <strong>Сайтта:</strong> <a href="dashboard-kg.html">жеке кабинетке</a> кириңиз → Жөндөөлөр → «Аккаунтту өчүрүү» жана ачылган терезеде ырастаңыз.</p>
+                    <p><strong>2.3.</strong> <strong>Аккаунтка кирбестен:</strong> аккаунтта көрсөтүлгөн даректен <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> дарегине «Аккаунтту өчүрүү» темасы менен жазыңыз. Биз аккаунтту 7 жумуш күнүнүн ичинде өчүрүп, бул жөнүндө билдиребиз.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    Дароо эмне болот
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> Профиль башка колдонуучуларга көрүнбөй калат, аккаунт жалпы тизмелерден ошол замат жашырылат.</p>
+                    <p><strong>3.2.</strong> Аккаунтка кирүү бөгөттөлөт, таркатуулар токтотулат.</p>
+                    <p><strong>3.3.</strong> Отуз күн ичинде аккаунтту кайтарууга болот: жөн гана кириңиз, биз калыбына келтирүүнү сунуштайбыз. Мөөнөт бүтө электе эч нерсе биротоло өчүрүлбөйт.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    30 күндөн кийин эмне өчүрүлөт
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> <strong>Кирүү аккаунту</strong> — профилдеги аты-жөнү, почта, туулган күнү, жынысы, телефону, сүрөтү, сырсөзү жана Google менен Telegram байланыштары.</p>
+                    <p><strong>4.2.</strong> <strong>Билдирүү токендери жана кирүүлөр жөнүндө техникалык маалыматтар.</strong></p>
+                    <p><strong>4.3.</strong> <strong>Лоялдуулук упайлары жана берилген арзандатуулар.</strong></p>
+                    <p><strong>4.4.</strong> <strong>Билдирүүлөрдүн жөндөөлөрү жана бардык макулдуктар.</strong></p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    Эмне калат жана эмне үчүн
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> <strong>Оюндардын жыйынтыктары жана топтолгон упайлары менен оюнчунун карточкасы калат.</strong> Бул жыйынтыктар сиз ойногон мелдештерге таандык: алар башкалардын оюндарынын, торчолордун жана рейтингдин тарыхынын бир бөлүгү, аларды өчүрүү өткөн мелдештердин жыйынтыктарын өзгөртмөк. Мелдеш тарыхында алар ээсиздендирилген түрдө же мелдештердин протоколдорунда аты-жөнү гана көрсөтүлүп сакталат (архивдик жана статистикалык максаттар, КР Санариптик кодексинин 83-беренесинин 2-бөлүгүнүн 2-пункту).</p>
+                    <p><strong>5.2.</strong> Карточканын аккаунт менен байланышы жок — анда «Аккаунт өчүрүлдү» белгиси пайда болот.</p>
+                    <p><strong>5.3.</strong> <strong>Колдонуучу макулдашуусун жана макулдуктарды кабыл алуу жөнүндө жазуулар</strong> — өчүрүлгөндөн кийин 3 жыл (КР Санариптик кодексинин 114-беренесинин 4-бөлүгү).</p>
+                    <p><strong>5.4.</strong> <strong>Төлөмдөр жөнүндө маалыматтар</strong> — бухгалтердик эсеп жөнүндө мыйзамдарда белгиленген мөөнөттө.</p>
+                    <p><strong>5.5.</strong> Аты-жөнү жана почтасы өчүрүлгөндөрдүн кызматтык журналында калат: ал боюнча клуб сиз аккаунтуңуз жөнүндө суроо менен кайрылсаңыз жооп бере алат.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">06</span>
+                    30 күндүн ичинде кантип кайтаруу керек
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>6.1.</strong> Мурда киргениңиздей эле кириңиз.</p>
+                    <p><strong>6.2.</strong> Биз аккаунтту калыбына келтирүүнү сунуштайбыз — ырастаңыз, баары кайтып келет: рейтинг, упайлар жана жөндөөлөр.</p>
+                    <p><strong>6.3.</strong> Отуз күндөн кийин калыбына келтирүүгө болбойт.</p>
+                </div>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">07</span>
+                    Баарын эмес, бир бөлүгүн өчүрүү
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>7.1.</strong> Айрым маалыматтарды — сүрөт, телефон, социалдык тармактарга шилтемелер — аккаунтту өчүрбөстөн <a href="dashboard-kg.html">жеке кабинетте</a> алып салууга болот.</p>
+                    <p><strong>7.2.</strong> Ошол эле жерде телефонду жана Telegram'ды башка оюнчуларга көрсөтүү өчүрүлөт.</p>
+                </div>
+            </div>$kslt$)
+ON CONFLICT (slug) DO UPDATE SET
+    body    = EXCLUDED.body,
+    body_en = EXCLUDED.body_en,
+    body_kg = EXCLUDED.body_kg,
+    title    = COALESCE(public.site_documents.title,    EXCLUDED.title),
+    title_en = COALESCE(public.site_documents.title_en, EXCLUDED.title_en),
+    title_kg = COALESCE(public.site_documents.title_kg, EXCLUDED.title_kg);
 
 -- ---- ПРОВЕРКА СРАЗУ ПОСЛЕ ПРАВКИ ----------------------------------
 -- Читает то, что легло. Абзацы должны совпасть с «в файлах» выше,
@@ -1025,5 +1320,5 @@ SELECT  slug,
          OR body_kg LIKE '%www.tennis.kg%')                        AS gde_to_ostalsya_www,
         updated_at
 FROM    public.site_documents
-WHERE   slug IN ('offer', 'terms', 'privacy')
+WHERE   slug IN ('offer', 'terms', 'privacy', 'delete-account')
 ORDER BY slug;

@@ -29,7 +29,9 @@ const КОРЕНЬ = path.join(__dirname, '..');
 const ДОКУМЕНТЫ = [
     { slug: 'offer',   ru: 'pages/offer.html',          en: 'pages/offer-en.html',          kg: 'pages/offer-kg.html'          },
     { slug: 'terms',   ru: 'pages/terms.html',          en: 'pages/terms-en.html',          kg: 'pages/terms-kg.html'          },
-    { slug: 'privacy', ru: 'pages/privacy-policy.html', en: 'pages/privacy-policy-en.html', kg: 'pages/privacy-policy-kg.html' }
+    { slug: 'privacy', ru: 'pages/privacy-policy.html', en: 'pages/privacy-policy-en.html', kg: 'pages/privacy-policy-kg.html' },
+    { slug: 'delete-account', ru: 'pages/delete-account.html', en: 'pages/delete-account-en.html', kg: 'pages/delete-account-kg.html',
+      название: ['Удаление аккаунта', 'Account deletion', 'Аккаунтту өчүрүү'] }
 ];
 
 /* Незаполненные места, с которыми документ выкладывать нельзя.
@@ -85,13 +87,26 @@ for (const д of ДОКУМЕНТЫ) {
     if (отложить) continue;
     отчёт.push(`  ${д.slug}: ru ${абзацев(ru)} · en ${абзацев(en)} · kg ${абзацев(kg)}`);
 
+    /* INSERT ... ON CONFLICT, А НЕ UPDATE. Строки `delete-account` в
+       таблице ещё нет: UPDATE по ней молча не сделал бы ничего и
+       отчитался «Success». Название трогаем только при создании —
+       у заведённых документов оно уже выверено. */
+    const [нру, нen, нkg] = д.название || [];
     куски.push(
 `-- ---- ${д.slug} ----------------------------------------------------
-UPDATE public.site_documents SET
-    body    = $kslt$${ru}$kslt$,
-    body_en = $kslt$${en}$kslt$,
-    body_kg = $kslt$${kg}$kslt$
-WHERE slug = '${д.slug}';`);
+INSERT INTO public.site_documents (slug, title, title_en, title_kg, body, body_en, body_kg)
+VALUES ('${д.slug}',
+        ${нру ? `'${нру}'` : 'NULL'}, ${нen ? `'${нen}'` : 'NULL'}, ${нkg ? `'${нkg}'` : 'NULL'},
+        $kslt$${ru}$kslt$,
+        $kslt$${en}$kslt$,
+        $kslt$${kg}$kslt$)
+ON CONFLICT (slug) DO UPDATE SET
+    body    = EXCLUDED.body,
+    body_en = EXCLUDED.body_en,
+    body_kg = EXCLUDED.body_kg,
+    title    = COALESCE(public.site_documents.title,    EXCLUDED.title),
+    title_en = COALESCE(public.site_documents.title_en, EXCLUDED.title_en),
+    title_kg = COALESCE(public.site_documents.title_kg, EXCLUDED.title_kg);`);
 }
 
 const шапка = `-- ============================================================
@@ -139,7 +154,7 @@ SELECT  slug,
          OR body_kg LIKE '%www.tennis.kg%')                        AS gde_to_ostalsya_www,
         updated_at
 FROM    public.site_documents
-WHERE   slug IN ('offer', 'terms', 'privacy')
+WHERE   slug IN ('offer', 'terms', 'privacy', 'delete-account')
 ORDER BY slug;
 `;
 

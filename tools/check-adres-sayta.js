@@ -129,7 +129,7 @@ const ДОМ_ПРИЛОЖЕНИЯ = 'mobile/www/js/supabase-config.js';
 const ИЗВЕСТНЫЕ = зашитые.filter(м =>
     /^tools\/check-tablo-vaucher-otkat\.js/.test(м) ||
     /^js\/admin\/core\/export\.js:/.test(м) ||
-    /^pages\/(offer|privacy-policy|terms)(-en|-kg)?\.html:/.test(м) ||
+    /^pages\/(offer|privacy-policy|terms|delete-account)(-en|-kg)?\.html:/.test(м) ||
     /* ИСТОЧНИК ДОКУМЕНТОВ — ТОТ ЖЕ ДОКУМЕНТ, ТОЛЬКО ДО ВСТРАИВАНИЯ.
        06.11 тела правовых документов переехали в `tools/dokumenty/`:
        оттуда они едут и в страницу, и в базу. Адрес внутри них — часть
@@ -193,6 +193,7 @@ const живые = зашитые.filter(м => ИЗВЕСТНЫЕ.indexOf(м) ==
 const ДОКУМЕНТЫ = ['pages/offer.html', 'pages/offer-en.html', 'pages/offer-kg.html',
     'pages/privacy-policy.html', 'pages/privacy-policy-en.html', 'pages/privacy-policy-kg.html',
     'tools/dokumenty/politika-ru.html', 'tools/dokumenty/politika-en.html', 'tools/dokumenty/politika-kg.html',
+    'pages/delete-account.html', 'pages/delete-account-en.html', 'pages/delete-account-kg.html',
     'pages/terms.html', 'pages/terms-en.html', 'pages/terms-kg.html',
     'pages/rules.html', 'pages/rules-en.html', 'pages/rules-kg.html'];
 const чужойАдрес = [];

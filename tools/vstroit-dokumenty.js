@@ -23,7 +23,10 @@ const ЯЗЫКИ = [
     { код: 'kg', тело: 'tools/dokumenty/politika-kg.html',    страница: 'pages/privacy-policy-kg.html' },
     { код: 'ru', тело: 'tools/dokumenty/soglashenie-ru.html', страница: 'pages/terms.html' },
     { код: 'en', тело: 'tools/dokumenty/soglashenie-en.html', страница: 'pages/terms-en.html' },
-    { код: 'kg', тело: 'tools/dokumenty/soglashenie-kg.html', страница: 'pages/terms-kg.html' }
+    { код: 'kg', тело: 'tools/dokumenty/soglashenie-kg.html', страница: 'pages/terms-kg.html' },
+    { код: 'ru', тело: 'tools/dokumenty/udalenie-ru.html',    страница: 'pages/delete-account.html' },
+    { код: 'en', тело: 'tools/dokumenty/udalenie-en.html',    страница: 'pages/delete-account-en.html' },
+    { код: 'kg', тело: 'tools/dokumenty/udalenie-kg.html',    страница: 'pages/delete-account-kg.html' }
 ];
 
 const ВЕРСИЯ_ДОК_JS = 1;
