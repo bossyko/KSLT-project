@@ -953,3 +953,302 @@
 }
 
 
+
+/* ══ ДОКУМЕНТ СО СКЛАДЫВАЮЩИМИСЯ РАЗДЕЛАМИ ══════════════════════════
+   06.11.2026. Утверждённая политика — 15 разделов и 31 пункт, стеной
+   текста её не читают.
+
+   ПОЧЕМУ НЕ АККОРДЕОН FAQ, ХОТЯ ОН ЕСТЬ. У `.ip-faq-answer` стоит
+   `max-height: 500px` в раскрытом виде — раздел 3 с таблицей на восемь
+   строк там обрежется молча. Плюс свёрнутый `div` не находится поиском
+   по странице, а в юридическом документе человек ищет слово. Нативный
+   `details` ищется, открывается с клавиатуры, читается диктором и
+   печатается — за это и взят. Два механизма в проекте намеренно: у них
+   разные требования, и общий сломал бы оба. */
+
+.ip-doc-approved {
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-left: 2px solid var(--alpha-lime-30);
+    background: var(--alpha-lime-06);
+    border-radius: var(--radius-xs);
+}
+
+.ip-doc-approved-line {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+/* ---- Выжимка ---- */
+
+.ip-doc-gist {
+    margin-bottom: var(--space-6);
+    padding: var(--space-5);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-glass);
+}
+
+.ip-doc-gist-title {
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+/* Пересказ не должен выдавать себя за документ: говорим это прежде,
+   чем человек начнёт на него опираться. */
+.ip-doc-gist-note {
+    margin: 0 0 var(--space-4);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+
+.ip-doc-gist-list {
+    margin: 0;
+    padding-left: var(--space-5);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+}
+
+.ip-doc-gist-list li { margin-bottom: var(--space-2); }
+.ip-doc-gist-list li:last-child { margin-bottom: 0; }
+.ip-doc-gist-list strong { color: var(--text-primary); }
+
+/* ---- Раздел-раскрывашка ---- */
+
+.ip-doc-fold {
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    background: var(--surface-glass);
+    overflow: hidden;
+}
+
+.ip-doc-fold[open] { border-color: var(--alpha-lime-20); }
+
+/* Своя стрелка вместо системного треугольника — он разный в каждом
+   браузере и ломает выравнивание. */
+.ip-doc-fold-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    min-height: 44px;          /* цель нажатия */
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--transition-fast);
+}
+
+.ip-doc-fold-head::-webkit-details-marker { display: none; }
+.ip-doc-fold-head::marker { content: ''; }
+
+.ip-doc-fold-head:hover { color: var(--accent); }
+
+.ip-doc-fold-head:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+/* ЗАГОЛОВОК В РАСКРЫВАШКЕ — СТУПЕНЬЮ НИЖЕ, ЧЕМ ЗАГОЛОВОК РАЗДЕЛА
+   СТРАНИЦЫ. Замер 06.11: `.ip-rules-section-title` даёт 26 на широком,
+   и в документе из пятнадцати свёрнутых полос это читается как
+   пятнадцать заголовков страницы подряд — длинные названия переносятся
+   на две строки и полоса раздувается вдвое.
+
+   Здесь это не заголовок раздела, а строка списка, которую открывают:
+   21 на широком, 18 на узком — обе ступени шкалы. Черту снизу убираем:
+   у полосы своя рамка, две границы на одном краю спорят. */
+.ip-doc-fold-head .ip-rules-section-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--fs-lg);
+    line-height: 1.25;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+@media (max-width: 640px) {
+    .ip-doc-fold-head .ip-rules-section-title { font-size: var(--fs-md); }
+    .ip-doc-fold-head { padding: var(--space-3) var(--space-4); }
+}
+
+/* Знак «плюс» рисуем псевдоэлементом: отдельного тега в разметке нет,
+   а разметка едет и в базу — чем её меньше, тем меньше поедет. */
+.ip-doc-fold-head::after {
+    content: '+';
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--surface-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: transform var(--transition-base), background var(--transition-base);
+}
+
+.ip-doc-fold[open] .ip-doc-fold-head::after {
+    transform: rotate(45deg);
+    background: var(--accent);
+    color: var(--neutral-black);
+}
+
+.ip-doc-fold .ip-rules-list {
+    padding: 0 var(--space-5) var(--space-5);
+}
+
+/* ---- Списки внутри пунктов ---- */
+
+.ip-doc-list {
+    margin: var(--space-2) 0 var(--space-4);
+    padding-left: var(--space-5);
+    color: var(--text-secondary);
+    line-height: 1.65;
+}
+
+.ip-doc-list li { margin-bottom: var(--space-2); }
+
+/* ---- Таблицы документа ---- */
+
+.ip-doc-table-wrap { margin: var(--space-4) 0; }
+
+.ip-doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+}
+
+.ip-doc-table th,
+.ip-doc-table td {
+    border: var(--bw-hair) solid var(--border-subtle);
+    padding: var(--space-3);
+    text-align: left;
+    vertical-align: top;
+}
+
+.ip-doc-table th {
+    color: var(--text-primary);
+    font-weight: 600;
+    background: var(--alpha-white-04);
+}
+
+.ip-doc-table td { color: var(--text-secondary); }
+
+/* ---- Подпись и кнопки ---- */
+
+.ip-doc-sign {
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: var(--bw-hair) solid var(--border-subtle);
+}
+
+.ip-doc-sign-role { margin: 0; font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* СТРОКА РЕДАКЦИИ СТРОГО МЕЛЬЧЕ ПОДПИСИ, НА ВСЕХ ВИДАХ. Замер 06.11:
+   общий `.ip-doc-revision` даёт 12 на узких и 16 на широких, а подпись
+   16 везде — на широком они сравнялись, и приписка стала читаться как
+   часть подписи. Берём одну ступень ниже подписи и не двигаем её по
+   видам: это перебивка, а не уровень, который едет. */
+.ip-doc-sign .ip-doc-revision { font-size: var(--fs-sm); }
+.ip-doc-sign-name { margin: 0 0 var(--space-4); font-size: var(--fs-base); color: var(--text-primary); font-weight: 600; }
+
+.ip-doc-expand,
+.ip-doc-print {
+    margin-top: var(--space-4);
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    border: var(--bw-hair) solid var(--border-light);
+    border-radius: var(--radius-full);
+    background: none;
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.ip-doc-expand:hover,
+.ip-doc-print:hover { border-color: var(--accent); color: var(--accent); }
+
+.ip-doc-expand:focus-visible,
+.ip-doc-print:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---- Узкий экран: таблица становится столбиком ────────────────────
+   Четыре колонки на 360 точках нечитаемы, а горизонтальная прокрутка
+   внутри страницы теряется под пальцем. Строка таблицы превращается в
+   карточку: первая ячейка — ключ, остальные под ней. */
+
+@media (max-width: 640px) {
+    .ip-doc-table thead { display: none; }
+
+    .ip-doc-table,
+    .ip-doc-table tbody,
+    .ip-doc-table tr,
+    .ip-doc-table td { display: block; width: 100%; }
+
+    .ip-doc-table tr {
+        border: var(--bw-hair) solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-3);
+        padding: var(--space-2);
+    }
+
+    .ip-doc-table td { border: none; padding: var(--space-2); }
+
+    .ip-doc-table td:first-child {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+}
+
+/* ---- Движение по желанию человека ---- */
+
+@media (prefers-reduced-motion: reduce) {
+    .ip-doc-fold-head,
+    .ip-doc-fold-head::after,
+    .ip-doc-expand,
+    .ip-doc-print { transition: none; }
+}
+
+/* ---- Печать ───────────────────────────────────────────────────────
+   Политика обещает в пункте 1.5, что её можно сохранить и распечатать.
+   Без этого правила на бумагу уходит меню, подвал и свёрнутые разделы,
+   то есть обещание не выполняется. */
+
+@media print {
+    .floating-header,
+    .ip-hero,
+    footer,
+    .ip-doc-expand,
+    .ip-doc-print,
+    .ip-toc { display: none !important; }
+
+    /* Раскрыть всё: `details` без `open` на печать не идёт. */
+    .ip-doc-fold .ip-rules-list { display: block !important; }
+    .ip-doc-fold-head::after { display: none; }
+
+    .ip-doc-fold {
+        border: none;
+        background: none;
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+    .ip-doc-fold-head { padding-left: 0; }
+
+    .ip-container,
+    .ip-doc-fold .ip-rules-list { padding-left: 0; padding-right: 0; }
+
+    .ip-doc-table { font-size: 10pt; }
+    .ip-doc-table th, .ip-doc-table td { border: 1px solid #999; }
+
+    .ip-fade-in { opacity: 1 !important; transform: none !important; }
+}

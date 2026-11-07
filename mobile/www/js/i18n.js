@@ -123,12 +123,12 @@
     'td.fee':       { ru: 'Взнос',        en: 'Entry fee',   kg: 'Катышуу акысы' },
     'td.feeMember': { ru: 'членам',       en: 'members',     kg: 'мүчөлөргө' },
     'td.feeGuest':  { ru: 'гостям',       en: 'guests',      kg: 'конокторго' },
-    'menu.terms':   { ru: 'Условия использования', en: 'Terms of Service', kg: 'Колдонуу шарттары' },
+    'menu.terms':   { ru: 'Пользовательское соглашение', en: 'User Agreement', kg: 'Колдонуучу макулдашуусу' },
     'menu.privacy': { ru: 'Политика конфиденциальности', en: 'Privacy Policy', kg: 'Купуялык саясаты' },
     'menu.offer':   { ru: 'Публичная оферта', en: 'Public Offer', kg: 'Ачык оферта' },
     // Ключ auth.terms уже занят под всю фразу целиком (ниже в этом файле),
     // поэтому у ссылок свои имена — иначе одно перебивает другое
-    'auth.linkTerms':   { ru: 'условиями использования', en: 'Terms of Service', kg: 'колдонуу шарттарын' },
+    'auth.linkTerms':   { ru: 'Пользовательским соглашением', en: 'User Agreement', kg: 'Колдонуучу макулдашуусун' },
     'auth.linkPrivacy': { ru: 'политикой конфиденциальности', en: 'Privacy Policy', kg: 'купуялык саясатын' },
     'auth.linkAnd':     { ru: ' и ', en: ' and ', kg: ' жана ' },
     'auth.regApple':    { ru: 'Регистрация через Apple', en: 'Sign up with Apple', kg: 'Apple аркылуу каттоо' },
@@ -635,7 +635,7 @@
     'auth.registerBtn':  { ru: 'Зарегистрироваться',   en: 'Register',          kg: 'Каттоо' },
     'auth.or':           { ru: 'или',                  en: 'or',                kg: 'же' },
     'auth.terms':        { ru: 'Регистрируясь, вы соглашаетесь с', en: 'By registering, you agree to the', kg: 'Катталуу менен сиз макулдугуңузду бересиз' },
-    'auth.termsLink':    { ru: 'условиями использования', en: 'terms of service', kg: 'колдонуу шарттары' },
+    'auth.termsLink':    { ru: 'Пользовательским соглашением', en: 'User Agreement', kg: 'Колдонуучу макулдашуусу' },
     'auth.privacyLink':  { ru: 'политикой конфиденциальности', en: 'privacy policy', kg: 'купуялуулук саясаты' },
 
     // === Onboarding ===
@@ -738,7 +738,7 @@
     'profile.docPrivacy':       { ru: 'Политика конфиденциальности', en: 'Privacy Policy', kg: 'Купуялык саясаты' },
     'profile.docOffer':         { ru: 'Публичная оферта', en: 'Public Offer', kg: 'Коомдук сунуш' },
     'profile.docRules':         { ru: 'Правила клуба', en: 'Club Rules', kg: 'Клубдун эрежелери' },
-    'profile.docTerms':         { ru: 'Пользовательское соглашение', en: 'Terms of Use', kg: 'Колдонуучу келишими' },
+    'profile.docTerms':         { ru: 'Пользовательское соглашение', en: 'User Agreement', kg: 'Колдонуучу макулдашуусу' },
     'profile.docOpens':         { ru: 'Откроется в браузере', en: 'Opens in your browser', kg: 'Браузерде ачылат' },
     'profile.notifTelegram':    { ru: 'Telegram', en: 'Telegram', kg: 'Telegram' },
     'profile.notifEmail':       { ru: 'Email', en: 'Email', kg: 'Email' },

@@ -27,7 +27,7 @@
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="../css/tokens.css?v=86">
     <link rel="stylesheet" href="../css/style.css?v=468">
-    <link rel="stylesheet" href="../css/info-pages.css?v=81">
+    <link rel="stylesheet" href="../css/info-pages.css?v=84">
 </head>
 <body>
     <!-- HEADER -->
@@ -125,7 +125,7 @@
                         <a href="pricing-en.html" class="nav-dropdown-item">Pricing</a>
                         <a href="faq-en.html" class="nav-dropdown-item">FAQ</a>
                         <a href="offer-en.html" class="nav-dropdown-item">Public Offer</a>
-                        <a href="terms-en.html" class="nav-dropdown-item">Terms of Use</a>
+                        <a href="terms-en.html" class="nav-dropdown-item">User Agreement</a>
                         <a href="privacy-policy-en.html" class="nav-dropdown-item">Privacy Policy</a>
                         <a href="sponsors-en.html" class="nav-dropdown-item">Become a sponsor</a>
                         <a href="download-en.html" class="nav-dropdown-item"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Download App</a>
@@ -255,7 +255,7 @@
                         <li><a href="pricing-en.html">Pricing</a></li>
                         <li><a href="faq-en.html">FAQ</a></li>
                         <li><a href="offer-en.html">Public Offer</a></li>
-                        <li><a href="terms-en.html">Terms of Use</a></li>
+                        <li><a href="terms-en.html">User Agreement</a></li>
                         <li><a href="privacy-policy-en.html">Privacy Policy</a></li>
                         <li><a href="sponsors-en.html">Become a sponsor</a></li>
                         <li><a href="download-en.html"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Download App (Android)</a></li>
@@ -292,181 +292,311 @@
 
         <!-- PRIVACY POLICY CONTENT -->
         <div class="ip-container" data-document="privacy">
-
-            <!-- Preamble -->
-            <div class="ip-rules-section ip-fade-in">
-                <p class="ip-doc-lead">This Privacy Policy defines the procedures for the collection, storage, processing, and protection of personal data of users of the <a href="https://tennis.kg">tennis.kg</a> website and the KSLT Tennis mobile application (hereinafter collectively referred to as the "Service"). By using the Service, you agree to the terms of this Policy.</p>
+            <!-- MACHINE TRANSLATION of the Russian edition approved by Order No. 1.
+                 The Russian text is the one that was approved; this is a convenience
+                 translation and is marked as such in the document itself. -->
+            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">Approved by Order No. 1 of the Head of the KSLT Public Foundation, 3 November 2026.</p>
+                <p class="ip-doc-approved-line">Edition of 3 November 2026.</p>
             </div>
 
-            <!-- Table of Contents -->
+            <div class="ip-rules-section ip-fade-in">
+                <p class="ip-doc-lead">This Policy sets out how personal data of users of the <a href="https://tennis.kg">tennis.kg</a> website and the «KSLT Tennis» mobile applications is processed. The full text is given below and applies in full. In case of any discrepancy, the Russian edition prevails.</p>
+            </div>
+
+            <div class="ip-doc-gist ip-fade-in">
+                <div class="ip-doc-gist-title">In short</div>
+                <p class="ip-doc-gist-note">This is a short summary for convenience. It does not replace the document: the full text below is what applies.</p>
+                <ul class="ip-doc-gist-list">
+                    <li><strong>What we collect.</strong> First and last name, e-mail, date of birth, gender — without these we cannot maintain the rating or build draws. Phone number and photo are optional.</li>
+                    <li><strong>What everyone can see.</strong> Name, profile photo, category, rating position and points, match results. E-mail, date of birth and payment details are never published.</li>
+                    <li><strong>Phone and Telegram.</strong> Shown to other players only if you switched this on in your profile, and switched off in the same place.</li>
+                    <li><strong>Who we share with.</strong> Supabase, Google, Telegram, Resend — so that the database, sign-in, notifications and e-mails work. Data is not sold and is not used for third-party advertising.</li>
+                    <li><strong>Deleting your account.</strong> In your profile or by e-mail. 30 days to change your mind, then permanent; tournament results remain in the protocols.</li>
+                    <li><strong>Your rights.</strong> Obtain your data, correct it, take a copy, withdraw consent, object, complain to the regulator. We reply within 7 working days.</li>
+                </ul>
+            </div>
+
             <div class="ip-toc ip-fade-in">
-                <div class="ip-toc-title">Table of Contents</div>
+                <div class="ip-toc-title">Contents</div>
                 <ol class="ip-toc-list">
-                    <li><a href="#pp-general">General Provisions</a></li>
-                    <li><a href="#pp-data-collected">Data We Collect</a></li>
-                    <li><a href="#pp-data-purposes">Purposes of Data Processing</a></li>
-                    <li><a href="#pp-third-parties">Third Parties</a></li>
-                    <li><a href="#pp-storage">Data Storage and Protection</a></li>
-                    <li><a href="#pp-user-rights">User Rights</a></li>
-                    <li><a href="#pp-cookies">Cookies and Analytics</a></li>
-                    <li><a href="#pp-changes">Policy Changes</a></li>
-                    <li><a href="#pp-contacts">Contact Information</a></li>
+                    <li><a href="#pp-1">General provisions</a></li>
+                    <li><a href="#pp-2">Details of the owner of personal records</a></li>
+                    <li><a href="#pp-3">What data we process, why and on what grounds</a></li>
+                    <li><a href="#pp-4">Public information</a></li>
+                    <li><a href="#pp-5">Automated decision-making</a></li>
+                    <li><a href="#pp-6">Who the data is shared with</a></li>
+                    <li><a href="#pp-7">Cross-border transfer</a></li>
+                    <li><a href="#pp-8">Retention periods</a></li>
+                    <li><a href="#pp-9">User rights</a></li>
+                    <li><a href="#pp-10">Deleting an account</a></li>
+                    <li><a href="#pp-11">Data protection</a></li>
+                    <li><a href="#pp-12">Children</a></li>
+                    <li><a href="#pp-13">Cookies and local storage</a></li>
+                    <li><a href="#pp-14">Changes to the Policy</a></li>
+                    <li><a href="#pp-15">Contacts</a></li>
                 </ol>
+                <button type="button" class="ip-doc-expand" data-doc-expand>Expand all sections</button>
             </div>
 
-            <!-- Section 1: General Provisions -->
-            <div class="ip-rules-section ip-fade-in" id="pp-general">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">01</span>
-                    General Provisions
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-1">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">01</span>General provisions</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>1.1.</strong> The personal data operator is KSLT (Kyrgyzstan Social Lawn Tennis) — an amateur tennis community registered in Bishkek, Kyrgyz Republic.</p>
-                    <p><strong>1.2.</strong> This Privacy Policy applies to all personal data that the Operator may receive from the User when using the <a href="https://tennis.kg">tennis.kg</a> website and the KSLT Tennis mobile application.</p>
-                    <p><strong>1.3.</strong> Registration on the website or in the application, as well as use of the Service, constitutes the User's unconditional consent to this Policy and the personal data processing conditions specified herein.</p>
-                    <p><strong>1.4.</strong> If the User disagrees with the terms of the Privacy Policy, the User must discontinue use of the Service and request deletion of their account.</p>
+                    <p><strong>1.1.</strong> This Policy sets out what personal data of users is processed by the Public Foundation «Kyrgyzstan Community of Tennis Enthusiasts» (hereinafter — KSLT, «we»), for what purposes and on what grounds, who it is shared with, how long it is kept and what rights users have. The Policy applies to the <a href="https://tennis.kg">tennis.kg</a> website (hereinafter — the Site), the «KSLT Tennis» mobile applications for Android and iOS (hereinafter — the Application) and the related services: rating, tournaments, battles, partner search, court and coach directories, news, the Telegram bot and mailings (together — the Service).</p>
+                    <p><strong>1.2.</strong> The Policy has been drawn up in accordance with the Digital Code of the Kyrgyz Republic of 31 July 2025 No. 178 (hereinafter — the Digital Code), including Chapter 11 «Processing of personal data», Articles 33, 44, 73–89 and 114–120. From 5 February 2026 the Digital Code replaced the Law of the Kyrgyz Republic «On personal information».</p>
+                    <p><strong>1.3.</strong> Terms are used with the meanings established by the Digital Code. Personal data means digital data containing information about a natural person who can be identified by it. Processing means any operation with data: collection, recording, storage, alteration, use, transfer, anonymisation, deletion and so on. User means a natural person using the Service (the data subject).</p>
+                    <p><strong>1.4.</strong> KSLT is the owner of personal records, that is, the party that determines the purposes and means of processing users' personal data.</p>
+                    <p><strong>1.5.</strong> The Policy is available before registration and at any time afterwards: on the Site, in the Application («Profile» → «Documents») and on the Application's pages in Google Play and the App Store. It can be saved and printed.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 2: Data We Collect -->
-            <div class="ip-rules-section ip-fade-in" id="pp-data-collected">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">02</span>
-                    Data We Collect
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-2">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">02</span>Details of the owner of personal records</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>2.1.</strong> During registration and use of the Service, we collect the following data:</p>
-                    <p style="padding-left:20px;"><strong>2.1.1.</strong> <strong>Email address</strong> — required. Used for account creation and authentication.</p>
-                    <p style="padding-left:20px;"><strong>2.1.2.</strong> <strong>First and last name</strong> — required. Used for identification in the system, display in rankings, and at tournaments.</p>
-                    <p style="padding-left:20px;"><strong>2.1.3.</strong> <strong>Phone number</strong> — optional. May be used for communication regarding tournament participation.</p>
-                    <p style="padding-left:20px;"><strong>2.1.4.</strong> <strong>Profile photo (avatar)</strong> — optional. Uploaded by the user for profile personalization.</p>
-                    <p style="padding-left:20px;"><strong>2.1.5.</strong> <strong>Ranking data</strong> — points, match results, win/loss statistics, player category. Generated automatically through tournament participation.</p>
-                    <p style="padding-left:20px;"><strong>2.1.6.</strong> <strong>Device data</strong> — a shortened browser string (user-agent), screen resolution and the time of the last sign-in. A hash of these is stored; it is used only to protect the account: when a sign-in happens from a new device, the owner is notified.</p>
-                    <p style="padding-left:20px;"><strong>2.1.7.</strong> <strong>Payment data</strong> — amount, date, payment method and membership period. Used for membership records and reporting.</p>
-                    <p><strong>2.2.</strong> When authenticating through third-party services (Google, Telegram), we may receive basic profile information: name, email, and photo, which are provided by these services under their authentication protocols.</p>
-                    <p><strong>2.3.</strong> We do not collect payment card data. All financial transactions are processed through third-party payment systems.</p>
-                    <p><strong>2.4.</strong> In the mobile app, if you have allowed notifications, a push notification token is stored. It is tied to the device rather than to a person and serves only to deliver messages. Notifications can be turned off in the app or device settings.</p>
+                    <p><strong>Full name:</strong> Public Foundation «Kyrgyzstan Community of Tennis Enthusiasts» («Кыргызстан теннис сүйүүчүлөрүн коомчулугу» Коомдук фонду)</p>
+                    <p><strong>Registration number:</strong> 197575-3301-ОФ (Unified State Register of Legal Entities, Chuy-Bishkek Department of Justice, first registered 19.05.2021)</p>
+                    <p><strong>Taxpayer number (INN):</strong> 01905202110030; OKPO code: 31147180</p>
+                    <p><strong>Registered address:</strong> Kyrgyz Republic, Bishkek, Sverdlovsky district, Chuy Avenue 127, apt. 26</p>
+                    <p><strong>Head:</strong> Aisuluu Erikovna Chokoeva</p>
+                    <p><strong>E-mail:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; phone / WhatsApp: +996 555 777703</p>
+                    <p><strong>Person responsible for personal data processing:</strong> Konstantin Khan, e-mail for personal data enquiries: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> (subject line «Personal data»).</p>
+                    <p><strong>Place of processing:</strong> the Kyrgyz Republic (KSLT) and the servers of the processors listed in section 6 (including outside the Kyrgyz Republic).</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 3: Purposes of Data Processing -->
-            <div class="ip-rules-section ip-fade-in" id="pp-data-purposes">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">03</span>
-                    Purposes of Data Processing
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-3">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">03</span>What data we process, why and on what grounds</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>3.1.</strong> Personal data is processed for the following purposes:</p>
-                    <p style="padding-left:20px;"><strong>3.1.1.</strong> <strong>Registration and authentication</strong> — account creation, login to personal dashboard, access recovery.</p>
-                    <p style="padding-left:20px;"><strong>3.1.2.</strong> <strong>User identification</strong> — profile display in rankings, on tournament pages, and in match results.</p>
-                    <p style="padding-left:20px;"><strong>3.1.3.</strong> <strong>Ranking system</strong> — maintaining player rankings, calculating points, determining categories, and forming tournament brackets.</p>
-                    <p style="padding-left:20px;"><strong>3.1.4.</strong> <strong>Notifications</strong> — informing users about tournaments, results, schedule changes, membership, and other community events via Telegram bot and email.</p>
-                    <p style="padding-left:20px;"><strong>3.1.5.</strong> <strong>Service improvement</strong> — usage analysis to improve functionality and user experience.</p>
-                    <p><strong>3.2.</strong> Personal data is not used for advertising purposes and is not shared with third parties for marketing.</p>
+                    <p><strong>3.1.</strong> We process only the data needed for the stated purposes (minimisation principle, Article 78 of the Digital Code). The data, purposes and grounds for processing are set out in the table.</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Purpose</th><th>Data</th><th>Ground (Article 79 of the Digital Code)</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Registration, sign-in, account management, password recovery</td>
+                                    <td>First and last name, e-mail address, password (stored only as a bcrypt hash), date of birth, gender; when signing in with Google — name, e-mail, Google profile photo; when signing in with Telegram — Telegram ID, username, photo</td>
+                                    <td>Performance of the user agreement (clause 1 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Maintaining the rating, participation in tournaments and battles, building draws, publishing results</td>
+                                    <td>First and last name, gender, age group, category (tour), points, match results, win and loss statistics, tournament history</td>
+                                    <td>Performance of the user agreement and the public offer (clause 1 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Membership and payment for services</td>
+                                    <td>Amount, date and method of payment, membership period, status of fees. KSLT does not receive or store bank card details</td>
+                                    <td>Performance of the contract (clause 1 part 1); compliance with accounting obligations (clause 2 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Account security (notification of sign-in from a new device, protection against account takeover)</td>
+                                    <td>Hash of the browser user-agent, screen resolution, time of last sign-in, IP address</td>
+                                    <td>Legitimate interest of KSLT and the user in protecting the account (clause 5 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Service notifications about tournaments, entries, matches and changes to the documents</td>
+                                    <td>E-mail address, Telegram ID, device push notification token</td>
+                                    <td>Performance of the agreement (clause 1 part 1); for notifications sent to contact details — the user's consent (Article 44)</td>
+                                </tr>
+                                <tr>
+                                    <td>Handling enquiries, complaints and disputes</td>
+                                    <td>Data provided in the enquiry, correspondence, details of the disputed situation</td>
+                                    <td>Compliance with obligations under Article 119 of the Digital Code (clause 2 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Traffic statistics and improvement of the Service</td>
+                                    <td>Anonymised Google Analytics data (pages, device, approximate location by IP)</td>
+                                    <td>Legitimate interest of KSLT (clause 5 part 1); Article 50 (anonymised records)</td>
+                                </tr>
+                                <tr>
+                                    <td>Additional purposes: showing phone/Telegram in the «Find a player» section, publishing photos and videos from tournaments on KSLT social media, newsletters and promotional mailings</td>
+                                    <td>Set out in the Consent to the processing of personal data</td>
+                                    <td>Separate voluntary consent of the user for each purpose (part 2 Article 79)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>3.2.</strong> First and last name, e-mail address, date of birth and gender are mandatory for registration. Without them it is impossible to create an account, maintain the rating and build draws by category. Phone number and profile photo are optional.</p>
+                    <p><strong>3.3.</strong> Consent to the processing of personal data is requested only for the purposes listed in the last row of the table. Refusing any of these purposes does not limit access to the core features of the Service.</p>
+                    <p><strong>3.4.</strong> We do not process special categories of personal data (health, racial or ethnic origin, religious and political views, biometric and genetic data). Please do not provide such information in your profile or messages.</p>
+                    <p><strong>3.5.</strong> We do not use personal data for third-party advertising and do not sell it.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 4: Third Parties -->
-            <div class="ip-rules-section ip-fade-in" id="pp-third-parties">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">04</span>
-                    Third Parties
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-4">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">04</span>Public information</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>4.1.</strong> To ensure the operation of the Service, we use the following third-party services that may process personal data:</p>
-                    <p style="padding-left:20px;"><strong>4.1.1.</strong> <strong>Supabase</strong> — database hosting and authentication system. Data is stored on Amazon Web Services (AWS) servers. Supabase complies with SOC 2 Type II security standards. Privacy policy: <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a>.</p>
-                    <p style="padding-left:20px;"><strong>4.1.2.</strong> <strong>Telegram Bot API</strong> — used for sending notifications and authentication via Telegram Login Widget. Processed data includes: Telegram ID, username, profile photo. Privacy policy: <a href="https://telegram.org/privacy" target="_blank" rel="noopener">telegram.org/privacy</a>.</p>
-                    <p style="padding-left:20px;"><strong>4.1.3.</strong> <strong>Google (OAuth 2.0)</strong> — used for authentication via Google account. Transferred data includes: email, name, profile photo. Privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
-                    <p style="padding-left:20px;"><strong>4.1.4.</strong> <strong>Resend</strong> — email delivery service. Used for sending notifications (registration confirmation, tournament reminders, system messages). Processed data includes: email address, recipient name. Privacy policy: <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener">resend.com/legal/privacy-policy</a>.</p>
-                    <p style="padding-left:20px;"><strong>4.1.5.</strong> <strong>Firebase Cloud Messaging (Google)</strong> — delivery of push notifications to the mobile app. The device token is processed. Privacy policy: firebase.google.com/support/privacy.</p>
-                    <p style="padding-left:20px;"><strong>4.1.6.</strong> <strong>Google Analytics</strong> — anonymised statistics of site visits. Privacy policy: policies.google.com/privacy.</p>
-                    <p style="padding-left:20px;"><strong>4.1.7.</strong> <strong>Site hosting</strong> — the server on which the tennis.kg site is hosted. When pages are loaded, technical connection data is processed, including the IP address, which is kept in the server logs.</p>
-                    <p><strong>4.2.</strong> We do not sell or share personal data with third parties, except as required by the laws of the Kyrgyz Republic.</p>
-                    <p><strong>4.3.</strong> All listed third-party services are used solely to ensure the operation of the Service and do not have access to data beyond what is necessary to perform their functions.</p>
+                    <p><strong>4.1.</strong> The Service is an open amateur tennis rating. Therefore the following information about a user is visible to all visitors of the Site and the Application: first and last name, profile photo (if uploaded), category, rating position and points, match and tournament results, participation in battles.</p>
+                    <p><strong>4.2.</strong> E-mail address, date of birth, payment details and technical data are not published. Phone and Telegram are shown to other users only where separate consent has been given.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 5: Data Storage and Protection -->
-            <div class="ip-rules-section ip-fade-in" id="pp-storage">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">05</span>
-                    Data Storage and Protection
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-5">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">05</span>Automated decision-making</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>5.1.</strong> All data is transmitted over the secure HTTPS protocol using TLS encryption.</p>
-                    <p><strong>5.2.</strong> Access to data in the database is controlled by the Row Level Security (RLS) mechanism, which provides data isolation at the row level. Each user has access only to their own data, unless otherwise specified by the role-based access model.</p>
-                    <p><strong>5.3.</strong> User passwords are stored in encrypted form (bcrypt) and are inaccessible even to system administrators.</p>
-                    <p><strong>5.4.</strong> Personal data is retained for the entire duration of the user's account existence. Upon account deletion the account immediately stops being shown in the Service, and personal data is erased after 30 calendar days. During this period the User may cancel the deletion by signing in.</p>
-                    <p><strong>5.5.</strong> Ranking data (match results, points, tournament statistics) is retained in anonymized form for tournament history purposes even after account deletion: it belongs to past competitions rather than to the account. The player card remains with a note that the account was deleted, and contact details are removed from it.</p>
-                    <p><strong>5.6.</strong> Database backups are created automatically and stored in encrypted form on Supabase (AWS) servers.</p>
+                    <p><strong>5.1.</strong> Points, rating position and category (Futures, Challenger, Tour, Masters, Pro-Masters) are calculated automatically from match results in accordance with the KSLT Rules, section «Rating system», published on the Site. This determines the category of tournaments a user may enter.</p>
+                    <p><strong>5.2.</strong> A user may request an explanation of how their points were calculated, dispute it with the tournament referee or with the KSLT administration, and object to automated processing (Article 84 of the Digital Code). The objection is decided by a KSLT officer.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 6: User Rights -->
-            <div class="ip-rules-section ip-fade-in" id="pp-user-rights">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">06</span>
-                    User Rights
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-6">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">06</span>Who the data is shared with (processors and recipients)</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>6.1.</strong> The User has the right to:</p>
-                    <p style="padding-left:20px;"><strong>6.1.1.</strong> <strong>View their data</strong> — all profile information is available in the personal Dashboard on the website and in the mobile application.</p>
-                    <p style="padding-left:20px;"><strong>6.1.2.</strong> <strong>Edit their data</strong> — name, last name, profile photo, and phone number can be changed in profile settings.</p>
-                    <p style="padding-left:20px;"><strong>6.1.3.</strong> <strong>Delete their account</strong> — directly in the dashboard under «Settings», or by request to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>. The account stops being shown in the Service immediately; data is erased for good after 30 calendar days. The deletion can be cancelled at any point during this period.</p>
-                    <p style="padding-left:20px;"><strong>6.1.4.</strong> <strong>Opt out of notifications</strong> — the user can disable email and Telegram notifications at any time in profile settings by individual category (tournaments, payments, news, system).</p>
-                    <p style="padding-left:20px;"><strong>6.1.5.</strong> <strong>Request data export</strong> — the user can request a copy of all their personal data by sending a request to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>.</p>
-                    <p><strong>6.2.</strong> To exercise their rights, the user may contact us via email at <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>, specifying the email address linked to their account.</p>
+                    <p><strong>6.1.</strong> To operate the Service, KSLT entrusts the processing of data to the following persons (processors) or transfers data to the following recipients:</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Party, location</th><th>Function</th><th>What data</th><th>Ground</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Developers: Konstantin Khan and Tatiana Nechaeva, Kyrgyz Republic</td>
+                                    <td>Development and technical support of the Site and the Application</td>
+                                    <td>All Service data to the extent needed for support</td>
+                                    <td>Contract No. 1 of 01.06.2026 (processing instruction, Article 86)</td>
+                                </tr>
+                                <tr>
+                                    <td>Supabase Inc., USA (Amazon Web Services servers, region us-east-1 — Northern Virginia, USA)</td>
+                                    <td>Database, authentication, backups</td>
+                                    <td>All account data</td>
+                                    <td>Supabase Terms of Service and Data Processing Agreement (DPA)</td>
+                                </tr>
+                                <tr>
+                                    <td>Google LLC, USA</td>
+                                    <td>Sign-in with Google (OAuth), Firebase Cloud Messaging push notifications, Google Analytics statistics</td>
+                                    <td>Name, e-mail, Google photo; device token; anonymised visit data</td>
+                                    <td>Google Terms and Google Ads Data Processing Terms</td>
+                                </tr>
+                                <tr>
+                                    <td>Telegram Messenger Inc. / Telegram FZ-LLC, UAE</td>
+                                    <td>Sign-in with Telegram, notifications via the Telegram bot</td>
+                                    <td>Telegram ID, username, photo, notification texts</td>
+                                    <td>Telegram Bot API Terms</td>
+                                </tr>
+                                <tr>
+                                    <td>Resend Inc., USA</td>
+                                    <td>Sending service e-mails</td>
+                                    <td>E-mail, recipient name, message text</td>
+                                    <td>Resend Terms of Service and DPA</td>
+                                </tr>
+                                <tr>
+                                    <td>ХОСТИНГ_НЕ_ЗАПОЛНЕН</td>
+                                    <td>Hosting of the Site</td>
+                                    <td>IP address and technical request data</td>
+                                    <td>ХОСТИНГ_НЕ_ЗАПОЛНЕН</td>
+                                </tr>
+                                <tr>
+                                    <td>Payment provider: DemirBank, Chuy Avenue 304, Bishkek, Kyrgyz Republic</td>
+                                    <td>Accepting payments (once online payment is enabled)</td>
+                                    <td>Amount, date, payment identifier</td>
+                                    <td>Contract No. 1 of 02.11.2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>6.2.</strong> Each processor processes data only on the instruction of KSLT and for the stated purposes. KSLT is liable for the actions of processors as for its own (Article 38 of the Digital Code). The list of processors is updated when the composition changes.</p>
+                    <p><strong>6.3.</strong> Data may also be provided to state authorities of the Kyrgyz Republic in the cases and in the manner established by law.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 7: Cookies and Analytics -->
-            <div class="ip-rules-section ip-fade-in" id="pp-cookies">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">07</span>
-                    Cookies and Analytics
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-7">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">07</span>Cross-border transfer</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>7.1.</strong> The Service uses the browser's localStorage mechanism to store authentication session data. This is necessary to maintain the user's login between visits.</p>
-                    <p><strong>7.2.</strong> We do not use third-party cookies for tracking or advertising.</p>
-                    <p><strong>7.3.</strong> Google Analytics may be used for website traffic analysis. In this case, anonymized data is collected: device type, browser, country, pages viewed. This data does not allow identification of a specific user.</p>
-                    <p><strong>7.4.</strong> The user can disable analytics data collection by using browser extensions that block analytics scripts.</p>
+                    <p><strong>7.1.</strong> The servers of Supabase, Google and Resend are located in the USA, Telegram — in the UAE and other countries. Before any transfer, KSLT checks whether the country is included in the list of states providing adequate protection of personal data approved by the sectoral regulator (part 3 Article 89 of the Digital Code).</p>
+                    <p><strong>7.2.</strong> If a country is not on the list, the transfer takes place because it is necessary for the conclusion and performance of the user agreement to which the user is a party (clause 4 part 4 Article 89), and on the terms of contracts with processors that ensure the protection of data (clause 6 part 4 Article 89). Transferred data is processed in accordance with the law of the recipient's country (part 5 Article 89).</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 8: Policy Changes -->
-            <div class="ip-rules-section ip-fade-in" id="pp-changes">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">08</span>
-                    Policy Changes
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-8">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">08</span>Retention periods</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>8.1.</strong> The Operator reserves the right to make changes to this Privacy Policy.</p>
-                    <p><strong>8.2.</strong> In case of significant changes, users will be notified via the mobile application and/or by email.</p>
-                    <p><strong>8.3.</strong> The current version of the Policy is always available at <a href="https://tennis.kg/pages/privacy-policy-en.html">tennis.kg/pages/privacy-policy-en.html</a>.</p>
-                    <p><strong>8.4.</strong> Continued use of the Service after the publication of changes constitutes the user's agreement with the updated Policy.</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Data</th><th>Retention period</th></tr></thead>
+                            <tbody>
+                                <tr><td>Account data</td><td>While the account is active. After the account is deleted — 30 days (the deletion can be cancelled), then erased</td></tr>
+                                <tr><td>Match and tournament results, rating history</td><td>Indefinitely as part of the tournament history; after the account is deleted — anonymised or with first and last name only in tournament protocols (clause 2 part 2 Article 83 — archival and statistical purposes)</td></tr>
+                                <tr><td>Records of the conclusion and performance of the user agreement and of consents obtained</td><td>The term of the agreement and 3 years after its termination (part 4 Article 114 of the Digital Code)</td></tr>
+                                <tr><td>Payment details</td><td>The period established by accounting legislation</td></tr>
+                                <tr><td>Technical sign-in data</td><td>12 months</td></tr>
+                                <tr><td>Enquiries and complaints</td><td>3 years after they are dealt with</td></tr>
+                                <tr><td>Data processed on the basis of consent</td><td>Until consent is withdrawn or the account is deleted</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </details>
 
-            <!-- Section 9: Contact Information -->
-            <div class="ip-rules-section ip-fade-in" id="pp-contacts">
-                <h2 class="ip-rules-section-title">
-                    <span class="ip-rules-section-num">09</span>
-                    Contact Information
-                </h2>
+            <details class="ip-doc-fold ip-fade-in" id="pp-9">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">09</span>User rights</h2></summary>
                 <div class="ip-rules-list">
-                    <p><strong>9.1.</strong> For any questions regarding the processing of personal data, you may contact us:</p>
-                    <p style="padding-left:20px;"><strong>Email:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a></p>
-                    <p style="padding-left:20px;"><strong>Organization:</strong> KSLT (Kyrgyzstan Social Lawn Tennis)</p>
-                    <p style="padding-left:20px;"><strong>Address:</strong> Bishkek, Kyrgyz Republic</p>
-                    <p style="padding-left:20px;"><strong>Website:</strong> <a href="https://tennis.kg">tennis.kg</a></p>
+                    <p><strong>9.1.</strong> A user has the right to:</p>
+                    <ul class="ip-doc-list">
+                        <li>obtain information about the processing of their data to the extent set out in part 1 Article 73 of the Digital Code;</li>
+                        <li>obtain access to all of their data or a copy of it (part 4 Article 73);</li>
+                        <li>correct or supplement their data (Article 75) — in the profile or upon request;</li>
+                        <li>receive their data in a machine-readable format or require its transfer to another owner of records (Article 76);</li>
+                        <li>require the deletion of data (Article 83), including deletion of the account (section 10);</li>
+                        <li>object to processing by certain means or for certain purposes (Article 84);</li>
+                        <li>require the restriction of processing while an objection is considered or data is corrected (Article 85);</li>
+                        <li>withdraw any consent in the profile settings or by e-mail — as easily as it was given (part 5 Article 79);</li>
+                        <li>refuse the Service and obtain information about their data (Article 118);</li>
+                        <li>appeal against the actions of KSLT to the State Agency for Personal Data Protection under the Cabinet of Ministers of the Kyrgyz Republic or to a court.</li>
+                    </ul>
+                    <p><strong>9.2.</strong> Requests are sent to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> or through «Profile» → «My data» in the Application. To verify identity we may ask that the request be sent from the e-mail address registered to the account (part 2 Article 37).</p>
+                    <p><strong>9.3.</strong> Response times: information about processing, access to data, correction and a decision on an objection — no more than 7 working days from receipt of the request. We notify of a restriction of processing or its lifting no later than the next working day. Deletion on the grounds of Article 83 is carried out without delay, subject to the 30-day period for cancelling deletion, unless the user has asked for immediate deletion.</p>
+                    <p><strong>9.4.</strong> Refusal to provide the mandatory data (clause 3.2) means that registration and participation in the rating and tournaments will not be possible. Refusing consent for additional purposes has no consequences for the core features.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Effective date -->
-            <div class="ip-rules-section ip-fade-in">
-                <p class="ip-doc-revision">Effective date: August 26, 2026</p>
-            </div>
+            <details class="ip-doc-fold ip-fade-in" id="pp-10">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">10</span>Deleting an account</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>10.1.</strong> An account can be deleted in the Application (Profile → Settings → «Delete account»), on the Site (Profile → Settings) or by e-mail to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>. The detailed procedure is published at <a href="https://tennis.kg/pages/delete-account-en.html">tennis.kg/pages/delete-account-en.html</a>.</p>
+                    <p><strong>10.2.</strong> After deletion the profile immediately stops being visible to other users. After 30 days personal data is erased permanently. Only the data listed in section 8 is kept, which KSLT is obliged or entitled to keep by law, of which the user is informed at the time of deletion (part 3 Article 118).</p>
+                </div>
+            </details>
 
+            <details class="ip-doc-fold ip-fade-in" id="pp-11">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">11</span>Data protection</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>11.1.</strong> KSLT takes organisational and technical protection measures (Articles 78, 88 of the Digital Code): data transfer over HTTPS (TLS) only, row-level access control in the database (Row Level Security), storage of passwords as hashes, encryption of backups, limiting the number of people with access to data, logging of operations with personal records, training of staff and volunteers.</p>
+                    <p><strong>11.2.</strong> In the event of a personal data breach, KSLT takes measures to remedy it and notifies affected users and the sectoral regulator in the manner established by law.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-12">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">12</span>Children</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>12.1.</strong> The Service is intended for persons aged 14 and over. Users aged 14 to 18 give consent to the processing of their data themselves (part 3 Article 81 of the Digital Code). Participation in tournaments is governed by the public offer.</p>
+                    <p><strong>12.2.</strong> If we become aware that a child under 14 has registered without the consent of a legal representative, the account will be deleted. A legal representative may report this to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-13">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">13</span>Cookies and local storage</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>13.1.</strong> The Site uses browser local storage (localStorage) only to keep the user signed in and to store settings (language). Advertising and third-party tracking cookies are not used. Google Analytics collects anonymised statistics. It can be disabled with browser extensions.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-14">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">14</span>Changes to the Policy</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>14.1.</strong> We notify users of material changes to the Policy in the Application and by e-mail at least one month before the changes take effect. A new purpose of processing for which there is no ground under part 1 Article 79 is introduced only after the user's consent has been obtained (part 2 Article 78). The current and previous editions are available on the Site.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-15">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">15</span>Contacts</h2></summary>
+                <div class="ip-rules-list">
+                    <p>For all questions about the processing of personal data: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; postal address: Kyrgyz Republic, Bishkek, Sverdlovsky district, Chuy Avenue 127, apt. 26, KSLT Public Foundation.</p>
+                </div>
+            </details>
+
+            <div class="ip-doc-sign ip-fade-in">
+                <p class="ip-doc-sign-role">Chair of the Board of KSLT</p>
+                <p class="ip-doc-sign-name">A. E. Chokoeva</p>
+                <p class="ip-doc-revision">Edition of 3 November 2026. Approved by Order No. 1 of 3 November 2026.</p>
+                <button type="button" class="ip-doc-print" data-doc-print>Print or save as PDF</button>
+            </div>
         </div>
     </main>
 
@@ -543,7 +673,7 @@
             <nav class="footer-legal-nav" aria-label="Legal">
                 <ul class="footer-bottom-links">
                     <li><a href="offer-en.html">Public offer</a></li>
-                    <li><a href="terms-en.html">Terms of Use</a></li>
+                    <li><a href="terms-en.html">User Agreement</a></li>
                     <li><a href="privacy-policy-en.html">Privacy policy</a></li>
                 </ul>
             </nav>
@@ -557,6 +687,7 @@
     <script src="../js/supabase-config.js?v=5"></script>
     <script src="../js/site-content.js?v=4"></script>
     <script src="../js/kslt-yazyk.js?v=5"></script>
+    <script src="../js/kslt-dokument.js?v=1"></script>
     <script src="../js/kslt-ekranirovanie.js?v=2"></script>
     <script src="../js/kslt-lico.js?v=8"></script>
     <script src="../js/kslt-fokus.js?v=4"></script>
