@@ -182,11 +182,29 @@ Deno.serve(async (req) => {
 
 // ---- Helpers ----
 
-function shouldNotify(prefs: any, channel: 'tg' | 'email', cat: string): boolean {
-  if (!prefs) return true
-  const ch = prefs[channel]
-  if (!ch) return true
-  return ch[cat] !== false
+function shouldNotify(prefs: any, channel: 'tg' | 'email' | 'site', cat: string): boolean {
+  /* ЦЕЛЬ 1 СОГЛАСИЯ: направление уведомлений НА КОНТАКТНЫЕ ДАННЫЕ (почта,
+     телеграм) идёт только с согласия — политика конфиденциальности, строка
+     «Служебные уведомления ... для направления уведомлений на контактные
+     данные — согласие пользователя (ст. 44)», и текст Согласия, цель 1:
+     «Без согласия уведомления показываются только в Приложении и личном
+     кабинете на Сайте». Поэтому МОЛЧАНИЕ — УМОЛЧАНИЕ: нет явного true —
+     не шлём. Прежде здесь стояло `нет настроек — слать`.
+     Значения в notify_preferences проставляет триггер базы
+     profiles_soglasie_v_nastroyki (sql/схема/soglasie-umolchanie-07nov.sql),
+     а НЕ этот код: УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ. Иначе согласие пришлось бы
+     передавать в 56 зовов и 16 копий этого правила.
+     ДВА ИСКЛЮЧЕНИЯ, и у каждого своё основание в политике:
+       • канал 'site' — колокольчик в приложении и кабинете, работает и без
+         согласия: это и есть «показываются только в Приложении»;
+       • раздел 'security' — уведомление о входе с нового устройства,
+         основание «законный интерес (п. 5 ч. 1)», согласия не требует. */
+  const ch = prefs && prefs[channel]
+  if (channel === 'site' || cat === 'security') {
+    if (!ch) return true
+    return ch[cat] !== false
+  }
+  return !!ch && ch[cat] === true
 }
 
 async function callSendEmail(serviceKey: string, payload: any): Promise<boolean> {

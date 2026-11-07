@@ -1759,8 +1759,16 @@
       });
       правка.notify_preferences = S.отметитьРешение(_profile);
 
+      /* ЧИТАЕМ ОТВЕТ БАЗЫ, А НЕ СВОЙ СЛЕПОК (07.11). Согласие цели 1 и 4
+         меняет `notify_preferences` ТРИГГЕРОМ `profiles_soglasie_v_nastroyki`
+         — там проставляются каналы `tg` и `email`. Возьми мы здесь свою
+         `правку`, экран уведомлений показывал бы прежнее, а следующее
+         касание ползунка записало бы устаревший слепок поверх того, что
+         дописала база. ЗНАЧЕНИЕ, КОТОРОЕ ДОПИСЫВАЕТ БАЗА, ПЕРЕЧИТЫВАЕТСЯ. */
       var ответ = await window.supabaseClient
-        .from('profiles').update(правка).eq('id', _profile.id);
+        .from('profiles').update(правка).eq('id', _profile.id)
+        .select('consent_notify, consent_media, consent_news, notify_preferences')
+        .maybeSingle();
 
       кнопка.disabled = false;
       if (ответ.error) {
@@ -1769,6 +1777,11 @@
       }
       for (var п in правка) {
         if (Object.prototype.hasOwnProperty.call(правка, п)) _profile[п] = правка[п];
+      }
+      if (ответ.data) {
+        for (var д in ответ.data) {
+          if (Object.prototype.hasOwnProperty.call(ответ.data, д)) _profile[д] = ответ.data[д];
+        }
       }
       if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('sog.saved'));
     });
@@ -1834,7 +1847,13 @@
         /* БЕЗ ПРИВЯЗАННОГО БОТА СТОЛБЕЦ ТЕЛЕГРАМА БЕСПОЛЕЗЕН: человек
            включал ползунок и ждал сообщений, которым неоткуда взяться.
            Это правило было только у сайта, здесь его не было вовсе. */
-        var гасить = !U.каналДоступен(канал, _profile);
+        /* И БЕЗ СОГЛАСИЯ СЕРВЕР МОЛЧИТ (07.11): политика требует согласия
+           на направление уведомлений на контактные данные (ст. 44), и
+           серверное правило без явного `true` не шлёт. Ползунок, который
+           человек включает впустую, — тот же обман, что и столбец без
+           бота. */
+        var гасить = !U.каналДоступен(канал, _profile)
+                  || !U.разделДоступен(раздел, _profile);
         html += '<label class="prof-notif-toggle' + (гасить ? ' prof-notif-off' : '') + '">';
         html += '<span>' + esc(каналы[канал]) + '</span>';
         html += '<input type="checkbox" class="prof-notif-cb"' +
@@ -1848,6 +1867,13 @@
 
     if (!U.каналДоступен('tg', _profile)) {
       html += '<div class="prof-notif-hint">' + esc(I18N.t('profile.notifTgOff')) + '</div>';
+    }
+
+    var нетСогласия = U.РАЗДЕЛЫ.some(function(раздел) {
+      return !U.разделДоступен(раздел, _profile);
+    });
+    if (нетСогласия) {
+      html += '<div class="prof-notif-hint">' + esc(I18N.t('profile.notifNeedConsent')) + '</div>';
     }
 
     content.innerHTML = html;

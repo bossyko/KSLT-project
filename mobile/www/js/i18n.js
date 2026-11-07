@@ -786,6 +786,7 @@
     'profile.notifTelegram':    { ru: 'Telegram', en: 'Telegram', kg: 'Telegram' },
     'profile.notifEmail':       { ru: 'Email', en: 'Email', kg: 'Email' },
     'profile.notifTgOff':       { ru: 'Telegram-бот не подключён — сюда ничего не придёт. Подключить его можно в Профиле.', en: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.', kg: 'Telegram-ботко байланган эмес — билдирүүлөр келбейт. Профилден байласаңыз болот.' },
+    'profile.notifNeedConsent': { ru: 'Отправка на почту и в Telegram идёт только с вашего согласия — дайте его в Профиль → Согласия. Уведомления в приложении и в кабинете работают без него.', en: 'Email and Telegram delivery requires your consent — give it under Profile → Consents. Notifications in the app and in your account work without it.', kg: 'Электрондук почтага жана Telegramга жөнөтүү үчүн макулдугуңуз керек — Профиль → Макулдуктар бөлүмүндө бериңиз. Тиркемедеги жана кабинеттеги билдирүүлөр ансыз да иштейт.' },
     'profile.newPass':        { ru: 'Новый пароль', en: 'New password', kg: 'Жаңы сырсөз' },
     'profile.confirmPass':    { ru: 'Подтверждение', en: 'Confirm', kg: 'Ырастоо' },
     /* ПОДПИСЬ ГОВОРИТ ТО ЖЕ, ЧТО ПРОВЕРЯЕТ КОД (02.11). Здесь стояло

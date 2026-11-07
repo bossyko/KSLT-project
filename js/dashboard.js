@@ -40,6 +40,7 @@
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
         notifTgOff: 'The Telegram bot is not connected, so nothing will arrive there. You can connect it in your profile.',
+        notifNeedConsent: 'Email and Telegram delivery requires your consent — give it under Profile → Consents. Notifications in the app and in your account work without it.',
         close: 'Close',
         cancel: 'Cancel',
         tgConnectTitle: 'Connect the Telegram bot',
@@ -401,6 +402,7 @@
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
         notifTgOff: 'Telegram\u2011боту байланган эмес — билдирүүлөр келбейт. Профилден байласаңыз болот.',
+        notifNeedConsent: 'Электрондук почтага жана Telegramга жөнөтүү үчүн макулдугуңуз керек — Профиль → Макулдуктар бөлүмүндө бериңиз. Тиркемедеги жана кабинеттеги билдирүүлөр ансыз да иштейт.',
         close: 'Жабуу',
         cancel: 'Жокко чыгаруу',
         tgConnectTitle: 'Telegram\u2011ботту байлоо',
@@ -750,6 +752,7 @@
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
         notifTgOff: 'Telegram\u2011бот не подключён — сюда ничего не придёт. Подключить его можно в Профиле.',
+        notifNeedConsent: 'Отправка на почту и в Telegram идёт только с вашего согласия — дайте его в Профиль → Согласия. Уведомления в приложении и в кабинете работают без него.',
         close: 'Закрыть',
         cancel: 'Отмена',
         tgConnectTitle: 'Подключение Telegram\u2011бота',
@@ -1388,8 +1391,16 @@
             });
             правка.notify_preferences = window.KSLT_SOGLASIYA.отметитьРешение(профиль);
 
+            /* ЧИТАЕМ ОТВЕТ БАЗЫ, А НЕ СВОЙ СЛЕПОК (07.11). Согласие целей
+               1 и 4 меняет `notify_preferences` триггером
+               `profiles_soglasie_v_nastroyki`: там проставляются каналы
+               `tg` и `email`. Это ВТОРОЕ место сохранения согласий — окно
+               после входа; первое (в профиле) я починил, а это нашёл
+               сторож. МЕСТ ОДНОГО ДЕЙСТВИЯ БЫВАЕТ БОЛЬШЕ, ЧЕМ ПОМНИШЬ. */
             var ответ = await window.supabaseClient
-                .from('profiles').update(правка).eq('id', профиль.id);
+                .from('profiles').update(правка).eq('id', профиль.id)
+                .select('consent_notify, consent_media, consent_news, notify_preferences')
+                .maybeSingle();
 
             if (ответ.error) {
                 /* ОТКАЗ БАЗЫ НЕ ЗАКРЫВАЕТ ОКНО: закрой мы его — решение
@@ -1402,6 +1413,11 @@
 
             for (var п in правка) {
                 if (Object.prototype.hasOwnProperty.call(правка, п)) профиль[п] = правка[п];
+            }
+            if (ответ.data) {
+                for (var д in ответ.data) {
+                    if (Object.prototype.hasOwnProperty.call(ответ.data, д)) профиль[д] = ответ.data[д];
+                }
             }
             if (подложка.__ksltСнять) подложка.__ksltСнять();
             подложка.classList.remove('visible');
@@ -5991,12 +6007,24 @@
         // говорим, что делать.
         var tgLinked = window.KSLT_UVEDOMLENIYA.каналДоступен('tg', window.ksltProfile);
 
+        /* БЕЗ СОГЛАСИЯ СЕРВЕР МОЛЧИТ — ЗНАЧИТ ВКЛЮЧАТЬ НЕЧЕГО (07.11).
+           Политика требует согласия на направление уведомлений на контактные
+           данные (ст. 44), и серверное правило `shouldNotify` теперь без
+           явного `true` не шлёт. Ползунок, который человек включает впустую,
+           — это ровно тот обман, за который сняли канал `site`: ОРГАН
+           УПРАВЛЕНИЯ, КОТОРЫЙ ДЕЛАЕТ НЕ ТО, ЧТО ОБЕЩАЕТ, ХУЖЕ
+           ОТСУТСТВУЮЩЕГО. Гасим и говорим, что делать. */
+        var нетСогласия = NOTIF_CATS().some(function(cat) {
+            return !window.KSLT_UVEDOMLENIYA.разделДоступен(cat, window.ksltProfile);
+        });
+
         var rows = '';
         NOTIF_CATS().forEach(function(cat) {
             var cells = '';
             NOTIF_CHANNELS().forEach(function(ch) {
                 var on = isNotifOn(prefs, ch, cat);
-                var off = !window.KSLT_UVEDOMLENIYA.каналДоступен(ch, window.ksltProfile);
+                var off = !window.KSLT_UVEDOMLENIYA.каналДоступен(ch, window.ksltProfile)
+                       || !window.KSLT_UVEDOMLENIYA.разделДоступен(cat, window.ksltProfile);
                 cells +=
                     '<td class="db-notify-cell">' +
                         '<label class="db-notif-toggle' + (off ? ' db-notif-off' : '') + '">' +
@@ -6026,6 +6054,8 @@
             '</table>' +
             (tgLinked ? '' :
                 '<div class="db-notif-hint">' + L.notifTgOff + '</div>') +
+            (нетСогласия ?
+                '<div class="db-notif-hint">' + L.notifNeedConsent + '</div>' : '') +
         '</div>';
     }
 
@@ -6778,9 +6808,16 @@
             правка.notify_preferences =
                 window.KSLT_SOGLASIYA.отметитьРешение(window.ksltProfile);
 
+            /* ЧИТАЕМ ОТВЕТ БАЗЫ, А НЕ СВОЙ СЛЕПОК (07.11): согласие целей
+               1 и 4 меняет `notify_preferences` триггером
+               `profiles_soglasie_v_nastroyki`. Иначе экран уведомлений
+               покажет прежнее, а следующее касание ползунка запишет
+               устаревшее поверх дописанного базой. */
             var ответ = await window.supabaseClient
                 .from('profiles').update(правка)
-                .eq('id', (window.ksltProfile || {}).id);
+                .eq('id', (window.ksltProfile || {}).id)
+                .select('consent_notify, consent_media, consent_news, notify_preferences')
+                .maybeSingle();
 
             кнопка.disabled = false;
             if (ответ.error) {
@@ -6790,6 +6827,13 @@
             for (var п in правка) {
                 if (Object.prototype.hasOwnProperty.call(правка, п)) {
                     window.ksltProfile[п] = правка[п];
+                }
+            }
+            if (ответ.data) {
+                for (var д in ответ.data) {
+                    if (Object.prototype.hasOwnProperty.call(ответ.data, д)) {
+                        window.ksltProfile[д] = ответ.data[д];
+                    }
                 }
             }
             showMessage('settingsMessage', L.sogSaved, false);
