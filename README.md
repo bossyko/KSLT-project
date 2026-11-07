@@ -183,7 +183,12 @@ See [`.env.example`](.env.example) for all required variables.
 
 ## Live Demo
 
-[kslt.netlify.app](https://kslt.netlify.app)
+[tennis.kg](https://tennis.kg)
+
+<!-- Боевой адрес с 07.11.2026. Прежний `kslt.netlify.app` был здесь
+     единственной живой ссылкой на себя во всём продукте — в коде
+     страниц и функций его не осталось ни одного (замерено 07.11). -->
+
 
 ## Screenshots
 
