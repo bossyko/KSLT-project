@@ -353,8 +353,18 @@ test('подпись фильтра влезает в чип на английс
         return Array.from(document.querySelectorAll('.kslt-dd-toggle')).map(э => {
             const s = getComputedStyle(э);
             const к = э.getBoundingClientRect();
+            /* ПОДПИСЬ ЛЕЖИТ В СВОЁМ SPAN, А НЕ ТЕКСТОМ В КНОПКЕ (08.11).
+               В общем доме у чипа двое детей: `span.kslt-dd-toggle-label`
+               и `svg`. Прямых текстовых узлов нет вовсе, и прежний счёт
+               по `э.childNodes` давал НОЛЬ строк — проба падала «подпись
+               переносится на 0 строки», хотя подпись целая.
+               Замерено загрузкой: одна строка и запас по четыре пиксела
+               у всех трёх подписей.
+               Берётся подпись, если она есть, иначе сама кнопка — тогда
+               проба переживёт и обратный переезд. */
+            const подпись = э.querySelector('.kslt-dd-toggle-label') || э;
             let шир = 0, строк = 0;
-            Array.from(э.childNodes).forEach(n => {
+            Array.from(подпись.childNodes).forEach(n => {
                 if (n.nodeType !== 3 || !n.nodeValue.trim()) return;
                 const r = document.createRange();
                 r.selectNode(n);
