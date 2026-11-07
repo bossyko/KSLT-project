@@ -8,6 +8,15 @@
     var A = window.KSLT_ADMIN;
     var L = A.L;
 
+    /* ДРУЖЕСКИЙ ТУРНИР — ОДНО ОПРЕДЕЛЕНИЕ НА ВЕСЬ РАЗДЕЛ (07.11).
+       Спрашивает признак у дома через `A.безОчковЗаКатегорию`, а тот
+       читает `categories.is_rating`. Объявлено здесь, потому что зовут
+       из двух разных функций: настройки экрана и сборки данных. */
+    function дружескийТурнир() {
+        var поле = document.getElementById('adTrnCat');
+        return A.безОчковЗаКатегорию(поле ? поле.value : '');
+    }
+
     var trnEditingId = null;
     var trnEditingPublishedAt = null;
     var trnEditingStatus = null;
@@ -282,7 +291,8 @@
         var рейтинговых = 0, дружеских = 0;
         trnAllData.forEach(function(t) {
             if (t.status !== 'completed') return;
-            if (t.category_id === 'friendly') дружеских++; else рейтинговых++;
+            if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(t.category_id)) дружеских++;
+            else рейтинговых++;
         });
 
         var elTotal = document.getElementById('adTrnStatTotal');
@@ -1818,11 +1828,6 @@ function обновитьРасклад() {
            поймано прувером заморозки 28.09. Источника два: значение поля
            в форме и категория записи из базы, поэтому решает одна функция,
            а зовут её с разным доводом */
-        function дружескийТурнир() {
-            var поле = document.getElementById('adTrnCat');
-            return A.безОчковЗаКатегорию(поле ? поле.value : '');
-        }
-
         function toggleFormatDependentFields() {
             var fmt = document.getElementById('adTrnFormat').value;
             var isDbl = fmt === 'doubles' || fmt === 'mixed_doubles';
@@ -1853,10 +1858,17 @@ function обновитьРасклад() {
             // Взнос за парный турнир берут с пары, за одиночный — с игрока
             syncFeeHints();
 
+            /* ПОЛА НЕТ НЕ ТОЛЬКО У МИКСТА, НО И У НЕРЕЙТИНГОВОЙ КАТЕГОРИИ
+               (07.11, слово Кости про «Open Friendly»): «тут можно будет ПОЛ
+               убрать, так как без разницы кто, там все играют». Поле не
+               просто прячется — ЗНАЧЕНИЕ СТАВИТСЯ, потому что в базе
+               `tournaments.gender` обязателен (NOT NULL, CHECK
+               men/women/mixed). Спрячь мы поле пустым — турнир не
+               сохранился бы вовсе, и причина была бы не видна. */
             var genderField = document.getElementById('adTrnGender');
             var genderWrap = genderField ? genderField.closest('.ad-field') : null;
             if (genderWrap) {
-                if (fmt === 'mixed_doubles') {
+                if (fmt === 'mixed_doubles' || дружескийТурнир()) {
                     genderWrap.style.display = 'none';
                     genderField.value = 'mixed';
                 } else {
@@ -2203,7 +2215,11 @@ function обновитьРасклад() {
             start_time: document.getElementById('adTrnStartTime').value || null,
             registration_start: document.getElementById('adTrnRegStart').value || null,
             registration_end: document.getElementById('adTrnRegEnd').value || null,
-            gender: document.getElementById('adTrnFormat').value === 'mixed_doubles'
+            /* Тот же договор, что и на экране: микст и нерейтинговая
+               категория идут как `mixed`. Решает ОДНО место — то же
+               `дружескийТурнир()`, которым живёт видимость поля. */
+            gender: (document.getElementById('adTrnFormat').value === 'mixed_doubles'
+                     || дружескийТурнир())
                 ? 'mixed'
                 : (document.getElementById('adTrnGender').value || null),
             ntrp_min: (function() { var v = document.getElementById('adTrnNtrpMin').value; return v ? parseFloat(v) : null; })(),

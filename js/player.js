@@ -527,7 +527,7 @@
         if (t) {
             if (t.format === 'mixed_doubles') return 'mixed';
             if (t.format === 'doubles') return 'doubles';
-            if (t.category_id === 'friendly') return 'friendly';
+            if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(t.category_id)) return 'friendly';
         }
         return 'rating';
     }
@@ -2385,7 +2385,8 @@
                             if (row.closed_at) continue;
                             // Friendly в рейтинге не участвует: турниры и матчи
                             // записываются, очков за них нет
-                            if (row.category_id === 'friendly') continue;
+                            if (window.KSLT_RULES &&
+                                window.KSLT_RULES.нерейтинговая(row.category_id)) continue;
                             // Место считаем так же, как рейтинг: среди игроков
                             // того же пола. Категория в базе общая на оба
                             var место = window.KSLT_RULES && KSLT_RULES.местоВКатегории

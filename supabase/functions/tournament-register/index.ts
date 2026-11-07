@@ -170,7 +170,7 @@
       // ---- Турнир ----
       const { data: tournament } = await db
         .from('tournaments')
-        .select('id, title, category_id, gender, format, status, max_participants, reserved_spots, ntrp_min, ntrp_max, ntrp_combined_max, level_id')
+        .select('id, title, category_id, gender, format, status, max_participants, reserved_spots, ntrp_min, ntrp_max, ntrp_combined_max, level_id, categories(is_rating)')
         .eq('id', tournamentId)
         .single()
 
@@ -333,8 +333,18 @@
       // всех, а в сетку она не пойдёт, пока менеджер не решит. Женскую пару
       // в мужской парный или двух мужчин в микст заявляют осознанно, и
       // решать это человеку, а не проверке.
+      /* НЕРЕЙТИНГОВАЯ КАТЕГОРИЯ ЧИТАЕТСЯ ИЗ БАЗЫ, А НЕ ИЗ СЛОВА (07.11).
+         Признак держался на зашитом `'friendly'`, и вторая дружеская
+         категория — а её завели — стала бы для сервера рейтинговой:
+         включились бы отказ по полу и проверка разряда. Здесь СЕРВЕР —
+         источник истины: клиент показывает, а допускает он.
+         `is_rating IS NULL` считается рейтинговой: столбец появился позже
+         строк, и пустое значение у старых категорий значит «как раньше». */
+      const безРейтинга = tournament.categories
+                          ? tournament.categories.is_rating === false
+                          : tournament.category_id === 'friendly'
       const рейтинговый = tournament.format === 'singles' &&
-                          tournament.category_id !== 'friendly' && !!tournament.level_id
+                          !безРейтинга && !!tournament.level_id
 
       /* ПРИЧИН БЫВАЕТ НЕСКОЛЬКО РАЗОМ, и раньше их держал булев
          gender_confirmed — то есть одна. Пара может и не совпасть по полу,
@@ -379,7 +389,7 @@
       }
 
       const isDoubles = tournament.format === 'doubles' || tournament.format === 'mixed_doubles'
-      const isFriendly = tournament.category_id === 'friendly'
+      const isFriendly = безРейтинга
 
       // ---- NTRP ----
       if (isDoubles) {

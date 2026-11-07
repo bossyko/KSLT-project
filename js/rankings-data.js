@@ -26,6 +26,7 @@
             // Сильные категории сверху: Pro-Masters → Masters → Tour → Challenger → Futures
             var catResult = await client.from('categories').select('*').order('sort_order', { ascending: false });
             if (catResult.error || !catResult.data || catResult.data.length === 0) return null;
+            window.KSLT_RULES && window.KSLT_RULES.rememberCategories(catResult.data);
 
             // Рейтинг только одиночный: парные и микст очков не дают
             var plrResult = await client.from('players_public').select('*').order('points', { ascending: false });
@@ -98,7 +99,8 @@
             var result = {};
             var genders = ['men', 'women'];
             categories.forEach(function(cat) {
-                if (cat.is_rating === false || cat.id === 'friendly') return;
+                if (cat.is_rating === false) return;
+                if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(cat.id)) return;
                 var catName = KSLT_YAZYK.выбрать(cat.name_en || cat.name, cat.name_kg || cat.name, cat.name);
                 genders.forEach(function(g) {
                     // Разряды заданы списком, а не наличием людей: у мужчин
@@ -210,7 +212,7 @@
 
         var итог = { всего: 0 };
         Object.keys(в).forEach(function(cat) {
-            if (cat === 'friendly') return;
+            if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(cat)) return;
             итог[cat] = Object.keys(в[cat]).length;
             итог.всего += итог[cat];
         });

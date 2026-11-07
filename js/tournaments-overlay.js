@@ -58,7 +58,11 @@
         if (заголовок) {
             // «Friendly Weekend» — название самого разряда, как в админке и на
             // карточках. «Турниры Дружеские» звучало переводом с чужого языка
-            заголовок.textContent = category === 'friendly' ? имя
+            /* У нерейтинговой категории заголовок — её собственное имя:
+               «Турниры Open Friendly» звучит переводом с чужого. */
+            var безРейтинга = !!(window.KSLT_RULES &&
+                                 window.KSLT_RULES.нерейтинговая(category));
+            заголовок.textContent = безРейтинга ? имя
                 : (KSLT_YAZYK.выбрать(имя + ' Tournaments', имя + ' турнирлери', 'Турниры ' + имя));
         }
 
@@ -161,7 +165,7 @@
     async function loadHeroStats(category) {
         var statsBlock = document.querySelector('.tournament-hero-stats');
 
-        if (category === 'friendly') {
+        if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(category)) {
             // Friendly: show Total / Upcoming / Completed
             нарисоватьОбложку([
                 { id: 'statFriendlyTotal',     подпись: friendlyLabels.total },
@@ -171,7 +175,7 @@
             try {
                 var result = await client.from('tournaments')
                     .select('id, date_end, published_at')
-                    .eq('category_id', 'friendly');
+                    .eq('category_id', category);
                 /* ЗАПАСНОГО СЧЁТА НЕТ. Было: нет опубликованных — показываем
                    ВСЕ строки, то есть черновики. Ноль — законный ответ. */
                 var allT = (result.data || []).filter(function(t) { return t.published_at !== null; });
@@ -340,7 +344,9 @@
                 var cardStatus = cardStatusMap[effectiveStatus] || 'soon';
 
                 var gender = t.gender || '';
-                var genderLabel = (t.format !== 'mixed_doubles' && category !== 'friendly' && (gender === 'men' || gender === 'women'))
+                var показатьПол = !(window.KSLT_RULES &&
+                                    window.KSLT_RULES.нерейтинговая(category));
+                var genderLabel = (t.format !== 'mixed_doubles' && показатьПол && (gender === 'men' || gender === 'women'))
                     ? (gender === 'women'
                         ? (KSLT_YAZYK.выбрать('Women', 'Аялдар', 'Женский'))
                         : (KSLT_YAZYK.выбрать('Men', 'Эркектер', 'Мужской')))

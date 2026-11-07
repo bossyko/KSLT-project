@@ -624,7 +624,7 @@
     if (t) {
       if (t.format === 'mixed_doubles') return 'mixed';
       if (t.format === 'doubles') return 'doubles';
-      if (t.category_id === 'friendly') return 'friendly';
+      if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(t.category_id)) return 'friendly';
     }
     return 'rating';
   };

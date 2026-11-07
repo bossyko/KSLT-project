@@ -62,7 +62,10 @@
                    записываются, очков за них нет. То же правило, что в
                    доме графика (`kslt-grafik-dannye.js`). */
                 var свои = все.filter(function (r) {
-                    return r.player_id === игрок.id && r.category_id !== 'friendly';
+                    var рейтинговая = global.KSLT_RULES
+                        ? global.KSLT_RULES.рейтинговая(r.category_id)
+                        : r.category_id !== 'friendly';
+                    return r.player_id === игрок.id && рейтинговая;
                 });
 
                 /* Домашняя категория видна и без очков: игрок в ней уже

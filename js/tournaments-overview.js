@@ -42,6 +42,7 @@
                 .select('*')
                 .order('sort_order', { ascending: false });
             if (!res.data || res.data.length === 0) return;
+            window.KSLT_RULES && window.KSLT_RULES.rememberCategories(res.data);
 
             CATEGORIES = res.data.map(function(c) {
                 if (c.is_rating === false) NO_RATING[c.id] = true;

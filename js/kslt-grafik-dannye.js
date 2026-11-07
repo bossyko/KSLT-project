@@ -82,7 +82,9 @@
      */
     API.pointRows = function (rows) {
         return (rows || []).filter(function (r) {
-            return r.category_id && r.category_id !== 'friendly' && r.is_doubles !== true;
+            var рейтинговая = global.KSLT_RULES ? global.KSLT_RULES.рейтинговая(r.category_id)
+                                                : r.category_id !== 'friendly';
+            return r.category_id && рейтинговая && r.is_doubles !== true;
         });
     };
 

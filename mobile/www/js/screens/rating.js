@@ -38,7 +38,7 @@
     categoriesFromDB = RULES
       ? RULES.categoriesFor(currentGender, allCategories)
       : (allCategories || []).filter(function(c) {
-          return c.is_rating !== false && c.id !== 'friendly';
+          return c.is_rating !== false;
         });
 
     var found = categoriesFromDB.some(function(c) { return c.id === currentCatId; });

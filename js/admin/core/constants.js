@@ -2222,6 +2222,7 @@
         if (!A.client) return;
         var result = await A.client.from('categories').select('*').order('sort_order', { ascending: true });
         var data = result.data || [];
+        window.KSLT_RULES && window.KSLT_RULES.rememberCategories(data);
         // Clear and push (keep reference)
         A.cachedCategories.length = 0;
         for (var i = 0; i < data.length; i++) {

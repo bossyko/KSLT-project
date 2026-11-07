@@ -1674,13 +1674,18 @@
            действующая. Friendly в рейтинге не участвует вовсе: турниры и
            матчи записываются, очков за них нет. */
         var мои = (pcRes.data || []).filter(function(r) {
-            return r.category_id !== 'friendly';
+            return window.KSLT_RULES ? window.KSLT_RULES.рейтинговая(r.category_id)
+                                     : r.category_id !== 'friendly';
         });
         if (!мои.length) return [];
 
         /* ИМЯ КАТЕГОРИИ — ПО ЯЗЫКУ СТРАНИЦЫ. Это и была та самая правка
            на шве: `select('id, name')` отдавал русское имя на все три. */
-        var спр = await client.from('categories').select('id, name, name_en, name_kg');
+        /* `is_rating` берётся вместе с именами: без него кабинет не
+           отличит дружескую категорию от рейтинговой и посчитает её
+           очки своей. */
+        var спр = await client.from('categories').select('id, name, name_en, name_kg, is_rating');
+        window.KSLT_RULES && window.KSLT_RULES.rememberCategories(спр.data || []);
         var имена = {};
         (спр.data || []).forEach(function(c) {
             имена[c.id] = KSLT_YAZYK.выбрать(c.name_en || c.name,
@@ -3450,7 +3455,7 @@
         if (t) {
             if (t.format === 'mixed_doubles') return 'mixed';
             if (t.format === 'doubles') return 'doubles';
-            if (t.category_id === 'friendly') return 'friendly';
+            if (window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(t.category_id)) return 'friendly';
         }
         return 'rating';
     }

@@ -1671,13 +1671,13 @@
         // задним числом турнир, который игрок когда-то сыграл, законно
         var allowed = {};
         (rows || []).forEach(function(r) {
-            if (r.category_id !== 'friendly') allowed[r.category_id] = true;
+            if (!A.безОчковЗаКатегорию(r.category_id)) allowed[r.category_id] = true;
         });
-        if (homeId && homeId !== 'friendly') allowed[homeId] = true;
+        if (homeId && !A.безОчковЗаКатегорию(homeId)) allowed[homeId] = true;
 
         var html = '<option value="">' + L.selectCategoryTrn + '</option>';
         A.cachedCategories.forEach(function(c) {
-            if (c.id === 'friendly') return;
+            if (A.безОчковЗаКатегорию(c.id)) return;
             var name = c.name;
             var off = !allowed[c.id];
             html += '<option value="' + c.id + '"' + (off ? ' disabled' : '') + '>' +
@@ -1697,7 +1697,7 @@
         // Friendly в рейтинге не участвует: турниры и матчи записываются,
         // очков за них нет
         var rows = (pcRes.data || []).filter(function(r) {
-            return r.category_id !== 'friendly';
+            return !A.безОчковЗаКатегорию(r.category_id);
         });
 
         fillRhCategories(pcRes.data || [], item && item.category_id);

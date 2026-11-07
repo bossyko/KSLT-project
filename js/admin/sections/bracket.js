@@ -2098,7 +2098,8 @@
     }
 
     function isFriendlyTournament(tournament) {
-        return !!(tournament && tournament.category_id === 'friendly');
+        return !!(tournament && window.KSLT_RULES &&
+                  window.KSLT_RULES.нерейтинговая(tournament.category_id));
     }
 
     /**
@@ -2157,17 +2158,24 @@
     var _лестницаКэш = null;
     async function лестницаРазрядов() {
         if (_лестницаКэш) return _лестницаКэш;
-        var нерейтинговые = (window.KSLT_RULES && KSLT_RULES.NON_RATING) || ['friendly'];
+        /* СПИСОК БОЛЬШЕ НЕ НУЖЕН: признак спрашивается у дома по каждой
+           категории — он знает и то, что сказала база, и запас. */
+        var нерейтинговая = function (ид) {
+            return !!(window.KSLT_RULES && window.KSLT_RULES.нерейтинговая(ид));
+        };
         var список = [], ступени = {}, изБазы = false;
         try {
+            /* `is_rating` БЕРЁТСЯ ВМЕСТЕ СО СТУПЕНЬЮ: без него фильтр
+               ниже сравнивал бы `undefined !== false` и пропускал всех.
+               Признак отдаётся дому — он один на продукт. */
             var ответ = await A.client.from('categories')
-                .select('id, sort_order')
+                .select('id, sort_order, is_rating')
                 .order('sort_order', { ascending: false });
             var строки = ответ && ответ.data ? ответ.data : [];
+            window.KSLT_RULES && window.KSLT_RULES.rememberCategories(строки);
             строки.forEach(function (к) { ступени[к.id] = Number(к.sort_order) || 0; });
             список = строки
-                .filter(function (к) { return нерейтинговые.indexOf(к.id) === -1; })
-                .filter(function (к) { return к.is_rating !== false; })
+                .filter(function (к) { return !нерейтинговая(к.id); })
                 .map(function (к) { return к.id; });
             изБазы = список.length > 0;
         } catch (e) { изБазы = false; }
