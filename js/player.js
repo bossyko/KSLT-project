@@ -407,10 +407,16 @@
         // Каждый способ связи открывается отдельно: у человека может быть
         // рабочий телеграм и личный WhatsApp, и смешивать их нельзя
         var phone = contacts.show_phone ? (contacts.phone || '') : '';
-        // WhatsApp живёт на своём номере, если он указан, иначе на основном.
-        // Разрешение отдельное: номер можно скрыть, а WhatsApp оставить.
+        /* WhatsApp живёт на своём номере, если он указан. Разрешение
+           отдельное: номер можно скрыть, а WhatsApp оставить — но тогда
+           WhatsApp показывается ТОЛЬКО со своим номером. Падение на
+           основной телефон при выключенном `show_phone` выносило
+           скрытый номер в ссылку `wa.me/<номер>`; заслон стоит в базе
+           (`sql/схема/vacap-ne-vydayot-skrytyy-nomer-06nov.sql`), здесь
+           он ВТОРОЙ рубеж — на случай отрисовки из старого ответа. */
         var wa = contacts.show_whatsapp
-            ? (contacts.whatsapp_phone || contacts.phone || '')
+            ? (contacts.whatsapp_phone ||
+               (contacts.show_phone ? (contacts.phone || '') : ''))
             : '';
         var tg = contacts.show_telegram ? (contacts.telegram || '') : '';
         var ig = contacts.show_instagram ? (contacts.instagram || '') : '';

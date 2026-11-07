@@ -375,7 +375,12 @@
          старого ответа, — но она больше не единственная. */
       var contacts = _zablokirovan ? {} : (_contacts || {});
       var cPhone = contacts.show_phone ? (contacts.phone || '') : '';
-      var cWa = contacts.show_whatsapp ? (contacts.whatsapp_phone || contacts.phone || '') : '';
+      /* ВТОРОЙ РУБЕЖ: основной телефон подставляется под WhatsApp только
+         тогда, когда он и сам разрешён к показу. Первый рубеж — в базе,
+         `sql/схема/vacap-ne-vydayot-skrytyy-nomer-06nov.sql`. */
+      var cWa = contacts.show_whatsapp
+        ? (contacts.whatsapp_phone || (contacts.show_phone ? (contacts.phone || '') : ''))
+        : '';
       var cTg = contacts.show_telegram ? (contacts.telegram || '') : '';
       var cIg = contacts.show_instagram ? (contacts.instagram || '') : '';
       var hasContact = cPhone || cWa || cTg || cIg;
