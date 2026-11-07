@@ -93,6 +93,24 @@
     'sog.minor':   { ru: 'Вам меньше 18 лет. Вы можете дать согласие самостоятельно. Перед публикацией фото и видео с вами рекомендуем обсудить это с родителями.', en: 'You are under 18. You may give consent yourself. Before photos and videos of you are published, we recommend discussing it with your parents.', kg: 'Сизге 18 жаш толо элек. Макулдукту өзүңүз бере аласыз. Сиз тартылган сүрөт жана видео жарыялангандан мурун ата-энеңиз менен талкуулоону сунуштайбыз.' },
     'sog.nomail':  { ru: 'Вы не будете получать письма о заявках, сетках и матчах — они будут видны только в кабинете.', en: 'You will not receive e-mails about entries, draws and matches — they will be shown only in your account.', kg: 'Арыздар, торчолор жана оюндар жөнүндө каттарды албайсыз — алар кабинетиңизде гана көрсөтүлөт.' },
 
+    /* МОИ ДАННЫЕ (Ю4). Обещано в политике 9.2 и Соглашении 11.2. */
+    'dat.title':    { ru: 'Мои данные', en: 'My data', kg: 'Менин маалыматтарым' },
+    'dat.intro':    { ru: 'Ниже — что мы о вас храним. Полную копию в машиночитаемом виде можно скачать в любой момент (ст. 73 и 76 Цифрового кодекса).', en: 'Below is what we store about you. You can download a full copy in a machine-readable format at any time (Articles 73 and 76 of the Digital Code).', kg: 'Төмөндө сиз жөнүндө сактала турган маалыматтар. Толук көчүрмөнү каалаган убакта машина окуй турган форматта жүктөп алсаңыз болот (Санариптик кодекстин 73 жана 76-беренелери).' },
+    'dat.download': { ru: 'Скачать копию (JSON)', en: 'Download a copy (JSON)', kg: 'Көчүрмөнү жүктөп алуу (JSON)' },
+    'dat.error':    { ru: 'Не удалось собрать данные', en: 'Could not collect the data', kg: 'Маалыматтарды чогултуу мүмкүн болгон жок' },
+    'dat.учётная_запись':    { ru: 'Учётная запись', en: 'Account', kg: 'Эсептик жазуу' },
+    'dat.карточка_игрока':   { ru: 'Карточка игрока', en: 'Player card', kg: 'Оюнчунун карточкасы' },
+    'dat.согласия':          { ru: 'Журнал согласий', en: 'Consent log', kg: 'Макулдуктардын журналы' },
+    'dat.заявки_на_турниры': { ru: 'Заявки на турниры', en: 'Tournament entries', kg: 'Мелдештерге арыздар' },
+    'dat.результаты':        { ru: 'Результаты', en: 'Results', kg: 'Жыйынтыктар' },
+    'dat.история_рейтинга':  { ru: 'История рейтинга', en: 'Rating history', kg: 'Рейтингдин тарыхы' },
+    'dat.членство':          { ru: 'Членство', en: 'Membership', kg: 'Мүчөлүк' },
+    'dat.платежи':           { ru: 'Платежи', en: 'Payments', kg: 'Төлөмдөр' },
+    'dat.баллы':             { ru: 'Баллы лояльности', en: 'Loyalty points', kg: 'Лоялдуулук упайлары' },
+    'dat.ваучеры':           { ru: 'Ваучеры', en: 'Vouchers', kg: 'Ваучерлер' },
+    'dat.устройства':        { ru: 'Устройства', en: 'Devices', kg: 'Түзмөктөр' },
+    'dat.уведомления':       { ru: 'Уведомления', en: 'Notifications', kg: 'Билдирүүлөр' },
+
     // === Home screen ===
     'home.live':            { ru: 'Live',            en: 'Live',             kg: 'Live' },
     'home.watch':           { ru: 'Смотреть',        en: 'Watch',            kg: 'Көрүү' },

@@ -7445,3 +7445,34 @@ select.prof-field-input { color: var(--text); }
 .db-notif-toggle input:checked + .db-notif-slider::after {
   transform: translateX(18px);
 }
+
+/* МОИ ДАННЫЕ (Ю4) — тот же вид, что в кабинете сайта: разметку рисует
+   общий дом `js/kslt-moi-dannye.js`, побайтово тот же. */
+.db-mydata-intro {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  margin: 0 0 var(--space-4);
+}
+
+.db-mydata-list { list-style: none; margin: 0 0 var(--space-4); padding: 0; }
+
+.db-mydata-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+
+.db-mydata-row:last-child { border-bottom: none; }
+
+.db-mydata-name { font-size: var(--fs-sm); color: var(--text-secondary); }
+
+.db-mydata-count {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}

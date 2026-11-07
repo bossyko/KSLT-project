@@ -5684,3 +5684,37 @@ select:-webkit-autofill {
     width: 100%;
     margin: auto;
 }
+
+/* МОИ ДАННЫЕ (Ю4). Сводка «что о вас хранится»: раздел и число
+   записей. Сами значения человек видит в скачанном файле — полтора
+   десятка таблиц на экране не показывают ничего. */
+.db-mydata-intro {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    margin: 0 0 var(--space-4);
+}
+
+.db-mydata-list { list-style: none; margin: 0 0 var(--space-4); padding: 0; }
+
+.db-mydata-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+
+.db-mydata-row:last-child { border-bottom: none; }
+
+.db-mydata-name { font-size: var(--fs-sm); color: var(--text-secondary); }
+
+/* ЧИСЛО — ЦИФРАМИ ОДНОЙ ШИРИНЫ: столбец справа не должен прыгать от
+   строки к строке. */
+.db-mydata-count {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}

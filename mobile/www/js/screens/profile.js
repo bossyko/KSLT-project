@@ -291,6 +291,9 @@
     html += profileRow('green',
       '<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
       I18N.t('sog.title'), '', '', true, 'profConsentRow');
+    html += profileRow('purple',
+      '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
+      I18N.t('dat.title'), '', '', true, 'profMyDataRow');
     html += profileRow('blue',
       '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>',
       I18N.t('profile.notifications'), '', '', true, 'profNotifyRow');
@@ -506,6 +509,7 @@
     bindRowClick('profPaymentsRow', showPayments);
     bindRowClick('profEditRow', showEditProfile);
     bindRowClick('profConsentRow', показатьСогласия);
+    bindRowClick('profMyDataRow', показатьМоиДанные);
     bindRowClick('profNotifyRow', showNotifications);
     bindRowClick('profPasswordRow', showPasswordChange);
     bindRowClick('profTelegramRow', showTelegramConnect);
@@ -1768,6 +1772,39 @@
       }
       if (window.KSLT_APP) window.KSLT_APP.toast(I18N.t('sog.saved'));
     });
+  }
+
+  /**
+   * МОИ ДАННЫЕ (Ю4) В ПРИЛОЖЕНИИ.
+   * Собирает база — та же функция `мои_данные()`, что и на сайте.
+   * Здесь словарь приложения и отдача файла.
+   */
+  async function показатьМоиДанные() {
+    var D = window.KSLT_MOI_DANNYE;
+    if (!D) return;
+
+    var Т = { datTitle: I18N.t('dat.title'), datIntro: I18N.t('dat.intro'),
+              datDownload: I18N.t('dat.download') };
+    D.РАЗДЕЛЫ.forEach(function (р) { Т['dat_' + р] = I18N.t('dat.' + р); });
+
+    var ov = openSubOverlay(I18N.t('dat.title'),
+      '<div class="loading-center"><div class="spinner"></div></div>');
+    var содержимое = ov.querySelector('.prof-sub-content');
+
+    var данные;
+    try {
+      данные = await D.запросить(window.supabaseClient);
+    } catch (е) {
+      содержимое.innerHTML = '<p class="db-mydata-intro">' +
+        esc(I18N.t('dat.error') + ': ' + е.message) + '</p>';
+      return;
+    }
+
+    содержимое.innerHTML = D.разметка(Т, данные);
+    var кнопка = содержимое.querySelector('.db-mydata-save');
+    if (кнопка) {
+      кнопка.addEventListener('click', function () { D.скачать(данные); });
+    }
   }
 
   function showNotifications() {

@@ -318,6 +318,16 @@
         sogSaved: 'Choice saved',
         sogMinor: 'You are under 18. You may give consent yourself. Before photos and videos of you are published, we recommend discussing it with your parents.',
         sogNoMail: 'You will not receive e-mails about entries, draws and matches — they will be shown only in your account.',
+        /* МОИ ДАННЫЕ (Ю4). Обещано в политике 9.2 и Соглашении 11.2. */
+        datTitle: 'My data', datDownload: 'Download a copy (JSON)',
+        datIntro: 'Below is what we store about you. You can download a full copy in a machine-readable format at any time (Articles 73 and 76 of the Digital Code).',
+        datError: 'Could not collect the data', datEmpty: 'no records',
+        'dat_учётная_запись': 'Account', 'dat_карточка_игрока': 'Player card',
+        'dat_согласия': 'Consent log', 'dat_заявки_на_турниры': 'Tournament entries',
+        'dat_результаты': 'Results', 'dat_история_рейтинга': 'Rating history',
+        'dat_членство': 'Membership', 'dat_платежи': 'Payments',
+        'dat_баллы': 'Loyalty points', 'dat_ваучеры': 'Vouchers',
+        'dat_устройства': 'Devices', 'dat_уведомления': 'Notifications',
         notifMembership: 'Membership',
         notifTournaments: 'Tournaments',
         notifMatches: 'Matches',
@@ -658,6 +668,15 @@
         sogSaved: 'Тандоо сакталды',
         sogMinor: 'Сизге 18 жаш толо элек. Макулдукту өзүңүз бере аласыз. Сиз тартылган сүрөт жана видео жарыялангандан мурун ата-энеңиз менен талкуулоону сунуштайбыз.',
         sogNoMail: 'Арыздар, торчолор жана оюндар жөнүндө каттарды албайсыз — алар кабинетиңизде гана көрсөтүлөт.',
+        datTitle: 'Менин маалыматтарым', datDownload: 'Көчүрмөнү жүктөп алуу (JSON)',
+        datIntro: 'Төмөндө сиз жөнүндө сактала турган маалыматтар. Толук көчүрмөнү каалаган убакта машина окуй турган форматта жүктөп алсаңыз болот (Санариптик кодекстин 73 жана 76-беренелери).',
+        datError: 'Маалыматтарды чогултуу мүмкүн болгон жок', datEmpty: 'жазуу жок',
+        'dat_учётная_запись': 'Эсептик жазуу', 'dat_карточка_игрока': 'Оюнчунун карточкасы',
+        'dat_согласия': 'Макулдуктардын журналы', 'dat_заявки_на_турниры': 'Мелдештерге арыздар',
+        'dat_результаты': 'Жыйынтыктар', 'dat_история_рейтинга': 'Рейтингдин тарыхы',
+        'dat_членство': 'Мүчөлүк', 'dat_платежи': 'Төлөмдөр',
+        'dat_баллы': 'Лоялдуулук упайлары', 'dat_ваучеры': 'Ваучерлер',
+        'dat_устройства': 'Түзмөктөр', 'dat_уведомления': 'Билдирүүлөр',
         notifMembership: 'Мүчөлүк',
         notifTournaments: 'Мелдештер',
         notifMatches: 'Матчтар',
@@ -995,6 +1014,15 @@
         sogSaved: 'Выбор сохранён',
         sogMinor: 'Вам меньше 18 лет. Вы можете дать согласие самостоятельно. Перед публикацией фото и видео с вами рекомендуем обсудить это с родителями.',
         sogNoMail: 'Вы не будете получать письма о заявках, сетках и матчах — они будут видны только в кабинете.',
+        datTitle: 'Мои данные', datDownload: 'Скачать копию (JSON)',
+        datIntro: 'Ниже — что мы о вас храним. Полную копию в машиночитаемом виде можно скачать в любой момент (ст. 73 и 76 Цифрового кодекса).',
+        datError: 'Не удалось собрать данные', datEmpty: 'записей нет',
+        'dat_учётная_запись': 'Учётная запись', 'dat_карточка_игрока': 'Карточка игрока',
+        'dat_согласия': 'Журнал согласий', 'dat_заявки_на_турниры': 'Заявки на турниры',
+        'dat_результаты': 'Результаты', 'dat_история_рейтинга': 'История рейтинга',
+        'dat_членство': 'Членство', 'dat_платежи': 'Платежи',
+        'dat_баллы': 'Баллы лояльности', 'dat_ваучеры': 'Ваучеры',
+        'dat_устройства': 'Устройства', 'dat_уведомления': 'Уведомления',
         notifMembership: 'Членство',
         notifTournaments: 'Турниры',
         notifMatches: 'Матчи',
@@ -6768,6 +6796,39 @@
         });
     }
 
+    /* МОИ ДАННЫЕ (Ю4). Собирает база — `public.мои_данные()`, одна
+       функция на оба продукта. Клиент только показывает и отдаёт файл. */
+    async function рисоватьМоиДанные() {
+        var карточка = document.getElementById('dbMyDataCard');
+        if (!карточка || !window.KSLT_MOI_DANNYE) return;
+
+        var Т = {};
+        for (var к in L) { if (Object.prototype.hasOwnProperty.call(L, к)) Т[к] = L[к]; }
+
+        var данные;
+        try {
+            данные = await window.KSLT_MOI_DANNYE.запросить(window.supabaseClient);
+        } catch (е) {
+            /* ОШИБКУ ПОКАЗЫВАЕМ НА МЕСТЕ КАРТОЧКИ, а не тостом: человек
+               пришёл за своими данными, и пустое место без объяснения
+               читается как «их нет». */
+            карточка.innerHTML = '<div class="db-card-title">' + L.datTitle + '</div>' +
+                '<p class="db-mydata-intro">' + L.datError + ': ' +
+                window.KSLT_экранировать(е.message) + '</p>';
+            return;
+        }
+
+        карточка.outerHTML = window.KSLT_MOI_DANNYE.разметка(Т, данные);
+
+        var новая = document.querySelector('.db-mydata-card');
+        var кнопка = новая && новая.querySelector('.db-mydata-save');
+        if (кнопка) {
+            кнопка.addEventListener('click', function () {
+                window.KSLT_MOI_DANNYE.скачать(данные);
+            });
+        }
+    }
+
     function renderSettings(user) {
         var container = document.getElementById('db-settings');
         if (!container) return;
@@ -6824,6 +6885,11 @@
                который не согласился. */
             '<div class="db-card db-settings-section" id="dbConsentCard"></div>' +
 
+            /* МОИ ДАННЫЕ — рядом с согласиями: оба про то, что человек
+               знает и решает о своих данных, и искать их он будет в
+               одном месте. */
+            '<div class="db-card db-settings-section" id="dbMyDataCard"></div>' +
+
             buildNotifySection() +
 
             /* ЗАБЛОКИРОВАННЫЕ — НАСТРОЙКА ОБЩЕНИЯ, поэтому стоит ДО
@@ -6841,6 +6907,7 @@
         рисоватьУстройства();
         рисоватьБлокировки();
         рисоватьСогласия();
+        рисоватьМоиДанные();
 
         // Password rules validation
         var pwRules = {
