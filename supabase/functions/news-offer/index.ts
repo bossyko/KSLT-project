@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  const cronSecret = Deno.env.get('CRON_SECRET') || ''
   const authHeader = req.headers.get('Authorization') || ''
   /* РАВЕНСТВО, А НЕ ВХОЖДЕНИЕ, И ОТКАЗ НА ПУСТОМ КЛЮЧЕ.
        Было `authHeader.includes(serviceKey)`. При пустом serviceKey
@@ -33,9 +34,19 @@ Deno.serve(async (req) => {
        служебный ключ удалят, функция пустила бы кого угодно.
        Принимаются обе формы, которые реально шлют свои же функции:
        `Bearer <ключ>` и голый ключ. */
-  if (!(serviceKey !== '' &&
-          (authHeader === 'Bearer ' + serviceKey || authHeader === serviceKey))) {
-    return json({ error: 'Unauthorized — service role only' }, 401)
+  /* ПРИНИМАЕТСЯ И CRON_SECRET — 07.11.
+     Задания по расписанию ходят через `public.позвать_функцию`, которая
+     шлёт ОДИН секрет из хранилища Vault. Семь функций сверяют его с
+     `CRON_SECRET`, а эти две сверяли только со служебным ключом — и
+     отвечали 401 (померено в `net._http_response`, 06.11).
+     Беда была не видна, потому что остальные задания отвечали 200:
+     ФУНКЦИЯ, КОТОРАЯ НЕ ПРОВЕРЯЕТ КЛЮЧ, НЕ ЗАМЕЧАЕТ, ЧТО КЛЮЧ НЕ ТОТ.
+     Теперь на одно расписание один секрет, как у остальных семи. */
+  const isCron = cronSecret !== '' && authHeader === `Bearer ${cronSecret}`
+  const isServiceRole = serviceKey !== '' &&
+          (authHeader === 'Bearer ' + serviceKey || authHeader === serviceKey)
+  if (!isCron && !isServiceRole) {
+    return json({ error: 'Unauthorized — service role or cron secret only' }, 401)
   }
 
   const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
