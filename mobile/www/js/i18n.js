@@ -678,6 +678,14 @@
     'profile.firstName':      { ru: 'Имя',       en: 'First name', kg: 'Аты' },
     'profile.phoneLbl':       { ru: 'Телефон',   en: 'Phone',      kg: 'Телефон' },
     'profile.gender':         { ru: 'Пол',       en: 'Gender',     kg: 'Жынысы' },
+    /* ДАТА РОЖДЕНИЯ — ПОЛЕ КАБИНЕТА, КАК НА САЙТЕ (06.11). В приложении
+       её не спрашивали нигде: у вошедших через приложение поле пустое,
+       а те же люди на сайте его видят и заполняют. Одна база, два
+       кабинета — данные расходились молча. */
+    'profile.birthday':       { ru: 'Дата рождения', en: 'Date of birth', kg: 'Туулган күнү' },
+    'profile.birthDay':       { ru: 'День',      en: 'Day',        kg: 'Күн' },
+    'profile.birthMonth':     { ru: 'Месяц',     en: 'Month',      kg: 'Ай' },
+    'profile.birthYear':      { ru: 'Год',       en: 'Year',       kg: 'Жыл' },
     'profile.genderNone':     { ru: 'Не указан', en: 'Not specified', kg: 'Көрсөтүлгөн эмес' },
     'profile.genderMale':     { ru: 'Мужской',   en: 'Male',       kg: 'Эркек' },
     'score.alreadyDone': { ru: 'Счёт уже подтверждён', en: 'The score is already confirmed', kg: 'Эсеп мурун ырасталган' },

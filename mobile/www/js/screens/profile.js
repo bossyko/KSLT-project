@@ -1419,6 +1419,29 @@
     html += '<option value="women"' + (p.gender === 'women' ? ' selected' : '') + '>' + I18N.t('profile.genderFemale') + '</option>';
     html += '</select></div>';
 
+    /* ДАТА РОЖДЕНИЯ — ТАК ЖЕ, КАК НА САЙТЕ (`js/dashboard.js:2141`):
+       день и месяц списками, год числом, и ни одно поле не обязательно.
+       До 06.11 приложение не спрашивало её вовсе, и у вошедших через
+       приложение она оставалась пустой — при том что те же люди на
+       сайте это поле видят. Ориентир по функционалу — сайт. */
+    var дней = '<option value="">' + I18N.t('profile.birthDay') + '</option>';
+    for (var д = 1; д <= 31; д++) {
+        дней += '<option value="' + д + '"' + (p.birth_day === д ? ' selected' : '') + '>' + д + '</option>';
+    }
+    var мес = '<option value="">' + I18N.t('profile.birthMonth') + '</option>';
+    for (var м = 1; м <= 12; м++) {
+        мес += '<option value="' + м + '"' + (p.birth_month === м ? ' selected' : '') + '>' +
+               I18N.t('month.' + (м - 1)) + '</option>';
+    }
+    html += '<div class="prof-field">';
+    html += '<label class="prof-field-label">' + I18N.t('profile.birthday') + '</label>';
+    html += '<div class="prof-birth-row">';
+    html += '<select class="prof-field-input" id="profBirthDay">' + дней + '</select>';
+    html += '<select class="prof-field-input" id="profBirthMonth">' + мес + '</select>';
+    html += '<input class="prof-field-input" type="number" id="profBirthYear" inputmode="numeric" value="' +
+            esc(p.birth_year || '') + '" placeholder="' + I18N.t('profile.birthYear') + '">';
+    html += '</div></div>';
+
     // Соцсети: у каждой своё разрешение — телеграм может быть рабочий,
     // инстаграм личный, и открывать их одной галочкой неправильно
     html += '<div class="prof-field">';
@@ -1471,6 +1494,17 @@
         ? KSLT_PHONE.join(waCountry, waRaw)
         : '';
       var gender = document.getElementById('profGender').value;
+      /* ПУСТОЕ ПОЛЕ — ЭТО `null`, А НЕ НОЛЬ. Пустая строка в числовом
+         столбце превратилась бы в 0, и «нулевой день рождения» потом
+         пришлось бы отличать от незаполненного. */
+      var чис = function (id) {
+          var з = (document.getElementById(id) || {}).value;
+          var н = parseInt(з, 10);
+          return з === '' || isNaN(н) ? null : н;
+      };
+      var birthDay = чис('profBirthDay');
+      var birthMonth = чис('profBirthMonth');
+      var birthYear = чис('profBirthYear');
       var fullName = (fn + ' ' + ln).trim();   // «Имя Фамилия», как на сайте
 
       // Instagram / Telegram
@@ -1512,6 +1546,9 @@
           whatsapp_phone: waNumber || null,
           whatsapp_country: waNumber ? waCountry : null,
           gender: gender,
+          birth_day: birthDay,
+          birth_month: birthMonth,
+          birth_year: birthYear,
           instagram: instagram,
           telegram: telegram
         })
@@ -1532,6 +1569,9 @@
             _profile.full_name = fullName;
             _profile.phone = phone;
             _profile.gender = gender;
+            _profile.birth_day = birthDay;
+            _profile.birth_month = birthMonth;
+            _profile.birth_year = birthYear;
             _profile.instagram = instagram;
             _profile.telegram = telegram;
             window.KSLT_AUTH.currentProfile = _profile;
