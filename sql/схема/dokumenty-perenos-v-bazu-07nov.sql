@@ -1029,6 +1029,950 @@ ON CONFLICT (slug) DO UPDATE SET
     title_en = COALESCE(public.site_documents.title_en, EXCLUDED.title_en),
     title_kg = COALESCE(public.site_documents.title_kg, EXCLUDED.title_kg);
 
+-- ---- privacy ----------------------------------------------------
+INSERT INTO public.site_documents (slug, title, title_en, title_kg, body, body_en, body_kg)
+VALUES ('privacy',
+        NULL, NULL, NULL,
+        $kslt$            <!-- ВЫЖИМКА. Не заменяет документ и прямо об этом говорит: человек
+                 должен понимать, что читает пересказ, а не текст, имеющий силу. -->
+            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">Утверждено приказом руководителя ОФ «КСЛТ» № 1 от 3 ноября 2026 г.</p>
+                <p class="ip-doc-approved-line">Редакция от 3 ноября 2026 г.</p>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <p class="ip-doc-lead">Настоящая Политика определяет порядок обработки персональных данных пользователей сайта <a href="https://tennis.kg">tennis.kg</a> и мобильных приложений «KSLT Tennis». Полный текст приведён ниже и имеет силу целиком.</p>
+            </div>
+
+            <div class="ip-doc-gist ip-fade-in">
+                <div class="ip-doc-gist-title">Коротко о главном</div>
+                <p class="ip-doc-gist-note">Это краткое изложение для удобства чтения. Оно не заменяет документ: действует полный текст ниже.</p>
+                <ul class="ip-doc-gist-list">
+                    <li><strong>Что собираем.</strong> Имя и фамилию, почту, дату рождения, пол — без них нельзя вести рейтинг и составлять сетки. Телефон и фото — по желанию.</li>
+                    <li><strong>Что видно всем.</strong> Имя, фото, категория, место и очки в рейтинге, результаты матчей. Почта, дата рождения и платежи не публикуются никогда.</li>
+                    <li><strong>Телефон и Telegram.</strong> Показываются другим игрокам только если вы сами включили это в профиле, и выключаются там же.</li>
+                    <li><strong>Кому передаём.</strong> Supabase, Google, Telegram, Resend — чтобы работали база, вход, уведомления и письма. Данные не продаются и не используются для чужой рекламы.</li>
+                    <li><strong>Удаление аккаунта.</strong> В профиле или письмом. 30 дней на возврат, потом окончательно; результаты турниров остаются в протоколах.</li>
+                    <li><strong>Ваши права.</strong> Получить свои данные, исправить, забрать копию, отозвать согласие, возразить, пожаловаться регулятору. Ответ — до 7 рабочих дней.</li>
+                </ul>
+            </div>
+
+            <!-- Оглавление: якоря внутри раскрывашек, поэтому переход их открывает —
+                 за это отвечает обработчик в конце страницы. -->
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Содержание</div>
+                <ol class="ip-toc-list">
+                    <li><a href="#pp-1">Общие положения</a></li>
+                    <li><a href="#pp-2">Сведения о владельце персональных записей</a></li>
+                    <li><a href="#pp-3">Какие данные мы обрабатываем, зачем и на каком основании</a></li>
+                    <li><a href="#pp-4">Публичная информация</a></li>
+                    <li><a href="#pp-5">Автоматическое принятие решений</a></li>
+                    <li><a href="#pp-6">Кому передаются данные</a></li>
+                    <li><a href="#pp-7">Трансграничная передача</a></li>
+                    <li><a href="#pp-8">Сроки хранения</a></li>
+                    <li><a href="#pp-9">Права пользователя</a></li>
+                    <li><a href="#pp-10">Удаление учётной записи</a></li>
+                    <li><a href="#pp-11">Защита данных</a></li>
+                    <li><a href="#pp-12">Дети</a></li>
+                    <li><a href="#pp-13">Cookie и локальное хранилище</a></li>
+                    <li><a href="#pp-14">Изменение Политики</a></li>
+                    <li><a href="#pp-15">Контакты</a></li>
+                </ol>
+                <button type="button" class="ip-doc-expand" data-doc-expand>Раскрыть все разделы</button>
+            </div>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-1">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">01</span>Общие положения</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>1.1.</strong> Настоящая Политика определяет, какие персональные данные пользователей обрабатывает Общественный фонд «Кыргызстанское сообщество любителей тенниса» (далее — КСЛТ, «мы»), в каких целях и на каких основаниях, кому они передаются, как долго хранятся и какие права есть у пользователей. Политика применяется к сайту <a href="https://tennis.kg">tennis.kg</a> (далее — Сайт), мобильным приложениям «KSLT Tennis» для Android и iOS (далее — Приложение) и связанным с ними сервисам: рейтингу, турнирам, баттлам, поиску партнёра, каталогам кортов и тренеров, новостям, Telegram-боту и рассылкам (вместе — Сервис).</p>
+                    <p><strong>1.2.</strong> Политика разработана в соответствии с Цифровым кодексом Кыргызской Республики от 31 июля 2025 года № 178 (далее — Цифровой кодекс), в том числе главой 11 «Обработка персональных данных», статьями 33, 44, 73–89 и 114–120. С 5 февраля 2026 года Цифровой кодекс заменил Закон Кыргызской Республики «Об информации персонального характера».</p>
+                    <p><strong>1.3.</strong> Термины используются в значениях, установленных Цифровым кодексом. Персональные данные — цифровые данные, содержащие информацию о физическом лице, которое может быть по ним идентифицировано. Обработка — любое действие с данными: сбор, запись, хранение, изменение, использование, передача, обезличивание, удаление и т.п. Пользователь — физическое лицо, использующее Сервис (субъект персональных данных).</p>
+                    <p><strong>1.4.</strong> КСЛТ является владельцем персональных записей, то есть лицом, которое определяет цели и способы обработки персональных данных пользователей Сервиса.</p>
+                    <p><strong>1.5.</strong> Политика доступна до регистрации и в любой момент после неё: на Сайте, в Приложении (раздел «Профиль» → «Документы») и на страницах Приложения в Google Play и App Store. Её можно сохранить и распечатать.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-2">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">02</span>Сведения о владельце персональных записей</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>Полное наименование:</strong> Общественный фонд «Кыргызстанское сообщество любителей тенниса» («Кыргызстан теннис сүйүүчүлөрүн коомчулугу» Коомдук фонду)</p>
+                    <p><strong>Регистрационный номер:</strong> 197575-3301-ОФ (Единый государственный реестр юридических лиц, Чуй-Бишкекское управление юстиции, дата первичной регистрации 19.05.2021)</p>
+                    <p><strong>ИНН:</strong> 01905202110030; код ОКПО: 31147180</p>
+                    <p><strong>Юридический адрес:</strong> Кыргызская Республика, г. Бишкек, Свердловский район, пр. Чуй, 127, кв. 26</p>
+                    <p><strong>Руководитель:</strong> Чокоева Айсулуу Эриковна</p>
+                    <p><strong>Электронная почта:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; телефон / WhatsApp: +996 555 777703</p>
+                    <p><strong>Ответственный за обработку персональных данных:</strong> Константин Хан, электронная почта для обращений по персональным данным: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> (тема письма «Персональные данные»).</p>
+                    <p><strong>Место обработки персональных данных:</strong> Кыргызская Республика (КСЛТ) и серверы обработчиков, указанных в разделе 6 (в том числе за пределами Кыргызской Республики).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-3">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">03</span>Какие данные мы обрабатываем, зачем и на каком основании</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> Мы обрабатываем только те данные, которые нужны для указанных целей (принцип минимизации, ст. 78 Цифрового кодекса). Перечень данных, цели и основания обработки приведены в таблице.</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Цель</th><th>Данные</th><th>Основание (ст. 79 Цифрового кодекса)</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Регистрация, вход, ведение учётной записи, восстановление пароля</td>
+                                    <td>Имя, фамилия, адрес электронной почты, пароль (хранится только в виде хеша bcrypt), дата рождения, пол; при входе через Google — имя, e-mail, фото профиля Google; при входе через Telegram — Telegram ID, имя пользователя, фото</td>
+                                    <td>Исполнение пользовательского соглашения (п. 1 ч. 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Ведение рейтинга, участие в турнирах и баттлах, формирование сеток, публикация результатов</td>
+                                    <td>Имя, фамилия, пол, возрастная группа, категория (тур), очки, результаты матчей, статистика побед и поражений, история турниров</td>
+                                    <td>Исполнение пользовательского соглашения и публичной оферты (п. 1 ч. 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Членство и оплата услуг</td>
+                                    <td>Сумма, дата и способ платежа, период членства, статус взносов. Данные банковских карт КСЛТ не получает и не хранит</td>
+                                    <td>Исполнение договора (п. 1 ч. 1); выполнение обязанностей по бухгалтерскому учёту (п. 2 ч. 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Безопасность учётной записи (уведомление о входе с нового устройства, защита от взлома)</td>
+                                    <td>Хеш user-agent браузера, разрешение экрана, время последнего входа, IP-адрес</td>
+                                    <td>Законный интерес КСЛТ и пользователя в защите аккаунта (п. 5 ч. 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Служебные уведомления о турнирах, заявках, матчах, изменении документов</td>
+                                    <td>Адрес электронной почты, Telegram ID, токен push-уведомлений устройства</td>
+                                    <td>Исполнение соглашения (п. 1 ч. 1); для направления уведомлений на контактные данные — согласие пользователя (ст. 44)</td>
+                                </tr>
+                                <tr>
+                                    <td>Рассмотрение обращений, жалоб и споров</td>
+                                    <td>Данные, указанные в обращении, переписка, сведения о спорной ситуации</td>
+                                    <td>Выполнение обязанностей по ст. 119 Цифрового кодекса (п. 2 ч. 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Статистика посещаемости и улучшение Сервиса</td>
+                                    <td>Обезличенные данные Google Analytics (страницы, устройство, приблизительное местоположение по IP)</td>
+                                    <td>Законный интерес КСЛТ (п. 5 ч. 1); ст. 50 (обезличенные записи)</td>
+                                </tr>
+                                <tr>
+                                    <td>Дополнительные цели: показ телефона/Telegram в разделе «Поиск игрока», публикация фото и видео с турниров в соцсетях КСЛТ, новостные и рекламные рассылки</td>
+                                    <td>Указаны в Согласии на обработку персональных данных</td>
+                                    <td>Отдельное добровольное согласие пользователя по каждой цели (ч. 2 ст. 79)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>3.2.</strong> Обязательными для регистрации являются имя, фамилия, адрес электронной почты, дата рождения и пол. Без них невозможно создать учётную запись, вести рейтинг и формировать сетки по категориям. Номер телефона и фото профиля указываются по желанию.</p>
+                    <p><strong>3.3.</strong> Согласие на обработку персональных данных запрашивается только для целей, указанных в последней строке таблицы. Отказ от любой из этих целей не ограничивает доступ к основным функциям Сервиса.</p>
+                    <p><strong>3.4.</strong> Мы не обрабатываем специальные категории персональных данных (сведения о здоровье, расовой или этнической принадлежности, религиозных и политических взглядах, биометрические и генетические данные). Пожалуйста, не указывайте такие сведения в профиле и сообщениях.</p>
+                    <p><strong>3.5.</strong> Мы не используем персональные данные для рекламы третьих лиц и не продаём их.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-4">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">04</span>Публичная информация</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> Сервис является открытым рейтингом любительского тенниса. Поэтому следующие сведения о пользователе видны всем посетителям Сайта и Приложения: имя и фамилия, фото профиля (если загружено), категория, место и очки в рейтинге, результаты матчей и турниров, участие в баттлах.</p>
+                    <p><strong>4.2.</strong> Адрес электронной почты, дата рождения, платёжные сведения и технические данные не публикуются. Телефон и Telegram показываются другим пользователям только при наличии отдельного согласия.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-5">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">05</span>Автоматическое принятие решений</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> Очки, место в рейтинге и категория (Futures, Challenger, Tour, Masters, Pro-Masters) рассчитываются автоматически по результатам матчей в соответствии с Правилами КСЛТ, разделом «Система рейтинга», опубликованным на Сайте. От этого зависит, в турнирах какой категории пользователь может участвовать.</p>
+                    <p><strong>5.2.</strong> Пользователь вправе запросить пояснение расчёта своих очков, оспорить его у главного судьи турнира или в администрации КСЛТ, а также направить возражение против автоматической обработки (ст. 84 Цифрового кодекса). Решение по возражению принимает работник КСЛТ.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-6">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">06</span>Кому передаются данные (обработчики и получатели)</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>6.1.</strong> Для работы Сервиса КСЛТ поручает обработку данных следующим лицам (обработчикам) или передаёт данные следующим получателям:</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Лицо, местонахождение</th><th>Функция</th><th>Какие данные</th><th>Основание</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Разработчики: Константин Хан и Татьяна Нечаева, Кыргызская Республика</td>
+                                    <td>Разработка и техническая поддержка Сайта и Приложения</td>
+                                    <td>Все данные Сервиса в объёме, необходимом для поддержки</td>
+                                    <td>Договор № 1 от 01.06.2026 (поручение на обработку, ст. 86)</td>
+                                </tr>
+                                <tr>
+                                    <td>Supabase Inc., США (серверы Amazon Web Services, регион us-east-1 — Северная Вирджиния, США)</td>
+                                    <td>База данных, аутентификация, резервные копии</td>
+                                    <td>Все данные учётных записей</td>
+                                    <td>Условия обслуживания и соглашение об обработке данных (DPA) Supabase</td>
+                                </tr>
+                                <tr>
+                                    <td>Google LLC, США</td>
+                                    <td>Вход через Google (OAuth), push-уведомления Firebase Cloud Messaging, статистика Google Analytics</td>
+                                    <td>Имя, e-mail, фото Google; токен устройства; обезличенные данные посещений</td>
+                                    <td>Условия Google и Google Ads Data Processing Terms</td>
+                                </tr>
+                                <tr>
+                                    <td>Telegram Messenger Inc. / Telegram FZ-LLC, ОАЭ</td>
+                                    <td>Вход через Telegram, уведомления Telegram-ботом</td>
+                                    <td>Telegram ID, имя пользователя, фото, тексты уведомлений</td>
+                                    <td>Условия Telegram Bot API</td>
+                                </tr>
+                                <tr>
+                                    <td>Resend Inc., США</td>
+                                    <td>Отправка служебных писем</td>
+                                    <td>E-mail, имя получателя, текст письма</td>
+                                    <td>Условия обслуживания и DPA Resend</td>
+                                </tr>
+                                <!-- ХОСТИНГ САЙТА: ЗАПОЛНЕНО 07.11.2026.
+                                     Оператор — Contabo GmbH (Мюнхен, Германия): сторона
+                                     договора названа Тати. Размещение серверов — США,
+                                     Сент-Луис, Миссури: СВЕРЕНО ЗАМЕРОМ, а не со слов —
+                                     tennis.kg ведёт на 209.145.52.153, обратное имя
+                                     vmi2366528.contaboserver.net, владелец AS40021
+                                     Contabo Inc. Геолокация по адресу — ориентир; точный
+                                     регион виден в панели Contabo у Тати.
+                                     ПРЕЖНЯЯ ПОМЕТКА И ЕЁ ПРИЧИНА: -->
+                                <!-- ХОСТИНГ САЙТА: СТРОКА НЕ ЗАПОЛНЕНА.
+                                     Прежняя редакция называла хостингом GitHub, и это
+                                     неправда: сайт переезжает на сервер, а чей он и в
+                                     какой стране — ждёт ответа. Пока строка помечена,
+                                     документ выкладывать нельзя: от страны зависит
+                                     раздел 7 о трансграничной передаче.
+                                     Сторож `check-politika.js` падает на этой пометке. -->
+                                <tr>
+                                    <td>Contabo GmbH, Вельфенштрассе 22, 81541 Мюнхен, Германия; серверы размещены в США (Сент-Луис, штат Миссури)</td>
+                                    <td>Хостинг Сайта</td>
+                                    <td>IP-адрес и технические данные запроса</td>
+                                    <td>Условия обслуживания и политика конфиденциальности Contabo</td>
+                                </tr>
+                                <tr>
+                                    <td>Платёжный провайдер: ДемирБанк, проспект Чуй, 304, Бишкек, Кыргызская Республика</td>
+                                    <td>Приём платежей (после подключения онлайн-оплаты)</td>
+                                    <td>Сумма, дата, идентификатор платежа</td>
+                                    <td>Договор № 1 от 02.11.2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>6.2.</strong> Каждый обработчик обрабатывает данные только по поручению КСЛТ и в указанных целях. КСЛТ отвечает за действия обработчиков как за свои собственные (ст. 38 Цифрового кодекса). Перечень обработчиков обновляется при изменении состава.</p>
+                    <p><strong>6.3.</strong> Данные также могут быть предоставлены государственным органам Кыргызской Республики в случаях и порядке, установленных законом.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-7">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">07</span>Трансграничная передача</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>7.1.</strong> Серверы Supabase, Google, Resend и Contabo (хостинг Сайта) находятся в США, Telegram — в ОАЭ и других странах. Перед передачей КСЛТ проверяет, включено ли государство в перечень государств, обеспечивающих адекватную защиту персональных данных, утверждённый отраслевым регулятором (ч. 3 ст. 89 Цифрового кодекса).</p>
+                    <p><strong>7.2.</strong> Если государство не включено в перечень, передача осуществляется, поскольку она необходима для заключения и исполнения пользовательского соглашения, стороной которого является пользователь (п. 4 ч. 4 ст. 89), и на условиях договоров с обработчиками, обеспечивающих защиту данных (п. 6 ч. 4 ст. 89). Переданные данные обрабатываются в соответствии с законодательством страны получателя (ч. 5 ст. 89).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-8">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">08</span>Сроки хранения</h2></summary>
+                <div class="ip-rules-list">
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Данные</th><th>Срок хранения</th></tr></thead>
+                            <tbody>
+                                <tr><td>Данные учётной записи</td><td>Пока учётная запись действует. После удаления учётной записи — 30 дней (возможность отменить удаление), затем удаляются</td></tr>
+                                <tr><td>Результаты матчей и турниров, история рейтинга</td><td>Бессрочно в составе турнирной истории; после удаления учётной записи — в обезличенном виде либо с указанием только имени и фамилии в протоколах турниров (п. 2 ч. 2 ст. 83 — архивные и статистические цели)</td></tr>
+                                <tr><td>Записи о заключении и исполнении пользовательского соглашения, о полученных согласиях</td><td>Срок действия соглашения и 3 года после его прекращения (ч. 4 ст. 114 Цифрового кодекса)</td></tr>
+                                <tr><td>Платёжные сведения</td><td>Срок, установленный законодательством о бухгалтерском учёте</td></tr>
+                                <tr><td>Технические данные о входах</td><td>12 месяцев</td></tr>
+                                <tr><td>Обращения и жалобы</td><td>3 года после рассмотрения</td></tr>
+                                <tr><td>Данные, обрабатываемые по согласию</td><td>До отзыва согласия или удаления учётной записи</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-9">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">09</span>Права пользователя</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>9.1.</strong> Пользователь вправе:</p>
+                    <ul class="ip-doc-list">
+                        <li>получить информацию об обработке своих данных в объёме ч. 1 ст. 73 Цифрового кодекса;</li>
+                        <li>получить доступ ко всем своим данным или их копию (ч. 4 ст. 73);</li>
+                        <li>исправить или дополнить свои данные (ст. 75) — самостоятельно в профиле или по запросу;</li>
+                        <li>получить свои данные в машиночитаемом формате или потребовать их передачи другому владельцу записей (ст. 76);</li>
+                        <li>потребовать удаления данных (ст. 83), в том числе удалить учётную запись (раздел 10);</li>
+                        <li>возразить против обработки определёнными способами или в определённых целях (ст. 84);</li>
+                        <li>потребовать ограничения обработки на время рассмотрения возражения или исправления данных (ст. 85);</li>
+                        <li>отозвать любое согласие в настройках профиля или письмом — так же просто, как оно было дано (ч. 5 ст. 79);</li>
+                        <li>отказаться от Сервиса и получить сведения о своих данных (ст. 118);</li>
+                        <li>обжаловать действия КСЛТ в Государственное агентство по защите персональных данных при Кабинете Министров Кыргызской Республики или в суд.</li>
+                    </ul>
+                    <p><strong>9.2.</strong> Запросы направляются на <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> или через раздел «Профиль» → «Мои данные» в Приложении. Для подтверждения личности мы можем попросить отправить запрос с адреса электронной почты, указанного в учётной записи (ч. 2 ст. 37).</p>
+                    <p><strong>9.3.</strong> Сроки ответа: информация об обработке, доступ к данным, исправление, решение по возражению — не более 7 рабочих дней со дня получения запроса. Об ограничении обработки или его снятии сообщаем не позднее следующего рабочего дня. Удаление по основаниям ст. 83 производится незамедлительно, с учётом 30-дневного срока на отмену удаления, если пользователь не попросил удалить сразу.</p>
+                    <p><strong>9.4.</strong> Отказ предоставить обязательные данные (п. 3.2) означает, что зарегистрироваться и участвовать в рейтинге и турнирах будет невозможно. Отказ от согласий на дополнительные цели последствий для основных функций не имеет.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-10">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">10</span>Удаление учётной записи</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>10.1.</strong> Удалить учётную запись можно в Приложении (Профиль → Настройки → «Удалить аккаунт»), на Сайте (Профиль → Настройки) или письмом на <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>. Подробный порядок опубликован на странице <a href="https://tennis.kg/pages/delete-account.html">tennis.kg/pages/delete-account.html</a>.</p>
+                    <p><strong>10.2.</strong> После удаления профиль сразу перестаёт быть виден другим пользователям. Через 30 дней персональные данные удаляются окончательно. Сохраняются только данные, указанные в разделе 8, которые КСЛТ обязан или вправе хранить по закону, о чём пользователю сообщается при удалении (ч. 3 ст. 118).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-11">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">11</span>Защита данных</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>11.1.</strong> КСЛТ принимает организационные и технические меры защиты (ст. 78, 88 Цифрового кодекса): передача данных только по HTTPS (TLS), разграничение доступа на уровне строк базы данных (Row Level Security), хранение паролей в виде хешей, шифрование резервных копий, ограничение круга лиц с доступом к данным, учёт операций с персональными записями, обучение работников и волонтёров.</p>
+                    <p><strong>11.2.</strong> При утечке персональных данных КСЛТ принимает меры по её устранению и уведомляет пострадавших пользователей и отраслевого регулятора в порядке, установленном законодательством.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-12">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">12</span>Дети</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>12.1.</strong> Сервис предназначен для лиц от 14 лет. Пользователи от 14 до 18 лет дают согласие на обработку своих данных самостоятельно (ч. 3 ст. 81 Цифрового кодекса). Участие в турнирах — по условиям публичной оферты.</p>
+                    <p><strong>12.2.</strong> Если нам станет известно, что зарегистрировался ребёнок младше 14 лет без согласия законного представителя, учётная запись будет удалена. Законный представитель может сообщить об этом на <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-13">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">13</span>Cookie и локальное хранилище</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>13.1.</strong> Сайт использует локальное хранилище браузера (localStorage) только для сохранения входа в учётную запись и настроек (язык). Рекламные и сторонние трекинговые cookie не используются. Google Analytics собирает обезличенную статистику. Её можно отключить расширениями браузера.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-14">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">14</span>Изменение Политики</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>14.1.</strong> О существенных изменениях Политики мы уведомляем пользователей в Приложении и по электронной почте не менее чем за один месяц до вступления изменений в силу. Новая цель обработки, для которой нет основания по ч. 1 ст. 79, вводится только после получения согласия пользователя (ч. 2 ст. 78). Действующая и предыдущие редакции доступны на Сайте.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-15">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">15</span>Контакты</h2></summary>
+                <div class="ip-rules-list">
+                    <p>По всем вопросам обработки персональных данных: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; почтовый адрес: Кыргызская Республика, г. Бишкек, Свердловский район, пр. Чуй, 127, кв. 26, ОФ «КСЛТ».</p>
+                </div>
+            </details>
+
+            <div class="ip-doc-sign ip-fade-in">
+                <p class="ip-doc-sign-role">Председатель Правления КСЛТ</p>
+                <p class="ip-doc-sign-name">Чокоева А. Э.</p>
+                <p class="ip-doc-revision">Редакция от 3 ноября 2026 г. Утверждена приказом № 1 от 3 ноября 2026 г.</p>
+                <button type="button" class="ip-doc-print" data-doc-print>Распечатать или сохранить PDF</button>
+            </div>$kslt$,
+        $kslt$            <!-- MACHINE TRANSLATION of the Russian edition approved by Order No. 1.
+                 The Russian text is the one that was approved; this is a convenience
+                 translation and is marked as such in the document itself. -->
+            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">Approved by Order No. 1 of the Head of the KSLT Public Foundation, 3 November 2026.</p>
+                <p class="ip-doc-approved-line">Edition of 3 November 2026.</p>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <p class="ip-doc-lead">This Policy sets out how personal data of users of the <a href="https://tennis.kg">tennis.kg</a> website and the «KSLT Tennis» mobile applications is processed. The full text is given below and applies in full. In case of any discrepancy, the Russian edition prevails.</p>
+            </div>
+
+            <div class="ip-doc-gist ip-fade-in">
+                <div class="ip-doc-gist-title">In short</div>
+                <p class="ip-doc-gist-note">This is a short summary for convenience. It does not replace the document: the full text below is what applies.</p>
+                <ul class="ip-doc-gist-list">
+                    <li><strong>What we collect.</strong> First and last name, e-mail, date of birth, gender — without these we cannot maintain the rating or build draws. Phone number and photo are optional.</li>
+                    <li><strong>What everyone can see.</strong> Name, profile photo, category, rating position and points, match results. E-mail, date of birth and payment details are never published.</li>
+                    <li><strong>Phone and Telegram.</strong> Shown to other players only if you switched this on in your profile, and switched off in the same place.</li>
+                    <li><strong>Who we share with.</strong> Supabase, Google, Telegram, Resend — so that the database, sign-in, notifications and e-mails work. Data is not sold and is not used for third-party advertising.</li>
+                    <li><strong>Deleting your account.</strong> In your profile or by e-mail. 30 days to change your mind, then permanent; tournament results remain in the protocols.</li>
+                    <li><strong>Your rights.</strong> Obtain your data, correct it, take a copy, withdraw consent, object, complain to the regulator. We reply within 7 working days.</li>
+                </ul>
+            </div>
+
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Contents</div>
+                <ol class="ip-toc-list">
+                    <li><a href="#pp-1">General provisions</a></li>
+                    <li><a href="#pp-2">Details of the owner of personal records</a></li>
+                    <li><a href="#pp-3">What data we process, why and on what grounds</a></li>
+                    <li><a href="#pp-4">Public information</a></li>
+                    <li><a href="#pp-5">Automated decision-making</a></li>
+                    <li><a href="#pp-6">Who the data is shared with</a></li>
+                    <li><a href="#pp-7">Cross-border transfer</a></li>
+                    <li><a href="#pp-8">Retention periods</a></li>
+                    <li><a href="#pp-9">User rights</a></li>
+                    <li><a href="#pp-10">Deleting an account</a></li>
+                    <li><a href="#pp-11">Data protection</a></li>
+                    <li><a href="#pp-12">Children</a></li>
+                    <li><a href="#pp-13">Cookies and local storage</a></li>
+                    <li><a href="#pp-14">Changes to the Policy</a></li>
+                    <li><a href="#pp-15">Contacts</a></li>
+                </ol>
+                <button type="button" class="ip-doc-expand" data-doc-expand>Expand all sections</button>
+            </div>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-1">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">01</span>General provisions</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>1.1.</strong> This Policy sets out what personal data of users is processed by the Public Foundation «Kyrgyzstan Community of Tennis Enthusiasts» (hereinafter — KSLT, «we»), for what purposes and on what grounds, who it is shared with, how long it is kept and what rights users have. The Policy applies to the <a href="https://tennis.kg">tennis.kg</a> website (hereinafter — the Site), the «KSLT Tennis» mobile applications for Android and iOS (hereinafter — the Application) and the related services: rating, tournaments, battles, partner search, court and coach directories, news, the Telegram bot and mailings (together — the Service).</p>
+                    <p><strong>1.2.</strong> The Policy has been drawn up in accordance with the Digital Code of the Kyrgyz Republic of 31 July 2025 No. 178 (hereinafter — the Digital Code), including Chapter 11 «Processing of personal data», Articles 33, 44, 73–89 and 114–120. From 5 February 2026 the Digital Code replaced the Law of the Kyrgyz Republic «On personal information».</p>
+                    <p><strong>1.3.</strong> Terms are used with the meanings established by the Digital Code. Personal data means digital data containing information about a natural person who can be identified by it. Processing means any operation with data: collection, recording, storage, alteration, use, transfer, anonymisation, deletion and so on. User means a natural person using the Service (the data subject).</p>
+                    <p><strong>1.4.</strong> KSLT is the owner of personal records, that is, the party that determines the purposes and means of processing users' personal data.</p>
+                    <p><strong>1.5.</strong> The Policy is available before registration and at any time afterwards: on the Site, in the Application («Profile» → «Documents») and on the Application's pages in Google Play and the App Store. It can be saved and printed.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-2">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">02</span>Details of the owner of personal records</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>Full name:</strong> Public Foundation «Kyrgyzstan Community of Tennis Enthusiasts» («Кыргызстан теннис сүйүүчүлөрүн коомчулугу» Коомдук фонду)</p>
+                    <p><strong>Registration number:</strong> 197575-3301-ОФ (Unified State Register of Legal Entities, Chuy-Bishkek Department of Justice, first registered 19.05.2021)</p>
+                    <p><strong>Taxpayer number (INN):</strong> 01905202110030; OKPO code: 31147180</p>
+                    <p><strong>Registered address:</strong> Kyrgyz Republic, Bishkek, Sverdlovsky district, Chuy Avenue 127, apt. 26</p>
+                    <p><strong>Head:</strong> Aisuluu Erikovna Chokoeva</p>
+                    <p><strong>E-mail:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; phone / WhatsApp: +996 555 777703</p>
+                    <p><strong>Person responsible for personal data processing:</strong> Konstantin Khan, e-mail for personal data enquiries: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> (subject line «Personal data»).</p>
+                    <p><strong>Place of processing:</strong> the Kyrgyz Republic (KSLT) and the servers of the processors listed in section 6 (including outside the Kyrgyz Republic).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-3">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">03</span>What data we process, why and on what grounds</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> We process only the data needed for the stated purposes (minimisation principle, Article 78 of the Digital Code). The data, purposes and grounds for processing are set out in the table.</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Purpose</th><th>Data</th><th>Ground (Article 79 of the Digital Code)</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Registration, sign-in, account management, password recovery</td>
+                                    <td>First and last name, e-mail address, password (stored only as a bcrypt hash), date of birth, gender; when signing in with Google — name, e-mail, Google profile photo; when signing in with Telegram — Telegram ID, username, photo</td>
+                                    <td>Performance of the user agreement (clause 1 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Maintaining the rating, participation in tournaments and battles, building draws, publishing results</td>
+                                    <td>First and last name, gender, age group, category (tour), points, match results, win and loss statistics, tournament history</td>
+                                    <td>Performance of the user agreement and the public offer (clause 1 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Membership and payment for services</td>
+                                    <td>Amount, date and method of payment, membership period, status of fees. KSLT does not receive or store bank card details</td>
+                                    <td>Performance of the contract (clause 1 part 1); compliance with accounting obligations (clause 2 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Account security (notification of sign-in from a new device, protection against account takeover)</td>
+                                    <td>Hash of the browser user-agent, screen resolution, time of last sign-in, IP address</td>
+                                    <td>Legitimate interest of KSLT and the user in protecting the account (clause 5 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Service notifications about tournaments, entries, matches and changes to the documents</td>
+                                    <td>E-mail address, Telegram ID, device push notification token</td>
+                                    <td>Performance of the agreement (clause 1 part 1); for notifications sent to contact details — the user's consent (Article 44)</td>
+                                </tr>
+                                <tr>
+                                    <td>Handling enquiries, complaints and disputes</td>
+                                    <td>Data provided in the enquiry, correspondence, details of the disputed situation</td>
+                                    <td>Compliance with obligations under Article 119 of the Digital Code (clause 2 part 1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Traffic statistics and improvement of the Service</td>
+                                    <td>Anonymised Google Analytics data (pages, device, approximate location by IP)</td>
+                                    <td>Legitimate interest of KSLT (clause 5 part 1); Article 50 (anonymised records)</td>
+                                </tr>
+                                <tr>
+                                    <td>Additional purposes: showing phone/Telegram in the «Find a player» section, publishing photos and videos from tournaments on KSLT social media, newsletters and promotional mailings</td>
+                                    <td>Set out in the Consent to the processing of personal data</td>
+                                    <td>Separate voluntary consent of the user for each purpose (part 2 Article 79)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>3.2.</strong> First and last name, e-mail address, date of birth and gender are mandatory for registration. Without them it is impossible to create an account, maintain the rating and build draws by category. Phone number and profile photo are optional.</p>
+                    <p><strong>3.3.</strong> Consent to the processing of personal data is requested only for the purposes listed in the last row of the table. Refusing any of these purposes does not limit access to the core features of the Service.</p>
+                    <p><strong>3.4.</strong> We do not process special categories of personal data (health, racial or ethnic origin, religious and political views, biometric and genetic data). Please do not provide such information in your profile or messages.</p>
+                    <p><strong>3.5.</strong> We do not use personal data for third-party advertising and do not sell it.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-4">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">04</span>Public information</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> The Service is an open amateur tennis rating. Therefore the following information about a user is visible to all visitors of the Site and the Application: first and last name, profile photo (if uploaded), category, rating position and points, match and tournament results, participation in battles.</p>
+                    <p><strong>4.2.</strong> E-mail address, date of birth, payment details and technical data are not published. Phone and Telegram are shown to other users only where separate consent has been given.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-5">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">05</span>Automated decision-making</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> Points, rating position and category (Futures, Challenger, Tour, Masters, Pro-Masters) are calculated automatically from match results in accordance with the KSLT Rules, section «Rating system», published on the Site. This determines the category of tournaments a user may enter.</p>
+                    <p><strong>5.2.</strong> A user may request an explanation of how their points were calculated, dispute it with the tournament referee or with the KSLT administration, and object to automated processing (Article 84 of the Digital Code). The objection is decided by a KSLT officer.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-6">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">06</span>Who the data is shared with (processors and recipients)</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>6.1.</strong> To operate the Service, KSLT entrusts the processing of data to the following persons (processors) or transfers data to the following recipients:</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Party, location</th><th>Function</th><th>What data</th><th>Ground</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Developers: Konstantin Khan and Tatiana Nechaeva, Kyrgyz Republic</td>
+                                    <td>Development and technical support of the Site and the Application</td>
+                                    <td>All Service data to the extent needed for support</td>
+                                    <td>Contract No. 1 of 01.06.2026 (processing instruction, Article 86)</td>
+                                </tr>
+                                <tr>
+                                    <td>Supabase Inc., USA (Amazon Web Services servers, region us-east-1 — Northern Virginia, USA)</td>
+                                    <td>Database, authentication, backups</td>
+                                    <td>All account data</td>
+                                    <td>Supabase Terms of Service and Data Processing Agreement (DPA)</td>
+                                </tr>
+                                <tr>
+                                    <td>Google LLC, USA</td>
+                                    <td>Sign-in with Google (OAuth), Firebase Cloud Messaging push notifications, Google Analytics statistics</td>
+                                    <td>Name, e-mail, Google photo; device token; anonymised visit data</td>
+                                    <td>Google Terms and Google Ads Data Processing Terms</td>
+                                </tr>
+                                <tr>
+                                    <td>Telegram Messenger Inc. / Telegram FZ-LLC, UAE</td>
+                                    <td>Sign-in with Telegram, notifications via the Telegram bot</td>
+                                    <td>Telegram ID, username, photo, notification texts</td>
+                                    <td>Telegram Bot API Terms</td>
+                                </tr>
+                                <tr>
+                                    <td>Resend Inc., USA</td>
+                                    <td>Sending service e-mails</td>
+                                    <td>E-mail, recipient name, message text</td>
+                                    <td>Resend Terms of Service and DPA</td>
+                                </tr>
+                                <tr>
+                                    <td>Contabo GmbH, Welfenstrasse 22, 81541 Munich, Germany; servers located in the USA (St. Louis, Missouri)</td>
+                                    <td>Hosting of the Site</td>
+                                    <td>IP address and technical request data</td>
+                                    <td>Contabo Terms of Service and Privacy Policy</td>
+                                </tr>
+                                <tr>
+                                    <td>Payment provider: DemirBank, Chuy Avenue 304, Bishkek, Kyrgyz Republic</td>
+                                    <td>Accepting payments (once online payment is enabled)</td>
+                                    <td>Amount, date, payment identifier</td>
+                                    <td>Contract No. 1 of 02.11.2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>6.2.</strong> Each processor processes data only on the instruction of KSLT and for the stated purposes. KSLT is liable for the actions of processors as for its own (Article 38 of the Digital Code). The list of processors is updated when the composition changes.</p>
+                    <p><strong>6.3.</strong> Data may also be provided to state authorities of the Kyrgyz Republic in the cases and in the manner established by law.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-7">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">07</span>Cross-border transfer</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>7.1.</strong> The servers of Supabase, Google, Resend and Contabo (hosting of the Site) are located in the USA, Telegram — in the UAE and other countries. Before any transfer, KSLT checks whether the country is included in the list of states providing adequate protection of personal data approved by the sectoral regulator (part 3 Article 89 of the Digital Code).</p>
+                    <p><strong>7.2.</strong> If a country is not on the list, the transfer takes place because it is necessary for the conclusion and performance of the user agreement to which the user is a party (clause 4 part 4 Article 89), and on the terms of contracts with processors that ensure the protection of data (clause 6 part 4 Article 89). Transferred data is processed in accordance with the law of the recipient's country (part 5 Article 89).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-8">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">08</span>Retention periods</h2></summary>
+                <div class="ip-rules-list">
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Data</th><th>Retention period</th></tr></thead>
+                            <tbody>
+                                <tr><td>Account data</td><td>While the account is active. After the account is deleted — 30 days (the deletion can be cancelled), then erased</td></tr>
+                                <tr><td>Match and tournament results, rating history</td><td>Indefinitely as part of the tournament history; after the account is deleted — anonymised or with first and last name only in tournament protocols (clause 2 part 2 Article 83 — archival and statistical purposes)</td></tr>
+                                <tr><td>Records of the conclusion and performance of the user agreement and of consents obtained</td><td>The term of the agreement and 3 years after its termination (part 4 Article 114 of the Digital Code)</td></tr>
+                                <tr><td>Payment details</td><td>The period established by accounting legislation</td></tr>
+                                <tr><td>Technical sign-in data</td><td>12 months</td></tr>
+                                <tr><td>Enquiries and complaints</td><td>3 years after they are dealt with</td></tr>
+                                <tr><td>Data processed on the basis of consent</td><td>Until consent is withdrawn or the account is deleted</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-9">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">09</span>User rights</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>9.1.</strong> A user has the right to:</p>
+                    <ul class="ip-doc-list">
+                        <li>obtain information about the processing of their data to the extent set out in part 1 Article 73 of the Digital Code;</li>
+                        <li>obtain access to all of their data or a copy of it (part 4 Article 73);</li>
+                        <li>correct or supplement their data (Article 75) — in the profile or upon request;</li>
+                        <li>receive their data in a machine-readable format or require its transfer to another owner of records (Article 76);</li>
+                        <li>require the deletion of data (Article 83), including deletion of the account (section 10);</li>
+                        <li>object to processing by certain means or for certain purposes (Article 84);</li>
+                        <li>require the restriction of processing while an objection is considered or data is corrected (Article 85);</li>
+                        <li>withdraw any consent in the profile settings or by e-mail — as easily as it was given (part 5 Article 79);</li>
+                        <li>refuse the Service and obtain information about their data (Article 118);</li>
+                        <li>appeal against the actions of KSLT to the State Agency for Personal Data Protection under the Cabinet of Ministers of the Kyrgyz Republic or to a court.</li>
+                    </ul>
+                    <p><strong>9.2.</strong> Requests are sent to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> or through «Profile» → «My data» in the Application. To verify identity we may ask that the request be sent from the e-mail address registered to the account (part 2 Article 37).</p>
+                    <p><strong>9.3.</strong> Response times: information about processing, access to data, correction and a decision on an objection — no more than 7 working days from receipt of the request. We notify of a restriction of processing or its lifting no later than the next working day. Deletion on the grounds of Article 83 is carried out without delay, subject to the 30-day period for cancelling deletion, unless the user has asked for immediate deletion.</p>
+                    <p><strong>9.4.</strong> Refusal to provide the mandatory data (clause 3.2) means that registration and participation in the rating and tournaments will not be possible. Refusing consent for additional purposes has no consequences for the core features.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-10">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">10</span>Deleting an account</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>10.1.</strong> An account can be deleted in the Application (Profile → Settings → «Delete account»), on the Site (Profile → Settings) or by e-mail to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>. The detailed procedure is published at <a href="https://tennis.kg/pages/delete-account-en.html">tennis.kg/pages/delete-account-en.html</a>.</p>
+                    <p><strong>10.2.</strong> After deletion the profile immediately stops being visible to other users. After 30 days personal data is erased permanently. Only the data listed in section 8 is kept, which KSLT is obliged or entitled to keep by law, of which the user is informed at the time of deletion (part 3 Article 118).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-11">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">11</span>Data protection</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>11.1.</strong> KSLT takes organisational and technical protection measures (Articles 78, 88 of the Digital Code): data transfer over HTTPS (TLS) only, row-level access control in the database (Row Level Security), storage of passwords as hashes, encryption of backups, limiting the number of people with access to data, logging of operations with personal records, training of staff and volunteers.</p>
+                    <p><strong>11.2.</strong> In the event of a personal data breach, KSLT takes measures to remedy it and notifies affected users and the sectoral regulator in the manner established by law.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-12">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">12</span>Children</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>12.1.</strong> The Service is intended for persons aged 14 and over. Users aged 14 to 18 give consent to the processing of their data themselves (part 3 Article 81 of the Digital Code). Participation in tournaments is governed by the public offer.</p>
+                    <p><strong>12.2.</strong> If we become aware that a child under 14 has registered without the consent of a legal representative, the account will be deleted. A legal representative may report this to <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-13">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">13</span>Cookies and local storage</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>13.1.</strong> The Site uses browser local storage (localStorage) only to keep the user signed in and to store settings (language). Advertising and third-party tracking cookies are not used. Google Analytics collects anonymised statistics. It can be disabled with browser extensions.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-14">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">14</span>Changes to the Policy</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>14.1.</strong> We notify users of material changes to the Policy in the Application and by e-mail at least one month before the changes take effect. A new purpose of processing for which there is no ground under part 1 Article 79 is introduced only after the user's consent has been obtained (part 2 Article 78). The current and previous editions are available on the Site.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-15">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">15</span>Contacts</h2></summary>
+                <div class="ip-rules-list">
+                    <p>For all questions about the processing of personal data: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; postal address: Kyrgyz Republic, Bishkek, Sverdlovsky district, Chuy Avenue 127, apt. 26, KSLT Public Foundation.</p>
+                </div>
+            </details>
+
+            <div class="ip-doc-sign ip-fade-in">
+                <p class="ip-doc-sign-role">Chair of the Board of KSLT</p>
+                <p class="ip-doc-sign-name">A. E. Chokoeva</p>
+                <p class="ip-doc-revision">Edition of 3 November 2026. Approved by Order No. 1 of 3 November 2026.</p>
+                <button type="button" class="ip-doc-print" data-doc-print>Print or save as PDF</button>
+            </div>$kslt$,
+        $kslt$            <!-- МАШИНАЛЫК КОТОРМО. Түп нуска — орус тилиндеги редакция, № 1 буйрук
+                 менен бекитилген. Котормо эне тилинде сүйлөгөн адам тарабынан
+                 текшерилген эмес. -->
+            <div class="ip-doc-approved ip-fade-in">
+                <p class="ip-doc-approved-line">«КСЛТ» Коомдук фондунун жетекчисинин 2026-жылдын 3-ноябрындагы № 1 буйругу менен бекитилген.</p>
+                <p class="ip-doc-approved-line">2026-жылдын 3-ноябрындагы редакциясы.</p>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in">
+                <p class="ip-doc-lead">Бул Саясат <a href="https://tennis.kg">tennis.kg</a> сайтынын жана «KSLT Tennis» мобилдик тиркемелеринин колдонуучуларынын жеке маалыматтарын иштетүү тартибин аныктайт. Толук тексти төмөндө келтирилген жана толугу менен колдонулат. Айырмачылык болгон учурда орус тилиндеги редакция колдонулат.</p>
+            </div>
+
+            <div class="ip-doc-gist ip-fade-in">
+                <div class="ip-doc-gist-title">Кыскача эң негизгиси</div>
+                <p class="ip-doc-gist-note">Бул окууга ыңгайлуу болушу үчүн кыскача баяндама. Ал документти алмаштырбайт: төмөндөгү толук текст колдонулат.</p>
+                <ul class="ip-doc-gist-list">
+                    <li><strong>Эмнени чогултабыз.</strong> Аты-жөнүн, электрондук почтаны, туулган күндү, жынысын — аларсыз рейтинг жүргүзүүгө жана торчолорду түзүүгө болбойт. Телефон жана сүрөт — каалоо боюнча.</li>
+                    <li><strong>Эмне баарына көрүнөт.</strong> Аты-жөнү, сүрөтү, категориясы, рейтингдеги орду жана упайлары, оюндардын жыйынтыктары. Электрондук почта, туулган күн жана төлөмдөр эч качан жарыяланбайт.</li>
+                    <li><strong>Телефон жана Telegram.</strong> Башка оюнчуларга профилде өзүңүз күйгүзгөн учурда гана көрүнөт, ошол эле жерден өчүрүлөт.</li>
+                    <li><strong>Кимге беребиз.</strong> Supabase, Google, Telegram, Resend — база, кирүү, билдирүүлөр жана каттар иштеши үчүн. Маалыматтар сатылбайт жана бөтөн жарнамага колдонулбайт.</li>
+                    <li><strong>Аккаунтту өчүрүү.</strong> Профилде же кат менен. Кайтаруу үчүн 30 күн, андан кийин биротоло; мелдештердин жыйынтыктары протоколдордо калат.</li>
+                    <li><strong>Сиздин укуктарыңыз.</strong> Маалыматыңызды алуу, оңдоо, көчүрмөсүн алуу, макулдукту кайтарып алуу, каршы пикир билдирүү, жөнгө салуучуга даттануу. Жооп — 7 жумуш күнүнө чейин.</li>
+                </ul>
+            </div>
+
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Мазмуну</div>
+                <ol class="ip-toc-list">
+                    <li><a href="#pp-1">Жалпы жоболор</a></li>
+                    <li><a href="#pp-2">Жеке жазуулардын ээси жөнүндө маалымат</a></li>
+                    <li><a href="#pp-3">Кандай маалыматтарды иштетебиз, эмне үчүн жана кандай негизде</a></li>
+                    <li><a href="#pp-4">Ачык маалымат</a></li>
+                    <li><a href="#pp-5">Автоматтык чечим кабыл алуу</a></li>
+                    <li><a href="#pp-6">Маалыматтар кимге берилет</a></li>
+                    <li><a href="#pp-7">Чек ара аркылуу берүү</a></li>
+                    <li><a href="#pp-8">Сактоо мөөнөттөрү</a></li>
+                    <li><a href="#pp-9">Колдонуучунун укуктары</a></li>
+                    <li><a href="#pp-10">Аккаунтту өчүрүү</a></li>
+                    <li><a href="#pp-11">Маалыматтарды коргоо</a></li>
+                    <li><a href="#pp-12">Балдар</a></li>
+                    <li><a href="#pp-13">Cookie жана жергиликтүү сактагыч</a></li>
+                    <li><a href="#pp-14">Саясатты өзгөртүү</a></li>
+                    <li><a href="#pp-15">Байланыш</a></li>
+                </ol>
+                <button type="button" class="ip-doc-expand" data-doc-expand>Бардык бөлүмдөрдү ачуу</button>
+            </div>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-1">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">01</span>Жалпы жоболор</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>1.1.</strong> Бул Саясат «Кыргызстан теннис сүйүүчүлөрүн коомчулугу» Коомдук фонду (мындан ары — КСЛТ, «биз») колдонуучулардын кайсы жеке маалыматтарын, кандай максаттарда жана кандай негиздерде иштетерин, алар кимге берилерин, канча убакыт сакталарын жана колдонуучулардын кандай укуктары бар экенин аныктайт. Саясат <a href="https://tennis.kg">tennis.kg</a> сайтына (мындан ары — Сайт), Android жана iOS үчүн «KSLT Tennis» мобилдик тиркемелерине (мындан ары — Тиркеме) жана алар менен байланышкан кызматтарга: рейтингге, мелдештерге, баттлдарга, өнөктөш издөөгө, корттордун жана машыктыруучулардын каталогдоруна, жаңылыктарга, Telegram ботуна жана таркатууларга (чогуусу менен — Кызмат) колдонулат.</p>
+                    <p><strong>1.2.</strong> Саясат Кыргыз Республикасынын 2025-жылдын 31-июлундагы № 178 Санариптик кодексине (мындан ары — Санариптик кодекс), анын ичинде «Жеке маалыматтарды иштетүү» 11-главасына, 33, 44, 73–89 жана 114–120-беренелерине ылайык иштелип чыккан. 2026-жылдын 5-февралынан тартып Санариптик кодекс Кыргыз Республикасынын «Жеке мүнөздөгү маалымат жөнүндө» Мыйзамын алмаштырды.</p>
+                    <p><strong>1.3.</strong> Терминдер Санариптик кодексте белгиленген маанилерде колдонулат. Жеке маалыматтар — алар боюнча аныкталышы мүмкүн болгон жеке адам жөнүндө маалыматты камтыган санариптик маалыматтар. Иштетүү — маалыматтар менен жасалган ар кандай аракет: чогултуу, жазуу, сактоо, өзгөртүү, колдонуу, берүү, ээсиздендирүү, өчүрүү жана башкалар. Колдонуучу — Кызматты колдонгон жеке адам (жеке маалыматтардын субъекти).</p>
+                    <p><strong>1.4.</strong> КСЛТ жеке жазуулардын ээси, башкача айтканда Кызматтын колдонуучуларынын жеке маалыматтарын иштетүүнүн максаттарын жана ыкмаларын аныктоочу жак болуп саналат.</p>
+                    <p><strong>1.5.</strong> Саясат катталганга чейин жана андан кийин каалаган убакта жеткиликтүү: Сайтта, Тиркемеде («Профиль» → «Документтер») жана Тиркеменин Google Play жана App Store барактарында. Аны сактап алууга жана басып чыгарууга болот.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-2">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">02</span>Жеке жазуулардын ээси жөнүндө маалымат</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>Толук аталышы:</strong> «Кыргызстан теннис сүйүүчүлөрүн коомчулугу» Коомдук фонду</p>
+                    <p><strong>Каттоо номери:</strong> 197575-3301-ОФ (Юридикалык жактардын бирдиктүү мамлекеттик реестри, Чүй-Бишкек юстиция башкармалыгы, алгачкы каттоо күнү 19.05.2021)</p>
+                    <p><strong>ИНН:</strong> 01905202110030; ОКПО коду: 31147180</p>
+                    <p><strong>Юридикалык дареги:</strong> Кыргыз Республикасы, Бишкек шаары, Свердлов району, Чүй проспекти, 127, 26-батир</p>
+                    <p><strong>Жетекчиси:</strong> Чокоева Айсулуу Эриковна</p>
+                    <p><strong>Электрондук почта:</strong> <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; телефон / WhatsApp: +996 555 777703</p>
+                    <p><strong>Жеке маалыматтарды иштетүү үчүн жооптуу адам:</strong> Константин Хан, жеке маалыматтар боюнча кайрылуулар үчүн электрондук почта: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> (каттын темасы «Жеке маалыматтар»).</p>
+                    <p><strong>Жеке маалыматтарды иштетүү орду:</strong> Кыргыз Республикасы (КСЛТ) жана 6-бөлүмдө көрсөтүлгөн иштетүүчүлөрдүн серверлери (анын ичинде Кыргыз Республикасынан тышкары).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-3">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">03</span>Кандай маалыматтарды иштетебиз, эмне үчүн жана кандай негизде</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> Биз көрсөтүлгөн максаттар үчүн керектүү маалыматтарды гана иштетебиз (минималдаштыруу принциби, Санариптик кодекстин 78-беренеси). Маалыматтардын тизмеси, максаттары жана иштетүү негиздери таблицада келтирилген.</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Максаты</th><th>Маалыматтар</th><th>Негизи (Санариптик кодекстин 79-беренеси)</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Каттоо, кирүү, аккаунтту жүргүзүү, сырсөздү калыбына келтирүү</td>
+                                    <td>Аты, фамилиясы, электрондук почта дареги, сырсөз (bcrypt хеши түрүндө гана сакталат), туулган күнү, жынысы; Google аркылуу киргенде — аты, e-mail, Google профилинин сүрөтү; Telegram аркылуу киргенде — Telegram ID, колдонуучунун аты, сүрөтү</td>
+                                    <td>Колдонуучу макулдашуусун аткаруу (1-бөлүктүн 1-пункту)</td>
+                                </tr>
+                                <tr>
+                                    <td>Рейтинг жүргүзүү, мелдештерге жана баттлдарга катышуу, торчолорду түзүү, жыйынтыктарды жарыялоо</td>
+                                    <td>Аты, фамилиясы, жынысы, жаш тобу, категориясы (тур), упайлары, оюндардын жыйынтыктары, жеңиштердин жана жеңилүүлөрдүн статистикасы, мелдештердин тарыхы</td>
+                                    <td>Колдонуучу макулдашуусун жана ачык офертаны аткаруу (1-бөлүктүн 1-пункту)</td>
+                                </tr>
+                                <tr>
+                                    <td>Мүчөлүк жана кызматтарды төлөө</td>
+                                    <td>Төлөмдүн суммасы, күнү жана ыкмасы, мүчөлүк мезгили, взносторддун абалы. Банк карталарынын маалыматтарын КСЛТ албайт жана сактабайт</td>
+                                    <td>Келишимди аткаруу (1-бөлүктүн 1-пункту); бухгалтердик эсеп боюнча милдеттерди аткаруу (1-бөлүктүн 2-пункту)</td>
+                                </tr>
+                                <tr>
+                                    <td>Аккаунттун коопсуздугу (жаңы түзмөктөн киргени жөнүндө билдирүү, бузуудан коргоо)</td>
+                                    <td>Браузердин user-agent хеши, экрандын чечилиши, акыркы кирүүнүн убактысы, IP-дарек</td>
+                                    <td>КСЛТнин жана колдонуучунун аккаунтту коргоодогу мыйзамдуу кызыкчылыгы (1-бөлүктүн 5-пункту)</td>
+                                </tr>
+                                <tr>
+                                    <td>Мелдештер, арыздар, оюндар, документтердин өзгөрүшү жөнүндө кызматтык билдирүүлөр</td>
+                                    <td>Электрондук почта дареги, Telegram ID, түзмөктүн push-билдирүү токени</td>
+                                    <td>Макулдашууну аткаруу (1-бөлүктүн 1-пункту); байланыш маалыматтарына билдирүү жөнөтүү үчүн — колдонуучунун макулдугу (44-берене)</td>
+                                </tr>
+                                <tr>
+                                    <td>Кайрылууларды, даттанууларды жана талаш-тартыштарды кароо</td>
+                                    <td>Кайрылууда көрсөтүлгөн маалыматтар, кат алышуу, талаштуу кырдаал жөнүндө маалымат</td>
+                                    <td>Санариптик кодекстин 119-беренеси боюнча милдеттерди аткаруу (1-бөлүктүн 2-пункту)</td>
+                                </tr>
+                                <tr>
+                                    <td>Кирүүлөрдүн статистикасы жана Кызматты жакшыртуу</td>
+                                    <td>Google Analytics'тин ээсиздендирилген маалыматтары (барактар, түзмөк, IP боюнча болжолдуу жайгашуу)</td>
+                                    <td>КСЛТнин мыйзамдуу кызыкчылыгы (1-бөлүктүн 5-пункту); 50-берене (ээсиздендирилген жазуулар)</td>
+                                </tr>
+                                <tr>
+                                    <td>Кошумча максаттар: «Оюнчу издөө» бөлүмүндө телефонду/Telegram'ды көрсөтүү, мелдештердин сүрөттөрүн жана видеолорун КСЛТнин социалдык тармактарында жарыялоо, жаңылык жана жарнама таркатуулары</td>
+                                    <td>Жеке маалыматтарды иштетүүгө Макулдукта көрсөтүлгөн</td>
+                                    <td>Ар бир максат боюнча колдонуучунун өзүнчө ыктыярдуу макулдугу (79-берененин 2-бөлүгү)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>3.2.</strong> Каттоо үчүн аты, фамилиясы, электрондук почта дареги, туулган күнү жана жынысы милдеттүү. Аларсыз аккаунт түзүүгө, рейтинг жүргүзүүгө жана категориялар боюнча торчолорду түзүүгө болбойт. Телефон номери жана профилдин сүрөтү каалоо боюнча көрсөтүлөт.</p>
+                    <p><strong>3.3.</strong> Жеке маалыматтарды иштетүүгө макулдук таблицанын акыркы сабында көрсөтүлгөн максаттар үчүн гана суралат. Бул максаттардын кайсынысынан болбосун баш тартуу Кызматтын негизги функцияларына жетүүнү чектебейт.</p>
+                    <p><strong>3.4.</strong> Биз жеке маалыматтардын өзгөчө категорияларын (ден соолук, расалык же этникалык таандыктык, диний жана саясий көз караштар, биометрикалык жана генетикалык маалыматтар) иштетпейбиз. Мындай маалыматтарды профилде жана билдирүүлөрдө көрсөтпөңүз.</p>
+                    <p><strong>3.5.</strong> Биз жеке маалыматтарды үчүнчү жактардын жарнамасы үчүн колдонбойбуз жана аларды сатпайбыз.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-4">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">04</span>Ачык маалымат</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> Кызмат — ышкыбоз теннистин ачык рейтинги. Ошондуктан колдонуучу жөнүндө төмөнкү маалыматтар Сайттын жана Тиркеменин бардык конокторуна көрүнөт: аты жана фамилиясы, профилдин сүрөтү (жүктөлгөн болсо), категориясы, рейтингдеги орду жана упайлары, оюндардын жана мелдештердин жыйынтыктары, баттлдарга катышуусу.</p>
+                    <p><strong>4.2.</strong> Электрондук почта дареги, туулган күнү, төлөм маалыматтары жана техникалык маалыматтар жарыяланбайт. Телефон жана Telegram башка колдонуучуларга өзүнчө макулдук болгондо гана көрсөтүлөт.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-5">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">05</span>Автоматтык чечим кабыл алуу</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> Упайлар, рейтингдеги орун жана категория (Futures, Challenger, Tour, Masters, Pro-Masters) Сайтта жарыяланган КСЛТнин Эрежелеринин «Рейтинг системасы» бөлүмүнө ылайык оюндардын жыйынтыктары боюнча автоматтык түрдө эсептелет. Колдонуучу кайсы категориядагы мелдештерге катыша аларын ушул аныктайт.</p>
+                    <p><strong>5.2.</strong> Колдонуучу өзүнүн упайларынын эсебин түшүндүрүүнү суроого, аны мелдештин башкы судьясында же КСЛТнин администрациясында талашууга, ошондой эле автоматтык иштетүүгө каршы пикир билдирүүгө укуктуу (Санариптик кодекстин 84-беренеси). Каршы пикир боюнча чечимди КСЛТнин кызматкери кабыл алат.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-6">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">06</span>Маалыматтар кимге берилет (иштетүүчүлөр жана алуучулар)</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>6.1.</strong> Кызматтын иштеши үчүн КСЛТ маалыматтарды иштетүүнү төмөнкү жактарга (иштетүүчүлөргө) тапшырат же маалыматтарды төмөнкү алуучуларга берет:</p>
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Жак, жайгашкан жери</th><th>Функциясы</th><th>Кандай маалыматтар</th><th>Негизи</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Иштеп чыгуучулар: Константин Хан жана Татьяна Нечаева, Кыргыз Республикасы</td>
+                                    <td>Сайтты жана Тиркемени иштеп чыгуу жана техникалык колдоо</td>
+                                    <td>Колдоо үчүн керектүү көлөмдө Кызматтын бардык маалыматтары</td>
+                                    <td>01.06.2026-жылдагы № 1 келишим (иштетүүгө тапшырма, 86-берене)</td>
+                                </tr>
+                                <tr>
+                                    <td>Supabase Inc., АКШ (Amazon Web Services серверлери, us-east-1 региону — Түндүк Вирджиния, АКШ)</td>
+                                    <td>Маалыматтар базасы, аутентификация, резервдик көчүрмөлөр</td>
+                                    <td>Аккаунттардын бардык маалыматтары</td>
+                                    <td>Supabase'тин тейлөө шарттары жана маалыматтарды иштетүү келишими (DPA)</td>
+                                </tr>
+                                <tr>
+                                    <td>Google LLC, АКШ</td>
+                                    <td>Google аркылуу кирүү (OAuth), Firebase Cloud Messaging push-билдирүүлөрү, Google Analytics статистикасы</td>
+                                    <td>Аты, e-mail, Google сүрөтү; түзмөктүн токени; кирүүлөрдүн ээсиздендирилген маалыматтары</td>
+                                    <td>Google'дун шарттары жана Google Ads Data Processing Terms</td>
+                                </tr>
+                                <tr>
+                                    <td>Telegram Messenger Inc. / Telegram FZ-LLC, БАЭ</td>
+                                    <td>Telegram аркылуу кирүү, Telegram бот аркылуу билдирүүлөр</td>
+                                    <td>Telegram ID, колдонуучунун аты, сүрөтү, билдирүүлөрдүн тексттери</td>
+                                    <td>Telegram Bot API шарттары</td>
+                                </tr>
+                                <tr>
+                                    <td>Resend Inc., АКШ</td>
+                                    <td>Кызматтык каттарды жөнөтүү</td>
+                                    <td>E-mail, алуучунун аты, каттын тексти</td>
+                                    <td>Resend'дин тейлөө шарттары жана DPA</td>
+                                </tr>
+                                <tr>
+                                    <td>Contabo GmbH, Вельфенштрассе 22, 81541 Мюнхен, Германия; серверлер АКШда (Сент-Луис, Миссури штаты) жайгашкан</td>
+                                    <td>Сайттын хостинги</td>
+                                    <td>IP-дарек жана суроо-талаптын техникалык маалыматтары</td>
+                                    <td>Contabo'нун тейлөө шарттары жана купуялык саясаты</td>
+                                </tr>
+                                <tr>
+                                    <td>Төлөм провайдери: ДемирБанк, Чүй проспекти, 304, Бишкек, Кыргыз Республикасы</td>
+                                    <td>Төлөмдөрдү кабыл алуу (онлайн төлөм кошулгандан кийин)</td>
+                                    <td>Сумма, күнү, төлөмдүн идентификатору</td>
+                                    <td>02.11.2026-жылдагы № 1 келишим</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>6.2.</strong> Ар бир иштетүүчү маалыматтарды КСЛТнин тапшырмасы боюнча жана көрсөтүлгөн максаттарда гана иштетет. КСЛТ иштетүүчүлөрдүн аракеттери үчүн өзүнүкүндөй жооп берет (Санариптик кодекстин 38-беренеси). Иштетүүчүлөрдүн тизмеси курам өзгөргөндө жаңыртылат.</p>
+                    <p><strong>6.3.</strong> Маалыматтар ошондой эле мыйзамда белгиленген учурларда жана тартипте Кыргыз Республикасынын мамлекеттик органдарына берилиши мүмкүн.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-7">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">07</span>Чек ара аркылуу берүү</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>7.1.</strong> Supabase, Google, Resend жана Contabo'нун (Сайттын хостинги) серверлери АКШда, Telegram — БАЭде жана башка өлкөлөрдө жайгашкан. Берүүдөн мурун КСЛТ тармактык жөнгө салуучу тарабынан бекитилген жеке маалыматтарды адекваттуу коргоону камсыз кылган мамлекеттердин тизмесине өлкө киргизилгенин текшерет (Санариптик кодекстин 89-беренесинин 3-бөлүгү).</p>
+                    <p><strong>7.2.</strong> Эгерде мамлекет тизмеге киргизилбесе, берүү колдонуучу тарап болгон колдонуучу макулдашуусун түзүү жана аткаруу үчүн зарыл болгондуктан (89-берененин 4-бөлүгүнүн 4-пункту) жана маалыматтарды коргоону камсыз кылган иштетүүчүлөр менен түзүлгөн келишимдердин шарттарында (89-берененин 4-бөлүгүнүн 6-пункту) жүргүзүлөт. Берилген маалыматтар алуучунун өлкөсүнүн мыйзамдарына ылайык иштетилет (89-берененин 5-бөлүгү).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-8">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">08</span>Сактоо мөөнөттөрү</h2></summary>
+                <div class="ip-rules-list">
+                    <div class="ip-doc-table-wrap">
+                        <table class="ip-doc-table">
+                            <thead><tr><th>Маалыматтар</th><th>Сактоо мөөнөтү</th></tr></thead>
+                            <tbody>
+                                <tr><td>Аккаунттун маалыматтары</td><td>Аккаунт колдонулуп турганда. Аккаунт өчүрүлгөндөн кийин — 30 күн (өчүрүүнү жокко чыгаруу мүмкүнчүлүгү), андан кийин жок кылынат</td></tr>
+                                <tr><td>Оюндардын жана мелдештердин жыйынтыктары, рейтингдин тарыхы</td><td>Мелдеш тарыхынын курамында мөөнөтсүз; аккаунт өчүрүлгөндөн кийин — ээсиздендирилген түрдө же мелдештердин протоколдорунда аты-жөнү гана көрсөтүлүп (83-берененин 2-бөлүгүнүн 2-пункту — архивдик жана статистикалык максаттар)</td></tr>
+                                <tr><td>Колдонуучу макулдашуусун түзүү жана аткаруу, алынган макулдуктар жөнүндө жазуулар</td><td>Макулдашуунун мөөнөтү жана ал токтотулгандан кийин 3 жыл (Санариптик кодекстин 114-беренесинин 4-бөлүгү)</td></tr>
+                                <tr><td>Төлөм маалыматтары</td><td>Бухгалтердик эсеп жөнүндө мыйзамдарда белгиленген мөөнөт</td></tr>
+                                <tr><td>Кирүүлөр жөнүндө техникалык маалыматтар</td><td>12 ай</td></tr>
+                                <tr><td>Кайрылуулар жана даттануулар</td><td>Каралгандан кийин 3 жыл</td></tr>
+                                <tr><td>Макулдук боюнча иштетилген маалыматтар</td><td>Макулдук кайтарылып алынганга же аккаунт өчүрүлгөнгө чейин</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-9">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">09</span>Колдонуучунун укуктары</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>9.1.</strong> Колдонуучу төмөнкүлөргө укуктуу:</p>
+                    <ul class="ip-doc-list">
+                        <li>Санариптик кодекстин 73-беренесинин 1-бөлүгүндөгү көлөмдө өз маалыматтарын иштетүү жөнүндө маалымат алууга;</li>
+                        <li>өз маалыматтарынын баарына же алардын көчүрмөсүнө жетүүгө (73-берененин 4-бөлүгү);</li>
+                        <li>өз маалыматтарын оңдоого же толуктоого (75-берене) — профилде өз алдынча же суроо-талап боюнча;</li>
+                        <li>өз маалыматтарын машина окуй турган форматта алууга же аларды башка жазуу ээсине берүүнү талап кылууга (76-берене);</li>
+                        <li>маалыматтарды жок кылууну талап кылууга (83-берене), анын ичинде аккаунтту өчүрүүгө (10-бөлүм);</li>
+                        <li>белгилүү ыкмалар менен же белгилүү максаттарда иштетүүгө каршы пикир билдирүүгө (84-берене);</li>
+                        <li>каршы пикир каралып жатканда же маалыматтар оңдолуп жатканда иштетүүнү чектөөнү талап кылууга (85-берене);</li>
+                        <li>каалаган макулдукту профилдин жөндөөлөрүндө же кат менен кайтарып алууга — ал берилгендей эле жөнөкөй (79-берененин 5-бөлүгү);</li>
+                        <li>Кызматтан баш тартууга жана өз маалыматтары жөнүндө маалымат алууга (118-берене);</li>
+                        <li>КСЛТнин аракеттерине Кыргыз Республикасынын Министрлер Кабинетине караштуу Жеке маалыматтарды коргоо боюнча мамлекеттик агенттикке же сотко даттанууга.</li>
+                    </ul>
+                    <p><strong>9.2.</strong> Суроо-талаптар <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> дарегине же Тиркемедеги «Профиль» → «Менин маалыматтарым» бөлүмү аркылуу жөнөтүлөт. Инсандыгын ырастоо үчүн биз суроо-талапты аккаунтта көрсөтүлгөн электрондук почта дарегинен жөнөтүүнү сурашыбыз мүмкүн (37-берененин 2-бөлүгү).</p>
+                    <p><strong>9.3.</strong> Жооп берүү мөөнөттөрү: иштетүү жөнүндө маалымат, маалыматтарга жетүү, оңдоо, каршы пикир боюнча чечим — суроо-талап алынган күндөн тартып 7 жумуш күнүнөн ашпайт. Иштетүүнүн чектелгени же чектөөнүн алынганы жөнүндө кийинки жумуш күнүнөн кечиктирбей билдиребиз. 83-берененин негиздери боюнча жок кылуу токтоосуз жүргүзүлөт, эгерде колдонуучу дароо өчүрүүнү сурабаса, өчүрүүнү жокко чыгаруунун 30 күндүк мөөнөтү эске алынат.</p>
+                    <p><strong>9.4.</strong> Милдеттүү маалыматтарды берүүдөн баш тартуу (3.2-пункт) катталууга жана рейтингге, мелдештерге катышууга мүмкүн болбой турганын билдирет. Кошумча максаттарга макулдуктан баш тартуу негизги функцияларга таасир этпейт.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-10">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">10</span>Аккаунтту өчүрүү</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>10.1.</strong> Аккаунтту Тиркемеде (Профиль → Жөндөөлөр → «Аккаунтту өчүрүү»), Сайтта (Профиль → Жөндөөлөр) же <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> дарегине кат жөнөтүү менен өчүрүүгө болот. Толук тартиби <a href="https://tennis.kg/pages/delete-account-kg.html">tennis.kg/pages/delete-account-kg.html</a> барагында жарыяланган.</p>
+                    <p><strong>10.2.</strong> Өчүрүлгөндөн кийин профиль дароо башка колдонуучуларга көрүнбөй калат. 30 күндөн кийин жеке маалыматтар биротоло жок кылынат. КСЛТ мыйзам боюнча сактоого милдеттүү же укуктуу болгон, 8-бөлүмдө көрсөтүлгөн маалыматтар гана сакталат, бул жөнүндө колдонуучуга өчүрүүдө билдирилет (118-берененин 3-бөлүгү).</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-11">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">11</span>Маалыматтарды коргоо</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>11.1.</strong> КСЛТ уюштуруучулук жана техникалык коргоо чараларын көрөт (Санариптик кодекстин 78, 88-беренелери): маалыматтарды HTTPS (TLS) аркылуу гана берүү, маалыматтар базасынын саптар деңгээлинде жетүүнү бөлүштүрүү (Row Level Security), сырсөздөрдү хеш түрүндө сактоо, резервдик көчүрмөлөрдү шифрлөө, маалыматтарга жетүүчү адамдардын чөйрөсүн чектөө, жеке жазуулар менен жасалган иштерди эсепке алуу, кызматкерлерди жана ыктыярчыларды окутуу.</p>
+                    <p><strong>11.2.</strong> Жеке маалыматтар агып чыккан учурда КСЛТ аны жоюу боюнча чараларды көрөт жана мыйзамдарда белгиленген тартипте жабыркаган колдонуучуларга жана тармактык жөнгө салуучуга билдирет.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-12">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">12</span>Балдар</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>12.1.</strong> Кызмат 14 жаштан жогорку адамдарга арналган. 14төн 18 жашка чейинки колдонуучулар өз маалыматтарын иштетүүгө макулдукту өз алдынча беришет (Санариптик кодекстин 81-беренесинин 3-бөлүгү). Мелдештерге катышуу — ачык офертанын шарттары боюнча.</p>
+                    <p><strong>12.2.</strong> Эгерде мыйзамдуу өкүлүнүн макулдугусуз 14 жашка толо элек бала катталганы бизге белгилүү болсо, аккаунт өчүрүлөт. Мыйзамдуу өкүл бул жөнүндө <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a> дарегине билдире алат.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-13">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">13</span>Cookie жана жергиликтүү сактагыч</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>13.1.</strong> Сайт браузердин жергиликтүү сактагычын (localStorage) аккаунтка кирүүнү жана жөндөөлөрдү (тил) сактоо үчүн гана колдонот. Жарнамалык жана үчүнчү тараптын көзөмөлдөөчү cookie файлдары колдонулбайт. Google Analytics ээсиздендирилген статистиканы чогултат. Аны браузердин кеңейтүүлөрү менен өчүрүүгө болот.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-14">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">14</span>Саясатты өзгөртүү</h2></summary>
+                <div class="ip-rules-list">
+                    <p><strong>14.1.</strong> Саясаттагы олуттуу өзгөртүүлөр жөнүндө биз колдонуучуларга Тиркемеде жана электрондук почта аркылуу өзгөртүүлөр күчүнө киргенге чейин кеминде бир ай мурун билдиребиз. 79-берененин 1-бөлүгү боюнча негизи жок жаңы иштетүү максаты колдонуучунун макулдугу алынгандан кийин гана киргизилет (78-берененин 2-бөлүгү). Колдонуудагы жана мурунку редакциялар Сайтта жеткиликтүү.</p>
+                </div>
+            </details>
+
+            <details class="ip-doc-fold ip-fade-in" id="pp-15">
+                <summary class="ip-doc-fold-head"><h2 class="ip-rules-section-title"><span class="ip-rules-section-num">15</span>Байланыш</h2></summary>
+                <div class="ip-rules-list">
+                    <p>Жеке маалыматтарды иштетүү боюнча бардык суроолор: <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>; почта дареги: Кыргыз Республикасы, Бишкек шаары, Свердлов району, Чүй проспекти, 127, 26-батир, «КСЛТ» Коомдук фонду.</p>
+                </div>
+            </details>
+
+            <div class="ip-doc-sign ip-fade-in">
+                <p class="ip-doc-sign-role">КСЛТнин Башкармалыгынын Төрагасы</p>
+                <p class="ip-doc-sign-name">Чокоева А. Э.</p>
+                <p class="ip-doc-revision">2026-жылдын 3-ноябрындагы редакциясы. 2026-жылдын 3-ноябрындагы № 1 буйругу менен бекитилген.</p>
+                <button type="button" class="ip-doc-print" data-doc-print>Басып чыгаруу же PDF сактоо</button>
+            </div>$kslt$)
+ON CONFLICT (slug) DO UPDATE SET
+    body    = EXCLUDED.body,
+    body_en = EXCLUDED.body_en,
+    body_kg = EXCLUDED.body_kg,
+    title    = COALESCE(public.site_documents.title,    EXCLUDED.title),
+    title_en = COALESCE(public.site_documents.title_en, EXCLUDED.title_en),
+    title_kg = COALESCE(public.site_documents.title_kg, EXCLUDED.title_kg);
+
 -- ---- delete-account ----------------------------------------------------
 INSERT INTO public.site_documents (slug, title, title_en, title_kg, body, body_en, body_kg)
 VALUES ('delete-account',
