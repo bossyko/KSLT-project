@@ -5594,3 +5594,81 @@ select:-webkit-autofill {
     margin: var(--space-4) 0 0;
     font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted);
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   СОГЛАСИЯ (Ю2/Ю3) — ОДИН ВИД НА ДВА МЕСТА: экран после регистрации
+   и раздел кабинета. Переключатель берётся готовый — `db-notif-*`,
+   тот же, что у уведомлений: ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ, и
+   рука у человека уже обучена.
+   Все числа — ступени шкалы, своих нет.
+   ───────────────────────────────────────────────────────────────── */
+.db-consent-intro {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    margin: 0 0 var(--space-4);
+}
+
+.db-consent-list { list-style: none; margin: 0; padding: 0; }
+
+.db-consent-item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+    padding: var(--space-4) 0;
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+
+.db-consent-item:last-child { border-bottom: none; }
+
+.db-consent-text { flex: 1; min-width: 0; }
+
+.db-consent-name {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.db-consent-desc {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.db-consent-meta {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    margin-top: var(--space-2);
+}
+
+.db-consent-footnote {
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: var(--space-4) 0 var(--space-4);
+}
+
+.db-consent-minor {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* НА ТЕЛЕФОНЕ переключатель уезжает под текст: в строку он не
+   помещается, и подпись дробится на три слова в столбик. */
+@media (max-width: 640px) {
+    .db-consent-item { flex-direction: column; gap: var(--space-2); }
+}
+
+/* Предупреждение «писем не будет» — показывается, когда первая цель
+   выключена. Прячется классом, а не перерисовкой экрана. */
+.db-consent-nomail {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--warning);
+    margin: var(--space-3) 0 0;
+}
+
+.db-consent-hidden { display: none; }

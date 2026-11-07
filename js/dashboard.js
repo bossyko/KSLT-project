@@ -296,6 +296,28 @@
         voucherCoaches: 'Coaches',
         voucherShowAll: 'Show all',
         notifications: 'Notifications',
+        /* СОГЛАСИЯ (Ю2/Ю3). Тексты — из Согласия, утверждённого приказом
+           № 1 от 03.11.2026. Правятся только вместе с документом. */
+        sogTitle: 'Consent to personal data processing',
+        sogIntro: 'This is a request for your consent. The Public Foundation «Kyrgyzstan Amateur Tennis Community» asks permission to process your data for the purposes below. <strong>Each consent is separate and optional.</strong> If you check nothing, you can still use the rating, tournaments and all core features.',
+        sog1Name: '1. Notifications to my contact details',
+        sog1Desc: 'Sending to my e-mail and Telegram notifications related to the User Agreement, membership and tournament participation: entry confirmations, draws, schedule, changes of terms. <em>Without consent, notifications are shown only in the App and in the personal account on the Site.</em>',
+        sog1Meta: 'Data: e-mail, Telegram, first and last name · Term: until withdrawal',
+        sog2Name: '2. Contact with other players',
+        sog2Desc: 'Showing my phone number and Telegram to other registered users in «Find a player» and «Battles» so they can arrange a game with me.',
+        sog2Meta: 'Data: phone, Telegram, name, photo, category · Term: until withdrawal',
+        sog3Name: '3. Photo and video from tournaments',
+        sog3Desc: 'Filming during KSLT tournaments and events and publishing materials with my image, name and results in the news of the Site and App and on KSLT accounts in Instagram, Telegram and YouTube.',
+        sog3Meta: 'Data: image, name, category, match results · Term: 3 years or until withdrawal',
+        sog4Name: '4. News and offers',
+        sog4Desc: 'Mailing of KSLT news, announcements of tournaments and events, information about offers from KSLT sponsors and partners by e-mail, Telegram and push notifications. <em>My data is not passed to sponsors.</em>',
+        sog4Meta: 'Data: e-mail, Telegram, push token, name · Term: until withdrawal',
+        sogFoot: 'You can withdraw any consent here or by writing to kslt.kyrgyzstan@gmail.com. After withdrawal, processing for that purpose stops, and data processed only for it is deleted within 7 working days.',
+        sogPolicy: 'Privacy Policy',
+        sogSave: 'Save choice',
+        sogSaved: 'Choice saved',
+        sogMinor: 'You are under 18. You may give consent yourself. Before photos and videos of you are published, we recommend discussing it with your parents.',
+        sogNoMail: 'You will not receive e-mails about entries, draws and matches — they will be shown only in your account.',
         notifMembership: 'Membership',
         notifTournaments: 'Tournaments',
         notifMatches: 'Matches',
@@ -616,6 +638,26 @@
         voucherCoaches: 'Машыктыруучулар',
         voucherShowAll: 'Баарын көрсөтүү',
         notifications: 'Билдирмелер',
+        sogTitle: 'Жеке маалыматтарды иштетүүгө макулдук',
+        sogIntro: 'Бул сиздин макулдугуңузду суроо. «Кыргызстандын теннис сүйүүчүлөрүнүн коомдоштугу» коомдук фонду төмөнкү максаттар үчүн маалыматтарыңызды иштетүүгө уруксат сурайт. <strong>Ар бир макулдук өзүнчө жана милдеттүү эмес.</strong> Эч нерсе белгилебесеңиз да, рейтингди, мелдештерди жана бардык негизги мүмкүнчүлүктөрдү колдоно аласыз.',
+        sog1Name: '1. Байланыш маалыматтарыма билдирүүлөр',
+        sog1Desc: 'Колдонуучу макулдашуусуна, мүчөлүккө жана мелдештерге катышууга байланышкан билдирүүлөрдү e-mail жана Telegram аркылуу жөнөтүү: арыздарды ырастоо, торчолор, расписание, шарттардын өзгөрүшү. <em>Макулдуксуз билдирүүлөр Тиркемеде жана Сайттагы жеке кабинетте гана көрсөтүлөт.</em>',
+        sog1Meta: 'Маалыматтар: e-mail, Telegram, аты-жөнү · Мөөнөтү: кайтарып алганга чейин',
+        sog2Name: '2. Башка оюнчулар менен байланыш',
+        sog2Desc: 'Мени менен оюн боюнча макулдашуу үчүн «Оюнчу издөө» жана «Баттлдар» бөлүмдөрүндө телефонумду жана Telegram\'ымды башка катталган колдонуучуларга көрсөтүү.',
+        sog2Meta: 'Маалыматтар: телефон, Telegram, аты, сүрөтү, категориясы · Мөөнөтү: кайтарып алганга чейин',
+        sog3Name: '3. Мелдештерден сүрөт жана видео',
+        sog3Desc: 'КСЛТдин мелдештеринде жана иш-чараларында тартуу жана менин сүрөтүм, атым жана жыйынтыктарым менен материалдарды Сайттын жана Тиркеменин жаңылыктарында, ошондой эле КСЛТдин Instagram, Telegram жана YouTube аккаунттарында жарыялоо.',
+        sog3Meta: 'Маалыматтар: сүрөт, видео, аты, категориясы, жыйынтыктары · Мөөнөтү: 3 жыл же кайтарып алганга чейин',
+        sog4Name: '4. Жаңылыктар жана сунуштар',
+        sog4Desc: 'КСЛТдин жаңылыктарын, мелдештердин жарыяларын, КСЛТдин демөөрчүлөрүнүн жана өнөктөштөрүнүн сунуштары жөнүндө маалыматты e-mail, Telegram жана push-билдирүүлөр аркылуу жөнөтүү. <em>Менин маалыматтарым демөөрчүлөргө берилбейт.</em>',
+        sog4Meta: 'Маалыматтар: e-mail, Telegram, push, аты · Мөөнөтү: кайтарып алганга чейин',
+        sogFoot: 'Каалаган макулдукту ушул жерден же kslt.kyrgyzstan@gmail.com дарегине кат жазуу менен кайтарып алсаңыз болот. Кайтарып алгандан кийин ошол максат боюнча иштетүү токтойт, ал үчүн гана иштетилген маалыматтар 7 жумуш күндүн ичинде өчүрүлөт.',
+        sogPolicy: 'Купуялык саясаты',
+        sogSave: 'Тандоону сактоо',
+        sogSaved: 'Тандоо сакталды',
+        sogMinor: 'Сизге 18 жаш толо элек. Макулдукту өзүңүз бере аласыз. Сиз тартылган сүрөт жана видео жарыялангандан мурун ата-энеңиз менен талкуулоону сунуштайбыз.',
+        sogNoMail: 'Арыздар, торчолор жана оюндар жөнүндө каттарды албайсыз — алар кабинетиңизде гана көрсөтүлөт.',
         notifMembership: 'Мүчөлүк',
         notifTournaments: 'Мелдештер',
         notifMatches: 'Матчтар',
@@ -933,6 +975,26 @@
         voucherCoaches: 'Тренеры',
         voucherShowAll: 'Показать все',
         notifications: 'Уведомления',
+        sogTitle: 'Согласие на обработку персональных данных',
+        sogIntro: 'Это запрос вашего согласия. Общественный фонд «Кыргызстанское сообщество любителей тенниса» просит разрешения обрабатывать ваши данные для целей ниже. <strong>Каждое согласие — отдельное и необязательное.</strong> Если вы ничего не отметите, вы всё равно сможете пользоваться рейтингом, турнирами и всеми основными функциями.',
+        sog1Name: '1. Уведомления на мои контактные данные',
+        sog1Desc: 'Направление на мой e-mail и в Telegram уведомлений, связанных с Пользовательским соглашением, членством и участием в турнирах: подтверждение заявок, сетки, расписание, изменения условий. <em>Без согласия уведомления показываются только в Приложении и личном кабинете на Сайте.</em>',
+        sog1Meta: 'Данные: e-mail, Telegram, имя и фамилия · Срок: до отзыва',
+        sog2Name: '2. Связь с другими игроками',
+        sog2Desc: 'Показ моего телефона и Telegram другим зарегистрированным пользователям в разделах «Поиск игрока» и «Баттлы», чтобы со мной могли договориться об игре.',
+        sog2Meta: 'Данные: телефон, Telegram, имя, фото, категория · Срок: до отзыва',
+        sog3Name: '3. Фото и видео с турниров',
+        sog3Desc: 'Съёмка во время турниров и мероприятий КСЛТ и публикация материалов с моим изображением, именем и результатами в новостях Сайта и Приложения и в аккаунтах КСЛТ в Instagram, Telegram и YouTube.',
+        sog3Meta: 'Данные: фото и видео, имя, категория, результаты · Срок: 3 года или до отзыва',
+        sog4Name: '4. Новости и предложения',
+        sog4Desc: 'Рассылка новостей КСЛТ, анонсов турниров и мероприятий, информации о предложениях спонсоров и партнёров КСЛТ по e-mail, в Telegram и push-уведомлениях. <em>Мои данные спонсорам не передаются.</em>',
+        sog4Meta: 'Данные: e-mail, Telegram, push, имя · Срок: до отзыва',
+        sogFoot: 'Отозвать любое согласие можно здесь же или письмом на kslt.kyrgyzstan@gmail.com. После отзыва обработка по этой цели прекращается, а данные, которые обрабатывались только для неё, удаляются в течение 7 рабочих дней.',
+        sogPolicy: 'Политике конфиденциальности',
+        sogSave: 'Сохранить выбор',
+        sogSaved: 'Выбор сохранён',
+        sogMinor: 'Вам меньше 18 лет. Вы можете дать согласие самостоятельно. Перед публикацией фото и видео с вами рекомендуем обсудить это с родителями.',
+        sogNoMail: 'Вы не будете получать письма о заявках, сетках и матчах — они будут видны только в кабинете.',
         notifMembership: 'Членство',
         notifTournaments: 'Турниры',
         notifMatches: 'Матчи',
@@ -6553,6 +6615,72 @@
     }
 
     // ---- Render Settings ----
+    /* ─────────────────────────────────────────────────────────────
+       СОГЛАСИЯ (Ю2/Ю3). Вид и правило «дано/не дано» — в общем доме
+       `js/kslt-soglasiya.js`, он же лежит в приложении. Здесь только
+       словарь, запись в базу и отклик на нажатие.
+       ЖУРНАЛ ОТСЮДА НЕ ПИШЕТСЯ: его ведёт триггер базы. Позови его и
+       отсюда — и на первом же новом месте записи разойдутся.
+       ───────────────────────────────────────────────────────────── */
+    function рисоватьСогласия() {
+        var карточка = document.getElementById('dbConsentCard');
+        if (!карточка || !window.KSLT_SOGLASIYA) return;
+        var Т = {};
+        for (var к in L) { if (Object.prototype.hasOwnProperty.call(L, к)) Т[к] = L[к]; }
+        Т.sogPolicyHref = 'privacy-policy' + KSLT_YAZYK.суффикс + '.html';
+        карточка.outerHTML = window.KSLT_SOGLASIYA.разметка(Т, window.ksltProfile);
+        привязатьСогласия();
+    }
+
+    function привязатьСогласия() {
+        var карточка = document.querySelector('.db-consent-card');
+        if (!карточка) return;
+
+        карточка.addEventListener('change', function (с) {
+            var поле = с.target.closest ? с.target.closest('input[data-sog]') : null;
+            if (!поле) return;
+            var цель = parseInt(поле.getAttribute('data-sog'), 10);
+            if (цель === 1) {
+                var строка = карточка.querySelector('.db-consent-nomail');
+                if (строка) строка.classList.toggle('db-consent-hidden', поле.checked);
+            }
+        });
+
+        var кнопка = карточка.querySelector('.db-consent-save');
+        if (!кнопка) return;
+        кнопка.addEventListener('click', async function () {
+            кнопка.disabled = true;
+            var правка = {};
+            карточка.querySelectorAll('input[data-sog]').forEach(function (поле) {
+                var ч = window.KSLT_SOGLASIYA.правка(
+                    parseInt(поле.getAttribute('data-sog'), 10), поле.checked);
+                for (var с in ч) {
+                    if (Object.prototype.hasOwnProperty.call(ч, с)) правка[с] = ч[с];
+                }
+            });
+            /* ПУСТОЙ ВЫБОР — ТОЖЕ ОТВЕТ. Отметка о том, что человек
+               решал, нужна, чтобы экран не всплывал после входа вечно. */
+            правка.notify_preferences =
+                window.KSLT_SOGLASIYA.отметитьРешение(window.ksltProfile);
+
+            var ответ = await window.supabaseClient
+                .from('profiles').update(правка)
+                .eq('id', (window.ksltProfile || {}).id);
+
+            кнопка.disabled = false;
+            if (ответ.error) {
+                showMessage('settingsMessage', ответ.error.message, true);
+                return;
+            }
+            for (var п in правка) {
+                if (Object.prototype.hasOwnProperty.call(правка, п)) {
+                    window.ksltProfile[п] = правка[п];
+                }
+            }
+            showMessage('settingsMessage', L.sogSaved, false);
+        });
+    }
+
     function renderSettings(user) {
         var container = document.getElementById('db-settings');
         if (!container) return;
@@ -6602,6 +6730,13 @@
 
             '<div class="db-card db-settings-section" id="dbDevicesCard"></div>' +
 
+            /* СОГЛАСИЯ СТОЯТ ПЕРЕД УВЕДОМЛЕНИЯМИ, И ЭТО НЕ ПОРЯДОК
+               КРАСОТЫ. Цель 1 — согласие на канал вообще; настройки
+               уведомлений ниже — это разделы ВНУТРИ него. Поставь их
+               наоборот, и человек будет включать разделы у канала, на
+               который не согласился. */
+            '<div class="db-card db-settings-section" id="dbConsentCard"></div>' +
+
             buildNotifySection() +
 
             /* ЗАБЛОКИРОВАННЫЕ — НАСТРОЙКА ОБЩЕНИЯ, поэтому стоит ДО
@@ -6618,6 +6753,7 @@
 
         рисоватьУстройства();
         рисоватьБлокировки();
+        рисоватьСогласия();
 
         // Password rules validation
         var pwRules = {
