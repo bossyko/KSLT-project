@@ -110,7 +110,13 @@ Deno.serve(async (req) => {
     // Find active memberships that have expired
     const { data: expired, error } = await db
       .from('memberships')
-      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, email, notify_preferences, lang)')
+      /* СВЯЗЬ НАЗВАНА ПО ИМЕНИ — та же беда, что в `membership-notify`.
+         `memberships` ссылается на `profiles` ДВАЖДЫ: `profile_id` и
+         `created_by`. Эта функция падала бы ровно так же, но её вовсе
+         не звали: задание `membership-auto-expire` обращалось к имени,
+         которого нет, и получало 404 раньше, чем успевало упасть на
+         запросе. Починили бы только имя — вылез бы 500. */
+      .select('id, profile_id, expires_at, profiles!memberships_profile_id_fkey(full_name, telegram_chat_id, email, notify_preferences, lang)')
       .eq('status', 'active')
       .lt('expires_at', now)
 

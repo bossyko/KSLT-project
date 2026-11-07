@@ -67,12 +67,21 @@ LANGUAGE sql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+    /* СРОК ОЖИДАНИЯ НАЗВАН, А НЕ ОСТАВЛЕН ПО УМОЛЧАНИЮ.
+       Умолчание `net.http_post` — 5 секунд, и `match-notify`,
+       который ходит каждые пять минут, в них иногда не укладывался:
+       замер 07.11 нашёл таймауты в 00:00, 01:00 и 03:00. Ответ при
+       этом не приходит вовсе, а в журнале заданий стоит «успешно» —
+       запрос ведь поставлен в очередь.
+       20 секунд: edge-функция холодным стартом поднимается до
+       нескольких секунд, и запас нужен именно на это. */
     SELECT net.http_post(
         url := 'https://qqkzszesviukopgjbead.supabase.co/functions/v1/' || p_имя,
         headers := jsonb_build_object(
             'Authorization', 'Bearer ' || public.cron_secret(),
             'Content-Type', 'application/json'),
-        body := '{}'::jsonb);
+        body := '{}'::jsonb,
+        timeout_milliseconds := 20000);
 $$;
 
 REVOKE ALL ON FUNCTION public.позвать_функцию(text) FROM PUBLIC;

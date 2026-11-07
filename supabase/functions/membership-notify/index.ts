@@ -136,7 +136,16 @@ await загрузитьТексты(supabase)
     // Find active memberships expiring on target date
     const { data: memberships, error: memError } = await supabase
       .from('memberships')
-      .select('id, profile_id, expires_at, profiles(full_name, telegram_chat_id, email, notify_preferences, lang)')
+      /* СВЯЗЬ НАЗВАНА ПО ИМЕНИ, А НЕ УГАДЫВАЕТСЯ. У `memberships` ДВА
+         внешних ключа на `profiles`: `memberships_profile_id_fkey`
+         (владелец членства) и `memberships_created_by_fkey` (кто завёл).
+         Короткое `profiles(...)` не говорит, по какому соединять, и
+         PostgREST отказывает: «more than one relationship was found».
+         Задание `membership-expiry-notify` падало на этом каждый день в
+         04:00 — замер 07.11 по `net._http_response`. В журнале заданий
+         при этом стояло «успешно»: запрос был поставлен в очередь, а
+         отказ пришёл позже. */
+      .select('id, profile_id, expires_at, profiles!memberships_profile_id_fkey(full_name, telegram_chat_id, email, notify_preferences, lang)')
       .eq('status', 'active')
       .gte('expires_at', targetDate + 'T00:00:00')
       .lt('expires_at', targetDate + 'T23:59:59')

@@ -2224,7 +2224,15 @@ function обновитьРасклад() {
         var maxPart = parseInt(document.getElementById('adTrnMaxPart').value, 10) || 16;
 
         var regRes = await A.client.from('tournament_registrations')
-            .select('*, players(id, name, name_en, photo, points, category_id)')
+            /* СВЯЗЬ НАЗВАНА ПО ИМЕНИ. У `tournament_registrations` ДВА
+               внешних ключа на `players` — `player_id` и `partner_id`, —
+               и короткое `players(...)` для PostgREST двусмысленно: он
+               отвечает «more than one relationship was found» и 500.
+               Ошибка здесь ПРОГЛАТЫВАЛАСЬ: `regRes.data || []` при
+               отказе даёт пустой массив, и список заявок в карточке
+               турнира оказывался пуст МОЛЧА. Найдено 07.11 сторожем
+               `check-dvoynaya-svyaz.js`, а не глазами. */
+            .select('*, players!tournament_registrations_player_id_fkey(id, name, name_en, photo, points, category_id)')
             .eq('tournament_id', tournamentId)
             .order('registered_at', { ascending: true });
         var regs = regRes.data || [];

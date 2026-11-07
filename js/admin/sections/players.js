@@ -2664,7 +2664,12 @@
         if (!body) return;
         body.innerHTML = '<div style="padding:20px;opacity:0.5;">Loading...</div>';
 
-        var res = await A.client.from('tournament_results').select('*, players(name, name_en)').eq('tournament_id', tournamentId);
+        /* СВЯЗЬ НАЗВАНА ПО ИМЕНИ: у `tournament_results` два внешних
+           ключа на `players` (`player_id` и `partner_id`). Та же беда,
+           что в заявках, и так же проглоченная: `res.data || []`. */
+        var res = await A.client.from('tournament_results')
+            .select('*, players!tournament_results_player_id_fkey(name, name_en)')
+            .eq('tournament_id', tournamentId);
         var results = res.data || [];
 
         var trnRes = await A.client.from('tournaments').select('*, tournament_levels(name, name_en)').eq('id', tournamentId).single();
