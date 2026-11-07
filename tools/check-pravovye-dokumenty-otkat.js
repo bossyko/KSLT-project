@@ -24,7 +24,16 @@ const RU  = 'tools/dokumenty/politika-ru.html',
       СТР = 'pages/privacy-policy.html',
       СОГЛ_RU = 'tools/dokumenty/soglashenie-ru.html',
       СОГЛ_KG = 'tools/dokumenty/soglashenie-kg.html',
-      SQL = 'sql/схема/dokumenty-perenos-v-bazu-06nov.sql';
+      /* ИМЯ ФАЙЛА ПЕРЕНОСА — ДАТА РЕДАКЦИИ, и зашивать его здесь значит
+         ломать откат при каждой новой редакции. Берётся самый свежий,
+         как и в самом стороже. */
+      SQL = (function () {
+          const д = path.join(КОРЕНЬ, 'sql', 'схема');
+          const е = fs.readdirSync(д)
+              .filter(и => /^dokumenty-perenos-v-bazu-.*\.sql$/.test(и)).sort();
+          if (!е.length) throw new Error('нет файла переноса документов');
+          return 'sql/схема/' + е[е.length - 1];
+      })();
 
 const ФАЙЛЫ = [RU, EN, KG, СТР, 'pages/privacy-policy-en.html', 'pages/privacy-policy-kg.html', SQL,
     СОГЛ_RU, 'tools/dokumenty/soglashenie-en.html', СОГЛ_KG,
