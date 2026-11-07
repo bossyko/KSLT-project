@@ -235,10 +235,10 @@ test.describe('поиск игрока · ' + Я.имя, () => {
         const з = await page.evaluate(() => {
             const полоса = document.querySelector('.trn-filters');
             if (!полоса) return null;
-            const выпадашки = [...полоса.querySelectorAll('.f-dd-toggle, .ct-dd-toggle')];
+            const выпадашки = [...полоса.querySelectorAll('.f-dd-toggle, .kslt-dd-toggle')];
             const чипы = [...полоса.querySelectorAll('.trn-chip')]
                 .filter(c => !c.classList.contains('f-dd-toggle') &&
-                             !c.classList.contains('ct-dd-toggle'));
+                             !c.classList.contains('kslt-dd-toggle'));
             const поиск = полоса.querySelector('.trn-search-input');
             return {
                 выпадашек: выпадашки.length,
@@ -269,7 +269,7 @@ test.describe('поиск игрока · ' + Я.имя, () => {
             const живых = document.querySelectorAll('.pt-card').length;
             const п = собрать(живых ? 0 : 1);
             const цели = [...document.querySelectorAll(
-                '.trn-back, .f-dd-toggle, .ct-dd-toggle, .pt-invite-btn,' +
+                '.trn-back, .f-dd-toggle, .kslt-dd-toggle, .pt-invite-btn,' +
                 ' .pt-guest-btn, .pl-page-btn')];
             const плохо = [];
             цели.forEach(el => {

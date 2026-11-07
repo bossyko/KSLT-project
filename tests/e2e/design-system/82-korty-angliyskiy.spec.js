@@ -193,13 +193,23 @@ for (const С of СТРАНИЦЫ) {
     });
 }
 
+/* ВЫПАДАШКА ЖИВЁТ В ОБЩЕМ ДОМЕ `kslt-dd-*` (08.11).
+   Проба держала прежние имена `ct-dd-*`. Их в продукте нет вовсе — ни в
+   `css/courts.css`, ни в `js/courts.js`, ноль совпадений, — а сторож
+   `check-vypadashka.js` прямо держит правило «мёртвое имя ct-dd не
+   вернулось». То есть переезд был осознанным, и упали не корты, а проба.
+   ПРОБА, ДЕРЖАЩАЯ ИМЯ КЛАССА, ПЕРЕЖИВАЕТ ПЕРЕЕЗД ПОНЯТИЯ В ДОМ ровно
+   так же, как сторож, держащий строку кода: падение выглядит бедой
+   продукта, а продукт цел. Имена сняты С ЖИВОЙ СТРАНИЦЫ, а не из памяти:
+   `kslt-dd`, `kslt-dd-toggle`, `kslt-dd-menu`, `kslt-dd-item`,
+   `kslt-dd-tick`, класс открытого состояния `open` остался прежним. */
 test('три языка дают ТРИ разных заголовка, а не один', async ({ page }) => {
     const снять = async (адрес) => {
         await открыть(page, адрес, '.ct-card');
         return page.evaluate(() => {
             const т = s => { const э = document.querySelector(s); return э ? (э.textContent || '').trim() : null; };
             const п = s => { const э = document.querySelector(s); return э ? (э.placeholder || '') : null; };
-            return { h1: т('.ct-hero-title'), поиск: п('.trn-search-input'), чип: т('.ct-dd-toggle') };
+            return { h1: т('.ct-hero-title'), поиск: п('.trn-search-input'), чип: т('.kslt-dd-toggle') };
         });
     };
     const ru = await снять('/pages/courts.html');
@@ -232,7 +242,7 @@ test('фокус с клавиатуры виден на фильтрах и к�
        обводка обязана быть. Не зажёг — ПРОПУСК С ПРИЧИНОЙ, а не падение:
        пропуск, у которого написано почему, честнее зелёной галочки.
        Само правило в css сторожит заморозка. */
-    const интересные = ['ct-dd-toggle', 'ct-card', 'trn-search-input', 'pl-page-btn'];
+    const интересные = ['kslt-dd-toggle', 'ct-card', 'trn-search-input', 'pl-page-btn'];
     const найдено = [];
     for (let шаг = 0; шаг < 60; шаг++) {
         await page.keyboard.press('Tab');
@@ -279,7 +289,7 @@ test('фокус с клавиатуры виден на фильтрах и к�
 
 test('раскрывашка сообщает своё состояние, и выбранный пункт помечен', async ({ page }) => {
     await открыть(page, '/pages/courts-en.html', '.ct-card');
-    const чип = page.locator('.ct-dd-toggle').first();
+    const чип = page.locator('.kslt-dd-toggle').first();
 
     expect(await чип.getAttribute('aria-haspopup'), 'нет aria-haspopup').toBe('listbox');
     expect(await чип.getAttribute('aria-expanded'), 'до открытия должно быть false').toBe('false');
@@ -288,11 +298,18 @@ test('раскрывашка сообщает своё состояние, и в
     await page.waitForTimeout(300);
     expect(await чип.getAttribute('aria-expanded'), 'после открытия должно быть true').toBe('true');
 
-    const меню = page.locator('.ct-dd.open .ct-dd-menu').first();
+    const меню = page.locator('.kslt-dd.open .kslt-dd-menu').first();
     expect(await меню.getAttribute('role'), 'у списка нет роли').toBe('listbox');
 
-    const галок = await page.locator('.ct-dd.open .ct-dd-tick').count();
-    const помечено = await page.locator('.ct-dd.open [aria-current="true"]').count();
+    const галок = await page.locator('.kslt-dd.open .kslt-dd-tick').count();
+    /* ПОМЕТКА ДЛЯ ДИКТОРА — `aria-selected`, А НЕ `aria-current` (08.11).
+       Проба ждала `aria-current="true"`, и это была ошибка пробы, а не
+       продукта: внутри `role="listbox"` выбранный пункт помечается
+       `aria-selected`, а `aria-current` значит «текущий» в навигации —
+       текущая страница, текущий шаг. Замерено загрузкой: у пункта стоит
+       `role="option"` и `aria-selected="true"`, то есть общий дом
+       раскрывашки сделал ПРАВИЛЬНЕЕ, чем ждала проба. */
+    const помечено = await page.locator('.kslt-dd.open [aria-selected="true"]').count();
     expect(галок, 'у выбранного пункта нет галочки: Menu item 32:44 — «never rely ' +
         'on the tint alone»').toBeGreaterThan(0);
     expect(помечено, 'выбранный пункт не помечен для диктора').toBeGreaterThan(0);
@@ -333,7 +350,7 @@ test('межстрочные карточки корта стоят на сту�
 test('подпись фильтра влезает в чип на английском', async ({ page }) => {
     await открыть(page, '/pages/courts-en.html', '.ct-card');
     const мера = await page.evaluate(() => {
-        return Array.from(document.querySelectorAll('.ct-dd-toggle')).map(э => {
+        return Array.from(document.querySelectorAll('.kslt-dd-toggle')).map(э => {
             const s = getComputedStyle(э);
             const к = э.getBoundingClientRect();
             let шир = 0, строк = 0;

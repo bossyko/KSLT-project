@@ -207,9 +207,9 @@ test.describe('корты · ' + Я.имя, () => {
         const з = await page.evaluate(() => {
             const полоса = document.querySelector('.trn-filters');
             if (!полоса) return null;
-            const выпадашки = [...полоса.querySelectorAll('.ct-dd-toggle')];
+            const выпадашки = [...полоса.querySelectorAll('.kslt-dd-toggle')];
             const чипы = [...полоса.querySelectorAll('.trn-chip')]
-                .filter(c => !c.classList.contains('ct-dd-toggle'));
+                .filter(c => !c.classList.contains('kslt-dd-toggle'));
             const поиск = полоса.querySelector('.trn-search-input');
             const назад = полоса.querySelector('.trn-back');
             return {
@@ -239,7 +239,7 @@ test.describe('корты · ' + Я.имя, () => {
         await открыть(page, Я.адрес);
         const з = await page.evaluate(() => {
             const цели = [...document.querySelectorAll(
-                '.trn-back, .ct-dd-toggle, .ct-card-cta, .pl-page-btn')];
+                '.trn-back, .kslt-dd-toggle, .ct-card-cta, .pl-page-btn')];
             const плохо = [];
             цели.forEach(el => {
                 const r = el.getBoundingClientRect();
