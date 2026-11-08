@@ -157,7 +157,13 @@ function имяУчастникаТекстом(playerId, regsMap, playersMap) {
         партнёр = reg.partner_external_name;
     }
 
-    if (партнёр) return { текст: капитан + ' / ' + партнёр, пара: true };
+    /* ЧАСТИ ОТДАЮТСЯ ОТДЕЛЬНО (07.11). Склейка нужна там, где имя идёт
+       строкой — подпись, список, предсказание. А клетке сетки нужны
+       ИМЕННО ДВОЕ: она ставит их друг под другом, как админка, и тогда
+       длинная пара не режется многоточием. Отдаём и то и другое — одно
+       определение, три выхода. */
+    if (партнёр) return { текст: капитан + ' / ' + партнёр, пара: true,
+                          капитан: капитан, партнёр: партнёр };
     return { текст: капитан, пара: false };
 }
 
@@ -351,6 +357,8 @@ function renderLeagueBracketPublic(leagueMatches, playersMap, prefix, isEn, isKg
                         ? имя.name
                         : (p ? (KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name)) : 'TBD'),
                     оформление: имя ? имя.оформление : '',
+                    капитан: имя ? имя.капитан : null,
+                    партнёр: имя ? имя.партнёр : null,
                     seed: null,
                     country: p ? tdCountryFlag(p.country) : ''
                 });
@@ -590,6 +598,37 @@ function краткоеИмя(имя) {
    ДОГОВОР ОДИН: в `p.name` лежат ДАННЫЕ, а чем их оформить, говорит поле
    `оформление`. Пустое — просто имя; так приходят `BYE`, `TBD` и все
    одиночные пути, и для них отдача совпадает с прежней знак в знак. */
+/* ПАРА ДВУМЯ СТРОКАМИ — ОДИН ДОМ НА КЛЕТКУ И НА ПЬЕДЕСТАЛ (08.11).
+   Сперва эта разметка стояла ДВАЖДЫ — своя в оформителе клетки и своя в
+   карточке пьедестала. Чужой сторож «данные в разметке» сказал об этом
+   числом: склеек стало на две больше замеренного, а его храповик — мера
+   слепоты, и растить её нельзя. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: двое
+   собираются здесь, а зовущий говорит лишь, во что их обернуть.
+
+   ОБЁРТКА — АРГУМЕНТ, А НЕ ЗАШИТОЕ ИМЯ. Клетке нужна `.td-team-name`
+   со своим кеглем, пьедесталу — никакой: там карточка со своим размером
+   букв, и чужая обёртка отняла бы его.
+
+   ПУСТО — ЭТО ОТВЕТ. Частей нет (заявка без партнёра) — дом возвращает
+   пустую строку, и зовущий ставит своё обычное имя. Решать за него, каким
+   оно будет, дом не вправе: у клетки и карточки имена берутся по-разному.
+
+   РАЗДЕЛИТЕЛЬ ОСТАЁТСЯ В РАЗМЕТКЕ И ПРЯЧЕТСЯ СТИЛЕМ: его читает диктор и
+   поиск по странице, которым две строки подряд слышатся как одно имя. */
+function паруРазметкой(и) {
+    if (!и || !и.капитан || !и.партнёр) return '';
+    /* ОДНА ВЕТКА И ОДНА СКЛЕЙКА. Обёртки у дома нет вовсе: клетке нужен
+       свой кегль, карточке пьедестала свой, и решает это CSS по месту, а
+       не разметка. Так склеек с разметкой стало МЕНЬШЕ, чем было до
+       куска, — чужой признак «данные в разметке» считает именно их.
+       В склейку входят только зовы экранирования: ПЕРЕМЕННАЯ, В КОТОРУЮ
+       ПОЛОЖИЛИ ПОЛЕ, ДЛЯ ПРИЗНАКА НЕВИДИМА, и ровно так адрес афиши ушёл
+       в `url(` мимо экранирования. */
+    return '<span class="td-team-p">' + KSLT_экранировать(и.капитан) +
+        '</span><span class="td-team-sep"> / </span><span class="td-team-p">' +
+        KSLT_экранировать(и.партнёр) + '</span>';
+}
+
 function имяВКлетку(участник) {
     /* ЭКРАНИРУЕТ КАЖДАЯ ВЕТКА, А НЕ ОДНА СТРОКА НАД НИМИ. Так было
        сначала — `var текст = KSLT_экранировать(...)` и три ветки на нём.
@@ -599,7 +638,16 @@ function имяВКлетку(участник) {
        экранирования. Зов на виду в каждой ветке — и прибор видит, что
        экранирование есть. */
     if (участник.оформление === 'метка') return '<span class="td-slot-wait">' + KSLT_экранировать(участник.name) + '</span>';
-    if (участник.оформление === 'пара') return '<span class="td-team-name">' + KSLT_экранировать(участник.name) + '</span>';
+    /* ПАРА — ЭТО ДВОЕ, И В КЛЕТКЕ ИХ ВИДНО ОБОИХ (07.11). Приём взят у
+       админки (`.ad-brk-name .ad-team-p { display: block }`), а не
+       придуман заново: одно понятие рисуется одинаково на обоих экранах.
+       Склейка одной строкой на десктопе резалась многоточием —
+       «Анастасия Трофимушкина / Гульмира…», то есть второго человека не
+       было видно вовсе.
+       ВЕТОК ТРИ И ЗОВОВ ТРИ: двоих собирает дом `паруРазметкой`, а
+       запасное имя эта ветка экранирует сама — ни одна не отдаёт сырое. */
+    if (участник.оформление === 'пара')
+        return паруРазметкой(участник) || KSLT_экранировать(участник.name);
     return KSLT_экранировать(участник.name);
 }
 
@@ -1055,7 +1103,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
        говорит, что отдаётся текст. */
     function pNameТекстом(playerId) {
         var и = имяУчастникаТекстом(playerId, isDbl ? regsMap : null, playersMap);
-        return { name: и.текст, оформление: и.пара ? 'пара' : '' };
+        return { name: и.текст, оформление: и.пара ? 'пара' : '',
+                 капитан: и.капитан, партнёр: и.партнёр };
     }
 
     var months = KSLT_YAZYK.выбрать(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']);
@@ -1649,6 +1698,8 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                                     id: pid,
                                     name: имя.name,
                                     оформление: имя.оформление,
+                                    капитан: имя.капитан,
+                                    партнёр: имя.партнёр,
                                     seed: null,
                                     country: p ? tdCountryFlag(p.country) : ''
                                 });
@@ -2111,16 +2162,23 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var addedIds = {};
             Object.keys(playersMap).forEach(function(pid) {
                 var p = playersMap[pid];
-                var displayName;
-                if (isDbl && regsMap && regsMap[pid]) {
-                    // Strip HTML tags for SE bracket (uses text rendering)
-                    displayName = getPublicTeamName(pid, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '');
-                } else {
-                    displayName = KSLT_YAZYK.выбрать(p.name_en || p.name, p.name_kg || p.name, p.name);
-                }
+                /* ТРЕТЬЯ СБОРКА УЧАСТНИКОВ — БЕРЁТ ИМЯ ОТТУДА ЖЕ, ОТКУДА
+                   ДВЕ ДРУГИЕ (07.11). Здесь стояло
+                   `getPublicTeamName(...).replace(/<[^>]*>/g, '')`:
+                   дом отдавал разметку, а её разбирали обратно регуляркой,
+                   чтобы получить текст. И ОФОРМЛЕНИЯ ТУТ НЕ БЫЛО ВОВСЕ —
+                   в обычной парной сетке плей-офф пара шла одной строкой
+                   без `.td-team-name`, то есть второе имя обрезалось
+                   так же, как в лигах, только молча.
+                   КУСОК МОЖЕТ ЛЕЖАТЬ В НЕСКОЛЬКИХ ФАЙЛАХ, И ПРИБОР ОБЯЗАН
+                   ЧИТАТЬ ВСЕ: эту копию нашёл сторож, а не я. */
+                var и = pNameТекстом(pid);
                 playersArr.push({
                     id: pid,
-                    name: displayName,
+                    name: и.name,
+                    оформление: и.оформление,
+                    капитан: и.капитан,
+                    партнёр: и.партнёр,
                     seed: null,
                     country: tdCountryFlag(p.country)
                 });
@@ -2214,16 +2272,25 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
     // На дружеских и парных очки не начисляются, и вкладка вела в пустой
     // раздел с надписью «результатов пока нет». Человек ждал, что там
     // что-то появится, а появиться было нечему
+    /* ДВА РАЗНЫХ ПОНЯТИЯ УЕХАЛИ ОДНОЙ КНОПКОЙ: «НАЧИСЛЯЕМ ОЧКИ» И
+       «ПОКАЗЫВАЕМ МЕСТА» (07.11). Здесь у нерейтинговых сносилась вкладка
+       ВМЕСТЕ С РАЗДЕЛОМ, а в разделе живёт пьедестал — тот самый «1 2 3
+       места, как и везде». Очки за дружеские и парные действительно не
+       идут, и таблица их честно убрана ниже; но место на корте человек
+       занял, и показать его стало нечем.
+       Замер 07.11 по боевой (турнир 6c6a7913, парный Masters и Futures):
+       в `tournament_results` 36 строк и в каждой ноль очков — то есть
+       прятать надо было ТАБЛИЦУ, а не пьедестал.
+       РАЗДЕЛ НЕ СНОСИТСЯ, А ПЕРЕИМЕНОВЫВАЕТСЯ: за очками человек туда
+       больше не пойдёт, потому что раздел зовётся «Места». */
     (function() {
         if (isRatingTournament(t)) return;
         var вкладка = document.querySelector('.td-tab[data-target="results"]');
-        if (вкладка) вкладка.remove();
-        var заголовок = document.getElementById('results');
-        if (заголовок) {
-            var раздел = заголовок.nextElementSibling;
-            заголовок.remove();
-            if (раздел && раздел.querySelector('#resultsPodium')) раздел.remove();
-        }
+        if (вкладка) вкладка.textContent =
+            KSLT_YAZYK.выбрать('Places', 'Орундар', 'Места');
+        var заголовок = document.querySelector('#results h2');
+        if (заголовок) заголовок.textContent =
+            KSLT_YAZYK.выбрать('PLACES', 'ОРУНДАР', 'МЕСТА');
     })();
 
     var participantsGrid = document.getElementById('participantsGrid');
@@ -2252,8 +2319,13 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
             function pubRegRow(reg, idx, всего) {
                 var p = reg.players || playersMap[reg.player_id] || {};
+                /* ТЕКСТ БЕРЁТСЯ У ДОМА, А НЕ ОТТИРАЕТСЯ ОТ РАЗМЕТКИ
+                   (07.11). В списке участников пара идёт ОДНОЙ строкой —
+                   это таблица, и перенос там не нужен; меняется не вид, а
+                   путь к имени: `имяУчастникаТекстом` отдаёт текст
+                   сразу, без разметки, которую пришлось бы снимать. */
                 var regDisplayName = isDbl
-                    ? getPublicTeamName(reg.player_id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
+                    ? имяУчастникаТекстом(reg.player_id, regsMap, playersMap).текст
                     : (KSLT_YAZYK.выбрать(p.name_en || p.name || '—', p.name_kg || p.name || '—', p.name || '—'));
                 var pName = regDisplayName;
                 var photo = p.photo || '';
@@ -2356,9 +2428,25 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
             var defaultPhoto = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect fill="%231a1f2e" width="80" height="80" rx="40"/><text x="40" y="48" text-anchor="middle" fill="%23666" font-size="28">?</text></svg>');
 
             function podiumCard(player, place, medal) {
-                var podName = isDbl
-                    ? getPublicTeamName(player.id, regsMap, playersMap, isEn, isKg).replace(/<[^>]*>/g, '')
-                    : (KSLT_YAZYK.выбрать(player.name_en || player.name || '?', player.name_kg || player.name || '?', player.name || '?'));
+                /* ИМЯ БЕРЁТСЯ У ДОМА, А НЕ ВЫКОВЫРИВАЕТСЯ ИЗ РАЗМЕТКИ
+                   (07.11). Здесь стояло
+                   `getPublicTeamName(...).replace(/<[^>]*>/g, '')`:
+                   дом отдавал готовую разметку, а её тут же разбирали
+                   обратно регуляркой, чтобы получить текст. Текст у дома
+                   есть сразу — и вместе с ним части пары.
+                   НАПАРНИК СТОИТ ОТДЕЛЬНОЙ СТРОКОЙ — слово Кости 07.11.
+                   Тем же приёмом, что в клетке сетки: тот же
+                   `.td-team-p`, то же скрытое `.td-team-sep`,
+                   одно правило на обоих экранах.
+                   В `alt` картинки идёт СКЛЕЙКА: диктор читает её
+                   одной фразой, и перенос там не нужен. */
+                var и = isDbl && player.id
+                    ? имяУчастникаТекстом(player.id, regsMap, playersMap)
+                    : { текст: KSLT_YAZYK.выбрать(player.name_en || player.name || '?', player.name_kg || player.name || '?', player.name || '?'), пара: false };
+                var podName = и.текст;
+                /* БЕЗ ОБЁРТКИ: у карточки пьедестала свой кегль, и
+                   `.td-team-name` отняла бы его. Дом один, обёртки разные. */
+
                 var photo = player.photo || defaultPhoto;
                 return '<div class="td-podium-card td-podium-' + place + '">' +
                     '<div class="td-podium-medal">' + medal + '</div>' +
@@ -2366,7 +2454,10 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
                         '<img class="td-podium-photo" src="' + KSLT_экранировать(photo) + '" alt="' + KSLT_экранировать(podName) + '">' +
                     '</div>' +
                     '<div class="td-podium-place">' + place + '-e ' + placeLabel + '</div>' +
-                    '<div class="td-podium-name">' + KSLT_экранировать(podName) + '</div>' +
+                    /* ПОДСТАНОВКА НА ВИДУ, А НЕ ЧЕРЕЗ ПЕРЕМЕННУЮ: голую
+                       переменную в склейке чужой признак не видит. */
+                    '<div class="td-podium-name">' +
+                        (паруРазметкой(и) || KSLT_экранировать(podName)) + '</div>' +
                 '</div>';
             }
 
@@ -2607,6 +2698,15 @@ function подписьЛиги(вид, isEn, isKg) {
 function показатьРаскладкуОчков(t, контейнер, пьедесталHtml, isEn, isKg, имя, точныеМеста, лиги, пьедесталыЛиг) {
     if (!контейнер || typeof supabaseClient === 'undefined') return;
     if (typeof KSLT_POINTS === 'undefined') return;
+
+    /* ТАБЛИЦА ОЧКОВ — ТОЛЬКО ТАМ, ГДЕ ОЧКИ НАЧИСЛЯЮТСЯ (07.11).
+       ДВЕРЬ ОДНА, А НЕ ТРИ: зовут эту функцию из трёх ветвей (сетка всех
+       мест, две лиги, SE и круговая), и признак, поставленный на зовах,
+       разошёлся бы при четвёртой ветви.
+       ВЫХОД НИЧЕГО НЕ ТЕРЯЕТ: пьедестал во всех трёх ветвях уже стоит в
+       `innerHTML` ДО этого зова — функция его лишь перерисовывала вместе
+       с таблицей. Уходим — остаётся он один, и это ровно то, что нужно. */
+    if (!isRatingTournament(t)) return;
 
     var язык = языкСтраницы();
     var П = {

@@ -328,6 +328,7 @@ const КУСКИ = [
     ['шкала кеглей сайта', 'check-shkala.js', 'check-shkala-otkat.js'],
     ['правила клуба и копии приложения', 'check-rules.js', 'check-rules-otkat.js'],
     ['полнота прогона', 'check-polnota-progona.js', 'check-polnota-progona-otkat.js'],
+    ['подпись лиги, пьедестал мест и пара в клетке', 'check-podpis-ligi.js', 'check-podpis-ligi-otkat.js'],
     ['дата рождения — необязательна',
      'check-data-rozhdeniya.js', 'check-data-rozhdeniya-otkat.js'],
     ['окна приложения — ни одно без оснастки',
