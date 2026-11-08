@@ -3402,13 +3402,20 @@ function initCountdown(t) {
     if (!t.date_start) return;
     var startStr = t.date_start; // YYYY-MM-DD
     var timeStr = t.start_time || '00:00'; // HH:MM
-    var startDate = new Date(startStr + 'T' + timeStr + ':00');
+    /* ВСЕ ТРИ МОМЕНТА — ПО ЧАСАМ БИШКЕКА (08.11, слово Кости: «пусть
+       берёт всегда время Бишкек»). Здесь стояло `new Date(день + 'T' +
+       время)` без пояса: браузер читает такую строку как СВОЁ местное
+       время, и из Чикаго страница показывала старт на двенадцать часов
+       позже, а срок заявок закрывался не в тот день.
+       ВРЕМЯ СТАРТА — СВОЙСТВО ТУРНИРА, А НЕ ЗРИТЕЛЯ: в базе лежит «9:00»
+       без пояса, и это девять утра в Бишкеке, где играют. */
+    var startDate = KSLT_VREMYA.моментПоБишкеку(startStr, timeStr);
 
     // Parse tournament end date
-    var endDate = t.date_end ? new Date(t.date_end + 'T23:59:59') : null;
+    var endDate = t.date_end ? KSLT_VREMYA.моментПоБишкеку(t.date_end, '23:59:59') : null;
 
     // Parse registration end
-    var regEnd = t.registration_end ? new Date(t.registration_end + 'T23:59:59') : null;
+    var regEnd = t.registration_end ? KSLT_VREMYA.моментПоБишкеку(t.registration_end, '23:59:59') : null;
 
     // Status check
     var now = new Date();

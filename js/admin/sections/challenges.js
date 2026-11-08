@@ -299,7 +299,11 @@
     /** Дата матча прошла, а счёт так и не ввели */
     function isBattleOverdue(c) {
         if (c.status === 'completed' || !c.proposed_date) return false;
-        var when = new Date(c.proposed_date + 'T' + (c.proposed_time || '23:59') + ':00+06:00');
+        /* ПОЯС ПО ИМЕНИ, А НЕ ЧИСЛОМ (08.11). Здесь стояло '+06:00':
+           верно ровно до того дня, когда часы тронут, и это второе
+           определение понятия рядом с домом времени. */
+        var when = KSLT_VREMYA.моментПоБишкеку(c.proposed_date, c.proposed_time || '23:59');
+        if (!when) return false;
         if (isNaN(when.getTime())) return false;
         return Date.now() > when.getTime();
     }
@@ -1524,8 +1528,11 @@
         var d = challenge.proposed_date;
         if (!d) return new Date().toISOString();
         var t = challenge.proposed_time || '12:00';
-        var when = new Date(d + 'T' + (t.length === 5 ? t + ':00' : t));
-        return isNaN(when.getTime()) ? new Date().toISOString() : when.toISOString();
+        /* МОМЕНТ ПО ЧАСАМ БИШКЕКА (08.11). Здесь пояса не было вовсе:
+           время матча писалось в базу по часам того, кто нажал кнопку.
+           Менеджер из другого пояса записал бы баттл не тем часом. */
+        var when = KSLT_VREMYA.моментПоБишкеку(d, t);
+        return (!when || isNaN(when.getTime())) ? new Date().toISOString() : when.toISOString();
     }
 
     function finalizeMatch(challenge, score, winnerId, loserId) {
