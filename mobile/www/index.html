@@ -8,7 +8,7 @@
 <title>KSLT</title>
 <link rel="stylesheet" href="css/fonts.css?v=1">
 <link rel="stylesheet" href="css/tokens.css?v=43">
-<link rel="stylesheet" href="css/app.css?v=80">
+<link rel="stylesheet" href="css/app.css?v=81">
 </head>
 <body>
 
@@ -28,7 +28,12 @@
          показывается сразу. -->
     <div class="splash-sponsor" id="splashSponsor" hidden>
       <div class="splash-sponsor-label" id="splashSponsorLabel"></div>
-      <img class="splash-sponsor-logo" id="splashSponsorLogo" src="" alt="">
+      <!-- КОРОБКА ПОД БЛИК (08.11): он обязан обрезаться границами
+           логотипа, иначе светлая полоса проедет по всему экрану.
+           Обёртка, а не правка картинки: чужой знак не трогаем. -->
+      <div class="splash-sponsor-box">
+        <img class="splash-sponsor-logo" id="splashSponsorLogo" src="" alt="">
+      </div>
     </div>
   </div>
 </div>

@@ -91,6 +91,50 @@ const ОТКАТЫ = [
  '    } finally { void 0; }',
  'память не обязана быть'],
 
+/* ── ОТКАТЫ НА ПОЯВЛЕНИЕ: РАЗМЫТИЕ + БЛИК (08.11) ─────────────────── */
+
+['вернуть спонсору общее всплытие', К,
+ '  animation: splashSponsorIn 0.5s cubic-bezier(.2, .7, .3, 1) 0.85s both;',
+ '  animation: splashFadeUp 0.4s ease-out 0.9s both;',
+ 'спонсор проявляется из размытия, а не всплывает'],
+
+['снять у коробки обрезку, и блик поедет по экрану', К,
+ '.splash-sponsor-box {\n  position: relative;\n  overflow: hidden;',
+ '.splash-sponsor-box {\n  position: relative;',
+ 'блик — слой на коробке, один проход'],
+
+['пустить блик по кругу', К,
+ 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.2s both;',
+ 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.2s infinite;',
+ 'блик — слой на коробке, один проход'],
+
+/* ЧИСЛО, ЖИВУЩЕЕ В ДВУХ ФАЙЛАХ. Двигаем блик за край экрана — правило
+   обязано поймать расхождение между css и js. */
+['увести конец блика за уход экрана', К,
+ 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.2s both;',
+ 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.8s both;',
+ 'движение успевает закончиться до ухода экрана'],
+
+['укоротить экран так, что блик не успеет', П,
+ '    var SPLASH_SO_SPONSOROM_MS = 2000;',
+ '    var SPLASH_SO_SPONSOROM_MS = 1700;',
+ 'движение успевает закончиться до ухода экрана'],
+
+['снять прикрытие «меньше движения» с экрана загрузки', К,
+ '  .splash-logo,\n  .splash-tagline,',
+ '  .zaglushka-bez-splesha,\n  .splash-tagline,',
+ 'экран загрузки уважает «меньше движения»'],
+
+['оставить пульс свечения бесконечным при «меньше движения»', К,
+ '  .splash-glow {\n    animation: none;',
+ '  .splash-glow {\n    opacity: 0.5;',
+ 'экран загрузки уважает «меньше движения»'],
+
+['отменить анимацию спонсора вместо снятия движения', К,
+ '    animation-duration: 1ms;\n    animation-delay: 0ms;',
+ '    animation: none;',
+ '«меньше движения» снимает движение, а не показ'],
+
 ['увести числа блока спонсора с токенов', К,
  '  gap: var(--space-3);\n  margin-top: var(--space-6);',
  '  gap: 13px;\n  margin-top: 25px;',
