@@ -94,7 +94,7 @@ const ОТКАТЫ = [
 /* ── ОТКАТЫ НА ПОЯВЛЕНИЕ: РАЗМЫТИЕ + БЛИК (08.11) ─────────────────── */
 
 ['вернуть спонсору общее всплытие', К,
- '  animation: splashSponsorIn 0.5s cubic-bezier(.2, .7, .3, 1) 0.85s both;',
+ '  animation: splashSponsorIn 0.65s cubic-bezier(.37, 0, .63, 1) 0.8s both;',
  '  animation: splashFadeUp 0.4s ease-out 0.9s both;',
  'спонсор проявляется из размытия, а не всплывает'],
 
@@ -104,15 +104,15 @@ const ОТКАТЫ = [
  'блик — слой на коробке, один проход'],
 
 ['пустить блик по кругу', К,
- 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.2s both;',
- 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.2s infinite;',
+ 'animation: splashSheen 0.75s cubic-bezier(.37, 0, .63, 1) 1.1s both;',
+ 'animation: splashSheen 0.75s cubic-bezier(.37, 0, .63, 1) 1.1s infinite;',
  'блик — слой на коробке, один проход'],
 
 /* ЧИСЛО, ЖИВУЩЕЕ В ДВУХ ФАЙЛАХ. Двигаем блик за край экрана — правило
    обязано поймать расхождение между css и js. */
 ['увести конец блика за уход экрана', К,
- 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.2s both;',
- 'animation: splashSheen 0.65s cubic-bezier(.3, .6, .3, 1) 1.8s both;',
+ 'animation: splashSheen 0.75s cubic-bezier(.37, 0, .63, 1) 1.1s both;',
+ 'animation: splashSheen 0.75s cubic-bezier(.37, 0, .63, 1) 1.8s both;',
  'движение успевает закончиться до ухода экрана'],
 
 ['укоротить экран так, что блик не успеет', П,

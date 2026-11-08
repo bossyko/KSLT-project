@@ -39,6 +39,16 @@ const ЗАГ = безКом(чит('js/sponsors-loader.js'));
 const ПРИЛ = безКом(чит('mobile/www/js/app.js'));
 const РАЗМЕТКА = чит('mobile/www/index.html');
 const CSS = чит('mobile/www/css/app.css');
+/* ПРАВИЛО, СЧИТАЮЩЕЕ СИМВОЛЫ, ЛОМАЕТСЯ ОТ ПОЯСНЕНИЯ. Правило «спонсор
+   проявляется из размытия» искало `filter: blur(` в пределах 220 знаков
+   от начала кадров — и упало, как только внутрь кадров дописали, почему
+   размытие именно 8 пикселей. Пояснение к коду не может ронять сторож:
+   он гасит примечания и ищет в КОДЕ. */
+/* Примечания ВЫРЕЗАЮТСЯ, а не гасятся пробелами: правила ниже меряют
+   РАССТОЯНИЕ между кусками кода, и пробелы той же длины мешают ровно
+   так же, как сам текст. Длина здесь не нужна — ищем не позиции в
+   оригинале, а соседство в коде. */
+const CSSК = CSS.replace(/\/\*[\s\S]*?\*\//g, '');
 
 /* ══ 1. ЧТЕНИЕ — ОДНО ═════════════════════════════════════════════════ */
 
@@ -178,8 +188,8 @@ const соСпонсором = (ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/)
    резкость, не двигая, — и потому уживается с прыжком. */
 правило('спонсор проявляется из размытия, а не всплывает',
     /animation: splashSponsorIn /.test(CSS) &&
-    /@keyframes splashSponsorIn \{[\s\S]{0,220}?filter: blur\(/.test(CSS) &&
-    !/\.splash-sponsor \{[\s\S]{0,320}?animation: splashFadeUp/.test(CSS),
+    /@keyframes splashSponsorIn \{[\s\S]{0,220}?filter: blur\(/.test(CSSК) &&
+    !/\.splash-sponsor \{[\s\S]{0,320}?animation: splashFadeUp/.test(CSSК),
     'Блок спонсора обязан появляться своим `splashSponsorIn` — проявление\n' +
     'с наводкой резкости. Возврат к общему `splashFadeUp` отменяет выбор\n' +
     'Кости и возвращает третье движение на экран, где их уже два.');
@@ -189,7 +199,7 @@ const соСпонсором = (ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/)
     /animation: splashSheen /.test(CSS) &&
     /@keyframes splashSheen/.test(CSS) &&
     !/splashSheen[^;]*infinite/.test(CSS) &&
-    /\.splash-sponsor-box \{[\s\S]{0,200}?overflow: hidden/.test(CSS),
+    /\.splash-sponsor-box \{[\s\S]{0,200}?overflow: hidden/.test(CSSК),
     'Блик обязан быть ОТДЕЛЬНЫМ слоем (`::after` на коробке), а не\n' +
     'правкой самого знака: чужой фирменный цвет не наш, чтобы его мять.\n' +
     'Коробка обязана резать по своим границам (`overflow: hidden`) —\n' +
@@ -204,14 +214,14 @@ const соСпонсором = (ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/)
 правило('движение успевает закончиться до ухода экрана',
     (() => {
         const срок = Number((ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/) || [])[1]);
-        const бл = CSS.match(/animation: splashSheen ([\d.]+)s[^;]*?([\d.]+)s both/);
+        const бл = CSSК.match(/animation: splashSheen ([\d.]+)s[^;]*?([\d.]+)s both/);
         if (!срок || !бл) return false;
         const конецБлика = (Number(бл[2]) + Number(бл[1])) * 1000;
         return конецБлика <= срок;
     })(),
     (() => {
         const срок = (ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/) || [])[1] || '—';
-        const бл = CSS.match(/animation: splashSheen ([\d.]+)s[^;]*?([\d.]+)s both/);
+        const бл = CSSК.match(/animation: splashSheen ([\d.]+)s[^;]*?([\d.]+)s both/);
         const конец = бл ? (Number(бл[2]) + Number(бл[1])) * 1000 : '—';
         return 'Блик заканчивается на ' + конец + ' мс, экран уходит на ' + срок + '.\n' +
                'Движение, оборванное на середине, читается как подвисание —\n' +
@@ -227,10 +237,10 @@ const соСпонсором = (ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/)
    отписывался. */
 правило('экран загрузки уважает «меньше движения»',
     (() => {
-        const и = CSS.indexOf('@media (prefers-reduced-motion: reduce)');
+        const и = CSSК.indexOf('@media (prefers-reduced-motion: reduce)');
         if (и === -1) return false;
         /* Ищем ИМЕННО тот блок, что прикрывает экран загрузки. */
-        const блоки = CSS.split('@media (prefers-reduced-motion: reduce)').slice(1);
+        const блоки = CSSК.split('@media (prefers-reduced-motion: reduce)').slice(1);
         return блоки.some(б => {
             const тело = б.slice(0, б.indexOf('\n}') + 2);
             return /\.splash-logo/.test(тело) && /\.splash-sponsor/.test(тело) &&
@@ -244,7 +254,7 @@ const соСпонсором = (ПРИЛ.match(/SPLASH_SO_SPONSOROM_MS = (\d+)/)
 
 правило('«меньше движения» снимает движение, а не показ',
     (() => {
-        const блоки = CSS.split('@media (prefers-reduced-motion: reduce)').slice(1);
+        const блоки = CSSК.split('@media (prefers-reduced-motion: reduce)').slice(1);
         return блоки.some(б => {
             const тело = б.slice(0, б.indexOf('\n}') + 2);
             if (!/\.splash-sponsor/.test(тело)) return false;
