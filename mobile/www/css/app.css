@@ -6293,28 +6293,33 @@ select.prof-field-input { color: var(--text); }
 .hh {
   padding: 32px 24px 24px; text-align: center;
   background-size: cover; background-position: center;
-  background-color: var(--bg-card);
+  /* ПОДЛОЖКА ТЁМНАЯ И БЕЗ КАРТИНКИ ТОЖЕ. Было `--bg-card`: в светлой
+     теме это белый, и когда картинки у блока нет, белые буквы ложились
+     бы на белое. Цвета этого блока не зависят от темы — и фон тоже. */
+  background-color: var(--on-image-bg);
 }
 .hh-season {
   display: inline-flex; align-items: center; gap: 8px;
   padding: var(--space-2) var(--space-3); border-radius: 999px;
-  border: 1px solid rgba(204,255,0,.4); color: var(--accent-text);
+  border: 1px solid rgba(204,255,0,.4); color: var(--on-image-accent);
   font-size: var(--fs-2xs); font-weight: 600; margin-bottom: 16px;
 }
-.hh-season::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.hh-season::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--on-image-accent); }
 /* `margin: 0` — потому что это `h1` (кусок 230), а у него свой отступ от
    браузера. Без него обложка поехала бы: вид меняться НЕ должен. */
-.hh-mark { font-size: 40px; font-weight: 900; letter-spacing: 1px; color: var(--accent-text); line-height: 1; margin: 0; }
-.hh-sub { font-size: 12px; color: var(--text-sec); font-style: italic; margin-top: 8px; }
-.hh-claim { font-size: 18px; font-weight: 800; letter-spacing: .3px; margin-top: 16px; color: var(--text); }
-.hh-text { font-size: var(--fs-xs); color: var(--text-sec); line-height: 1.55; margin-top: 8px; }
+.hh-mark { font-size: 40px; font-weight: 900; letter-spacing: 1px; color: var(--on-image-accent); line-height: 1; margin: 0; }
+.hh-sub { font-size: 12px; color: var(--on-image-sec); font-style: italic; margin-top: 8px; }
+.hh-claim { font-size: 18px; font-weight: 800; letter-spacing: .3px; margin-top: 16px; color: var(--on-image); }
+.hh-text { font-size: var(--fs-xs); color: var(--on-image-sec); line-height: 1.55; margin-top: 8px; }
 .hh-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   /* ЦЕЛЬ НАЖАТИЯ 44. Было 43: отступ 13 и кегль 14 дали ровно на пиксель
      меньше — цифра, которую глазами не поймать. */
   min-height: 44px;
   margin-top: var(--space-4); padding: var(--space-3) var(--space-6); border-radius: var(--radius-full); border: none;
-  background: var(--accent); color: #0A0A0A; font-size: 14px; font-weight: 800;
+  /* ЛАЙМ, А НЕ АКЦЕНТ ТЕМЫ. В светлой теме `--accent` = #4A8C00, и на
+     тёмной подложке он тусклый; лайм с чёрным текстом даёт 17:1. */
+  background: var(--on-image-accent); color: #0A0A0A; font-size: 14px; font-weight: 800;
   font-family: inherit; cursor: pointer;
 }
 .hh-btn:active { opacity: .8; }
@@ -6337,11 +6342,13 @@ select.prof-field-input { color: var(--text); }
   max-width: 160px;
   min-width: 0;
   padding: var(--space-2); border-radius: var(--radius-md);
-  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  /* Граница была `--border`: в светлой теме это чёрный с прозрачностью,
+     на тёмной подложке её не видно вовсе. */
+  background: var(--on-image-fill); border: 1px solid var(--on-image-border);
 }
-.hh-stat-num { display: block; font-size: 16px; font-weight: 800; color: var(--accent-text); line-height: 1.1; }
+.hh-stat-num { display: block; font-size: 16px; font-weight: 800; color: var(--on-image-accent); line-height: 1.1; }
 .hh-stat-cap {
-  display: block; font-size: var(--fs-2xs); color: var(--text-muted);
+  display: block; font-size: var(--fs-2xs); color: var(--on-image-muted);
   margin-top: 2px; line-height: 1.25;
   /* «Зарегистрировано» — одно слово шире карточки, переносить его негде,
      и оно вылезало за край. Разрешаем разрыв внутри слова: лучше перенос
