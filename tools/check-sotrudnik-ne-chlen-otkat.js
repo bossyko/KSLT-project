@@ -21,9 +21,9 @@ fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 
 const ЧЛ = 'js/membership.js', ТУ = 'js/tournament-detail.js', ДМ = 'js/kslt-dostup.js',
-      КБ = 'js/dashboard.js', АВ = 'js/auth.js', ИГ = 'js/players.js',
+      КБ = 'js/dashboard.js', АВ = 'js/auth.js', АГ = 'js/auth-guard.js', ИГ = 'js/players.js',
       ЦЕ = 'pages/pricing.html', СТР = 'pages/dashboard.html';
-const ФАЙЛЫ = [ЧЛ, ТУ, ДМ, КБ, АВ, ИГ, ЦЕ, СТР];
+const ФАЙЛЫ = [ЧЛ, ТУ, ДМ, КБ, АВ, АГ, ИГ, ЦЕ, СТР];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -101,9 +101,9 @@ const ОТКАТЫ = [
      'копий предиката роли по сайту не прибавилось'],
 
     /* 10. копий стало меньше — храповик ОПУСКАЕТСЯ, и правило говорит об этом */
-    ['снять одну из трёх законных копий', АВ,
-     "        if (role === 'admin' || role === 'manager') {\n            return 'admin.html';",
-     "        if (role === 'админка') {\n            return 'admin.html';",
+    ['снять одну из двух законных копий', АГ,
+     "        var staffRoles = ['admin', 'manager'];",
+     "        var staffRoles = ['админка'];",
      'потолок копий не завышен'],
 
     /* 11. дом ушёл со страницы кабинета */

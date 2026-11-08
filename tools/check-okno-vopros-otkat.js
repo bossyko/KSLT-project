@@ -29,11 +29,20 @@ const РАЗМЕТКА = 'mobile/www/index.html';
 
 /* Якоря держатся на СОДЕРЖИМОМ — на объявлениях и зовах, которые живут
    в своём месте постоянно, — а не на номерах строк и не на соседях. */
-const КНОПКА = '  min-height: 44px;\n  display: inline-flex; align-items: center; justify-content: center;';
+const КНОПКА = '  border: none; border-radius: 999px; padding: 12px 24px;\n' +
+               '  min-height: 44px;\n' +
+               '  display: inline-flex; align-items: center; justify-content: center;';
 const ФОКУС = '.gi-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }';
 const УБОРКА = "if (старое) { старое.classList.remove('open'); старое.remove(); }";
 const КОРОБКА = '\'<div class="gi-box">\' +';
-const ПОДКЛЮЧЕНИЕ = '<script src="js/kslt-vopros.js?v=1"></script>\n';
+const ТЕГ = (имя) => {
+    const р = new RegExp('<script src="js/' + имя + '\\.js\\?v=\\d+"></script>');
+    const м = fs.readFileSync(path.join(КОРЕНЬ, РАЗМЕТКА), 'utf8').match(р);
+    if (!м) { console.log('\n  ОСТАНОВ  тега ' + имя + ' в разметке нет\n'); process.exit(1); }
+    return м[0];
+};
+const ПОДКЛЮЧЕНИЕ = ТЕГ('kslt-vopros');
+const ЗОВУЩИЙ = ТЕГ('game-invites');
 
 const ОТКАТЫ = [
     { имя: 'вернуть системный confirm в профиль',
@@ -78,7 +87,8 @@ const ОТКАТЫ = [
       ждём: 'кнопка окна держит цель нажатия 44',
       файл: ОДЕЖДА,
       было: КНОПКА,
-      станет: '  display: inline-flex; align-items: center; justify-content: center;' },
+      станет: '  border: none; border-radius: 999px; padding: 12px 24px;\n' +
+              '  display: inline-flex; align-items: center; justify-content: center;' },
 
     { имя: 'снять у кнопки окна обводку фокуса',
       ждём: 'кнопка окна держит цель нажатия 44',
@@ -89,8 +99,8 @@ const ОТКАТЫ = [
     { имя: 'подключить дом ПОСЛЕ того, кто его зовёт',
       ждём: 'дом подключён раньше тех, кто его зовёт',
       файл: РАЗМЕТКА,
-      было: ПОДКЛЮЧЕНИЕ + '<script src="js/game-invites.js?v=3"></script>',
-      станет: '<script src="js/game-invites.js?v=3"></script>\n' + ПОДКЛЮЧЕНИЕ.trim() },
+      было: ПОДКЛЮЧЕНИЕ,
+      станет: '<!-- дом переставлен прувером -->' },
 
     { имя: 'ослепить в приборе отличие слова от имени',
       ждём: 'прибор отличает системное окно',

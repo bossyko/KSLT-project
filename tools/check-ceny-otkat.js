@@ -135,7 +135,11 @@ const ОТКАТЫ = [
    'дата блока разбирается по частям, а не через Date'],
 
   /* 17.10 · дом считает по ИМЕНИ зоны, а не зашитым смещением. */
-  [VREM, 'timeZone: ЗОНА', 'timeZone: undefined',
+  /* ЯКОРЬ ЗАДВОИЛСЯ (08.11): `timeZone: ЗОНА` появился второй раз —
+     в `моментПоБишкеку`, заведённом куском «время старта по Бишкеку».
+     Правило держит ДЕНЬ, и якорь берём из той строки, что считает день. */
+  [VREM, "return d.toLocaleDateString('sv-SE', { timeZone: ЗОНА });",
+         "return d.toLocaleDateString('sv-SE', { timeZone: undefined });",
    'день считается по Бишкеку, а не по Гринвичу'],
 
   [RU, 'var r = await window.supabaseClient.auth.getSession();',
