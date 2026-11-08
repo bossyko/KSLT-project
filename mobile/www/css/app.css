@@ -1,4 +1,32 @@
 /* ===== KSLT Mobile App — Styles ===== */
+
+/* ══════════════════════════════════════════════════════════════════════
+   СВЕТЛОЙ ТЕМЫ У ПРИЛОЖЕНИЯ БОЛЬШЕ НЕТ — СНЯТА 07.11.2026.
+
+   ЧТО БЫЛО: блок токенов и 5 правил под
+   `[data-theme="light"]`. Сайт светлой темы не имел НИКОГДА.
+
+   ПОЧЕМУ СНЯТО. Заглавный экран стоит на фотографии корта — она тёмная
+   всегда. В светлой теме тёмный блок оказывался заплаткой посреди белого
+   экрана, а цвета букв он брал из темы и становился нечитаемым: правил
+   `.hh-*` тринадцать, правил для светлой — НИ ОДНОГО. Починили цвета,
+   посмотрели глазами — и увидели, что беда не в цвете, а в самой затее:
+   светлая тема воюет с тем, что делает экран нашим.
+
+   ТЕМА, КОТОРУЮ НИКТО НЕ СМОТРЕЛ ГЛАЗАМИ, — ЭТО НЕ ТЕМА, А ОБЕЩАНИЕ.
+   Дыра в герое сидела месяцами и нашлась случайно; сколько таких же в
+   остальных блоках, не знал никто.
+
+   ЧТО С МАГАЗИНОМ: Apple светлой темы НЕ ТРЕБУЕТ. Больше того — её
+   критерии «Supports Dark Interface» прямо называют приложение, тёмное
+   по умолчанию во всех основных задачах, подходящим для этого ярлыка
+   доступности. То есть снятие светлой темы не отнимает, а ДАЁТ право на
+   отметку в карточке.
+
+   ЕСЛИ СВЕТЛАЯ ПОНАДОБИТСЯ СНОВА: это не «вернуть удалённое», а новый
+   кусок — своя палитра, свой заглавный экран без фотографии и свои
+   глаза на каждом разделе. */
+
 /* Extracted from mockup, adapted for Capacitor */
 
 /* ===== SPLASH SCREEN ===== */
@@ -149,81 +177,11 @@
    пустым. Здесь осталось только переопределение для светлой темы. */
 
 /* ===== LIGHT THEME ===== */
-[data-theme="light"] {
-  --bg: #ECEEF0;
-  --bg-card: var(--neutral-white);
-  --bg-card-hover: #F5F5F5;
-  --bg-elevated: #E4E6E8;
-  --accent: #4A8C00;
-  --accent-hover: #3D7500;
-  --accent-dim: rgba(74,140,0,0.10);
-  --accent-glow: rgba(74,140,0,0.20);
-  --text: #111111;
-  /* 27.10: `--text-primary` здесь НЕ ПЕРЕОПРЕДЕЛЯЛСЯ и оставался белым из
-     tokens.css — 20 мест в этом файле стоят на нём, и в светлой теме это
-     был белый текст на белой карточке. Замерено: контраст 1.00 у `.rr-ntrp`,
-     1.00 у `.hb-badge-name`. `--text` и `--text-primary` — одно понятие под
-     двумя именами; здесь они и сводятся к одному значению. */
-  --text-primary: #111111;
-  --accent-text: #3D7500;
-  --text-sec: rgba(0,0,0,0.72);
-  --text-muted: rgba(0,0,0,0.55);
-  --text-dim: rgba(0,0,0,0.38);
-  --border: rgba(0,0,0,0.12);
-  --border-light: rgba(0,0,0,0.16);
-  --glass: rgba(0,0,0,0.04);
-  /* ТЕ ЖЕ ЧЕТЫРЕ КРАСКИ, НО ИЗ ПАЛИТРЫ (02.11). Здесь стояли числа, и
-     это было их ЕДИНСТВЕННОЕ место в продукте: яркие 400/500 из палитры
-     на светлом фоне не читаются, а тёмных ступеней не было вовсе.
-     Теперь они заведены в `tokens.css` как 600-е, и светлая тема их
-     зовёт. Значения не изменились — вид прежний. */
-  --red: var(--red-600);
-  --green: var(--green-600);
-  --blue: var(--blue-600);
-  --orange: var(--orange-600);
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
-
-  --tab-bg: rgba(236,238,240,0.95);
-  --overlay-bg: rgba(236,238,240,0.97);
-  --img-overlay: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.55));
-  --img-overlay-top: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);
-  --img-overlay-40: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55));
-  --modal-bg: rgba(0,0,0,0.4);
-  --modal-bg-heavy: rgba(0,0,0,0.5);
-  --onb-bg: rgba(0,0,0,0.6);
-  --shimmer: rgba(0,0,0,0.04);
-  --serving-row: rgba(74,140,0,0.06);
-  --guest-cta-bg: rgba(255,255,255,0.95);
-  --guest-gradient-mid: rgba(236,238,240,0.6);
-  --guest-gradient-end: rgba(236,238,240,0.95);
-}
 /* Light theme — card borders for separation */
-[data-theme="light"] .card,
-[data-theme="light"] .tc-card,
-[data-theme="light"] .tournament-list-item,
-[data-theme="light"] .news-list-item,
-[data-theme="light"] .battle-card,
-[data-theme="light"] .profile-row,
-[data-theme="light"] .rating-row,
-[data-theme="light"] .live-list-card,
-[data-theme="light"] .prof-membership,
-[data-theme="light"] .pd-stat,
-[data-theme="light"] .kst-card {
-  border: 1px solid rgba(0,0,0,0.08);
-}
 /* У знака КСЛТ буквы белые — на светлом фоне их попросту не видно.
    Перекрасить SVG из CSS нельзя, он подключён картинкой, поэтому для
    светлой темы лежит отдельный файл с тёмными буквами. Заставка сюда не
    входит: она всегда на чёрном. */
-[data-theme="light"] .header-logo-img,
-[data-theme="light"] .auth-logo-img,
-[data-theme="light"] .menu-footer-logo-img {
-  content: url(../img/kslt-logo-light.svg);
-}
-[data-theme="light"] .header-logo-img,
-[data-theme="light"] .auth-logo-img {
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
-}
 /* 27.10: ЗДЕСЬ БЫЛО `color: #fff` — И ИМЕННО ОНО ОПУСКАЛО КОНТРАСТ.
    Белый текст на лайме `#4A8C00` даёт 4.16, ниже планки 4.5; чёрный на том
    же лайме даёт 5.04. Переопределение снято: в светлой теме заполненная
@@ -231,12 +189,6 @@
    читаемее, а не наоборот. Правка, которую вносили ради светлой темы, и
    была бедой светлой темы. */
 /* Light theme — header & tab bar subtle border */
-[data-theme="light"] .header {
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-[data-theme="light"] .tab-bar {
-  border-top: 1px solid rgba(0,0,0,0.08);
-}
 
 html {
   font-size: 16px;

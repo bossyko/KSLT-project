@@ -14,18 +14,14 @@
   var loadedScreens = {};
 
   // === Theme ===
-  var _themeMode = localStorage.getItem('kslt_theme') || 'system';
-
+  /* ТЕМА ОДНА — ТЁМНАЯ (07.11). Светлая снята: см. пояснение в
+     css/app.css. Переключателя больше нет, выбор системы не слушаем —
+     приложение тёмное всегда, как и сайт.
+     `APP.setTheme` оставлен и НИЧЕГО НЕ ДЕЛАЕТ нарочно: его зовут из
+     кода экранов, и падение из-за пропавшего имени стоило бы дороже
+     мёртвой строки. Когда зовов не останется — снять вместе с ними. */
   function applyTheme() {
-    var isDark;
-    if (_themeMode === 'dark') {
-      isDark = true;
-    } else if (_themeMode === 'light') {
-      isDark = false;
-    } else {
-      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', 'dark');
     // Системные полосы (Capacitor 8).
     // Под край-в-край фон полос не красится: в плагине System Bars
     // setBackgroundColor помечен Unsupported, а под верхней полосой рисует
@@ -33,26 +29,17 @@
     // background: var(--bg)). Остаётся задать только цвет значков.
     // 'DARK' в обоих плагинах значит СВЕТЛЫЕ значки на тёмном фоне.
     var _plugins = window.Capacitor && window.Capacitor.Plugins;
-    var _barStyle = { style: isDark ? 'DARK' : 'LIGHT' };
     if (_plugins && _plugins.SystemBars) {
-      _plugins.SystemBars.setStyle(_barStyle);
+      _plugins.SystemBars.setStyle({ style: 'DARK' });
     } else if (_plugins && _plugins.StatusBar) {
-      _plugins.StatusBar.setStyle(_barStyle);
+      _plugins.StatusBar.setStyle({ style: 'DARK' });
     }
   }
 
-  APP.setTheme = function(mode) {
-    _themeMode = mode;
-    localStorage.setItem('kslt_theme', mode);
-    applyTheme();
-  };
+  APP.setTheme = function() { /* тема одна, менять нечего */ };
 
-  APP.getTheme = function() { return _themeMode; };
+  APP.getTheme = function() { return 'dark'; };
 
-  // Listen for system theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
-    if (_themeMode === 'system') applyTheme();
-  });
 
   // Apply immediately
   applyTheme();
