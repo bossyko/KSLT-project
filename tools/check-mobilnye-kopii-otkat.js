@@ -39,6 +39,42 @@ function прогон() {
 
 /** Каждый откат: что сделать на копии, что вернуть обратно, какое правило ждём. */
 const ОТКАТЫ = [
+    /* ГРАНИЦА НАЗВАННОГО РАСХОЖДЕНИЯ. `css/tokens.css` разведён намеренно
+       (светлая тема есть только у приложения), но словарь ролей у двух
+       продуктов общий. Три отката держат три способа его разломать:
+       новая роль, пропавшая роль, разное значение. */
+    {
+        имя: 'в общей части токенов приложения завелась своя роль',
+        ждём: 'общая часть токенов не разошлась',
+        сломать() {
+            const ф = path.join(ВРЕМ, 'mobile/www/css/tokens.css');
+            const было = fs.readFileSync(ф, 'utf8');
+            fs.writeFileSync(ф, было.replace('  --on-solid:      #FFFFFF;',
+                '  --on-solid:      #FFFFFF;\n  --svoya-rol-prilozheniya: #123456;'));
+            return () => fs.writeFileSync(ф, было);
+        }
+    },
+    {
+        имя: 'роль сайта пропала из общей части приложения',
+        ждём: 'общая часть токенов не разошлась',
+        сломать() {
+            const ф = path.join(ВРЕМ, 'mobile/www/css/tokens.css');
+            const было = fs.readFileSync(ф, 'utf8');
+            fs.writeFileSync(ф, было.replace('  --accent-on:     var(--neutral-950);', ''));
+            return () => fs.writeFileSync(ф, было);
+        }
+    },
+    {
+        имя: 'у общей роли разошлись значения',
+        ждём: 'общая часть токенов не разошлась',
+        сломать() {
+            const ф = path.join(ВРЕМ, 'mobile/www/css/tokens.css');
+            const было = fs.readFileSync(ф, 'utf8');
+            fs.writeFileSync(ф, было.replace('  --accent-on:     var(--neutral-950);',
+                '  --accent-on:     var(--neutral-900);'));
+            return () => fs.writeFileSync(ф, было);
+        }
+    },
     {
         имя: 'правка доехала до сайта и не доехала до приложения',
         ждём: 'копии, которые совпадали, совпадают до сих пор',

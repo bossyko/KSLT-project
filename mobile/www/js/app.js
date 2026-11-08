@@ -14,35 +14,97 @@
   var loadedScreens = {};
 
   // === Theme ===
-  /* ТЕМА ОДНА — ТЁМНАЯ (07.11). Светлая снята: см. пояснение в
-     css/app.css. Переключателя больше нет, выбор системы не слушаем —
-     приложение тёмное всегда, как и сайт.
-     `APP.setTheme` оставлен и НИЧЕГО НЕ ДЕЛАЕТ нарочно: его зовут из
-     кода экранов, и падение из-за пропавшего имени стоило бы дороже
-     мёртвой строки. Когда зовов не останется — снять вместе с ними. */
+  /* ТЕМЫ ДВЕ, ПОЛОЖЕНИЙ ТРИ (08.11). Светлая вернулась новым куском:
+     своя палитра ролей в `css/tokens.css`, числа посчитаны по WCAG на
+     худшем из светлых фонов. Прежняя запись («тема одна») снята вместе
+     с причиной, а не затёрта: причина была в том, что светлая тема
+     спорила с зашитыми красками, и этот кусок свёл их на роли.
+
+     ВЫБОР — СВОЙСТВО ЧЕЛОВЕКА, А НЕ ЭКРАНА, и потому хранится. Положений
+     три: `light`, `dark` и `system`. Третье — ПО УМОЛЧАНИЮ: человек
+     ставит ночной режим в телефоне один раз и ждёт, что приложения ему
+     подчинятся. Так устроены Settings > Appearance у Apple и
+     `AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM` у Google.
+
+     УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ: в разметке
+     `data-theme="dark"` стоит затем, чтобы первый кадр не мигнул белым,
+     а настоящее решение принимает этот дом при запуске.
+
+     ХРАНИМ ВЫБОР, А НЕ ИТОГ: записано `system` — значит и завтра, когда
+     человек переключит телефон на ночной режим, приложение пойдёт за
+     ним. Записать вычисленное `dark` значило бы запомнить сегодняшнюю
+     погоду вместо желания. */
+  var ТЕМА_КЛЮЧ = 'kslt-tema';
+  var ТЕМЫ = ['light', 'dark', 'system'];
+
+  function выборТемы() {
+    try {
+      var в = localStorage.getItem(ТЕМА_КЛЮЧ);
+      return ТЕМЫ.indexOf(в) !== -1 ? в : 'system';
+    } catch (e) { return 'system'; }
+  }
+
+  /* СИСТЕМА СПРАШИВАЕТСЯ У БРАУЗЕРА, А НЕ УГАДЫВАЕТСЯ ПО ЧАСАМ. */
+  function системнаяТема() {
+    try {
+      return (window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+    } catch (e) { return 'dark'; }
+  }
+
+  function действующаяТема() {
+    var в = выборТемы();
+    return в === 'system' ? системнаяТема() : в;
+  }
+
   function applyTheme() {
-    document.documentElement.setAttribute('data-theme', 'dark');
+    var т = действующаяТема();
+    document.documentElement.setAttribute('data-theme', т);
     // Системные полосы (Capacitor 8).
     // Под край-в-край фон полос не красится: в плагине System Bars
     // setBackgroundColor помечен Unsupported, а под верхней полосой рисует
     // сам .status-bar-spacer (app.css: padding-top: var(--safe-top),
     // background: var(--bg)). Остаётся задать только цвет значков.
     // 'DARK' в обоих плагинах значит СВЕТЛЫЕ значки на тёмном фоне.
+    /* ЗНАЧКИ СИСТЕМНЫХ ПОЛОС ИДУТ ЗА ТЕМОЙ. В обоих плагинах 'DARK'
+       значит СВЕТЛЫЕ значки (для тёмного фона), 'LIGHT' — ТЁМНЫЕ. Имена
+       читаются наоборот смыслу, и это уже стоило одному продукту белых
+       значков на белой полосе. */
+    var стиль = (т === 'light') ? 'LIGHT' : 'DARK';
     var _plugins = window.Capacitor && window.Capacitor.Plugins;
     if (_plugins && _plugins.SystemBars) {
-      _plugins.SystemBars.setStyle({ style: 'DARK' });
+      _plugins.SystemBars.setStyle({ style: стиль });
     } else if (_plugins && _plugins.StatusBar) {
-      _plugins.StatusBar.setStyle({ style: 'DARK' });
+      _plugins.StatusBar.setStyle({ style: стиль });
     }
   }
 
-  APP.setTheme = function() { /* тема одна, менять нечего */ };
+  APP.setTheme = function(в) {
+    if (ТЕМЫ.indexOf(в) === -1) return;
+    try { localStorage.setItem(ТЕМА_КЛЮЧ, в); } catch (e) {}
+    applyTheme();
+  };
 
-  APP.getTheme = function() { return 'dark'; };
-
+  /* ОТДАЁМ ВЫБОР, А НЕ ИТОГ: переключателю нужно знать, на какой кнопке
+     стоит человек, а не какую тему посчитал дом. */
+  APP.getTheme = function() { return выборТемы(); };
 
   // Apply immediately
   applyTheme();
+
+  /* СИСТЕМА МЕНЯЕТСЯ НА ХОДУ — И МЫ ЗА НЕЙ. Человек тянет шторку,
+     включает ночной режим, возвращается в приложение: без этой
+     подписки оно осталось бы в прежней теме до перезапуска. Слушаем
+     только пока выбран `system`: иначе ручной выбор перебивался бы
+     системным. */
+  try {
+    if (window.matchMedia) {
+      var слух = window.matchMedia('(prefers-color-scheme: light)');
+      var насистему = function() { if (выборТемы() === 'system') applyTheme(); };
+      if (слух.addEventListener) слух.addEventListener('change', насистему);
+      else if (слух.addListener) слух.addListener(насистему);
+    }
+  } catch (e) {}
 
   // === Tab Navigation ===
   var tabs = document.querySelectorAll('.tab-item');
@@ -282,13 +344,21 @@
       // Set active on load
       var current = APP.getTheme();
       themeCtrl.querySelectorAll('.seg-btn').forEach(function(b) {
-        b.classList.toggle('active', b.getAttribute('data-theme') === current);
+        var он = b.getAttribute('data-theme') === current;
+        b.classList.toggle('active', он);
+        /* ДИКТОР ЧИТАЕТ `aria-pressed`, А НЕ КЛАСС `active`: класс — это
+           краска, а нажатость — состояние, и его нужно объявить. */
+        b.setAttribute('aria-pressed', он ? 'true' : 'false');
       });
       themeCtrl.addEventListener('click', function(e) {
         var btn = e.target.closest('.seg-btn');
         if (!btn) return;
-        themeCtrl.querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+        themeCtrl.querySelectorAll('.seg-btn').forEach(function(b) {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
         APP.setTheme(btn.getAttribute('data-theme'));
       });
     }

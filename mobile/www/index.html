@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>KSLT</title>
 <link rel="stylesheet" href="css/fonts.css?v=1">
-<link rel="stylesheet" href="css/tokens.css?v=41">
-<link rel="stylesheet" href="css/app.css?v=76">
+<link rel="stylesheet" href="css/tokens.css?v=43">
+<link rel="stylesheet" href="css/app.css?v=80">
 </head>
 <body>
 
@@ -367,9 +367,27 @@
       </div>
 
       <div class="menu-section">
+        <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ВЕРНУЛСЯ 08.11, ТРЕМЯ ПОЛОЖЕНИЯМИ.
+
+             ТРИ, А НЕ ДВА — ТАК ДЕЛАЮТ В 2026 (слово Кости: «давай как
+             сейчас делают большинство»). Третье положение «Система» —
+             не прихоть: человек ставит ночной режим в телефоне один раз
+             и ждёт, что приложения ему подчинятся. Оно же ПО УМОЛЧАНИЮ.
+
+             ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: переключатель темы здесь
+             ОДИН. Ровно на этом месте раньше жила беда с языком — его
+             переключателей было два, и работали они по-разному.
+
+             ПРЕДПОЛОЖЕНИЕ: место выбрано боковым меню, потому что здесь
+             для него уже была строка и уже есть код. Если тема должна
+             жить в профиле рядом с языком — переносится одним куском. -->
         <div class="menu-controls-row">
-          <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ УБРАН 07.11: тема одна, тёмная.
-               Пояснение в css/app.css. -->
+          <div class="menu-section-title" style="margin:0 0 6px">Тема</div>
+          <div class="seg-control" id="menuThemeControl" role="group" aria-label="Тема оформления">
+            <button class="seg-btn" data-theme="light" aria-pressed="false">Светлая</button>
+            <button class="seg-btn" data-theme="dark" aria-pressed="false">Тёмная</button>
+            <button class="seg-btn active" data-theme="system" aria-pressed="true">Система</button>
+          </div>
         </div>
         <!-- РЯД ЯЗЫКА В БОКОВОМ МЕНЮ УБРАН, пока язык заперт (слово
              Кости 29.10: «языки пока оставим и уберём, оставим только на
@@ -788,6 +806,6 @@
 <script src="js/badge-celebration.js?v=2"></script>
 <script src="js/push.js?v=3"></script>
 <script src="js/kslt-okno.js?v=5"></script>
-<script src="js/app.js?v=14"></script>
+<script src="js/app.js?v=15"></script>
 </body>
 </html>

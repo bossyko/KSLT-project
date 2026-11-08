@@ -66,7 +66,7 @@
   width: 224px; height: 224px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(204,255,0,0.3) 0%, rgba(204,255,0,0.1) 40%, transparent 70%);
+  background: radial-gradient(circle, var(--alpha-lime-30) 0%, rgba(204,255,0,0.1) 40%, transparent 70%);
   animation: splashPulse 2s ease-in-out 0.5s infinite;
 }
 /* Экран загрузки всегда тёмный, поэтому знак здесь белыми буквами
@@ -353,7 +353,7 @@ a, button, [role="button"] {
   color: var(--text-muted);
   transition: color 0.2s;
 }
-.tab-item.active svg { stroke: var(--accent); }
+.tab-item.active svg { stroke: var(--accent-text); }
 .tab-item.active span { color: var(--accent-text); font-weight: 600; }
 .tab-item:active { transform: scale(0.9); }
 
@@ -383,7 +383,7 @@ a, button, [role="button"] {
   margin-right: calc(var(--space-2) * -1);
 }
 .section-title .see-all:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
   border-radius: var(--radius-sm, 8px);
 }
@@ -408,7 +408,7 @@ a, button, [role="button"] {
   align-items: center;
   gap: 8px;
   background: var(--red);
-  color: var(--neutral-white);
+  color: var(--on-solid);
   font-size: 11px;
   font-weight: 700;
   padding: 8px 8px;
@@ -420,7 +420,7 @@ a, button, [role="button"] {
   content: '';
   width: 8px;
   height: 8px;
-  background: var(--neutral-white);
+  background: var(--on-solid);
   border-radius: 50%;
   animation: pulse-live 1.5s infinite;
 }
@@ -589,7 +589,7 @@ a, button, [role="button"] {
 }
 .rating-mini-cat.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   border-color: var(--accent);
 }
 .rating-mini-row {
@@ -766,7 +766,7 @@ a, button, [role="button"] {
 }
 .filter-chip.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   border-color: var(--accent);
   font-weight: 600;
 }
@@ -794,7 +794,7 @@ a, button, [role="button"] {
   display: inline-block;
   width: 16px; height: 16px;
   border: 2px solid var(--border-light);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-text);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   margin-right: 8px;
@@ -877,19 +877,19 @@ a, button, [role="button"] {
   border-radius: var(--radius-full);
 }
 .tc-status.open {
-  background: rgba(46,213,115,0.2);
+  background: var(--alpha-green-15);
   color: var(--green);
-  border: 1px solid rgba(46,213,115,0.3);
+  border: 1px solid var(--alpha-green-30);
 }
 .tc-status.soon {
-  background: rgba(255,159,67,0.2);
+  background: var(--alpha-orange-15);
   color: var(--orange);
-  border: 1px solid rgba(255,159,67,0.3);
+  border: 1px solid var(--alpha-orange-30);
 }
 .tc-status.live {
-  background: rgba(255,71,87,0.2);
+  background: var(--alpha-red-15);
   color: var(--red);
-  border: 1px solid rgba(255,71,87,0.3);
+  border: 1px solid var(--alpha-red-30);
   animation: pulse-live 1.5s infinite;
 }
 .tc-status.completed {
@@ -968,7 +968,7 @@ a, button, [role="button"] {
   display: inline-block;
   width: 14px; height: 14px;
   border: 2px solid var(--border-light);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-text);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   vertical-align: middle;
@@ -1181,7 +1181,7 @@ a, button, [role="button"] {
   top: -40%; left: 50%;
   transform: translateX(-50%);
   width: 160px; height: 160px;
-  background: radial-gradient(circle, rgba(204,255,0,0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--alpha-lime-12) 0%, transparent 70%);
   border-radius: 50%;
   z-index: -1;
   animation: rr-glow 3s ease-in-out infinite;
@@ -1243,7 +1243,7 @@ a, button, [role="button"] {
   height: 80px;
   border-radius: 50%;
   background: var(--bg-elevated);
-  border: 3px solid var(--accent);
+  border: 3px solid var(--accent-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1279,7 +1279,7 @@ a, button, [role="button"] {
   font-weight: 600;
   color: var(--accent-text);
 }
-.profile-membership svg { width: 14px; height: 14px; fill: var(--accent); stroke: none; }
+.profile-membership svg { width: 14px; height: 14px; fill: var(--accent-text); stroke: none; }
 
 /* Stats grid */
 /* ОДНО ОБЪЯВЛЕНИЕ `.kst-grid` — ВТОРОЕ, НИЖЕ (шаг A3.1, 29.10).
@@ -1370,15 +1370,15 @@ a, button, [role="button"] {
   flex-shrink: 0;
 }
 .profile-row-icon svg { width: 18px; height: 18px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-.profile-row-icon.green { background: rgba(46,213,115,0.15); }
+.profile-row-icon.green { background: var(--alpha-green-15); }
 .profile-row-icon.green svg { stroke: var(--green); }
 .profile-row-icon.blue { background: rgba(59,130,246,0.15); }
 .profile-row-icon.blue svg { stroke: var(--blue); }
-.profile-row-icon.orange { background: rgba(255,159,67,0.15); }
+.profile-row-icon.orange { background: var(--alpha-orange-15); }
 .profile-row-icon.orange svg { stroke: var(--orange); }
 .profile-row-icon.yellow { background: var(--accent-subtle); }
-.profile-row-icon.yellow svg { stroke: var(--accent); }
-.profile-row-icon.red { background: rgba(255,71,87,0.15); }
+.profile-row-icon.yellow svg { stroke: var(--accent-text); }
+.profile-row-icon.red { background: var(--alpha-red-15); }
 .profile-row-icon.red svg { stroke: var(--red); }
 .profile-row-text { flex: 1; }
 .profile-row-label { font-size: 14px; font-weight: 500; }
@@ -1492,7 +1492,7 @@ a, button, [role="button"] {
 .menu-item .menu-badge {
   margin-left: auto;
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
@@ -1548,7 +1548,7 @@ a, button, [role="button"] {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0) 45%);
+  background: linear-gradient(to top, var(--alpha-black-50), rgba(0,0,0,0) 45%);
   pointer-events: none;
 }
 .news-own-cover::before {
@@ -1728,7 +1728,7 @@ a, button, [role="button"] {
 .battle-btn:active { transform: scale(0.97); }
 .battle-btn.primary {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
 }
 .battle-btn.secondary {
   background: var(--glass);
@@ -1884,7 +1884,7 @@ a, button, [role="button"] {
   padding: 8px 16px;
   border-radius: var(--radius-full);
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   font-size: 14px;
   font-weight: 600;
   transition: all 0.15s;
@@ -1911,7 +1911,7 @@ a, button, [role="button"] {
 .gender-toggle-btn:last-child { border-right: none; }
 .gender-toggle-btn.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   font-weight: 600;
 }
 .rating-type-btn {
@@ -1926,7 +1926,7 @@ a, button, [role="button"] {
 .rating-type-btn:last-child { border-right: none; }
 .rating-type-btn.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   font-weight: 600;
 }
 
@@ -1978,7 +1978,7 @@ a, button, [role="button"] {
   text-overflow: ellipsis;
 }
 .rf-select:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 .rf-select svg {
@@ -2025,7 +2025,7 @@ a, button, [role="button"] {
   font-family: inherit;
 }
 .rating-toggle-btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 /* На залитой кнопке лаймовая обводка по лаймовому фону не видна —
@@ -2036,7 +2036,7 @@ a, button, [role="button"] {
 .rating-toggle-btn.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
 }
 
 /* --- Rating podium (top 3) ---
@@ -2082,7 +2082,7 @@ a, button, [role="button"] {
   /* Фото первого больше остальных на одну ступень отступов (52 + 12). */
   width: 64px;
   height: 64px;
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   box-shadow: 0 0 12px var(--accent-glow);
 }
 .rp-photo {
@@ -2184,14 +2184,14 @@ a, button, [role="button"] {
   text-align: center;
 }
 .bs-option.active {
-  background: var(--accent); color: var(--neutral-black);
+  background: var(--accent); color: var(--accent-on);
   border-color: var(--accent); font-weight: 600;
 }
 .bs-option:active { transform: scale(0.95); }
 .bs-apply {
   width: 100%; padding: 16px;
   border-radius: var(--radius-full);
-  background: var(--accent); color: var(--neutral-black);
+  background: var(--accent); color: var(--accent-on);
   font-size: 16px; font-weight: 600;
   margin-top: 8px;
   transition: all 0.2s;
@@ -2288,7 +2288,7 @@ a, button, [role="button"] {
   font-weight: 500;
   color: var(--accent-text);
 }
-.overlay-back svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; stroke-width: 2; }
+.overlay-back svg { width: 24px; height: 24px; stroke: var(--accent-text); fill: none; stroke-width: 2; }
 .overlay-topbar-title { font-size: 14px; font-weight: 600; }
 
 /* ===== HOME EMPTY STATE ===== */
@@ -2391,8 +2391,8 @@ a, button, [role="button"] {
 .bvm-avatar {
   width: 40px; height: 40px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  border: 2px solid rgba(255,255,255,0.2);
+  background: var(--border-light);
+  border: 2px solid var(--alpha-white-20);
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700; color: var(--text-sec);
 }
@@ -2445,7 +2445,7 @@ a, button, [role="button"] {
   font-size: 14px; font-weight: 500; color: var(--accent-text);
   background: none; border: none; cursor: pointer;
 }
-.td-back svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; stroke-width: 2; }
+.td-back svg { width: 24px; height: 24px; stroke: var(--accent-text); fill: none; stroke-width: 2; }
 .td-topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
 
 .td-hero { padding: 24px 16px; text-align: center; }
@@ -2460,9 +2460,9 @@ a, button, [role="button"] {
   background: var(--accent-subtle);
   color: var(--accent-text);
 }
-.td-badge.cat { background: rgba(255,159,67,0.15); color: var(--orange); }
-.td-badge.status-upcoming { background: rgba(46,213,115,0.15); color: var(--green); }
-.td-badge.status-live { background: rgba(255,71,87,0.15); color: var(--red); }
+.td-badge.cat { background: var(--alpha-orange-15); color: var(--orange); }
+.td-badge.status-upcoming { background: var(--alpha-green-15); color: var(--green); }
+.td-badge.status-live { background: var(--alpha-red-15); color: var(--red); }
 .td-badge.status-completed { background: var(--glass); color: var(--text-muted); }
 
 .td-tabs {
@@ -2488,7 +2488,7 @@ a, button, [role="button"] {
   cursor: pointer;
   transition: all 0.2s;
 }
-.td-tab.active { color: var(--accent-text); border-bottom-color: var(--accent); font-weight: 600; }
+.td-tab.active { color: var(--accent-text); border-bottom-color: var(--accent-text); font-weight: 600; }
 .td-tab-content { display: none; padding: 16px; }
 .td-tab-content.active { display: block; }
 
@@ -2608,7 +2608,7 @@ a, button, [role="button"] {
   font-size: 14px; font-weight: 700; color: var(--text-sec);
   flex-shrink: 0;
 }
-.live-full-sb-row.serving .sb-avatar { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+.live-full-sb-row.serving .sb-avatar { border-color: var(--accent-text); box-shadow: 0 0 8px var(--accent-glow); }
 .sb-dot-serve { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
 .sb-no-serve { width: 8px; flex-shrink: 0; }
 .sb-pname { flex: 1; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2621,7 +2621,7 @@ a, button, [role="button"] {
   background: var(--bg-elevated); color: var(--text-sec);
 }
 .sb-set-val.won { color: var(--accent-text); }
-.sb-set-val.current { background: var(--accent); color: var(--neutral-black); font-weight: 800; }
+.sb-set-val.current { background: var(--accent); color: var(--accent-on); font-weight: 800; }
 
 .live-full-info {
   margin: 0 16px 12px;
@@ -2671,7 +2671,7 @@ a, button, [role="button"] {
   margin: 0 16px 12px;
   padding: 16px;
   background: var(--accent-subtle);
-  border: 1px solid rgba(204,255,0,0.2);
+  border: 1px solid var(--alpha-lime-20);
   border-radius: var(--radius-lg);
   text-align: center;
 }
@@ -2706,11 +2706,11 @@ a, button, [role="button"] {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid var(--on-image-border);
   border-radius: 999px;
-  background: rgba(10,10,10,0.55);
+  background: var(--on-image-fill);
   backdrop-filter: blur(8px);
-  color: var(--neutral-white);
+  color: var(--on-image);
   font-size: 12px;
   font-family: inherit;
 }
@@ -2763,7 +2763,7 @@ a, button, [role="button"] {
 }
 .nd-react-btn:active { transform: scale(0.92); }
 .nd-react-btn.active {
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   background: var(--accent-subtle);
 }
 .nd-react-emoji { font-size: 21px; line-height: 1; }
@@ -2775,7 +2775,7 @@ a, button, [role="button"] {
   width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--accent);
-  color: #0A0A0A;
+  color: var(--accent-on);
   font-size: 11px;
   display: flex;
   align-items: center;
@@ -2798,15 +2798,15 @@ a, button, [role="button"] {
   color: var(--text); font-size: 14px; text-align: left; cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
-.nd-poll-option:active { background: var(--accent); color: var(--neutral-black); border-color: var(--accent); }
+.nd-poll-option:active { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
 .nd-poll-result {
   position: relative; padding: 12px 16px; margin-bottom: 8px;
   border-radius: 8px; overflow: hidden; background: var(--bg-sec);
 }
-.nd-poll-result.voted { border: 1px solid var(--accent); }
+.nd-poll-result.voted { border: 1px solid var(--accent-text); }
 .nd-poll-result-bar {
   position: absolute; top: 0; left: 0; height: 100%;
-  background: rgba(204,255,0,0.12); border-radius: 8px;
+  background: var(--alpha-lime-12); border-radius: 8px;
   transition: width 0.5s ease;
 }
 .nd-poll-result-label { position: relative; font-size: 14px; color: var(--text); }
@@ -2846,7 +2846,7 @@ a, button, [role="button"] {
   background: none; border: none; color: var(--text);
   font-size: 21px; cursor: pointer; padding: 0;
 }
-.notif-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
+.notif-back:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; border-radius: var(--radius-sm); }
 .notif-header h2 { font-size: 18px; font-weight: 600; margin: 0; flex: 1; }
 .notif-list { flex: 1; overflow-y: auto; padding: 12px 16px; }
 .notif-item {
@@ -2910,7 +2910,7 @@ a, button, [role="button"] {
 }
 .auth-tab.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
 }
 .auth-form {
   width: 100%;
@@ -2932,7 +2932,7 @@ a, button, [role="button"] {
   outline: none;
   transition: border-color 0.2s;
 }
-.auth-input:focus { border-color: var(--accent); }
+.auth-input:focus { border-color: var(--accent-text); }
 .auth-input::placeholder { color: var(--text-dim); }
 
 /* Подставленные браузером почта и пароль приходят со своим белым фоном и
@@ -2956,7 +2956,7 @@ select:-webkit-autofill {
   padding: 16px;
   border-radius: var(--radius-full);
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   font-size: 16px;
   font-weight: 700;
   border: none;
@@ -2989,8 +2989,8 @@ select:-webkit-autofill {
   margin-top: 8px;
 }
 .td-reg-done {
-  background: rgba(204, 255, 0, 0.1);
-  border: 1px solid rgba(204, 255, 0, 0.2);
+  background: var(--alpha-lime-12);
+  border: 1px solid var(--alpha-lime-20);
   color: var(--accent-text);
   padding: 16px 24px;
   border-radius: 12px;
@@ -3010,9 +3010,16 @@ select:-webkit-autofill {
   height: 8px;
   background: var(--border);
 }
+/* СТУПЕНЬ `--text-dim` РАССЧИТАНА НА ГРАФИКУ, А НЕ НА БУКВЫ (08.11).
+   Замер контраста в браузере — обе темы, пять видов, пять экранов —
+   нашёл ровно ДВА места ниже планки, и в обеих темах одни и те же:
+   «или» (12px) и строка про условия (11px) стояли на `--text-dim`,
+   который даёт 3.14 в тёмной и 3.20 в светлой при планке 4.5 для
+   мелкого текста. Беда СТАРАЯ, светлая тема её только показала.
+   `--text-muted` даёт 5.33 и 5.45 — ПОСЧИТАНО. */
 .auth-divider-text {
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-muted);
 }
 .auth-social {
   display: flex;
@@ -3079,7 +3086,7 @@ select:-webkit-autofill {
 .auth-footer {
   margin-top: 32px;
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-muted);
   text-align: center;
   line-height: 1.4;
 }
@@ -3106,7 +3113,7 @@ select:-webkit-autofill {
 /* ===== TELEGRAM REG MODAL ===== */
 .tg-reg-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
+  background: var(--alpha-black-60);
   z-index: 600;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden;
@@ -3150,7 +3157,7 @@ select:-webkit-autofill {
 /* ===== OTP VERIFICATION ===== */
 .otp-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85); z-index: 1100;
+  background: var(--alpha-black-85); z-index: 1100;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; transition: all 0.3s ease;
 }
@@ -3173,7 +3180,7 @@ select:-webkit-autofill {
 .otp-digit {
   width: 40px; height: 48px; text-align: center;
   font-size: 1.3rem; font-weight: 700; font-family: var(--font);
-  background: var(--input-bg, rgba(255,255,255,0.06));
+  background: var(--surface-glass-hover);
   border: 2px solid var(--border); border-radius: 10px;
   color: var(--text-primary); transition: all 0.2s;
   -webkit-appearance: none; -moz-appearance: textfield;
@@ -3181,11 +3188,11 @@ select:-webkit-autofill {
 .otp-digit::-webkit-inner-spin-button,
 .otp-digit::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .otp-digit:focus {
-  border-color: var(--accent); outline: none;
+  border-color: var(--accent-text); outline: none;
   box-shadow: 0 0 0 3px rgba(204,255,0,0.15);
 }
 .otp-digit.filled {
-  border-color: var(--accent); background: rgba(204,255,0,0.08);
+  border-color: var(--accent-text); background: var(--alpha-lime-06);
 }
 .otp-timer {
   font-size: 14px; color: var(--text-sec); margin-bottom: 12px;
@@ -3216,7 +3223,7 @@ select:-webkit-autofill {
 /* OTP New Password Modal */
 .otp-pw-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85); z-index: 1100;
+  background: var(--alpha-black-85); z-index: 1100;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; transition: all 0.3s ease;
 }
@@ -3244,7 +3251,7 @@ select:-webkit-autofill {
   cursor: pointer; font-family: var(--font); transition: all 0.2s;
 }
 .otp-method-tab.active {
-  background: rgba(204,255,0,0.12); color: var(--accent-text); font-weight: 600;
+  background: var(--alpha-lime-12); color: var(--accent-text); font-weight: 600;
 }
 .otp-phone-row { display: flex; gap: 8px; }
 /* `.otp-country-select` снят 02.11 ВМЕСТЕ С НАТИВНЫМ СЕЛЕКТОМ, который
@@ -3258,7 +3265,7 @@ select:-webkit-autofill {
   width: 24px;
   height: 24px;
   border: 2px solid var(--border);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-text);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -3327,13 +3334,13 @@ select:-webkit-autofill {
   width: 72px; height: 72px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--accent);
+  border: 3px solid var(--accent-text);
 }
 .bd-avatar-fallback {
   width: 72px; height: 72px;
   border-radius: 50%;
   background: var(--bg-elevated);
-  border: 3px solid var(--accent);
+  border: 3px solid var(--accent-text);
   display: flex; align-items: center; justify-content: center;
   font-size: 26px; font-weight: 800; color: var(--text);
 }
@@ -3449,13 +3456,13 @@ select:-webkit-autofill {
 .bd-bar-left {
   background: linear-gradient(90deg, #ef4444, var(--danger));
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; color: var(--neutral-white);
+  font-size: 14px; font-weight: 700; color: var(--on-solid);
   min-width: 40px; transition: width 0.3s;
 }
 .bd-bar-right {
   background: linear-gradient(90deg, #3b82f6, #60a5fa);
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; color: var(--neutral-white);
+  font-size: 14px; font-weight: 700; color: var(--on-solid);
   min-width: 40px; transition: width 0.3s;
 }
 .bd-vote-buttons {
@@ -3474,11 +3481,11 @@ select:-webkit-autofill {
 }
 .bd-vote-btn:not(:disabled):active {
   background: var(--accent-subtle);
-  border-color: var(--accent);
+  border-color: var(--accent-text);
 }
 .bd-vote-btn.selected {
   background: var(--accent-subtle);
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   color: var(--accent-text);
 }
 .bd-vote-btn:disabled {
@@ -3604,7 +3611,7 @@ select:-webkit-autofill {
   line-height: 1.5;
 }
 .pd-guest-btn {
-  background: var(--accent); color: #0A0A0A;
+  background: var(--accent); color: var(--accent-on);
   font-weight: 700; font-size: 14px;
   padding: 12px 32px; border-radius: var(--radius-full);
   border: none; cursor: pointer;
@@ -3734,9 +3741,9 @@ select:-webkit-autofill {
   font-size: 11px; font-weight: 700;
   white-space: nowrap;
 }
-.match-tag-rating   { background: rgba(204,255,0,0.14); color: var(--accent-text); }
-.match-tag-friendly { background: rgba(255,255,255,0.10); color: var(--text-muted); }
-.match-tag-battle   { background: rgba(255,159,67,0.16); color: #FF9F43; }
+.match-tag-rating   { background: var(--alpha-lime-12); color: var(--accent-text); }
+.match-tag-friendly { background: var(--border-light); color: var(--text-muted); }
+.match-tag-battle   { background: var(--alpha-orange-15); color: var(--warning); }
 .match-tag-doubles  { background: var(--info-subtle); color: var(--info); }
 .match-tag-mixed    { background: rgba(168,85,247,0.18); color: var(--role-manager); }
 .pd-match-opp {
@@ -3753,8 +3760,8 @@ select:-webkit-autofill {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.pd-match-result.win { background: rgba(46,213,115,0.15); color: var(--green); }
-.pd-match-result.loss { background: rgba(255,71,87,0.15); color: var(--red); }
+.pd-match-result.win { background: var(--alpha-green-15); color: var(--green); }
+.pd-match-result.loss { background: var(--alpha-red-15); color: var(--red); }
 
 /* ОДЕЖДА ОТСЕЧКИ (02.11). Класс `.pd-show-all` носила своя кнопка
    «показать все», написанная в приложении заново; теперь список режет
@@ -3771,7 +3778,7 @@ select:-webkit-autofill {
   font-size: 14px; font-weight: 600; cursor: pointer;
 }
 .kslt-more:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -3794,7 +3801,7 @@ select:-webkit-autofill {
   font-size: 11px; font-weight: 600;
   padding: 2px 8px; border-radius: var(--radius-full);
 }
-.pd-tournament-status.completed { background: rgba(46,213,115,0.15); color: var(--green); }
+.pd-tournament-status.completed { background: var(--alpha-green-15); color: var(--green); }
 .pd-tournament-status.upcoming { background: var(--accent-subtle); color: var(--accent-text); }
 
 /* Achievements/Badges grid */
@@ -3823,7 +3830,7 @@ select:-webkit-autofill {
 .pd-challenge-btn {
   display: block; width: 100%;
   padding: 16px; text-align: center;
-  background: var(--accent); color: #0A0A0A;
+  background: var(--accent); color: var(--accent-on);
   font-weight: 700; font-size: 16px;
   border: none; border-radius: var(--radius-md);
   cursor: pointer;
@@ -3886,7 +3893,7 @@ select:-webkit-autofill {
   font-size: 14px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
-.pd-h2h-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pd-h2h-close:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .pd-h2h-body { padding: 16px; }
 
 /* H2H VS block */
@@ -3950,8 +3957,8 @@ select:-webkit-autofill {
   width: 24px; height: 24px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
 }
-.pd-h2h-match.win .pd-h2h-m-result { background: rgba(46,213,115,0.15); color: var(--green); }
-.pd-h2h-match.loss .pd-h2h-m-result { background: rgba(255,71,87,0.15); color: var(--red); }
+.pd-h2h-match.win .pd-h2h-m-result { background: var(--alpha-green-15); color: var(--green); }
+.pd-h2h-match.loss .pd-h2h-m-result { background: var(--alpha-red-15); color: var(--red); }
 .pd-h2h-m-tournament {
   display: flex; align-items: center; min-width: 0;
   max-width: 144px;
@@ -3975,9 +3982,9 @@ select:-webkit-autofill {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
-.prof-membership.active { border-color: rgba(46,213,115,0.3); }
-.prof-membership.expiring { border-color: rgba(255,159,67,0.3); }
-.prof-membership.expired { border-color: rgba(255,71,87,0.3); }
+.prof-membership.active { border-color: var(--alpha-green-30); }
+.prof-membership.expiring { border-color: var(--alpha-orange-30); }
+.prof-membership.expired { border-color: var(--alpha-red-30); }
 .prof-membership.none { border-color: var(--border); }
 .prof-mem-icon { font-size: 26px; flex-shrink: 0; }
 .prof-mem-info { flex: 1; min-width: 0; }
@@ -4107,7 +4114,7 @@ select:-webkit-autofill {
   font-size: var(--fs-2xs);
   padding: 0 var(--space-2);
   border-radius: 999px;
-  background: var(--bg-elevated, rgba(255,255,255,.08));
+  background: var(--bg-elevated);
   color: var(--text-muted);
 }
 
@@ -4166,7 +4173,7 @@ select:-webkit-autofill {
   margin: var(--space-2) var(--space-4);
   border-radius: 999px;
   overflow: hidden;
-  background: var(--bg-elevated, rgba(255,255,255,.08));
+  background: var(--bg-elevated);
 }
 .kst-cat-bar-w, .kst-cat-bar-l { display: block; height: 100%; }
 .kst-cat-bar-w { background: var(--success); }
@@ -4276,8 +4283,8 @@ select:-webkit-autofill {
   font-size: 11px; font-weight: 600; padding: 2px 8px;
   border-radius: var(--radius-full); flex-shrink: 0;
 }
-.prof-voucher-status.active { background: rgba(46,213,115,0.15); color: var(--green); }
-.prof-voucher-status.inactive { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+.prof-voucher-status.active { background: var(--alpha-green-15); color: var(--green); }
+.prof-voucher-status.inactive { background: var(--surface-glass); color: var(--text-muted); }
 
 /* Payments */
 .prof-pay-summary {
@@ -4313,7 +4320,7 @@ select:-webkit-autofill {
 .prof-edit-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .prof-edit-avatar-hint {
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: var(--badge-overlay); color: var(--neutral-white);
+  background: var(--badge-overlay); color: var(--on-image);
   font-size: 11px; text-align: center; padding: 2px 0;
 }
 .prof-field { margin-bottom: 12px; }
@@ -4329,7 +4336,7 @@ select:-webkit-autofill {
   -webkit-appearance: none;
 }
 .prof-field-input:focus {
-  outline: none; border-color: var(--accent);
+  outline: none; border-color: var(--accent-text);
 }
 select.prof-field-input { color: var(--text); }
 
@@ -4368,13 +4375,13 @@ select.prof-field-input { color: var(--text); }
 .prof-notif-cb { display: none; }
 .prof-toggle-switch {
   width: 40px; height: 24px; border-radius: 11px;
-  background: var(--border); position: relative;
+  background: var(--switch-track); position: relative;
   transition: background 0.2s; flex-shrink: 0;
 }
 .prof-toggle-switch::after {
   content: ''; position: absolute; top: 2px; left: 2px;
   width: 18px; height: 18px; border-radius: 50%;
-  background: var(--neutral-white); transition: transform 0.2s;
+  background: var(--bg-card); transition: transform 0.2s;
 }
 .prof-notif-cb:checked + .prof-toggle-switch {
   background: var(--accent);
@@ -4414,7 +4421,7 @@ select.prof-field-input { color: var(--text); }
 }
 .coach-partner-badge {
   position: absolute; top: 8px; right: 8px;
-  background: var(--accent); color: #0A0A0A;
+  background: var(--accent); color: var(--accent-on);
   font-size: 11px; font-weight: 700;
   padding: 2px 8px; border-radius: var(--radius-full);
 }
@@ -4566,7 +4573,7 @@ select.prof-field-input { color: var(--text); }
 }
 .round-pill.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   border-color: var(--accent);
 }
 
@@ -4584,8 +4591,8 @@ select.prof-field-input { color: var(--text); }
 }
 .mob-match-row:last-child { border-bottom: none; }
 .mob-match-row.winner {
-  color: var(--neutral-white); font-weight: 600;
-  background: rgba(204,255,0,0.06);
+  color: var(--text-primary); font-weight: 600;
+  background: var(--alpha-lime-06);
 }
 .mob-match-seed {
   color: var(--text-muted); font-size: 11px;
@@ -4645,11 +4652,11 @@ select.prof-field-input { color: var(--text); }
 .mob-standings th.stat:last-child,
 .mob-standings td.stat:last-child { width: 48px; }
 .mob-standings td {
-  padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 8px; border-bottom: 1px solid var(--alpha-white-04);
 }
 .mob-standings td.num { text-align: center; font-weight: 600; }
 .mob-standings td.stat { text-align: center; }
-.mob-standings tr.qualified { background: rgba(204,255,0,0.06); }
+.mob-standings tr.qualified { background: var(--alpha-lime-06); }
 /* Геймы: справочная колонка, поэтому приглушена и уже остальных */
 .mob-standings td.mob-games {
   font-size: 11px; color: var(--text-muted); white-space: nowrap;
@@ -4697,13 +4704,13 @@ select.prof-field-input { color: var(--text); }
    для прохода с клавиатуры. */
 .td-tab:focus { outline: none; }
 .td-tab:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: -2px;
   border-radius: var(--radius-sm);
 }
 .round-pill:focus { outline: none; }
 .round-pill:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -4894,10 +4901,10 @@ select.prof-field-input { color: var(--text); }
 }
 .td-round-chip.active {
   background: var(--accent); border-color: var(--accent);
-  color: #0A0A0A;
+  color: var(--accent-on);
 }
 .td-round-chip:focus { outline: none; }
-.td-round-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.td-round-chip:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 
 .td-bracket-round {
   display: flex;
@@ -4996,7 +5003,7 @@ select.prof-field-input { color: var(--text); }
   font-size: var(--fs-sm); font-weight: 600;
 }
 .td-more-btn:focus { outline: none; }
-.td-more-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.td-more-btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 
 /* ---- Расписание запусков ---- */
 .td-sched-table .when { width: 56px; white-space: nowrap; font-weight: 600; }
@@ -5076,7 +5083,7 @@ select.prof-field-input { color: var(--text); }
 }
 .onb-btn {
   width: 100%; padding: 16px;
-  background: var(--accent); color: var(--neutral-black);
+  background: var(--accent); color: var(--accent-on);
   border: none; border-radius: var(--radius-md);
   font-size: 16px; font-weight: 700;
   cursor: pointer;
@@ -5093,7 +5100,7 @@ select.prof-field-input { color: var(--text); }
   min-height: 44px;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.onb-skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.onb-skip:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .onb-skip:active { color: var(--text-sec); }
 
 /* ===== SEGMENTED CONTROL (theme/lang) ===== */
@@ -5121,7 +5128,7 @@ select.prof-field-input { color: var(--text); }
 .seg-btn:last-child { border-right: none; }
 .seg-btn.active {
   background: var(--accent);
-  color: var(--neutral-black);
+  color: var(--accent-on);
   font-weight: 600;
 }
 .seg-btn:active { transform: scale(0.95); }
@@ -5160,7 +5167,7 @@ select.prof-field-input { color: var(--text); }
 }
 
 .rc-grid {
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: var(--surface-glass-hover);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
@@ -5205,7 +5212,7 @@ select.prof-field-input { color: var(--text); }
    разноцветные по категориям, оценка одна. Красим её краской темы, а не
    цветом категории — иначе она притворялась бы ещё одной категорией. */
 .rc-line-ntrp {
-  stroke: var(--accent);
+  stroke: var(--accent-text);
 }
 
 /* ОДНО ИЗМЕРЕНИЕ — ЭТО ЧИСЛО, А НЕ ГРАФИК. Решение взято у сайта
@@ -5267,7 +5274,7 @@ select.prof-field-input { color: var(--text); }
 
 .pd-tournament-status.withdrawn {
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--surface-glass-hover);
 }
 
 .pd-withdraw-btn {
@@ -5297,7 +5304,7 @@ select.prof-field-input { color: var(--text); }
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--scrim-dialog);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -5338,7 +5345,7 @@ select.prof-field-input { color: var(--text); }
 .rc-confirm-yes {
   background: var(--danger) !important;
   border-color: var(--danger) !important;
-  color: var(--neutral-white) !important;
+  color: var(--on-solid) !important;
 }
 
 .td-reg-badge {
@@ -5351,7 +5358,7 @@ select.prof-field-input { color: var(--text); }
 }
 
 .td-reg-badge-off {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--surface-glass-hover);
   color: var(--text-muted);
 }
 
@@ -5378,7 +5385,7 @@ select.prof-field-input { color: var(--text); }
 
 .pd-reenter-btn {
   color: var(--accent-text) !important;
-  border-color: rgba(204, 255, 0, 0.4) !important;
+  border-color: var(--alpha-lime-30) !important;
 }
 
 /* ЗДЕСЬ ЖИЛ ПЯТЫЙ КРАСНЫЙ (30.10): фон rgba(255,59,48,.12) — четвёртый,
@@ -5449,7 +5456,7 @@ select.prof-field-input { color: var(--text); }
   height: 26px;
   width: auto;
   display: block;
-  filter: drop-shadow(0 0 5px rgba(204, 255, 0, 0.3));
+  filter: drop-shadow(0 0 5px var(--alpha-lime-30));
 }
 
 /* ============================================
@@ -5480,7 +5487,7 @@ select.prof-field-input { color: var(--text); }
   padding: 0; border: 0; background: none; display: block;
 }
 .news-carousel-kadr:focus { outline: none; }
-.news-carousel-kadr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.news-carousel-kadr:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
 /* Снимок ЦЕЛИКОМ, не обрезком — то же правило, что у афиши новости. */
 .news-carousel-main { width: 100%; height: 100%; object-fit: contain; display: block; }
 .news-carousel-nav {
@@ -5488,21 +5495,21 @@ select.prof-field-input { color: var(--text); }
   width: 44px; height: 44px;
   display: flex; align-items: center; justify-content: center;
   font-size: var(--fs-xl); line-height: 1;
-  color: var(--neutral-white);
-  background: rgba(0,0,0,0.45);
+  color: var(--on-image);
+  background: var(--on-image-fill);
   border: 0; border-radius: 50%;
   z-index: 2;
 }
 .news-carousel-nav:focus { outline: none; }
-.news-carousel-nav:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.news-carousel-nav:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .news-carousel-nav[disabled] { opacity: 0.35; }
 .news-carousel-prev { left: var(--space-2); }
 .news-carousel-next { right: var(--space-2); }
 .news-carousel-count {
   position: absolute; right: var(--space-2); bottom: var(--space-2);
   padding: var(--space-1) var(--space-2);
-  font-size: var(--fs-2xs); color: var(--neutral-white);
-  background: rgba(0,0,0,0.6);
+  font-size: var(--fs-2xs); color: var(--on-image);
+  background: var(--alpha-black-60);
   border-radius: var(--radius-full);
 }
 .news-carousel-thumbs {
@@ -5522,9 +5529,9 @@ select.prof-field-input { color: var(--text); }
   opacity: 0.55;
 }
 .news-carousel-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.news-carousel-thumb.active { opacity: 1; border-color: var(--accent); }
+.news-carousel-thumb.active { opacity: 1; border-color: var(--accent-text); }
 .news-carousel-thumb:focus { outline: none; }
-.news-carousel-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.news-carousel-thumb:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 
 /* Короб видео стоит В ТОЙ ЖЕ сцене, что и крупный снимок: переключение
    меняет видимость, а не разметку — иначе каждый шаг ленты
@@ -5586,8 +5593,8 @@ select.prof-field-input { color: var(--text); }
   right: 8px; bottom: 8px;
   padding: 8px 8px;
   border-radius: 999px;
-  background: rgba(0,0,0,0.6);
-  color: var(--neutral-white);
+  background: var(--alpha-black-60);
+  color: var(--on-image);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -5617,7 +5624,7 @@ select.prof-field-input { color: var(--text); }
   opacity: 0.55;
 }
 .nm-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.nm-thumb.active { opacity: 1; border-color: var(--accent); }
+.nm-thumb.active { opacity: 1; border-color: var(--accent-text); }
 
 /* Один-два снимка лентой не оформляем — просто столбиком */
 .nm-grid { margin: 16px 0 8px; }
@@ -5633,7 +5640,7 @@ select.prof-field-input { color: var(--text); }
   position: fixed;
   inset: 0;
   z-index: 3000;
-  background: rgba(0,0,0,0.94);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5651,8 +5658,8 @@ select.prof-field-input { color: var(--text); }
   width: 36px; height: 36px;
   border: 0;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  color: var(--neutral-white);
+  background: var(--alpha-white-12);
+  color: var(--on-image);
   font-size: 26px;
   line-height: 1;
 }
@@ -5667,8 +5674,8 @@ select.prof-field-input { color: var(--text); }
   display: flex; align-items: center; justify-content: center;
   border: 0;
   border-radius: 50%;
-  background: rgba(0,0,0,0.45);
-  color: var(--neutral-white);
+  background: var(--on-image-fill);
+  color: var(--on-image);
   font-size: var(--fs-xl);
   line-height: 1;
   z-index: 2;
@@ -5677,7 +5684,7 @@ select.prof-field-input { color: var(--text); }
 .nm-viewer-nav.nm-next, .nm-nav.nm-next { right: var(--space-2); }
 .nm-viewer-nav:focus, .nm-nav:focus { outline: none; }
 .nm-viewer-nav:focus-visible, .nm-nav:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 .nm-viewer:focus { outline: none; }
@@ -5687,7 +5694,7 @@ select.prof-field-input { color: var(--text); }
   bottom: calc(env(safe-area-inset-bottom) + 14px);
   left: 0; right: 0;
   text-align: center;
-  color: rgba(255,255,255,0.75);
+  color: var(--text-secondary);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -5724,13 +5731,13 @@ select.prof-field-input { color: var(--text); }
 .prof-switch input { opacity: 0; width: 0; height: 0; }
 .prof-switch-slider {
   position: absolute; inset: 0;
-  background: rgba(255,255,255,0.14);
+  background: var(--switch-track);
   border-radius: 9px; transition: background 0.2s;
 }
 .prof-switch-slider::before {
   content: ''; position: absolute;
   width: 12px; height: 12px; left: 3px; bottom: 3px;
-  background: var(--neutral-white); border-radius: 50%; transition: transform 0.2s;
+  background: var(--bg-card); border-radius: 50%; transition: transform 0.2s;
 }
 .prof-switch input:checked + .prof-switch-slider { background: var(--accent); }
 .prof-switch input:checked + .prof-switch-slider::before { transform: translateX(16px); }
@@ -5740,7 +5747,7 @@ select.prof-field-input { color: var(--text); }
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-muted);
-  background: rgba(255,255,255,0.03);
+  background: var(--surface-glass);
   border-left: 2px solid var(--accent);
   border-radius: 0 8px 8px 0;
   padding: 12px 12px;
@@ -5752,7 +5759,7 @@ select.prof-field-input { color: var(--text); }
 .pd-match-mate {
     margin-top: 8px;
     font-size: 0.7rem;
-    color: var(--text-dim, rgba(255,255,255,0.38));
+    color: var(--text-dim);
 }
 
 .pd-match-mate-name {
@@ -5774,7 +5781,7 @@ select.prof-field-input { color: var(--text); }
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--scrim-dialog);
   backdrop-filter: blur(6px);
   animation: achFade 0.25s ease both;
   padding: 24px;
@@ -5791,7 +5798,7 @@ select.prof-field-input { color: var(--text); }
   padding: 32px 24px 24px;
   text-align: center;
   background: var(--bg-elevated);
-  border: 1px solid rgba(204, 255, 0, 0.35);
+  border: 1px solid var(--alpha-lime-30);
   border-radius: 24px;
   box-shadow: 0 0 60px rgba(204, 255, 0, 0.18);
   animation: achPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
@@ -5834,7 +5841,7 @@ select.prof-field-input { color: var(--text); }
   height: 112px;
   margin: -56px 0 0 -56px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-text);
   pointer-events: none;
   animation: achHalo 1s ease-out 0.25s both;
 }
@@ -5899,7 +5906,7 @@ select.prof-field-input { color: var(--text); }
   height: 16px;
   border-radius: 50%;
   background: radial-gradient(circle at 34% 30%, #e8ff7a, #b9e400 60%, #8fb300);
-  box-shadow: inset -2px -3px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: inset -2px -3px 4px var(--alpha-black-25);
   animation: achFall linear forwards;
 }
 
@@ -5913,7 +5920,7 @@ select.prof-field-input { color: var(--text); }
    именами путались друг с другом при поиске по разметке */
 .ar-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85); z-index: 1200;
+  background: var(--alpha-black-85); z-index: 1200;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; transition: all 0.3s ease;
 }
@@ -5941,7 +5948,7 @@ select.prof-field-input { color: var(--text); }
 
 .gi-overlay {
   position: fixed; inset: 0; z-index: 1250;
-  background: rgba(0,0,0,0.72);
+  background: var(--scrim-dialog);
   -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center; padding: 24px;
   opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease;
@@ -5979,8 +5986,8 @@ select.prof-field-input { color: var(--text); }
 .gi-btn:active { opacity: .75; }
 /* Обводки фокуса у кнопки окна не было вовсе: с клавиатуры человек не
    видел, на чём стоит. Та же обводка, что у остальных органов. */
-.gi-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.gi-btn-primary { background: var(--accent); color: #0A0A0A; font-weight: 700; }
+.gi-btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.gi-btn-primary { background: var(--accent); color: var(--accent-on); font-weight: 700; }
 .gi-btn-ghost {
   background: transparent; color: var(--text-sec);
   border: 1px solid var(--border);
@@ -5996,13 +6003,13 @@ select.prof-field-input { color: var(--text); }
 .gi-contact {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 16px; border-radius: 12px;
-  background: rgba(255,255,255,0.05);
+  background: var(--surface-glass);
   border: 1px solid var(--border);
   color: var(--text-primary); text-decoration: none; font-size: 14px;
 }
 .gi-contact-icon { display: flex; width: 18px; height: 18px; flex-shrink: 0; }
 .gi-contact-icon svg { width: 18px; height: 18px; }
-.gi-contact--phone { color: var(--accent-text); border-color: rgba(204,255,0,0.35); }
+.gi-contact--phone { color: var(--accent-text); border-color: var(--alpha-lime-30); }
 .gi-contact--wa    { color: #25D366; border-color: rgba(37,211,102,0.35); }
 .gi-contact--tg    { color: #2AABEE; border-color: rgba(42,171,238,0.35); }
 .gi-contact--ig    { color: #E1306C; border-color: rgba(225,48,108,0.35); }
@@ -6018,7 +6025,7 @@ select.prof-field-input { color: var(--text); }
 }
 .gi-card-avatar--letters {
   display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.08); color: var(--text-sec);
+  background: var(--alpha-white-08); color: var(--text-sec);
   font-size: 14px; font-weight: 600;
 }
 .gi-card-who { flex: 1; min-width: 0; }
@@ -6043,14 +6050,14 @@ select.prof-field-input { color: var(--text); }
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .4px; padding: 8px 12px; border-radius: 999px; flex-shrink: 0;
 }
-.gi-status--pending  { background: rgba(204,255,0,0.12); color: var(--accent-text); }
+.gi-status--pending  { background: var(--alpha-lime-12); color: var(--accent-text); }
 .gi-status--accepted { background: rgba(52,199,89,0.14); color: var(--success); }
 .gi-status--declined { background: rgba(255,69,58,0.14); color: #FF453A; }
 
 /* ---- Кнопка на карточке игрока ---- */
 .pd-invite-btn {
   width: 100%; margin-top: 12px; padding: 16px;
-  background: transparent; border: 1px solid var(--accent);
+  background: transparent; border: 1px solid var(--accent-text);
   border-radius: 999px; color: var(--accent-text);
   font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer;
 }
@@ -6086,7 +6093,7 @@ select.prof-field-input { color: var(--text); }
 .partner-invite-btn {
   margin-left: auto; flex-shrink: 0;
   padding: 8px 16px; border-radius: 999px;
-  background: transparent; border: 1px solid var(--accent);
+  background: transparent; border: 1px solid var(--accent-text);
   color: var(--accent-text); font-size: 12px; font-weight: 600;
   font-family: inherit; cursor: pointer; white-space: nowrap;
 }
@@ -6102,7 +6109,7 @@ select.prof-field-input { color: var(--text); }
   /* Было 13.5px — не ступень, а дробь. */
   color: var(--text-sec); font-size: 14px; font-family: inherit; cursor: pointer;
 }
-.rr-more-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rr-more-btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .rr-more-btn:active { opacity: .7; }
 
 /* Раскрытый складной телефон: места по ширине больше, поэтому карточки
@@ -6128,7 +6135,7 @@ select.prof-field-input { color: var(--text); }
      что ещё можно взять */
   opacity: .45;
 }
-.hb-badge--got { opacity: 1; border-color: rgba(204,255,0,0.35); }
+.hb-badge--got { opacity: 1; border-color: var(--alpha-lime-30); }
 .hb-badge-icon { font-size: 26px; line-height: 1; margin-bottom: 8px; }
 .hb-badge-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .hb-badge--got .hb-badge-name { color: var(--accent-text); }
@@ -6148,7 +6155,7 @@ select.prof-field-input { color: var(--text); }
   display: block; margin: var(--space-3) auto 0;
   min-height: 44px;
   padding: var(--space-3) var(--space-6); border-radius: var(--radius-full);
-  background: transparent; border: 2px solid var(--accent); color: var(--accent-text);
+  background: transparent; border: 2px solid var(--accent-text); color: var(--accent-text);
   font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
 }
 .hb-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
@@ -6249,6 +6256,36 @@ select.prof-field-input { color: var(--text); }
      теме это белый, и когда картинки у блока нет, белые буквы ложились
      бы на белое. Цвета этого блока не зависят от темы — и фон тоже. */
   background-color: var(--on-image-bg);
+}
+
+/* ══ ОБЛОЖКА В СВЕТЛОЙ ТЕМЕ — КАРТОЧКА, А НЕ ПОЛОСА (08.11) ═══════════
+
+   СЛОВО КОСТИ: «герой фото тёмная, что можно будет сделать, она не
+   вписывается». И это ровно та беда, из-за которой светлую тему сняли
+   07.11: «тёмный блок оказывался заплаткой посреди белого экрана».
+   Тогда её сочли неустранимой; на деле неустранима она только пока
+   блок идёт ПОЛОСОЙ ВО ВСЮ ШИРИНУ.
+
+   ЧТО МЕНЯЕМ И ПОЧЕМУ. Тёмный прямоугольник от края до края посреди
+   светлой страницы читается как ДЫРА — у него нет своей формы, он
+   выглядит незагрузившимся. Тот же блок с отступом по бокам и
+   скруглением читается как ОБЛОЖКА: предмет на странице, у которого
+   своя рамка. Так показывают обложку альбома в Apple Music и
+   иллюстрацию карточки в Material 3 — тёмная картинка там норма, пока
+   у неё есть граница.
+
+   ЦЕНА НАЗВАНА: блок становится уже на два отступа (16 слева и справа),
+   то есть фотография видна чуть мельче. Взамен она перестаёт спорить с
+   фоном страницы.
+
+   ЧИСЛА СО ШКАЛЫ, А НЕ ИЗ ВКУСА: отступ 16 — ступень шкалы отступов,
+   радиус `--radius-xl` (24) — тот же, что у крупных карточек продукта.
+   ТЁМНАЯ ТЕМА НЕ ТРОГАЕТСЯ: там блок во всю ширину верен, потому что
+   его фон и фон страницы — одно и то же, и граница ни к чему. */
+[data-theme="light"] .hh {
+  margin: 0 var(--space-4) var(--space-4);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
 }
 .hh-season {
   display: inline-flex; align-items: center; gap: 8px;
@@ -6358,7 +6395,7 @@ select.prof-field-input { color: var(--text); }
 .msa-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--scrim-dialog);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -6440,7 +6477,7 @@ select.prof-field-input { color: var(--text); }
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-elevated, rgba(255,255,255,0.06));
+    background: var(--bg-elevated);
     color: var(--text-muted);
     font-style: normal;
     font-weight: 700;
@@ -6517,7 +6554,7 @@ select.prof-field-input { color: var(--text); }
     font-family: inherit;
 }
 
-.msa-in:focus { outline: none; border-color: var(--accent); }
+.msa-in:focus { outline: none; border-color: var(--accent-text); }
 
 /* ТАЙ-БРЕЙК (29.10). Два поля в одной клетке сета. Клетку прячет
    атрибут `hidden` из js, а решение, когда её показать, живёт в своде
@@ -6581,7 +6618,7 @@ select.prof-field-input { color: var(--text); }
 .msa-send + .msa-send { margin-top: 12px; }
 
 .msa-ghost {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-glass-hover);
     color: var(--text-secondary);
     border: 1px solid var(--border);
 }
@@ -6592,8 +6629,8 @@ select.prof-field-input { color: var(--text); }
 
 /* Полоса «ждёт ответа» над списком матчей */
 .msa-todo {
-    border: 1px solid rgba(204, 255, 0, 0.3);
-    background: rgba(204, 255, 0, 0.04);
+    border: 1px solid var(--alpha-lime-30);
+    background: var(--alpha-lime-06);
     border-radius: 14px;
     padding: 12px 16px;
     margin-bottom: 16px;
@@ -6636,7 +6673,7 @@ select.prof-field-input { color: var(--text); }
     border-radius: 9px;
     border: 0;
     background: var(--accent);
-    color: #0a0a0a;
+    color: var(--accent-on);
     font-weight: 700;
     font-size: 0.78rem;
     font-family: inherit;
@@ -6671,8 +6708,8 @@ select.prof-field-input { color: var(--text); }
 /* Свой матч в сетке приложения: выделен и с кнопкой счёта — так же, как
    в сетке на сайте. Раньше сетка в приложении была картинкой без действий */
 .mob-match-mine {
-    border: 1px solid var(--accent);
-    background: rgba(204, 255, 0, 0.04);
+    border: 1px solid var(--accent-text);
+    background: var(--alpha-lime-06);
 }
 
 .mob-match-act {
@@ -6683,7 +6720,7 @@ select.prof-field-input { color: var(--text); }
     border: 0;
     border-radius: 10px;
     background: var(--accent);
-    color: #0a0a0a;
+    color: var(--accent-on);
     font-weight: 700;
     font-size: 0.8rem;
     font-family: inherit;
@@ -6741,14 +6778,14 @@ select.prof-field-input { color: var(--text); }
   padding: 12px 12px;
   border-radius: 12px;
   background: var(--bg-card);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-text);
   font-size: 14px;
   color: var(--text-primary);
   box-shadow: 0 8px 24px rgba(0,0,0,0.45);
 }
 .app-update-bar span { flex: 1; }
 .app-update-bar a {
-  color: #0A0A0A; background: var(--accent);
+  color: var(--accent-on); background: var(--accent);
   padding: 8px 12px; border-radius: 999px;
   font-weight: 700; text-decoration: none; white-space: nowrap;
 }
@@ -6779,7 +6816,7 @@ select.prof-field-input { color: var(--text); }
 .mob-reg-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--scrim-dialog);
   backdrop-filter: blur(4px);
   z-index: 3000;
   display: flex;
@@ -6921,7 +6958,7 @@ select.prof-field-input { color: var(--text); }
 /* Обводка внутрь: кнопка стоит вплотную к краю поля, и наружная
    обводка срезалась бы его рамкой. */
 .pw-eye:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--accent-text);
     outline-offset: -2px;
     border-radius: var(--radius-sm);
 }
@@ -6982,7 +7019,7 @@ select.prof-field-input { color: var(--text); }
 .push-prime-yes {
   background: var(--accent);
   border: none;
-  color: var(--neutral-black);
+  color: var(--accent-on);
   margin-bottom: 8px;
 }
 .push-prime-no {
@@ -6992,7 +7029,7 @@ select.prof-field-input { color: var(--text); }
 }
 .push-prime-yes:focus-visible,
 .push-prime-no:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -7096,7 +7133,7 @@ select.prof-field-input { color: var(--text); }
 .prof-pass-rule.is-ok { color: var(--accent-text); }
 
 .kslt-skladka-shapka:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -7139,7 +7176,7 @@ select.prof-field-input { color: var(--text); }
   cursor: pointer;
 }
 .pd-safety-btn:active { opacity: .75; }
-.pd-safety-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pd-safety-btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .pd-safety-btn--block { color: var(--danger); border-color: var(--danger-border); }
 
 /* --- причины жалобы ---
@@ -7162,9 +7199,9 @@ select.prof-field-input { color: var(--text); }
   display: flex; align-items: center; justify-content: center;
   font-size: var(--fs-xs); color: var(--bg);
 }
-.pd-rep-reason:has(input:checked) { border-color: var(--accent); }
+.pd-rep-reason:has(input:checked) { border-color: var(--accent-text); }
 .pd-rep-reason:has(input:checked) .pd-rep-tick { background: var(--accent); border-color: var(--accent); }
-.pd-rep-reason:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pd-rep-reason:has(input:focus-visible) { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .pd-rep-label { font-size: var(--fs-base); line-height: var(--lh-snug); }
 
 /* --- необязательная заметка. СЛОВО «НЕОБЯЗАТЕЛЬНО» СТОИТ В ПОДПИСИ,
@@ -7180,10 +7217,10 @@ select.prof-field-input { color: var(--text); }
   border-radius: var(--radius-md); color: var(--text);
   font-family: inherit; font-size: var(--fs-base); resize: vertical;
 }
-.pd-rep-note:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pd-rep-note:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .pd-rep-send {
   width: 100%; min-height: 44px; margin-top: 16px; padding: 16px;
-  background: var(--accent); color: #0A0A0A; border: none;
+  background: var(--accent); color: var(--accent-on); border: none;
   border-radius: var(--radius-md);
   font-family: inherit; font-size: var(--fs-base); font-weight: 700; cursor: pointer;
 }
@@ -7246,7 +7283,7 @@ select.prof-field-input { color: var(--text); }
   font-family: inherit; font-size: var(--fs-sm); cursor: pointer;
 }
 .prof-blk-off:disabled { opacity: .5; cursor: progress; }
-.prof-blk-off:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.prof-blk-off:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .prof-blk-note {
   margin: 16px 0 0; font-size: var(--fs-xs); line-height: var(--lh-normal);
   color: var(--text-muted);
@@ -7389,14 +7426,14 @@ select.prof-field-input { color: var(--text); }
 
 .db-notif-slider {
   width: 40px; height: 24px; border-radius: 11px;
-  background: var(--border); position: relative;
+  background: var(--switch-track); position: relative;
   transition: background 0.2s; flex-shrink: 0;
 }
 
 .db-notif-slider::after {
   content: ''; position: absolute; top: 2px; left: 2px;
   width: 18px; height: 18px; border-radius: 50%;
-  background: var(--neutral-white); transition: transform 0.2s;
+  background: var(--bg-card); transition: transform 0.2s;
 }
 
 .db-notif-toggle input:checked + .db-notif-slider { background: var(--accent); }
@@ -7435,3 +7472,41 @@ select.prof-field-input { color: var(--text); }
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ЛОГОТИП В СВЕТЛОЙ ТЕМЕ (08.11).
+
+   КРАСКА, СПРЯТАННАЯ В КАРТИНКЕ, ТЕМЕ НЕ ПОДЧИНЯЕТСЯ. Логотип — это
+   `.svg` с зашитыми `fill="white"` и `fill="#CCFF00"`, и ни один прибор,
+   читающий css, его не видел: приборы куска прочитали 98 красок в
+   одежде и НИ ОДНОЙ в картинке. Поймали ГЛАЗА на первом же снимке —
+   белые буквы «КСЛТ» на светлой шапке.
+
+   ПОЧЕМУ ДВА ФАЙЛА, А НЕ ОДИН. Логотип — знак бренда, и у знака по
+   правилам обычно две редакции: для тёмного фона и для светлого. Это
+   ОДНО понятие в двух представлениях, а не два понятия: светлая
+   редакция делается из тёмной заменой двух красок на роли темы
+   (чернила и тёмный лайм #446000 — тот же, что `--accent-text`), и
+   расхождение между ними ловится сторожем.
+
+   ПОЧЕМУ `content`, А НЕ ВТОРОЙ `<img>`. Второй тег означал бы, что
+   диктор читает логотип дважды, а Tab останавливается на невидимом.
+   `content` подменяет картинку у того же тега: один узел, одна
+   подпись, одна точка остановки. */
+[data-theme="light"] .header-logo-img,
+[data-theme="light"] .auth-logo-img,
+[data-theme="light"] .menu-footer-logo-img {
+  content: url("../img/kslt-logo-light.svg");
+}
+
+/* СВЕЧЕНИЕ ЛОГОТИПА СНИМАЕТСЯ В СВЕТЛОЙ ТЕМЕ. Оно лаймовое и задумано
+   как ореол на тёмном; на светлом фоне тот же приём читается грязным
+   пятном вокруг знака — видно на первом же снимке шапки.
+   ТЕНЬ И СВЕЧЕНИЕ — СВОИ В КАЖДОЙ ТЕМЕ, а не одно на обе. */
+[data-theme="light"] .auth-logo-img,
+[data-theme="light"] .header-logo-img,
+[data-theme="light"] .menu-footer-logo-img { filter: none; }
+
+/* СПЛЭШ ТЕМЫ НЕ ЗНАЕТ НАРОЧНО: он показывается ДО того, как дом успеет
+   прочитать выбор, и обязан быть одним и тем же — иначе первый кадр
+   мигнёт. Логотип там остаётся тёмной редакции. */
