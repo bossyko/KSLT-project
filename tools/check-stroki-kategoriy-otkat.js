@@ -34,13 +34,19 @@ const ОТКАТЫ = [
     { имя: 'правило про friendly повторено вторым местом',
       ждём: '`friendly` выбрасывается в кабинете одним местом',
       файл: КАБИНЕТ,
-      было: "        var мои = (pcRes.data || []).filter(function(r) {\n            return r.category_id !== 'friendly';\n        });",
-      станет: "        var мои = (pcRes.data || []).filter(function(r) {\n            return r.category_id !== 'friendly';\n        }).filter(function(r) {\n            return r.category_id !== 'friendly';\n        });" },
+      /* ОТКАТ ПЕРЕЕХАЛ ВСЛЕД ЗА ПОНЯТИЕМ (08.11). Он целился в фильтр с
+         голым литералом; куском «Open Friendly» 07.11 признак стал
+         спрашиваться у дома, литерал остался ЗАПАСНЫМ путём, и якорь
+         исчез. Вторая копия заводится тем же приёмом, но по живому коду. */
+      было: "        var мои = (pcRes.data || []).filter(function(r) {\n            return window.KSLT_RULES ? window.KSLT_RULES.рейтинговая(r.category_id)\n                                     : r.category_id !== 'friendly';\n        });",
+      станет: "        var мои = (pcRes.data || []).filter(function(r) {\n            return window.KSLT_RULES ? window.KSLT_RULES.рейтинговая(r.category_id)\n                                     : r.category_id !== 'friendly';\n        }).filter(function(r) {\n            return r.category_id !== 'friendly';\n        });" },
 
     { имя: 'справочник снова читается одним русским именем',
       ждём: 'справочник категорий кабинет читает со всеми тремя именами',
       файл: КАБИНЕТ,
-      было: "        var спр = await client.from('categories').select('id, name, name_en, name_kg');",
+      /* В запросе прибавилось `is_rating` — тем же куском «Open Friendly»:
+         признак рейтинговости стал свойством данных. */
+      было: "        var спр = await client.from('categories').select('id, name, name_en, name_kg, is_rating');",
       станет: "        var спр = await client.from('categories').select('id, name');" },
 
     { имя: 'имя берётся мимо языка',

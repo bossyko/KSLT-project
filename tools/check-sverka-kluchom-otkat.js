@@ -42,9 +42,14 @@ const ОТКАТЫ = [
           "    const isServiceRole = authHeader.includes(serviceKey)"],
      'доступ нигде не сверяется вхождением'],
 
+    /* ОТКАТ ПЕРЕЕХАЛ ВСЛЕД ЗА КОДОМ (08.11). Он целился в `if (!(...))`,
+       а проверка с тех пор вынесена в отдельную переменную
+       `isServiceRole` — ровно как в соседней функции. Якорь стал
+       встречаться НОЛЬ раз, и прувер молчал, пока прогон не сделали
+       целиком. БЕГУНОК, КОТОРЫЙ НЕ ЗАПУСКАЮТ, МОЛЧА ГНИЁТ. */
     ['вернуть половинчатую защиту в news-fetch (как было до 27.10)',
-     [NF, "  if (!(serviceKey !== '' &&\n          (authHeader === 'Bearer ' + serviceKey || authHeader === serviceKey))) {",
-          "  if (!serviceKey || !authHeader.includes(serviceKey)) {"],
+     [NF, "  const isServiceRole = serviceKey !== '' &&\n          (authHeader === 'Bearer ' + serviceKey || authHeader === serviceKey)",
+          "  const isServiceRole = authHeader.includes(serviceKey)"],
      'доступ нигде не сверяется вхождением'],
 
     /* Равенство остаётся, но отказ на пустом ключе снимается: падает

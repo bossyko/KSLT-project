@@ -62,7 +62,13 @@ const ФАЙЛЫ = [];
     fs.readdirSync(path.join(КОРЕНЬ, д), { withFileTypes: true }).forEach(э => {
         const п = д + '/' + э.name;
         if (э.isDirectory()) {
-            if (/node_modules|\.git|dist|test-results|tests|^build$/.test(э.name)) return;
+            /* ПАПКА СБОРКИ — НЕ ИСХОДНИК (08.11). `mobile/ios/App/App/public`
+               появляется от `npx cap sync`: туда КОПИРУЕТСЯ `mobile/www`, и в
+               гите её нет вовсе (`mobile/ios/.gitignore`, 0 файлов). Сторож
+               обходит ДИСК, а не репозиторий, и находил в копии то, что в
+               исходнике давно починено. ПРИБОР НЕ ДОЛЖЕН ЧИТАТЬ ТО, ЧЕГО НЕТ
+               В РЕПОЗИТОРИИ: иначе он красен от собственной сборки. */
+            if (/node_modules|\.git|dist|test-results|tests|^build$|^public$/.test(э.name)) return;
             /* ВЫХОД СБОРЩИКА ЛЕЖИТ НЕ ТОЛЬКО В `build`: `npx cap sync`
                кладёт копию `mobile/www` в ИСХОДНИКИ Android-проекта —
                `android/app/src/main/assets/public`. Сторож знал одно
@@ -301,7 +307,7 @@ const ССЫЛКИ_НА_УДАЛЁННЫЙ = [];
     fs.readdirSync(path.join(КОРЕНЬ, д), { withFileTypes: true }).forEach(э => {
         const п = д + '/' + э.name;
         if (э.isDirectory()) {
-            if (/node_modules|\.git|dist|test-results|^build$/.test(э.name)) return;
+            if (/node_modules|\.git|dist|test-results|^build$|^public$/.test(э.name)) return;
             if (п.indexOf('mobile/android/app/build') !== -1) return;
             if (п.indexOf('android/app/src/main/assets') !== -1) return;
             /* ПРИБОРЫ НЕ ПРОДУКТ: пруверы НАРОЧНО подставляют прежний
