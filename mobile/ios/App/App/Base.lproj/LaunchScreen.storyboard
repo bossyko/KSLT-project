@@ -15,7 +15,8 @@
                     <imageView key="view" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Splash" id="snD-IY-ifK">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <!-- ФОН ЗАПУСКА РАВЕН ФОНУ ПЕРВОГО ЭКРАНА (08.11). Стоял systemBackgroundColor: белый в светлом режиме системы, при том что первый экран приложения чёрный (#0A0A0A) всегда. Человек видел белую вспышку перед чёрным — Apple про это прямо: "people may experience an unpleasant flash between the launch screen and your first screen". Тот же #0A0A0A стоит у Android (res/drawable/splash.xml) и в capacitor.config.ts. -->
+                        <color key="backgroundColor" red="0.0392156862745098" green="0.0392156862745098" blue="0.0392156862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </imageView>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>

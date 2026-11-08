@@ -756,6 +756,13 @@
 <script src="js/kslt-vozvrat.js?v=2"></script>
 <script src="js/kslt-kategorii.js?v=2"></script>
 <script src="js/kslt-setka.js?v=8"></script>
+<!-- ДОМ ВРЕМЕНИ ПОДКЛЮЧЁН РАНЬШЕ ТЕХ, КТО ЕГО ЗОВЁТ (08.11).
+     Его не было в приложении ВОВСЕ, а `tournament-status.js` звал
+     `KSLT_VREMYA.сегодня()` — ветка `вычислить` упала бы при первом же
+     зове. Не стреляла она только потому, что приложение зовёт у этого
+     дома лишь `подпись`: КОПИЯ ПРИЕХАЛА ЦЕЛИКОМ, А ЕЁ ОПОРА — НЕТ.
+     Он же считает день по Бишкеку для показа спонсора раз в сутки. -->
+<script src="js/kslt-vremya.js?v=1"></script>
 <script src="js/tournament-status.js?v=1"></script>
 <script src="js/kslt-video.js?v=2"></script>
 <script src="js/kslt-ekranirovanie.js?v=1"></script>
@@ -806,6 +813,6 @@
 <script src="js/badge-celebration.js?v=2"></script>
 <script src="js/push.js?v=3"></script>
 <script src="js/kslt-okno.js?v=5"></script>
-<script src="js/app.js?v=15"></script>
+<script src="js/app.js?v=16"></script>
 </body>
 </html>
