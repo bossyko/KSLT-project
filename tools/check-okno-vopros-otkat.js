@@ -32,7 +32,7 @@ const РАЗМЕТКА = 'mobile/www/index.html';
 const КНОПКА = '  border: none; border-radius: 999px; padding: 12px 24px;\n' +
                '  min-height: 44px;\n' +
                '  display: inline-flex; align-items: center; justify-content: center;';
-const ФОКУС = '.gi-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }';
+const ФОКУС = '.gi-btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }';
 const УБОРКА = "if (старое) { старое.classList.remove('open'); старое.remove(); }";
 const КОРОБКА = '\'<div class="gi-box">\' +';
 const ТЕГ = (имя) => {

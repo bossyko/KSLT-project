@@ -25,8 +25,15 @@
  *
  * Запуск: node tools/razovye/217-chto-slomaetsya.js <корень> [#фон]
  */
-const fs = require('fs');
-const path = require('path');
+/* МОДУЛЬ, А НЕ CommonJS: формула WCAG берётся из `tools/kontrast.mjs`, а
+   верхнеуровневый `await` в .js-приборе невозможен — поэтому .mjs и
+   статический import. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. */
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { контраст } from '../kontrast.mjs';
+/* В МОДУЛЕ НЕТ __dirname — он выводится из своего URL. */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const корень = process.argv[2] || path.join(__dirname, '..', '..');
 const ФОН = process.argv[3] || '#FFFFFF';
 
@@ -58,12 +65,12 @@ const наложить = (ц, ф) => ({
     g: ц.g * ц.a + ф.g * (1 - ц.a),
     b: ц.b * ц.a + ф.b * (1 - ц.a), a: 1 });
 
-const лин = в => { const s = Math.max(0, Math.min(255, в)) / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };
-const яркость = ц => 0.2126 * лин(ц.r) + 0.7152 * лин(ц.g) + 0.0722 * лин(ц.b);
-const контраст = (а, б) => {
-    const я1 = яркость(а), я2 = яркость(б);
-    return (Math.max(я1, я2) + 0.05) / (Math.min(я1, я2) + 0.05); };
+/* ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: формула WCAG живёт в `tools/kontrast.mjs`
+   и больше нигде. Своя копия здесь подняла счёт копий с 43 до 45 и уронила
+   `check-odin-schyot-kontrasta` — ХРАПОВИК ИДЁТ ТОЛЬКО ВНИЗ, и потолок не
+   поднимается под новую копию. Модуль ждёт краску массивом [r,g,b,a],
+   прибор держит её объектом — переходник ниже, формулы здесь нет. */
+const вМассив = ц => [ц.r, ц.g, ц.b, ц.a === undefined ? 1 : ц.a];
 
 const фон = разобрать(ФОН);
 const ЦВЕТ = /#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)/g;
@@ -104,7 +111,7 @@ const БРЕНД = /telegram|apple|google|whatsapp|instagram|\bwa\b|\big\b|\btg\
         if (!р) continue;
         const св = свойствоДля(с, м.index);
         const виден = наложить(р, фон);
-        const к = контраст(виден, фон);
+        const к = контраст(вМассив(виден), вМассив(фон));
         const з = { строка: и + 1, цвет: ц, сел: s, св: св, к: к.toFixed(2) };
         if (БРЕНД.test(s)) { бренды.push(з); continue; }
         if (св === 'color') { if (к < 4.5) буквы.push(з); else целые.push(з); continue; }

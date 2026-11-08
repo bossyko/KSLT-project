@@ -100,14 +100,14 @@ const ОТКАТЫ = [
      'цель нажатия: ссылка «Все»'],
 
     ['второй призыв снова залит акцентом', C,
-     '  background: transparent; border: 2px solid var(--accent); color: var(--accent-text);',
+     '  background: transparent; border: 2px solid var(--accent-text); color: var(--accent-text);',
      '  background: var(--accent); color: #0A0A0A;',
-     'второй призыв не залит акцентом'],
+     'второй призыв не залит, а обведён краской семейства'],
 
     ['главное действие потеряло заливку', C,
-     '  background: var(--accent); color: #0A0A0A; font-size: 14px; font-weight: 800;',
+     '  background: var(--on-image-accent); color: #0A0A0A; font-size: 14px; font-weight: 800;',
      '  background: transparent; color: var(--accent-text); font-size: 14px; font-weight: 800;',
-     'главное действие экрана залито акцентом']
+     'главное действие экрана залито краской семейства акцента']
 ];
 
 let плохо = 0;

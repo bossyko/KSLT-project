@@ -248,7 +248,10 @@ const дом = безСлов(ДОМ);
 правило(
     'у вкладок и таблеток кругов своя обводка фокуса',
     /\.td-tab:focus \{ outline: none; \}/.test(чит('mobile/www/css/app.css')) &&
-    /\.td-tab:focus-visible \{[\s\S]{0,120}?outline: 2px solid var\(--accent\)/.test(чит('mobile/www/css/app.css')),
+    /* ЗАМОРАЖИВАЕТСЯ ОТНОШЕНИЕ, А НЕ ИМЯ КРАСКИ: 08.11 обводки фокуса
+       переведены на `--accent-text`, потому что лайм на белом даёт 1.18.
+       Держим «обводка СВОЯ, краской семейства акцента», а не точное имя. */
+    /\.td-tab:focus-visible \{[\s\S]{0,120}?outline: 2px solid var\(--(?:accent|accent-text|accent-dim|on-image-accent)\)/.test(чит('mobile/www/css/app.css')),
     'Браузер рисовал свою синюю — она не из нашей палитры и оставалась\n' +
     'даже после нажатия мышью. Костя увидел это глазами.');
 

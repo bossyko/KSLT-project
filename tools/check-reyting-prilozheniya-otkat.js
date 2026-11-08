@@ -91,7 +91,7 @@ const ОТКАТЫ = [
      'цель нажатия: выпадашка не ниже 44'],
 
     ['видимый фокус у выпадашки снят', C,
-     '.rf-select:focus-visible {\n  outline: 2px solid var(--accent);\n  outline-offset: 2px;\n}\n',
+     '.rf-select:focus-visible {\n  outline: 2px solid var(--accent-text);\n  outline-offset: 2px;\n}\n',
      '',
      'видимый фокус: выпадашка'],
 

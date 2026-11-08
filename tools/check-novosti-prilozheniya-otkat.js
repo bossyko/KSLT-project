@@ -101,8 +101,8 @@ const ОТКАТЫ = [
      'свайп остался'],
 
     ['цель нажатия кнопок мимо шкалы', C,
-     '  width: 44px; height: 44px;\n  display: flex; align-items: center; justify-content: center;\n  border: 0;\n  border-radius: 50%;\n  background: rgba(0,0,0,0.45);',
-     '  width: 40px; height: 40px;\n  display: flex; align-items: center; justify-content: center;\n  border: 0;\n  border-radius: 50%;\n  background: rgba(0,0,0,0.45);',
+     '  width: 44px; height: 44px;\n  display: flex; align-items: center; justify-content: center;\n  border: 0;\n  border-radius: 50%;\n  background: var(--on-image-fill);',
+     '  width: 40px; height: 40px;\n  display: flex; align-items: center; justify-content: center;\n  border: 0;\n  border-radius: 50%;\n  background: var(--on-image-fill);',
      'у кнопок листания цель нажатия со шкалы'],
 
     ['посев снова после имени', S,
