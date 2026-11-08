@@ -90,55 +90,16 @@ async function показатьЭкран(page, имя) {
 
 /* Замер контраста живёт одной строкой-функцией: её текст уезжает в
    браузер, и ссылки на внешние имена там не работают. */
-const ЗАМЕР = `(() => {
-  const лин = в => { const s = в/255; return s <= 0.03928 ? s/12.92 : Math.pow((s+0.055)/1.055, 2.4); };
-  const ярк = c => 0.2126*лин(c[0]) + 0.7152*лин(c[1]) + 0.0722*лин(c[2]);
-  const кон = (a,b) => { const x=ярк(a), y=ярк(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); };
-  const раз = s => { const м = s.match(/[\\d.]+/g); return м ? м.map(Number) : null; };
-  const нал = (c,a,ф) => [c[0]*a+ф[0]*(1-a), c[1]*a+ф[1]*(1-a), c[2]*a+ф[2]*(1-a)];
-  function фонЗа(э) {
-    let у = э;
-    while (у) {
-      const c = getComputedStyle(у);
-      const ч = раз(c.backgroundColor);
-      if (ч && (ч.length < 4 || ч[3] > 0.95)) return [ч[0],ч[1],ч[2]];
-      if (ч && ч.length === 4 && ч[3] > 0) {
-        const ниже = фонЗа(у.parentElement) || [255,255,255];
-        return нал([ч[0],ч[1],ч[2]], ч[3], ниже);
-      }
-      /* Картинка под текстом — контраст по ней числом не считается. */
-      if (c.backgroundImage && c.backgroundImage !== 'none') return null;
-      у = у.parentElement;
-    }
-    return [255,255,255];
-  }
-  const беды = [];
-  document.querySelectorAll('*').forEach(э => {
-    const c = getComputedStyle(э);
-    if (c.display === 'none' || c.visibility === 'hidden' || +c.opacity === 0) return;
-    const r = э.getBoundingClientRect();
-    if (r.width < 4 || r.height < 4) return;
-    const свой = [...э.childNodes].some(н => н.nodeType === 3 && н.textContent.trim().length > 1);
-    if (!свой) return;
-    const ч = раз(c.color);
-    if (!ч) return;
-    const ф = фонЗа(э);
-    if (!ф) return;
-    const цвет = ч.length === 4 && ч[3] < 1 ? нал([ч[0],ч[1],ч[2]], ч[3], ф) : [ч[0],ч[1],ч[2]];
-    const к = кон(цвет, ф);
-    const кегль = parseFloat(c.fontSize);
-    const жирн = parseInt(c.fontWeight, 10) >= 700;
-    const крупн = кегль >= 24 || (кегль >= 18.66 && жирн);
-    const порог = крупн ? 3 : 4.5;
-    if (к < порог) беды.push({
-      узел: (э.tagName.toLowerCase() + (typeof э.className === 'string' && э.className
-             ? '.' + э.className.trim().split(/\\s+/).slice(0,2).join('.') : '')).slice(0,46),
-      текст: (э.textContent || '').trim().slice(0, 24),
-      к: +к.toFixed(2), порог, кегль,
-    });
-  });
-  return беды;
-})()`;
+/* ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: счёт контраста живёт в
+ * `tools/kontrast.mjs` и больше нигде. Своя копия формулы здесь подняла
+ * число копий с 43 до 45 и уронила `check-odin-schyot-kontrasta`:
+ * ХРАПОВИК ИДЁТ ТОЛЬКО ВНИЗ, потолок под новую копию не поднимается.
+ * Поля приводятся к тем, которыми печатается список ниже. */
+const ЗАМЕР = async page => (await page.evaluate(
+    async () => (await import('/tools/kontrast.mjs')).замер(99)
+)).ниже.map(о => ({
+    узел: о.путь, текст: о.текст, к: о.контраст, порог: о.порог, кегль: о.кегль,
+}));
 
 const ЭКРАНЫ = ['screenHome', 'screenTournaments', 'screenRating', 'screenNews', 'screenProfile'];
 
@@ -154,7 +115,7 @@ test.describe('светлая тема приложения', () => {
             const всеБеды = [];
             for (const экран of ЭКРАНЫ) {
                 await показатьЭкран(page, экран);
-                const беды = await page.evaluate(ЗАМЕР);
+                const беды = await ЗАМЕР(page);
                 беды.forEach(б => всеБеды.push({ ...б, экран: экран.replace('screen', '') }));
             }
 
@@ -265,25 +226,13 @@ test.describe('светлая тема приложения', () => {
        1.18: человек с клавиатурой не знал бы, где стоит. */
     test('обводка фокуса видна в светлой теме', async ({ page }) => {
         await открыть(page, 'light');
-        const к = await page.evaluate(() => {
-            const лин = в => { const s = в/255; return s <= 0.03928 ? s/12.92 : Math.pow((s+0.055)/1.055, 2.4); };
-            const ярк = c => 0.2126*лин(c[0]) + 0.7152*лин(c[1]) + 0.0722*лин(c[2]);
-            const раз = s => (s.match(/[\d.]+/g) || []).map(Number);
-            const обводка = raw => raw.trim();
+        /* ТА ЖЕ ЕДИНСТВЕННАЯ ФОРМУЛА: `раз` понимает и #hex, и rgb(),
+           `контраст` считает. Своей копии у пробы нет. */
+        const к = await page.evaluate(async () => {
+            const м = await import('/tools/kontrast.mjs');
             const ст = getComputedStyle(document.documentElement);
-            const текст = раз(ст.getPropertyValue('--accent-text').trim().startsWith('#')
-                ? (() => { const h = ст.getPropertyValue('--accent-text').trim().slice(1);
-                           return `rgb(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)})`;
-                         })()
-                : ст.getPropertyValue('--accent-text'));
-            const фон = раз(ст.getPropertyValue('--bg-card').trim().startsWith('#')
-                ? (() => { const h = ст.getPropertyValue('--bg-card').trim().slice(1);
-                           return `rgb(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)})`;
-                         })()
-                : ст.getPropertyValue('--bg-card'));
-            void обводка;
-            const a = ярк(текст), b = ярк(фон);
-            return (Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
+            const краска = имя => м.раз(ст.getPropertyValue(имя).trim());
+            return м.контраст(краска('--accent-text'), краска('--bg-card'));
         });
         /* Планка нетекстового элемента — 3; наш запас посчитан на 7. */
         expect(к, 'акцентный цвет в светлой теме не виден на карточке')
