@@ -437,8 +437,8 @@
           var ведёт = (n.action_type === 'match_score' && n.action_id) ? n.action_id : '';
           html += '<div class="notif-item' + (n.is_read ? '' : ' unread') +
                   (ведёт ? ' notif-item-live" data-match="' + ведёт : '') + '">' +
-            '<div class="notif-item-type">' + (n.type || 'system') + '</div>' +
-            '<div class="notif-item-text">' + (n.message || n.title || '') + '</div>' +
+            '<div class="notif-item-type">' + KSLT_экранировать(n.type || 'system') + '</div>' +
+            '<div class="notif-item-text">' + KSLT_экранировать(n.message || n.title || '') + '</div>' +
             '<div class="notif-item-time">' + timeStr + '</div>' +
           '</div>';
         });
@@ -892,11 +892,11 @@
     var полоса = document.createElement('div');
     полоса.id = 'appUpdateBar';
     полоса.className = 'app-update-bar';
-    var текст = I18N.t('app.updateReady').replace('{v}', сборка.version_name);
+    var текст = I18N.t('app.updateReady').replace('{v}', KSLT_экранировать(сборка.version_name));
     полоса.innerHTML =
       '<span>' + текст + '</span>' +
       (сборка.url
-        ? '<a href="' + сборка.url + '" target="_blank" rel="noopener">' + I18N.t('app.updateGet') + '</a>'
+        ? '<a href="' + KSLT_экранировать(сборка.url) + '" target="_blank" rel="noopener">' + I18N.t('app.updateGet') + '</a>'
         : '') +
       '<button type="button" aria-label="' + I18N.t('common.close') + '">&times;</button>';
     document.body.appendChild(полоса);

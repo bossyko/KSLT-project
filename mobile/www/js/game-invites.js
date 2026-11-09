@@ -22,11 +22,14 @@
   function I(key) { return window.KSLT_I18N ? window.KSLT_I18N.t(key) : key; }
 
   function esc(s) {
-    if (s === null || s === undefined) return '';
-    var d = document.createElement('div');
-    d.textContent = String(s);
-    return d.innerHTML;
-  }
+      /* ЭКРАНИРОВАНИЕ ОДНО НА ВЕСЬ ПРОДУКТ. Здесь стояло своё тело на
+         `textContent`/`innerHTML`, и оно НЕ ЭКРАНИРУЕТ КАВЫЧКИ: проверено
+         работой 08.11 — имя игрока `Костя" onmouseover="alert(1)` давало
+         кнопку с чужим обработчиком, потому что значения атрибутов здесь
+         собираются строками. Ещё `if (!s)` съедал ноль: счёт «0» пропадал.
+         Имя `esc` оставлено: одна правка ТЕЛА чинит все зовы файла. */
+      return KSLT_экранировать(s);
+    }
 
   function token() {
     return supabaseClient.auth.getSession().then(function (s) {

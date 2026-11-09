@@ -151,7 +151,7 @@
     var chName = b.challenger ? b.challenger.name : I18N.t('home.player') + ' 1';
     var opName = b.opponent ? b.opponent.name : I18N.t('home.player') + ' 2';
     var imgStyle = b.banner_url
-      ? 'background-image:url(' + b.banner_url + ');background-size:cover;background-position:center'
+      ? 'background-image:url(' + KSLT_экранировать(b.banner_url) + ');background-size:cover;background-position:center'
       : 'background:linear-gradient(135deg,#2d1b4e,#1a0a2e)';
 
     return '<div class="tournament-card-v' + (отменён ? ' battle-card-cancelled' : '') +
@@ -2236,11 +2236,14 @@
   }
 
   function esc(s) {
-    if (!s) return '';
-    var d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
+      /* ЭКРАНИРОВАНИЕ ОДНО НА ВЕСЬ ПРОДУКТ. Здесь стояло своё тело на
+         `textContent`/`innerHTML`, и оно НЕ ЭКРАНИРУЕТ КАВЫЧКИ: проверено
+         работой 08.11 — имя игрока `Костя" onmouseover="alert(1)` давало
+         кнопку с чужим обработчиком, потому что значения атрибутов здесь
+         собираются строками. Ещё `if (!s)` съедал ноль: счёт «0» пропадал.
+         Имя `esc` оставлено: одна правка ТЕЛА чинит все зовы файла. */
+      return KSLT_экранировать(s);
+    }
 
   function infoRow(l, v) {
     return '<div class="live-full-info-row"><span class="lfi-label">' + esc(l) + '</span><span class="lfi-val">' + esc(v) + '</span></div>';
