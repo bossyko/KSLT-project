@@ -83,7 +83,7 @@
       var картинка = n.image || (window.KSLT_NEWS_COVERS
         ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
       var bgStyle = картинка
-        ? 'background-image:url(' + картинка + ');background-size:cover;background-position:center' : '';
+        ? 'background-image:url(' + esc(картинка) + ');background-size:cover;background-position:center' : '';
       html += '<div class="news-list-item" data-news-id="' + n.id + '"' +
         ' role="listitem" tabindex="0" aria-label="' + esc(n.title || '') + '">' +
         '<div class="news-list-img' + (своя ? ' news-own-cover' : '') + '"' +

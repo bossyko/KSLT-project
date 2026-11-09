@@ -19,7 +19,14 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-razmetka-'));
    песке столбцов 190 вместо 258 — восемь названных мест становятся мёртвыми
    именами, и база прувера падает на ЧИСТОЙ копии. ПЕСОК ОБЯЗАН НЕСТИ ВСЁ,
    ЧТО ЧИТАЕТ ПРИЗНАК. */
+/* ПЕСОЧНИЦА ПОВТОРЯЕТ ТО, ЧТО ЧИТАЕТ СТОРОЖ. С 09.11 он обходит ДВА
+   продукта, и без `mobile` прувер падал на отсутствующей папке — не
+   доказав ничего. КОПИЯ, НЕПОЛНАЯ ОТНОСИТЕЛЬНО ПРОВЕРЯЕМОГО, НИЧЕГО НЕ
+   ДОКАЗЫВАЕТ. Берём только `mobile/www/js`: остальное приложение —
+   картинки и сборка, они сторожу не нужны и копируются долго. */
 ['js', 'tools', 'supabase', 'sql'].forEach(д => fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
+fs.cpSync(path.join(КОРЕНЬ, 'mobile', 'www', 'js'),
+          path.join(песок, 'mobile', 'www', 'js'), { recursive: true });
 fs.cpSync(path.join(КОРЕНЬ, 'node_modules', 'acorn'),
           path.join(песок, 'node_modules', 'acorn'), { recursive: true });
 

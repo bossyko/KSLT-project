@@ -404,7 +404,7 @@
       } else {
         pt = pNum === 1 ? (m.points_p1 || '0') : (m.points_p2 || '0');
       }
-      setsHtml += '<span class="sb-set-val sb-points">' + pt + '</span>';
+      setsHtml += '<span class="sb-set-val sb-points">' + esc(pt) + '</span>';
     }
 
     var avatarHtml = '';
@@ -442,7 +442,7 @@
     if (player && player.photo) {
       return '<img class="live-list-av" src="' + esc(player.photo) + '" alt="' + esc(name) + '" style="object-fit:cover">';
     }
-    return '<div class="live-list-av">' + initials(name) + '</div>';
+    return '<div class="live-list-av">' + esc(initials(name)) + '</div>';
   }
 
   function initials(name) {

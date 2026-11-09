@@ -209,7 +209,7 @@
     html += '<div class="pd-guest-avatar-wrap">';
     html += photoUrl
       ? '<img class="pd-guest-avatar" src="' + esc(photoUrl) + '" alt="">'
-      : '<div class="pd-guest-avatar-fallback">' + initials(p.name) + '</div>';
+      : '<div class="pd-guest-avatar-fallback">' + esc(initials(p.name)) + '</div>';
     html += '</div>';
     html += '<h2 class="pd-guest-name">' + esc(p.name) + '</h2>';
     html += '<div class="pd-guest-cat">' + esc(_categoryLabel) + ' · #' + _rank + '</div>';
@@ -252,7 +252,7 @@
     html += '<div class="pd-avatar-wrap">';
     html += p.photo
       ? '<img class="pd-avatar" src="' + esc(p.photo) + '" alt="">'
-      : '<div class="pd-avatar-fallback">' + initials(p.name) + '</div>';
+      : '<div class="pd-avatar-fallback">' + esc(initials(p.name)) + '</div>';
     html += '</div>';
     html += '<h2 class="pd-name">' + esc(p.name) + '</h2>';
     html += '<div class="pd-meta">';
@@ -739,7 +739,7 @@
               '</span>' + window.KSLT_APP.matchKindTag(m) + '</div>';
       html += '<div class="pd-match-opp" id="pdOpp_' + esc(oppId) + '">' + I18N.t('common.loading') + '</div>';
       html += '</div>';
-      html += '<div class="pd-match-score">' + displayScore + '</div>';
+      html += '<div class="pd-match-score">' + esc(displayScore) + '</div>';
       html += '<div class="pd-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</div>';
       html += '</div>';
     });
@@ -954,12 +954,12 @@
       // VS header
       html += '<div class="pd-h2h-vs">';
       html += '<div class="pd-h2h-player">';
-      html += '<div class="pd-h2h-avatar">' + (_player.photo ? '<img src="' + esc(_player.photo) + '" alt="">' : initials(_player.name)) + '</div>';
+      html += '<div class="pd-h2h-avatar">' + (_player.photo ? '<img src="' + esc(_player.photo) + '" alt="">' : esc(initials(_player.name))) + '</div>';
       html += '<div class="pd-h2h-pname">' + esc(_player.name) + '</div>';
       html += '</div>';
       html += '<div class="pd-h2h-vs-text">VS</div>';
       html += '<div class="pd-h2h-player">';
-      html += '<div class="pd-h2h-avatar">' + (opp.photo ? '<img src="' + esc(opp.photo) + '" alt="">' : initials(opp.name)) + '</div>';
+      html += '<div class="pd-h2h-avatar">' + (opp.photo ? '<img src="' + esc(opp.photo) + '" alt="">' : esc(initials(opp.name))) + '</div>';
       html += '<div class="pd-h2h-pname">' + esc(opp.name) + '</div>';
       html += '</div>';
       html += '</div>';
@@ -986,7 +986,7 @@
 
           html += '<div class="pd-h2h-match ' + (result === 'W' ? 'win' : 'loss') + '">';
           html += '<span class="pd-h2h-m-date">' + formatDateShort(m.played_at) + '</span>';
-          html += '<span class="pd-h2h-m-score">' + displayScore + '</span>';
+          html += '<span class="pd-h2h-m-score">' + esc(displayScore) + '</span>';
           html += '<span class="pd-h2h-m-result">' + result + '</span>';
           html += '<span class="pd-h2h-m-tournament"><span class="pd-t-name">' + esc(tName) +
                   '</span>' + window.KSLT_APP.matchKindTag(m) + '</span>';

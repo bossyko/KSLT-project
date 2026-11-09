@@ -107,12 +107,12 @@
         side.forEach(function(p) {
           h += p.photo
             ? '<img class="battle-fighter-avatar battle-fighter-photo" src="' + esc(p.photo) + '" alt="">'
-            : '<div class="battle-fighter-avatar">' + initials(p.name) + '</div>';
+            : '<div class="battle-fighter-avatar">' + esc(initials(p.name)) + '</div>';
         });
         h += '</div><div class="battle-fighter-name">';
         side.forEach(function(p) {
           var флаг = флагом(p.country);
-          h += '<span>' + (флаг ? флаг + '\u00A0' : '') + esc(p.name) + '</span>';
+          h += '<span>' + (флаг ? esc(флаг) + '\u00A0' : '') + esc(p.name) + '</span>';
         });
         return h + '</div></div>';
       }

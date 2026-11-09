@@ -772,7 +772,7 @@
               var genderIcon = p.gender === 'men' ? ' ♂' : (p.gender === 'women' ? ' ♀' : '');
               // Партнёра подбираем в парный турнир — и рейтинг показываем парный
               var pNtrp = window.KSLT_RULES.ntrpПары(p.ntrp_singles, p.ntrp_doubles);
-              html += '<div class="mob-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + (p.gender || '') + '" data-ntrp="' + (pNtrp || '') + '" ' +
+              html += '<div class="mob-partner-item" data-id="' + p.id + '" data-name="' + esc(displayName) + '" data-gender="' + esc(p.gender || '') + '" data-ntrp="' + esc(pNtrp || '') + '" ' +
                 'style="padding:10px 12px;cursor:pointer;border-radius:8px;font-size:0.9rem;color:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);">' +
                 '<span>' + esc(displayName) + genderIcon + '</span>' +
                 (pNtrp ? '<span style="color:rgba(255,255,255,0.4);font-size:0.75rem;">NTRP ' + pNtrp + '</span>' : '') +

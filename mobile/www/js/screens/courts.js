@@ -331,7 +331,7 @@
         var surfName = покрытие(t.surface) || t.surface || '';
         html += '<div class="pd-match" style="cursor:default">';
         html += '<div class="pd-match-info"><div class="pd-match-opp">' + typeName + ' · ' + surfName + '</div><div class="pd-match-tournament">' + (t.count || 1) + ' корт(ов)</div></div>';
-        html += '<div class="pd-match-score" style="color:var(--accent)">' + (t.price || '—') + ' сом</div>';
+        html += '<div class="pd-match-score" style="color:var(--accent)">' + esc(t.price || '—') + ' сом</div>';
         html += '</div>';
       });
       html += '</div></div>';

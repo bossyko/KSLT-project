@@ -107,7 +107,7 @@
     if (_profile && _profile.avatar_url) {
       html += '<div class="profile-avatar"><img src="' + esc(_profile.avatar_url) + '" alt=""></div>';
     } else {
-      html += '<div class="profile-avatar">' + initials(name) + '</div>';
+      html += '<div class="profile-avatar">' + esc(initials(name)) + '</div>';
     }
     html += '<div class="profile-name">' + esc(name) + '</div>';
 
@@ -1036,7 +1036,7 @@
               if (myMate) html += '<div class="pd-match-mate">' + esc(I18N.t('profile.matchWith')) +
                 ' <span class="pd-match-mate-name">' + esc(myMate) + '</span></div>';
               html += '</div>';
-              html += '<div class="pd-match-score">' + displayScore + '</div>';
+              html += '<div class="pd-match-score">' + esc(displayScore) + '</div>';
               html += '<div class="pd-match-result ' + (result === 'W' ? 'win' : 'loss') + '">' + result + '</div>';
               html += '</div>';
             });
@@ -1093,7 +1093,7 @@
       allBadges.forEach(function(b) {
         var e = earnedIds[b.id];
         html += '<div class="pd-badge-card ' + (e ? 'earned' : 'locked') + '">';
-        html += '<div class="pd-badge-icon">' + (b.icon || '🏅') + '</div>';
+        html += '<div class="pd-badge-icon">' + esc(b.icon || '🏅') + '</div>';
         html += '<div class="pd-badge-name">' + esc(badgeName(b)) + '</div>';
         if (e) {
           html += '<div class="pd-badge-date">' + formatDate(e.earned_at) + '</div>';
@@ -1371,7 +1371,7 @@
     if (p.avatar_url) {
       html += '<img src="' + esc(p.avatar_url) + '" alt="">';
     } else {
-      html += '<span>' + initials(p.full_name) + '</span>';
+      html += '<span>' + esc(initials(p.full_name)) + '</span>';
     }
     html += '<div class="prof-edit-avatar-hint">' + I18N.t('profile.editAvatar') + '</div>';
     html += '</div>';

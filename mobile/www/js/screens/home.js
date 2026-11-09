@@ -55,12 +55,12 @@
       '</div>' +
       '<div class="live-players">' +
         '<div class="live-player">' +
-          '<div class="live-avatar">' + initials(p1) + '</div>' +
+          '<div class="live-avatar">' + esc(initials(p1)) + '</div>' +
           '<div class="live-player-name">' + esc(p1) + '</div>' +
         '</div>' +
         '<div class="live-score-block">' + renderScore(m.score) + '</div>' +
         '<div class="live-player">' +
-          '<div class="live-avatar">' + initials(p2) + '</div>' +
+          '<div class="live-avatar">' + esc(initials(p2)) + '</div>' +
           '<div class="live-player-name">' + esc(p2) + '</div>' +
         '</div>' +
       '</div>' +
@@ -111,7 +111,7 @@
       html += '<span class="' + cls + '">' + v + '</span>';
     });
     return '<div class="live-full-sb-row' + (serving ? ' serving' : '') + '">' +
-      '<div class="sb-avatar">' + initials(name) + '</div>' +
+      '<div class="sb-avatar">' + esc(initials(name)) + '</div>' +
       (serving ? '<span class="sb-dot-serve"></span>' : '<span class="sb-no-serve"></span>') +
       '<span class="sb-pname">' + esc(name) + '</span>' +
       '<div class="sb-sets">' + html + '</div></div>';
@@ -158,9 +158,9 @@
       '" data-battle-id="' + b.id + '">' +
       '<div class="tcv-img" style="' + imgStyle + '">' +
         (b.banner_url ? '' : '<div class="battle-vs-mini">' +
-          '<div class="bvm-avatar">' + initials(chName) + '</div>' +
+          '<div class="bvm-avatar">' + esc(initials(chName)) + '</div>' +
           '<span class="bvm-vs">VS</span>' +
-          '<div class="bvm-avatar">' + initials(opName) + '</div>' +
+          '<div class="bvm-avatar">' + esc(initials(opName)) + '</div>' +
         '</div>') +
         /* ОТМЕНА ГОВОРИТСЯ И НА ГЛАВНОЙ (06.11). Значок здесь был один
            на все баттлы — слово «Баттл», то есть название раздела,
@@ -235,7 +235,7 @@
   function renderTournamentCard(t) {
     var d = new Date(t.date_start);
     var imgStyle = t.image
-      ? 'background-image:url(' + t.image + ');background-size:cover;background-position:center'
+      ? 'background-image:url(' + KSLT_экранировать(t.image) + ');background-size:cover;background-position:center'
       : 'background:linear-gradient(135deg,#0d2818,#1a4030)';
 
     return '<div class="tournament-card-v" data-tournament-id="' + t.id + '">' +
@@ -1284,7 +1284,7 @@
     var картинка = n.image || (window.KSLT_NEWS_COVERS
       ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
     var imgStyle = картинка
-      ? 'background-image:url(' + картинка + ');background-size:cover;background-position:center'
+      ? 'background-image:url(' + KSLT_экранировать(картинка) + ');background-size:cover;background-position:center'
       : 'background:linear-gradient(135deg,#1a1a2e,#16213e)';
     var catLabels = { announcement: 'Анонс', tournament: 'Турнир', club: 'Клуб', rating: 'Рейтинг', news: 'Новости' };
 
@@ -1330,7 +1330,7 @@
         ? window.KSLT_NEWS_COVERS.путь(n.id, '') : '');
       if (обложка) {
         html += '<div class="nd-hero-img' + (n.image ? '' : ' news-own-cover') +
-          '" style="background-image:url(' + обложка + ')">' +
+          '" style="background-image:url(' + KSLT_экранировать(обложка) + ')">' +
           (n.image_original
             ? '<button type="button" class="nd-hero-zoom" data-full="' + esc(n.image_original) + '">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
@@ -1369,15 +1369,15 @@
           if (Array.isArray(blocks)) {
             blocks.forEach(function(block, index) {
               if (block.type === 'text' || block.type === 'paragraph') {
-                contentHtml += '<p style="margin-bottom:12px;line-height:1.6">' + (block.text || block.content || '') + '</p>';
+                contentHtml += '<p style="margin-bottom:12px;line-height:1.6">' + esc(block.text || block.content || '') + '</p>';
               } else if (block.type === 'image') {
                 contentHtml += '<div style="margin:16px 0"><img src="' + esc(block.url || block.src || '') + '" style="width:100%;border-radius:8px" alt=""><div style="font-size:11px;color:var(--text-muted);margin-top:4px">' + esc(block.caption || '') + '</div></div>';
               } else if (block.type === 'quote') {
-                contentHtml += '<blockquote style="border-left:3px solid var(--accent);padding:8px 12px;margin:12px 0;color:var(--text-sec);font-style:italic">' + (block.text || block.content || '') + '</blockquote>';
+                contentHtml += '<blockquote style="border-left:3px solid var(--accent);padding:8px 12px;margin:12px 0;color:var(--text-sec);font-style:italic">' + esc(block.text || block.content || '') + '</blockquote>';
               } else if (block.type === 'heading' || block.type === 'header') {
                 contentHtml += '<h3 style="margin:16px 0 8px">' + esc(block.text || block.content || '') + '</h3>';
               } else {
-                contentHtml += '<p>' + (block.text || block.content || '') + '</p>';
+                contentHtml += '<p>' + esc(block.text || block.content || '') + '</p>';
               }
 
               // Снимок ставится после абзаца с этим номером, счёт с единицы
@@ -1711,7 +1711,7 @@
 
     // Banner
     if (b.banner_url) {
-      html += '<div class="nd-hero-img" style="background-image:url(' + b.banner_url + ')"></div>';
+      html += '<div class="nd-hero-img" style="background-image:url(' + KSLT_экранировать(b.banner_url) + ')"></div>';
     }
 
     // Title
@@ -2270,7 +2270,7 @@
        показывались сырым именем из базы: Костя увидел на экране
        «registration_closed». Карта писалась не по базе. */
     if (t.status) {
-        badges += '<span class="td-badge status-' + t.status + '">' +
+        badges += '<span class="td-badge status-' + esc(t.status) + '">' +
                   esc(KSLT_STATUS.подпись(t.status, I18N.lang)) + '</span>';
     }
     document.getElementById('tdBadges').innerHTML = badges;

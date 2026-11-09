@@ -148,7 +148,7 @@
       html += '<div class="partner-card" role="listitem" aria-label="' + esc(p.name) + '"' +
               (isGuest ? '' : ' data-player-id="' + p.id + '" tabindex="0"') + '>';
       html += '<div class="partner-avatar">';
-      html += p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : '<span>' + initials(p.name) + '</span>';
+      html += p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : '<span>' + esc(initials(p.name)) + '</span>';
       html += '</div>';
       html += '<div class="partner-info">';
       html += '<div class="coach-card-name">' + esc(p.name) + '</div>';
