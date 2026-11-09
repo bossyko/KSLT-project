@@ -52,10 +52,14 @@ async function открытьКабинет(page) {
     await page.evaluate(() => {
         ['.onb-overlay', '.splash-overlay', '#onboarding'].forEach(с =>
             document.querySelectorAll(с).forEach(э => { э.style.display = 'none'; }));
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        const п = document.getElementById('screenProfile');
-        if (п) п.classList.add('active');
     });
+    /* ПЕРЕКЛЮЧЕНИЕ КЛАССОМ — НЕ ПЕРЕХОД. Первая редакция ставила
+       `screenProfile` класс `active` руками, и кабинет оставался ПУСТ: его
+       рисует `KSLT_PROFILE.load()`, которого зовёт `switchScreen` через
+       `loadScreen`. Двадцать падений были про это, а не про вход.
+       Нажимаем кнопку раздела, как человек. */
+    await page.locator('.tab-item[data-screen="screenProfile"]').first().click();
+    await page.waitForTimeout(400);
     return ошибки;
 }
 
@@ -71,7 +75,15 @@ test.describe('Кабинет приложения — под живым вхо�
         const ошибки = await открытьКабинет(page);
 
         /* ПРИЗНАК, А НЕ ТИШИНА СЕТИ: ждём саму строку кабинета. */
-        await page.waitForSelector('#' + РАЗДЕЛЫ[0], { timeout: 20000 });
+        /* ЕСЛИ СТРОК НЕТ — СКАЗАТЬ, ВОШЛИ ЛИ: иначе падение молчит о том,
+           что проверять дальше, и разбор начинается с нуля. */
+        const вход = await page.evaluate(() => ({
+            сессия: Object.keys(localStorage).some(к => /^sb-.*-auth-token$/.test(к)),
+            пользователь: !!(window.AUTH && window.AUTH.currentUser),
+        }));
+        await page.waitForSelector('#' + РАЗДЕЛЫ[0], { timeout: 20000 })
+            .catch(() => { throw new Error('строк кабинета нет. Сессия в хранилище: ' +
+                вход.сессия + ', пользователь в доме: ' + вход.пользователь); });
 
         const снимок = await page.evaluate((разделы) => {
             const нет = разделы.filter(и => !document.getElementById(и));
