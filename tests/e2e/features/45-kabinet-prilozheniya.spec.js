@@ -53,13 +53,23 @@ async function открытьКабинет(page) {
         ['.onb-overlay', '.splash-overlay', '#onboarding'].forEach(с =>
             document.querySelectorAll(с).forEach(э => { э.style.display = 'none'; }));
     });
-    /* ПЕРЕКЛЮЧЕНИЕ КЛАССОМ — НЕ ПЕРЕХОД. Первая редакция ставила
-       `screenProfile` класс `active` руками, и кабинет оставался ПУСТ: его
-       рисует `KSLT_PROFILE.load()`, которого зовёт `switchScreen` через
-       `loadScreen`. Двадцать падений были про это, а не про вход.
-       Нажимаем кнопку раздела, как человек. */
+    /* ПЕРЕКЛЮЧЕНИЕ КЛАССОМ — НЕ ПЕРЕХОД: кабинет рисует
+       `KSLT_PROFILE.load()`, которого зовёт `switchScreen` через
+       `loadScreen`. Поэтому нажимаем кнопку раздела, как человек.
+
+       НО КНОПКА РАБОТАЕТ НЕ С ПЕРВОГО КАДРА. Второй заход 09.11 упал так
+       же: снимок показал ГЛАВНЫЙ экран — клик случился раньше, чем
+       `app.js` навесил обработчики табов. НАЖАТИЕ ДО ОСНАСТКИ — ЭТО НЕ
+       НАЖАТИЕ, и ждать надо ПРИЗНАК готовности, а не время. */
+    await page.waitForFunction(
+        () => !!(window.KSLT_APP && window.KSLT_APP.switchScreen),
+        null, { timeout: 20000 });
     await page.locator('.tab-item[data-screen="screenProfile"]').first().click();
-    await page.waitForTimeout(400);
+    /* ПРИЗНАК ПЕРЕХОДА — САМ ЭКРАН, А НЕ ПРОШЕДШЕЕ ВРЕМЯ. */
+    await page.waitForFunction(() => {
+        const э = document.getElementById('screenProfile');
+        return !!э && э.classList.contains('active');
+    }, null, { timeout: 20000 });
     return ошибки;
 }
 
