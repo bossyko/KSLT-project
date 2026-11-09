@@ -43,9 +43,14 @@
                ' .ar-overlay, .onboarding-overlay, .otp-pw-overlay,' +
                ' .tg-reg-overlay, .gi-overlay, .pd-h2h-modal,' +
                ' .push-prime-overlay';
+    /* СПИСОК ПОДПИСЕЙ, КОТОРЫЙ ДЕРЖИТСЯ РУКАМИ, ОТСТАЁТ — ровно как список
+       окон 29.10. ЗАМЕР 08.11 работой: четыре окна открывались для диктора
+       БЕЗ ИМЕНИ — меню, баттл, профиль игрока и новость. Заголовки у них
+       есть («Разделы», «Баттл», «Профиль», «Новость»), но их классы дом не
+       знал: три несут `.td-topbar-title`, меню — `.menu-section-title`. */
     var ПОДПИСЬ = 'h1, h2, h3, .bs-title, .td-title, .notif-title, .otp-title,' +
                   ' .ar-title, .gi-title, .prof-sub-title, .tg-reg-title,' +
-                  ' .push-prime-title';
+                  ' .push-prime-title, .td-topbar-title, .menu-section-title';
     var ЗАКРЫТЬ = '[data-okno-zakryt], .td-back, .notif-back, .otp-close,' +
                   ' .live-back, .nm-viewer-close, .menu-close,' +
                   ' .ar-close, .gi-close, .prof-sub-back, .tg-reg-close';
@@ -180,8 +185,17 @@
         var узел = верхнее();
         if (!узел) return false;
         var кнопка = узел.querySelector(ЗАКРЫТЬ);
-        if (кнопка) { кнопка.click(); return true; }
-        узел.classList.remove('open');
+        if (!кнопка) { узел.classList.remove('open'); return true; }
+        /* НАЖАТЬ КНОПКУ — НЕ ЗНАЧИТ ЗАКРЫТЬ. Замер 08.11: у окна пушей дом
+           находил `pushPrimeNo`, нажимал её, возвращал true — и окно
+           оставалось открытым, потому что обработчик кнопки живёт в коде
+           пушей и навешивается не всегда. Esc становился бессилен, а дом
+           считал работу сделанной.
+           РЕЗУЛЬТАТ ПРОВЕРЯЕТСЯ, А НЕ ПРЕДПОЛАГАЕТСЯ: своя кнопка остаётся
+           первым путём — у неё может быть своя работа помимо закрытия, — но
+           если окно не закрылось, класс снимается сами́м домом. */
+        кнопка.click();
+        if (узел.classList.contains('open')) узел.classList.remove('open');
         return true;
     }
 
