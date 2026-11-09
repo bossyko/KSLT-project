@@ -1,0 +1,156 @@
+/**
+ * КАБИНЕТ ПРИЛОЖЕНИЯ ПОД ЖИВЫМ ВХОДОМ (09.11).
+ *
+ * ЗАЧЕМ. У приложения не было НИ ОДНОЙ пробы за входом: все 18 проб,
+ * которые его гоняют, ходят гостем. 02.11 кабинет оказался пуст — и это
+ * прошло мимо прогона, потому что прогонять кабинет было нечем. Долг
+ * назван тогда же и держался до сегодня.
+ *
+ * ПОЧЕМУ ЭТОГО НЕ ВИДНО БЕЗ ВХОДА: строк кабинета нет в разметке вовсе,
+ * их рисует js после входа. Гостевой прогон не находит их не потому, что
+ * они сломаны, а потому, что их там нет.
+ *
+ * СПИСОК РАЗДЕЛОВ ЧИТАЕТСЯ ИЗ КОДА, А НЕ ДЕРЖИТСЯ ЗДЕСЬ. Сегодня же
+ * выяснилось, чем кончается ручной список: проба окон держала шесть
+ * классов из пятнадцати и была зелёной, пока четыре окна открывались без
+ * имени. СПИСОК, КОТОРЫЙ ДЕРЖИТСЯ РУКАМИ, ОТСТАЁТ.
+ *
+ * КНОПКУ, КОТОРАЯ ПИШЕТ В БАЗУ, НЕ НАЖИМАЕМ — правило Кости. Поэтому
+ * удаление аккаунта исключено по имени, а не пропущено молча.
+ */
+const fs = require('fs');
+const path = require('path');
+const { test, expect } = require('../../fixtures');
+const { playerState } = require('../../auth-setup');
+
+const ПРИЛОЖЕНИЕ = '/mobile/www/index.html';
+
+/* ── РАЗДЕЛЫ КАБИНЕТА ЧИТАЮТСЯ ИЗ ЭКРАНА ПРОФИЛЯ ── */
+const ЭКРАН = path.join(__dirname, '..', '..', '..',
+    'mobile', 'www', 'js', 'screens', 'profile.js');
+
+/* ПИШЕТ В БАЗУ — НЕ НАЖИМАЕМ. Удаление аккаунта разбирается чтением кода
+   (`pages/delete-account.html`, кусок 204), а не нажатием в прогоне. */
+const НЕ_НАЖИМАЕМ = { profDeleteRow: 'удаляет аккаунт — пишет в базу' };
+
+const РАЗДЕЛЫ = (function () {
+    const текст = fs.readFileSync(ЭКРАН, 'utf8');
+    const найдено = (текст.match(/bindRowClick\('([a-zA-Z]+)'/g) || [])
+        .map(с => с.replace(/bindRowClick\('/, '').replace(/'/, ''));
+    if (найдено.length < 12) {
+        throw new Error('разделов кабинета прочитано ' + найдено.length +
+            ' — список не прочитан, проверь `bindRowClick` в ' + ЭКРАН);
+    }
+    return найдено.filter(и => !НЕ_НАЖИМАЕМ[и]);
+})();
+
+async function открытьКабинет(page) {
+    const ошибки = [];
+    page.on('pageerror', e => ошибки.push(String(e.message || e)));
+    await page.goto(ПРИЛОЖЕНИЕ, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!window.KSLT_OKNO, null, { timeout: 20000 });
+    await page.evaluate(() => {
+        ['.onb-overlay', '.splash-overlay', '#onboarding'].forEach(с =>
+            document.querySelectorAll(с).forEach(э => { э.style.display = 'none'; }));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const п = document.getElementById('screenProfile');
+        if (п) п.classList.add('active');
+    });
+    return ошибки;
+}
+
+/* ОБХОД ШЕСТНАДЦАТИ РАЗДЕЛОВ ДОЛЬШЕ ОБЫЧНОЙ ПРОБЫ: каждый раздел ходит в
+   базу. Запас взят такой же, как у других проб за входом. */
+test.describe.configure({ timeout: 90000 });
+
+test.use({ storageState: playerState });
+
+test.describe('Кабинет приложения — под живым входом', () => {
+
+    test('кабинет не пуст: вход виден и разделы нарисованы', async ({ page }) => {
+        const ошибки = await открытьКабинет(page);
+
+        /* ПРИЗНАК, А НЕ ТИШИНА СЕТИ: ждём саму строку кабинета. */
+        await page.waitForSelector('#' + РАЗДЕЛЫ[0], { timeout: 20000 });
+
+        const снимок = await page.evaluate((разделы) => {
+            const нет = разделы.filter(и => !document.getElementById(и));
+            const п = document.getElementById('screenProfile');
+            return {
+                нет,
+                строк: разделы.length - нет.length,
+                естьИмя: !!(п && п.querySelector('.profile-avatar, .profile-name')),
+                пусто: !!(п && п.textContent.trim().length < 40),
+            };
+        }, РАЗДЕЛЫ);
+
+        expect(снимок.нет, 'все разделы кабинета нарисованы').toEqual([]);
+        expect(снимок.естьИмя, 'в шапке кабинета виден вошедший').toBe(true);
+        expect(снимок.пусто, 'кабинет не пуст — ровно это и случилось 02.11').toBe(false);
+        expect(ошибки, 'страница без ошибок').toEqual([]);
+    });
+
+    test('каждый раздел открывается и получает оснастку окна', async ({ page }) => {
+        const ошибки = await открытьКабинет(page);
+        await page.waitForSelector('#' + РАЗДЕЛЫ[0], { timeout: 20000 });
+
+        const итог = [];
+        for (const ид of РАЗДЕЛЫ) {
+            const строка = page.locator('#' + ид);
+            if (!(await строка.count())) { итог.push({ ид, беда: 'строки нет' }); continue; }
+            await строка.click();
+            await page.waitForTimeout(900);
+            итог.push(await page.evaluate(() => {
+                const окно = [...document.querySelectorAll('.td-overlay, .gi-overlay, .bottom-sheet-overlay')]
+                    .filter(э => э.classList.contains('open')).pop();
+                if (!окно) return { беда: 'окно не открылось' };
+                const тело = окно.querySelector('.prof-sub-content') || окно;
+                const о = {
+                    роль: окно.getAttribute('role'),
+                    подпись: окно.getAttribute('aria-label') || окно.getAttribute('aria-labelledby'),
+                    /* СПИННЕР, ОСТАВШИЙСЯ НАВСЕГДА, — ЭТО ПУСТОЙ РАЗДЕЛ,
+                       а не загрузка: 900 мс хватает и на отказ. */
+                    толькоСпиннер: !!тело.querySelector('.spinner') && тело.textContent.trim().length < 2,
+                };
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                return о;
+            }));
+            await page.waitForTimeout(350);
+        }
+
+        const неОткрылись = РАЗДЕЛЫ.filter((_, i) => итог[i] && итог[i].беда);
+        const безРоли = РАЗДЕЛЫ.filter((_, i) => итог[i] && !итог[i].беда && итог[i].роль !== 'dialog');
+        const безИмени = РАЗДЕЛЫ.filter((_, i) => итог[i] && !итог[i].беда && !итог[i].подпись);
+        const висятСпиннером = РАЗДЕЛЫ.filter((_, i) => итог[i] && итог[i].толькоСпиннер);
+
+        expect(неОткрылись, 'каждый раздел кабинета открывается').toEqual([]);
+        expect(безРоли, 'диктору сказано, что это окно').toEqual([]);
+        expect(безИмени, 'у окна раздела есть имя для диктора').toEqual([]);
+        expect(висятСпиннером, 'раздел показал содержимое, а не вечный спиннер').toEqual([]);
+        expect(ошибки, 'страница без ошибок').toEqual([]);
+    });
+
+    /* ЗА ВХОДОМ КОНТРАСТ НЕ МЕРИЛИ НИ РАЗУ. Проба светлой темы проверяет
+       четыре состояния — всё, что видно ГОСТЮ. Половина продукта осталась
+       непомеренной, и в ней же сидит известное 3.95 у личных встреч. */
+    for (const тема of ['light', 'dark']) {
+        test(`${тема}: надписи кабинета не ниже планки`, async ({ page }) => {
+            await page.addInitScript(т => {
+                try { localStorage.setItem('kslt-tema', т); } catch (e) {}
+            }, тема);
+            const ошибки = await открытьКабинет(page);
+            await page.waitForSelector('#' + РАЗДЕЛЫ[0], { timeout: 20000 });
+
+            const р = await page.evaluate(
+                async () => (await import('/tools/kontrast.mjs')).замер(99));
+            expect(Array.isArray(р.худшие),
+                'модуль контраста отдал список: ключи ' + Object.keys(р).join(', ')).toBe(true);
+
+            const список = р.худшие.map(о =>
+                `  ${о.путь} «${о.текст}» — ${о.контраст} при ${о.порог} (${о.кегль}px)`).join('\n');
+            expect(р.худшие.length,
+                `надписи кабинета ниже планки в теме «${тема}»:\n${список}`).toBe(0);
+            expect(ошибки, 'страница без ошибок').toEqual([]);
+        });
+    }
+});
