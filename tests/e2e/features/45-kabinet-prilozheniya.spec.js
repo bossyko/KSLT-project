@@ -49,6 +49,25 @@ async function открытьКабинет(page) {
     page.on('pageerror', e => ошибки.push(String(e.message || e)));
     await page.goto(ПРИЛОЖЕНИЕ, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => !!window.KSLT_OKNO, null, { timeout: 20000 });
+    /* ЗНАКОМСТВО ЗАКРЫВАЕТСЯ НАЖАТИЕМ, А НЕ СОКРЫТИЕМ.
+
+       ТРИ ЗАХОДА ПОДРЯД УПАЛИ ИМЕННО ЗДЕСЬ, и увидел я это только глазами,
+       на снимке: поверх приложения стояло окно «Добро пожаловать!» с
+       кнопками «Далее» и «Пропустить». Оно ловило каждый клик, и нажатие
+       на раздел профиля уходило в него.
+
+       Я ПИСАЛ СВОЙ ПРИЁМ ВМЕСТО ГОТОВОГО: проба светлой темы закрывает
+       знакомство нажатием `.onb-skip` до трёх раз и только ПОТОМ прячет
+       остатки. Я скопировал вторую половину и выбросил первую.
+       ПРОЦЕДУРА, НАПИСАННАЯ ЗАНОВО ВМЕСТО ГОТОВОЙ, ПОВТОРЯЕТ ЕЁ ОШИБКИ —
+       а эта готовая была написана ровно потому, что на знакомстве уже
+       попался прибор снимков. */
+    for (let i = 0; i < 3; i++) {
+        const к = page.locator('.onb-skip:visible').first();
+        if (!(await к.count())) break;
+        await к.click({ timeout: 2000 }).catch(() => {});
+        await page.waitForTimeout(300);
+    }
     await page.evaluate(() => {
         ['.onb-overlay', '.splash-overlay', '#onboarding'].forEach(с =>
             document.querySelectorAll(с).forEach(э => { э.style.display = 'none'; }));
