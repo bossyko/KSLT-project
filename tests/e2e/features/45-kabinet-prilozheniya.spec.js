@@ -98,6 +98,30 @@ async function открытьКабинет(page) {
     await page.waitForFunction(
         () => !!(window.KSLT_APP && window.KSLT_APP.switchScreen),
         null, { timeout: 20000 });
+
+    /* ЭКРАН ВХОДА ОТКРЫТ В РАЗМЕТКЕ ПО УМОЛЧАНИЮ (`index.html:436`), а
+       снимается ТОЛЬКО ПОСЛЕ ОТВЕТА БАЗЫ о сессии (`auth.js:34`,
+       `checkSession`). До ответа он лежит поверх всего и забирает нажатия:
+       пятый заход висел 90 секунд на клике по вкладке, и браузер прямо
+       назвал виновника — `DIV.auth-screen open` под точкой нажатия.
+
+       ЭТО И ЕСТЬ НАСТОЯЩИЙ ПРИЗНАК ВХОДА: пока экран входа не ушёл, мы не
+       вошли, сколько бы сессия ни лежала в хранилище. Ждём его, а не время,
+       и говорим внятно, если не дождались. */
+    await page.waitForFunction(() => {
+        const э = document.querySelector('.auth-screen');
+        return !э || !э.classList.contains('open');
+    }, null, { timeout: 30000 }).catch(async () => {
+        const с = await page.evaluate(() => ({
+            сессия: Object.keys(localStorage).some(к => /^sb-.*-auth-token$/.test(к)),
+            пользователь: !!(window.AUTH && window.AUTH.currentUser),
+            база: !!window.KSLT_DB,
+        }));
+        throw new Error('экран входа не ушёл за 30 с. Сессия в хранилище: ' +
+            с.сессия + ', пользователь в доме: ' + с.пользователь +
+            ', адрес базы подставлен: ' + с.база);
+    });
+
     await page.locator('.tab-item[data-screen="screenProfile"]').first().click();
     /* ПРИЗНАК ПЕРЕХОДА — САМ ЭКРАН, А НЕ ПРОШЕДШЕЕ ВРЕМЯ. */
     await page.waitForFunction(() => {
