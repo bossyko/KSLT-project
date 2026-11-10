@@ -297,6 +297,19 @@
     html += profileRow('purple',
       '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
       I18N.t('dat.title'), '', '', true, 'profMyDataRow');
+    /* ДОКУМЕНТЫ. СТРОКИ НЕ БЫЛО ВОВСЕ — нашла проба кабинета 09.11, первым
+       же настоящим прогоном: `bindRowClick('profDocsRow', showDocuments)`
+       висел на кнопке, которой нет ни в кабинете, ни в меню, ни в
+       разметке, а `showDocuments()` был написан и мёртв.
+       ОБРАБОТЧИК БЕЗ КНОПКИ НЕ ЖАЛУЕТСЯ: `bindRowClick` молча ничего не
+       находит, и раздел просто не существует для человека.
+       Это не мелочь: Apple 5.1.1(i) требует, чтобы политика открывалась
+       ИЗ приложения, а чек-лист публикации всё это время утверждал, что
+       раздел есть. Стоит рядом с «Согласиями» и «Моими данными» — это
+       один ряд про документы и данные. */
+    html += profileRow('blue',
+      '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
+      I18N.t('profile.documents'), '', '', true, 'profDocsRow');
     html += profileRow('blue',
       '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>',
       I18N.t('profile.notifications'), '', '', true, 'profNotifyRow');
