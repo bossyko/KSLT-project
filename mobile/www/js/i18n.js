@@ -56,7 +56,7 @@
     'menu.about':       { ru: 'О проекте',    en: 'About the Project', kg: 'Долбоор жөнүндө' },
     'menu.rules':       { ru: 'Правила',      en: 'Rules',         kg: 'Эрежелер' },
     'menu.faq':         { ru: 'FAQ',           en: 'FAQ',           kg: 'FAQ' },
-    'menu.pricing':     { ru: 'Членство',     en: 'Membership',    kg: 'Мүчөлүк' },
+    'menu.pricing':     { ru: 'Клубный взнос', en: 'Club fee',     kg: 'Клуб төгүмү' },
     'menu.contact':     { ru: 'Связаться',    en: 'Contact',       kg: 'Байланыш' },
     'app.updateReady':   { ru: 'Вышла новая версия {v}', en: 'Version {v} is available', kg: 'Жаңы версия {v} чыкты' },
     'app.updateGet':     { ru: 'Обновить', en: 'Update', kg: 'Жаңыртуу' },
@@ -231,8 +231,8 @@
     'td.som':           { ru: 'сом',               en: 'KGS',             kg: 'сом' },
     'td.max':           { ru: 'макс.',             en: 'max',              kg: 'макс.' },
     'td.loginToReg':    { ru: 'Войдите, чтобы записаться на турнир', en: 'Log in to register for the tournament', kg: 'Мелдешке жазылуу үчүн кириңиз' },
-    'td.needMembership':{ ru: 'Для участия нужно членство КСЛТ', en: 'KSLT membership required to participate', kg: 'Катышуу үчүн КСЛТ мүчөлүгү керек' },
-    'td.getMembership': { ru: 'Оформить членство',  en: 'Get membership',   kg: 'Мүчөлүк алуу' },
+    'td.needMembership':{ ru: 'Турниры КСЛТ — для тех, кто оформил клубный взнос', en: 'KSLT tournaments are for players who have paid the club fee', kg: 'КСЛТ мелдештери клуб төгүмүн төлөгөндөр үчүн' },
+    'td.getMembership': { ru: 'Как вступить в клуб', en: 'How to join the club', kg: 'Клубга кантип кирүү' },
     'td.register':      { ru: 'Записаться на турнир', en: 'Register for tournament', kg: 'Мелдешке жазылуу' },
     'td.bracketEmpty':  { ru: 'Сетка пока не сформирована', en: 'Bracket not yet formed', kg: 'Тор азырынча түзүлө элек' },
     'td.resultsEmpty':  { ru: 'Очки пока не начислены', en: 'Points not yet awarded', kg: 'Упай азырынча берилген жок' },
@@ -444,8 +444,8 @@
     'profile.language':     { ru: 'Язык',                 en: 'Language',          kg: 'Тил' },
 
     // Profile — Membership
-    'profile.noMembership':   { ru: 'Нет членства',                  en: 'No membership',           kg: 'Мүчөлүк жок' },
-    'profile.getMembership':  { ru: 'Оформите для доступа ко всем функциям', en: 'Get access to all features', kg: 'Бардык функцияларга жетүү үчүн алыңыз' },
+    'profile.noMembership':   { ru: 'Клубный взнос не оформлен',     en: 'Club fee not paid',       kg: 'Клуб төгүмү төлөнгөн эмес' },
+    'profile.getMembership':  { ru: 'Участие в турнирах и скидки в клубе', en: 'Tournament entry and club discounts', kg: 'Мелдештерге катышуу жана клубда арзандатуу' },
     'profile.memActive':      { ru: 'Активно',                       en: 'Active',                  kg: 'Активдүү' },
     'profile.memExpired':     { ru: 'Истекло',                       en: 'Expired',                 kg: 'Мөөнөтү бүттү' },
     'profile.memDaysLeft':    { ru: 'Осталось',                      en: 'days left',               kg: 'күн калды' },
@@ -619,7 +619,6 @@
     'pd.guestTitle':     { ru: 'Хотите узнать больше?', en: 'Want to know more?', kg: 'Көбүрөөк билгиңиз келеби?' },
     'pd.guestText':      { ru: 'Зарегистрируйтесь, чтобы видеть полную статистику, матчи и достижения', en: 'Register to see full stats, matches and achievements', kg: 'Толук статистика, матчтар жана жетишкендиктерди көрүү үчүн катталыңыз' },
     'pd.guestBtn':       { ru: 'Регистрация',         en: 'Register',        kg: 'Каттоо' },
-    'pd.memberCta':      { ru: 'Для вызовов нужно членство КСЛТ', en: 'KSLT membership required for challenges', kg: 'Чакыруулар үчүн КСЛТ мүчөлүгү керек' },
     'pd.h2h':            { ru: 'Личные встречи',      en: 'Head to Head',     kg: 'Жеке жолугушуулар' },
 
     // === Коды подтверждения ===
@@ -941,17 +940,21 @@
                            kg: 'Оюнчунун картасын ачып, оюн сунуштаңыз' },
 
     // === Pricing ===
-    'pricing.title':             { ru: 'Членство КСЛТ',          en: 'KSLT Membership',       kg: 'КСЛТ мүчөлүгү' },
+    'pricing.title':             { ru: 'Клубный взнос КСЛТ',     en: 'KSLT club fee',         kg: 'КСЛТ клуб төгүмү' },
     'pricing.singlePlan':        { ru: 'Единый тариф',           en: 'Single plan',           kg: 'Бирдиктүү тариф' },
     'pricing.monthlyMembership': { ru: 'Ежемесячное членство',   en: 'Monthly membership',    kg: 'Ай сайын мүчөлүк' },
     'pricing.perMonth':          { ru: 'мес',                     en: 'mo',                   kg: 'ай' },
-    'pricing.feat1':             { ru: 'Участие во всех турнирах КСЛТ', en: 'Participate in all KSLT tournaments', kg: 'Бардык КСЛТ мелдештерине катышуу' },
-    'pricing.feat2':             { ru: 'Полный рейтинг и статистика',   en: 'Full rating & statistics',           kg: 'Толук рейтинг жана статистика' },
+    'pricing.feat1':             { ru: 'Участие в турнирах КСЛТ на кортах клуба', en: 'Entry to KSLT tournaments at the club courts', kg: 'Клубдун корттарындагы КСЛТ мелдештерине катышуу' },
+    'pricing.feat2':             { ru: 'Скидки у тренеров клуба',       en: 'Discounts with club coaches',        kg: 'Клубдун машыктыруучуларында арзандатуу' },
     'pricing.feat3':             { ru: 'Скидки на аренду кортов',       en: 'Discounts on court rental',          kg: 'Корт ижарасына арзандатуу' },
     'pricing.feat4':             { ru: 'Доступ к закрытым мероприятиям', en: 'Access to exclusive events',         kg: 'Жабык иш-чараларга жетүү' },
-    'pricing.feat5':             { ru: 'Система вызовов между игроками', en: 'Player challenge system',            kg: 'Оюнчулар арасында чакыруу системасы' },
-    'pricing.feat6':             { ru: 'Программа лояльности (баллы)',   en: 'Loyalty program (points)',            kg: 'Лоялдуулук программасы (упайлар)' },
+    'pricing.feat5':             { ru: 'Контакты игроков клуба',        en: 'Contact details of club players',    kg: 'Клуб оюнчуларынын байланыштары' },
+    'pricing.feat6':             { ru: 'Клубные тренировки и сборы',    en: 'Club practice sessions and camps',   kg: 'Клубдук машыгуулар жана жыйындар' },
     'pricing.howToPay':          { ru: 'Для оплаты свяжитесь с нами:',  en: 'To pay, contact us:',                kg: 'Төлөө үчүн биз менен байланышыңыз:' },
+    /* ОФОРМЛЕНИЕ ИДЁТ В КЛУБЕ, И ЭТО НЕ ОТГОВОРКА, А УСТРОЙСТВО УСЛУГИ:
+       взнос берут на месте, за ним стоит корт и турнир, а не функция
+       приложения. Строка заменяет собой способ оплаты в сборке для iOS. */
+    'pricing.atClub':            { ru: 'Оформляется в клубе КСЛТ',      en: 'Arranged at the KSLT club',          kg: 'КСЛТ клубунда таризделет' },
 
     // === Generic ===
     'common.back':       { ru: 'Назад',     en: 'Back',     kg: 'Артка' },

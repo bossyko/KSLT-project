@@ -108,7 +108,6 @@
 
     var AUTH = window.KSLT_AUTH;
     var isGuest = !(AUTH && AUTH.currentUser);
-    var isMember = !isGuest && !!AUTH._membershipStatus;
 
     var filtered = allPartners;
 
@@ -162,7 +161,13 @@
       html += '</div>';
       // Предложить игру можно прямо отсюда, не заходя в карточку: экран для
       // того и открывают — найти, с кем выйти на корт
-      if (isMember) {
+      /* ПРИГЛАШЕНИЕ ОТКРЫТО ВСЕМ ВОШЕДШИМ (Ю14, 10.11, слово Кости «да,
+         открываем»). Было за взносом — и это был ЦИФРОВОЙ замок внутри
+         приложения, то есть ровно то, за что правило 3.1.1 требует IAP
+         и его долю. Взнос покупает корт и турнир, а не кнопку.
+         ЗАМОК НА ФУНКЦИИ ПРИЛОЖЕНИЯ ДЕЛАЕТ УСЛУГУ ЦИФРОВОЙ, КАК БЫ МЫ
+         ЕЁ НИ НАЗЫВАЛИ. */
+      if (!isGuest) {
         html += '<button class="partner-invite-btn" data-invite="' + esc(p.id) + '">' +
                 I18N.t('inv.btn') + '</button>';
       }
@@ -306,13 +311,33 @@
     );
   };
 
+  /* ═══ КЛУБНЫЙ ВЗНОС, А НЕ ПОДПИСКА (Ю14, 10.11) ══════════════════════
+     ПЛАТИМ МЫ APPLE НЕ ЗА ТО, ЧТО БЕРЁМ ДЕНЬГИ, А ЗА ТО, ЧТО ДЕНЬГИ
+     ОТКРЫВАЮТ. Правило 3.1.1 говорит про «features or functionality
+     WITHIN YOUR APP» — за них нужен IAP и его доля. Правило 3.1.3(e)
+     говорит обратное про услуги, которые потребляются ВНЕ приложения:
+     «you MUST use purchase methods other than in-app purchase» — для
+     них IAP не просто не нужен, он ЗАПРЕЩЁН, и доли нет.
+
+     Взнос КСЛТ покупает корт, турнир и тренера — всё за пределами
+     телефона. Поэтому из окна убраны ТРИ вещи, которые делали его
+     похожим на подписку: плашка тарифа, строка «ежемесячное членство»
+     и само число цены. На Android и в браузере цена остаётся: правило
+     про витрину App Store, а не про деньги вообще.
+
+     ЦЕНА СКРЫТА НЕ ПОТОМУ, ЧТО МЫ ГДЕ-ТО, А ПОТОМУ, ЧТО ТАК ВЕЛИТ
+     ПРАВИЛО: спрашиваем `ценуПоказываем()`, а не имя платформы. */
   window.KSLT_INFO.showPricing = function() {
+    var П = window.KSLT_PLATFORMA;
+    var ценуВидно = !П || П.ценуПоказываем();
     showInfoOverlay(I18N.t('pricing.title'),
-      '<div style="text-align:center;padding:8px 0">' +
-        '<div style="display:inline-block;background:var(--accent);color:#0A0A0A;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:12px">' + I18N.t('pricing.singlePlan') + '</div>' +
-        '<div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">' + I18N.t('pricing.monthlyMembership') + '</div>' +
-        '<div style="margin-bottom:16px"><span style="font-size:40px;font-weight:800;color:var(--accent)">1 000</span> <span style="font-size:14px;color:var(--text-muted)">' + I18N.t('td.som') + ' / ' + I18N.t('pricing.perMonth') + '</span></div>' +
-      '</div>' +
+      (ценуВидно
+        ? '<div style="text-align:center;padding:8px 0">' +
+            '<div style="display:inline-block;background:var(--accent);color:#0A0A0A;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:12px">' + I18N.t('pricing.singlePlan') + '</div>' +
+            '<div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">' + I18N.t('pricing.monthlyMembership') + '</div>' +
+            '<div style="margin-bottom:16px"><span style="font-size:40px;font-weight:800;color:var(--accent)">1 000</span> <span style="font-size:14px;color:var(--text-muted)">' + I18N.t('td.som') + ' / ' + I18N.t('pricing.perMonth') + '</span></div>' +
+          '</div>'
+        : '') +
       '<div class="info-content" style="text-align:left">' +
         '<ul style="list-style:none;padding:0;margin:0 0 20px">' +
           '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat1') + '</li>' +
@@ -322,9 +347,24 @@
           '<li style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px">✅ ' + I18N.t('pricing.feat5') + '</li>' +
           '<li style="padding:8px 0;font-size:14px">✅ ' + I18N.t('pricing.feat6') + '</li>' +
         '</ul>' +
-        '<p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:16px">' + I18N.t('pricing.howToPay') + '</p>' +
-        // WhatsApp убран: номер был выдуманный и оказался чужим настоящим
-        '<a href="https://t.me/kslt_admin" target="_blank" class="pd-challenge-btn" style="background:#2AABEE;display:block;text-align:center;text-decoration:none;color:#fff">Telegram</a>' +
+        /* СПОСОБ ОПЛАТЫ ИЗ ПРИЛОЖЕНИЯ УБРАН ЦЕЛИКОМ, А НЕ СПРЯТАН ПОД
+           ПЛАТФОРМУ. Две причины, и каждая достаточна.
+
+           ПЕРВАЯ: правило 3.1.3 запрещает внутри приложения «buttons,
+           external links OR OTHER CALLS TO ACTION» к способу оплаты
+           помимо IAP — везде, кроме витрины США. Кыргызстан не США.
+           Кнопка «Telegram» под строкой «для оплаты свяжитесь с нами»
+           была ровно таким призывом.
+
+           ВТОРАЯ: платёжного шлюза у нас нет вовсе, стоит заглушка.
+           ЗАГЛУШКА, КОТОРАЯ ЗОВЁТ ПЛАТИТЬ, — ЭТО ПРИЗЫВ, А НЕ ЗАГЛУШКА:
+           ревьюер видит экран, а не наши планы.
+
+           ШОВ ОСТАВЛЕН НАРОЧНО: когда шлюз появится, оплата включается
+           ЗДЕСЬ, одним блоком, и уже по 3.1.3(e) — картой или Apple Pay
+           внутри приложения, без доли Apple. Возвращать «как было» не
+           придётся. */
+        '<p style="font-size:13px;color:var(--text-muted);text-align:center;margin:0">' + I18N.t('pricing.atClub') + '</p>' +
       '</div>'
     );
   };
@@ -332,7 +372,10 @@
   window.KSLT_INFO.showFaq = function() {
     showInfoOverlay('FAQ',
       '<div class="info-content">' +
-        '<div class="faq-item"><h4>Как стать членом КСЛТ?</h4><p>Зарегистрируйтесь на сайте и оформите членство через раздел «Членство».</p></div>' +
+        /* FAQ НЕ ОТСЫЛАЕТ ОФОРМЛЯТЬ: прежний текст говорил «оформите членство
+           через раздел „Членство“» — то есть указывал путь к покупке внутри
+           приложения. Это call to action не меньше кнопки. */
+        '<div class="faq-item"><h4>Как вступить в клуб КСЛТ?</h4><p>Клубный взнос оформляется в клубе. После этого открывается участие в турнирах КСЛТ, скидки на корты и у тренеров.</p></div>' +
         '<div class="faq-item"><h4>Сколько стоит членство?</h4><p>Актуальные цены доступны в разделе «Членство» на сайте.</p></div>' +
         '<div class="faq-item"><h4>Как записаться на турнир?</h4><p>Откройте турнир и нажмите «Записаться». Необходимо активное членство.</p></div>' +
         '<div class="faq-item"><h4>Как работает рейтинг?</h4><p>Рейтинг ведётся внутри категории. Очки начисляются за турниры.</p></div>' +
