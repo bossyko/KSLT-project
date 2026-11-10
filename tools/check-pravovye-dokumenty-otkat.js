@@ -15,7 +15,12 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-dokumenty-'));
-['pages', 'tools', 'sql'].forEach(д =>
+/* ПЕСОЧНИЦА ПОВТОРЯЕТ ТО, ЧТО ЧИТАЕТ СТОРОЖ. С 09.11 он смотрит и в
+   `css/info-pages.css` — проверяет, что документ не спрятан безусловно.
+   Без `css` правила падали на ЧИСТОЙ копии, и прувер не доказывал ничего.
+   КОПИЯ, НЕПОЛНАЯ ОТНОСИТЕЛЬНО ПРОВЕРЯЕМОГО, НИЧЕГО НЕ ДОКАЗЫВАЕТ —
+   второй раз за сутки, первый был у сторожа разметки. */
+['pages', 'tools', 'sql', 'css'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 
 const RU  = 'tools/dokumenty/politika-ru.html',
@@ -37,7 +42,12 @@ const RU  = 'tools/dokumenty/politika-ru.html',
 
 const ФАЙЛЫ = [RU, EN, KG, СТР, 'pages/privacy-policy-en.html', 'pages/privacy-policy-kg.html', SQL,
     СОГЛ_RU, 'tools/dokumenty/soglashenie-en.html', СОГЛ_KG,
-    'pages/terms.html', 'pages/terms-en.html', 'pages/terms-kg.html'];
+    'pages/terms.html', 'pages/terms-en.html', 'pages/terms-kg.html',
+    /* ПРАВКА К ФАЙЛУ, КОТОРОГО НЕТ В ЭТОМ СПИСКЕ, НЕ ПРИМЕНЯЕТСЯ И НЕ
+       ЖАЛУЕТСЯ: цикл просто не доходит до него, откат «проходит», а правило
+       остаётся зелёным. Поймано 09.11 на двух новых откатах про скрытый
+       документ — они молчали, пока css не попал сюда. */
+    'css/info-pages.css'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => {
     const п = path.join(КОРЕНЬ, ф);
@@ -136,7 +146,20 @@ const ОТКАТЫ = [
 
     ['потерять источник кыргызской редакции',
      ['УДАЛИТЬ', KG],
-     'политика: источник и страницы на месте']
+     'политика: источник и страницы на месте'],
+
+    /* ДВА ОТКАТА НА НАХОДКУ 09.11: документ, спрятанный безусловно. */
+    ['спрятать документ безусловно, как было до 09.11',
+     ['css/info-pages.css',
+      '.ip-fade-in {\n    opacity: 1;\n    transform: none;',
+      '.ip-fade-in {\n    opacity: 0;\n    transform: translateY(24px);'],
+     'документ не прячется безусловно'],
+
+    ['снять условие появления, оставив скрытие без хозяина',
+     ['css/info-pages.css',
+      '.js-pojavlenie .ip-fade-in {',
+      '.net-takogo-klassa .ip-fade-in {'],
+     'появление остаётся улучшением, а не условием']
 ];
 
 const база = прогон(null);
