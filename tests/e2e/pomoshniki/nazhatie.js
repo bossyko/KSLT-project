@@ -35,9 +35,21 @@ async function нажатьСквозьПомехи(page, селектор) {
                     ? '.' + у.className.trim().split(/\s+/).join('.') : '');
             const ц = document.querySelector(с);
             if (!ц) return { нет: true };
+            /* ТОЧКА ВНЕ ОКНА НЕ ПРИНАДЛЕЖИТ НИКОМУ: `elementFromPoint`
+               отдаёт null, и это НЕ «свободно». Поймано 10.11 на виде
+               телефона лёжа (844×390): пункт меню стоял ниже окна, восемь
+               заходов подряд получали пустоту, помех не находили — и проба
+               падала словами «перекрыто 0 раз подряд», то есть ни о чём.
+               Цель сначала доводится до вида, как это сделал бы человек. */
+            ц.scrollIntoView({ block: 'center', inline: 'center' });
             const r = ц.getBoundingClientRect();
             if (!r.width || !r.height) return { невидима: true, цель: имя(ц) };
-            const э = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            const x = r.left + r.width / 2, y = r.top + r.height / 2;
+            if (x < 0 || y < 0 || x > innerWidth || y > innerHeight)
+                return { заОкном: true, цель: имя(ц),
+                         где: Math.round(x) + ',' + Math.round(y),
+                         окно: innerWidth + 'x' + innerHeight };
+            const э = document.elementFromPoint(x, y);
             if (!э) return { пусто: true };
             if (э === ц || ц.contains(э) || э.contains(ц)) return { свободно: true };
             /* СЛОЙ — ЭТО ТОТ, КОГО ПРЯЧУТ, А НЕ ТОТ, НА КОГО ПОПАЛИ:
@@ -65,6 +77,10 @@ async function нажатьСквозьПомехи(page, селектор) {
         if (кто.нет) throw new Error('нет элемента ' + селектор +
             (помехи.length ? '. Помехи до этого: ' + помехи.join(' | ') : ''));
         if (кто.невидима) throw new Error('цель ' + селектор + ' нулевого размера (' + кто.цель + ')');
+        if (кто.заОкном) throw new Error('цель ' + селектор + ' (' + кто.цель +
+            ') стоит за окном даже после прокрутки: центр ' + кто.где +
+            ' при окне ' + кто.окно + '.\nПРОКРУТКА НЕ ПОМОГЛА — ЗНАЧИТ ЦЕЛЬ ' +
+            'НЕ В ПРОКРУЧИВАЕМОМ СЛОЕ, А ЗА ГРАНИЦЕЙ РАЗМЕТКИ.');
         if (кто.пусто) { await page.waitForTimeout(400); continue; }
         помехи.push(кто.слой + ' (под точкой ' + кто.помеха + ', ' + кто.как + ')');
         await page.waitForTimeout(450);

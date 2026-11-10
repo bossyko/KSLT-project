@@ -62,7 +62,12 @@ async function открытьВзнос(page, { платформа } = {}) {
     return page.evaluate(() => {
         const о = document.getElementById('infoOverlay');
         return {
-            язык: (window.I18N && (window.I18N.ОДИН_ЯЗЫК || window.I18N.lang)) || '?',
+            /* ДОМ ЗОВЁТСЯ `KSLT_I18N`, А НЕ `I18N`: внутри файла имя
+               короткое, наружу выставлено длинное (`i18n.js:7`). Я взял
+               короткое и получил «?» вместо языка на всех пяти видах.
+               Рядом в том же файле уже записана ровно эта беда про
+               `currentLang` — ИМЯ ПРОВЕРЯЕТСЯ У ДОМА, А НЕ У ПАМЯТИ. */
+            язык: (window.KSLT_I18N && (window.KSLT_I18N.ОДИН_ЯЗЫК || window.KSLT_I18N.lang)) || '?',
             платформа: window.KSLT_PLATFORMA.имя,
             ценуПоказываем: window.KSLT_PLATFORMA.ценуПоказываем(),
             текст: о.textContent.replace(/\s+/g, ' ').trim(),
