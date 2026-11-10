@@ -157,7 +157,15 @@ export function замер(сколько, док) {
     const вид = док.defaultView;
     const итог = [], неМерено = [];
     док.querySelectorAll('body *').forEach(эл => {
-        if (!([...эл.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 1))) return;
+    /* ОДИН ЗНАК — НЕ НАДПИСЬ, и порог «длиннее одного» стоял здесь с
+       самого начала. Но длина считалась ячейками UTF-16, а эмодзи
+       занимает две: иконка-кубок в карточке турнира проходила как
+       надпись из двух знаков и падала с контрастом 1.26 — при том
+       что рисуется она с opacity 0.25 именно как подложка.
+       ДЛИНА ТЕКСТА СЧИТАЕТСЯ ЗНАКАМИ, А НЕ ЯЧЕЙКАМИ: `[...строка]`
+       разбирает суррогатные пары, `.length` — нет. */
+        if (!([...эл.childNodes].some(n => n.nodeType === 3 &&
+                [...n.textContent.trim()].length > 1))) return;
         const c = вид.getComputedStyle(эл);
         if (c.visibility === 'hidden' || c.display === 'none' || +c.opacity === 0) return;
         const r = эл.getBoundingClientRect();

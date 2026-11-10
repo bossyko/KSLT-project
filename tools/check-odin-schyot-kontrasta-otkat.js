@@ -13,7 +13,11 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-kontrast-'));
-['css', 'tools', 'tests', 'maket'].forEach(д =>
+/* КОПИЯ, НЕПОЛНАЯ ОТНОСИТЕЛЬНО ПРОВЕРЯЕМОГО, НИЧЕГО НЕ ДОКАЗЫВАЕТ.
+   10.11 сторож получил правило о mobile/www/css/app.css — папку
+   пришлось добавить сюда же, иначе прувер падал бы на её отсутствии,
+   а не на откате. */
+['css', 'tools', 'tests', 'maket', 'mobile'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 
 const МОД = 'tools/kontrast.mjs',
@@ -21,7 +25,8 @@ const МОД = 'tools/kontrast.mjs',
       ОКН = 'tests/e2e/design-system/104-kontrast-v-oknah.spec.js',
       ЦСС = 'css/style.css',
       НОВ = 'tools/razovye/zzz-kopiya-formuly.js';
-const ФАЙЛЫ = [МОД, ПРБ, ОКН, ЦСС];
+const ПРИЛ = 'mobile/www/css/app.css';
+const ФАЙЛЫ = [МОД, ПРБ, ОКН, ЦСС, ПРИЛ];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -45,6 +50,16 @@ function прогон(правки, лишний) {
 }
 
 const ОТКАТЫ = [
+    ['считать длину надписи ячейками UTF-16', [[МОД,
+      '[...n.textContent.trim()].length > 1',
+      'n.textContent.trim().length > 1']],
+     'длина надписи считается знаками'],
+
+    ['вернуть подпись статистики на --text-dim', [[ПРИЛ,
+      'font-size: 11px; color: var(--text-muted);\n  text-align: center;',
+      'font-size: 11px; color: var(--text-dim);\n  text-align: center;']],
+     'подпись статистики кабинета не на --text-dim'],
+
     ['спрятать формулу внутрь модуля', [[МОД,
       'export const контраст = (a,b)', 'const контраст = (a,b)']],
      'модуль отдаёт наружу и замер, и саму формулу'],
