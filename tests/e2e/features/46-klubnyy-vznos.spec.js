@@ -17,7 +17,7 @@
  * человека: ПРОБА, КОТОРАЯ СОЗДАЁТ СВОЁ ОКНО, ПРОВЕРЯЕТ ДОМ, А НЕ ПРОДУКТ.
  */
 const { test, expect } = require('../../fixtures');
-const { нажатьСквозьПомехи } = require('../../pomoshniki/nazhatie');
+const { нажатьСквозьПомехи } = require('../pomoshniki/nazhatie');
 
 const ПРИЛОЖЕНИЕ = '/mobile/www/index.html';
 
