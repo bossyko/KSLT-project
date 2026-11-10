@@ -436,7 +436,7 @@
        1024 — ноль вместе с зазором строк ниже. Высота карточки не
        меняется ни там, ни там. */
     --to-thumb: 96px;
-    padding-left: calc(var(--to-thumb) + var(--space-2));
+    --to-pad-left: calc(var(--to-thumb) + var(--space-2));
 }
 
 .to-side-stack .to-compact .to-compact-right {
@@ -769,7 +769,21 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--space-md);
     align-items: center;
-    padding: var(--space-md) var(--space-lg);
+    /* ЛЕВЫЙ ОТСТУП КАРТОЧКИ — ОДНО ПОНЯТИЕ, И ЖИВЁТ ОНО В ПЕРЕМЕННОЙ.
+       10.11, телефон вертикально: название турнира лежало ПОВЕРХ афиши.
+       Замер: афиша (::before) занимает слева 120, текст начинается с 41-го
+       пикселя — наезд 95. Место под афишу держал `padding-left` у
+       .to-compact-thumb, а ниже по файлу, в медиа 640, стояло
+       `.to-compact { padding: ... }` — та же специфичность (0,1,0), но
+       ПОЗЖЕ. СОКРАЩЁННАЯ ЗАПИСЬ ЗАТИРАЕТ ОТДЕЛЬНОЕ СВОЙСТВО, ДАЖЕ ЕСЛИ ТО
+       НАПИСАНО ТОЧНЕЕ, и место под афишу пропадало — а сама афиша нет.
+       Чинить специфичностью значило бы оставить второе определение жить.
+       Отступы объявлены ОДИН раз здесь; точки останова и варианты карточки
+       меняют ПЕРЕМЕННЫЕ, а не свойство. */
+    --to-pad-y: var(--space-md);
+    --to-pad-x: var(--space-lg);
+    --to-pad-left: var(--to-pad-x);
+    padding: var(--to-pad-y) var(--to-pad-x) var(--to-pad-y) var(--to-pad-left);
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -876,7 +890,7 @@
     gap: var(--space-md);
     align-items: center;
     /* Слева место под афишу: она лежит отдельным слоем и тянется во всю высоту */
-    padding-left: calc(var(--to-thumb, 120px) + var(--space-md));
+    --to-pad-left: calc(var(--to-thumb, 120px) + var(--space-md));
     overflow: hidden;
 }
 
@@ -1748,8 +1762,11 @@
         gap: var(--space-sm);
     }
 
+    /* МЕНЯЕМ ПЕРЕМЕННЫЕ, А НЕ СВОЙСТВО: сокращённый `padding` здесь
+       затирал место под афишу (разбор у .to-compact выше). */
     .to-compact {
-        padding: var(--space-sm) var(--space-md);
+        --to-pad-y: var(--space-sm);
+        --to-pad-x: var(--space-md);
     }
 
     .to-compact-info h4 {
@@ -2037,7 +2054,7 @@
        даёт содержимое. */
     .trn-block .to-side-stack .to-compact-thumb {
         --to-thumb: 96px;
-        padding-left: calc(var(--to-thumb) + var(--space-sm));
+        --to-pad-left: calc(var(--to-thumb) + var(--space-sm));
         /* ОДНА КОЛОНКА, А НЕ ДВЕ. Столб объявляет `auto minmax(0, 1fr)`
            (css/tournaments-overview.css:393) — это раскладка широкого вида,
            где слева столбец меты, справа название. На телефоне мета — РЯД,
@@ -2103,7 +2120,7 @@
    есть везде, кроме той самой узкой полосы. */
 @container (max-width: 340px) {
     .to-compact-thumb {
-        padding-left: var(--space-lg);
+        --to-pad-left: var(--to-pad-x);
         grid-template-columns: minmax(0, 1fr);
         align-content: start;
     }
