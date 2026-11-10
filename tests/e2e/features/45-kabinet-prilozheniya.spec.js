@@ -44,6 +44,67 @@ const РАЗДЕЛЫ = (function () {
     return найдено.filter(и => !НЕ_НАЖИМАЕМ[и]);
 })();
 
+/* ══ НАЖАТИЕ СКВОЗЬ ПОМЕХИ ════════════════════════════════════════════
+   НЕ ГАДАТЬ, ЧТО МЕШАЕТ НАЖАТИЮ, А СПРОСИТЬ У БРАУЗЕРА. Шесть прогонов
+   ушло на то, чтобы по одному угадывать, кто стоит поверх вкладки:
+   знакомство, экран входа, очередь поздравлений — и каждый раз следующий
+   находился только новым прогоном. Перечислять их по одному бесполезно:
+   список растёт, а проба падает молча, одним «timeout».
+
+   ПОМЕХА НАЗЫВАЕТСЯ ТОЧКОЙ, А НЕ ПЕРЕЧНЕМ. `elementFromPoint` в центре
+   цели отдаёт того, кто реально примет нажатие. Кто бы это ни был — его
+   имя попадает в список, он закрывается своей кнопкой (а если кнопки нет,
+   прячется), и путь проверяется заново. Сколько помех было и какие — проба
+   рассказывает вслух, даже когда прошла.
+   ПРОБА, КОТОРУЮ НЕЛЬЗЯ ПРОВЕРИТЬ САМОМУ, ОБЯЗАНА РАССКАЗЫВАТЬ. */
+async function нажатьСквозьПомехи(page, селектор) {
+    const помехи = [];
+    for (let заход = 0; заход < 8; заход++) {
+        const кто = await page.evaluate((с) => {
+            const имя = (у) => !у ? '?' : у.tagName.toLowerCase() +
+                (у.id ? '#' + у.id : '') +
+                ((у.className && typeof у.className === 'string')
+                    ? '.' + у.className.trim().split(/\s+/).join('.') : '');
+            const ц = document.querySelector(с);
+            if (!ц) return { нет: true };
+            const r = ц.getBoundingClientRect();
+            if (!r.width || !r.height) return { невидима: true, цель: имя(ц) };
+            const э = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            if (!э) return { пусто: true };
+            if (э === ц || ц.contains(э) || э.contains(ц)) return { свободно: true };
+            /* СЛОЙ — ЭТО ТОТ, КОГО ПРЯЧУТ, А НЕ ТОТ, НА КОГО ПОПАЛИ:
+               поднимаемся до ближайшего вынутого из потока родителя. */
+            let слой = э;
+            while (слой.parentElement && слой.parentElement !== document.body) {
+                const п = getComputedStyle(слой).position;
+                if (п === 'fixed' || п === 'absolute') break;
+                слой = слой.parentElement;
+            }
+            /* ЗАКРЫВАТЬ СВОЕЙ КНОПКОЙ, А НЕ СОКРЫТИЕМ: окно, снятое
+               руками, оставляет приложение в середине своего состояния. */
+            const кнопка = слой.querySelector(
+                '.ach-btn, .onb-skip, [class*="close"], [class*="skip"], button');
+            let как;
+            if (кнопка && кнопка.offsetParent !== null) { кнопка.click(); как = 'закрыт ' + имя(кнопка); }
+            else { слой.style.display = 'none'; как = 'СПРЯТАН'; }
+            return { помеха: имя(э), слой: имя(слой), как: как };
+        }, селектор);
+
+        if (кто.свободно) {
+            await page.locator(селектор).first().click({ timeout: 10000 });
+            return помехи;
+        }
+        if (кто.нет) throw new Error('нет элемента ' + селектор +
+            (помехи.length ? '. Помехи до этого: ' + помехи.join(' | ') : ''));
+        if (кто.невидима) throw new Error('цель ' + селектор + ' нулевого размера (' + кто.цель + ')');
+        if (кто.пусто) { await page.waitForTimeout(400); continue; }
+        помехи.push(кто.слой + ' (под точкой ' + кто.помеха + ', ' + кто.как + ')');
+        await page.waitForTimeout(450);
+    }
+    throw new Error('нажатие по ' + селектор + ' перекрыто ' + помехи.length +
+        ' раз подряд: ' + помехи.join(' | '));
+}
+
 async function открытьКабинет(page) {
     /* ОТМЕТКА ЗНАКОМСТВА — ДО ПЕРВОЙ ЗАГРУЗКИ, иначе окно успевает встать
        поверх приложения и забрать себе все нажатия. */
@@ -139,7 +200,9 @@ async function открытьКабинет(page) {
         () => !document.querySelector('.ach-card'),
         null, { timeout: 15000 }).catch(() => {});
 
-    await page.locator('.tab-item[data-screen="screenProfile"]').first().click();
+    const помехи = await нажатьСквозьПомехи(page,
+        '.tab-item[data-screen="screenProfile"]');
+    if (помехи.length) ошибки.push('ПОМЕХИ НА ПУТИ К ВКЛАДКЕ: ' + помехи.join(' | '));
     /* ПРИЗНАК ПЕРЕХОДА — САМ ЭКРАН, А НЕ ПРОШЕДШЕЕ ВРЕМЯ. */
     await page.waitForFunction(() => {
         const э = document.getElementById('screenProfile');
@@ -155,6 +218,39 @@ test.describe.configure({ timeout: 90000 });
 test.use({ storageState: playerState });
 
 test.describe('Кабинет приложения — под живым входом', () => {
+
+    /* ══ СНИМОК СОСТОЯНИЯ: ОДИН ПРОГОН — ВСЯ КАРТИНА ═══════════════════
+       Этот тест НИЧЕГО НЕ ТРЕБУЕТ и не падает. Он печатает, что на самом
+       деле происходит в кабинете, и существует по одной причине: проверить
+       пробу своими руками я не могу — тестовая база недоступна из моего
+       окружения, и каждая догадка стоит Косте прогона. Шесть прогонов
+       ушло на то, что один такой снимок показал бы сразу.
+       ПРОБА, КОТОРУЮ НЕЛЬЗЯ ПРОВЕРИТЬ САМОМУ, ОБЯЗАНА РАССКАЗЫВАТЬ. */
+    test('@снимок состояние кабинета', async ({ page }) => {
+        const ошибки = await открытьКабинет(page).catch(e => ['СОРВАЛОСЬ: ' + e.message]);
+        const о = await page.evaluate((разделы) => {
+            const есть = и => !!document.getElementById(и);
+            const экран = document.getElementById('screenProfile');
+            return {
+                сессия: Object.keys(localStorage).some(к => /^sb-.*-auth-token$/.test(к)),
+                пользователь: !!(window.AUTH && window.AUTH.currentUser),
+                экранВхода: !!document.querySelector('.auth-screen.open'),
+                поздравление: !!document.querySelector('.ach-card'),
+                профильАктивен: !!(экран && экран.classList.contains('active')),
+                текстаВкабинете: экран ? экран.textContent.trim().length : 0,
+                строкиЕсть: разделы.filter(есть),
+                строкиНет: разделы.filter(и => !есть(и)),
+                окон: document.querySelectorAll('.td-overlay, .gi-overlay').length,
+            };
+        }, РАЗДЕЛЫ).catch(e => ({ сорвалось: e.message }));
+
+        console.log('\n──── СОСТОЯНИЕ КАБИНЕТА ────');
+        console.log(JSON.stringify(о, null, 1));
+        console.log('ошибок страницы: ' + (Array.isArray(ошибки) ? ошибки.length : '?'));
+        if (Array.isArray(ошибки) && ошибки.length) console.log(ошибки.slice(0, 5).join('\n'));
+        console.log('────────────────────────────\n');
+    });
+
 
     test('кабинет не пуст: вход виден и разделы нарисованы', async ({ page }) => {
         const ошибки = await открытьКабинет(page);
