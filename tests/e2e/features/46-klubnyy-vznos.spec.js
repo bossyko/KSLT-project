@@ -17,6 +17,7 @@
  * человека: ПРОБА, КОТОРАЯ СОЗДАЁТ СВОЁ ОКНО, ПРОВЕРЯЕТ ДОМ, А НЕ ПРОДУКТ.
  */
 const { test, expect } = require('../../fixtures');
+const { нажатьСквозьПомехи } = require('../../pomoshniki/nazhatie');
 
 const ПРИЛОЖЕНИЕ = '/mobile/www/index.html';
 
@@ -44,11 +45,19 @@ async function открытьВзнос(page, { платформа } = {}) {
     });
     await page.waitForFunction(
         () => !!document.getElementById('menuPricing'), null, { timeout: 20000 });
-    await page.locator('#menuBtn').click();
+
+    /* ЭКРАН ВХОДА СТОИТ ПОВЕРХ, ПОКА БАЗА НЕ ОТВЕТИЛА (`index.html:436`).
+       Проба идёт гостем, ответа ждать неоткуда, и все 25 прогонов 10.11
+       легли именно здесь — 90 секунд на нажатии по кнопке меню.
+       Помощник спрашивает у браузера, КТО принимает нажатие, закрывает
+       помеху её же кнопкой и говорит вслух, что убрал. */
+    const помехиМеню = await нажатьСквозьПомехи(page, '#menuBtn');
     await page.waitForFunction(
         () => { const м = document.getElementById('menuOverlay');
                 return !!м && м.classList.contains('open'); }, null, { timeout: 10000 });
-    await page.locator('#menuPricing').click();
+    const помехиПункта = await нажатьСквозьПомехи(page, '#menuPricing');
+    const помехи = помехиМеню.concat(помехиПункта);
+    if (помехи.length) console.log('помехи на пути к окну взноса: ' + помехи.join(' | '));
     await page.waitForSelector('#infoOverlay', { timeout: 10000 });
     return page.evaluate(() => {
         const о = document.getElementById('infoOverlay');

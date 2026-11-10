@@ -15,7 +15,7 @@ const КОРЕНЬ = path.join(__dirname, '..');
 const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vznos-'));
 /* КОПИЯ, НЕПОЛНАЯ ОТНОСИТЕЛЬНО ПРОВЕРЯЕМОГО, НИЧЕГО НЕ ДОКАЗЫВАЕТ —
    пятый раз за четверо суток. Сторож читает mobile и лежит в tools. */
-['tools', 'mobile/www'].forEach(д => {
+['tools', 'mobile/www', 'tests/e2e'].forEach(д => {
     fs.mkdirSync(path.join(песок, д), { recursive: true });
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true });
 });
@@ -24,8 +24,9 @@ const ПЛАТФ = 'mobile/www/js/kslt-platforma.js',
       ПАРТН = 'mobile/www/js/screens/partners.js',
       КАРТ  = 'mobile/www/js/screens/player-detail.js',
       ЯЗЫКИ = 'mobile/www/js/i18n.js',
-      ДОМ   = 'mobile/www/index.html';
-const ФАЙЛЫ = [ПЛАТФ, ПАРТН, КАРТ, ЯЗЫКИ, ДОМ];
+      ДОМ   = 'mobile/www/index.html',
+      ПРОБА = 'tests/e2e/features/46-klubnyy-vznos.spec.js';
+const ФАЙЛЫ = [ПЛАТФ, ПАРТН, КАРТ, ЯЗЫКИ, ДОМ, ПРОБА];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -46,6 +47,16 @@ function прогон(правки) {
 }
 
 const ОТКАТЫ = [
+    ['отнять у пробы взноса общий помощник', [[ПРОБА,
+      "const { нажатьСквозьПомехи } = require('../../pomoshniki/nazhatie');",
+      "var нажатьСквозьПомехи = async (p, s) => { await p.locator(s).click(); return []; };"]],
+     'проба взноса зовёт общий помощник'],
+
+    ['завести пробе свою копию приёма', [[ПРОБА,
+      "    const помехиМеню = await нажатьСквозьПомехи(page, '#menuBtn');",
+      "    const нажатьСквозьПомехи2 = async () => [];\n    function нажатьСквозьПомехи(p, s) { return p.locator(s).click(); }\n    const помехиМеню = await нажатьСквозьПомехи(page, '#menuBtn');"]],
+     'приём расчистки пути не копируется по пробам'],
+
     ['вернуть приглашение за взнос', [[ПАРТН,
       "if (!isGuest) {\n        html += '<button class=\"partner-invite-btn\"",
       "if (AUTH._membershipStatus) {\n        html += '<button class=\"partner-invite-btn\""]],
