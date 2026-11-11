@@ -11,6 +11,12 @@
     var finSearchQuery = '', finFilterType = '', finFilterStatus = '';
     var finPeriodMode = '', finDateFrom = '', finDateTo = '';
     var finPage = 1, finAllData = [], finEditingId = null, finEditingSource = null;
+    /* ОТБОР РАЗДЕЛА — ОДНО ОПРЕДЕЛЕНИЕ. До 11.11 отбор по датам был
+       написан ТРИЖДЫ: здесь, в листе печати и в выгрузке CSV — и две
+       последние копии знали только даты. Человек сужал поиск до одного
+       клуба, жал «CSV» и получал все платежи. ДВА ОПРЕДЕЛЕНИЯ ОДНОГО
+       ПОНЯТИЯ СЧИТАЮТ ДВАЖДЫ, А НЕ НАДЁЖНЕЕ. */
+    var finОтобрано = [];
     var FIN_PER_PAGE = 15;
 
     function renderFinancesSection() {
@@ -251,6 +257,9 @@
         } else if (finFilterStatus === 'expired') {
             filtered = filtered.filter(function(p) { return !p.period_end || p.period_end < today; });
         }
+
+        finОтобрано = filtered;
+        A.подписьВыгрузки(['adFinPdfBtn', 'adFinExcelBtn'], filtered.length);
 
         var totalItems = filtered.length;
         var totalPages = Math.max(1, Math.ceil(totalItems / FIN_PER_PAGE));
@@ -972,13 +981,7 @@
     // ---- PDF ----
     function openFinPdfReport() {
         var today = KSLT_VREMYA.сегодня();
-        var filtered = finAllData.slice();
-        if (finDateFrom) {
-            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) >= finDateFrom; });
-        }
-        if (finDateTo) {
-            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) <= finDateTo; });
-        }
+        var filtered = finОтобрано;
 
         var active = 0, expired = 0, totalAmount = 0;
         filtered.forEach(function(p) {
@@ -1047,13 +1050,7 @@
     // ---- Excel Export ----
     function exportFinExcel() {
         var today = KSLT_VREMYA.сегодня();
-        var filtered = finAllData.slice();
-        if (finDateFrom) {
-            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) >= finDateFrom; });
-        }
-        if (finDateTo) {
-            filtered = filtered.filter(function(p) { return p.created_at && p.created_at.slice(0, 10) <= finDateTo; });
-        }
+        var filtered = finОтобрано;
 
         var headers = ['№', L.payEntity, 'Тип', L.payAmount, 'Валюта', 'Активен до', L.thStatus, L.payCreatedAt];
         var rows = filtered.map(function(p, i) {

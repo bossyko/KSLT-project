@@ -122,6 +122,17 @@
     var plrSearchQuery = '';
     // Игроков триста с лишним — тянуть их одним куском незачем
     var PLR_PER_PAGE = 25;
+
+    /* ОТБОР РАЗДЕЛА — ОДНО ОПРЕДЕЛЕНИЕ. Здесь фильтры уходят В БАЗУ, и
+       таблица берёт у неё страницу. До 11.11 выгрузка делала СВОЙ запрос
+       без единого фильтра: человек искал одного игрока, видел одну
+       строку и скачивал файл на три сотни. Теперь оба запроса проходят
+       через этот дом и разойтись не могут. */
+    function плрФильтры(query) {
+        if (plrFilterCategory) query = query.eq('category_id', plrFilterCategory);
+        if (plrSearchQuery) query = query.ilike('name', '%' + plrSearchQuery + '%');
+        return query;
+    }
     var plrPage = 1;
 
     // ---- Rating state (moved from ratings.js) ----
@@ -229,7 +240,7 @@
                 '<h2 class="ad-section-title">' + L.players + '</h2>' +
                 (isAdm ? '<div class="ad-section-header-actions">' +
                     '<button class="ad-btn ad-btn-sm" id="adPlrImportBtn">\ud83d\udce5 ' + L.plrImport + '</button>' +
-                    '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adPlrExportBtn">\ud83d\udcca ' + L.plrExport + '</button>' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adPlrExportBtn" title="' + L.plrExportHint + '">\ud83d\udcca CSV</button>' +
                 '</div>' : '') +
             '</div>' +
             '<div class="ad-filter-row ad-filter-sticky">' +
@@ -279,16 +290,9 @@
         if (!A.client) return;
         var isAdm = A.currentRole === 'admin';
 
-        var query = A.client.from('players')
+        var query = плрФильтры(A.client.from('players')
             .select('id,name,photo,country,category_id,points,wins,losses,rank_change,banned_until,view_count,is_guest', { count: 'exact' })
-            .order('points', { ascending: false });
-
-        if (plrFilterCategory) {
-            query = query.eq('category_id', plrFilterCategory);
-        }
-        if (plrSearchQuery) {
-            query = query.ilike('name', '%' + plrSearchQuery + '%');
-        }
+            .order('points', { ascending: false }));
 
         // Страницу берём у базы, а не режем всё загруженное: так не тянем
         // три сотни строк ради двадцати пяти видимых
@@ -300,6 +304,10 @@
             plrPage = Math.max(1, Math.ceil(result.count / PLR_PER_PAGE));
             return loadPlayersList();
         }
+
+        /* ЧИСЛО СТАВИТСЯ ДО ВСЕХ ВОЗВРАТОВ: пустой отбор тоже обязан
+           погасить кнопку, иначе она зовёт скачать пустой файл. */
+        A.подписьВыгрузки('adPlrExportBtn', result.count || 0);
 
         var table = document.getElementById('adPlrTable');
         if (!table) return;
@@ -2991,9 +2999,11 @@
     // ---- Export Players to Excel/CSV ----
     async function exportPlayersExcel() {
         if (!A.client) return;
-        var res = await A.client.from('players')
+        /* ТОТ ЖЕ ОТБОР, ЧТО У ТАБЛИЦЫ — но без `.range`: в файл уходит
+           весь отбор, а не видимые двадцать пять строк. */
+        var res = await плрФильтры(A.client.from('players')
             .select('id,name,name_en,category_id,points,wins,losses,ntrp_singles,country')
-            .order('points', { ascending: false });
+            .order('points', { ascending: false }));
         var items = res.data || [];
         if (!items.length) { A.showToast(L.plrImportNoData, 'warning'); return; }
 

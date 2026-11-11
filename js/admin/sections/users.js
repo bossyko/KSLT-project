@@ -12,6 +12,11 @@
     var usrFilterRole = '';
     var usrPeriodMode = '', usrDateFrom = '', usrDateTo = '';
     var usrAllItems = [], usrMemMap = {};
+    /* ОТБОР РАЗДЕЛА — ОДНО ОПРЕДЕЛЕНИЕ. То, что человек видит в таблице:
+       период и роль уже ушли в запрос, поиск применяется здесь. Выгрузка
+       и лист печати читают ЭТУ переменную и своего отбора не заводят —
+       иначе файл и экран расходятся молча. */
+    var usrОтобрано = [];
     var usrDeletedCount = 0, usrDeletedPeriodCount = 0;
     var usrChartInstance = null;
     var usrSortByMembership = 0; // 0=none, 1=asc (expiring soon first), -1=desc
@@ -301,6 +306,9 @@
             }
             return 0;
         });
+
+        usrОтобрано = items;
+        A.подписьВыгрузки(['adUsrPdfBtn', 'adUsrExcelBtn'], items.length);
 
         var table = document.getElementById('adUsrTable');
         if (!table) return;
@@ -1555,7 +1563,7 @@
     // ---- PDF ----
     function openUsrPdfReport() {
         var now = new Date();
-        var items = usrAllItems;
+        var items = usrОтобрано;
         var memMap = usrMemMap;
 
         // Compute stats
@@ -1657,7 +1665,7 @@
 
     // ---- Excel Export ----
     function exportUsrExcel() {
-        var items = usrAllItems;
+        var items = usrОтобрано;
         var memMap = usrMemMap;
         var today = KSLT_VREMYA.сегодня();
 

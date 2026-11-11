@@ -447,6 +447,19 @@ const КУСКИ = [
     ['кабинеты не расходятся',
      'check-kabinety-ne-rashodyatsya.js', 'check-kabinety-ne-rashodyatsya-otkat.js'],
 
+    ['выгрузки админки',
+     'check-vygruzki.js', 'check-vygruzki-otkat.js'],
+
+    /* ТРИ ПАРЫ, ЛЕЖАВШИЕ МИМО СПИСКА. Пруверы к ним написаны и лежат на
+       диске, но общий бегунок их не звал — то есть они не гонялись ни
+       разу с того дня, как появились. Внесены 11.11. */
+    ['клубный взнос',
+     'check-klubnyy-vznos.js', 'check-klubnyy-vznos-otkat.js'],
+    ['сведения о поставщике',
+     'check-svedeniya-o-postavshchike.js', 'check-svedeniya-o-postavshchike-otkat.js'],
+    ['карта и сетка на телефоне',
+     'check-telefon-karta-i-setka.js', 'check-telefon-karta-i-setka-otkat.js'],
+
     /* СТОРОЖ НАД ЭТИМ САМЫМ СПИСКОМ: он падает, когда пара заведена, а в
        список не внесена, и когда одна пара стоит в нём дважды. */
     ['список пар полон',

@@ -282,7 +282,10 @@
             return 0;
         });
 
+        /* ЭТАЛОН РАЗДЕЛА: отбор один, и выгрузка с печатью читают его.
+           Остальные три раздела 11.11 приведены к этому виду. */
         vchFilteredData = filtered;
+        A.подписьВыгрузки(['adVchExportPdf', 'adVchExcelBtn'], filtered.length);
 
         var totalItems = filtered.length;
         var totalPages = Math.max(1, Math.ceil(totalItems / VCH_PER_PAGE));
