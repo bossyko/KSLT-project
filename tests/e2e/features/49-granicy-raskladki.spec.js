@@ -40,6 +40,7 @@ const УЗЛЫ = [
     ['спонсорам',       '.sp-offer'],
     ['подвал',          '.footer-content'],
     ['подвал-бренд',    '.footer-brand'],
+    ['подвал-правовой', '.footer-bottom-links'],
 ];
 
 /* Границы, которые сегодня живут в коде. Печатаются те, что сработали:
@@ -132,6 +133,52 @@ for (const стр of СТРАНИЦЫ) {
                 String(с.кегль).padStart(6), (с.раскладка + '/' + с.напр).padEnd(16),
                 String(с.колонок).padStart(3),
             ].join(' '));
+        }
+
+        /* ПОДВАЛ И КНОПКА «НАВЕРХ» НЕ ПЕРЕКРЫВАЮТ ДРУГ ДРУГА.
+           Запись h258 посчитана на 390: ряд правовых ссылок шириной 332
+           стоял в x 29..361, кнопка (right:16, шириной 44) — в x 330..374,
+           НАЛОЖЕНИЕ 31 точка. Решение h260 прячет кнопку, когда подвал
+           виден. Проверяем это там, где оно и происходит: прокручиваем до
+           подвала и смотрим, перекрывает ли кнопка ссылки.
+           ПЕРЕКРЫТИЕ СЧИТАЕТСЯ ПРЯМОУГОЛЬНИКАМИ, А НЕ НА ГЛАЗ. */
+        const подвалИКнопка = await page.evaluate(async () => {
+            window.scrollTo(0, document.documentElement.scrollHeight);
+            await new Promise(r => setTimeout(r, 700));
+            const к = document.querySelector('.scroll-to-top');
+            const ряд = document.querySelector('.footer-bottom-links');
+            if (!ряд) return { нетРяда: true };
+            const c = к ? getComputedStyle(к) : null;
+            const виднаКнопка = !!(к && к.getClientRects().length &&
+                c.display !== 'none' && c.visibility !== 'hidden' && +c.opacity > 0);
+            const рр = ряд.getBoundingClientRect();
+            const кр = к ? к.getBoundingClientRect() : null;
+            const наложение = (виднаКнопка && кр)
+                ? Math.max(0, Math.min(рр.right, кр.right) - Math.max(рр.left, кр.left))
+                : 0;
+            const вертикально = (виднаКнопка && кр)
+                ? Math.max(0, Math.min(рр.bottom, кр.bottom) - Math.max(рр.top, кр.top))
+                : 0;
+            return {
+                виднаКнопка, непрозрачность: c ? +c.opacity : null,
+                рядX: [Math.round(рр.left), Math.round(рр.right)],
+                кнопкаX: кр ? [Math.round(кр.left), Math.round(кр.right)] : null,
+                наложениеПоX: Math.round(наложение),
+                наложениеПоY: Math.round(вертикально),
+                ссылок: ряд.querySelectorAll('a').length,
+            };
+        });
+        console.log('--- подвал и кнопка «наверх»: ' + JSON.stringify(подвалИКнопка));
+
+        /* h258: КНОПКА НЕ НАКРЫВАЕТ ПРАВОВЫЕ ССЫЛКИ. Перекрытие считается
+           только когда оно есть ПО ОБЕИМ осям: пересечение по одной
+           ничего не закрывает. */
+        if (!подвалИКнопка.нетРяда) {
+            const накрывает = подвалИКнопка.наложениеПоX > 0 && подвалИКнопка.наложениеПоY > 0;
+            expect(накрывает,
+                `кнопка «наверх» не накрывает правовые ссылки (ряд ${JSON.stringify(подвалИКнопка.рядX)}, ` +
+                `кнопка ${JSON.stringify(подвалИКнопка.кнопкаX)}, перекрытие ` +
+                `${подвалИКнопка.наложениеПоX}×${подвалИКнопка.наложениеПоY})`).toBe(false);
         }
 
         /* ЧТО ДЕРЖАТЬСЯ ОБЯЗАНО НА ЛЮБОЙ ГРАНИЦЕ. */
