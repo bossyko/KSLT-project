@@ -26,7 +26,7 @@
     <meta name="theme-color" content="#0A0A0A">
     <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="css/tokens.css?v=86">
-    <link rel="stylesheet" href="css/style.css?v=468">
+    <link rel="stylesheet" href="css/style.css?v=471">
     <link rel="stylesheet" href="css/podium.css?v=45">
     <link rel="stylesheet" href="css/partners.css?v=75">
     <link rel="stylesheet" href="css/battle-cards.css?v=69">
@@ -740,6 +740,17 @@
                             return (имя || '').trim().split(/\s+/).slice(0, 2)
                                 .map(function (ч) { return ч.charAt(0); }).join('');
                         }
+                        /* ЭКРАНИРОВАНИЕ — ОДНО НА ВСЕ ТРИ ГЛАВНЫЕ. Имена
+                           игроков и подпись турнира вводит админ в модалке
+                           Live, а вставляются они в innerHTML: кавычка или
+                           угловая скобка ломали разметку главной для всех
+                           посетителей. На русской и английской главных такая
+                           функция была, ЗДЕСЬ ЕЁ НЕ БЫЛО ВОВСЕ — замер 11.11. */
+                        function esc(str) {
+                            if (!str) return '';
+                            return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                        }
+
                         function лицо(фото, имя) {
                             return фото
                                 ? '<img src="' + фото + '" alt="' + имя + '">'
@@ -772,17 +783,17 @@
                             html += '<a href="pages/live-match-kg.html?id=' + m.id + '" class="live-match" style="text-decoration:none;color:inherit;cursor:pointer;">' +
                                 '<div class="match-status">' +
                                     '<span class="live-badge' + statusClass + '">' + statusBadge + '</span>' +
-                                    (label ? '<span class="match-set">' + label + '</span>' : '') +
+                                    (label ? '<span class="match-set">' + esc(label) + '</span>' : '') +
                                 '</div>' +
                                 '<div class="match-players">' +
                                     '<div class="player">' +
                                         лицо(p1.photo, p1Name) +
-                                        '<span class="player-name">' + p1Name + '</span>' +
+                                        '<span class="player-name">' + esc(p1Name) + '</span>' +
                                         '<span class="player-score' + servingClass1 + '">' + p1scores.trim() + '</span>' +
                                     '</div>' +
                                     '<div class="player">' +
                                         лицо(p2.photo, p2Name) +
-                                        '<span class="player-name">' + p2Name + '</span>' +
+                                        '<span class="player-name">' + esc(p2Name) + '</span>' +
                                         '<span class="player-score' + servingClass2 + '">' + p2scores.trim() + '</span>' +
                                     '</div>' +
                                 '</div>' +
