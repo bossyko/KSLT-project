@@ -202,16 +202,25 @@ body.ad-page {
 
 /* Поля по бокам ужимаются вместе с окном: на широком экране они держат
    воздух, на узком отдают место таблице. Публичной части это не касается —
-   правило живёт только в админке */
-@media (max-width: 1600px) {
-    .ad-content {
-        --ad-content-pad: var(--space-3);
-        padding-left: var(--ad-content-pad);
-        padding-right: var(--ad-content-pad);
-    }
+   правило живёт только в админке.
+
+   11.11 · ГРАНИЦЫ УБРАНЫ СОВСЕМ, А НЕ ПЕРЕНЕСЕНЫ. Здесь стояли
+   @media (max-width: 1600px) и (max-width: 1280px) — две самодельные
+   ширины ради одного свойства. Поле не раскладка: ему не нужен порог, ему
+   нужна зависимость от ширины. clamp() даёт её непрерывно, и ступенька на
+   1600 и 1280, которую видно глазом при тяге окна, исчезает вместе с
+   границами. ШИРИНЫ В МЕДИА — ТОЛЬКО 640 И 992; всё остальное решается
+   иначе, и вот один из способов.
+
+   Считано: нижняя граница --space-2 (8) держится до 1280, верхняя
+   --space-6 (24) набирается к 1600, между ними идёт ровно. */
+.ad-content {
+    --ad-content-pad: clamp(var(--space-2), calc((100vw - 1280px) / 20 + var(--space-2)), var(--space-6));
+    padding-left: var(--ad-content-pad);
+    padding-right: var(--ad-content-pad);
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 992px) {
     .ad-content {
         --ad-content-pad: var(--space-2);
         padding-left: var(--ad-content-pad);
@@ -3614,7 +3623,7 @@ select.ad-field-input {
 
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     /* МИНУС РАВЕН ПОЛЮ СОДЕРЖИМОГО, А НЕ ЧИСЛУ 16. Было `margin: 0 -16px`
        при поле 16 на этом виде — сходилось; но на телефоне поле 12, и
        страница переливалась на 4 пикселя в каждую сторону. Теперь обе
@@ -3670,7 +3679,7 @@ select.ad-field-input {
 
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .ad-content {
         --ad-content-pad: var(--space-3);
         padding: var(--ad-content-pad);
@@ -3946,7 +3955,7 @@ select.ad-field-input {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .ad-rat-tabs {
         gap: var(--space-05);
         padding: var(--space-05);
@@ -4192,7 +4201,7 @@ select.ad-field-input {
     padding: var(--space-1) var(--space-1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .ad-reg-columns {
         grid-template-columns: 1fr;
     }
@@ -5261,7 +5270,7 @@ select.ad-field-input {
     padding: var(--space-1) var(--space-1) !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .ad-tabs {
         flex-direction: column;
     }
@@ -6147,7 +6156,7 @@ select.ad-field-input {
     cursor: help;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .ad-grp-block {
         padding: var(--space-2);
     }
@@ -6413,7 +6422,7 @@ select.ad-field-input {
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
     .ad-usr-card {
         padding: var(--space-3) var(--space-4);
     }
@@ -6572,7 +6581,7 @@ select.ad-field-input {
     letter-spacing: 0.3px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .ad-vch-period-row {
         flex-direction: column;
         align-items: stretch;
@@ -7356,7 +7365,7 @@ select.ad-field-input {
 
 /* На узком экране прячем то, без чего список читается: сортировку и
    просмотры смотрят редко, а место они занимают */
-@media (max-width: 900px) {
+@media (max-width: 992px) {
     .ad-table-sponsors th:nth-child(7),
     .ad-table-sponsors td:nth-child(7),
     .ad-table-sponsors th:nth-child(8),

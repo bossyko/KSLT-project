@@ -2152,7 +2152,7 @@ h3.td-league-title {
     border: var(--bw-hair) solid var(--alpha-white-12);
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 992px) {
     .td-dual-league {
         flex-direction: column;
     }
@@ -2331,7 +2331,7 @@ h3.td-league-title {
    Только на широких экранах. На телефоне ужимать нечего: четыре круга в
    390 пикселей не влезают, колонки наезжали друг на друга, а прокрутку это
    же правило и запрещало — сетку нельзя было ни прочитать, ни сдвинуть. */
-@media (min-width: 1024px) {
+@media (min-width: 993px) {
 .td-bracket-scroll {
     /* Не hidden, а visible: при hidden по одной оси браузер сам делает
        вторую прокручиваемой — внутри сетки появлялась вертикальная полоса,
@@ -2408,7 +2408,7 @@ h3.td-league-title {
 /* ---- Сетка на телефоне ----
    Ужимать её некуда, поэтому листаем вбок: блоки нормальной ширины, имена
    целиком, круги не наезжают друг на друга. */
-@media (max-width: 1023px) {
+@media (max-width: 992px) {
     .td-bracket-scroll {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;

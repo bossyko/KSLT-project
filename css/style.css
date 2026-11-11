@@ -1271,7 +1271,7 @@ input, button, select, textarea {
     color: var(--text-muted);
     margin-top: 4px;
 }
-@media (max-width: 600px) {
+@media (max-width: 640px) {
     .site-notif-dropdown { width: 260px; right: -40px; }
 }
 
@@ -2832,7 +2832,7 @@ h2 {
    Заморозка проверяет ОТНОШЕНИЕ: перебивка строго мельче заголовка раздела на
    каждом из пяти видов. Когда заголовок раздела переедет на 640 — перебивка
    поедет за ним, или правило упадёт и скажет. */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .badges-cta-text h2 { font-size: var(--fs-base); }
 
     /* ПЕРЕНЕСЕНО СЮДА 24.09 с границы 640, поймал настоящий Playwright:
@@ -3591,6 +3591,35 @@ h2 {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: var(--space-lg);
 }
+
+/* ТЕЛЕФОН БОКОМ ДЕЛИТСЯ ВЫСОТОЙ И ПОВОРОТОМ, А НЕ ШИРИНОЙ.
+   Слово Кости 11.11: две колонки.
+
+   Замер 11.11, слепок пробы 49: на 844×390 сетки получали ДЕСКТОПНУЮ
+   раскладку — корты в четыре колонки, — потому что единственное правило
+   на них стояло на max-width: 768, а 844 туда не попадал. После переноса
+   границы на 992 он стал получать одну колонку, как планшет стоймя. Но
+   планшет стоймя и телефон боком — разные случаи: ширина у них почти
+   одна (734 против 807), а высота отличается втрое, 1024 против 390.
+   Одна колонка на 390 в высоту — это длинная прокрутка там, где места
+   вширь как раз хватает.
+
+   ЧИСЛО НЕ ВЫДУМАНО: max-height 500 с orientation landscape — приём,
+   уже принятый в продукте и применённый в семи файлах (challenge-detail,
+   info-overview, live-match, news, players, pricing, services) и в этом
+   же файле на строке 2864. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ.
+
+   Карточка турнира сюда не входит: она одна и с картинкой во всю ширину,
+   её делить надвое нечем. */
+@media (orientation: landscape) and (max-height: 500px) {
+    .courts-grid,
+    .coaches-grid,
+    .live-matches {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+    }
+}
+
 
 .court-card {
     background: var(--bg-card);
@@ -5436,7 +5465,7 @@ h2 {
 
 
 /* Шире телефона: места больше, окно дышит свободнее */
-@media (min-width: 769px) {
+@media (min-width: 993px) {
     .pt-modal {
         padding: 40px 32px 32px;
         border-radius: var(--radius-lg);
@@ -6752,7 +6781,7 @@ h2 {
    а не число: 26/18 и 21/16 — обе пары через две ступени.
    Граница 768 здесь ЗАИМСТВОВАНА у заголовка и уедет на 640 вместе с ним,
    когда лестница заголовков сайта встанет на шкалу. */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .pg-sub { font-size: var(--fs-base); }   /* 16 */
 }
 
@@ -7087,7 +7116,7 @@ h2 {
 /* Тот же перенос, h274: шесть правил выравнивания подвала.
    Условие ТО ЖЕ, что у блока .footer-acc и у складывать() в
    js/script.js. Меняешь здесь — меняй во всех трёх местах. */
-@media (any-pointer: coarse), (max-width: 768px) {
+@media (any-pointer: coarse), (max-width: 992px) {
     .footer-content {
         grid-template-columns: 1fr;
         text-align: center;
@@ -7209,11 +7238,11 @@ h2 {
    всю ширину — при листе 360 странице осталось бы 15 пикселей, это не
    «страница видна», это полоска. На доске 243:145 у меня 844 сначала получал
    лист уже, чем 768: экран шире, лист уже. Ошибка макета, здесь исправлена. */
-@media (min-width: 480px) {
+@media (min-width: 640px) {
     .mobile-nav { --sheet-w: 360px; }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     .mobile-nav { --sheet-w: 400px; }
 }
 
@@ -7817,7 +7846,7 @@ body.nav-open {
    RESPONSIVE - MOBILE
    ======================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     section {
         /* ТОЛЬКО БОКА. Вертикаль отсюда убрана 23.09: здесь стояло
            padding: 40px 26px — сокращённая запись, которая перебивала крутилку
@@ -7844,7 +7873,7 @@ body.nav-open {
     }
 
     /* Здесь было .section-header { flex-direction: column }. Оно тоже НИКОГДА
-       не работало: ниже в файле есть ВТОРОЙ блок @media (max-width: 768px),
+       не работало: ниже в файле есть ВТОРОЙ блок @media (max-width: 992px),
        который ставит flex-direction: row. Два блока с одним условием спорили,
        побеждал второй. Шапку раздела на телефоне задаёт он один. */
 
@@ -9042,7 +9071,7 @@ body.nav-open {
 
    Макет: Figma «Auth card — sizes to the scale» (258:145).
    ============================================================== */
-@media (max-height: 680px) and (min-width: 600px) {
+@media (max-height: 680px) and (min-width: 640px) {
 
     /* шапка страницы входа худеет с ~62 до 48: на 390 каждый пиксель счётный */
     .auth-header {
@@ -9431,7 +9460,7 @@ body.nav-open {
 /* ========================================
    375px — Ultra-small phones (iPhone SE)
    ======================================== */
-@media (max-width: 375px) {
+@media (max-width: 640px) {
     .floating-header.header-hybrid {
         padding: 0 var(--pad-x);
     }
@@ -9534,7 +9563,7 @@ section.pt-filters {
 }
 
 /* Fix players-grid cascade: 480px rule was overridden by later 768px rule */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
 
     .live-matches {
         grid-template-columns: 1fr;
@@ -9981,7 +10010,7 @@ input:-internal-autofill-previewed {
    Когда общий долг по ломкам будет закрыт и заголовки разделов уедут
    на 640, этот слой уедет вместе с ними — правило заморозки проверяет
    ОТНОШЕНИЕ, а не число. */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .sp-offer { padding: var(--space-4); }
 
     .sp-offer-lead {
@@ -10298,7 +10327,7 @@ input:-internal-autofill-previewed {
    а 844 оставался в одной колонке с обложкой 453 — секция выходила 1993 при
    экране 390. Теперь две колонки на всю полосу, а телефон боком забирает
    лента ниже по файлу. */
-@media (max-width: 900px) {
+@media (max-width: 992px) {
     .hn-grid {
         grid-template-columns: 1fr 1fr;
     }
@@ -10311,7 +10340,7 @@ input:-internal-autofill-previewed {
      три колонки (901 и шире) — три карточки
      две колонки (900 и уже)  — четыре, два полных ряда
      лента (телефон боком)    — все, рядов там нет */
-@media (min-width: 901px) {
+@media (min-width: 993px) {
     .hn-grid > .hn-card:nth-child(n+4) {
         display: none;
     }
@@ -10401,7 +10430,7 @@ input:-internal-autofill-previewed {
    считается «телефоном», хотя у турниров телефон начинается с 640. Из-за
    этого на 768 две карточки одинаковой ширины 352 имели разные заголовки:
    у турнира 16, у новости 14. Ступень card title одна на обе секции. */
-@media (min-width: 641px) and (max-width: 768px) {
+@media (min-width: 641px) and (max-width: 992px) {
     /* Селектор с родителем — НАРОЧНО. Правило мельче лежит ниже по файлу, в
        блоке max-width: 768, и при равной цепкости побеждало бы оно. Поднимать
        цепкость приходится потому, что у новостей «телефон» начинается с 768,
@@ -10524,7 +10553,7 @@ input:-internal-autofill-previewed {
    занимала ряд целиком: внутри неё два столбца, фотография и текст, и на
    390 пикселях от текста оставалась полоска. Здесь все карточки одинаковые,
    по две в ряд, фотография сверху. */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .tournaments-grid .tournament-card-featured {
         grid-column: span 1;
         display: flex;
@@ -10798,7 +10827,7 @@ input:-internal-autofill-previewed {
    с полями 24/22.5 вместо 12/0/14.
    Условие ТО ЖЕ, что у блока .footer-acc и у складывать() в
    js/script.js. Меняешь здесь — меняй во всех трёх местах. */
-@media (any-pointer: coarse), (max-width: 768px) {
+@media (any-pointer: coarse), (max-width: 992px) {
 
     /* Футер шёл сплошной колонкой на 1116 пикселей: пять блоков подряд с
        промежутком в 40. Ставим разделы по два в ряд — «Навигация» рядом с
@@ -10882,14 +10911,14 @@ input:-internal-autofill-previewed {
    =====================================================
    Условие двойное и читается как «или»: сенсорный экран ЛЮБОЙ ширины
    либо узкое окно на компьютере.
-   Раньше эти правила лежали внутри @media (max-width: 768px), и это
+   Раньше эти правила лежали внутри @media (max-width: 992px), и это
    оставляло дыру: телефон боком (844) и iPad Pro (1024) шире 768, но
    тыкают в них пальцем. Там подвал разворачивался в колонки со всеми
    списками — на 844 это 988 пикселей высоты при экране 390, почти два с
    половиной экрана.
    Скрипт js/script.js ставит класс footer-acc по такому же условию —
    если поменять одно, надо менять и другое. */
-@media (any-pointer: coarse), (max-width: 768px) {
+@media (any-pointer: coarse), (max-width: 992px) {
     /* Гармошка: видны только заголовки, списки раскрываются по нажатию.
        Класс footer-acc ставит script.js — если он не отработал, подвал
        остаётся обычным, со всеми ссылками на виду */
@@ -10995,7 +11024,7 @@ input:-internal-autofill-previewed {
 
 /* ЦЕЛИ НАЖАТИЯ ТАМ, ГДЕ ПАЛЕЦ, А НЕ ТАМ, ГДЕ УЗКО.
    ================================================
-   Правила на 44 сначала жили только в @media (max-width: 768px), и это
+   Правила на 44 сначала жили только в @media (max-width: 992px), и это
    была ошибка рассуждения: ширина окна ничего не говорит о том, чем по
    экрану тыкают. Замерено на iPad Pro 1024×1366 — браузер отвечает
    (pointer: coarse) ДА и (hover: none) ДА, то есть прямо сообщает, что
@@ -11037,7 +11066,7 @@ input:-internal-autofill-previewed {
 /* Короткие подписи — только на узком экране. Полные 457 не влезают в
    доступные (ширина − 32) примерно до 489, поэтому граница 600 с запасом
    111. Подробности и расчёт — у .footer-legal-short выше. */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
     .footer-legal-full { display: none; }
     .footer-legal-short { display: inline; }
 }
@@ -11235,7 +11264,7 @@ input:-internal-autofill-previewed {
 
    Админку не трогаем: ей телефон не нужен, там свои правила. */
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .section-title.section-title,
     .co-section-title.co-section-title,
     .ct-section-title.ct-section-title,
@@ -11489,7 +11518,7 @@ main > section:first-child:not(.hero) {
    с данными ещё НЕ мерены, и распространять на них решение, принятое по замеру
    390x844, значило бы выдумывать. Померим — расширим условие осознанно.
    ========================================================================= */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
 
     /* B · ПЯТЬ ЦИФР — ТРИ И ДВА, ВСЕ ВИДНЫ СРАЗУ.
        Было: сетка 1fr 1fr (правило выше, общее для всех обложек) — пять цифр
@@ -11729,7 +11758,7 @@ main > section:first-child:not(.hero) {
    менялось, менялся способ: раньше его давала сокращённая запись
    padding: 40px 26px, которая молча перебивала все слои сразу.
    ============================================================================ */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     section {
         --section-vozduh: var(--space-10);   /* 40 */
     }
