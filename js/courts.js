@@ -319,13 +319,10 @@
     // View counter for detail page (localStorage dedup)
     function incrementCourtView(id) {
         if (!id) return;
-        var key = 'kslt_crtview_' + id;
-        if (localStorage.getItem(key)) return;
+        /* Просмотры — общий дом, см. js/kslt-prosmotry.js. */
         var cl = window.supabaseClient;
-        if (!cl) return;
-        cl.rpc('increment_court_view', { p_id: id }).then(function(res) {
-            if (!res.error) localStorage.setItem(key, '1');
-        });
+        if (!cl || !window.KSLT_PROSMOTRY) return;
+        window.KSLT_PROSMOTRY.считать(cl, 'increment_court_view', { p_id: id });
     }
 
     if (isDetailPage) {

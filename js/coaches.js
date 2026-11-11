@@ -706,13 +706,14 @@
     // View counter for detail page (localStorage dedup)
     function incrementCoachView(id) {
         if (!id) return;
-        var key = 'kslt_cchview_' + id;
-        if (localStorage.getItem(key)) return;
+        /* ПРОСМОТРЫ ЖИВУТ В ОДНОМ ДОМЕ — js/kslt-prosmotry.js.
+           Здесь был голый вызов с ОДНИМ аргументом, и он не записывал
+           ничего: у функции в базе две перегрузки, и PostgREST отвечал
+           PGRST203 вместо записи. Источник и защита от повторов теперь
+           там, а не в каждом файле по-своему. */
         var cl = window.supabaseClient;
-        if (!cl) return;
-        cl.rpc('increment_coach_view', { p_id: id }).then(function(res) {
-            if (!res.error) localStorage.setItem(key, '1');
-        });
+        if (!cl || !window.KSLT_PROSMOTRY) return;
+        window.KSLT_PROSMOTRY.считать(cl, 'increment_coach_view', { p_id: id });
     }
 
     // ---- DETAIL PAGE ----

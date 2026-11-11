@@ -439,13 +439,11 @@
     // ---- View counter (localStorage dedup) ----
     function incrementSponsorView(id) {
         if (!id) return;
-        var key = 'kslt_sponview_' + id;
-        if (localStorage.getItem(key)) return;
+        /* Просмотры — общий дом, см. js/kslt-prosmotry.js. Этот вызов
+           к тому же единственный не смотрел на ошибку вовсе. */
         var cl = window.supabaseClient;
-        if (!cl) return;
-        cl.rpc('increment_sponsor_view', { p_id: id }).then(function() {
-            localStorage.setItem(key, '1');
-        });
+        if (!cl || !window.KSLT_PROSMOTRY) return;
+        window.KSLT_PROSMOTRY.считать(cl, 'increment_sponsor_view', { p_id: id });
     }
 
     // ---- Click delegation for sponsor modals ----
@@ -473,7 +471,14 @@
         if (sessionStorage.getItem('kslt_sv')) return;
         var cl = window.supabaseClient;
         if (!cl) return;
-        cl.rpc('increment_page_view', { p_page_name: 'site_visit' });
+        /* ЗАХОД НА САЙТ СЧИТАЕТСЯ НЕ ЗДЕСЬ. Он живёт в js/script.js,
+           который подключён на всех страницах, и считает один раз.
+
+           11.11 я на час оставил здесь второй зов «чтобы не потерять» —
+           и замер сразу это поймал: за ОДНУ загрузку главной счётчик
+           вырос на два, с 1 до 3. Отметка сеанса не спасает, потому что
+           оба зова уходят раньше, чем первый успевает ответить.
+           ДВА ОПРЕДЕЛЕНИЯ ОДНОГО ПОНЯТИЯ СЧИТАЮТ ДВАЖДЫ, А НЕ НАДЁЖНЕЕ. */
         sessionStorage.setItem('kslt_sv', '1');
     }
 

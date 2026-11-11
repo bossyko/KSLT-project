@@ -1348,13 +1348,10 @@ function updateLangLinks(slug) {
 
 function incrementViewCount(newsId) {
     if (!newsId) return;
-    var key = 'kslt_viewed_' + newsId;
-    if (localStorage.getItem(key)) return;
+    /* Просмотры — общий дом, см. js/kslt-prosmotry.js. */
     var client = window.supabaseClient;
-    if (!client) return;
-    client.rpc('increment_news_view', { p_news_id: newsId }).then(function(res) {
-        if (!res.error) localStorage.setItem(key, '1');
-    });
+    if (!client || !window.KSLT_PROSMOTRY) return;
+    window.KSLT_PROSMOTRY.считать(client, 'increment_news_view', { p_news_id: newsId });
 }
 
 // ========================================

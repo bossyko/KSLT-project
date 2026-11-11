@@ -2310,12 +2310,9 @@
     // View counter for player detail page (localStorage dedup)
     function incrementPlayerView(id) {
         if (!id) return;
-        var key = 'kslt_plview_' + id;
-        if (localStorage.getItem(key)) return;
-        if (!client) return;
-        client.rpc('increment_player_view', { p_id: id }).then(function(res) {
-            if (!res.error) localStorage.setItem(key, '1');
-        });
+        /* Просмотры — общий дом, см. js/kslt-prosmotry.js. */
+        if (!client || !window.KSLT_PROSMOTRY) return;
+        window.KSLT_PROSMOTRY.считать(client, 'increment_player_view', { p_id: id });
     }
 
     // ---- Init ----

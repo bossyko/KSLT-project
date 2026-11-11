@@ -943,11 +943,9 @@ function initPredictionAnimations() {
 
 function incrementTournamentView(client, id) {
     if (!id) return;
-    var key = 'kslt_tview_' + id;
-    if (localStorage.getItem(key)) return;
-    client.rpc('increment_tournament_view', { p_tournament_id: id }).then(function(res) {
-        if (!res.error) localStorage.setItem(key, '1');
-    });
+    /* Просмотры — общий дом, см. js/kslt-prosmotry.js. */
+    if (!client || !window.KSLT_PROSMOTRY) return;
+    window.KSLT_PROSMOTRY.считать(client, 'increment_tournament_view', { p_tournament_id: id });
 }
 
 function loadFromSupabase(client, id) {

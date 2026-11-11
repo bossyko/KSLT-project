@@ -107,6 +107,19 @@
     })();
 })();
 
+/* ЗАХОД НА САЙТ СЧИТАЕТСЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ, А НЕ В ЗАГРУЗЧИКЕ
+   СПОНСОРОВ. Замер 11.11: карточки «Заходы на сайт» и «Заходы в
+   приложение» в аналитике показывали ноль и ноль при 4866 просмотрах
+   страниц, и единственный вызов site_visit жил в js/sponsors-loader.js —
+   то есть заход считался там, где рисуются логотипы. js/script.js
+   подключён на всех страницах сайта, и место ему здесь.
+   Сам счёт — один раз за сеанс, это решает дом js/kslt-prosmotry.js. */
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.KSLT_PROSMOTRY && window.supabaseClient) {
+        window.KSLT_PROSMOTRY.заход(window.supabaseClient);
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // Clean Supabase auth tokens from URL (prevent user seeing access_token in address bar)
