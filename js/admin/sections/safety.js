@@ -346,7 +346,7 @@
     function когда(iso) {
         if (!iso) return '—';
         try {
-            return new Date(iso).toLocaleString('ru-RU', {
+            return new Date(iso).toLocaleString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek',
                 day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
             });
         } catch (e) { return String(iso).slice(0, 16); }

@@ -365,7 +365,7 @@
 
     function fmtDate(dateStr) {
         if (!dateStr) return L.noData;
-        return new Date(dateStr).toLocaleDateString('ru-RU');
+        return new Date(dateStr).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' });
     }
 
     async function loadStats() {

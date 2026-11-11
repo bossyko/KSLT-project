@@ -207,12 +207,12 @@
                 var dateOpts = { day: 'numeric', month: 'short' };
                 if (pubDateEl) {
                     pubDateEl.textContent = s.last_published
-                        ? L.newsStatLastDate + ': ' + new Date(s.last_published).toLocaleDateString(dateFmt, dateOpts)
+                        ? L.newsStatLastDate + ': ' + new Date(s.last_published).toLocaleDateString(dateFmt, dateOpts, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' })
                         : L.newsStatNoArticles;
                 }
                 if (draftDateEl) {
                     draftDateEl.textContent = s.last_draft
-                        ? L.newsStatLastDate + ': ' + new Date(s.last_draft).toLocaleDateString(dateFmt, dateOpts)
+                        ? L.newsStatLastDate + ': ' + new Date(s.last_draft).toLocaleDateString(dateFmt, dateOpts, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' })
                         : '';
                 }
             }
@@ -524,7 +524,7 @@
                 : '<span class="ad-status-badge ad-status-draft">' + L.newsDraft + '</span>';
 
             var dateStr = a.published_at
-                ? new Date(a.published_at).toLocaleDateString('ru-RU')
+                ? new Date(a.published_at).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' })
                 : L.noData;
 
             var eng = engMap[a.id] || { reactions: 0, votes: 0 };

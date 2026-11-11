@@ -3151,7 +3151,10 @@ function renderRegistrationButton(tournament, registrations, isEn) {
                     var isPerm = new Date(plRes.data.banned_until).getFullYear() >= 2099;
                     var banDateStr = isPerm
                         ? (KSLT_YAZYK.выбрать('permanently', 'түбөлүккө', 'навсегда'))
-                        : new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.локаль);
+                        /* ПОЯС — ДОМ ВРЕМЕНИ: до какого дня закрыт доступ,
+                            решает клуб в Бишкеке, а не часы смотрящего. */
+                        : new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.локаль,
+                            { timeZone: window.KSLT_VREMYA.зона });
                     var banReasonText = plRes.data.ban_reason
                         ? '<div class="td-zapis-note-pod">' +
                             (KSLT_YAZYK.выбрать('Reason: ', 'Себеби: ', 'Причина: ')) + KSLT_экранировать(plRes.data.ban_reason) + '</div>'

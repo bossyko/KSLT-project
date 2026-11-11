@@ -1710,7 +1710,7 @@
                 '<td>' + A.esc(к.name || z.player_id) +
                     '<div class="ad-podpis">' + A.esc((к.category_id || '') + ntrp) + '</div></td>' +
                 '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
-                    new Date(z.created_at).toLocaleDateString('ru-RU') + '</td>' +
+                    new Date(z.created_at).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) + '</td>' +
                 '<td style="text-align:right;white-space:nowrap;">' +
                     /* ЗАЯВКА ОТ СОТРУДНИКА НЕ ОДОБРЯЕТСЯ — кусок 143. Подать
                        её из кабинета он больше не может (кусок 142 убрал
@@ -1807,7 +1807,7 @@
                     '<td style="color:' + п.цвет + ';font-weight:600;">' + п.текст +
                         (z.note ? '<div style="font-size:var(--fs-xs);color:var(--text-muted);font-weight:400;">' + A.esc(z.note) + '</div>' : '') + '</td>' +
                     '<td style="font-size:var(--fs-xs);color:var(--text-secondary);white-space:nowrap;">' +
-                        (когда ? new Date(когда).toLocaleDateString('ru-RU') : '—') + '</td>' +
+                        (когда ? new Date(когда).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '—') + '</td>' +
                 '</tr>';
             }).join('') + '</tbody></table></div></div>';
         });

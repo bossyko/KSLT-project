@@ -6219,8 +6219,13 @@
             else typeLabel = L.loyAdjust;
 
             var actionLabel = LOY_ACTION_MAP[t.action] || (t.action || '—');
-            /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
-            var dateStr = new Date(t.created_at).toLocaleDateString(KSLT_YAZYK.локаль, { day: 'numeric', month: 'short' });
+            /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147), ПОЯС — ДОМ ВРЕМЕНИ.
+                Без timeZone день брался у браузера: замер 11.11 из Чикаго
+                показал турнир 8 ноября как 7-е. У операции лояльности в
+                created_at лежит момент со временем, и под утро по Бишкеку
+                он уезжал на сутки назад для всех, кто западнее. */
+            var dateStr = new Date(t.created_at).toLocaleDateString(KSLT_YAZYK.локаль,
+                { day: 'numeric', month: 'short', timeZone: window.KSLT_VREMYA.зона });
 
             /* КРАСКА — КЛАССОМ ИЗ СИСТЕМЫ. Стояли #4caf50 и #f44336
                инлайном: Material мимо палитры, и инлайн бьёт правило по
@@ -6595,9 +6600,12 @@
     function датаБлокировки(iso) {
         if (!iso) return '';
         try {
+            /* ПОЯС — ДОМ ВРЕМЕНИ. Срок блокировки показывается тем же
+                днём, каким он записан клубом, а не днём смотрящего. */
             return new Date(iso).toLocaleDateString(
                 KSLT_YAZYK.код === 'en' ? 'en-GB' : 'ru-RU',
-                { day: 'numeric', month: 'long', year: 'numeric' });
+                { day: 'numeric', month: 'long', year: 'numeric',
+                  timeZone: window.KSLT_VREMYA.зона });
         } catch (e) { return String(iso).slice(0, 10); }
     }
 
