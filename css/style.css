@@ -8574,8 +8574,18 @@ body.nav-open {
     text-decoration: underline;
 }
 
+/* ВЫСОТА КНОПКИ — СВОЙСТВОМ, А НЕ ПОЛЯМИ. Замер 11.11 пробой
+   48-lestnica-vhoda, 165 чисел на пяти видах и трёх языках: «Войти»
+   выходила 46 — единственное число мимо шкалы 28·36·44·52 во всём куске.
+   Никто его не выбирал: оно собиралось как padding 14 + строка 18 + 14.
+   Та же болезнь была у .ad-btn в админке и там уже вылечена
+   (admin.css: height со ступени). ПРАВИЛО, ВЫВЕДЕННОЕ НА ОДНОМ КУСКЕ,
+   ПРИМЕНЯЕТСЯ К СЛЕДУЮЩЕМУ БЕЗ НОВОГО РАЗБОРА.
+   Слово Кости 11.11: все три по 44. 44 — минимальный тап-таргет по
+   iOS HIG, и на phone-landscape (экран 390) это 18px, которых там нет. */
 .auth-btn {
-    padding: 14px;
+    height: var(--btn-h-md);
+    padding: 0 var(--space-4);
     background: var(--accent);
     color: var(--neutral-black);
     border: none;
@@ -8639,13 +8649,16 @@ body.nav-open {
     gap: 12px;
 }
 
+/* Прежние 52 у способов входа были не выбором, а совпадением: высота
+   собиралась полями и дотягивалась растяжкой по ряду. Теперь ступень. */
 .auth-social-btn {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px;
+    height: var(--btn-h-md);
+    padding: 0 var(--space-3);
     background: transparent;
     border: var(--bw-hair) solid var(--border-light);
     border-radius: var(--radius-md);
@@ -8738,7 +8751,8 @@ body.nav-open {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 16px;
+    height: var(--btn-h-md);
+    padding: 0 var(--space-4);
     background: var(--surface-glass);
     border: var(--bw-hair) solid var(--border-subtle);
     border-radius: 8px;
@@ -8809,12 +8823,25 @@ body.nav-open {
    Экран выбора способа в регистрации живёт на .auth-option-btn и не задет.
 
    Макет: Figma «Auth card — sizes to the scale» (258:145) — три способа по 52.
+
+   11.11 · ВЫСОТА УШЛА ОТСЮДА, И ЭТО ГЛАВНОЕ В ЭТОЙ ПРАВКЕ.
+   Здесь стоял `min-height: 52px`, и после того как базовое правило
+   .auth-social-btn получило честную высоту со ступени, высота оказалась
+   объявлена ДВАЖДЫ. `min-height` молча бьёт `height`, поэтому правка
+   «все три по 44» легла в файл и не доехала до экрана: замер пробой
+   48-lestnica-vhoda показал главную кнопку 44, а способы входа всё те
+   же 52. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ — БЕДА РОДИЛАСЬ РОВНО НА ШВЕ.
+   Высота теперь живёт только в базовых правилах; здесь остаётся то,
+   ради чего правило и заводили, — ОДНА СЕМЬЯ НА ВИД: общая рамка, фон,
+   краска и кегль у всех трёх способов.
+   Слово Кости 11.11: все три по 44 (--btn-h-md), макет 258:145 на 52
+   отменён — на phone-landscape экран 390, и 18px там дороже крупной
+   кнопки. ОТМЕНЁННОЕ РЕШЕНИЕ НЕ СТИРАЕТСЯ, А ПОМЕЧАЕТСЯ С ПРИЧИНОЙ.
 */
 .auth-col-methods .auth-social-btn,
 .auth-col-methods .auth-tg-app-btn,
 .auth-col-methods .auth-apple-btn {
-    min-height: 52px;
-    padding: 0 16px;
+    padding: 0 var(--space-4);
     border-radius: var(--radius-md);
     border: var(--bw-hair) solid var(--border-light);
     background: transparent;
