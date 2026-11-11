@@ -69,8 +69,8 @@
                 '<input type="date" class="ad-field-input" id="adFinDateFrom" value="' + finDateFrom + '" style="max-width:150px;display:' + (finPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<input type="date" class="ad-field-input" id="adFinDateTo" value="' + finDateTo + '" style="max-width:150px;display:' + (finPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<button class="ad-btn ad-btn-sm" id="adFinPrdApply" style="display:' + (finPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.payPrdApply + '</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinPdfBtn" title="' + L.payPdfExport + '">📄 PDF</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinExcelBtn" title="' + L.payExcelExport + '">📊 Excel</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinPdfBtn" title="' + L.payPdfExport + '">📄 Печать</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adFinExcelBtn" title="' + L.payExcelExport + '">📊 CSV</button>' +
             '</div>' +
 
             '<div class="ad-filter-row ad-filter-sticky">' +

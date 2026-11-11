@@ -81,8 +81,8 @@
                 '<input type="date" class="ad-field-input" id="adVchDateFrom" value="' + vchDateFrom + '" style="max-width:150px;display:' + (vchPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<input type="date" class="ad-field-input" id="adVchDateTo" value="' + vchDateTo + '" style="max-width:150px;display:' + (vchPeriodMode === 'custom' ? 'block' : 'none') + ';">' +
                 '<button class="ad-btn ad-btn-sm" id="adVchApply" style="display:' + (vchPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.vchApply + '</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adVchExportPdf" title="' + L.vchExportPdf + '">📄 PDF</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adVchExcelBtn" title="' + L.vchExcelExport + '">📊 Excel</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adVchExportPdf" title="' + L.vchExportPdf + '">📄 Печать</button>' +
+                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adVchExcelBtn" title="' + L.vchExcelExport + '">📊 CSV</button>' +
             '</div>' +
 
             // Filters
