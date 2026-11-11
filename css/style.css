@@ -3612,12 +3612,30 @@ h2 {
    Карточка турнира сюда не входит: она одна и с картинкой во всю ширину,
    её делить надвое нечем. */
 @media (orientation: landscape) and (max-height: 500px) {
+    /* СЕЛЕКТОР ДОЛЖЕН БИТЬ НЕ СЛАБЕЕ ТОГО, КОГО ПЕРЕБИВАЕТ.
+       Первая редакция была написана на голый .courts-grid и не сработала:
+       на главной сетка размечена как `courts-grid vn-four`, а правила для
+       .courts-grid.vn-four весят два класса против одного и выигрывают,
+       где бы моё ни стояло в файле. Слепок пробы 49 показал это числом —
+       на 844 осталось четыре дорожки вместо двух.
+       ПОРЯДОК В ФАЙЛЕ РЕШАЕТ ТОЛЬКО ПРИ РАВНОМ ВЕСЕ. */
     .courts-grid,
     .coaches-grid,
-    .live-matches {
+    .live-matches,
+    .courts-grid.vn-four,
+    .coaches-grid.vn-four {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: var(--space-3);
     }
+
+    /* Витрина «четыре карточки» на повороте показывает четыре в два ряда,
+       а не три: места вширь хватает, а высоты нет — прятать четвёртую
+       незачем. Правило-близнец к тем, что живут выше на 992 и 640. */
+    .vn-four > .court-card:nth-child(n+4),
+    .vn-four > .coach-card:nth-child(n+4) { display: flex; }
+
+    .vn-four > .court-card:nth-child(n+5),
+    .vn-four > .coach-card:nth-child(n+5) { display: none; }
 }
 
 
