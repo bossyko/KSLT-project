@@ -403,7 +403,10 @@
             freeBlock.style.display = mode === 'free' ? '' : 'none';
             tournBlock.style.display = mode === 'tournament' ? '' : 'none';
             battleBlock.style.display = mode === 'battle' ? '' : 'none';
-            preview.style.display = mode !== 'free' ? 'none' : 'none';
+            /* Обе ветки тернарника были 'none' — предпросмотр прятался
+               всегда, в любом режиме. Оставлено прямое скрытие: что должно
+               его показывать, решается отдельной задачей f16. */
+            preview.style.display = 'none';
 
             if (mode === 'tournament' && !cachedTournaments.length) loadTournaments();
             if (mode === 'battle' && !cachedBattles.length) loadBattles();
@@ -582,10 +585,22 @@
                     if (sel) sel.innerHTML = '<option value="">' + L.liveNoTournaments + '</option>';
                     return;
                 }
-                A.client.from('tournaments').select('id, title, title_en, start_date')
+                /* ИМЯ КОЛОНКИ ПРОВЕРЯЕТСЯ У БАЗЫ, А НЕ У ПАМЯТИ.
+                   Здесь спрашивалась `start_date`, а в таблице tournaments
+                   колонка зовётся `date_start`. Postgres отвечал ошибкой
+                   42703, код брал `tRes.data || []` и ошибку НЕ СМОТРЕЛ —
+                   поэтому список турниров молча оставался пустым, и режим
+                   «Турнир» не работал никогда. Замер 11.11 в живой админке:
+                   переключил источник в tournament — поля выбора турнира на
+                   экране не появилось вовсе. */
+                A.client.from('tournaments').select('id, title, title_en, date_start')
                     .in('id', tids)
-                    .order('start_date', { ascending: false })
+                    .order('date_start', { ascending: false })
                     .then(function(tRes) {
+                        /* ОТВЕТ БАЗЫ ПРОВЕРЯЕТСЯ, А НЕ ПРЕДПОЛАГАЕТСЯ. */
+                        if (tRes.error) {
+                            console.error('[live] турниры не пришли:', tRes.error.message);
+                        }
                         cachedTournaments = tRes.data || [];
                         var sel = document.getElementById('liveTournSelect');
                         if (!sel) return;

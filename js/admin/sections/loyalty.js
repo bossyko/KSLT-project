@@ -136,8 +136,12 @@
         html += '</tbody></table></div>';
         wrap.innerHTML = html;
 
-        document.getElementById('adLoyAddRule').addEventListener('click', function() { showRuleForm(null); });
-
+        /* ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ: слушатель на «Добавить правило»
+           вешается там, где кнопка рисуется, и только там. Здесь, в
+           renderRules, разметки с этой кнопкой нет — getElementById
+           возвращал null, и падало TypeError «Cannot read properties of
+           null», ЧЕТЫРЕ РАЗА ЗА ОДНУ ЗАГРУЗКУ. Всё, что в этой функции шло
+           после строки, не выполнялось вовсе. */
         wrap.querySelectorAll('[data-loyedit]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var id = this.dataset.loyedit;
