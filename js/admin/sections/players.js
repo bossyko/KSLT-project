@@ -2111,7 +2111,7 @@
                 var def = allDefs.find(function(d) { return d.id === pb.badge_id; });
                 if (!def) return;
                 var name = def.name;
-                var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString({ timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '';
+                var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString(undefined, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '';
 
                 html += '<tr>';
                 /* Имя рядом экранировано с самого начала, значок — нет. */

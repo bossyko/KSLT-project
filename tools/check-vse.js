@@ -449,6 +449,14 @@ const КУСКИ = [
 
     ['выгрузки админки',
      'check-vygruzki.js', 'check-vygruzki-otkat.js'],
+    ['ряд действий формы',
+     'check-ryad-deystviy.js', 'check-ryad-deystviy-otkat.js'],
+    ['границы раскладки',
+     'check-granicy.js', 'check-granicy-otkat.js'],
+    ['просмотры',
+     'check-prosmotry.js', 'check-prosmotry-otkat.js'],
+    ['показ даты',
+     'check-pokaz-daty.js', 'check-pokaz-daty-otkat.js'],
 
     /* ТРИ ПАРЫ, ЛЕЖАВШИЕ МИМО СПИСКА. Пруверы к ним написаны и лежат на
        диске, но общий бегунок их не звал — то есть они не гонялись ни
