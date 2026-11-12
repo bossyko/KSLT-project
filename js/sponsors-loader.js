@@ -215,13 +215,31 @@
         // До 24.09 не было ни role, ни aria-modal, ни метки: окно открывалось,
         // а для чтения с экрана ничего не происходило.
         overlay.innerHTML =
+            /* ТРИ ЧАСТИ ВМЕСТО ПЛОСКОЙ СТОПКИ (11.11).
+               ЗАМЕР НА 844x390, спонсор «Мульти Спорт»: окно 400x592,
+               верх −101 — срезано и сверху, и снизу на 101. НИ КРЕСТИК,
+               НИ КНОПКА «ЗАКРЫТЬ» НЕ ВИДНЫ, подложка не прокручивается,
+               страница под окном заперта. На телефоне закрыть окно было
+               НЕЧЕМ: Escape там нажать не на чем.
+               Высота окна зависит от ДАННЫХ — сколько у спонсора
+               контактов, — а не от вёрстки, поэтому порог ставится не
+               «под нынешнего самого длинного», а по высоте экрана.
+               Шапка и нижняя кнопка закреплены, середина прокручивается
+               внутри окна: так держат лист Apple HIG и диалог Material.
+               ЗАГОЛОВОК И КРЕСТИК В ОДНОЙ СТРОКЕ — решение Кости 21.09 по
+               макету: отдельная строка под крестик съедала 39px и ломала
+               порядок чтения, глаз падал на крестик раньше имени. */
             '<div class="spon-modal" role="dialog" aria-modal="true" aria-label="' + KSLT_экранировать(s.name) + '">' +
-                '<button class="spon-modal-close" aria-label="' + modalLabels.close + '">&times;</button>' +
-                (s.logo ? '<div class="spon-modal-logo"><img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '"></div>' : '') +
-                '<div class="spon-modal-name">' + KSLT_экранировать(s.name) + '</div>' +
-                (desc ? '<div class="spon-modal-desc">' + KSLT_экранировать(desc) + '</div>' : '') +
-                addressHtml +
-                (actions ? '<div class="spon-modal-actions">' + actions + '</div>' : '') +
+                '<div class="spon-modal-head">' +
+                    '<div class="spon-modal-name">' + KSLT_экранировать(s.name) + '</div>' +
+                    '<button class="spon-modal-close" aria-label="' + modalLabels.close + '">&times;</button>' +
+                '</div>' +
+                '<div class="spon-modal-body">' +
+                    (s.logo ? '<div class="spon-modal-logo"><img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '"></div>' : '') +
+                    (desc ? '<div class="spon-modal-desc">' + KSLT_экранировать(desc) + '</div>' : '') +
+                    addressHtml +
+                    (actions ? '<div class="spon-modal-actions">' + actions + '</div>' : '') +
+                '</div>' +
                 '<button class="spon-modal-close-btn">' + modalLabels.close + '</button>' +
             '</div>';
 

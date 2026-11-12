@@ -3961,17 +3961,56 @@ h2 {
     background: var(--bg-card);
     border: var(--bw-hair) solid var(--border);
     border-radius: var(--radius-xl);
-    padding: 32px 28px 24px;
+    padding: var(--space-4) var(--space-6) var(--space-6);
     max-width: 400px;
     width: 100%;
     position: relative;
     text-align: center;
     transform: scale(0.95);
     transition: transform 0.25s ease;
+    /* ОКНО НЕ ВЫШЕ ЭКРАНА. Замер 11.11 на 844x390: «Мульти Спорт» давал
+       592 и срезался на 101 сверху и снизу — ни крестика, ни кнопки
+       «Закрыть», а страница под окном заперта. Высоту задают ДАННЫЕ
+       (сколько контактов у спонсора), поэтому предел ставится по экрану,
+       а не под нынешнего самого длинного.
+       dvh, а не vh: vh считает высоту без адресной строки браузера. */
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - var(--space-8));
 }
 
 .spon-modal-overlay.visible .spon-modal {
     transform: scale(1);
+}
+
+/* ШАПКА: ИМЯ И ЗАКРЫТИЕ В ОДНОЙ СТРОКЕ (решение Кости 21.09 по макету,
+   компонент Modal 26:143). Так держат лист Apple HIG, диалог Material 3,
+   Stripe и GitHub. Две причины: отдельная строка под крестик съедала
+   целую строку высоты (39px при окне 505) и ломала порядок чтения —
+   глаз падал на одинокий крестик раньше, чем узнавал, что за окно.
+   Шапка не прокручивается: закрытие должно быть под рукой всегда. */
+.spon-modal-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    margin-bottom: var(--space-4);
+}
+
+.spon-modal-head .spon-modal-name {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+/* СЕРЕДИНА ПРОКРУЧИВАЕТСЯ ВНУТРИ ОКНА, а не уезжает за экран вместе с
+   ним. `min-height: 0` обязателен: без него flex-элемент не даёт себя
+   сжать ниже содержимого, и предел высоты окна не сработает. */
+.spon-modal-body {
+    overflow-y: auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Цель нажатия 44 — Icon button 40:93, ступень lg: «Only lg (44) meets the
@@ -3979,8 +4018,7 @@ h2 {
    uses it». Было 22 x 32 при padding 4: и ниже порога 44, и уже минимума 24
    из WCAG 2.5.8. Крестик остаётся того же кегля, растёт коробка. */
 .spon-modal-close {
-    position: absolute;
-    top: var(--space-2); right: var(--space-2);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4111,7 +4149,11 @@ h2 {
 
 /* Высота свойством, а не полями — Button 17:82. Было 99 x 36 из padding
    10/24: ниже порога нажатия на кнопке, которой закрывают окно. */
+/* ОДНО ОБЪЯВЛЕНИЕ НА КЛАСС: `flex-shrink` сперва ушёл отдельным блоком
+   выше — и тут же родилась вторая запись об одном понятии. Нижняя кнопка
+   не сжимается: на высоком окне до крестика одной рукой не дотянуться. */
 .spon-modal-close-btn {
+    flex-shrink: 0;
     height: var(--btn-h-md);
     padding: 0 var(--space-6);
     background: var(--alpha-white-08);

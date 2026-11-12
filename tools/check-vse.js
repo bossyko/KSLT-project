@@ -463,6 +463,8 @@ const КУСКИ = [
      'check-hvost-vhoda.js', 'check-hvost-vhoda-otkat.js'],
     ['состав блоков по языкам',
      'check-sostav-yazykov.js', 'check-sostav-yazykov-otkat.js'],
+    ['окно спонсора',
+     'check-okno-sponsora.js', 'check-okno-sponsora-otkat.js'],
 
     /* ТРИ ПАРЫ, ЛЕЖАВШИЕ МИМО СПИСКА. Пруверы к ним написаны и лежат на
        диске, но общий бегунок их не звал — то есть они не гонялись ни
