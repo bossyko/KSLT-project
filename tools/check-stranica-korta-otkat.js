@@ -197,6 +197,13 @@ fs.mkdirSync(path.join(песок, 'css'), { recursive: true });
 fs.mkdirSync(path.join(песок, 'js'), { recursive: true });
 fs.mkdirSync(path.join(песок, 'tools'), { recursive: true });
 fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
+/* ПЕСОЧНИЦА ОБЯЗАНА ДАВАТЬ ПРИБОРУ ТО ЖЕ, ЧТО И ЖИЗНЬ (11.11). Правило
+   берёт числа границ из tools/lib/granicy.js, а тот — из справочника
+   css/tokens.css. Без них прувер падает на `Cannot find module` и винит
+   сторожа — то есть отчитывается о беде, которой нет. */
+fs.mkdirSync(path.join(песок, 'tools', 'lib'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'lib', 'granicy.js'), path.join(песок, 'tools', 'lib', 'granicy.js'));
+fs.copyFileSync(path.join(КОРЕНЬ, 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-stranica-korta.js'),
                  fs.readFileSync(path.join(__dirname, 'check-stranica-korta.js')));
 

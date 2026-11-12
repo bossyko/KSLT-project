@@ -41,13 +41,17 @@ const БЛОКФ = 'js/tournament-blocks.js';
 
 const ОТКАТЫ = [
 
-/* ДОБАВЛЕНО 31.10: боковая карточка и лента — размер по содержимому. */
-[CSS, `    padding-left: calc(var(--to-thumb) + var(--space-2));`,
-      `    padding-left: 144px;`,
+/* ДОБАВЛЕНО 31.10: боковая карточка и лента — размер по содержимому.
+   ЯКОРИ ПЕРЕВЕШЕНЫ 11.11: отступы карточки съехали в токен
+   `--to-pad-left`, и оба якоря искали `padding-left: calc(…)`, которого в
+   файле больше нет — прувер честно говорил «якорь встречается 0 раз», то
+   есть откат НЕ СОСТОЯЛСЯ и ничего не доказывал. */
+[CSS, `    --to-pad-left: calc(var(--to-thumb) + var(--space-2));`,
+      `    --to-pad-left: 144px;`,
  'место под афишу считается из ширины самой афиши'],
 
-[CSS, `    --to-thumb: 96px;\n    padding-left: calc(var(--to-thumb) + var(--space-2));`,
-      `    --to-thumb: 120px;\n    padding-left: calc(var(--to-thumb) + var(--space-2));`,
+[CSS, `    --to-thumb: 96px;\n    --to-pad-left: calc(var(--to-thumb) + var(--space-2));`,
+      `    --to-thumb: 120px;\n    --to-pad-left: calc(var(--to-thumb) + var(--space-2));`,
  'в боковом столбе афиша своей ступени, а не широкого вида'],
 
 [СТИЛЬ, `    .tournaments-grid > .tc:nth-child(n) { height: auto; min-height: 270px; }`,
