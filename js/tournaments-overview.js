@@ -376,9 +376,14 @@
     }
 
     // Category ID is now stored without gender prefix
+    /* СЕМЬЯ КАТЕГОРИИ РЕШАЕТСЯ В ДОМЕ ПРАВИЛ (11.11). Решение Кости:
+       Open Friendly показывается вместе с Friendly Weekend, одной
+       категорией. Родство объявлено ОДИН раз в `KSLT_RULES`, здесь только
+       зов — иначе обзорная, страница категории и главная разойдутся. */
     function getCatId(catId) {
         if (!catId) return 'tour';
-        return catId;
+        return (window.KSLT_RULES && window.KSLT_RULES.семья)
+            ? window.KSLT_RULES.семья(catId) : catId;
     }
 
     function groupByCategory(rows, fromSupabase, regCounts) {

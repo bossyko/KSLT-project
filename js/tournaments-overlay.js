@@ -19,6 +19,21 @@
     /* СТАТУС БЕРЁТСЯ У ДОМА НАПРЯМУЮ (19.10): третья из четырёх обёрток. */
 
     /** Сумма в шапке — коротко: 2626000 → «2.6M», 40000 → «40K» */
+    /* СЕМЬЯ КАТЕГОРИИ (11.11). Решение Кости: Open Friendly идёт вместе с
+       Friendly Weekend — «как бы одна категория, где нет ограничений». В
+       базе это две строки, на странице одна, поэтому спрашиваем базу по
+       ВСЕЙ семье. Иначе турнир Open Friendly не попал бы ни на одну
+       страницу вовсе: своей у него нет, а в дружескую он бы не вошёл.
+       Состав семьи объявлен ОДИН раз в KSLT_RULES и читается оттуда.
+       ЭТО ФУНКЦИЯ, А НЕ ПЕРЕМЕННАЯ: первая редакция объявила `СЕМЬЯ` внутри
+       обработчика `load`, а зовут её из двух других функций — страница
+       падала на `СЕМЬЯ is not defined` и показывала прочерки вместо
+       турниров. Поймано своим же замером сразу после правки. */
+    function семьяКатегории(category) {
+        return (window.KSLT_RULES && window.KSLT_RULES.семьяСписок)
+            ? window.KSLT_RULES.семьяСписок(category) : [category];
+    }
+
     function shortPrize(num) {
         if (!num) return '0';
         if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -175,7 +190,7 @@
             try {
                 var result = await client.from('tournaments')
                     .select('id, date_end, published_at')
-                    .eq('category_id', category);
+                    .in('category_id', семьяКатегории(category));
                 /* ЗАПАСНОГО СЧЁТА НЕТ. Было: нет опубликованных — показываем
                    ВСЕ строки, то есть черновики. Ноль — законный ответ. */
                 var allT = (result.data || []).filter(function(t) { return t.published_at !== null; });
@@ -223,7 +238,7 @@
             // All tournaments in this category (all statuses)
             var result = await client.from('tournaments')
                 .select('id, prize_fund, published_at')
-                .eq('category_id', category);
+                .in('category_id', семьяКатегории(category));
 
             var allT = (result.data && !result.error) ? result.data : [];
             /* ЗАПАСНОГО СЧЁТА НЕТ — он был заряженным ружьём: у категории с
@@ -271,7 +286,7 @@
         try {
             var result = await client.from('tournaments')
                 .select('*')
-                .eq('category_id', category)
+                .in('category_id', семьяКатегории(category))
                 .order('date_start', { ascending: true });
 
             // Filter out drafts (published_at null = draft)
