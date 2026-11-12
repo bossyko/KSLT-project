@@ -84,12 +84,12 @@ const ОТКАТЫ = [
   ['css/style.css',
    '@media (max-width: 640px) {\n    .sp-gives { grid-template-columns: 1fr; }\n}',
    '@media (max-width: 480px) {\n    .sp-gives { grid-template-columns: 1fr; }\n}',
-   'в блоке нет ни одной ширины, кроме 768 и 640'],
+   'в блоке нет ни одной ширины, кроме двух границ раскладки'],
 
   ['css/style.css',
    '@media (orientation: landscape) and (max-height: 500px) {\n    .sp-offer { padding: var(--space-4) var(--space-6); }\n    .sp-offer-lead { margin-bottom: var(--space-4); }\n    .sp-nums { margin-bottom: var(--space-4); }\n    .sp-gives { margin-bottom: var(--space-4); }\n}',
    '',
-   'слоёв ровно три: ≤768, ≤640 и поворот'],
+   'слоёв ровно три: широкая граница, узкая и поворот'],
 
   ['css/style.css',
    '    .sp-offer h2,\n',
@@ -137,7 +137,7 @@ const ОТКАТЫ = [
   ['index.html',
    ВЕРСИЯ_СЕЙЧАС,
    ВЕРСИЯ_НАЗАД,
-   'версии подняты']
+   'версия стилей одна на три языка']
 ];
 
 function прогон() {

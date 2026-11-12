@@ -30,6 +30,7 @@
  *   node tools/check-geroy.js
  */
 const fs = require('fs');
+const ГР = require('./lib/granicy.js');
 const path = require('path');
 
 const ФАЙЛ = path.join(__dirname, '..', 'css', 'style.css');
@@ -220,7 +221,12 @@ const телефон = (function () {
        ни от значения свойств внутри них. */
     const блоки = [];
     let н = -1;
-    while ((н = тЧ.indexOf('@media (max-width: 768px) {', н + 1)) !== -1) {
+    /* ЧИСЛО БЕРЁТСЯ ИЗ СПРАВОЧНИКА (11.11): здесь стояло 768, утром
+       границы перевели на 640/992 — и срез стал пустым, а семь правил
+       упали разом на исправном коде. Это третий раз, когда это место
+       ломается, и первые два были про порядок блоков. */
+    const ТЕЛЕФОННЫЙ = '@media (max-width: ' + ГР.широкая + 'px) {';
+    while ((н = тЧ.indexOf(ТЕЛЕФОННЫЙ, н + 1)) !== -1) {
         const к = тЧ.indexOf('@media', н + 10);
         const блок = к === -1 ? тЧ.slice(н) : тЧ.slice(н, к);
         if (блок.indexOf('.hero') !== -1) блоки.push(блок);

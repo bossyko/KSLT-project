@@ -23,10 +23,13 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-footer-'));
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
 const ОТКАТЫ = [
+  /* ОТКАТ БЬЁТ В НЫНЕШНЕЕ СОСТОЯНИЕ (11.11): порог стал 992 вместе с
+     переводом границ, и прежний якорь `УЗКО = 768` не находился — откат
+     молча не срабатывал, а прувер винил сторожа. */
   ['js/script.js',
-   '        var УЗКО = 768;',
+   '        var УЗКО = 992;',
    '        var УЗКО = 640;',
-   'гармошка включается до 768'],
+   'порог гармошки в скрипте — широкая граница раскладки'],
 
   ['js/script.js',
    'window.innerHeight - 20;',
@@ -69,9 +72,9 @@ const ОТКАТЫ = [
    'переключатель длинных и коротких названий'],
 
   ['css/style.css',
-   '@media (max-width: 600px) {\n    .footer-legal-full { display: none; }',
-   '@media (max-width: 768px) {\n    .footer-legal-full { display: none; }',
-   'короткие подписи включаются на 600, а не на 768'],
+   '@media (max-width: 640px) {\n    .footer-legal-full { display: none; }',
+   '@media (max-width: 992px) {\n    .footer-legal-full { display: none; }',
+   'короткие подписи включаются на узкой границе, а не на широкой'],
 
   ['css/style.css',
    '@media (any-pointer: coarse) {\n    .footer-bottom-links a {\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        min-height: 44px;',

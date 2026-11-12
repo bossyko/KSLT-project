@@ -14,13 +14,15 @@ const исходник = {};
 const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-novosti.js'), 'utf8');
 
 const ОТКАТЫ = [
-['вернуть одну колонку на 900 — та самая причина 1993', 'css/style.css',
- '@media (max-width: 900px) {\n    .hn-grid {\n        grid-template-columns: 1fr 1fr;\n    }\n}',
- '@media (max-width: 900px) {\n    .hn-grid {\n        grid-template-columns: 1fr;\n    }\n}',
- 'от 900 и уже сетка новостей в ДВЕ колонки'],
+/* ОТКАТ БЬЁТ В НЫНЕШНЕЕ СОСТОЯНИЕ (11.11): границы свели к 640/992, и
+   якоря с 900/901 перестали находиться — откаты молча не срабатывали. */
+['вернуть одну колонку — та самая причина 1993', 'css/style.css',
+ '@media (max-width: 992px) {\n    .hn-grid {\n        grid-template-columns: 1fr 1fr;\n    }\n}',
+ '@media (max-width: 992px) {\n    .hn-grid {\n        grid-template-columns: 1fr;\n    }\n}',
+ 'на широкой границе и уже сетка новостей в ДВЕ колонки'],
 
-['вернуть счёту карточек условие min-width: 641', 'css/style.css',
- '@media (min-width: 901px) {\n    .hn-grid > .hn-card:nth-child(n+4) {',
+['вернуть счёту карточек условие узкой границы', 'css/style.css',
+ '@media (min-width: 993px) {\n    .hn-grid > .hn-card:nth-child(n+4) {',
  '@media (min-width: 641px) {\n    .hn-grid > .hn-card:nth-child(n+4) {',
  'четвёртую карточку прячем только при трёх колонках'],
 
@@ -150,6 +152,13 @@ fs.mkdirSync(path.join(песок, 'css'));
 fs.mkdirSync(path.join(песок, 'js'));
 fs.mkdirSync(path.join(песок, 'tools'));
 fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
+/* ОБЩИЙ ИСТОЧНИК ГРАНИЦ ЕДЕТ В ПЕСОЧНИЦУ ВМЕСТЕ С ПРАВИЛОМ (11.11):
+   правило берёт числа из tools/lib/granicy.js, тот — из справочника
+   css/tokens.css. Без них прувер падает на `Cannot find module` и винит
+   сторожа. ПЕСОЧНИЦА ОБЯЗАНА ДАВАТЬ ПРИБОРУ ТО ЖЕ, ЧТО И ЖИЗНЬ. */
+fs.mkdirSync(path.join(песок, 'tools', 'lib'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'lib', 'granicy.js'), path.join(песок, 'tools', 'lib', 'granicy.js'));
+fs.copyFileSync(path.join(КОРЕНЬ, 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-novosti.js'), ПРАВИЛО);
 
 function прогон(замена) {

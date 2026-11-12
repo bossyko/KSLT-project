@@ -247,6 +247,15 @@ fs.mkdirSync(path.join(песок, 'tools'));
 fs.cpSync(path.join(КОРЕНЬ, 'images', 'live-fony'),
           path.join(песок, 'images', 'live-fony'), { recursive: true });
 fs.copyFileSync(path.join(__dirname, 'dvizhenie.js'), path.join(песок, 'tools', 'dvizhenie.js'));
+/* ОБЩИЙ ИСТОЧНИК ГРАНИЦ ЕДЕТ В ПЕСОЧНИЦУ ВМЕСТЕ С ПРАВИЛОМ (11.11).
+   Правило берёт числа границ из tools/lib/granicy.js, а тот — из
+   справочника css/tokens.css. Без них в песочнице прувер падает на
+   `Cannot find module` и винит сторожа. ПЕСОЧНИЦА ОБЯЗАНА ДАВАТЬ ПРИБОРУ
+   ТО ЖЕ, ЧТО И ЖИЗНЬ. */
+fs.mkdirSync(path.join(песок, 'tools', 'lib'), { recursive: true });
+fs.copyFileSync(path.join(__dirname, 'lib', 'granicy.js'), path.join(песок, 'tools', 'lib', 'granicy.js'));
+if (!fs.existsSync(path.join(песок, 'css'))) fs.mkdirSync(path.join(песок, 'css'), { recursive: true });
+fs.copyFileSync(path.join(КОРЕНЬ, 'css', 'tokens.css'), path.join(песок, 'css', 'tokens.css'));
 fs.writeFileSync(path.join(песок, 'tools', 'check-live.js'), ПРАВИЛО);
 
 function прогон(замена) {
