@@ -36,6 +36,24 @@ const ОТКАТЫ = [
    'window.innerHeight;',
    'кнопка «наверх» уходит от подвала'],
 
+  /* ДВА ОТКАТА НА ОБЩИЙ ПРИЗНАК (11.11). Признак «подвал в кадре» один на
+     кнопку и шапку, и у каждого потребителя свой откат: иначе правило,
+     которое держит ВТОРОГО, остаётся недоказанным. */
+  ['js/script.js',
+   'var overFooter = подвалВКадре();',
+   'var overFooter = false;',
+   'кнопка «наверх» уходит от подвала'],
+
+  ['js/script.js',
+   "            headerEl.classList.toggle('na-podvale', подвалВКадре());",
+   "            headerEl.classList.remove('na-podvale');",
+   'шапка уходит с подвала тем же признаком, что и кнопка'],
+
+  ['css/style.css',
+   '.floating-header.na-podvale {\n    transform: translateY(-100%);',
+   '.floating-header.na-podvale {\n    opacity: 0.99;',
+   'шапка уходит с подвала тем же признаком, что и кнопка'],
+
   ['js/script.js',
    "                    заголовок.removeAttribute('role');",
    "                    заголовок.removeAttribute('data-role');",
