@@ -1,0 +1,91 @@
+/**
+ * СЛЕД ОТМЕНЫ СКИДКИ — СТОРОЖ (11.11.2026).
+ *
+ * ЗАМОРАЖИВАЕТСЯ ОТНОШЕНИЕ: ОТМЕНУ ЗАПИСЫВАЕТ СЕРВЕР, А НЕ БРАУЗЕР.
+ *
+ * ЗАМЕР 11.11. В `discount_vouchers` было тринадцать колонок и ни одной
+ * про отмену; `vouchers.js` писал при отмене только `status`. Кто, когда
+ * и почему — нигде. У вызовов (`challenges`) это решено давно: три поля
+ * с теми же именами и серверная функция, и там же записано словами —
+ * «Запись не удаляем: у обеих сторон в истории остаётся, что вызов был».
+ *
+ * ПОЧЕМУ ИМЕННО СЕРВЕР. Поставь клиент `cancelled_by` — его подделает
+ * кто угодно; поставь `cancelled_at` — он придёт с часов смотрящего.
+ * 11.11 мы ровно на этом поймали сутки разницы в админке. ВРЕМЯ И ИМЯ
+ * БЕРЁТ СЕРВЕР, А НЕ БРАУЗЕР.
+ *
+ * ЧТО СТОРОЖИТСЯ:
+ *   1. отмена в админке идёт зовом cancel_voucher, без своего update;
+ *   2. ответ функции читается, а не считается успехом;
+ *   3. миграция объявляет все три колонки;
+ *   4. функция ставит now() и auth.uid() сама и не принимает их извне;
+ *   5. причина необязательна, но пустая строка не становится причиной.
+ */
+const fs = require('fs');
+const path = require('path');
+
+const корень = path.resolve(__dirname, '..');
+const без = т => т.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+const ошибки = [];
+
+function тело(текст, имя) {
+    const м = текст.match(new RegExp('function\\s+' + имя + '\\s*\\('));
+    if (!м) return null;
+    const i = текст.indexOf('{', м.index);
+    let гл = 0;
+    for (let j = i; j < текст.length; j++) {
+        if (текст[j] === '{') гл++;
+        else if (текст[j] === '}') { гл--; if (!гл) return текст.slice(i, j + 1); }
+    }
+    return null;
+}
+
+/* ---- 1 и 2: админка ------------------------------------------------ */
+const разделПуть = path.join(корень, 'js/admin/sections/vouchers.js');
+if (!fs.existsSync(разделПуть)) {
+    ошибки.push('js/admin/sections/vouchers.js не найден — сторожить нечего');
+} else {
+    const т = без(fs.readFileSync(разделПуть, 'utf8'));
+    const т2 = тело(т, 'cancelVoucher');
+    if (!т2) {
+        ошибки.push('vouchers.js: функции cancelVoucher нет — отмена переехала, правило ослепло');
+    } else {
+        if (!/\.rpc\(\s*'cancel_voucher'/.test(т2))
+            ошибки.push('vouchers.js:cancelVoucher не зовёт серверную функцию cancel_voucher');
+        if (/\.update\(/.test(т2))
+            ошибки.push('vouchers.js:cancelVoucher снова пишет статус сам — время и имя возьмутся у браузера');
+        if (!/ответ\.error|data\s*&&\s*\w+\.error|\w+\.error\b/.test(т2))
+            ошибки.push('vouchers.js:cancelVoucher не читает ответ функции — молчаливый «успех» вернётся');
+    }
+}
+
+/* ---- 3, 4 и 5: миграция -------------------------------------------- */
+const мигр = path.join(корень, 'sql/схема/skidka-otmena-sled-11nov.sql');
+if (!fs.existsSync(мигр)) {
+    ошибки.push('sql/схема/skidka-otmena-sled-11nov.sql пропал — колонки объявлять негде');
+} else {
+    const sql = fs.readFileSync(мигр, 'utf8');
+    for (const к of ['cancelled_at', 'cancelled_by', 'cancel_reason']) {
+        if (!new RegExp('ADD COLUMN IF NOT EXISTS\\s+' + к).test(sql))
+            ошибки.push(`миграция не добавляет колонку ${к}`);
+    }
+    const тело_sql = sql.slice(sql.indexOf('CREATE OR REPLACE FUNCTION'));
+    if (!/cancelled_at\s*=\s*now\(\)/.test(тело_sql))
+        ошибки.push('функция не ставит cancelled_at = now() — время придёт со стороны');
+    if (!/cancelled_by\s*=\s*v_me/.test(тело_sql) || !/v_me\s*(uuid\s*)?:=\s*auth\.uid\(\)/.test(тело_sql))
+        ошибки.push('функция не берёт имя из auth.uid() — его можно будет передать снаружи');
+    /* ПОДПИСЬ ФУНКЦИИ НЕ ПРИНИМАЕТ НИ ВРЕМЕНИ, НИ ИМЕНИ: иначе первые два
+       правила обходятся одним лишним аргументом. */
+    const подпись = (тело_sql.match(/cancel_voucher\(([^)]*)\)/) || [])[1] || '';
+    if (/uuid/.test(подпись.replace(/p_id\s+uuid/, '')) || /timestamp/.test(подпись))
+        ошибки.push(`функция принимает лишние аргументы: ${подпись.trim()} — время и имя должны ставиться внутри`);
+    if (!/nullif\s*\(\s*btrim/.test(тело_sql))
+        ошибки.push('функция не отсекает пустую причину — пробелы станут «причиной отмены»');
+}
+
+if (ошибки.length) {
+    console.error('СЛЕД ОТМЕНЫ СКИДКИ — НАРУШЕНО:');
+    for (const о of ошибки) console.error('  · ' + о);
+    process.exit(1);
+}
+console.log('след отмены: отмена идёт серверной функцией, три колонки объявлены, время и имя ставит сервер');

@@ -202,12 +202,30 @@ test.describe('Admin Page — Navigation Elements', () => {
             expect(await burgerMenu.count()).toBe(1);
         });
 
+        /* ПРОБА ЧИТАЛА ЧЕРНОВИК РАЗМЕТКИ, А НЕ ИТОГ (11.11).
+           В `pages/admin.html` стоит `<button onclick="ksltLogout()">Выйти`,
+           но при живом входе `js/auth-nav.js:703` ЗАМЕНЯЕТ обе эти кнопки
+           на выпадашку: у сотрудника «Админка» с пунктом `.admin-nav-logout`
+           внутри, у обычного человека — `#navLogoutBtn`. То есть исходной
+           кнопки в работающей админке нет уже давно.
+
+           Пока обёртка открывала страницу по domcontentloaded, проба
+           успевала прочесть DOM ДО подмены и была зелёной — проверяя то,
+           чего человек никогда не видит. Как только обёртка стала ждать
+           признак продукта (`body.auth-ready`, коммит 589ac8b5), проба
+           увидела итог и упала на пяти видах.
+
+           ПРОБА, ЧИТАЮЩАЯ DOM ДО ПОДМЕНЫ, ПРОВЕРЯЕТ ЧЕРНОВИК. Спрашиваем
+           то, что важно человеку: ВЫЙТИ МОЖНО — любым из органов, какой
+           бы ветке он ни принадлежал. */
         test(`${adminPage.name}: Has logout button`, async ({ page }) => {
             await открытьЗакрытую(page, adminPage.path);
 
-            // Logout button with ksltLogout onclick
-            const logoutBtn = page.locator('button[onclick*="ksltLogout"], .btn-auth[onclick*="ksltLogout"]');
-            expect(await logoutBtn.count()).toBeGreaterThanOrEqual(1);
+            const выход = page.locator(
+                '.admin-nav-logout, .user-dropdown-logout, #navLogoutBtn, ' +
+                '[onclick*="ksltLogout"]'
+            );
+            expect(await выход.count()).toBeGreaterThanOrEqual(1);
         });
     }
 });

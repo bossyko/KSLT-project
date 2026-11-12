@@ -14,6 +14,10 @@
     var vchSortField = 'created_at', vchSortAsc = false;
     var vchPage = 1, vchAllData = [], vchFilteredData = [];
     var vchCourtsMap = {}, vchCoachesMap = {};
+    /* КТО ОТМЕНИЛ — ИМЕНЕМ, А НЕ ИДЕНТИФИКАТОРОМ. В базе лежит uuid;
+       показывать его человеку бессмысленно. Карта собирается одним
+       запросом и только по тем, кто вправду что-то отменял. */
+    var vchKtoMap = {};
     var VCH_PER_PAGE = 20;
 
     // ---- Entry point ----
@@ -222,6 +226,17 @@
             vchCourtsMap[c.id] = { id: c.id, name: c.name, price: firstType ? (firstType.price || 0) : 0 };
         });
         (results[2].data || []).forEach(function(c) { vchCoachesMap[c.id] = c; });
+
+        /* ЗАПРОС ТОЛЬКО КОГДА ЕСТЬ КОГО СПРАШИВАТЬ: пока никто ничего не
+           отменял, лишнего обращения к базе не будет. */
+        var кого = [];
+        vchAllData.forEach(function(v) {
+            if (v.cancelled_by && кого.indexOf(v.cancelled_by) === -1) кого.push(v.cancelled_by);
+        });
+        if (кого.length) {
+            var ктоRes = await A.client.from('profiles').select('id, full_name').in('id', кого);
+            (ктоRes.data || []).forEach(function(p) { vchKtoMap[p.id] = p.full_name; });
+        }
 
         computePeriodDates();
         applyVchFilters();
@@ -446,29 +461,38 @@
     async function cancelVoucher(id) {
         if (A.currentRole !== 'admin') return;
 
-        // У окна подтверждения три части: заголовок, пояснение и действие.
-        // Пояснение пропускали, и на его месте печаталась сама функция
-        A.showConfirm(L.vchCancelConfirm, L.deleteConfirmText, async function() {
-            // select() после update: без него ответ приходит пустым и «успехом»
-            // считается даже случай, когда правила доступа ничего не изменили
-            var result = await A.client.from('discount_vouchers')
-                .update({ status: 'cancelled' })
-                .eq('id', id)
-                .eq('status', 'active')
-                .select('id');
-
-            if (result.error) {
-                A.showToast(result.error.message, 'error');
-                return;
-            }
-            if (!result.data || !result.data.length) {
-                A.showToast('Ничего не изменилось: нет прав или скидка уже не активна', 'error');
-                return;
-            }
-
-            A.showToast(L.vchCancelled, 'success');
-            loadVouchersData();
+        /* ПРИЧИНУ СПРАШИВАЕМ, А НЕ ТРЕБУЕМ. Пустое поле — это «без
+           причины», и так и запишется; у вызовов сделано так же. */
+        var причина = await A.showPromptAsync({
+            title: L.vchCancelConfirm,
+            text: L.vchCancelPrichinaText,
+            placeholder: L.vchCancelPrichinaPodskazka,
+            okLabel: L.vchCancel
         });
+        /* Закрыли окно крестиком или Esc — отмены не было. */
+        if (причина === null) return;
+
+        /* ВРЕМЯ И ИМЯ СТАВИТ СЕРВЕР. Прежде здесь стоял update прямо из
+           браузера, и он писал только статус. Поставь мы cancelled_by
+           тут — его можно подделать, а cancelled_at взялся бы с часов
+           смотрящего: 11.11 мы ровно на этом поймали сутки разницы.
+           Решение и имена взяты у отмены вызова (challenges). */
+        var result = await A.client.rpc('cancel_voucher', { p_id: id, p_reason: причина });
+
+        if (result.error) {
+            A.showToast(result.error.message, 'error');
+            return;
+        }
+        /* ОТВЕТ ЧИТАЕТСЯ, А НЕ ПРЕДПОЛАГАЕТСЯ: функция всегда говорит
+           словами, что произошло, и молчаливого «успеха» тут нет. */
+        var ответ = result.data || {};
+        if (ответ.error) {
+            A.showToast(L.vchCancelOshibka[ответ.error] || ответ.error, 'error');
+            return;
+        }
+
+        A.showToast(L.vchCancelled, 'success');
+        loadVouchersData();
     }
 
     /** Удаление насовсем — только для отменённых и истёкших. */
@@ -542,6 +566,13 @@
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchDate + '</span><span>' + formatVchDate(v.created_at) + '</span></div>' +
                             '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.thExpires + '</span><span>' + formatVchDate(v.expires_at) + '</span></div>' +
                             (v.used_at ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchUsedAt + '</span><span>' + formatVchDate(v.used_at) + '</span></div>' : '') +
+                            /* СЛЕД ОТМЕНЫ. Показывается ровно столько,
+                               сколько записано: у скидок, отменённых до
+                               11.11, полей нет вовсе, и выдумывать их
+                               нечем. Пустые строки не рисуются. */
+                            (v.cancelled_at ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchCancelledAt + '</span><span>' + formatVchDate(v.cancelled_at) + '</span></div>' : '') +
+                            (v.cancelled_by ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchCancelledBy + '</span><span>' + A.esc(vchKtoMap[v.cancelled_by] || L.vchKtoNeizvesten) + '</span></div>' : '') +
+                            (v.cancel_reason ? '<div class="ad-vch-detail-row"><span class="ad-vch-detail-label">' + L.vchCancelReason + '</span><span>' + A.esc(v.cancel_reason) + '</span></div>' : '') +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -639,13 +670,21 @@
     }
 
     // ---- Helpers ----
+    /* ДЕНЬ БЕРЁТСЯ У КЛУБА, А НЕ У СМОТРЯЩЕГО (11.11). Здесь стояла
+       ручная сборка из getDate/getMonth/getFullYear — то есть день по
+       часам того, кто смотрит. Из Чикаго скидка, выданная утром по
+       Бишкеку, показывалась вчерашней. Сторож check-pokaz-daty этого
+       не видел: он сторожит toLocaleDateString, а ручная сборка — другой
+       способ сказать то же самое. В продукте таких мест 114, они
+       заведены отдельной записью; здесь чиню своё, потому что на этой
+       же функции сейчас печатается след отмены, и врать он не должен
+       с первого дня. */
     function formatVchDate(dateStr) {
         if (!dateStr) return '—';
-        var d = new Date(dateStr);
-        var dd = String(d.getDate()).padStart(2, '0');
-        var mm = String(d.getMonth() + 1).padStart(2, '0');
-        var yy = String(d.getFullYear()).slice(-2);
-        return dd + '.' + mm + '.' + yy;
+        var день = window.KSLT_VREMYA.деньПоБишкеку(dateStr);
+        if (!день) return '—';
+        var ч = день.split('-');
+        return ч[2] + '.' + ч[1] + '.' + ч[0].slice(2);
     }
 
     // ---- Excel Export ----
