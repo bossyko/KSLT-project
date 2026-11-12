@@ -45,14 +45,22 @@ const ОТКАТЫ = [
    '    /* :not(:first-child)',
    'телефон — две колонки, два полных ряда, и хвост считается ОТ КОНЦА'],
 
+  /* ОБА ЯКОРЯ ПЕРЕВЕШЕНЫ 11.11: они держались на СВОЁМ слое поворота у
+     витрины, а он снят — он был мёртвым (его объявление колонок перебивал
+     общий слой ниже, а правила показа повторялись там же знак в знак).
+     Прежние якоря не нашлись бы вовсе: прувер честно сказал «якорь
+     встречается 0 раз», то есть откат НЕ СОСТОЯЛСЯ и ничего не доказывал.
+     Теперь откаты бьют по ОБЩЕМУ слою — тому, который в продукте и решает.
+     `.live-matches` в якоре не украшение: без него та же тройка строк
+     встречается ещё и в слое ≤640, знак в знак. */
   ['css/style.css',
-   '    .coaches-grid.vn-four { grid-template-columns: repeat(4, 1fr); }',
-   '    .coaches-grid.vn-four { grid-template-columns: repeat(3, 1fr); }',
-   'телефон боком — четыре в ряд и ровно один ряд'],
+   '    .live-matches,\n    .courts-grid.vn-four,\n    .coaches-grid.vn-four {\n        grid-template-columns: repeat(2, minmax(0, 1fr));',
+   '    .live-matches,\n    .courts-grid.vn-four,\n    .coaches-grid.vn-four {\n        grid-template-columns: repeat(4, 1fr);',
+   'на повороте витрина идёт общим слоем в две дорожки, своего слоя у неё нет'],
 
   ['css/style.css',
-   '@media (orientation: landscape) and (max-height: 500px) {\n    .courts-grid.vn-four,',
-   '@media (max-height: 500px) {\n    .courts-grid.vn-four,',
+   '@media (orientation: landscape) and (max-height: 500px) {\n    /* СЕЛЕКТОР ДОЛЖЕН БИТЬ',
+   '@media (max-height: 500px) {\n    /* СЕЛЕКТОР ДОЛЖЕН БИТЬ',
    'слой поворота стоит ПОСЛЕ телефона и планшета'],
 
   /* 07.10: якорь был одной строкой свойства, и как только отношение 4:3
