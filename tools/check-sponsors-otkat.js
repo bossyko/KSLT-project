@@ -19,6 +19,10 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-sponsors-'));
     fs.copyFileSync(path.join(КОРЕНЬ, ф), path.join(ВРЕМ, ф)));
 
 const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(КОРЕНЬ, 'index.html'), 'utf8').match(/style\.css\?v=(\d+)/) || [0, 0])[1];
+/* ОТКАТ НА ЗАШИТОЕ ЧИСЛО ПЕРЕСТАЁТ БЫТЬ ОТКАТОМ, КОГДА ЖИЗНЬ ДОХОДИТ ДО
+   ЭТОГО ЧИСЛА (11.11): стояло 483 при нынешней 483 — замена строки на саму
+   себя. Версия уводится вниз ОТ ТЕКУЩЕЙ. */
+const ВЕРСИЯ_НАЗАД = 'style.css?v=' + (Number(ВЕРСИЯ_СЕЙЧАС.replace(/\D+/g, '')) - 1);
 
 const ОТКАТЫ = [
   ['css/style.css',
@@ -57,9 +61,13 @@ const ОТКАТЫ = [
    '@media (max-width: 768px) {\n    .sponsors-cloud { gap: var(--space-3); }',
    'в секции нет ни одной ширины, кроме 640 и 992'],
 
+  /* ЯКОРЬ ПЕРЕПИСАН 11.11: до переделки окна крестик стоял `position:
+     absolute` в углу, теперь он живёт в шапке окна строкой с именем.
+     ОТКАТ, КОТОРЫЙ НЕ СОСТОЯЛСЯ, НИЧЕГО НЕ ДОКАЗЫВАЕТ — прежний якорь
+     не нашёлся бы вовсе, и прувер отчитался бы зелёным. */
   ['css/style.css',
-   '.spon-modal-close {\n    position: absolute;\n    top: var(--space-2); right: var(--space-2);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: var(--btn-h-md);\n    height: var(--btn-h-md);',
-   '.spon-modal-close {\n    position: absolute;\n    top: var(--space-2); right: var(--space-2);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    padding: 4px;',
+   '.spon-modal-close {\n    flex-shrink: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: var(--btn-h-md);\n    height: var(--btn-h-md);',
+   '.spon-modal-close {\n    flex-shrink: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    padding: 4px;',
    'крестик и «Закрыть» — высотой-свойством и не ниже порога'],
 
   ['css/style.css',
@@ -119,8 +127,8 @@ const ОТКАТЫ = [
   /* ЯКОРЬ НА ЧИСЛО, КОТОРОЕ РАСТЁТ, — ТАКОЙ ЖЕ ЯКОРЬ НА СОСЕДА. */
   ['index.html',
    ВЕРСИЯ_СЕЙЧАС,
-   'style.css?v=483',
-   'версии подняты'],
+   ВЕРСИЯ_НАЗАД,
+   'версия стилей и загрузчика одна на три языка'],
   ['css/style.css',
    '    border-color: var(--accent);\n    box-shadow: 0 0 0 1px var(--accent);',
    '    border-color: var(--border-light);',
