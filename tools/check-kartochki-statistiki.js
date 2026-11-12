@@ -52,6 +52,37 @@ for (const ф of файлы) {
     }
 }
 
+/* ═══ ГЕОМЕТРИЯ — ОДНА НА ВСЕ КАРТОЧКИ СВОДКИ (h146/h208, 12.11) ═══
+   До правки у одного понятия было СЕМЬ коробок: 8/4, 12/16, 16, 20,
+   16/20 и два радиуса. Теперь отступ и радиус берутся из двух имён, и
+   правило требует именно их: своё число или своя ступень в любой из
+   этих карточек — снова семь геометрий через месяц. */
+const css = fs.readFileSync(path.join(КОРЕНЬ, 'css/admin.css'), 'utf8');
+const КАРТОЧКИ = ['ad-stat-card', 'ad-vch-stat', 'ad-news-stat-card', 'ad-pay-stat-card',
+    'anl-card', 'ad-cch-stat-card', 'ad-crt-stat-card', 'ad-usr-card'];
+const своиГеометрии = [];
+for (const к of КАРТОЧКИ) {
+    const м = css.match(new RegExp('\\n\\.' + к + '\\s*\\{([^}]*)\\}'));
+    if (!м) { своиГеометрии.push(к + ' — правила нет вовсе'); continue; }
+    const тело = м[1];
+    const отступ = (тело.match(/padding:\s*([^;]+);/) || [])[1];
+    const радиус = (тело.match(/border-radius:\s*([^;]+);/) || [])[1];
+    if (отступ && отступ.indexOf('--ad-stat-pad') === -1) своиГеометрии.push(к + ': свой отступ ' + отступ);
+    if (радиус && радиус.indexOf('--ad-stat-radius') === -1) своиГеометрии.push(к + ': свой радиус ' + радиус);
+}
+if (!/--ad-stat-pad:/.test(css) || !/--ad-stat-radius:/.test(css)) {
+    своиГеометрии.push('в admin.css нет имён --ad-stat-pad / --ad-stat-radius — геометрию снова задают на местах');
+}
+if (/\.ad-usr-card--sm\s*\{/.test(css)) {
+    своиГеометрии.push('.ad-usr-card--sm вернулся: вторая высота одного и того же понятия (h124)');
+}
+if (своиГеометрии.length) {
+    console.error('КАРТОЧКИ СТАТИСТИКИ — НАРУШЕНО:');
+    for (const о of своиГеометрии) console.error('  · ' + о);
+    console.error('    Решение 12.11: отступ и радиус — только --ad-stat-pad и --ad-stat-radius.');
+    process.exit(1);
+}
+
 if (всего < 10) {
     console.error('КАРТОЧКИ СТАТИСТИКИ — НАРУШЕНО:');
     console.error('  · найдено всего ' + всего + ' карточек при замере 13 — прибор ослеп либо раздел снесли');

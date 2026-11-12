@@ -327,11 +327,27 @@ body.ad-page {
     margin-bottom: var(--space-md);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   КАРТОЧКА СВОДКИ — ОДНА ГЕОМЕТРИЯ НА ВСЮ АДМИНКУ (h146/h208, 12.11)
+
+   ЗАМЕР ПО CSS ДО ПРАВКИ — СЕМЬ ГЕОМЕТРИЙ У ОДНОГО ПОНЯТИЯ:
+     .ad-stat-card 8/4 sm · .ad-vch-stat 12/16 sm · .ad-news-stat-card
+     12/16 md · .ad-pay-stat-card 16 sm · .anl-card 20 sm ·
+     .ad-cch-stat-card 16/20 md · .ad-crt-stat-card 16/20 md.
+   Соседние разделы показывали одно и то же разной коробкой.
+
+   ВЫБРАНО БОЛЬШИНСТВО, А НЕ ВКУС: 16/20 и радиус md встречались чаще
+   всех. Числа — ступени шкалы. Дальше геометрия берётся ТОЛЬКО отсюда. */
+:root {
+    --ad-stat-pad: var(--space-4) var(--space-5);
+    --ad-stat-radius: var(--radius-md);
+}
+
 .ad-stat-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-1);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
     text-align: center;
 }
 
@@ -5379,8 +5395,8 @@ select.ad-field-input {
 .ad-news-stat-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--space-3) var(--space-4);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
     text-align: center;
 }
 
@@ -5485,8 +5501,8 @@ select.ad-field-input {
 .ad-crt-stat-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--space-4) var(--space-5);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
 }
 
 .ad-crt-stat-header {
@@ -5622,8 +5638,8 @@ select.ad-field-input {
 .ad-cch-stat-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--space-4) var(--space-5);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -5732,8 +5748,8 @@ select.ad-field-input {
 .ad-pay-stat-card {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
-    border-radius: var(--radius-sm);
-    padding: var(--space-4);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
     text-align: center;
 }
 
@@ -6373,13 +6389,17 @@ select.ad-field-input {
     gap: var(--space-3);
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
-    border-radius: 12px;
-    padding: var(--space-4) var(--space-5);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
 }
 
-.ad-usr-card--sm {
-    padding: var(--space-3) var(--space-4);
-}
+/* .ad-usr-card--sm СНЯТ 12.11 (h124). Это была ВТОРАЯ ВЫСОТА ОДНОГО И
+   ТОГО ЖЕ ПОНЯТИЯ: четыре карточки второго ряда отличались от первого
+   ряда только отступами 12/16 против 16/20 — и ряд читался как два
+   разных блока. Отступы теперь общие (--ad-stat-pad), а класс оставлен
+   в разметке пустым якорем намеренно: его снимут вместе со следующей
+   правкой раздела, чтобы не трогать сейчас четыре строки js ради нуля
+   изменений на экране. */
 
 .ad-usr-card-icon {
     flex-shrink: 0;
@@ -6475,8 +6495,8 @@ select.ad-field-input {
 .ad-vch-stat {
     background: var(--alpha-white-04);
     border: var(--bw-hair) solid var(--alpha-white-08);
-    border-radius: var(--radius-sm);
-    padding: var(--space-3) var(--space-4);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
@@ -6816,8 +6836,8 @@ select.ad-field-input {
 .anl-card {
     background: var(--bg-elevated);
     border: var(--bw-hair) solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: var(--space-5);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);
     text-align: center;
 }
 .anl-card-icon {

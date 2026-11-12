@@ -13,6 +13,10 @@ function копия() {
     fs.copyFileSync(path.join(корень, 'tools/check-kartochki-statistiki.js'),
         path.join(двор, 'tools/check-kartochki-statistiki.js'));
     fs.cpSync(path.join(корень, 'js/admin'), path.join(двор, 'js/admin'), { recursive: true });
+    /* С 12.11 сторож читает ещё и геометрию в css/admin.css — без копии
+       откаты про отступы падали бы на «файла нет». */
+    fs.mkdirSync(path.join(двор, 'css'));
+    fs.copyFileSync(path.join(корень, 'css/admin.css'), path.join(двор, 'css/admin.css'));
     return двор;
 }
 
@@ -40,6 +44,35 @@ const ОТКАТЫ = [
             fs.writeFileSync(п, т.replace(было, станет));
         },
         ждём: /подпись стоит НАД числом в 1 карточке/,
+    },
+    {
+        имя: 'аналитике вернули свой отступ 20 вместо общего',
+        правка(двор) {
+            const п = path.join(двор, 'css/admin.css');
+            const т = fs.readFileSync(п, 'utf8');
+            const рег = /(\n\.anl-card\s*\{[^}]*?)padding: var\(--ad-stat-pad\);/;
+            if (!рег.test(т)) return 'якорь не найден';
+            fs.writeFileSync(п, т.replace(рег, '$1padding: var(--space-5);'));
+        },
+        ждём: /anl-card: свой отступ/,
+    },
+    {
+        имя: 'вернулась вторая высота карточек пользователей (--sm)',
+        правка(двор) {
+            const п = path.join(двор, 'css/admin.css');
+            const т = fs.readFileSync(п, 'utf8');
+            fs.writeFileSync(п, т + '\n.ad-usr-card--sm {\n    padding: var(--space-3) var(--space-4);\n}\n');
+        },
+        ждём: /ad-usr-card--sm вернулся/,
+    },
+    {
+        имя: 'имена геометрии снесены — каждый задаёт своё',
+        правка(двор) {
+            const п = path.join(двор, 'css/admin.css');
+            const т = fs.readFileSync(п, 'utf8');
+            fs.writeFileSync(п, т.replace('--ad-stat-pad:', '--ad-stat-pad-ubrano:'));
+        },
+        ждём: /нет имён --ad-stat-pad/,
     },
     {
         имя: 'карточки статистики вынесли из админки — прибору нечего мерить',

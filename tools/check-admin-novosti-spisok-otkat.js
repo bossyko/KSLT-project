@@ -34,12 +34,22 @@ const ОТКАТЫ = [
 `,          ``,
    'карточки аналитики остались тремя — состав не менялся'],
 
-  [ADM, `    padding: var(--space-3) var(--space-4);
-    text-align: center;
-}`,     `    padding: 14px 16px;
-    text-align: center;
-}`,
-   'поля карточки аналитики стоят на шкале отступов'],
+  /* ЯКОРЬ ДЕРЖИТСЯ НА ИМЕНИ КЛАССА, А НЕ НА ТЕЛЕ ПРАВИЛА (12.11).
+     После сведения карточек сводки к одной геометрии текст
+     «padding: var(--ad-stat-pad); text-align: center; }» встречается в
+     четырёх блоках, и прежний якорь перестал быть единственным.
+     ЯКОРЬ, СТАВШИЙ ОБЩИМ ДЛЯ НЕСКОЛЬКИХ БЛОКОВ, НИЧЕГО НЕ ОТКАТЫВАЕТ. */
+  [ADM, `.ad-news-stat-card {
+    background: var(--bg-elevated);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--ad-stat-radius);
+    padding: var(--ad-stat-pad);`,
+        `.ad-news-stat-card {
+    background: var(--bg-elevated);
+    border: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--ad-stat-radius);
+    padding: 14px 16px;`,
+   'поля карточки аналитики берутся из общего имени, а не задаются на месте'],
 
   [ADM, `    gap: var(--space-3);
     margin-bottom: var(--space-6);
