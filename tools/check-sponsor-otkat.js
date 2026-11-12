@@ -25,7 +25,7 @@ const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-sponsor-'));
 const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(КОРЕНЬ, 'index.html'), 'utf8').match(/style\.css\?v=(\d+)/) || [0, 0])[1];
 /* Откат уводит версию заведомо ниже порога: минус единица порог не пробивает,
    а правило проверяет именно «не ниже». */
-const ВЕРСИЯ_НАЗАД = 'style.css?v=1';
+const ВЕРСИЯ_НАЗАД = 'style.css?v=479';
 
 const ОТКАТЫ = [
   ['css/style.css',

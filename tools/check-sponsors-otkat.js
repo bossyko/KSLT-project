@@ -119,7 +119,7 @@ const ОТКАТЫ = [
   /* ЯКОРЬ НА ЧИСЛО, КОТОРОЕ РАСТЁТ, — ТАКОЙ ЖЕ ЯКОРЬ НА СОСЕДА. */
   ['index.html',
    ВЕРСИЯ_СЕЙЧАС,
-   'style.css?v=1',
+   'style.css?v=479',
    'версии подняты'],
   ['css/style.css',
    '    border-color: var(--accent);\n    box-shadow: 0 0 0 1px var(--accent);',

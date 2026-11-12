@@ -123,7 +123,7 @@ let плохо = 0;
   } else if (ф === null) {
     /* особый откат: заводим английскую страницу, грузящую админку */
     const путь = path.join(ВРЕМ, 'pages/admin-en-proba.html');
-    fs.writeFileSync(путь, '<script src="../js/admin/core/constants.js?v=1"></script>');
+    fs.writeFileSync(путь, '<script src="../js/admin/core/constants.js?v=187"></script>');
     вернуть = () => fs.rmSync(путь, { force: true });
   } else {
     const путь = path.join(ВРЕМ, ф);

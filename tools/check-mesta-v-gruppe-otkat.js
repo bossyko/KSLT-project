@@ -281,7 +281,7 @@ const ОТКАТЫ = [
    воспроизвести, поэтому откат кладёт файл и убирает его за собой. */
 const ЗАВОДИМ = [
   ['maket/setka-zamer-en.html',
-   '<script src="../js/admin/core/constants.js?v=1"></script>',
+   '<script src="../js/admin/core/constants.js?v=187"></script>',
    'админка одноязычна: английского адреса у подписей нет']
 ];
 

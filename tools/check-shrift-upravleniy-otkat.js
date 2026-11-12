@@ -94,7 +94,7 @@ const ОТКАТЫ = [
   [EN, 'dashboard.css?v=', 'dashboard.css?v=1&bylo=',
    'версия dashboard.css одна на все три языка'],
 
-  [EN, 'style.css?v=', 'style.css?v=1&bylo=',
+  [EN, 'style.css?v=', 'style.css?v=479&bylo=',
    'версия style.css одна на все три языка']
 ];
 
