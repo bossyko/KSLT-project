@@ -74,6 +74,32 @@
         if (m) m.remove();
     }
 
+    /* СКОЛЬКО ЧЕЛОВЕК В ВЫБОРКЕ. Отдаёт число или null, если посчитать не
+       вышло: тогда окно всё равно откроется, но без числа — молчаливый
+       ноль хуже честного «не знаю». */
+    async function посчитатьПолучателей(audience) {
+        try {
+            if (audience === 'all') {
+                var все = await A.client.from('profiles').select('id', { count: 'exact', head: true });
+                return все.error ? null : (все.count || 0);
+            }
+            if (audience === 'members') {
+                var ч = await A.client.from('memberships')
+                    .select('profile_id')
+                    .eq('status', 'active')
+                    .gte('expires_at', new Date().toISOString());
+                if (ч.error || !ч.data) return null;
+                var свои = {};
+                ч.data.forEach(function (м) { свои[м.profile_id] = true; });
+                return Object.keys(свои).length;
+            }
+            return null;
+        } catch (e) {
+            console.error('[KSLT] не посчитал получателей:', e);
+            return null;
+        }
+    }
+
     // ---- Send Broadcast ----
     async function sendBroadcast() {
         var subject = document.getElementById('adBcSubject').value.trim();
@@ -96,8 +122,20 @@
             return;
         }
 
-        // Confirm (async — returns Promise)
-        var ok = await A.showConfirmAsync(L.broadcastConfirm, '', L.broadcastSend);
+        /* ЧИСЛО ПОЛУЧАТЕЛЕЙ НАЗЫВАЕТСЯ ДО ОТПРАВКИ (h222, 12.11).
+           Рассылку нельзя отозвать, а окно спрашивало «отправить?» и не
+           говорило, скольким. Отбор повторяет серверный (supabase/functions/
+           broadcast/index.ts:76-99): all — все профили, members — активные
+           членства, не истёкшие. ЧИТАЕМ, А НЕ ПИШЕМ: это count, запрос без
+           изменений.
+           ЧЕСТНО ПРО РАЗНИЦУ: сервер потом ещё отсеивает тех, кто не дал
+           согласия на новости и у кого нет канала, поэтому число названо
+           «в выборке», а не «получат». */
+        var вВыборке = await посчитатьПолучателей(audience);
+        var тело = (вВыборке === null)
+            ? L.broadcastSkolkoDoydyot
+            : ('<b>' + L.broadcastVVyborke + вВыборке + '</b><br>' + L.broadcastSkolkoDoydyot);
+        var ok = await A.showConfirmAsync(L.broadcastConfirm, тело, L.broadcastSend);
         if (!ok) return;
 
         var btn = document.getElementById('adBcSend');

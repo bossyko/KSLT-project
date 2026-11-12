@@ -480,6 +480,9 @@ const КУСКИ = [
     ['карта и сетка на телефоне',
      'check-telefon-karta-i-setka.js', 'check-telefon-karta-i-setka-otkat.js'],
 
+    /* РАССЫЛКА — необратимое действие называет число (h222, 12.11). */
+    ['рассылка', 'check-rassylka.js', 'check-rassylka-otkat.js'],
+
     /* КАРТОЧКА СТАТИСТИКИ АДМИНКИ — один порядок на все разделы (12.11). */
     ['карточки статистики',
      'check-kartochki-statistiki.js', 'check-kartochki-statistiki-otkat.js'],

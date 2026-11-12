@@ -1502,6 +1502,8 @@
         broadcastSuccess: 'Рассылка отправлена',
         broadcastSelectTournament: '— Выберите турнир —',
         broadcastConfirm: 'Отправить рассылку выбранной аудитории?',
+        broadcastVVyborke: 'В выборке человек: ',
+        broadcastSkolkoDoydyot: 'Дойдёт меньше: письмо и телеграм уходят только тем, кто дал согласие на новости и у кого есть нужный канал.',
         // Push Notifications
         pushNotifications: 'Уведомления',
         pushTitle: 'Заголовок',
