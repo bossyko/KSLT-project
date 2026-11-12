@@ -75,13 +75,21 @@
             '<div class="ad-table-card" style="position:relative;">' +
                 '<div class="ad-table-wrap">' +
                     '<table class="ad-table ad-table-clickable" id="adCchTable">' +
+                        /* КОЛОНОК В colgroup СТОЛЬКО ЖЕ, СКОЛЬКО В ШАПКЕ (h158,
+                           12.11). Было ДЕВЯТЬ <col> против ВОСЬМИ <th>: лишний
+                           первый сдвигал всю раздачу на одну колонку, и ФИО
+                           доставались 36 точек от пустой колонки-значка, а теги
+                           получали ширину цены. Отсюда и жалоба «всё в ряд
+                           идёт»: шесть чипов по 539 суммарной ширины не влезали
+                           и вставали столбиком, ряд рос до 169 вместо ~70.
+                           Ширины: имени — потолок по содержимому (min 200),
+                           тегам — 360 под две строки чипов. */
                         '<colgroup>' +
-                            '<col style="width:40px;">' +
                             '<col style="width:36px;">' +
-                            '<col style="min-width:130px;">' +
+                            '<col style="min-width:200px;">' +
                             '<col style="width:130px;">' +
                             '<col style="width:120px;">' +
-                            '<col style="width:140px;">' +
+                            '<col style="width:360px;">' +
                             '<col style="width:80px;">' +
                             '<col style="width:80px;">' +
                             '<col style="width:50px;">' +

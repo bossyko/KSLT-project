@@ -480,6 +480,9 @@ const КУСКИ = [
     ['карта и сетка на телефоне',
      'check-telefon-karta-i-setka.js', 'check-telefon-karta-i-setka-otkat.js'],
 
+    /* СТОЛБЦЫ ТАБЛИЦ — colgroup по числу колонок (h158, 12.11). */
+    ['столбцы таблиц', 'check-stolbcy-tablic.js', 'check-stolbcy-tablic-otkat.js'],
+
     /* РАССЫЛКА — необратимое действие называет число (h222, 12.11). */
     ['рассылка', 'check-rassylka.js', 'check-rassylka-otkat.js'],
 
