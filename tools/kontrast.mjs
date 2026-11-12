@@ -28,7 +28,10 @@ export const раз = s => { if (!s) return null;
     m = s.match(/^#([0-9a-f]{6})$/i);
     if (m) return [parseInt(m[1].slice(0,2),16), parseInt(m[1].slice(2,4),16), parseInt(m[1].slice(4,6),16), 1];
     return null; };
-const свет = c => { const [r,g,b] = c.map(v => { const s = v/255;
+/* ЯРКОСТЬ ОТДАЁТСЯ НАРУЖУ (11.11): стендам замера она нужна сама по себе —
+   «самый светлый пиксель в полосе — это и есть текст». Без неё стенд держал
+   свою копию формулы, и храповик копий это считал. */
+export const свет = c => { const [r,g,b] = c.map(v => { const s = v/255;
         return s <= 0.03928 ? s/12.92 : Math.pow((s+0.055)/1.055, 2.4); });
     return 0.2126*r + 0.7152*g + 0.0722*b; };
 export const контраст = (a,b) => { const x = свет(a), y = свет(b);
