@@ -59,6 +59,20 @@ const ОТКАТЫ = [
         ждём: /не читает ответ функции/,
     },
     {
+        имя: 'удаление дотянулось до действующей скидки',
+        правка: замена('js/admin/sections/vouchers.js',
+            ".in('status', ['cancelled', 'expired'])",
+            ".in('status', ['active', 'cancelled', 'expired'])"),
+        ждём: /допускает статус active/,
+    },
+    {
+        имя: 'удаление перестало ограничивать статусы вовсе',
+        правка: замена('js/admin/sections/vouchers.js',
+            ".in('status', ['cancelled', 'expired'])",
+            ''),
+        ждём: /больше не ограничивает статусы/,
+    },
+    {
         имя: 'колонка причины исчезла из миграции',
         правка: замена('sql/схема/skidka-otmena-sled-11nov.sql',
             'ADD COLUMN IF NOT EXISTS cancel_reason text;',
