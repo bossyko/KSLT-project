@@ -257,9 +257,13 @@ test.describe('Подвал — разметка и содержимое · ' + 
     test('полные названия там, где влезают; короткие — на узком', async ({ page }) => {
         await кПодвалу(page, адрес);
         const видно = await page.evaluate(() => {
+            /* ВИДИМОСТЬ СЧИТАЕТ ДОМ, А НЕ ПРОБА (11.11): своя копия признака
+               смотрит на сам узел и не знает ни о предках, ни о нулевом
+               прямоугольнике. null остаётся null — «узла нет» и «узел
+               скрыт» это разные ответы. */
             const вид = sel => {
                 const el = document.querySelector(sel);
-                return el ? getComputedStyle(el).display !== 'none' : null;
+                return el ? window.КСЛТ_виден(el) : null;
             };
             return { полное: вид('.footer-legal-full'), короткое: вид('.footer-legal-short'),
                      естьДубль: !!document.querySelector('.footer-legal-full') };

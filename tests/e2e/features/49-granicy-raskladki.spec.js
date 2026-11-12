@@ -52,8 +52,17 @@ const ГРАНИЦЫ = [
     '(min-width: 769px)', '(min-width: 901px)', '(min-width: 993px)',
 ];
 
+const СРОК = 15000 + 20000 + 25000;
+
 for (const стр of СТРАНИЦЫ) {
     test(`${стр.к}: слепок раскладки`, async ({ page }, инфо) => {
+        /* ПРЕДЕЛ ПРОБЫ БОЛЬШЕ СУММЫ ЕЁ ИМЕНОВАННЫХ ОЖИДАНИЙ (11.11).
+           Своих ожиданий здесь 15 000 + 20 000 = 35 000, а общий срок стоял
+           30 000: проба умирала по общему сроку РАНЬШЕ, чем падало первое
+           ожидание с именем, и отчёт говорил «Test timeout», не называя,
+           чего не дождались. Поймал сторож пределов. 35 000 ожиданий плюс
+           25 000 на сам замер, прокрутку и запись слепка. */
+        test.setTimeout(СРОК);
         await page.goto(стр.адрес, { waitUntil: 'domcontentloaded' });
         /* ЖДЁМ ПРИЗНАК, А НЕ ТИШИНУ СЕТИ. */
         await page.waitForSelector('.hero-title, main', { timeout: 15000 });
@@ -73,11 +82,10 @@ for (const стр of СТРАНИЦЫ) {
         }, { timeout: 20000 }).catch(() => {});
 
         const снимок = await page.evaluate(([УЗЛЫ, ГРАНИЦЫ]) => {
-            const вне = э => {
-                if (!э.getClientRects().length) return true;
-                const c = getComputedStyle(э);
-                return c.display === 'none' || c.visibility === 'hidden' || +c.opacity === 0;
-            };
+            /* ВИДИМОСТЬ СЧИТАЕТ ДОМ, А НЕ ПРОБА (11.11): своя копия признака
+               смотрит только на САМ узел и не знает о предках — ровно та
+               беда, из-за которой дом и заведён. */
+            const вне = э => !window.КСЛТ_виден(э);
             const строки = [];
             for (const [имя, селектор] of УЗЛЫ) {
                 const э = document.querySelector(селектор);

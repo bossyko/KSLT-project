@@ -32,7 +32,8 @@ for (const стр of СТРАНИЦЫ) {
             const c = getComputedStyle(p), r = p.getBoundingClientRect();
             return {
                 текст: p.textContent.replace(/\s+/g, ' ').trim(),
-                видим: c.display !== 'none' && c.visibility !== 'hidden' && +c.opacity > 0,
+                /* видимость считает дом: он смотрит и предков, и прямоугольник */
+                видим: window.КСЛТ_виден(p),
                 ширина: Math.round(r.width), высота: Math.round(r.height),
                 кегль: parseFloat(c.fontSize),
                 вылезает: r.right > innerWidth + 1 || r.left < -1,
