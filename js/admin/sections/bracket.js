@@ -7512,20 +7512,20 @@
         // Summary header
         html += '<div class="ad-res-stats">' +
             '<div class="ad-stat-card">' +
-                '<div class="ad-stat-label">' + L.resTotalPlayers + '</div>' +
                 '<div class="ad-stat-value ad-stat-value--neutral">' + results.length + '</div>' +
+                '<div class="ad-stat-label">' + L.resTotalPlayers + '</div>' +
             '</div>' +
             '<div class="ad-stat-card">' +
-                '<div class="ad-stat-label">' + L.brkTotalOchkovRaspredeleno + '</div>' +
                 '<div class="ad-stat-value">' + totalPoints + '</div>' +
+                '<div class="ad-stat-label">' + L.brkTotalOchkovRaspredeleno + '</div>' +
             '</div>' +
             '<div class="ad-stat-card">' +
-                '<div class="ad-stat-label">' + L.brkUrovenTurnira + '</div>' +
                 '<div class="ad-stat-value ad-stat-value--neutral">' + (function() {
                     if (!tournament.level_id) return '—';
                     var lv = A.cachedLevels.find(function(l) { return l.id === tournament.level_id; });
                     return lv ? A.esc(lv.name) : '—';
                 })() + '</div>' +
+                '<div class="ad-stat-label">' + L.brkUrovenTurnira + '</div>' +
             '</div>' +
         '</div>';
 

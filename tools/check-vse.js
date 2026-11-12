@@ -480,6 +480,10 @@ const КУСКИ = [
     ['карта и сетка на телефоне',
      'check-telefon-karta-i-setka.js', 'check-telefon-karta-i-setka-otkat.js'],
 
+    /* КАРТОЧКА СТАТИСТИКИ АДМИНКИ — один порядок на все разделы (12.11). */
+    ['карточки статистики',
+     'check-kartochki-statistiki.js', 'check-kartochki-statistiki-otkat.js'],
+
     /* ШАПКА ВОШЕДШЕГО — кусок 12.11, первый замер Member. */
     ['шапка вошедшего',
      'check-shapka-voshedshego.js', 'check-shapka-voshedshego-otkat.js'],

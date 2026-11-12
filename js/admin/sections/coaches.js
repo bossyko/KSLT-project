@@ -53,16 +53,16 @@
             // Stat cards
             '<div class="ad-cch-stats-grid">' +
                 '<div class="ad-cch-stat-card">' +
-                    '<div class="ad-cch-stat-label">' + L.cchStatTotal + '</div>' +
                     '<div class="ad-cch-stat-value" id="adCchStatTotal">...</div>' +
+                    '<div class="ad-cch-stat-label">' + L.cchStatTotal + '</div>' +
                 '</div>' +
                 '<div class="ad-cch-stat-card">' +
-                    '<div class="ad-cch-stat-label">' + L.cchStatPromoted + '</div>' +
                     '<div class="ad-cch-stat-value" id="adCchStatPromoted">...</div>' +
+                    '<div class="ad-cch-stat-label">' + L.cchStatPromoted + '</div>' +
                 '</div>' +
                 '<div class="ad-cch-stat-card">' +
-                    '<div class="ad-cch-stat-label">' + L.cchStatNew + '</div>' +
                     '<div class="ad-cch-stat-value" id="adCchStatNew">...</div>' +
+                    '<div class="ad-cch-stat-label">' + L.cchStatNew + '</div>' +
                 '</div>' +
             '</div>' +
             // Filter row
