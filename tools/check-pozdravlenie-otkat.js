@@ -47,21 +47,44 @@ const ОТКАТЫ = [
       файл: 'mobile/www/js/badge-celebration.js',
       было: 'KSLT_POZDRAVLENIE',
       станет: 'KSLT_ЧУЖОЙ', всеВхождения: true },
-    { имя: 'страница грузит поздравление без дома',
-      ждём: 'дом подключён во всех разметках',
+    { имя: 'кабинет грузит поздравление без дома',
+      ждём: 'дом подключён: pages/dashboard.html',
       файл: 'pages/dashboard.html',
       было: '<script src="../js/kslt-pozdravlenie.js?v=1"></script>',
       станет: '' },
-    { имя: 'дом поставлен ПОСЛЕ зовущего',
-      ждём: 'дом грузится ДО того, кто его зовёт',
+    /* ТОТ САМЫЙ СЛУЧАЙ, РАДИ КОТОРОГО ПРАВИЛО ПЕРЕПИСАНО НА ПОИСК:
+       главная сайта. Со старым списком из двух разметок этот откат
+       не ронял ничего — беда жила в продукте, а сторож был зелёный. */
+    { имя: 'ГЛАВНАЯ грузит поздравление без дома (беда h290)',
+      ждём: 'дом подключён: index.html',
+      файл: 'index.html',
+      было: '<script src="js/kslt-pozdravlenie.js?v=1"></script>\n    ',
+      станет: '' },
+    { имя: 'главная на кыргызском — то же самое',
+      ждём: 'дом подключён: index-kg.html',
+      файл: 'index-kg.html',
+      было: '<script src="js/kslt-pozdravlenie.js?v=1"></script>\n    ',
+      станет: '' },
+    { имя: 'дом поставлен ПОСЛЕ зовущего (приложение)',
+      ждём: 'дом грузится ДО зовущего: mobile/www/index.html',
       файл: 'mobile/www/index.html',
       было: '<script src="js/kslt-pozdravlenie.js?v=1"></script>\n',
-      станет: '' }
+      станет: '' },
+    { имя: 'на главной дом переехал ПОСЛЕ зовущего',
+      ждём: 'дом грузится ДО зовущего: index.html',
+      файл: 'index.html',
+      было: '<script src="js/kslt-pozdravlenie.js?v=1"></script>\n    <script src="js/badge-celebration.js?v=7"></script>',
+      станет: '<script src="js/badge-celebration.js?v=7"></script>\n    <script src="js/kslt-pozdravlenie.js?v=1"></script>' }
 ];
 function копия() {
     const куда = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-pozdr-'));
     for (const отн of ['js', 'mobile/www', 'pages', 'tools'])
         fs.cpSync(path.join(КОРЕНЬ, отн), path.join(куда, отн), { recursive: true });
+    /* ОТКАТУ ДОЛЖНО БЫТЬ ЧТО ПОРТИТЬ: сторож с 12.11 обходит разметки
+       сам, и главные страницы сайта лежат в корне. Без них откаты про
+       главную падали на «файла нет», а не на своём правиле. */
+    for (const ф of fs.readdirSync(КОРЕНЬ))
+        if (ф.endsWith('.html')) fs.copyFileSync(path.join(КОРЕНЬ, ф), path.join(куда, ф));
     return куда;
 }
 function прогон(к) {
