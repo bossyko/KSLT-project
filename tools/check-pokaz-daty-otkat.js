@@ -24,30 +24,68 @@ function копия() {
     return двор;
 }
 
-const ЯКОРЬ = ".toLocaleDateString(undefined, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' })";
+/* ЯКОРЬ ПЕРЕВЕШЕН 12.11. Он держался на строке
+   `.toLocaleDateString(undefined, { timeZone: (window.KSLT_VREMYA && …) })`
+   в live.js. Починка пояса 11.11 увела семнадцать таких мест в дом времени
+   (`KSLT_VREMYA.показДня`), и строки в файле не стало вовсе: прувер честно
+   сказал «якорь не единственный» — его ноль. ОТКАТ, КОТОРЫЙ НЕ СОСТОЯЛСЯ,
+   НИЧЕГО НЕ ДОКАЗЫВАЕТ.
+   Берём место, которое ЖИВО и которое сторож действительно судит: срок
+   закрытия доступа на странице турнира. Оно одно на весь файл. */
+const ФАЙЛ_ПОКАЗА = 'js/tournament-detail.js';
+const ЯКОРЬ = "new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.локаль,\n                            { timeZone: window.KSLT_VREMYA.зона })";
 
 const ОТКАТЫ = [
     {
         имя: 'пояс переставлен на место языка — день съезжает на сутки',
         правка(двор) {
-            const ф = path.join(двор, 'js/admin/sections/live.js');
+            const ф = path.join(двор, ФАЙЛ_ПОКАЗА);
             let т = fs.readFileSync(ф, 'utf8');
             if (т.split(ЯКОРЬ).length - 1 !== 1) return 'якорь не единственный';
-            fs.writeFileSync(ф, т.replace(ЯКОРЬ, ЯКОРЬ.replace('(undefined, {', '({')));
+            /* Пояс переезжает на место языка: язык выброшен, объект стал
+               первым доводом — язык его не читает, пояс молча пропадает. */
+            fs.writeFileSync(ф, т.replace(ЯКОРЬ,
+                "new Date(plRes.data.banned_until).toLocaleDateString({ timeZone: window.KSLT_VREMYA.зона })"));
         },
         ждём: /пояс стоит ПЕРВЫМ аргументом/,
     },
     {
         имя: 'пояс убран вовсе — день берётся у смотрящего',
         правка(двор) {
-            const ф = path.join(двор, 'js/admin/sections/live.js');
+            const ф = path.join(двор, ФАЙЛ_ПОКАЗА);
             let т = fs.readFileSync(ф, 'utf8');
             if (т.split(ЯКОРЬ).length - 1 !== 1) return 'якорь не единственный';
-            fs.writeFileSync(ф, т.replace(ЯКОРЬ, '.toLocaleDateString()'));
+            fs.writeFileSync(ф, т.replace(ЯКОРЬ,
+                "new Date(plRes.data.banned_until).toLocaleDateString(KSLT_YAZYK.локаль)"));
         },
         ждём: /момент показывается без пояса/,
     },
     {
+        имя: 'в доме доводы показа переставлены — пояс встал на место языка',
+        правка(двор) {
+            const ф = path.join(двор, 'js/kslt-vremya.js');
+            let т = fs.readFileSync(ф, 'utf8');
+            const я = 'return d.toLocaleDateString(речь || undefined, сПоясом(вид));';
+            if (т.split(я).length - 1 !== 1) return 'якорь не единственный';
+            fs.writeFileSync(ф, т.replace(я, 'return d.toLocaleDateString(сПоясом(вид));'));
+        },
+        ждём: /показ в доме времени идёт без пояса вторым доводом/,
+    },
+    {
+        имя: 'сПоясом ставит зону ПЕРЕД видом — зовущий перебивает дом',
+        правка(двор) {
+            const ф = path.join(двор, 'js/kslt-vremya.js');
+            let т = fs.readFileSync(ф, 'utf8');
+            const я = '        о.timeZone = ЗОНА;\n        return о;';
+            if (т.split(я).length - 1 !== 1) return 'якорь не единственный';
+            /* Зона уезжает в начало — теперь её перебивает вид зовущего. */
+            fs.writeFileSync(ф, т
+                .replace('        var о = {};\n', '        var о = { timeZone: ЗОНА };\n')
+                .replace(я, '        return о;'));
+        },
+        ждём: /сПоясом ставит зону НЕ ПОСЛЕ вида/,
+    },
+        {
         имя: 'дом времени перестал отдавать зону',
         правка(двор) {
             const ф = path.join(двор, 'js/kslt-vremya.js');
