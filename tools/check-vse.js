@@ -465,6 +465,8 @@ const КУСКИ = [
      'check-sostav-yazykov.js', 'check-sostav-yazykov-otkat.js'],
     ['окно спонсора',
      'check-okno-sponsora.js', 'check-okno-sponsora-otkat.js'],
+    ['фокус с клавиатуры',
+     'check-fokus-sloem.js', 'check-fokus-sloem-otkat.js'],
 
     /* ТРИ ПАРЫ, ЛЕЖАВШИЕ МИМО СПИСКА. Пруверы к ним написаны и лежат на
        диске, но общий бегунок их не звал — то есть они не гонялись ни

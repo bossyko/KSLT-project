@@ -17,6 +17,52 @@
     box-sizing: border-box;
 }
 
+/* ========================================================================
+   ФОКУС С КЛАВИАТУРЫ — СВОЙСТВО СЛОЯ, А НЕ КОМПОНЕНТА (11.11)
+
+   ЗАМЕР 11.11 на главной, десктоп 1512: интерактивных 132 в 22 семьях.
+   Десять семей (35 элементов) не попадали НИ ПОД ОДНО из 47 правил
+   фокуса: lang-option, btn-primary, link-all, tc, hn-card,
+   badges-cta-btn, rankings-tab, guest-cta-btn, social-link,
+   scroll-to-top. Одиннадцатая — carousel-slide-infinite (18 штук) —
+   под правило попадала, но оно ставит только text-decoration и color,
+   то есть не показывает ничего. Итого 53 элемента из 132: человек,
+   идущий по странице с клавиатуры, не видит, где он находится.
+
+   ПОЧЕМУ ОДНО ПРАВИЛО НА СЛОЙ, А НЕ ПО ПРАВИЛУ НА КЛАСС. Классов на
+   главной 22, и завтра появится двадцать третий — он снова окажется без
+   фокуса, и узнаем мы об этом через полтора месяца. Так держат фокус
+   GitHub Primer и Material: кольцо принадлежит слою интерактивного, а
+   компонент его только уточняет.
+
+   ЧАСТНЫЕ ПРАВИЛА ПЕРЕБИВАЮТ ЭТО САМИ: `a:focus-visible` весит (0,1,1),
+   а любое `.класс:focus-visible` — (0,2,0). Поэтому заведённые кольца
+   остаются как были, а семьи без своего кольца получают общее.
+
+   :focus-visible, а НЕ :focus — кольцо показывается тому, кто идёт
+   клавиатурой, и не вспыхивает под мышью.
+   ======================================================================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: var(--bw-heavy) solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* КАРУСЕЛЬ СПОНСОРОВ: своё правило было, но без вида — оно гасило бы
+   общее по весу. Кольцо дописано туда же, где живёт остальное
+   оформление ссылки. */
+.carousel-slide-infinite:focus-visible {
+    outline: var(--bw-heavy) solid var(--accent);
+    outline-offset: 3px;
+}
+
 body {
     font-family: var(--font-sans);
     line-height: 1.5;
