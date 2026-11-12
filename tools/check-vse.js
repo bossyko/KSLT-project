@@ -459,6 +459,8 @@ const КУСКИ = [
      'check-pokaz-daty.js', 'check-pokaz-daty-otkat.js'],
     ['след отмены скидки',
      'check-sled-otmeny.js', 'check-sled-otmeny-otkat.js'],
+    ['хвост входа',
+     'check-hvost-vhoda.js', 'check-hvost-vhoda-otkat.js'],
 
     /* ТРИ ПАРЫ, ЛЕЖАВШИЕ МИМО СПИСКА. Пруверы к ним написаны и лежат на
        диске, но общий бегунок их не звал — то есть они не гонялись ни

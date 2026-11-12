@@ -30,7 +30,7 @@ const ПЕСОЧНИЦА = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vhod-'));
 /** [имя правила, файл, что вернуть, на что] */
 const ОТКАТЫ = [
 ['раскладка переключается по высоте экрана, а не по ширине',
- 'css/style.css', '@media (max-height: 680px) and (min-width: 600px)', '@media (max-width: 900px)'],
+ 'css/style.css', '@media (max-height: 680px) and (min-width: 640px)', '@media (max-width: 900px)'],
 
 ['две колонки включаются только на экране входа',
  'css/style.css', ':has(#signinForm.active)', ''],
@@ -50,8 +50,12 @@ const ОТКАТЫ = [
 ['ячейки не растягиваются на высоту строки',
  'css/style.css', 'align-items: start;', 'align-items: stretch;'],
 
-['Google, Telegram и Apple — одна семья кнопок, 52',
- 'css/style.css', '.auth-col-methods .auth-apple-btn {\n    min-height: 52px;', '.auth-col-methods .auth-apple-btn {\n    min-height: 44px;'],
+['высота способов входа НЕ объявлена второй раз в семейном правиле',
+ /* ОТКАТ БЬЁТ В НЫНЕШНЕЕ СОСТОЯНИЕ, А НЕ В ПРОШЛОЕ. 11.11 утром высота
+      семьи перешла с min-height 52 на height со шкалы (--btn-h-md), а этот
+      откат остался искать прежнюю строку и молча не срабатывал: прувер
+      показывал 28 из 30, и два правила не доказывались ничем. */
+     'css/style.css', '.auth-col-methods .auth-apple-btn {\n    padding: 0 var(--space-4);', '.auth-col-methods .auth-apple-btn {\n    min-height: 52px;\n    padding: 0 var(--space-4);'],
 
 ['глаз показа пароля — цель 44x44',
  'css/style.css', '    right: 4px;\n    top: 50%;\n    transform: translateY(-50%);\n    width: 44px;', '    right: 12px;\n    top: 50%;\n    transform: translateY(-50%);\n    width: 28px;'],

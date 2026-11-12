@@ -8953,6 +8953,12 @@ body.nav-open {
 
 .auth-gender-option {
     flex: 1;
+    /* ЦЕЛЬ НАЖАТИЯ 44, А НЕ 43 (замер 11.11 на всех видах: 151x43 на
+       телефоне, 207x43 на планшете). Высота собиралась из строки 21,
+       отступов 10+10 и рамки 1+1 — и промахивалась ровно на пиксель.
+       У соседнего согласия min-height 44 стоит с 21.09; ПРАВИЛО,
+       ВЫВЕДЕННОЕ НА ОДНОМ КУСКЕ, ПРИМЕНЯЕТСЯ К СЛЕДУЮЩЕМУ. */
+    min-height: var(--btn-h-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -9248,8 +9254,134 @@ body.nav-open {
     #forgotStep1 > .forgot-col-send > * {
         margin: 0;
     }
+
+    /* ==========================================================
+       ТЕ ЖЕ ДВЕ КОЛОНКИ — ОСТАЛЬНЫМ ЭКРАНАМ КАРТОЧКИ (11.11)
+
+       ЗАМЕР 11.11, телефон боком 844x390, карточка за сгибом:
+         signupForm 468 · otpNewPasswordForm 293 ·
+         tgRegisterForm 212 · resetForm 169
+       Правило двух колонок стояло только у входа, кода и
+       восстановления — три экрана из девяти. Остальные шесть никто
+       не раскладывал, и четыре из них не помещались.
+
+       ОДНА ЗАПИСЬ НА ТРИ ЭКРАНА, А НЕ ТРИ КОПИИ: у них одинаковая
+       стопка — `.auth-screen-header` сверху, под ним поля и кнопка.
+       Шапка слева, остальное — одной стопкой справа.
+
+       ПОЧЕМУ ОБЁРТКА В РАЗМЕТКЕ, А НЕ `display: contents`. Первый заход
+       был без обёртки: шапка `grid-row: 1 / -1`, остальные дети в
+       колонку 2. ЗАМЕР ПОКАЗАЛ, ЧТО ЭТО НЕ РАБОТАЕТ: строк вышло пять
+       (115.7 / 69.5 / 69.5 / 130 / 44), шапка заняла СВОЮ первую
+       строку, и правая колонка поехала со второй — карточка 543 при
+       окне 390. `span 99` дал 99 строк с зазорами и 2007. Обёртка —
+       одна ячейка, и строк ровно столько, сколько нужно. Так же
+       сделано у восстановления (`.forgot-col-*`) с 21.09.
+       ========================================================== */
+    /* ПЛОТНЕЕ НА СТУПЕНЬ, А НЕ НА ГЛАЗ: отступы карточки 24 → 16 и
+       ритм колонки 16 → 12. Обе величины со шкалы 8·12·16·24·32·40.
+       Замер 11.11: это те самые 55–73, на которые экраны не влезали. */
+    .auth-card:has(#tgRegisterForm.active),
+    .auth-card:has(#otpNewPasswordForm.active),
+    .auth-card:has(#resetForm.active) {
+        max-width: 700px;
+        padding: var(--space-4);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
+        align-items: start;
+    }
+
+    #tgRegisterForm.active,
+    #otpNewPasswordForm.active,
+    #resetForm.active {
+        display: contents;
+    }
+
+    #tgRegisterForm.active > .auth-screen-header,
+    #otpNewPasswordForm.active > .auth-screen-header,
+    #resetForm.active > .auth-screen-header {
+        grid-column: 1;
+        align-self: center;
+        margin: 0;
+    }
+
+    #tgRegisterForm.active > .auth-col-glavnoe,
+    #otpNewPasswordForm.active > .auth-col-glavnoe,
+    #resetForm.active > .auth-col-glavnoe {
+        grid-column: 2;
+        gap: var(--space-3);
+    }
+
+    /* РЕГИСТРАЦИЯ СЛОЖЕНА ИНАЧЕ, И ПОТОМУ СВОЯ ЗАПИСЬ: у неё не шапка
+       экрана, а выбор способа (.auth-signup-options) и скрытая до
+       нажатия форма (#signupFields). Способы слева, поля справа. */
+    .auth-card:has(#signupForm.active) {
+        max-width: 700px;
+        padding: var(--space-4);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
+        align-items: start;
+    }
+
+    #signupForm.active { display: contents; }
+    #signupForm.active > .auth-signup-options { grid-column: 1; }
+    #signupForm.active > #signupFields { grid-column: 2; }
+
+    /* ПОЛЯ РЕГИСТРАЦИИ — В ДВА РЯДА, ИНАЧЕ НЕ ВЛЕЗАЮТ. Замер 11.11:
+       одной стопкой правая колонка 451 при доступных 350, карточка за
+       сгибом на 207. Поля короткие, ширины на 844 хватает: имя с
+       фамилией, почта, пол ложатся парами, а согласие и кнопка идут
+       на всю ширину — их нельзя дробить, это одно решение и одно
+       действие. */
+    #signupForm.active > #signupFields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: var(--space-3);
+        row-gap: var(--space-3);
+        align-content: start;
+    }
+
+    #signupForm.active > #signupFields > .auth-row,
+    #signupForm.active > #signupFields > .auth-checkbox,
+    #signupForm.active > #signupFields > .auth-btn,
+    #signupForm.active > #signupFields > #signupTurnstile {
+        grid-column: 1 / -1;
+    }
+
+    /* ПРАВИЛА ПАРОЛЯ НА ТЕСНОМ ЭКРАНЕ — СТРОКОЙ, А НЕ СТОЛБИКОМ.
+       Замер 11.11: список из четырёх правил занимает 130 из 350
+       доступных — больше трети экрана под подсказку. Смысл не
+       меняется: это те же четыре правила и та же подсветка, просто
+       уложены в строку. */
+    #otpNewPasswordForm.active .auth-pw-detail ul,
+    #resetForm.active .auth-pw-detail ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px var(--space-3);
+        margin: 0;
+        padding: 0;
+    }
+
+    #otpNewPasswordForm.active .auth-pw-detail li,
+    #resetForm.active .auth-pw-detail li {
+        margin: 0;
+    }
 }
 
+
+/* ГЛАВНАЯ КОЛОНКА ЭКРАНА — ТАКАЯ ЖЕ СТОПКА, ЧТО И САМА ФОРМА.
+   Та же причина, что у обёрток восстановления ниже: `.auth-form` —
+   flex-колонка с промежутком 16, и, завернув её детей, я сделал
+   флекс-элементом обёртку, а кнопка внутри обычного блока села бы по
+   своему тексту. Обёртка обязана быть такой же колонкой с тем же
+   промежутком, иначе ритм и ширина живут порознь. */
+.auth-col-glavnoe {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
 
 /* ОБЁРТКИ КОЛОНОК ВОССТАНОВЛЕНИЯ — ТАКИЕ ЖЕ СТОПКИ, ЧТО И САМА ФОРМА.
 
