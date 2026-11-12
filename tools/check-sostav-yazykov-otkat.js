@@ -11,19 +11,37 @@ const os = require('os');
 const { execFileSync } = require('child_process');
 
 const корень = path.resolve(__dirname, '..');
-const ФАЙЛЫ = ['tools/check-sostav-yazykov.js', 'index.html', 'index-en.html', 'index-kg.html'];
-
+/* КОПИЯ БЕРЁТ ВСЕ СТРАНИЦЫ, А НЕ ТРИ ГЛАВНЫЕ: сторож собирает языковые
+   тройки с диска, и во дворе без папки pages он падает на чтении
+   каталога — прувер тогда показывает «упало не то правило» на всех
+   откатах разом. КОПИЯ ОБЯЗАНА ДАВАТЬ ПРИБОРУ ТО ЖЕ, ЧТО И ЖИЗНЬ. */
 function копия() {
     const двор = fs.mkdtempSync(path.join(os.tmpdir(), 'sostav-'));
-    for (const ф of ФАЙЛЫ) {
-        const к = path.join(двор, ф);
-        fs.mkdirSync(path.dirname(к), { recursive: true });
-        fs.copyFileSync(path.join(корень, ф), к);
+    fs.mkdirSync(path.join(двор, 'tools'));
+    fs.copyFileSync(path.join(корень, 'tools/check-sostav-yazykov.js'), path.join(двор, 'tools/check-sostav-yazykov.js'));
+    for (const ф of fs.readdirSync(корень).filter(ф => ф.endsWith('.html'))) {
+        fs.copyFileSync(path.join(корень, ф), path.join(двор, ф));
+    }
+    fs.mkdirSync(path.join(двор, 'pages'));
+    for (const ф of fs.readdirSync(path.join(корень, 'pages')).filter(ф => ф.endsWith('.html'))) {
+        fs.copyFileSync(path.join(корень, 'pages', ф), path.join(двор, 'pages', ф));
     }
     return двор;
 }
 
 const ОТКАТЫ = [
+    {
+        имя: 'расхождение на внутренней странице, не на главной',
+        правка(двор) {
+            const п = path.join(двор, 'pages/coaches-kg.html');
+            if (!fs.existsSync(п)) return 'страницы нет';
+            const т = fs.readFileSync(п, 'utf8');
+            const м = т.match(/<section[^>]*class="[^"]+"[^>]*>/);
+            if (!м) return 'секций нет';
+            fs.writeFileSync(п, т.replace(м[0], м[0].replace('<section', '<div')));
+        },
+        ждём: /coaches-kg\.html: состав секций разошёлся/,
+    },
     {
         имя: 'видео-фон вернулся на кыргызскую главную',
         правка(двор) {
