@@ -149,7 +149,7 @@ const ОТКАТЫ = [
   [EN, '../js/rating-chart.js?v=', '../js/rating-chart.js?v=1&bylo=',
    'версия rating-chart.js одна на все три языка'],
 
-  [EN, '../css/style.css?v=', '../css/style.css?v=481&bylo=',
+  [EN, '../css/style.css?v=', '../css/style.css?v=483&bylo=',
    'версия style.css одна на все три языка'],
 ];
 

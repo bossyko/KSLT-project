@@ -126,7 +126,7 @@ const ОТКАТЫ = [
  'js/kslt-vhod.js', 'ЛЕСТНИЦА_ПОВТОРА = [30, 60, 120, 300]', 'ЛЕСТНИЦА_ПОВТОРА = [60, 60, 60, 60]'],
 
 ['версия style.css одна на все страницы',
- 'pages/auth-en.html', 'style.css?v=', 'style.css?v=481'],
+ 'pages/auth-en.html', 'style.css?v=', 'style.css?v=483'],
 
 ['версия auth.js одна на все страницы',
  'pages/auth-en.html', '/auth.js?v=', '/auth.js?v=9'],
