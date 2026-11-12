@@ -167,57 +167,40 @@
         var siteValues = typeData.map(function(d) { return d.site; });
         var appValues = typeData.map(function(d) { return d.app; });
 
+        var В = window.KSLT_GRAFIK_VID;
         var chart = new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
-                    {
-                        label: 'Site',
-                        data: siteValues,
-                        backgroundColor: window.KSLT_KRASKA.цвет('--accent'),
-                        borderRadius: 6,
-                        barThickness: 40
-                    },
-                    {
-                        label: 'App',
-                        data: appValues,
-                        backgroundColor: window.KSLT_KRASKA.цвет('--cat-1'),
-                        borderRadius: 6,
-                        barThickness: 40
-                    }
+                    В.набор('Site', siteValues, 'site', { тонкая: true }),
+                    В.набор('App', appValues, 'app', { тонкая: true })
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 indexAxis: 'y',
+                /* ВОЗДУХ МЕЖДУ ПОЛОСАМИ: при 40 без зазора шесть строк
+                   читались одной массой — жалоба Кости 12.11. */
+                /* ДВЕ ПОЛОСЫ РЯДОМ, А НЕ СТОПКОЙ (12.11). В стопке подпись
+                   первого набора падает на сегмент второго и читается на
+                   чужой краске — поймано снимком сразу после правки.
+                   Рядом стоящие полосы дают каждому числу своё место и
+                   отвечают на главный вопрос сводки: сайт или приложение. */
+                categoryPercentage: 0.78,
+                barPercentage: 0.82,
+                layout: { padding: { right: 36 } },
                 plugins: {
-                    legend: {
-                        display: true,
-                        labels: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 12 } }
-                    },
-                    tooltip: {
-                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
-                        titleColor: window.KSLT_KRASKA.цвет('--accent'),
-                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
-                        borderColor: window.KSLT_KRASKA.цвет('--chart-tip-border'),
-                        borderWidth: 1
-                    }
+                    legend: В.легенда(),
+                    tooltip: В.подсказка()
                 },
                 scales: {
-                    x: {
-                        stacked: true,
-                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.06) },
-                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5) }
-                    },
-                    y: {
-                        stacked: true,
-                        grid: { display: false },
-                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 13 } }
-                    }
+                    x: В.ось({}),
+                    y: В.ось({ безСетки: true, крупные: true })
                 }
-            }
+            },
+            plugins: [В.подписиЗначений]
         });
         chartsInstances.push(chart);
     }
@@ -233,44 +216,26 @@
         var siteValues = data.map(function(d) { return d.view_count || 0; });
         var appValues = data.map(function(d) { return d.view_count_app || 0; });
 
+        var В = window.KSLT_GRAFIK_VID;
         var chart = new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
-                    {
-                        label: 'Site',
-                        data: siteValues,
-                        backgroundColor: window.KSLT_KRASKA.цвет('--accent', 0.20),
-                        borderColor: window.KSLT_KRASKA.цвет('--accent'),
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        barThickness: 20
-                    },
-                    {
-                        label: 'App',
-                        data: appValues,
-                        backgroundColor: window.KSLT_KRASKA.цвет('--cat-1', 0.25),
-                        borderColor: window.KSLT_KRASKA.цвет('--cat-1'),
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        barThickness: 20
-                    }
+                    В.набор('Site', siteValues, 'site', { тонкая: true }),
+                    В.набор('App', appValues, 'app', { тонкая: true })
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 indexAxis: 'y',
+                categoryPercentage: 0.78,
+                barPercentage: 0.82,
+                layout: { padding: { right: 30 } },
                 plugins: {
-                    legend: {
-                        display: true,
-                        labels: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 11 } }
-                    },
-                    tooltip: {
-                        backgroundColor: window.KSLT_KRASKA.цвет('--chart-tip-bg'),
-                        titleColor: window.KSLT_KRASKA.цвет('--accent'),
-                        bodyColor: window.KSLT_KRASKA.цвет('--chart-tip-body'),
+                    legend: В.легенда(),
+                    tooltip: Object.assign(В.подсказка(), {
                         callbacks: {
                             title: function(items) {
                                 if (!items.length) return '';
@@ -287,21 +252,14 @@
                                 return 'site: ' + site + ', app: ' + app;
                             }
                         }
-                    }
+                    })
                 },
                 scales: {
-                    x: {
-                        stacked: true,
-                        grid: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.06) },
-                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.5) }
-                    },
-                    y: {
-                        stacked: true,
-                        grid: { display: false },
-                        ticks: { color: window.KSLT_KRASKA.цвет('--neutral-white', 0.72), font: { size: 12 } }
-                    }
+                    x: В.ось({}),
+                    y: В.ось({ безСетки: true })
                 }
-            }
+            },
+            plugins: [В.подписиЗначений]
         });
         chartsInstances.push(chart);
     }
