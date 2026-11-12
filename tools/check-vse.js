@@ -480,6 +480,10 @@ const КУСКИ = [
     ['карта и сетка на телефоне',
      'check-telefon-karta-i-setka.js', 'check-telefon-karta-i-setka-otkat.js'],
 
+    /* ШАПКА ВОШЕДШЕГО — кусок 12.11, первый замер Member. */
+    ['шапка вошедшего',
+     'check-shapka-voshedshego.js', 'check-shapka-voshedshego-otkat.js'],
+
     /* СТОРОЖ НАД ЭТИМ САМЫМ СПИСКОМ: он падает, когда пара заведена, а в
        список не внесена, и когда одна пара стоит в нём дважды. */
     ['список пар полон',
