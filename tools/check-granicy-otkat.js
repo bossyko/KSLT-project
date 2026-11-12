@@ -21,10 +21,26 @@ function копия() {
     fs.copyFileSync(path.join(корень, 'js/script.js'), path.join(двор, 'js/script.js'));
     fs.mkdirSync(path.join(двор, 'tools'));
     fs.copyFileSync(path.join(корень, 'tools/check-granicy.js'), path.join(двор, 'tools/check-granicy.js'));
+    /* С 12.11 сторож читает ещё и пробы, и справочник границ: без них
+       откат падал бы на «файла нет», а не на своём правиле. */
+    fs.cpSync(path.join(корень, 'tools/lib'), path.join(двор, 'tools/lib'), { recursive: true });
+    fs.cpSync(path.join(корень, 'tests'), path.join(двор, 'tests'), { recursive: true,
+        filter: и => !/node_modules|[\\/]reports([\\/]|$)|test-results/.test(и) });
     return двор;
 }
 
 const ОТКАТЫ = [
+    {
+        имя: 'проба снова судит ширину зашитым числом 768',
+        правка(двор) {
+            const п = path.join(двор, 'tests/e2e/design-system/30-ritm-pervogo-ekrana.spec.js');
+            const т = fs.readFileSync(п, 'utf8');
+            const было = 'ширина <= ГРАНИЦА_ТЕЛЕФОНА';
+            if (т.split(было).length - 1 < 1) return 'в пробе нет сравнения через справочник';
+            fs.writeFileSync(п, т.replace(было, 'ширина <= 768'));
+        },
+        ждём: /проба сравнивает ширину с числом мимо справочника границ/,
+    },
     {
         имя: 'декоративная ширина вернулась в медиа-условие',
         правка(двор) {
