@@ -206,7 +206,7 @@
         completedList.forEach(function(m) {
             var p1 = playerName(m.player1_id, m.player1_name);
             var p2 = playerName(m.player2_id, m.player2_name);
-            var date = m.completed_at ? new Date(m.completed_at).toLocaleDateString(undefined, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '—';
+            var date = m.completed_at ? window.KSLT_VREMYA.показДня(m.completed_at) : '—';
 
             html += '<tr>' +
                 '<td><strong>' + A.esc(p1) + '</strong> vs <strong>' + A.esc(p2) + '</strong></td>' +

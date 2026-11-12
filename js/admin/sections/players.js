@@ -808,7 +808,7 @@
                     '<h3 style="font-size:var(--fs-sm);color:var(--accent);margin-bottom:12px;font-weight:600;">' + L.usrModeration + '</h3>';
                 if (isPlayerBanned) {
                     var isPerm = new Date(item.banned_until).getFullYear() >= 2099;
-                    var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + new Date(item.banned_until).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }));
+                    var banDateStr = isPerm ? L.plrBannedForever : (L.plrBannedUntil + ' ' + window.KSLT_VREMYA.показДня(item.banned_until, 'ru-RU'));
                     var banReasonStr = item.ban_reason ? '<div style="color:var(--text-muted);font-size:var(--fs-xs);margin-top:4px;">' + A.esc(item.ban_reason) + '</div>' : '';
                     banHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
                         '<span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:var(--fs-xs);font-weight:600;background:var(--danger-subtle);color:var(--danger);">' + banDateStr + '</span>' +
@@ -1576,8 +1576,8 @@
             }
 
             var dateStr = m.played_at
-                ? new Date(m.played_at).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek', day: '2-digit', month: '2-digit', year: '2-digit' })
-                : (m.created_at ? new Date(m.created_at).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek', day: '2-digit', month: '2-digit', year: '2-digit' }) : '\u2014');
+                ? window.KSLT_VREMYA.показДня(m.played_at, 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                : (m.created_at ? window.KSLT_VREMYA.показДня(m.created_at, 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '\u2014');
 
             var trnName = '';
             if (m.tournament) {
@@ -2111,7 +2111,7 @@
                 var def = allDefs.find(function(d) { return d.id === pb.badge_id; });
                 if (!def) return;
                 var name = def.name;
-                var dateStr = pb.earned_at ? new Date(pb.earned_at).toLocaleDateString(undefined, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '';
+                var dateStr = pb.earned_at ? window.KSLT_VREMYA.показДня(pb.earned_at) : '';
 
                 html += '<tr>';
                 /* Имя рядом экранировано с самого начала, значок — нет. */
@@ -2525,7 +2525,7 @@
         if (m.tournaments) {
             trnName = m.tournaments.title;
         }
-        var dateStr = m.played_at ? new Date(m.played_at).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '—';
+        var dateStr = m.played_at ? window.KSLT_VREMYA.показДня(m.played_at, 'ru-RU') : '—';
 
         var overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';

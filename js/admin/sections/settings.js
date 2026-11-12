@@ -244,7 +244,7 @@
             .select('value, updated_at').eq('key', 'free_access_until').maybeSingle();
         var дата = (r.data && r.data.value) ? String(r.data.value).replace(/"/g, '') : '';
         var когда = (r.data && r.data.updated_at)
-            ? new Date(r.data.updated_at).toLocaleString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '';
+            ? window.KSLT_VREMYA.показМомента(r.data.updated_at, 'ru-RU') : '';
 
         var сегодня = KSLT_VREMYA.сегодня();
         var идёт = дата && сегодня <= дата;

@@ -124,7 +124,7 @@
         if (сЧасами) { раскладка.hour = '2-digit'; раскладка.minute = '2-digit'; }
         /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147): понятие было здесь своим, а оно
            одно на продукт. Причина и замер — в `js/kslt-yazyk.js`. */
-        return new Date(значение).toLocaleString(KSLT_YAZYK.локаль, раскладка, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' });
+        return window.KSLT_VREMYA.показМомента(значение, KSLT_YAZYK.локаль, раскладка);
     };
 
     /** АДРЕС ПРОВЕРКИ ВАУЧЕРА — один на продукт, и он несёт язык. */

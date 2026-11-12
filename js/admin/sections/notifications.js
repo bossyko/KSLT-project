@@ -264,7 +264,7 @@
         var delLabel = 'Удалить рассылку';
 
         tbody.innerHTML = rows.map(function(r) {
-            var date = r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU', { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+            var date = r.created_at ? window.KSLT_VREMYA.показДня(r.created_at, 'ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
             var recalled = !!r.recalled_at;
 
             // Отозвать может менеджер: это про людей — убрать сообщение у

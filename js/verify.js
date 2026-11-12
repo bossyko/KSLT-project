@@ -139,7 +139,7 @@
                 return;
             }
             if (data.status === 'already_used') {
-                var usedDate = data.used_at ? new Date(data.used_at).toLocaleString(ЛОКАЛЬ, { timeZone: (window.KSLT_VREMYA && window.KSLT_VREMYA.зона) || 'Asia/Bishkek' }) : '';
+                var usedDate = data.used_at ? window.KSLT_VREMYA.показМомента(data.used_at, ЛОКАЛЬ) : '';
                 showError(L.errorUsed, L.errorUsedText + (usedDate ? ' (' + usedDate + ')' : ''), L.nextNew);
                 return;
             }
