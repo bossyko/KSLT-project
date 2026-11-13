@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — стенд: экран согласий</title>
+<!-- СТЕНД, А НЕ СТРАНИЦА ПРОДУКТА. Показывает вид экрана согласий
+     (Ю2/Ю3) на готовых классах кабинета: своих цветов и размеров тут
+     нет ни одного — всё из tokens.css и dashboard.css. Тексты взяты
+     ДОСЛОВНО из «Согласия на обработку персональных данных»,
+     утверждённого приказом № 1 от 03.11.2026. -->
+<link rel="stylesheet" href="../css/tokens.css?v=87">
+<link rel="stylesheet" href="../css/style.css?v=486">
+<link rel="stylesheet" href="../css/dashboard.css?v=179">
+<style>
+    body { background: var(--bg); padding: var(--space-5); }
+    .stend-obertka { max-width: 760px; margin: 0 auto; }
+    .stend-podpis { color: var(--text-muted); font-size: var(--fs-sm);
+                    margin: 0 0 var(--space-4); }
+</style>
+</head>
+<body>
+<div class="stend-obertka">
+
+    <p class="stend-podpis">СТЕНД. Вид рисует НАСТОЯЩИЙ дом `js/kslt-soglasiya.js`,
+       а не рукописная разметка: стенд, повторяющий код своими словами, проверяет
+       себя, а не продукт.</p>
+
+    <div id="stendVzroslyy"></div>
+
+    <p class="stend-podpis" style="margin-top: var(--space-5)">Так это выглядит для 14–17 лет
+       (оговорка показывается по дате рождения).</p>
+
+    <div id="stendMladshiy"></div>
+
+<script src="../js/kslt-ekranirovanie.js?v=2"></script>
+<script src="../js/kslt-soglasiya.js?v=1"></script>
+<script>
+    /* Тексты — те же, что в кабинете: взяты из словаря `dashboard.js`
+       дословно. Профили поддельные, база не нужна. */
+    var Т = {
+        sogTitle: 'Согласие на обработку персональных данных',
+        sogIntro: 'Это запрос вашего согласия. Общественный фонд «Кыргызстанское сообщество любителей тенниса» просит разрешения обрабатывать ваши данные для целей ниже. <strong>Каждое согласие — отдельное и необязательное.</strong> Если вы ничего не отметите, вы всё равно сможете пользоваться рейтингом, турнирами и всеми основными функциями.',
+        sog1Name: '1. Уведомления на мои контактные данные',
+        sog1Desc: 'Направление на мой e-mail и в Telegram уведомлений, связанных с Пользовательским соглашением, членством и участием в турнирах: подтверждение заявок, сетки, расписание, изменения условий. <em>Без согласия уведомления показываются только в Приложении и личном кабинете на Сайте.</em>',
+        sog1Meta: 'Данные: e-mail, Telegram, имя и фамилия · Срок: до отзыва',
+        sog2Name: '2. Связь с другими игроками',
+        sog2Desc: 'Показ моего телефона и Telegram другим зарегистрированным пользователям в разделах «Поиск игрока» и «Баттлы», чтобы со мной могли договориться об игре.',
+        sog2Meta: 'Данные: телефон, Telegram, имя, фото, категория · Срок: до отзыва',
+        sog3Name: '3. Фото и видео с турниров',
+        sog3Desc: 'Съёмка во время турниров и мероприятий КСЛТ и публикация материалов с моим изображением, именем и результатами в новостях Сайта и Приложения и в аккаунтах КСЛТ в Instagram, Telegram и YouTube.',
+        sog3Meta: 'Данные: фото и видео, имя, категория, результаты · Срок: 3 года или до отзыва',
+        sog4Name: '4. Новости и предложения',
+        sog4Desc: 'Рассылка новостей КСЛТ, анонсов турниров и мероприятий, информации о предложениях спонсоров и партнёров КСЛТ по e-mail, в Telegram и push-уведомлениях. <em>Мои данные спонсорам не передаются.</em>',
+        sog4Meta: 'Данные: e-mail, Telegram, push, имя · Срок: до отзыва',
+        sogFoot: 'Отозвать любое согласие можно здесь же или письмом на kslt.kyrgyzstan@gmail.com. После отзыва обработка по этой цели прекращается, а данные, которые обрабатывались только для неё, удаляются в течение 7 рабочих дней.',
+        sogPolicy: 'Политике конфиденциальности',
+        sogPolicyHref: '../pages/privacy-policy.html',
+        sogSave: 'Сохранить выбор',
+        sogMinor: 'Вам меньше 18 лет. Вы можете дать согласие самостоятельно. Перед публикацией фото и видео с вами рекомендуем обсудить это с родителями.',
+        sogNoMail: 'Вы не будете получать письма о заявках, сетках и матчах — они будут видны только в кабинете.'
+    };
+
+    /* Взрослый, ничего не включал: все выключены, предупреждение видно. */
+    document.getElementById('stendVzroslyy').outerHTML =
+        KSLT_SOGLASIYA.разметка(Т, { id: 'proba', birth_year: 1990 });
+
+    /* Младше 18 и уже включил показ телефона — цель 2 должна стоять
+       включённой БЕЗ своего столбца, по `show_phone`. */
+    document.getElementById('stendMladshiy').outerHTML =
+        KSLT_SOGLASIYA.разметка(Т, { id: 'proba2', birth_year: new Date().getFullYear() - 16,
+                                     show_phone: true, consent_notify: true });
+
+    /* Предупреждение гаснет при включении первой цели — та же связка,
+       что в кабинете. */
+    document.querySelectorAll('.db-consent-card').forEach(function (к) {
+        к.addEventListener('change', function (с) {
+            var п = с.target.closest('input[data-sog]');
+            if (!п || п.getAttribute('data-sog') !== '1') return;
+            var стр = к.querySelector('.db-consent-nomail');
+            if (стр) стр.classList.toggle('db-consent-hidden', п.checked);
+        });
+    });
+</script>
+</body>
+</html>

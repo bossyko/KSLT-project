@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- CSP:START -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+<!-- CSP:END -->
+    <title>КСЛТ — Суроолор</title>
+    <meta name="description" content="КСЛТ мүчөлүгү, турнирлер жана рейтинг системасы тууралуу жооптор.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="КСЛТ">
+    <meta property="og:title" content="КСЛТ — Суроолор">
+    <meta property="og:description" content="Частые суроолор о КСЛТ: членство, турниры, рейтинг, корты и игра.">
+    <meta property="og:url" content="https://tennis.kg/pages/faq-kg.html">
+    <meta property="og:image" content="https://tennis.kg/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="../css/tokens.css?v=87">
+    <link rel="stylesheet" href="../css/style.css?v=486">
+    <link rel="stylesheet" href="../css/info-pages.css?v=86">
+</head>
+<body>
+    <!-- HEADER -->
+<!-- HEADER:START -->
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="../index-kg.html" class="logo">
+                    <img src="../images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="../index-kg.html#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="tournaments-overview-kg.html" class="nav-item nav-item-dropdown">
+                        Мелдештер
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="tournaments-kg.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-kg.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-kg.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-kg.html?category=challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="tournaments-kg.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-kg.html?category=friendly" class="nav-dropdown-item">Friendly Weekend</a>
+                        <a href="battles-overview-kg.html" class="nav-dropdown-item">Баттлдар</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="players-kg.html" class="nav-item nav-item-dropdown">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="players-kg.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="players-kg.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="players-kg.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                        <a href="players-kg.html?tab=men-challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="players-kg.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="services-kg.html" class="nav-item nav-item-dropdown">
+                        Кызматтар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="courts-kg.html" class="nav-dropdown-item">Теннис корттору</a>
+                        <a href="coaches-kg.html" class="nav-dropdown-item">Машыктыруучулар</a>
+                        <a href="partners-kg.html" class="nav-dropdown-item">Оюнчу издөө</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="news-kg.html" class="nav-item nav-item-dropdown">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news-kg.html?category=announcement" class="nav-dropdown-item">Жарыялоо</a>
+                        <a href="news-kg.html?category=world" class="nav-dropdown-item">Дүйнөлүк теннис</a>
+                        <a href="news-kg.html?category=results" class="nav-dropdown-item">Жыйынтыктар</a>
+                        <a href="news-kg.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="info-kg.html" class="nav-item nav-item-dropdown active">
+                        Маалымат
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="about-kg.html" class="nav-dropdown-item">Долбоор жөнүндө</a>
+                        <a href="rules-kg.html" class="nav-dropdown-item">Эрежелер</a>
+                        <a href="pricing-kg.html" class="nav-dropdown-item">Баалар</a>
+                        <a href="faq-kg.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="offer-kg.html" class="nav-dropdown-item">Ачык оферта</a>
+                        <a href="terms-kg.html" class="nav-dropdown-item">Колдонуу шарттары</a>
+                        <a href="privacy-policy-kg.html" class="nav-dropdown-item">Купуялык саясаты</a>
+                        <a href="sponsors-kg.html" class="nav-dropdown-item">Демөөрчү болуу</a>
+                        <a href="download-kg.html" class="nav-dropdown-item"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Тиркемени жүктөө</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="auth-kg.html" class="btn-auth">Кирүү</a>
+
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">KG</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="faq.html" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="faq-kg.html" class="lang-option active" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="faq-en.html" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="tournaments-overview-kg.html" class="mobile-dropdown-toggle">
+                        Мелдештер
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments-overview-kg.html" class="mobile-dropdown-self">Бардык турнирлер</a></li>
+                        <li><a href="tournaments-kg.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments-kg.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments-kg.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments-kg.html?category=challenger">Challengers</a></li>
+                        <li><a href="tournaments-kg.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments-kg.html?category=friendly">Friendly Weekend</a></li>
+                        <li><a href="battles-overview-kg.html">Баттлдар</a></li>
+                    </ul>
+                </li>
+                <li><a href="../index-kg.html#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="players-kg.html" class="mobile-dropdown-toggle">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="players-kg.html" class="mobile-dropdown-self">Толук рейтинг</a></li>
+                        <li><a href="players-kg.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="players-kg.html?tab=men-masters">Masters</a></li>
+                        <li><a href="players-kg.html?tab=men-tour">Tour</a></li>
+                        <li><a href="players-kg.html?tab=men-challenger">Challengers</a></li>
+                        <li><a href="players-kg.html?tab=men-futures">Futures</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="services-kg.html" class="mobile-dropdown-toggle">
+                        Кызматтар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="services-kg.html" class="mobile-dropdown-self">Бардык кызматтар</a></li>
+                        <li><a href="courts-kg.html">Теннис корттору</a></li>
+                        <li><a href="coaches-kg.html">Машыктыруучулар</a></li>
+                        <li><a href="partners-kg.html">Оюнчу издөө</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news-kg.html" class="mobile-dropdown-toggle">
+                        Жаңылыктар
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news-kg.html" class="mobile-dropdown-self">Бардык жаңылыктар</a></li>
+                        <li><a href="news-kg.html?category=announcement">Жарыялоо</a></li>
+                        <li><a href="news-kg.html?category=world">Дүйнөлүк теннис</a></li>
+                        <li><a href="news-kg.html?category=results">Жыйынтыктар</a></li>
+                        <li><a href="news-kg.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="info-kg.html" class="mobile-dropdown-toggle active">
+                        Маалымат
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="info-kg.html" class="mobile-dropdown-self">КСЛТ жөнүндө баары</a></li>
+                        <li><a href="about-kg.html">Долбоор жөнүндө</a></li>
+                        <li><a href="rules-kg.html">Эрежелер</a></li>
+                        <li><a href="pricing-kg.html">Баалар</a></li>
+                        <li><a href="faq-kg.html">FAQ</a></li>
+                        <li><a href="offer-kg.html">Ачык оферта</a></li>
+                        <li><a href="terms-kg.html">Колдонуу шарттары</a></li>
+                        <li><a href="privacy-policy-kg.html">Купуялык саясаты</a></li>
+                        <li><a href="sponsors-kg.html">Демөөрчү болуу</a></li>
+                        <li><a href="download-kg.html"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Тиркемени жүктөө (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Тил</span>
+                    <a href="faq.html" class="mobile-lang-option" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="faq-kg.html" class="mobile-lang-option active" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="faq-en.html" class="mobile-lang-option" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+<!-- HEADER:END -->
+
+    <main>
+        <!-- HERO -->
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('../images/heroes/services.jpg')"></div>
+            <div class="ip-hero-content">
+                <span class="fq-slogan">сенин теннис CLUB</span>
+                <h1 class="ip-hero-title">Көп берилүүчү <span>суроолор</span></h1>
+                <p class="ip-hero-subtitle">КСЛТ, мүчөлүк жана турнирлер тууралуу суроолорго жооптор</p>
+            </div>
+        </section>
+
+        <!-- FAQ CONTENT -->
+        <div class="ip-container">
+
+        <!-- ==================== ВСТУПЛЕНИЕ ==================== -->
+        <div class="ip-faq-category ip-fade-in">
+            <h2 class="ip-faq-category-title">КСЛТге кирүү</h2>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">КСЛТге кирүү үчүн эмне керек?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Кеминде алты айлык оюн тажрыйбасы, эсепти жүргүзө билүү жана теннис жабдыгы: ракетка, форма, корттун капталына ылайык бут кийим — грунт же хард, — жана ачык кортто турнир болсо кепка. Кирерден мурун машыктыруучу менен кеңешкен жакшы: ал сизге кайсы категория жакын экенин айтат.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">КСЛТнин мүчөсү кантип болом?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Баары сайтта же тиркемеде жасалат:
+                    <ol class="fq-steps">
+                        <li>КСЛТ сайтына катталыңыз же тиркемени жүктөп алыңыз — Android Google Playден, iPhone App Storeдон.</li>
+                        <li>Профилди толтуруп, өз категорияңызды тандаңыз.</li>
+                        <li>Мүчөлүк төгүмүн төлөңүз — жылдык же айлык.</li>
+                    </ol>
+                    <p style="margin-top:14px;">Башка эч нерсе кылуунун кереги жок: төлөгөндөн кийин КСЛТ базасына автоматтык түрдө кошуласыз, рейтингге, турнирлерге жана статистикага жетки дароо ачылат. Чектерди кураторго жиберүүнүн кереги жок.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Мүчөлүк канча турат?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Төгүм ай сайын же дароо жылга төлөнөт — жылдыгы тиешелүүрөөк. Колдонуудагы суммалар <a href="pricing-kg.html">Баалар барагында</a> көрсөтүлгөн — алар бир жерде турушу жана ар башка болбошу үчүн.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Мүчөлүк эмне берет?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <strong>Турнирлер.</strong> КСЛТнин бардык турнирлерине катышуу: рейтингдик жекече, жуптук, коммерциялык, сырттагы жана дем алыш күндөрүнүн достук мелдештери. Ошондой эле орун аз болгондо катталууда артыкчылык жана арзандатылган турнирдик төгүм.<br><br>
+                    <strong>Рейтинг жана статистика.</strong> Жалпы рейтингдеги орун, бардык матчтарыңыздын тарыхы, жеңиш жана жеңилүү статистикасы, акыркы оюндардын формасы жана атаандаштар менен жеке кездешүүлөр.<br><br>
+                    <strong>Арзандатуулар.</strong> Машыктыруучулардын кызматына, корт ижарасына жана спорт комплекстеринин кызматына — аларды сунуштаган өнөктөштөрдө.<br><br>
+                    <strong>Тиркеме.</strong> Турнирлер жөнүндө эскертмелер, баттлга чакыруулар, матчтардын түз эсеби жана мүчөлүгүңүз турган жеке кабинет.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Мүчөлүк төгүмдөрү эмнеге жумшалат?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    КСЛТ — бул турнирлер гана эмес. Корттон көрүнбөгөн иштер да бар: катышуучулар менен байланыш жана кайтарым пикир, жаңы форматтар, демөөрчүлөр жана өнөктөштөр менен сүйлөшүүлөр, бухгалтерия жана отчёттуулук, сайт менен домендин иштеши, топ сатып алуу, дизайн жана мерч. Мүчөлүк төгүмү — жалпы коомчулуктун өнүгүшүнө кошкон салым.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Төлөбөй калсам эмне болот?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Мүчөлүк так төлөнгөн мөөнөттө күчүндө, ансыз рейтингдик турнирлерге киргизилбейт. Алты ай бою төгүм төлөнбөсө, катышуучу КСЛТ мүчөлүгүнөн чыгат, рейтинг тоңдурулат. Каалаган убакта кирүү төгүмүн кайра төлөп кайтууга болот. Кененирээк — <a href="rules-kg.html#rules-membership">Эрежелер, 02-бөлүм</a>.
+                </div></div>
+            </div>
+        </div>
+
+        <!-- ==================== УРОВЕНЬ И КАТЕГОРИИ ==================== -->
+        <div class="ip-faq-category ip-fade-in">
+            <h2 class="ip-faq-category-title">Оюн деңгээли жана категориялар</h2>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">NTRP деген эмне?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Оюн деңгээлин баалоо системасы. Ал теңтуштар менен ойноп, матчтан ырахат алышыңыз үчүн керек, бир тараптуу жеңилүү эмес. «Ойноймун, бирок деңгээлим кандай?» — биринчи турнирдин алдындагы эң көп берилүүчү суроо, NTRP ага жооп берет.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Өз деңгээлимди кантип аныктайм?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Өзүңүздү чынчыл баалаңыз — бул оюндан алган ырахатыңыздан башка эч нерсеге таасир этпейт:
+                    <div class="fq-levels">
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Futures</span>
+                            <span class="fq-level-ntrp">2–2.5</span>
+                            <span class="fq-level-txt">Жаңы баштап жатасыз. Сокку туруктуу эмес, розыгрышты кармоо кыйын. Теннисте жаңы болсоңуз — бул кадимки нерсе.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Challengers</span>
+                            <span class="fq-level-ntrp">3–3.5</span>
+                            <span class="fq-level-txt">Розыгрышты кармайсыз, туруктуулук пайда болду, эрежелерди жана тактиканы түшүнөсүз. Futuresте байгелүү орундарды алгансыз. Аялдарда бул деңгээлге Tour категориясы туура келет.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Tour</span>
+                            <span class="fq-level-ntrp">3.5+</span>
+                            <span class="fq-level-txt">Туруктуу оюн, тактика иштейт, Challengersте байгелүү орундар бар. Эркектер категориясы, Masters тордун ылдыйкы бөлүгү.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Masters</span>
+                            <span class="fq-level-ntrp">4–4.5+</span>
+                            <span class="fq-level-txt">Ишенимдүү оюн, топту көзөмөлдөө, жекече жана жуптук тактика. Орто жана жогорку деңгээлдеги турнирлерде байгелүү орундар.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Pro-Masters</span>
+                            <span class="fq-level-ntrp">5</span>
+                            <span class="fq-level-txt">Балалыкта машыккансыз, ATF же ITF ойногонсуз, бирок бир нече жыл чыккан эмессиз. КМС, МС жана ITF рейтинг упайларысыз.</span>
+                        </div>
+                    </div>
+                    <p style="margin-top:16px;">Акыркы деңгээлди уюштуруучулар белгилейт — бир же бир нече турнир ойногондон кийин.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Эркектерде жана аялдарда кандай категориялар бар?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <div class="fq-cols">
+                        <div>
+                            <h5>Эркектер</h5>
+                            <ul>
+                                <li>Pro-Masters</li>
+                                <li>Masters</li>
+                                <li>Tour</li>
+                                <li>Challengers</li>
+                                <li>Futures</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5>Аялдар</h5>
+                            <ul>
+                                <li>Masters</li>
+                                <li>Tour</li>
+                                <li>Futures</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="margin-top:14px;">Ар бир категориянын КСЛТ телеграм каналында өз чаты бар — турнирлер жөнүндө кабарлар ошол жакка келет.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Кайсы категория меники экенин кантип билем?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <strong>Futures</strong> — үч айдан эки жылга чейин машыгасыз, эрежелерди билесиз, атаандаштар менен аз ойногонсуз же турнирлерге катышып, жеңген эмессиз.<br><br>
+                    <strong>Challengers</strong> — бир жылдан үч жылга чейин машыгасыз, туруктуу ойнойсуз, атаандаштарды көп жеңесиз, турнирлерге катышкансыз.<br><br>
+                    <strong>Tour</strong> — үч-беш жыл жана андан ашык машыгасыз; же 3.5тен жогорку эл аралык турнирлерде ойногонсуз; же Mastersте чыгып, жеңбегенсиз; же балалыкта эки-үч жыл ATF жана ITFсиз машыккансыз.<br><br>
+                    <strong>Masters</strong> — беш жылдан ашык машыгасыз, жакшы деңгээлде ойнойсуз, көп жеңесиз; 4төн жогорку эл аралык турнирлерге катышкансыз.<br><br>
+                    <strong>Pro-Masters</strong> — балалыкта машыгып, ATF же ITF ойногонсуз, бирок бир нече жыл чыккан эмессиз. КМС, МС жана ITF рейтинг упайларысыз.<br><br>
+                    Бир пункт боюнча дал келүү жетиштүү. Күмөн санасаңыз — төмөнкүнү тандаңыз: жогорулоо, өзүңүздөн алда канча күчтүүлөр менен ойногондон оңой.
+                </div></div>
+            </div>
+        </div>
+
+        <!-- ==================== ТУРНИРЫ ==================== -->
+        <div class="ip-faq-category ip-fade-in">
+            <h2 class="ip-faq-category-title">Турнирлер</h2>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Биринчи турнирге кантип жазылам?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <ol class="fq-steps">
+                        <li>Сиздин категорияңыздагы жаңы турнир жөнүндө тиркемеге жана телеграмга эскертме келет.</li>
+                        <li>Турнирдин барагын сайттан же тиркемеден ачыңыз — анда регламент, күнү, орду жана төгүмү бар.</li>
+                        <li>«Катталуу» баскычын басыңыз. Орундар чектелүү жана тез түгөнөт.</li>
+                    </ol>
+                    <p style="margin-top:14px;">КСЛТ мүчөлөрүндө катталууда артыкчылык бар: арыз орундан көп болсо, алар торго биринчи кирет.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Жуптук турнирге өнөктөштү кантип табам?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Өз категорияңыздын чатында же турнир чатында жуп издеп жатканыңызды жазыңыз. Жуптук турнирлер тууралуу кабарлар «Достук турнирлер», «Doubles» чаттарында жана демөөрчүлөрдүн чаттарында жарыяланат.<br><br>
+                    Тезирээк жооп алуу үчүн үч нерсени дароо жазыңыз: оюн деңгээлиңизди, турнирлерге катышуу тажрыйбаңызды жана форматты — ырахат үчүнбү же натыйжа үчүнбү.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Турнирдик төгүм мүчөлүккө киреби?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Жок, булар ар башка төлөмдөр. Турнирдик төгүм өзүнчө төлөнөт жана ар турнирде башка — сумма турнирдин барагында көрсөтүлгөн. Мүчөлүк арыз берүү укугун, катталууда артыкчылыкты жана арзандатылган төгүмдү берет, бирок бекер катышууну эмес.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Жуптук турнирлер рейтингге киреби?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Жок. КСЛТ рейтинги жекече турнирлер боюнча жүргүзүлөт. Жуптук жана микст — расмийи да, достугу да — рейтинг упайларын бербейт.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Friendly Weekend деген эмне?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Дем алыш күндөрүнүн турнирлери — ырахат үчүн ойноп, машыгуу. Алар үчүн рейтинг упайлары берилбейт, мындай турнирдин барагында «Рейтингсиз» белгиси турат. Катышуу шарттарын уюштуруучу аныктайт, тиешелүү турнирдин барагын караңыз.
+                </div></div>
+            </div>
+        </div>
+
+        </div>
+    
+        <!-- SPONSORS -->
+        <section id="sponsors" class="section-sponsors-compact"></section>
+    </main>
+
+    <!-- FOOTER -->
+<!-- FOOTER:START -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </div>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis. Рейтинг, мелдештер жана оюнчуга керектүү нерселердин баары.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://t.me/c/1939029205/1" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@%D0%9A%D0%A1%D0%9B%D0%A2-%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%81%D1%82%D0%B0%D0%BD" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-block">
+                <h4>Багыттоо</h4>
+                <ul class="footer-links">
+                    <li><a href="tournaments-overview-kg.html">Мелдештер</a></li>
+                    <li><a href="players-kg.html">Рейтинг</a></li>
+                    <li><a href="courts-kg.html">Корттор</a></li>
+                    <li><a href="coaches-kg.html">Машыктыруучулар</a></li>
+                    <li><a href="news-kg.html">Жаңылыктар</a></li>
+                    <li><a href="about-kg.html">Долбоор жөнүндө</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Оюнчуларга</h4>
+                <ul class="footer-links">
+                    <li><a href="rules-kg.html">Лига эрежелери</a></li>
+                    <li><a href="rules-kg.html#rules-ranking">Рейтинг системасы</a></li>
+                    <li><a href="faq-kg.html">FAQ</a></li>
+                    <li><a href="pricing-kg.html">Баалар</a></li>
+                    <li><a href="rules-kg.html#rules-conduct">Тартип жобосу</a></li>
+</ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Демөөрчүлөргө жана өнөктөштөргө</h4>
+                <ul class="footer-links">
+                    <li><a href="sponsors-kg.html">Демөөрчү болуу</a></li>
+                    <li><a href="sponsors-kg.html#current">Биздин демөөрчүлөр</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block" id="contacts">
+                <h4>Байланыш</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Бишкек, Кыргызстан</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© <span class="footer-year">2026</span> КСЛТ. Бардык укуктар корголгон.</p>
+            <nav class="footer-legal-nav" aria-label="Укуктук маалымат">
+                <ul class="footer-bottom-links">
+                    <li><a href="offer-kg.html">Ачык оферта</a></li>
+                    <li><a href="terms-kg.html">Колдонуу шарттары</a></li>
+                    <li><a href="privacy-policy-kg.html">Купуялык саясаты</a></li>
+                </ul>
+            </nav>
+            <p class="footer-entity">
+                «Кыргызстандык теннис сүйүүчүлөрүнүн коомдоштугу» коомдук фонду · катталуу № 197575-3301-ОФ · ИНН 01905202110030 · Кыргыз Республикасы, Бишкек ш., Свердлов району, Чүй пр., 127, 26-батир · Колдонулуучу укук: Кыргыз Республикасынын мыйзамдары
+            </p>
+            <p class="footer-made">Кыргызстанда жасалган</p>
+        </div>
+    </footer>
+<!-- FOOTER:END -->
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/kslt-baza.js?v=2"></script>
+    <script src="../js/supabase-config.js?v=5"></script>
+    <script src="../js/kslt-yazyk.js?v=5"></script>
+    <script src="../js/kslt-ekranirovanie.js?v=2"></script>
+    <script src="../js/kslt-prosmotry.js?v=1"></script>
+    <script src="../js/kslt-lico.js?v=8"></script>
+    <script src="../js/kslt-fokus.js?v=4"></script>
+    <script src="../js/kslt-sponsory.js?v=1"></script>
+    <script src="../js/sponsors-loader.js?v=18"></script>
+    <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
+    <script src="../js/contact-icons.js?v=1"></script>
+    <script src="../js/kslt-zov.js?v=2"></script>
+    <script src="../js/auth-nav.js?v=38"></script>
+    <script src="../js/script.js?v=27"></script>
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.ip-faq-question').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var item = this.closest('.ip-faq-item');
+                var wasActive = item.classList.contains('active');
+                // Close all in same category
+                item.closest('.ip-faq-category').querySelectorAll('.ip-faq-item').forEach(function(el) {
+                    el.classList.remove('active');
+                });
+                if (!wasActive) item.classList.add('active');
+            });
+        });
+
+        // Scroll animations
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
+</body>
+</html>

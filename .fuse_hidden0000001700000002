@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- CSP:START -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+<!-- CSP:END -->
+    <title>КСЛТ — Кыргызстанское Сообщество Любителей Тенниса</title>
+    <meta name="description" content="Кыргызстанское Сообщество Любителей Тенниса: турниры, рейтинг игроков, корты и тренеры в Бишкеке. Присоединяйся и играй.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="КСЛТ">
+    <meta property="og:title" content="КСЛТ — Кыргызстанское Сообщество Любителей Тенниса">
+    <meta property="og:description" content="Кыргызстанское Сообщество Любителей Тенниса: турниры, рейтинг игроков, корты и тренеры в Бишкеке. Присоединяйся и играй.">
+    <meta property="og:url" content="https://tennis.kg/index.html">
+    <meta property="og:image" content="https://tennis.kg/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/tokens.css?v=87">
+    <link rel="stylesheet" href="css/style.css?v=486">
+    <link rel="stylesheet" href="css/podium.css?v=45">
+    <link rel="stylesheet" href="css/partners.css?v=75">
+    <link rel="stylesheet" href="css/battle-cards.css?v=69">
+    <link rel="stylesheet" href="css/kslt-toast.css?v=36">
+</head>
+<body>
+<!-- HEADER:START -->
+    <header class="floating-header header-hybrid">
+        <nav>
+            <!-- Левая часть: Логотип + Генеральный спонсор -->
+            <div class="nav-left">
+                <a href="index.html" class="logo">
+                    <img src="images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <!-- Центр: Навигация -->
+            <ul class="nav-links">
+                <li>
+                    <a href="#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="pages/tournaments-overview.html" class="nav-item nav-item-dropdown">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="pages/tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="pages/tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="pages/tournaments.html?category=challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="pages/tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="pages/tournaments.html?category=friendly" class="nav-dropdown-item">Friendly Weekend</a>
+                        <a href="pages/battles-overview.html" class="nav-dropdown-item">Баттлы</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="pages/players.html" class="nav-item nav-item-dropdown">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/players.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="pages/players.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="pages/players.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                        <a href="pages/players.html?tab=men-challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="pages/players.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="pages/services.html" class="nav-item nav-item-dropdown">
+                        Услуги
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/courts.html" class="nav-dropdown-item">Теннисные корты</a>
+                        <a href="pages/coaches.html" class="nav-dropdown-item">Тренеры</a>
+                        <a href="pages/partners.html" class="nav-dropdown-item">Поиск игрока</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="pages/news.html" class="nav-item nav-item-dropdown">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/news.html?category=announcement" class="nav-dropdown-item">Анонс</a>
+                        <a href="pages/news.html?category=world" class="nav-dropdown-item">Мировой теннис</a>
+                        <a href="pages/news.html?category=results" class="nav-dropdown-item">Результаты</a>
+                        <a href="pages/news.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="pages/info.html" class="nav-item nav-item-dropdown">
+                        Инфо
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/about.html" class="nav-dropdown-item">О проекте</a>
+                        <a href="pages/rules.html" class="nav-dropdown-item">Правила</a>
+                        <a href="pages/pricing.html" class="nav-dropdown-item">Цены</a>
+                        <a href="pages/faq.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="pages/offer.html" class="nav-dropdown-item">Публичная оферта</a>
+                        <a href="pages/terms.html" class="nav-dropdown-item">Условия использования</a>
+                        <a href="pages/privacy-policy.html" class="nav-dropdown-item">Политика конфиденциальности</a>
+                        <a href="pages/sponsors.html" class="nav-dropdown-item">Стать спонсором</a>
+                        <a href="pages/download.html" class="nav-dropdown-item"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Скачать приложение</a>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Правая часть: Авторизация + Язык -->
+            <div class="nav-right">
+                <a href="pages/auth.html" class="btn-auth">Войти</a>
+
+                <!-- Выпадающее меню языков -->
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">RU</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="index.html" class="lang-option active" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="index-kg.html" class="lang-option" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="index-en.html" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Бургер меню для мобильных -->
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <!-- Мобильная навигация -->
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/tournaments-overview.html" class="mobile-dropdown-toggle">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/tournaments-overview.html" class="mobile-dropdown-self">Все турниры</a></li>
+                        <li><a href="pages/tournaments.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="pages/tournaments.html?category=masters">Masters</a></li>
+                        <li><a href="pages/tournaments.html?category=tour">Tour</a></li>
+                        <li><a href="pages/tournaments.html?category=challenger">Challengers</a></li>
+                        <li><a href="pages/tournaments.html?category=futures">Futures</a></li>
+                        <li><a href="pages/tournaments.html?category=friendly">Friendly Weekend</a></li>
+                        <li><a href="pages/battles-overview.html">Баттлы</a></li>
+                    </ul>
+                </li>
+                <li><a href="#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/players.html" class="mobile-dropdown-toggle">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/players.html" class="mobile-dropdown-self">Весь рейтинг</a></li>
+                        <li><a href="pages/players.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="pages/players.html?tab=men-masters">Masters</a></li>
+                        <li><a href="pages/players.html?tab=men-tour">Tour</a></li>
+                        <li><a href="pages/players.html?tab=men-challenger">Challengers</a></li>
+                        <li><a href="pages/players.html?tab=men-futures">Futures</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/services.html" class="mobile-dropdown-toggle">
+                        Услуги
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/services.html" class="mobile-dropdown-self">Все услуги</a></li>
+                        <li><a href="pages/courts.html">Теннисные корты</a></li>
+                        <li><a href="pages/coaches.html">Тренеры</a></li>
+                        <li><a href="pages/partners.html">Поиск игрока</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/news.html" class="mobile-dropdown-toggle">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/news.html" class="mobile-dropdown-self">Все новости</a></li>
+                        <li><a href="pages/news.html?category=announcement">Анонс</a></li>
+                        <li><a href="pages/news.html?category=world">Мировой теннис</a></li>
+                        <li><a href="pages/news.html?category=results">Результаты</a></li>
+                        <li><a href="pages/news.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="pages/info.html" class="mobile-dropdown-toggle">
+                        Инфо
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="pages/info.html" class="mobile-dropdown-self">Всё о КСЛТ</a></li>
+                        <li><a href="pages/about.html">О проекте</a></li>
+                        <li><a href="pages/rules.html">Правила</a></li>
+                        <li><a href="pages/pricing.html">Цены</a></li>
+                        <li><a href="pages/faq.html">FAQ</a></li>
+                        <li><a href="pages/offer.html">Публичная оферта</a></li>
+                        <li><a href="pages/terms.html">Условия использования</a></li>
+                        <li><a href="pages/privacy-policy.html">Политика конфиденциальности</a></li>
+                        <li><a href="pages/sponsors.html">Стать спонсором</a></li>
+                        <li><a href="pages/download.html"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Скачать приложение (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Язык</span>
+                    <a href="index.html" class="mobile-lang-option active" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="index-kg.html" class="mobile-lang-option" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="index-en.html" class="mobile-lang-option" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+<!-- HEADER:END -->
+
+    <main>
+        <!-- HERO с фоновым изображением -->
+        <section id="home" class="hero">
+            <div class="hero-bg">
+                <img src="images/hero-courts.jpg" alt="" class="hero-bg-image" data-content="hero.image">
+                <div class="hero-bg-overlay"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span data-content="hero.season">Сезон 2026</span>
+                </div>
+                <h1 class="hero-title">
+                    <span class="highlight">КСЛТ</span>
+                </h1>
+                <p class="hero-full" data-content="hero.tagline">Кыргызстанское Сообщество Любителей Тенниса</p>
+                <p class="hero-slogan" data-content="hero.claim">Искусство становиться первым</p>
+                <p class="hero-subtitle" data-content="hero.text">Присоединяйся к 350+ игрокам: находи партнёров по игре, новых друзей и любимые турниры.</p>
+                <div class="hero-cta">
+                    <a href="pages/partners.html" class="btn-primary">
+                        Найти игрока
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value" id="statRanked">&mdash;</span>
+                        <span class="stat-label">В рейтинге</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statUsers">&mdash;</span>
+                        <span class="stat-label">Зарегистрировано</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statTournaments">&mdash;</span>
+                        <span class="stat-label">Турниров</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statCourts">&mdash;</span>
+                        <span class="stat-label">Теннисных центров</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statCoaches">&mdash;</span>
+                        <span class="stat-label">Тренеров</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image-container">
+                    <img
+                        src="images/heroes/tournaments.jpg"
+                        alt="Теннисист"
+                        class="hero-image"
+                    >
+                    <div class="floating-card card-rating">
+                        <div class="card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Твой рейтинг</span>
+                            <span class="card-value">4.2 <small>+0.3</small></span>
+                        </div>
+                    </div>
+                    <div class="floating-card card-match">
+                        <div class="card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Ближайший матч</span>
+                            <span class="card-value">Сегодня, 18:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карусель спонсоров (dynamic from Supabase) -->
+            <div class="hero-sponsors-section">
+                <p class="hero-sponsors-title">Наши спонсоры</p>
+                <div class="sponsors-carousel-infinite hero-sponsors-carousel" id="heroSponsorsCarousel"></div>
+            </div>
+
+        </section>
+
+        <!-- LIVE SCORES (dynamic from Supabase) -->
+        <section id="live" class="section-live" style="display:none">
+            <div class="section-header">
+                <h2><span class="live-indicator"></span> Live матчи</h2>
+            </div>
+            <div class="live-matches" id="liveMatchesGrid"></div>
+        </section>
+
+        <!-- BATTLE CARDS -->
+        <div id="battleContainer" class="bc-section" style="display:none"></div>
+
+        <!-- TOURNAMENTS -->
+        <section id="tournaments" class="section-tournaments">
+            <div class="section-header">
+                <h2>Турниры</h2>
+                <a href="pages/tournaments-overview.html" class="link-all">Все турниры →</a>
+            </div>
+            <div class="tournaments-grid" id="homeTournaments"></div>
+        </section>
+
+        <!-- NEWS -->
+        <section id="news" class="section-home-news">
+            <div class="section-header">
+                <h2>Новости</h2>
+                <a href="pages/news.html" class="link-all">Все новости →</a>
+            </div>
+            <div class="hn-grid" id="homeNewsGrid"></div>
+        </section>
+
+        <!-- BADGES CTA -->
+        <section class="section-badges-cta">
+            <div class="badges-cta-inner">
+                <div class="badges-cta-text">
+                    <h2>Играй. Расти. Собирай достижения.</h2>
+                    <p id="badgesCtaDesc">Регистрируйся, играй в турнирах и получай награды за достижения</p>
+                </div>
+                <div class="badges-cta-wrap">
+                    <div class="badges-cta-cards" id="badgesCtaCards"></div>
+                    <div class="badges-cta-cards badges-cta-locked" id="badgesCtaLocked"></div>
+                </div>
+                <div class="badges-cta-box">
+                    <a href="pages/auth.html?tab=register" class="badges-cta-btn" id="badgesCtaBtn">Начать путь к победе</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- RANKINGS -->
+        <section id="rankings" class="section-rankings">
+            <div class="section-header">
+                <h2>Топ рейтинга</h2>
+                <a href="pages/players.html" class="link-all">Полный рейтинг →</a>
+            </div>
+            <!-- Переключатель пола: только на телефоне. Две таблицы рядом
+                 туда не помещаются, а листать их одну под другой долго -->
+            <div class="rk-gender-switch">
+                <button class="rk-gender active" data-пол="men">Мужчины</button>
+                <button class="rk-gender" data-пол="women">Женщины</button>
+            </div>
+            <div class="rankings-columns"></div>
+        </section>
+
+        <!-- PLAYERS / FIND PARTNER -->
+        <section id="players" class="section-players">
+            <div class="section-header">
+                <h2>Давай сыграем</h2>
+                <a href="pages/partners.html" class="link-all">Показать всех →</a>
+            </div>
+            <p class="pg-sub">Подбирай по уровню NTRP и играй с теми, кто в форме</p>
+            <div class="pt-grid" id="homePartners"></div>
+        </section>
+
+        <!-- COURTS -->
+                <!-- КОРТЫ И ТРЕНЕРЫ -->
+        <section id="venues" class="section-venues">
+            <div class="section-header">
+                <h2>Где играть и у кого учиться</h2>
+            </div>
+
+            <div class="vn-row-head">
+                <h3>Теннисные корты</h3>
+                <a href="pages/courts.html" class="link-all">Все корты →</a>
+            </div>
+            <div class="courts-grid vn-four" id="venuesCourts"></div>
+
+            <div class="vn-row-head">
+                <h3>Тренеры</h3>
+                <a href="pages/coaches.html" class="link-all">Все тренеры →</a>
+            </div>
+            <div class="coaches-grid vn-four" id="venuesCoaches"></div>
+        </section>
+
+        <!-- SPONSORS (dynamic from Supabase) -->
+        <!-- ABOUT -->
+        <section id="about" class="section-about">
+            <div class="about-head">
+                <div class="section-header">
+                    <h2>О проекте КСЛТ</h2>
+                    <a href="pages/info.html" class="link-all">Всё о КСЛТ →</a>
+                </div>
+            </div>
+            <div class="about-body">
+                <p class="about-lead">
+                    КСЛТ объединяет игроков всех уровней — от новичков до опытных любителей. С 2021 года мы проводим турниры, помогаем находить партнёров по игре и растим большое живое теннисное сообщество.
+                </p>
+                <ul class="about-features">
+                    <li>
+                        <a class="feature" href="pages/tournaments-overview.html">
+                            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3.5h8v5.5a4 4 0 0 1-8 0V3.5Z"/><path d="M8 5H5.4a2.6 2.6 0 0 0 2.7 4.2M16 5h2.6a2.6 2.6 0 0 1-2.7 4.2"/><path d="M12 13v2.6"/><path d="M9.6 15.6h4.8l1.1 3.4H8.5l1.1-3.4Z"/><path d="M7.5 20.5h9"/></svg></span>
+                            <div class="feature-text">
+                                <h3>Турниры</h3>
+                                <p>Регулярные соревнования для всех уровней</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="feature" href="pages/partners.html">
+                            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="6.6" r="2.6"/><circle cx="5.2" cy="9.4" r="2.2"/><circle cx="18.8" cy="9.4" r="2.2"/><path d="M7.4 17.6c0-2.6 2-4.5 4.6-4.5s4.6 1.9 4.6 4.5"/><path d="M1.8 19c0-2.2 1.5-3.8 3.4-3.8M22.2 19c0-2.2-1.5-3.8-3.4-3.8"/></svg></span>
+                            <div class="feature-text">
+                                <h3>Сообщество</h3>
+                                <p>Найди партнёра для игры в любое время</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="feature" href="pages/players.html">
+                            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 20h18"/><rect x="3.5" y="12.5" width="5.4" height="7.5" rx="1"/><rect x="9.3" y="7.5" width="5.4" height="12.5" rx="1"/><rect x="15.1" y="15" width="5.4" height="5" rx="1"/><path d="M12 4.2l.9 1.9 2.1.3-1.5 1.5.4 2.1-1.9-1-1.9 1 .4-2.1L9 6.4l2.1-.3.9-1.9Z"/></svg></span>
+                            <div class="feature-text">
+                                <h3>Рейтинг</h3>
+                                <p>Система очков и статистика каждого игрока</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="feature" href="pages/courts.html">
+                            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.6"/><path d="M6.1 5.6c1.9 2.5 2.9 5.3 2.9 8.3 0 2.2-.5 4.3-1.5 6.1"/><path d="M17.9 5.6c-1.9 2.5-2.9 5.3-2.9 8.3 0 2.2.5 4.3 1.5 6.1"/></svg></span>
+                            <div class="feature-text">
+                                <h3>Корты</h3>
+                                <p>Полный список кортов Кыргызстана</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="feature" href="pages/coaches.html">
+                            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="7.6" cy="5.8" r="2.4"/><path d="M3.4 19.4c0-2.4 1.9-4.2 4.2-4.2s4.2 1.8 4.2 4.2"/><path d="M7.6 8.2v7"/><circle cx="16.8" cy="11.4" r="1.8"/><path d="M13.8 19.4c0-1.7 1.3-2.9 3-2.9s3 1.2 3 2.9"/><ellipse cx="13.4" cy="6.2" rx="2.1" ry="2.6" transform="rotate(28 13.4 6.2)"/><path d="M12 8.2 10.4 10"/></svg></span>
+                            <div class="feature-text">
+                                <h3>Тренеры</h3>
+                                <p>Найди тренера под свой уровень</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="feature" href="pages/pricing.html">
+                            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.4 3.4 20.6 11.6a2 2 0 0 1 0 2.8l-6.2 6.2a2 2 0 0 1-2.8 0L3.4 12.4V6a2.6 2.6 0 0 1 2.6-2.6Z"/><circle cx="7.6" cy="7.6" r="1.2"/><path d="M11.4 13.8l3.4-3.4"/></svg></span>
+                            <div class="feature-text">
+                                <h3>Скидки</h3>
+                                <p>Членам КСЛТ — специальные цены на корты и тренировки</p>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+                <div class="about-image">
+                    <img src="images/about-community.jpg" alt="Участницы КСЛТ" width="1400" height="691" loading="lazy">
+                </div>
+            </div>
+        </section>
+
+        <!-- Приглашение спонсорам: подробности — на отдельной странице -->
+        <section class="sp-offer-wrap">
+            <div class="sp-offer">
+                <h2>Станьте спонсором КСЛТ</h2>
+                <p class="sp-offer-lead">КСЛТ — крупнейшее любительское теннисное сообщество Кыргызстана. Среди наших участников — руководители ведущих компаний страны.</p>
+
+                <div class="sp-nums">
+                    <div><span class="sp-num-val">350+</span><span class="sp-num-cap">членов сообщества</span></div>
+                    <div><span class="sp-num-val">900+</span><span class="sp-num-cap">участников в чатах</span></div>
+                    <div><span class="sp-num-val" data-stat="statTournaments">&mdash;</span><span class="sp-num-cap">турниров сыграно</span></div>
+                    <div><span class="sp-num-val">30+</span><span class="sp-num-cap">международных турниров</span></div>
+                </div>
+
+                <ul class="sp-gives">
+                    <li>Логотип на сайте и в мобильном приложении</li>
+                    <li>Упоминание на турнирах и в трансляциях</li>
+                    <li>Баннеры на кортах во время соревнований</li>
+                    <li>Именной турнир под вашим брендом</li>
+                </ul>
+
+                <a class="sp-cta-btn" href="pages/sponsors.html">Подробнее о спонсорстве →</a>
+            </div>
+        </section>
+
+        <section id="sponsors" class="section-sponsors-compact"></section>
+
+
+    </main>
+
+
+
+<!-- FOOTER:START -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <img src="images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </div>
+                <p class="footer-desc">Кыргызстанское Сообщество Любителей Тенниса. Рейтинг, турниры и всё, что нужно игроку.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://t.me/c/1939029205/1" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@%D0%9A%D0%A1%D0%9B%D0%A2-%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%81%D1%82%D0%B0%D0%BD" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-block">
+                <h4>Навигация</h4>
+                <ul class="footer-links">
+                    <li><a href="pages/tournaments-overview.html">Турниры</a></li>
+                    <li><a href="pages/players.html">Рейтинг</a></li>
+                    <li><a href="pages/courts.html">Корты</a></li>
+                    <li><a href="pages/coaches.html">Тренеры</a></li>
+                    <li><a href="pages/news.html">Новости</a></li>
+                    <li><a href="pages/about.html">О проекте</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Игрокам</h4>
+                <ul class="footer-links">
+                    <li><a href="pages/rules.html">Правила лиги</a></li>
+                    <li><a href="pages/rules.html#rules-ranking">Система рейтинга</a></li>
+                    <li><a href="pages/faq.html">FAQ</a></li>
+                    <li><a href="pages/pricing.html">Цены</a></li>
+                    <li><a href="pages/rules.html#rules-conduct">Дисциплинарное положение</a></li>
+</ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Спонсорам и партнёрам</h4>
+                <ul class="footer-links">
+                    <li><a href="pages/sponsors.html">Стать спонсором</a></li>
+                    <li><a href="pages/sponsors.html#current">Наши спонсоры</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block" id="contacts">
+                <h4>Контакты</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>г. Бишкек, Кыргызстан</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© <span class="footer-year">2026</span> КСЛТ. Все права защищены.</p>
+            <!-- ОСОЗНАННЫЙ ДУБЛЬ, не чинить и не схлопывать.
+                 Два названия документа подряд — это не забытая копипаста.
+                 Замер: на 390 внутри плашки доступно 358, а полные русские
+                 названия занимают 457 — не влезают, переносятся во второй
+                 ряд, и цель нажатия падает до 17px. Короткие дают 333 в один
+                 ряд высотой 44. На десктопе места хватает, и терять точное
+                 имя документа там незачем.
+                 Переключает .footer-legal-full / .footer-legal-short в
+                 style.css. Кыргызский и английский дубля НЕ имеют: их полные
+                 названия влезают и на 390 (324 и 241). -->
+            <nav class="footer-legal-nav" aria-label="Правовая информация">
+                <ul class="footer-bottom-links">
+                    <li><a href="pages/offer.html"><span class="footer-legal-full">Публичная оферта</span><span class="footer-legal-short">Оферта</span></a></li>
+                    <li><a href="pages/terms.html">Условия использования</a></li>
+                    <li><a href="pages/privacy-policy.html"><span class="footer-legal-full">Политика конфиденциальности</span><span class="footer-legal-short">Конфиденциальность</span></a></li>
+                </ul>
+            </nav>
+            <p class="footer-entity">
+                Общественный фонд «Кыргызстанское сообщество любителей тенниса» · рег. № 197575-3301-ОФ · ИНН 01905202110030 · Кыргызская Республика, г. Бишкек, Свердловский район, пр. Чуй, 127, кв. 26 · Применимое право: законодательство Кыргызской Республики
+            </p>
+            <p class="footer-made">Сделано в Кыргызстане</p>
+        </div>
+    </footer>
+<!-- FOOTER:END -->
+
+    <script src="js/contact-icons.js?v=1"></script>
+
+    <script src="js/kslt-yazyk.js?v=5"></script>
+    <script src="js/kslt-ekranirovanie.js?v=2"></script>
+    <script src="js/kslt-prosmotry.js?v=1"></script>
+    <script src="js/kslt-lico.js?v=8"></script>
+    <script src="js/kslt-zov.js?v=2"></script>
+    <script src="js/kslt-baza.js?v=2"></script>
+    <script src="js/auth-nav.js?v=38"></script>
+    <script src="js/script.js?v=27"></script>
+    <script src="js/scroll-spy.js?v=1"></script>
+    <!-- Supabase: capture OAuth tokens from redirect -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="js/supabase-config.js?v=5"></script>
+    <script src="js/kslt-fokus.js?v=4"></script>
+    <script src="js/kslt-sponsory.js?v=1"></script>
+    <script src="js/sponsors-loader.js?v=18"></script>
+    <script>
+    if (window.loadSponsors) loadSponsors('sponsors');
+    if (window.loadSponsorsCarousel) loadSponsorsCarousel('heroSponsorsCarousel');
+    </script>
+    <script src="js/session-monitor.js?v=4"></script>
+    <script src="js/kslt-vremya.js?v=4"></script>
+    <script src="js/membership.js?v=6"></script>
+    <script src="js/battle-format.js?v=6"></script>
+    <script src="js/country-utils.js?v=69"></script>
+    <script src="js/kslt-toast.js?v=3"></script>
+    <script src="js/battle-cards.js?v=32"></script>
+    <script src="js/kslt-chisla-kluba.js?v=1"></script>
+    <script src="js/stats.js?v=11"></script>
+    <script src="js/kslt-pozdravlenie.js?v=1"></script>
+    <script src="js/badge-celebration.js?v=7"></script>
+    <script src="js/tournament-slots.js?v=6"></script>
+    <script src="js/tournament-status.js?v=13"></script>
+    <script src="js/tournament-featured.js?v=16"></script>
+    <script src="js/tournament-card.js?v=13"></script>
+    <script src="js/kslt-rules.js?v=43"></script>
+    <script src="js/site-content.js?v=4"></script>
+    <script src="js/zayavka-texts.js?v=1"></script>
+    <script src="js/kslt-zayavka.js?v=2"></script>
+    <script src="js/kslt-vhod.js?v=3"></script>
+    <script src="js/tournament-register.js?v=32"></script>
+    <script src="js/doubles-entry.js?v=19"></script>
+    <script src="js/home-tournaments.js?v=80"></script>
+    <script src="js/home-badges.js?v=4"></script>
+    <script src="js/rankings-data.js?v=21"></script>
+    <script src="js/home-rankings.js?v=22"></script>
+    <script src="js/news-covers.js?v=1"></script>
+    <script src="js/home-news.js?v=59"></script>
+    <script src="js/kslt-dostup.js?v=5"></script>
+    <script src="js/invite-player.js?v=75"></script>
+    <script src="js/kslt-sloy.js?v=3"></script>
+    <script src="js/kslt-tasovka.js?v=1"></script>
+    <script src="js/home-partners.js?v=30"></script>
+    <script src="js/home-courts-coaches.js?v=46"></script>
+    <script>
+    
+    
+    // HTML escape helper
+    function esc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    // Load Supabase tournaments into main page
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var grid = document.querySelector('.section-tournaments .tournaments-grid');
+        if (!grid) return;
+        var today = new Date().toISOString().split('T')[0];
+        client.from('tournaments').select('*').gte('date_start', today).order('date_start', { ascending: true }).limit(3)
+            .then(function(res) {
+                if (res.error || !res.data || !res.data.length) return;
+                var html = '';
+                var formatLabels = { singles: 'Одиночный', doubles: 'Парный', mixed_doubles: 'Смешанный парный' };
+                res.data.forEach(function(t, i) {
+                    var isFeatured = i === 0;
+                    var dateStr = '';
+                    if (t.date_start) {
+                        var d = new Date(t.date_start + 'T00:00:00');
+                        dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                        if (t.date_end && t.date_end !== t.date_start) {
+                            var d2 = new Date(t.date_end + 'T00:00:00');
+                            dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric' }) + '-' + d2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                        }
+                    }
+                    var img = t.image || 'images/heroes/tournaments.jpg';
+                    var gender = (t.category_id || '').split('-')[0];
+                    var genderLabel = gender === 'women' ? 'Женский' : (gender === 'men' ? 'Мужской' : '');
+                    html += '<a href="pages/tournament.html?id=' + t.id + '" class="tournament-card' + (isFeatured ? ' tournament-card-featured' : '') + '">' +
+                        '<div class="tournament-image">' +
+                            '<img src="' + esc(img) + '" alt="' + esc(t.title || '') + '">' +
+                            (isFeatured && t.status === 'registration' ? '<span class="tournament-badge">Регистрация</span>' : '') +
+                        '</div>' +
+                        '<div class="tournament-info">' +
+                            '<span class="tournament-date">' + dateStr + '</span>' +
+                            '<h3>' + (t.title || '') + '</h3>' +
+                            (isFeatured && t.description ? '<p>' + t.description.substring(0, 100) + '</p>' : '') +
+                            '<div class="tournament-meta">' +
+                                (genderLabel ? '<span>' + genderLabel + '</span>' : '') +
+                                (formatLabels[t.format] ? '<span>' + formatLabels[t.format] + '</span>' : '') +
+                                (t.max_participants ? '<span><strong>' + t.max_participants + '</strong> участников</span>' : '') +
+                                (t.prize_fund ? '<span>' + t.prize_fund + '</span>' : '') +
+                            '</div>' +
+                            (isFeatured ? '<span class="btn-primary">Подробнее</span>' : '') +
+                        '</div>' +
+                    '</a>';
+                });
+                grid.innerHTML = html;
+            });
+    })();
+    /* ИНЛАЙНОВЫЙ РЕНДЕР РЕЙТИНГА УДАЛЁН 24.09.
+       Он строил колонки, ленту вкладок и панели, а js/home-rankings.js потом
+       подменял содержимое каждой панели — два шага одного конвейера с двумя
+       разными правилами о том, что такое рейтинговая категория. Здесь фильтр
+       шёл по НАЗВАНИЮ ('friendly'), а категория называется «Friendly Weekend»,
+       поэтому он не срабатывал никогда: вкладка создавалась, данных для неё не
+       было, и раздел на всех пяти видах открывался пустой категорией.
+       Теперь колонку строит один файл — js/home-rankings.js. */
+    // Load LIVE matches from Supabase (live_matches table)
+    (function() {
+        var client = window.supabaseClient;
+        if (!client) return;
+        var section = document.getElementById('live');
+        var grid = document.getElementById('liveMatchesGrid');
+        if (!section || !grid) return;
+
+        // ОГОНЬКОМ Live ЗДЕСЬ БОЛЬШЕ НЕ РАСПОРЯЖАЕМСЯ.
+        // Было два независимых хозяина класса is-live — этот блок и js/script.js.
+        // Два запроса в базу на каждую загрузку главной и разные селекторы:
+        // здесь href="#live", там href*="#live". Мы узнаём ответ первыми — и
+        // просто сообщаем его. Красит один js/script.js, одним набором селекторов.
+        function toggleLiveClass(active) {
+            window.KSLT_LIVE_АКТИВЕН = !!active;
+            if (window.KSLT_отметитьLive) window.KSLT_отметитьLive(!!active);
+            document.dispatchEvent(new CustomEvent('kslt:live', { detail: { active: !!active } }));
+        }
+
+        function loadLive() {
+            client.from('live_matches')
+                .select('id, player1_id, player2_id, player1_name, player2_name, status, sets_data, current_game_p1, current_game_p2, points_p1, points_p2, serving_player, tournament_label, is_tiebreak, tiebreak_p1, tiebreak_p2')
+                .in('status', ['warmup', 'live', 'paused'])
+                .order('created_at', { ascending: false })
+                .then(function(res) {
+                    if (res.error || !res.data || !res.data.length) {
+                        section.style.display = 'none';
+                        toggleLiveClass(false);
+                        return;
+                    }
+                    var matches = res.data;
+                    var playerIds = [];
+                    matches.forEach(function(m) {
+                        if (m.player1_id && playerIds.indexOf(m.player1_id) === -1) playerIds.push(m.player1_id);
+                        if (m.player2_id && playerIds.indexOf(m.player2_id) === -1) playerIds.push(m.player2_id);
+                    });
+
+                    var pPromise = playerIds.length
+                        ? client.from('players').select('id,name,photo').in('id', playerIds)
+                        : Promise.resolve({ data: [] });
+
+                    pPromise.then(function(pRes) {
+                        var pMap = {};
+                        (pRes.data || []).forEach(function(p) { pMap[p.id] = p; });
+                        // ЗАГЛУШКА АВАТАРА — ИНИЦИАЛЫ, НЕ КАРТИНКА С ЧУЖОГО CDN.
+                        // Было: картинка тянулась с placehold.co — два запроса
+                        // наружу на каждую карточку, и в кружке стоял «?».
+                        // Avatar 29:82: нет фото -> инициалы на accent/subtle.
+                        function инициалы(имя) {
+                            return (имя || '').trim().split(/\s+/).slice(0, 2)
+                                .map(function (ч) { return ч.charAt(0); }).join('');
+                        }
+                        function лицо(фото, имя) {
+                            return фото
+                                ? '<img src="' + фото + '" alt="' + имя + '">'
+                                : '<span class="live-avatar" aria-hidden="true">' + инициалы(имя) + '</span>';
+                        }
+                        var html = '';
+
+                        matches.forEach(function(m) {
+                            var p1 = pMap[m.player1_id] || {};
+                            var p2 = pMap[m.player2_id] || {};
+                            var p1Name = m.player1_name || p1.name || 'TBD';
+                            var p2Name = m.player2_name || p2.name || 'TBD';
+                            var label = m.tournament_label || '';
+
+                            var p1scores = '', p2scores = '';
+                            (m.sets_data || []).forEach(function(s) {
+                                p1scores += s.g1 + ' ';
+                                p2scores += s.g2 + ' ';
+                            });
+                            p1scores += (m.current_game_p1 || 0);
+                            p2scores += (m.current_game_p2 || 0);
+
+                            var servingClass1 = m.serving_player === 1 ? ' serving' : '';
+                            var servingClass2 = m.serving_player === 2 ? ' serving' : '';
+                            var statusBadge = m.status === 'live' ? 'LIVE' : m.status === 'warmup' ? 'РАЗМИНКА' : 'ПАУЗА';
+                            // Тон бейджа из компонента Badge 27:53: доминирует только LIVE.
+                            var statusClass = m.status === 'live' ? ' is-live'
+                                            : m.status === 'warmup' ? ' is-warmup' : ' is-paused';
+
+                            html += '<a href="pages/live-match.html?id=' + m.id + '" class="live-match" style="text-decoration:none;color:inherit;cursor:pointer;">' +
+                                '<div class="match-status">' +
+                                    '<span class="live-badge' + statusClass + '">' + statusBadge + '</span>' +
+                                    (label ? '<span class="match-set">' + esc(label) + '</span>' : '') +
+                                '</div>' +
+                                '<div class="match-players">' +
+                                    '<div class="player">' +
+                                        лицо(p1.photo, p1Name) +
+                                        '<span class="player-name">' + esc(p1Name) + '</span>' +
+                                        '<span class="player-score' + servingClass1 + '">' + p1scores.trim() + '</span>' +
+                                    '</div>' +
+                                    '<div class="player">' +
+                                        лицо(p2.photo, p2Name) +
+                                        '<span class="player-name">' + esc(p2Name) + '</span>' +
+                                        '<span class="player-score' + servingClass2 + '">' + p2scores.trim() + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</a>';
+                        });
+                        grid.innerHTML = html;
+                        section.style.display = '';
+                        toggleLiveClass(true);
+
+                        // Пришли по ссылке Live из шапки другой страницы:
+                        // сама прокрутка браузера не срабатывает, потому что
+                        // в момент загрузки раздела на странице ещё нет
+                        if (!section._jumped && window.location.hash === '#live') {
+                            section._jumped = true;
+                            // Отступ на высоту закреплённой шапки: без него
+                            // она наезжала на заголовок раздела
+                            var y = section.getBoundingClientRect().top + window.scrollY - 90;
+                            window.scrollTo({ top: y, behavior: 'smooth' });
+                        }
+                    });
+                });
+        }
+
+        loadLive();
+
+        // НЕ СПРАШИВАЕМ БАЗУ, КОГДА ВКЛАДКУ НЕ ВИДНО.
+        // Было: setInterval(loadLive, 15000) без условий — вкладка,
+        // забытая в фоне, стучалась в базу 240 раз в час и обновляла
+        // счёт, на который никто не смотрит.
+        // Вернулись на экран — спрашиваем СРАЗУ, не дожидаясь очередных
+        // 15 секунд: иначе первое, что человек увидит, — счёт на момент,
+        // когда он ушёл.
+        // Такт заводим заново при возврате, а не просто пропускаем в фоне:
+        // иначе очередной тик приходил сразу за возвратом и запрос уходил
+        // дважды подряд. Замерено: прирост 2 вместо 1.
+        var такт = null;
+        function завестиТакт() {
+            if (такт) clearInterval(такт);
+            такт = setInterval(function () { if (!document.hidden) loadLive(); }, 15000);
+        }
+        завестиТакт();
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) { clearInterval(такт); такт = null; return; }
+            loadLive();
+            завестиТакт();
+        });
+    })();
+    </script>
+    <script>
+        // Тексты и картинка заглавного экрана приходят из базы: поменял в
+        // админке — обновилось и здесь, и в приложении, без выкладки
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.KSLT_CONTENT && window.supabaseClient) {
+                window.KSLT_CONTENT.mount(window.supabaseClient);
+            }
+        });
+    </script>
+</body>
+</html>

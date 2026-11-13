@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- CSP:START -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+<!-- CSP:END -->
+    <title>KSLT — Public Offer</title>
+    <meta name="description" content="Public Offer — KSLT, the tennis community of Kyrgyzstan.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KSLT">
+    <meta property="og:title" content="KSLT — Public Offer">
+    <meta property="og:description" content="Public Offer — KSLT, the tennis community of Kyrgyzstan.">
+    <meta property="og:url" content="https://tennis.kg/pages/offer-en.html">
+    <meta property="og:image" content="https://tennis.kg/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="../css/tokens.css?v=87">
+    <link rel="stylesheet" href="../css/style.css?v=486">
+    <link rel="stylesheet" href="../css/info-pages.css?v=86">
+</head>
+<body>
+    <!-- HEADER -->
+<!-- HEADER:START -->
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="../index-en.html" class="logo">
+                    <img src="../images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="../index-en.html#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="tournaments-overview-en.html" class="nav-item nav-item-dropdown">
+                        Tournaments
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly Weekend</a>
+                        <a href="battles-overview-en.html" class="nav-dropdown-item">Battles</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="players-en.html" class="nav-item nav-item-dropdown">
+                        Rankings
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="players-en.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="players-en.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="players-en.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                        <a href="players-en.html?tab=men-challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="players-en.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="services-en.html" class="nav-item nav-item-dropdown">
+                        Services
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="courts-en.html" class="nav-dropdown-item">Tennis Courts</a>
+                        <a href="coaches-en.html" class="nav-dropdown-item">Coaches</a>
+                        <a href="partners-en.html" class="nav-dropdown-item">Player Search</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="news-en.html" class="nav-item nav-item-dropdown">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news-en.html?category=announcement" class="nav-dropdown-item">Announcements</a>
+                        <a href="news-en.html?category=world" class="nav-dropdown-item">World Tennis</a>
+                        <a href="news-en.html?category=results" class="nav-dropdown-item">Results</a>
+                        <a href="news-en.html?category=interview" class="nav-dropdown-item">Interviews</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="info-en.html" class="nav-item nav-item-dropdown active">
+                        Info
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="about-en.html" class="nav-dropdown-item">About the Project</a>
+                        <a href="rules-en.html" class="nav-dropdown-item">Rules</a>
+                        <a href="pricing-en.html" class="nav-dropdown-item">Pricing</a>
+                        <a href="faq-en.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="offer-en.html" class="nav-dropdown-item">Public Offer</a>
+                        <a href="terms-en.html" class="nav-dropdown-item">Terms of Use</a>
+                        <a href="privacy-policy-en.html" class="nav-dropdown-item">Privacy Policy</a>
+                        <a href="sponsors-en.html" class="nav-dropdown-item">Become a sponsor</a>
+                        <a href="download-en.html" class="nav-dropdown-item"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Download App</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="auth-en.html" class="btn-auth">Sign In</a>
+
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">EN</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="offer.html" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="offer-kg.html" class="lang-option" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="offer-en.html" class="lang-option active" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="tournaments-overview-en.html" class="mobile-dropdown-toggle">
+                        Tournaments
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments-overview-en.html" class="mobile-dropdown-self">All tournaments</a></li>
+                        <li><a href="tournaments-en.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments-en.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments-en.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments-en.html?category=challenger">Challengers</a></li>
+                        <li><a href="tournaments-en.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments-en.html?category=friendly">Friendly Weekend</a></li>
+                        <li><a href="battles-overview-en.html">Battles</a></li>
+                    </ul>
+                </li>
+                <li><a href="../index-en.html#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="players-en.html" class="mobile-dropdown-toggle">
+                        Rankings
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="players-en.html" class="mobile-dropdown-self">Full rankings</a></li>
+                        <li><a href="players-en.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="players-en.html?tab=men-masters">Masters</a></li>
+                        <li><a href="players-en.html?tab=men-tour">Tour</a></li>
+                        <li><a href="players-en.html?tab=men-challenger">Challengers</a></li>
+                        <li><a href="players-en.html?tab=men-futures">Futures</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="services-en.html" class="mobile-dropdown-toggle">
+                        Services
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="services-en.html" class="mobile-dropdown-self">All services</a></li>
+                        <li><a href="courts-en.html">Tennis Courts</a></li>
+                        <li><a href="coaches-en.html">Coaches</a></li>
+                        <li><a href="partners-en.html">Player Search</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news-en.html" class="mobile-dropdown-toggle">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news-en.html" class="mobile-dropdown-self">All news</a></li>
+                        <li><a href="news-en.html?category=announcement">Announcements</a></li>
+                        <li><a href="news-en.html?category=world">World Tennis</a></li>
+                        <li><a href="news-en.html?category=results">Results</a></li>
+                        <li><a href="news-en.html?category=interview">Interviews</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="info-en.html" class="mobile-dropdown-toggle active">
+                        Info
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="info-en.html" class="mobile-dropdown-self">Everything about KSLT</a></li>
+                        <li><a href="about-en.html">About the Project</a></li>
+                        <li><a href="rules-en.html">Rules</a></li>
+                        <li><a href="pricing-en.html">Pricing</a></li>
+                        <li><a href="faq-en.html">FAQ</a></li>
+                        <li><a href="offer-en.html">Public Offer</a></li>
+                        <li><a href="terms-en.html">Terms of Use</a></li>
+                        <li><a href="privacy-policy-en.html">Privacy Policy</a></li>
+                        <li><a href="sponsors-en.html">Become a sponsor</a></li>
+                        <li><a href="download-en.html"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Download App (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Language</span>
+                    <a href="offer.html" class="mobile-lang-option" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="offer-kg.html" class="mobile-lang-option" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="offer-en.html" class="mobile-lang-option active" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+<!-- HEADER:END -->
+
+    <main>
+        <!-- HERO -->
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('../images/heroes/services.jpg')"></div>
+            <div class="ip-hero-content">
+                <h1 class="ip-hero-title">Public <span>Offer</span></h1>
+                <p class="ip-hero-subtitle">Agreement for sports tennis event organization and participation services</p>
+            </div>
+        </section>
+
+        <!-- OFFER CONTENT -->
+        <div class="ip-container" data-document="offer">
+
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Table of Contents</div>
+                <ol class="ip-toc-list">
+                    <li><a href="#offer-terms">Terms and Definitions</a></li>
+                    <li><a href="#offer-conditions">Public Offer Conditions</a></li>
+                    <li><a href="#offer-services">Services Provided</a></li>
+                    <li><a href="#offer-service-conditions">Service Conditions</a></li>
+                    <li><a href="#offer-refusal">Contract Termination</a></li>
+                </ol>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="ip-rules-section ip-fade-in" id="offer-terms">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    Terms and Definitions
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>1.1.</strong> <strong>"Offer"</strong>, <strong>"Public Offer"</strong> — the present proposal by the Organizer to enter into a Service Agreement in accordance with Articles 396 and 398 of the Civil Code of the Kyrgyz Republic for services related to organizing participation in sports tennis events, under the terms set forth herein.</p>
+                    <p><strong>1.2.</strong> <strong>"Acceptance of the Offer"</strong> — a person's response indicating acceptance thereof. Acceptance of the Offer signifies full and unconditional adherence by the Participant to the terms and conditions of the Offer.</p>
+                    <p><strong>1.3.</strong> <strong>"Organizer"</strong> — Public Foundation "Kyrgyzstan Social Lawn Tennis Community" (KSLT), Registration No. 197575-3301-PF, TIN 01905202110030, legal address: Kyrgyz Republic, Bishkek city, Sverdlovsky district, Chuy Ave. 127, apt. 26, represented by Director Chokoeva Aisuluu Erikovna, acting on the basis of the Charter, being the service provider for organizing participation in sports tennis events (competitions), which carries out organizational, financial and other support for their preparation and conduct.</p>
+                    <p><strong>1.4.</strong> <strong>"Agreement"</strong> — a compensated agreement on the provision of services by the Organizer for organizing participation in a Competition under the terms of the Offer. The Agreement is concluded between the Participant and the Organizer in relation to a specific Competition for which the Participant has registered. To conclude the Agreement, the Organizer uses the following Internet resources: website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
+                    <p><strong>1.5.</strong> <strong>"Participant"</strong> — an individual who has entered into the Agreement with the Organizer by accepting this Offer.</p>
+                    <p><strong>1.6.</strong> <strong>"Competition"</strong> — a sports tennis event in relation to which the Agreement has been concluded under the terms of this Offer.</p>
+                    <p><strong>1.7.</strong> <strong>"Competition Rules"</strong>, <strong>"Competition Regulations"</strong> — a document defining the terms, procedures for conducting and participating in a Competition in relation to which the Agreement has been concluded under the terms of this Offer. The Rules are binding on the Organizer, its staff, the Participant and visitors of the Competition. The Rules are published on the Organizer's website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> within the time frames specified in this Offer.</p>
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="ip-rules-section ip-fade-in" id="offer-conditions">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    Public Offer Conditions
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>2.1.</strong> This Offer enters into force from the date of its publication on the Internet on the Organizer's website at: <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> and is valid for an indefinite period.</p>
+                    <p><strong>2.2.</strong> The Organizer reserves the right to withdraw the Offer at any time or make amendments to it without the Participant's consent. All amendments and additions enter into force from the moment of their publication on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
+                    <p><strong>2.3.</strong> Acceptance of this Offer is performed by the Participant completing the registration procedure for a Competition on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
+                    <p><strong>2.4.</strong> A person is deemed to have concluded the Agreement with the Organizer under the terms of the Offer at the moment of submitting their registration application for the Competition in their personal account on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>, or by phone number provided during the registration procedure.</p>
+                    <p><strong>2.5.</strong> Place of contract conclusion: Kyrgyz Republic, Bishkek city.</p>
+                    <p><strong>2.6.</strong> By accepting this Offer, the Participant confirms the following:</p>
+                    <p style="padding-left:20px;"><strong>2.6.1.</strong> The Participant is aware that participation in the Competition involves risk to life and health, requires physical and mental exertion, and may lead to significant physical strain and the risk of injury.</p>
+                    <p style="padding-left:20px;"><strong>2.6.2.</strong> The Participant is aware of their health condition and has no medical contraindications to participating in the Competition.</p>
+                    <p style="padding-left:20px;"><strong>2.6.3.</strong> The Participant is aware that participation in the Competition is not recommended for persons with medical restrictions for physical culture and sports activities.</p>
+                    <p style="padding-left:20px;"><strong>2.6.4.</strong> The Participant has read the terms of the Offer.</p>
+                    <p style="padding-left:20px;"><strong>2.6.5.</strong> The Participant agrees to the unconditional and unqualified acceptance of the terms of this Offer and undertakes to strictly comply with the Competition Rules/Regulations, the requirements of the staff and the Organizer.</p>
+                    <p style="padding-left:20px;"><strong>2.6.6.</strong> The Participant has read the internal documents of the Organizer published on the Organizer's website.</p>
+                    <p style="padding-left:20px;"><strong>2.6.7.</strong> The Participant assumes responsibility for any possible negative consequences of their participation in the Competition.</p>
+                    <p style="padding-left:20px;"><strong>2.6.8.</strong> The Participant gives consent to the processing of personal data for the purposes of fulfilling this Offer, and for informing about goods and services of the Organizer and/or the Organizer's partners.</p>
+                    <p style="padding-left:20px;"><strong>2.6.9.</strong> The Participant gives consent to the publication and further use, including for commercial purposes, of their image obtained during the Competition.</p>
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="ip-rules-section ip-fade-in" id="offer-services">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    Services Provided
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>3.1.</strong> The Organizer undertakes to provide, and the Participant undertakes to pay for, the following services for organizing participation in the Competition:</p>
+                    <p style="padding-left:20px;"><strong>3.1.1.</strong> grant the Participant the right to participate in the Competition specified in the Competition Rules published on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>;</p>
+                    <p style="padding-left:20px;"><strong>3.1.2.</strong> provide the Participant with information via WhatsApp group, in the «KSLT Tennis» application or in the personal account on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> regarding the approval of their application;</p>
+                    <p style="padding-left:20px;"><strong>3.1.3.</strong> provide other related services (supply of drinking water, tennis balls, refreshments during the Competition, etc.), the list of which is specified in the Competition Rules/Regulations on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
+                    <p><strong>3.2.</strong> Information about the date, time and venue of the Competition, the Competition program and other necessary information is published on the Organizer's website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
+                    <p><strong>3.3.</strong> Detailed information about the Competition may be communicated to the Participant by other available means, including by messaging to the phone number provided by the Participant during registration.</p>
+                    <p><strong>3.4.</strong> The cost of services (entry fee) is determined by the Organizer independently and is indicated on the website in the section for the specific Competition.</p>
+                    <p><strong>3.5.</strong> Payment of the entry fee is made in cashless form through the methods specified on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>. The date of payment is the date of debiting funds from the Participant's account.</p>
+                    <p><strong>3.6.</strong> All expenses for transferring funds to pay the entry fee, as well as expenses for paying the commission of the payment agent (sub-agent), are borne by the Participant.</p>
+                </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="ip-rules-section ip-fade-in" id="offer-service-conditions">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    Service Conditions
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>4.1.</strong> The service is provided by the Organizer on a one-time basis, on the date, at the time and at the venue of the Competition specified on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> or in a message sent by the Organizer to the Participant's phone number.</p>
+                    <p><strong>4.2.</strong> The Participant assumes full responsibility for their medical condition during the Competition period, and bears all negative consequences associated with violation of this condition.</p>
+                    <p><strong>4.3.</strong> The Organizer undertakes to:</p>
+                    <p style="padding-left:20px;"><strong>4.3.1.</strong> inform the Participant of the date, time, and venue of the Competition, and provide other information necessary for participation;</p>
+                    <p style="padding-left:20px;"><strong>4.3.2.</strong> provide the Participant with access to the Competition venue and tennis courts, subject to the Participant's compliance with the requirements set out in the Competition Rules;</p>
+                    <p style="padding-left:20px;"><strong>4.3.3.</strong> ensure by its own efforts and means the observance of public order and public safety measures at the Competition venue;</p>
+                    <p style="padding-left:20px;"><strong>4.3.4.</strong> inform the Participant of the Competition results by publishing the final Competition protocol;</p>
+                    <p style="padding-left:20px;"><strong>4.3.5.</strong> provide the Participant with an electronic Competition protocol containing the Participant's name and their placement, by publishing it on the website;</p>
+                    <p style="padding-left:20px;"><strong>4.3.6.</strong> notify the Participant of amendments and/or additions to the terms of this Offer by publishing the relevant information on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>.</p>
+                    <p><strong>4.4.</strong> The Organizer has the right to:</p>
+                    <p style="padding-left:20px;"><strong>4.4.1.</strong> change the date, time and venue, and cancel the Competition, provided that the relevant information is published on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a> no later than 24 hours before the original date of the Competition;</p>
+                    <p style="padding-left:20px;"><strong>4.4.2.</strong> make changes to the Competition program, including changing the number of participants, by notifying the Participant through publication on the website <a href="https://tennis.kg" target="_blank" rel="noopener noreferrer">tennis.kg</a>, in the «KSLT Tennis» application or in the private WhatsApp group;</p>
+                    <p style="padding-left:20px;"><strong>4.4.3.</strong> establish and change the Competition rules, rules for visitors at the Competition venue, and other rules related to organizing and conducting the Competition, and require compliance with said rules from the Participant and other persons;</p>
+                    <p style="padding-left:20px;"><strong>4.4.4.</strong> determine the procedure for photo and video recording during the Competition;</p>
+                    <p style="padding-left:20px;"><strong>4.4.5.</strong> deny the Participant access to the Competition: in the absence of payment of the Organizer's membership fees; in case of non-payment of the tournament entry fee by the Participant; if the Participant is in a state of alcohol, drug, or toxic intoxication; in case of violation by the Participant of the Competition Rules, other rules and instructions of the Organizer, as well as provisions of the current legislation of the Kyrgyz Republic.</p>
+                    <p><strong>4.5.</strong> The Participant undertakes to:</p>
+                    <p style="padding-left:20px;"><strong>4.5.1.</strong> pay the entry fee for participation in the Competition within the time frame and in the manner established by the Organizer;</p>
+                    <p style="padding-left:20px;"><strong>4.5.2.</strong> when paying the entry fee and submitting the application, provide the Organizer with complete and accurate information: surname, first name, patronymic; date of birth (the Participant must be at least 18 years of age); contact phone number; other information indicated as mandatory in the registration form;</p>
+                    <p style="padding-left:20px;"><strong>4.5.3.</strong> upon receiving notification of application approval for participation in the tournament, give consent to the processing of personal data by the Organizer for the purposes of fulfilling this Offer;</p>
+                    <p style="padding-left:20px;"><strong>4.5.4.</strong> comply with the Competition Rules, and follow the instructions of the Organizer's staff during the Competition;</p>
+                    <p style="padding-left:20px;"><strong>4.5.5.</strong> not use the Organizer's content containing the results of its intellectual activity without written consent, except in cases established by law.</p>
+                    <p><strong>4.6.</strong> The Participant has the right to:</p>
+                    <p style="padding-left:20px;"><strong>4.6.1.</strong> withdraw their application by notifying the tournament Organizer at least 3 calendar days before the start of the tournament and receive a refund of the entry fee. In case of withdrawal later than 3 days, the Organizer has the right to refuse to refund the entry fee.</p>
+                    <p style="padding-left:20px;"><strong>4.6.2.</strong> during the Competition, receive necessary information from the Organizer's staff.</p>
+                    <p><strong>4.7.</strong> The Organizer is not liable for the loss or damage of the Participant's property used during the Competition.</p>
+                    <p><strong>4.8.</strong> The Organizer is not liable for damage to the life, health, or property of the Participant caused as a result of the Participant's violation of safety measures during the Competition, as well as violation of rules established by the Organizer.</p>
+                    <p><strong>4.9.</strong> The Organizer is not liable for the actions of third parties present at the Competition venue who are not employees of the Organizer.</p>
+                    <p><strong>4.10.</strong> Disputes and disagreements arising in the course of fulfilling this Offer shall be resolved by the parties through negotiation.</p>
+                </div>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="ip-rules-section ip-fade-in" id="offer-refusal">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    Contract Termination
+                </h2>
+                <div class="ip-rules-list">
+                    <p><strong>5.1.</strong> The Participant has the right to unilaterally withdraw from the Agreement no later than 3 calendar days before the date of the Competition by sending a notification to the tournament Organizer via WhatsApp phone number.</p>
+                    <p><strong>5.2.</strong> When refunding funds paid as the entry fee, the Organizer has the right to retain the commission paid by the Participant to the payment agent and/or intermediary bank for accepting the payment.</p>
+                    <p><strong>5.3.</strong> In case of withdrawal from the Agreement without notifying the Organizer at least 3 days in advance, funds paid as the entry fee shall not be refunded.</p>
+                    <p><strong>5.4.</strong> The Organizer has the right to withdraw from the Agreement (cancel the Competition) by sending the Participant a notification via WhatsApp phone number or through the «KSLT Tennis» application, no later than 48 hours before the start of the Competition.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+<!-- FOOTER:START -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </div>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis. Rankings, tournaments and everything a player needs.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://t.me/c/1939029205/1" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@%D0%9A%D0%A1%D0%9B%D0%A2-%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%81%D1%82%D0%B0%D0%BD" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-block">
+                <h4>Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="tournaments-overview-en.html">Tournaments</a></li>
+                    <li><a href="players-en.html">Rankings</a></li>
+                    <li><a href="courts-en.html">Courts</a></li>
+                    <li><a href="coaches-en.html">Coaches</a></li>
+                    <li><a href="news-en.html">News</a></li>
+                    <li><a href="about-en.html">About</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>For players</h4>
+                <ul class="footer-links">
+                    <li><a href="rules-en.html">League rules</a></li>
+                    <li><a href="rules-en.html#rules-ranking">Rating system</a></li>
+                    <li><a href="faq-en.html">FAQ</a></li>
+                    <li><a href="pricing-en.html">Pricing</a></li>
+                    <li><a href="rules-en.html#rules-conduct">Discipline code</a></li>
+</ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>For sponsors and partners</h4>
+                <ul class="footer-links">
+                    <li><a href="sponsors-en.html">Become a sponsor</a></li>
+                    <li><a href="sponsors-en.html#current">Our sponsors</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block" id="contacts">
+                <h4>Contacts</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Bishkek, Kyrgyzstan</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© <span class="footer-year">2026</span> KSLT. All rights reserved.</p>
+            <nav class="footer-legal-nav" aria-label="Legal">
+                <ul class="footer-bottom-links">
+                    <li><a href="offer-en.html">Public offer</a></li>
+                    <li><a href="terms-en.html">Terms of Use</a></li>
+                    <li><a href="privacy-policy-en.html">Privacy policy</a></li>
+                </ul>
+            </nav>
+            <p class="footer-entity">
+                Public Foundation “Kyrgyzstan Social Lawn Tennis Community” (KSLT) · Registration No. 197575-3301-PF · TIN 01905202110030 · Kyrgyz Republic, Bishkek city, Sverdlovsky district, Chuy Ave. 127, apt. 26 · Governing law: the laws of the Kyrgyz Republic
+            </p>
+            <p class="footer-made">Made in Kyrgyzstan</p>
+        </div>
+    </footer>
+<!-- FOOTER:END -->
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/kslt-baza.js?v=2"></script>
+    <script src="../js/supabase-config.js?v=5"></script>
+    <script src="../js/site-content.js?v=4"></script>
+    <script src="../js/kslt-yazyk.js?v=5"></script>
+    <script src="../js/kslt-ekranirovanie.js?v=2"></script>
+    <script src="../js/kslt-prosmotry.js?v=1"></script>
+    <script src="../js/kslt-lico.js?v=8"></script>
+    <script src="../js/kslt-fokus.js?v=4"></script>
+    <script src="../js/kslt-sponsory.js?v=1"></script>
+    <script src="../js/sponsors-loader.js?v=18"></script>
+    <script src="../js/session-monitor.js?v=4"></script>
+    <script src="../js/contact-icons.js?v=1"></script>
+    <script src="../js/kslt-zov.js?v=2"></script>
+    <script src="../js/auth-nav.js?v=38"></script>
+    <script src="../js/script.js?v=27"></script>
+    <script>
+        document.querySelectorAll('.ip-toc-list a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
+    <script>
+        // Текст документа приходит из базы: правится один раз и меняется
+        // и здесь, и в приложении. В разметке остаётся та же редакция —
+        // она видна, пока база не ответила
+        document.addEventListener('DOMContentLoaded', function () {
+            var box = document.querySelector('[data-document]');
+            if (!box || !window.KSLT_CONTENT || !window.supabaseClient) return;
+            window.KSLT_CONTENT.document(window.supabaseClient, box.dataset.document, function (doc) {
+                if (!doc || !doc.body) return;
+                box.innerHTML = doc.body;
+                box.dataset.fromDb = '1';   // отметка: текст пришёл из базы
+                // Блоки на этих страницах проявляются по мере прокрутки, и
+                // наблюдатель уже отработал по прежней разметке. Новые он не
+                // видел — без этого текст лежал на странице невидимым
+                box.querySelectorAll('.ip-fade-in').forEach(function (el) {
+                    el.classList.add('visible');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

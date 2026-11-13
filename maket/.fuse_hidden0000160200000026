@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КСЛТ — макет экрана рейтинговых очков</title>
+<!--
+  ПОСТОЯННОЕ УСЛОВИЕ КОСТИ, ДЕЙСТВУЕТ НА ВСЮ АДМИНКУ:
+  АДМИНКА — ДЕСКТОП И ПЛАНШЕТ. ТЕЛЕФОН НЕ БЕРЁМ. ТОЛЬКО РУССКИЙ.
+
+  Значит видов у этого экрана ТРИ, а не пять: десктоп, планшет стоя, планшет
+  лёжа. Трёх языков здесь тоже нет — админка русская.
+
+  03.10 я снял замер на пяти видах, включая телефон 390, и пошёл чинить то,
+  что на телефоне. Костя: «телефон не берём для админки», «ты забыл опять».
+  Правило, выведенное на одном куске, применяется к следующему БЕЗ НОВОГО
+  РАЗБОРА — а я его заново не применил. Условие теперь стоит здесь и в
+  `tools/zamer-ochki-ekran.mjs`, чтобы померить лишнее было нельзя, не
+  прочитав этих строк.
+-->
+<link rel="stylesheet" href="../css/tokens.css?v=87">
+<link rel="stylesheet" href="../css/admin.css?v=320">
+<style>
+/* ===================================================================
+   ПРАВКИ ЖИВУТ В СТЕНДЕ, А НЕ В admin.css — до слова Кости.
+   Каждое число — ступень шкалы:
+     отступы 8 · 12 · 16 · 24 · 32 · 40
+     кегли   11 · 12 · 14 · 16 · 18 · 21 · 26 · 32 · 40
+     кнопки  28 · 36 · 44 · 52
+   Строка 36 и поле 28 — ступени кнопок. Четыре пиксела воздуха сверху и
+   снизу поля НИКТО НЕ ОБЪЯВЛЯЛ: они вышли из выравнивания по центру.
+   =================================================================== */
+
+/* ФОН И ЦВЕТ СТРАНИЦЫ — ЗАДАЁТ МАКЕТ, А НЕ admin.css.
+   Прибор 03.10 показал: у `html` и `body` фон `rgba(0,0,0,0)`, а цвет текста
+   `rgb(0,0,0)`. То есть страница белая, заголовки чёрные, а карточки внутри
+   тёмные: макет выглядел полуразобранным, и числа контраста, снятые с него,
+   были про чужой фон. В настоящей админке фон вешает своя обёртка
+   (`pages/admin.html`), макету её никто не даёт — значит он объявляет сам.
+   УМОЛЧАНИЕ — СВОЙСТВО ДАННЫХ, А НЕ РАЗМЕТКИ: здесь данных нет, поэтому
+   умолчание пришлось назвать. */
+html, body {
+    background: var(--bg-base);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.st-wrap { max-width: 1240px; margin: 0 auto; padding: var(--space-6) var(--space-4) 80px; }
+.st-h1 { font-size: var(--fs-2xl); margin: 0 0 var(--space-2); }
+.st-lead { color: var(--text-secondary); max-width: 70ch; margin: 0 0 var(--space-8); }
+.st-block { margin: 0 0 var(--space-10); }
+.st-tag {
+    /* БЫЛ 11 КЕГЛЕМ И ТЕРЯЛСЯ: Костя открыл стенд и не нашёл блок глазами.
+       Подпись блока — ориентир, а не мета: 14 и вес. Буквы кириллические,
+       чтобы в чате и на экране назывались одинаково. */
+    display: inline-block; font-size: var(--fs-sm); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--accent); margin-bottom: var(--space-2);
+}
+.st-h2 { font-size: var(--fs-lg); margin: 0 0 var(--space-3); }
+/* Третий уровень внутри блока: ступень между h2 (18) и текстом (14). */
+.st-h3 { font-size: var(--fs-base); margin: var(--space-6) 0 var(--space-3); }
+.st-sost { margin: 0 0 var(--space-4); }
+.st-note-stand { color: var(--text-muted); font-size: var(--fs-sm); max-width: 78ch; margin: 0 0 var(--space-4); }
+.st-bad { color: #FF6B6B; }
+.st-ok  { color: var(--accent); }
+/* ---- КРЕСТИК УДАЛЕНИЯ УРОВНЯ ----
+   Диалог и подсказка нарисованы разметкой, а не браузерным `confirm`:
+   `confirm` в макете заблокировал бы страницу, и посмотреть второй случай
+   стало бы нельзя. Форма та же — текст и две кнопки.
+   Каждое число — ступень: 28 у крестика (ступень кнопок), отступы 8 · 12 ·
+   16 · 24, кегли 12 · 14. */
+.st-krest-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-surface); border-radius: var(--radius-sm);
+    font-size: var(--fs-sm); font-weight: 600;
+}
+.st-krest {
+    /* 28 — ступень кнопок. Цель нажатия у настоящей кнопки должна быть 44;
+       здесь НАМЕРЕНО оставлено 28, потому что это снимок того, что стоит в
+       продукте сегодня (`settings.js:164` рисует 18×18). Исправление цели
+       нажатия — отдельная находка, она записана в блоке Е. */
+    width: 28px; height: 28px; flex: 0 0 28px;
+    border: 0; border-radius: 50%; cursor: pointer;
+    background: rgba(255, 107, 107, 0.15); color: #FF6B6B;
+    font-size: var(--fs-base); line-height: 1;
+}
+.st-krest:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.st-dialog {
+    margin-top: var(--space-3);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg-elevated); padding: var(--space-4);
+    max-width: 52ch;
+}
+.st-dialog-text { font-size: var(--fs-sm); color: var(--text-primary); }
+.st-dialog-btns {
+    display: flex; gap: var(--space-2); justify-content: flex-end;
+    margin-top: var(--space-4);
+}
+.st-dialog-btn {
+    min-height: 28px; padding: 0 var(--space-3); display: inline-flex;
+    align-items: center; border-radius: var(--radius-sm);
+    font-size: var(--fs-sm); color: var(--text-secondary);
+    background: var(--bg-surface);
+}
+.st-dialog-btn-ok { color: var(--text-primary); font-weight: 600; }
+.st-toast {
+    margin-top: var(--space-3); padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm); font-size: var(--fs-sm);
+    max-width: 52ch; line-height: 1.5;
+}
+.st-toast-bad {
+    /* ТОКЕНОВ `--surface-1` И `--surface-2` В ПРОДУКТЕ НЕТ — я их придумал,
+       как придумывал колонки в черновой базе. Настоящие:
+       `--bg-base` · `--bg-card` · `--bg-surface` · `--bg-elevated`
+       (`css/tokens.css:69–72`). Здесь `--bg-surface` = #141414.
+       Контраст #FF6B6B на #141414 — 6.64, ПОСЧИТАНО по формуле WCAG
+       (относительная светлота 0.3736 против 0.0085), выше 4.5. */
+    background: var(--bg-surface); color: #FF6B6B;
+    border-left: 3px solid #FF6B6B;
+}
+
+/* ТАБЛИЦА ЗАМЕРА ПРОКРУЧИВАЕТСЯ СВОЕЙ ОБЁРТКОЙ, А НЕ СТРАНИЦЕЙ.
+   Она шире своего места и тянула за собой документ. Обёртка оставлена не
+   ради телефона — телефона у админки нет, — а потому что таблица шире
+   контейнера обязана иметь СВОЮ прокрутку на любой ширине: рядом то же
+   делает `.ad-pts-scroll` у таблицы мест. */
+.st-mer-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ---- НОВАЯ ВЕРСИЯ С ДАТЫ ----
+   СВЕРКА ФИГМЫ (аудит `claude/kslt-formy-i-modalki.md`, 18.09): на экране
+   очков уже живёт `ad-modal` 400 — её открывает «+ Добавить уровень»
+   (`setAddLevelBtn`). Второе семейство, `ad-confirm-modal` 440/520, стоит на
+   другом фоне (#0A0A0A против #111111) — видно глазом, если открыть две
+   модалки подряд. Два семейства НА ОДНОМ ЭКРАНЕ — это шов, на котором
+   родится беда. Беру `ad-modal`, ширина 400, та же.
+   Здесь нарисована её внутренность, сама коробка — продуктовая. */
+.st-okno {
+    /* `box-sizing: border-box` — ПОСЧИТАНО, А НЕ ДЛЯ КРАСОТЫ. Прибор дал 402
+       там, где объявлено 400: рамка по пикселю с каждой стороны
+       прибавляется к `max-width` при `content-box`. Та же беда, что у поля,
+       где 28×64 мерилось как 30×82. ОБЪЯВЛЕННОЕ ЧИСЛО ДОЛЖНО БЫТЬ ТЕМ, ЧТО
+       МЕРЯЕТСЯ НА ЭКРАНЕ. */
+    box-sizing: border-box;
+    max-width: 400px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+.st-okno-head {
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--fs-base); font-weight: 600;
+    box-shadow: inset 0 -1px 0 var(--border-subtle);
+}
+.st-okno-body { padding: var(--space-5); }
+.st-okno-foot {
+    padding: var(--space-4) var(--space-5);
+    display: flex; gap: var(--space-2); justify-content: flex-end;
+    box-shadow: inset 0 1px 0 var(--border-subtle);
+}
+.st-ver-on {
+    /* ВЫБРАННАЯ ВЕРСИЯ — это кнопка в нажатом состоянии, а не просто
+       подпись. Первая редакция макета нарисовала две подписи и не показала
+       ни выбора, ни того, что под ними меняется; Костя спросил «где
+       смотреть старую, где новую» — значит переключателя там и не было. */
+    background: var(--accent); color: var(--bg-base); font-weight: 600;
+}
+.st-ver-more { color: var(--text-muted); background: none; text-decoration: underline; }
+.st-polosa {
+    /* Строка переключения версий в шапке карточки. Высота 28 — ступень
+       кнопок; это не вкладки способов начисления, от которых отказались,
+       а ВЕРСИИ: они не пересекаются по определению. */
+    display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+    margin-top: var(--space-2);
+}
+.st-ver {
+    min-height: 28px; display: inline-flex; align-items: center;
+    padding: 0 var(--space-3); border-radius: var(--radius-full);
+    font-size: var(--fs-xs); color: var(--text-muted);
+    background: var(--bg-surface);
+}
+.st-ver-act { color: var(--text-primary); font-weight: 600; }
+.st-ver-bud { color: var(--accent); }
+
+.st-two { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 992px) { .st-two { grid-template-columns: 1fr 1fr; } }
+
+/* ---- ЭКРАН ОЧКОВ: CSS ПЕРЕЕХАЛ В `css/admin.css` ----
+   Пока Костя не сказал «да», правки жили здесь, чтобы не трогать продукт.
+   03.10 он сказал «да» — и держать классы `.ad-pts-*` в двух файлах значило
+   бы ЗАВЕСТИ ВТОРОЕ ОПРЕДЕЛЕНИЕ: макет и экран начали бы расходиться, а
+   замер с макета перестал бы говорить про продукт. Теперь макет грузит тот
+   же `admin.css`, что и админка, и своих `.ad-pts-*` не имеет. */
+
+/* Замер лестницы текста */
+.st-mer { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.st-mer th, .st-mer td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: 1px solid var(--border-subtle); }
+.st-mer th { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); }
+.st-mer td { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.st-mer td:first-child { color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="st-wrap">
+
+<h1 class="st-h1">Экран рейтинговых очков — стенд</h1>
+<p class="st-lead">
+  Настоящая разметка и настоящий <code>admin.css</code>. Числа в таблице —
+  из боевой базы, Приложение 2 к Положению КСЛТ 2021, разобраны из
+  <code>sql/схема/kategorii-i-ochki.sql</code>, а не перенабраны.
+  Правки CSS живут в этом файле и в <code>admin.css</code> не уйдут до слова Кости.
+</p>
+
+<!-- ===== А ===== -->
+<section class="st-block">
+  <span class="st-tag">А · что не так сегодня</span>
+  <h2 class="st-h2">Экран правит не ту таблицу</h2>
+  <p class="st-note-stand">
+    Настройки пишут в <code>points_rules</code> — очки по РАУНДАМ
+    (<code>settings.js:309</code>). Начисление читает
+    <code>points_by_place</code> — очки по МЕСТАМ (<code>bracket.js:2328</code>).
+    <span class="st-bad">Правка на этом экране ни на что не влияет.</span>
+    Строк в нём двенадцать — по стадиям; мест в таблице очков
+    <b>64</b>, и экрана у них не было никогда.
+    Числа ниже — настоящие из боевой, замер 02.10, шаг 4: первые четыре
+    строки совпадают с местами, а дальше
+    <span class="st-bad">шкала перевёрнута</span> — полуфинал во 2 категории
+    стоит 18, а в 3 категории 36.
+  </p>
+  <div class="ad-table-card">
+    <div class="ad-table-wrap"><table class="ad-table" id="tblBylo"></table></div>
+  </div>
+</section>
+
+<!-- ===== Б ===== -->
+<section class="st-block">
+  <span class="st-tag">Б · стало · администратор</span>
+  <h2 class="st-h2">Одна таблица по местам, 64 строки, плашка вместо переключателя</h2>
+  <p class="st-note-stand">
+    Строка <b>36</b> вместо 65, поле <b>28 × 64</b>, значение кеглем 14 весом,
+    шапка контраст <b>9.94</b> вместо 3.19 — всё посчитано, не на глаз.
+    Первые четыре места отбиты: они платятся таблицей всегда, и в группах тоже.
+    У итогового турнира <b>8 строк</b>, а не 64 — решение Кости: «итоговый это
+    просто восьмёрка, 8 строк там больше и не может быть».
+  </p>
+  <div class="ad-table-card">
+    <div class="ad-pts-head">
+      <div class="ad-pts-who">Правит: <b>администратор</b></div>
+      <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+    </div>
+    <div class="ad-pts-band">
+      <div class="ad-pts-band-text">
+        <b>Таблица одна, а начисляет она двумя способами.</b><br>
+        <span>В олимпийке и сетке всех мест</span> — очки начисляются за каждое место, победы не прибавляются.<br>
+        <span>В группах и двух лигах</span> — по таблице начисляются места 1–4, остальным 25 за победу либо 10 за участие.
+      </div>
+    </div>
+    <div class="ad-pts-scroll">
+      <table class="ad-pts" id="tblAdmin"></table>
+    </div>
+    <div class="ad-rat-actions" style="margin-top:var(--space-4);">
+      <button class="ad-btn ad-btn-secondary">Новая версия с даты…</button>
+      <button class="ad-btn ad-btn-primary">Сохранить</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== В ===== -->
+<section class="st-block">
+  <span class="st-tag">В · стало · менеджер</span>
+  <h2 class="st-h2">Менеджер смотрит, но не правит</h2>
+  <p class="st-note-stand">
+    Слово Кости: «изменить очки может только администратор, не менеджер».
+    В базе это уже так — политика пускает только <code>is_admin()</code>.
+    На экране поля без рамки и без фона: не «заблокированное поле», а текст.
+    Кнопок сохранения нет вовсе — <span class="st-ok">наружу выходит только
+    безопасное</span>.
+  </p>
+  <div class="ad-table-card">
+    <div class="ad-pts-head">
+      <div class="ad-pts-who">Смотрит: <b>менеджер</b> · правка только у администратора</div>
+      <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+    </div>
+    <div class="ad-pts-scroll">
+      <table class="ad-pts" id="tblManager"></table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Г ===== -->
+<section class="st-block">
+  <span class="st-tag">Г · крестик удаления уровня</span>
+  <h2 class="st-h2">Этим крестиком осиротели восемь ТБШ</h2>
+  <p class="st-note-stand">
+    Крестик стоит в шапке КАЖДОЙ колонки (<code>settings.js:164</code>). Он
+    зовёт <code>deleteLevel</code>, а та первой строкой ставит турнирам этого
+    уровня <code>level_id = null</code> и не трогает
+    <code>tournament_results</code>. Турнир без уровня не рейтинговый —
+    <span class="st-bad">история осиротела: очки лежат, а таблицы за ними
+    больше нет</span>. Вторым заходом <code>ON DELETE CASCADE</code> уносит
+    64 строки мест, и <code>deleteLevel</code> их даже не упоминает.
+    Так 30.09 и осиротели восемь ТБШ: <b>269 строк, 37 181 очко</b>.
+  </p>
+  <div class="st-two">
+    <div>
+      <p class="st-note-stand"><b>БЫЛО</b> · один вопрос на все случаи</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="st-krest-head">
+          <span>Высшая категория</span>
+          <button class="st-krest" type="button" title="Удалить уровень">&times;</button>
+        </div>
+        <div class="st-dialog">
+          <div class="st-dialog-text">Удалить этот уровень и все его правила?</div>
+          <div class="st-dialog-btns">
+            <span class="st-dialog-btn">Отмена</span>
+            <span class="st-dialog-btn st-dialog-btn-ok">OK</span>
+          </div>
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+          <span class="st-bad">Ни слова о турнирах и ни слова о 64 строках.</span>
+          Человек соглашается, не зная, что теряет.
+        </p>
+      </div>
+    </div>
+    <div>
+      <p class="st-note-stand"><b>СТАЛО</b> · сначала посчитать, потом спросить</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="st-krest-head">
+          <span>Высшая категория</span>
+          <button class="st-krest" type="button" title="Удалить уровень">&times;</button>
+        </div>
+        <div class="st-toast st-toast-bad">
+          Уровень не удалить: на нём турниров <b>47</b>, в них <b>325</b> строк
+          итогов. Сначала переведите их на другой уровень — иначе их история
+          перестанет быть рейтинговой, и по какой таблице платили, уже не
+          узнать.
+        </div>
+        <div class="st-krest-head" style="margin-top:var(--space-5);">
+          <span>Пробный уровень</span>
+          <button class="st-krest" type="button" title="Удалить уровень">&times;</button>
+        </div>
+        <div class="st-dialog">
+          <div class="st-dialog-text">Удалить уровень? Вместе с ним исчезнут
+            <b>64</b> строк таблицы очков за место. Отката нет.</div>
+          <div class="st-dialog-btns">
+            <span class="st-dialog-btn">Отмена</span>
+            <span class="st-dialog-btn st-dialog-btn-ok">OK</span>
+          </div>
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+          <span class="st-ok">Уровень с турнирами не удаляется вовсе</span> —
+          вопроса даже не возникает. Вопрос остаётся только у пустого уровня,
+          и в нём названо число.
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="st-note-stand" style="margin-top:var(--space-4);">
+    Числа <b>47</b> и <b>325</b> в отказе — <b>ПОСЧИТАНО</b> из замера:
+    464 строки итогов всего (шаг 5) минус 139 у турниров без уровня
+    (шаг 10в) = 325; турниров с уровнем — из тех же выдач. В продукте их
+    считает <code>чтоПотеряетУровень</code> запросом, и показано будет
+    то, что ответит база.
+    Порог стоит И у кнопки, И внутри <code>deleteLevel</code>: проверка у
+    кнопки — вежливость, проверка у действия — защита.
+  </p>
+</section>
+
+<!-- ===== Д ===== -->
+<section class="st-block">
+  <span class="st-tag">Д · новая версия с даты</span>
+  <h2 class="st-h2">Ввёл числа, сохранил — и один вопрос про дату</h2>
+  <p class="st-note-stand">
+    Вопрос Кости 03.10: «он 1 декабря решил изменить начисления и просто в
+    таблице введёт новые значения, сохранит, и всё да?». Почти: сохранение
+    спрашивает ОДИН раз — с какой даты. Без этого вопроса ответ «со дня
+    изменения» был бы неправдой: сторож в базе не даёт править версию,
+    которая уже в силе, и «Сохранить» просто падало бы с его текстом.
+  </p>
+  <p class="st-note-stand">
+    <b>ГДЕ СМОТРЕТЬ КАКУЮ — ПОЛОСА В ШАПКЕ КАРТОЧКИ.</b> Это переключатель, а
+    не подпись: нажал пилюлю — таблица под ней показывает ТУ версию. Первая
+    редакция этого блока нарисовала две подписи и не показала ни выбора, ни
+    того, что под ними меняется, — Костя спросил «где смотреть старую, где
+    новую», и значит переключателя там и не было.
+  </p>
+
+  <h3 class="st-h3">Полоса версий — три состояния</h3>
+
+  <div class="st-sost">
+    <p class="st-note-stand"><b>Сегодня</b> — версия одна. Полосы нет вовсе:
+      переключать нечего, и лишняя строка только шумит.</p>
+    <div class="ad-table-card" style="padding:var(--space-4);">
+      <div class="ad-pts-ver">Версия в силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+    </div>
+  </div>
+
+  <div class="st-sost">
+    <p class="st-note-stand"><b>После «Завести версию»</b> — полоса из двух.
+      Выбрана новая: её и правят.</p>
+    <div class="ad-table-card" style="padding:var(--space-4);">
+      <div class="st-polosa">
+        <span class="st-ver">В силе с 01.01.2021</span>
+        <span class="st-ver st-ver-on">Готовится с 02.12.2026</span>
+      </div>
+      <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+        Под полосой: поля <span class="st-ok">открыты</span>, кнопки
+        «Сохранить» и «Удалить версию».
+      </p>
+    </div>
+  </div>
+
+  <div class="st-sost">
+    <p class="st-note-stand"><b>Через годы</b> — версий много. Действующая и
+      невступившие стоят всегда, прошедшие прячутся за «Ещё».
+      <b>ПРАВИЛО, ВЫВЕДЕННОЕ НА ИТОГАХ ДВУХ ЛИГ, ПРИМЕНЯЕТСЯ БЕЗ НОВОГО
+      РАЗБОРА:</b> длинный список отсекается и раскрывается нажатием — там
+      это было 8 строк и «Показать всех (64)».</p>
+    <div class="ad-table-card" style="padding:var(--space-4);">
+      <div class="st-polosa">
+        <span class="st-ver st-ver-more">Ещё 3</span>
+        <span class="st-ver st-ver-on">В силе с 01.01.2027</span>
+        <span class="st-ver">Готовится с 01.07.2027</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="st-h3">Версия несёт ТРИ вещи, а не одну таблицу</h3>
+
+  <p class="st-note-stand">
+    Вопрос Кости 03.10: «там будет также новая таблица, да, и изменения можно
+    будет вносить и за победу, и за участие — которых нет в таблице». Да: у
+    версии своя копия всех <b>320</b> строк мест ПЛЮС два числа, которых в
+    таблице нет вовсе — <b>за победу</b> и <b>за участие</b>. Они живут в
+    шапке, потому что не привязаны к месту: их получает тот, кому таблица не
+    платит.
+  </p>
+
+  <div class="st-two">
+    <div>
+      <p class="st-note-stand"><b>Действующая</b> — числа текстом</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="ad-pts-ver">В силе с <b>01.01.2021</b> · за победу <b>25</b> · за участие <b>10</b></div>
+      </div>
+    </div>
+    <div>
+      <p class="st-note-stand"><b>Невступившая</b> — числа полями</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="st-polosa">
+          <span class="ad-pts-ver">Готовится с <b>02.12.2026</b> ·</span>
+          <label class="ad-pts-ver" for="stWin">за победу</label>
+          <input id="stWin" class="ad-pts-in" value="30">
+          <label class="ad-pts-ver" for="stEnt">за участие</label>
+          <input id="stEnt" class="ad-pts-in" value="12">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="st-note-stand">
+    <b class="st-bad">И ТУТ ЖЕ НАХОДКА, КОТОРУЮ ВОПРОС И ВСКРЫЛ.</b>
+    Версия эти два числа несёт (<code>points_versions.per_win</code> и
+    <code>per_entry</code>, прувер правит их в невступившей и требует
+    <code>UPDATE 1</code>), а начисление их НЕ ЧИТАЕТ: 25 и 10 зашиты в
+    <code>js/rating-points.js:18–19</code> как константы. То есть поправишь
+    их на экране — ничего не изменится. <b>Это ровно та же беда, что была с
+    экраном раундов:</b> правка, которая ни на что не влияет.
+    Чиню вместе с окном, иначе окно соврёт в первый же день.
+  </p>
+
+  <h3 class="st-h3">Что меняется под полосой</h3>
+
+  <div class="st-two">
+    <div>
+      <p class="st-note-stand"><b>Действующая</b> — только чтение, всегда</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="ad-pts-who">В силе с <b>01.01.2021</b> · только чтение</div>
+        <div class="st-polosa" style="margin-top:var(--space-3);">
+          <input class="ad-pts-in" value="1000" readonly>
+          <input class="ad-pts-in" value="600" readonly>
+          <input class="ad-pts-in" value="420" readonly>
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+          Поля без рамки и без фона — не «заблокированное поле», а текст.
+          Кнопок сохранения нет вовсе. По этой версии считались прошедшие
+          турниры: посмотреть, что им начислялось, надо уметь всегда.
+        </p>
+      </div>
+    </div>
+    <div>
+      <p class="st-note-stand"><b>Невступившая</b> — правится свободно</p>
+      <div class="ad-table-card" style="padding:var(--space-4);">
+        <div class="ad-pts-who">Готовится с <b>02.12.2026</b> · правится</div>
+        <div class="st-polosa" style="margin-top:var(--space-3);">
+          <input class="ad-pts-in" value="1200">
+          <input class="ad-pts-in" value="700">
+          <input class="ad-pts-in" value="480">
+        </div>
+        <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+          <span class="st-ok">Править можно сколько угодно раз до даты
+          вступления</span>, и удалить версию целиком тоже — места уедут
+          вместе с ней. Это не обещание: прувер
+          <code>tools/proverka-versii-ochkov.sh</code> требует от базы
+          <code>UPDATE 5</code> на правке невступившей и <code>DELETE 1</code>
+          на её удалении, и обе проверки зелёные. В день вступления версия
+          закрывается сама — сторожем, а не экраном.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="st-h3">Окно, которое открывает «Сохранить»</h3>
+
+  <div class="st-two">
+    <div>
+      <div class="st-okno">
+        <div class="st-okno-head">Новые очки — с какой даты?</div>
+        <div class="st-okno-body">
+          <p class="st-note-stand" style="margin:0 0 var(--space-4);">
+            Изменено <b>7</b> значений. Турниры, начавшиеся раньше этой даты,
+            не изменятся: у них своя версия.
+          </p>
+          <label class="ad-field-label" for="stDate">Начать начислять с</label>
+          <input id="stDate" type="date" class="ad-field-input" value="2026-12-02">
+          <p class="st-note-stand" style="margin:var(--space-3) 0 0;">
+            Раньше завтрашнего дня нельзя: турнир, начавшийся сегодня, уже
+            идёт по старым очкам.
+          </p>
+        </div>
+        <div class="st-okno-foot">
+          <span class="st-dialog-btn">Отмена</span>
+          <span class="st-dialog-btn st-dialog-btn-ok">Завести версию</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="st-note-stand">
+        Окно спрашивает ОДИН раз. Дальше экран сам переключается на новую
+        версию, и дальнейшие правки идут уже в неё — без вопросов, обычным
+        «Сохранить». Второй раз дату не спрашивают: версия уже заведена.
+      </p>
+      <p class="st-note-stand">
+        <b>СТАРАЯ ОСТАЁТСЯ</b> — слово Кости: «а старая вкладка останется,
+        да». Действующая версия никуда не девается.
+        <span class="st-ok">Правятся только невступившие.</span>
+      </p>
+    </div>
+  </div>
+
+  <p class="st-note-stand" style="margin-top:var(--space-4);">
+    <b>ПРЕДПОЛОЖЕНИЕ, КОТОРОЕ Я СДЕЛАЛ САМ:</b> дата по умолчанию —
+    ЗАВТРАШНЯЯ, выбрать можно любую позже. Если у клуба правило вроде «очки
+    меняются только с 1 января» — подставлю его. Костя сказал «давай», на
+    сам вопрос про дату прямо не ответил, и я иду по умолчанию.
+  </p>
+  <p class="st-note-stand">
+    <b>ПОЧЕМУ ЭТО НЕ ТОТ ПЕРЕКЛЮЧАТЕЛЬ, ОТ КОТОРОГО ОТКАЗАЛИСЬ.</b> Там две
+    вкладки делили СПОСОБЫ начисления, и места 1–4 попадали бы в обе — два
+    определения одного понятия. Здесь переключаются ВЕРСИИ: место 1 версии
+    2021 года и место 1 версии 2026-го — разные строки разных таблиц, они не
+    пересекаются по устройству.
+  </p>
+</section>
+
+<!-- ===== Е ===== -->
+<section class="st-block">
+  <span class="st-tag">Е · лестница текста</span>
+  <h2 class="st-h2">Замер: каждый уровень на ступени</h2>
+  <p class="st-note-stand">
+    Снято <code>tools/zamer-ochki-ekran.mjs</code> на ТРЁХ видах — десктоп,
+    планшет стоя, планшет лёжа. <b>Телефона у админки нет</b>, и четвёртого
+    вида здесь не будет. На всех трёх числа совпали до цифры.
+  </p>
+  <div class="st-mer-wrap">
+  <table class="st-mer">
+    <thead><tr><th>уровень текста</th><th>кегль</th><th>вес</th><th>межстрочный</th><th>контраст</th><th>ступень</th></tr></thead>
+    <tbody>
+      <tr><td>шапка столбца</td><td>11</td><td>700</td><td>normal</td><td>9.98</td><td>да</td></tr>
+      <tr><td>номер места</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>место 1–4</td><td>12</td><td>600</td><td>normal</td><td>17.87</td><td>да</td></tr>
+      <tr><td>значение в поле</td><td>14</td><td>600</td><td>normal</td><td>16.67</td><td>да</td></tr>
+      <tr><td>плашка</td><td>14</td><td>400</td><td>21</td><td>9.16</td><td>да</td></tr>
+      <tr><td>кто правит</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>версия в силе</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>текст диалога</td><td>14</td><td>400</td><td>normal</td><td>16.67</td><td>да</td></tr>
+      <tr><td>отказ с числами</td><td>14</td><td>400</td><td>21</td><td>6.64</td><td>да</td></tr>
+      <tr><td>заголовок окна версии</td><td>16</td><td>600</td><td>normal</td><td>18.88</td><td>да</td></tr>
+      <tr><td>текст окна версии</td><td>14</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>лейбл поля даты</td><td>12</td><td>400</td><td>normal</td><td>5.33</td><td>да</td></tr>
+      <tr><td>пилюля версии</td><td>12</td><td>400</td><td>normal</td><td>15.68</td><td>да, высота 28</td></tr>
+      <tr><td>пилюля выбранной версии</td><td>12</td><td>600</td><td>normal</td><td>5.30</td><td>да, высота 28</td></tr>
+      <tr><td>подзаголовок блока</td><td>16</td><td>700</td><td>normal</td><td>19.80</td><td>да, макетная</td></tr>
+      <tr><td>подпись блока</td><td>14</td><td>600</td><td>normal</td><td>16.85</td><td>да, макетная</td></tr>
+      <tr><td>заголовок блока</td><td>21</td><td>700</td><td>normal</td><td>19.8</td><td>да, макетная</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="st-note-stand" style="margin-top:var(--space-3);">
+    <b>ЧЕТЫРЕ ЧИСЛА В ЭТОЙ ТАБЛИЦЕ Я ОБЪЯВИЛ, НЕ ПОМЕРИВ.</b> Стояло: шапка
+    вес 400 и контраст 9.94, место 1–4 — 18.88, значение — 18.88, плашка —
+    9.94. Померено: <b>700 и 9.98 · 17.87 · 16.67 · 9.16</b>. Промах вышел из
+    прибора: он брал полупрозрачный цвет за свой
+    (<code>rgba(255,255,255,0.72)</code> как чистый белый) и давал 18.88 там,
+    где на самом деле 9.98. Теперь альфа накладывается на фон, и замороженной
+    становится ЗАМЕРЕННАЯ лестница, а не задуманная.
+  </p>
+  <p class="st-note-stand">
+    <b>СТРОКА «ЗНАЧЕНИЕ, НОЛЬ» ИЗ ЛЕСТНИЦЫ УШЛА — ВМЕСТЕ С ПРЕДМЕТОМ.</b>
+    Здесь стоял уровень с контрастом 3.19 и пометкой «намеренно тихо»:
+    тридцать нулей подряд у итогового турнира мешали читать то, что несёт
+    решение, и я объявил это осознанной ценой. Предел мест убрал эти строки с
+    экрана вовсе — прибор говорит, что <code>.ad-pts-zero</code> на странице
+    больше нет ни одного. Цену платить стало не за что.
+  </p>
+  <p class="st-note-stand">
+    Окно новой версии: ширина <b>400</b> (с рамкой, <code>border-box</code> —
+    прибор сначала дал 402), поле даты <b>44</b>, все пять пилюль версий
+    ростом <b>28</b> — ступень кнопок, ни одной врозь. Выбранная пилюля —
+    чёрным по лайму, контраст <b>5.30</b>. Прокрутки страницы нет ни на
+    одном виде.
+  </p>
+  <p class="st-note-stand">
+    Ещё из замера: строка <b>36</b>, поле <b>28 × 64</b>, крестик
+    <b>28 × 28</b>, шапка и номер места <code>position: sticky</code>,
+    полей <b>264</b> и прочерков <b>56</b> — то есть 320 минус 56 за
+    пределом, ровно как в базе. У менеджера <b>0</b> кнопок и
+    <code>readonly</code> на каждом поле.
+  </p>
+  </section>
+
+<!-- ===== Ж ===== -->
+<section class="st-block">
+  <span class="st-tag">Ж · что ещё открыто</span>
+  <h2 class="st-h2">Не сделано и названо вслух</h2>
+  <p class="st-note-stand">
+    · <b>Ручной ввод прошлых результатов</b> (<code>players.js:2795</code>)
+    по-прежнему начисляет по раундам, и сводиться на места механически НЕ БУДЕТ:
+    шаг 5 замера нашёл 174 живые строки R16 и R32 — это вилка в 8 и 16 мест, —
+    и 28 строк G3/G4 с числами, которых в <code>points_rules</code> нет вовсе.
+    Отделено в свой кусок, вместе с правкой счёта.<br>
+    · <b>Новая версия с даты</b> — окно нарисовано в блоке Д, кода за ним
+    ещё нет. Пока его нет, «Сохранить» на действующей версии падает текстом
+    сторожа, и это честный отказ, а не поломка.<br>
+    · <b class="st-bad">25 ЗА ПОБЕДУ И 10 ЗА УЧАСТИЕ ЗАШИТЫ В КОДЕ</b>
+    (<code>js/rating-points.js:18–19</code>), а версия их несёт. Пока
+    начисление читает константы, правка этих чисел на экране ни на что не
+    повлияет — та же беда, что была с экраном раундов. Чинится вместе с
+    окном новой версии.<br>
+    · <b>Цель нажатия у крестика 28, а не 44.</b> В продукте сегодня 18×18
+    (<code>settings.js:164</code>); в блоке Г НАМЕРЕНО оставлено 28, чтобы
+    снимок показывал нынешнее. Поднять до 44 — в этом же куске, при правке
+    вёрстки.<br>
+    · <b>Планшет</b>: 64 строки с липкой шапкой на 992 проверены только здесь,
+    в админке замер не снят.<br>
+    · <b>Проверка 3 замера</b> не прогнана: где начисленное разойдётся с
+    таблицей при будущем пересчёте.<br>
+    · <b>Цифры без хозяина.</b> После переезда экрана на места SF · QF · R16 ·
+    R32 · G3…G6 в <code>points_rules</code> никто не правит, а ручной ввод их
+    читает. Что с ними — решить, а не забыть.
+  </p>
+  </section>
+
+</div>
+
+<script>
+var ОЧКИ = [
+  [1, 1000, 600, 360, 215, 130],
+  [2, 600, 360, 215, 130, 80],
+  [3, 420, 250, 150, 90, 55],
+  [4, 360, 215, 130, 77, 48],
+  [5, 250, 150, 90, 55, 33],
+  [6, 215, 130, 78, 45, 28],
+  [7, 180, 110, 65, 38, 23],
+  [8, 180, 110, 65, 38, 23],
+  [9, 145, 90, 50, 30, 18],
+  [10, 125, 75, 45, 27, 16],
+  [11, 110, 65, 40, 23, 13],
+  [12, 110, 65, 40, 23, 13],
+  [13, 90, 55, 32, 19, 11],
+  [14, 90, 55, 32, 19, 11],
+  [15, 90, 55, 32, 19, 11],
+  [16, 90, 55, 32, 19, 11],
+  [17, 80, 50, 29, 17, 10],
+  [18, 65, 38, 22, 13, 8],
+  [19, 45, 27, 16, 9, 6],
+  [20, 45, 27, 16, 9, 6],
+  [21, 35, 21, 12, 8, 4],
+  [22, 35, 21, 12, 8, 4],
+  [23, 35, 21, 12, 8, 4],
+  [24, 35, 21, 12, 8, 4],
+  [25, 33, 18, 10, 6, 3],
+  [26, 32, 18, 10, 6, 3],
+  [27, 31, 18, 10, 6, 3],
+  [28, 31, 18, 10, 6, 3],
+  [29, 30, 18, 10, 6, 3],
+  [30, 30, 18, 10, 6, 3],
+  [31, 30, 18, 10, 6, 3],
+  [32, 30, 18, 10, 6, 3],
+  [33, 30, 18, 10, 6, 3],
+  [34, 20, 12, 6, 4, 2],
+  [35, 15, 8, 4, 3, 0],
+  [36, 15, 8, 4, 3, 0],
+  [37, 10, 5, 3, 2, 0],
+  [38, 10, 5, 3, 2, 0],
+  [39, 10, 4, 3, 2, 0],
+  [40, 10, 4, 3, 2, 0],
+  [41, 8, 3, 2, 1, 0],
+  [42, 7, 3, 2, 1, 0],
+  [43, 5, 3, 2, 1, 0],
+  [44, 5, 3, 2, 1, 0],
+  [45, 5, 3, 2, 1, 0],
+  [46, 5, 3, 2, 1, 0],
+  [47, 5, 3, 2, 1, 0],
+  [48, 5, 3, 2, 1, 0],
+  [49, 4, 2, 1, 1, 0],
+  [50, 4, 2, 1, 1, 0],
+  [51, 4, 2, 1, 1, 0],
+  [52, 4, 2, 1, 1, 0],
+  [53, 3, 2, 1, 1, 0],
+  [54, 3, 2, 1, 1, 0],
+  [55, 3, 2, 1, 1, 0],
+  [56, 3, 2, 1, 1, 0],
+  [57, 2, 1, 1, 1, 0],
+  [58, 2, 1, 1, 1, 0],
+  [59, 2, 1, 1, 1, 0],
+  [60, 2, 1, 1, 1, 0],
+  [61, 2, 1, 1, 1, 0],
+  [62, 2, 1, 1, 1, 0],
+  [63, 2, 1, 1, 1, 0],
+  [64, 2, 1, 1, 1, 0],
+];
+
+/* ПРЕДЕЛ ТЕПЕРЬ ЖИВЁТ В БАЗЕ, А НЕ В ЭТОМ ФАЙЛЕ.
+   `tournament_levels.max_place`, прогнано Костей 03.10 в обеих базах и
+   проверено чтением: у четырёх категорий 64, у итогового 8, за пределом 56
+   строк и 179 очков. Числа ниже — не макетная условность, а то, что экран
+   получит запросом. */
+var УРОВНИ = [
+  { имя: 'Высшая категория', мест: 64 },
+  { имя: '1 категория',      мест: 64 },
+  { имя: '2 категория',      мест: 64 },
+  { имя: '3 категория',      мест: 64 },
+  { имя: 'Итоговый турнир',  мест: 8  }
+];
+
+/* Настоящие числа `points_rules` из боевой — замер ШАГА 4, прогнан Костей
+   03.10. Порядок: Высшая · 1 · 2 · 3 · Итоговый.
+
+   ПОПРАВКА К МОЕЙ ЖЕ СТРОКЕ. До 03.10 здесь стояло R32 = нули у всех пяти —
+   я НАРИСОВАЛ ЭТО ПО ДОГАДКЕ, потому что шаг 4 тогда ещё не прогонялся: он
+   трижды терялся в хвосте файла, из которого редактор Supabase отдаёт только
+   последнюю выдачу. В боевой у ИТОГОВОГО там стоит 9 — единственное
+   ненулевое R во всей таблице, и стоит оно на уровне, где 1/16 финала
+   невозможна вовсе: итоговый это восьмёрка.
+   Остальные 59 чисел догадка угадала, и это ничего не оправдывает. */
+var РАУНДЫ = [
+  ['W',   [1000, 600, 360, 215, 130]],
+  ['F',   [600,  360, 215, 130, 80]],
+  ['3RD', [420,  250, 150, 90,  55]],
+  ['4TH', [360,  215, 130, 77,  48]],
+  ['SF',  [150,  8,   18,  36,  70]],
+  ['QF',  [75,   4,   9,   18,  35]],
+  ['R16', [0,    0,   0,   0,   0]],
+  ['R32', [0,    0,   0,   0,   9]],
+  ['G3',  [0,    25,  25,  25,  25]],
+  ['G4',  [0,    10,  10,  10,  10]],
+  ['G5',  [0,    0,   0,   0,   0]],
+  ['G6',  [0,    0,   0,   0,   0]]
+];
+
+var ПОДПИСЬ_РАУНДА = {
+  W: 'Победитель', F: 'Финалист', '3RD': '3-е место', '4TH': '4-е место',
+  SF: 'Полуфинал', QF: 'Четвертьфинал', R16: '1/8 финала', R32: '1/16 финала',
+  G3: '3-е в группе', G4: '4-е в группе', G5: '5-е в группе', G6: '6-е в группе'
+};
+
+/* РАЗМЕТКА ШАПКИ — ТА ЖЕ, ЧТО В ПРОДУКТЕ (`settings.js`, renderSetRules).
+   До 03.10 макет рисовал `<th>имя</th>` без `<span>` и без предела, и
+   прибор, глядя на макет, читал пустые названия колонок: макет перестал
+   говорить про продукт ровно там, где его и смотрят.
+   Предел — ОТДЕЛЬНОЙ СТРОКОЙ: на боевой вышло «ИТОГОВЫЙ ТУРНИРДО 8». */
+function шапка(первая, правит) {
+  var предел = Math.max.apply(null, УРОВНИ.map(function(у) { return у.мест; }));
+  var h = '<thead><tr><th class="ad-pts-place-h">' + первая + '</th>';
+  УРОВНИ.forEach(function(у) {
+    h += '<th><span>' + у.имя + '</span>' +
+         (у.мест < предел ? '<span class="ad-pts-limit">' + у.мест + '</span>' : '') +
+         (правит ? '<button class="ad-btn-icon set-del-level" title="Удалить уровень">&times;</button>' : '') +
+         '</th>';
+  });
+  return h + '</tr></thead>';
+}
+
+/* A — как сейчас: по раундам, и видно, что шкала ниже четвёртого места
+   перевёрнута по категориям. */
+function нарисоватьБыло() {
+  var h = '<thead><tr><th>Стадия</th>';
+  УРОВНИ.forEach(function(у) { h += '<th style="text-align:center;">' + у.имя + '</th>'; });
+  h += '</tr></thead><tbody>';
+  РАУНДЫ.forEach(function(р) {
+    h += '<tr><td><strong>' + (ПОДПИСЬ_РАУНДА[р[0]] || р[0]) + '</strong></td>';
+    р[1].forEach(function(v) {
+      h += '<td style="text-align:center;"><input type="number" class="ad-field-input" value="' +
+           v + '" style="width:70px;text-align:center;"></td>';
+    });
+    h += '</tr>';
+  });
+  document.getElementById('tblBylo').innerHTML = h + '</tbody>';
+}
+
+/* B и C — по местам. Отличие одно: можно править или нет. */
+function нарисоватьМеста(куда, правит) {
+  var h = шапка('Место', правит) + '<tbody>';
+  ОЧКИ.forEach(function(строка) {
+    var место = строка[0];
+    var класс = место <= 4 ? ' class="ad-pts-tbl"' : '';
+    h += '<tr' + класс + '><td class="ad-pts-place">' + место + '</td>';
+    for (var i = 1; i <= 5; i++) {
+      var у = УРОВНИ[i - 1];
+      if (место > у.мест) {
+        h += '<td><span class="ad-pts-off">—</span></td>';
+        continue;
+      }
+      var v = строка[i];
+      var ноль = v === 0 ? ' ad-pts-zero' : '';
+      h += '<td><input type="number" class="ad-pts-in' + ноль + '" value="' + v + '"' +
+           (правит ? '' : ' readonly') + ' min="0"></td>';
+    }
+    h += '</tr>';
+    if (место === 4) h += '<tr class="ad-pts-sep"><td colspan="6"></td></tr>';
+  });
+  document.getElementById(куда).innerHTML = h + '</tbody>';
+}
+
+нарисоватьБыло();
+нарисоватьМеста('tblAdmin', true);
+нарисоватьМеста('tblManager', false);
+</script>
+</body>
+</html>

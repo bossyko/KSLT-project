@@ -15,6 +15,10 @@ function копия() {
     fs.copyFileSync(path.join(корень, 'js/kslt-grafik-vid.js'), path.join(двор, 'js/kslt-grafik-vid.js'));
     fs.copyFileSync(path.join(корень, 'js/admin/sections/analytics.js'), path.join(двор, 'js/admin/sections/analytics.js'));
     fs.copyFileSync(path.join(корень, 'pages/admin.html'), path.join(двор, 'pages/admin.html'));
+    /* С 12.11 сторож читает ещё и справочник красок — ОТКАТУ ДОЛЖНО
+       БЫТЬ ЧТО ПОРТИТЬ (четвёртый раз за двое суток). */
+    fs.mkdirSync(path.join(двор, 'css'), { recursive: true });
+    fs.copyFileSync(path.join(корень, 'css/tokens.css'), path.join(двор, 'css/tokens.css'));
     return двор;
 }
 const замена = (файл, было, стало) => function (двор) {
@@ -43,7 +47,11 @@ const ОТКАТЫ = [
       правка(двор) {
           const п = path.join(двор, 'pages/admin.html');
           const т = fs.readFileSync(п, 'utf8');
-          const стр = '    <script src="../js/kslt-grafik-vid.js?v=1"></script>\n';
+          /* ЯКОРЬ НЕ ДЕРЖИТСЯ НА НОМЕРЕ ВЕРСИИ: он слепнет при первом же
+             подъёме (правило дня). Строка ищется по имени файла. */
+          const м = т.match(/[ \t]*<script src="\.\.\/js\/kslt-grafik-vid\.js[^"]*"><\/script>\n/);
+          if (!м) return 'строки подключения дома нет';
+          const стр = м[0];
           if (т.split(стр).length - 1 !== 1) return 'якорь встречается не один раз';
           const без = т.replace(стр, '');
           fs.writeFileSync(п, без.replace('</body>', стр + '</body>'));
@@ -53,6 +61,14 @@ const ОТКАТЫ = [
     { имя: 'толщина полосы вернулась числом на месте',
       правка: замена('js/kslt-grafik-vid.js', 'barThickness: о.тонкая ? API.ПОЛОСА_МАЛАЯ : API.ПОЛОСА', 'barThickness: 40'),
       ждём: /толщина полосы — имя, а не число на месте/ },
+
+    { имя: 'в краску полосы вернулся акцент клуба (лайм)',
+      правка: замена('js/kslt-grafik-vid.js', "'--chart-ryad-2' : '--chart-ryad-1'", "'--cat-1' : '--accent'"),
+      ждём: /ряды графика красятся своими именами/ },
+
+    { имя: 'имена рядов пропали из справочника',
+      правка: замена('css/tokens.css', '--chart-ryad-1: var(--cat-2);', '--chart-ryad-1-ubrano: var(--cat-2);'),
+      ждём: /имена рядов объявлены в справочнике/ },
 
     { имя: 'из дома пропала часть вида',
       правка: замена('js/kslt-grafik-vid.js', 'API.легенда =', 'API.легендаУбрана ='),

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<title>КСЛТ — стенд окна удаления турнира</title>
+<!--
+  ПРИБОР, А НЕ КАРТИНКА. Окно рисует НАСТОЯЩАЯ `A.showConfirm`
+  (js/admin/core/utils.js), тело собирает НАСТОЯЩАЯ `текстПотерь`
+  (js/admin/sections/tournaments.js, отдана наружу как
+  `A.текстПотерьТурнира`). Разметка сюда НЕ КОПИРУЕТСЯ: скопируй — и стенд
+  начнёт показывать своё, а не то, что видит Костя.
+
+  ЗАЧЕМ. Удаление турнира уносит каскадом заявки, матчи, результаты и
+  НАЧИСЛЕНИЯ, а окно об этом молчало. Массовое удаление вдобавок не
+  пересчитывало очки вовсе — игрок оставался в рейтинге выше, чем заслужил.
+
+  ЧИСЛА ЗДЕСЬ НАМЕРЕННЫЕ, А НЕ ЗАМЕРЕННЫЕ: это пределы, выбранные для
+  проверки разметки. Настоящие окно соберёт запросом.
+
+  БАЗЫ ЗДЕСЬ НЕТ: `A.client` подменён заглушкой без методов записи.
+
+  СТОЯЩЕЕ УСЛОВИЕ: АДМИНКА — ДЕСКТОП И ПЛАНШЕТ, ТОЛЬКО РУССКИЙ.
+  Виды: 1512 · 1024 · 768. Узкий вид (390) здесь для правила «подвал
+  стопкой», хотя админки на телефоне нет.
+-->
+<link rel="stylesheet" href="../css/kslt-toast.css?v=36">
+<link rel="stylesheet" href="../css/tokens.css?v=87">
+<link rel="stylesheet" href="../css/style.css?v=486">
+<link rel="stylesheet" href="../css/admin.css?v=320">
+<style>
+  html, body { background: var(--bg-base); color: var(--text-primary); margin: 0; }
+  body { font-family: var(--font-primary); }
+  /* style.css гасит body до нуля и зажигает скриптом загрузки страницы,
+     которого у стенда нет: замеры шли верные, а снимок был чёрный */
+  body { opacity: 1 !important; }
+  .stend-ryad { display: flex; gap: var(--space-3); padding: var(--space-6); flex-wrap: wrap; }
+</style>
+</head>
+<body class="ad-page">
+
+<div class="stend-ryad">
+  <button class="ad-btn ad-btn-danger" data-sluchay="krayniy">А · крайний: длинное имя, 8 игроков</button>
+  <button class="ad-btn ad-btn-danger" data-sluchay="massovoe">Б · массовое, 23 турнира</button>
+  <button class="ad-btn ad-btn-danger" data-sluchay="pusto">В · пустой турнир</button>
+  <!-- СПРОС ПУБЛИКАЦИИ И СНЯТИЯ, кусок 154. Окно то же самое — оболочка
+       админки; новое здесь только ТЕКСТ, и он берётся из НАСТОЯЩЕГО
+       словаря, а не копируется сюда. -->
+  <button class="ad-btn ad-btn-primary" data-spros="opublikovat">Г · спрос публикации, имя с кавычкой</button>
+  <button class="ad-btn ad-btn-warning" data-spros="snyat">Д · спрос снятия, очень длинное имя</button>
+</div>
+<div id="ad-content" data-stend="окно удаления турнира"></div>
+
+<!-- ПОЗИЦИИ СЕЯНЫХ: `SEED_POSITIONS` живут здесь, и bracket.js читает
+     только их — запасных списков в нём больше нет (сведено 16.10) -->
+<script src="../js/kslt-chisla.js?v=1"></script>
+<script src="../js/kslt-vremya.js?v=4"></script>
+<script src="../js/tournament-generator.js?v=5"></script>
+<script src="../js/tournament-status.js?v=13"></script>
+<script src="../js/admin/core/constants.js?v=187"></script>
+<script src="../js/kslt-toast.js?v=3"></script>
+<script src="../js/kslt-fokus.js?v=4"></script>
+<script src="../js/kslt-ekranirovanie.js?v=2"></script>
+<script src="../js/kslt-zov.js?v=2"></script>
+<script src="../js/admin/core/utils.js?v=69"></script>
+<script src="../js/admin/core/cover-crop.js?v=4"></script>
+<script src="../js/admin/core/editor.js?v=11"></script>
+<script src="../js/kslt-yazyk.js?v=5"></script>
+<script src="../js/kslt-lico.js?v=8"></script>
+<script src="../js/admin/core/layout.js?v=29"></script>
+<script src="../js/kslt-dostup.js?v=5"></script>
+<script src="../js/admin/sections/news.js?v=64"></script>
+<script src="../js/kslt-rules.js?v=43"></script>
+<script src="../js/tournament-slots.js?v=6"></script>
+<script src="../js/admin/sections/bracket.js?v=339"></script>
+<script src="../js/admin/sections/tournaments.js?v=90"></script>
+<script>
+(function() {
+    'use strict';
+    var A = window.KSLT_ADMIN;
+
+    A.client = {
+        rpc: function() { return Promise.resolve({ data: [] }); },
+        auth: { getSession: function() { return Promise.resolve({ data: { session: null } }); } },
+        from: function() { return { select: function() { return {
+            in: function() { return Promise.resolve({ data: [], count: 0 }); },
+            eq: function() { return Promise.resolve({ data: [], count: 0 }); } }; } }; }
+    };
+
+    /* КРАЙНИЕ СЛУЧАИ. Числа НАМЕРЕННЫЕ — пределы для проверки разметки. */
+    var СЛУЧАИ = {
+        krayniy: {
+            заголовок: 'Удалить «МЕЖДУНАРОДНЫЙ РЕЙТИНГОВЫЙ ТУРНИР ABDYSH-ATA SPRING CUP 2026 — ЖЕНСКИЙ ПАРНЫЙ РАЗРЯД FUTURES»?',
+            потери: { заявок: 48, матчей: 31, результатов: 12,
+                      начислений: 36, игроков: 8, очков: 1240, игроки: [], сНачислениями: 1 },
+            турниров: 1
+        },
+        massovoe: {
+            заголовок: 'Удалить 23 турнира?',
+            потери: { заявок: 611, матчей: 388, результатов: 147,
+                      начислений: 402, игроков: 96, очков: 18940, игроки: [], сНачислениями: 9 },
+            турниров: 23
+        },
+        pusto: {
+            заголовок: 'Удалить турнир?',
+            потери: { заявок: 0, матчей: 0, результатов: 0,
+                      начислений: 0, игроков: 0, очков: 0, игроки: [], сНачислениями: 0 },
+            турниров: 1
+        }
+    };
+
+    function показать(ключ) {
+        var с = СЛУЧАИ[ключ];
+        A.showConfirm(с.заголовок, A.текстПотерьТурнира(с.потери, с.турниров), function() {});
+    }
+
+    document.querySelectorAll('[data-sluchay]').forEach(function(b) {
+        b.addEventListener('click', function() { показать(b.dataset.sluchay); });
+    });
+
+    /* КРАЙНИЕ СЛУЧАИ СПРОСА — ИМЕНА, А НЕ ЧИСЛА. У публикации проверяется
+       ОБРАТНЫЙ ПУТЬ ЭКРАНИРОВАНИЯ: кавычка и амперсанд в названии турнира
+       обязаны вернуться знак в знак, а не разорвать атрибут и не приехать
+       как `&amp;`. У снятия — длина: текст с длинным названием не должен
+       распирать окно. */
+    var ИМЕНА = {
+        opublikovat: 'Кубок «Ала-Тоо» & Co. <b>весна</b> 2026',
+        snyat: 'МЕЖДУНАРОДНЫЙ РЕЙТИНГОВЫЙ ТУРНИР ABDYSH-ATA SPRING CUP 2026 — ЖЕНСКИЙ ПАРНЫЙ РАЗРЯД FUTURES, ВТОРОЙ ЭТАП'
+    };
+    var L = A.L;
+
+    function показатьСпрос(вид) {
+        var снимаем = вид === 'snyat';
+        /* ТЕКСТ БЕРЁТСЯ У СЛОВАРЯ И СОБИРАЕТСЯ ДОМОМ `A.фраза` — тем же
+           путём, которым его собирает раздел турниров. Копия текста здесь
+           показывала бы стенд, а не продукт. */
+        return A.showConfirmAsync(
+            снимаем ? L.trnSprosSnyat : L.trnSprosOpublikovat,
+            /* ТЕМ ЖЕ ПУТЁМ, ЧТО В ПРОДУКТЕ: тело окна — разметка, поэтому
+               данные экранируются ПЕРЕД подстановкой. Именно этот путь
+               стенд и проверяет: имя с кавычкой, амперсандом и тегом
+               обязано вернуться знак в знак, а не стать разметкой. */
+            A.фраза(снимаем ? L.trnSprosSnyatTekst : L.trnSprosOpublikovatTekst,
+                    { турнир: A.esc(ИМЕНА[вид]) }),
+            снимаем ? L.trnSnyatSPublikacii : L.trnOpublikovat);
+    }
+
+    document.querySelectorAll('[data-spros]').forEach(function(b) {
+        b.addEventListener('click', function() { показатьСпрос(b.dataset.spros); });
+    });
+
+    /* Признак готовности для прогона: стенд собран и живой код на месте */
+    window.СТЕНД_ГОТОВ = typeof A.текстПотерьТурнира === 'function' &&
+                         typeof A.showConfirm === 'function' &&
+                         typeof A.showConfirmAsync === 'function' &&
+                         typeof A.фраза === 'function';
+    window.показатьСлучай = показать;
+    window.показатьСпрос = показатьСпрос;
+    window.ИМЕНА_СПРОСА = ИМЕНА;
+    document.body.dataset.stendGotov = window.СТЕНД_ГОТОВ ? '1' : '0';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- CSP:START -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+<!-- CSP:END -->
+    <title>KSLT — League Rules</title>
+    <meta name="description" content="League Rules — KSLT, the tennis community of Kyrgyzstan.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KSLT">
+    <meta property="og:title" content="KSLT — League Rules">
+    <meta property="og:description" content="League Rules — KSLT, the tennis community of Kyrgyzstan.">
+    <meta property="og:url" content="https://tennis.kg/pages/rules-en.html">
+    <meta property="og:image" content="https://tennis.kg/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="../css/tokens.css?v=87">
+    <link rel="stylesheet" href="../css/style.css?v=486">
+    <link rel="stylesheet" href="../css/info-pages.css?v=86">
+</head>
+<body>
+    <!-- HEADER -->
+<!-- HEADER:START -->
+    <header class="floating-header header-hybrid">
+        <nav>
+            <div class="nav-left">
+                <a href="../index-en.html" class="logo">
+                    <img src="../images/kslt-logo.svg" alt="KSLT" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="../index-en.html#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="tournaments-overview-en.html" class="nav-item nav-item-dropdown">
+                        Tournaments
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="tournaments-en.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments-en.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments-en.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments-en.html?category=challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="tournaments-en.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments-en.html?category=friendly" class="nav-dropdown-item">Friendly Weekend</a>
+                        <a href="battles-overview-en.html" class="nav-dropdown-item">Battles</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="players-en.html" class="nav-item nav-item-dropdown">
+                        Rankings
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="players-en.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="players-en.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="players-en.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                        <a href="players-en.html?tab=men-challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="players-en.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="services-en.html" class="nav-item nav-item-dropdown">
+                        Services
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="courts-en.html" class="nav-dropdown-item">Tennis Courts</a>
+                        <a href="coaches-en.html" class="nav-dropdown-item">Coaches</a>
+                        <a href="partners-en.html" class="nav-dropdown-item">Player Search</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="news-en.html" class="nav-item nav-item-dropdown">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news-en.html?category=announcement" class="nav-dropdown-item">Announcements</a>
+                        <a href="news-en.html?category=world" class="nav-dropdown-item">World Tennis</a>
+                        <a href="news-en.html?category=results" class="nav-dropdown-item">Results</a>
+                        <a href="news-en.html?category=interview" class="nav-dropdown-item">Interviews</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="info-en.html" class="nav-item nav-item-dropdown active">
+                        Info
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="about-en.html" class="nav-dropdown-item">About the Project</a>
+                        <a href="rules-en.html" class="nav-dropdown-item">Rules</a>
+                        <a href="pricing-en.html" class="nav-dropdown-item">Pricing</a>
+                        <a href="faq-en.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="offer-en.html" class="nav-dropdown-item">Public Offer</a>
+                        <a href="terms-en.html" class="nav-dropdown-item">Terms of Use</a>
+                        <a href="privacy-policy-en.html" class="nav-dropdown-item">Privacy Policy</a>
+                        <a href="sponsors-en.html" class="nav-dropdown-item">Become a sponsor</a>
+                        <a href="download-en.html" class="nav-dropdown-item"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Download App</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="auth-en.html" class="btn-auth">Sign In</a>
+
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">EN</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="rules.html" class="lang-option" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="rules-kg.html" class="lang-option" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="rules-en.html" class="lang-option active" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="tournaments-overview-en.html" class="mobile-dropdown-toggle">
+                        Tournaments
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments-overview-en.html" class="mobile-dropdown-self">All tournaments</a></li>
+                        <li><a href="tournaments-en.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments-en.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments-en.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments-en.html?category=challenger">Challengers</a></li>
+                        <li><a href="tournaments-en.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments-en.html?category=friendly">Friendly Weekend</a></li>
+                        <li><a href="battles-overview-en.html">Battles</a></li>
+                    </ul>
+                </li>
+                <li><a href="../index-en.html#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="players-en.html" class="mobile-dropdown-toggle">
+                        Rankings
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="players-en.html" class="mobile-dropdown-self">Full rankings</a></li>
+                        <li><a href="players-en.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="players-en.html?tab=men-masters">Masters</a></li>
+                        <li><a href="players-en.html?tab=men-tour">Tour</a></li>
+                        <li><a href="players-en.html?tab=men-challenger">Challengers</a></li>
+                        <li><a href="players-en.html?tab=men-futures">Futures</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="services-en.html" class="mobile-dropdown-toggle">
+                        Services
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="services-en.html" class="mobile-dropdown-self">All services</a></li>
+                        <li><a href="courts-en.html">Tennis Courts</a></li>
+                        <li><a href="coaches-en.html">Coaches</a></li>
+                        <li><a href="partners-en.html">Player Search</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news-en.html" class="mobile-dropdown-toggle">
+                        News
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news-en.html" class="mobile-dropdown-self">All news</a></li>
+                        <li><a href="news-en.html?category=announcement">Announcements</a></li>
+                        <li><a href="news-en.html?category=world">World Tennis</a></li>
+                        <li><a href="news-en.html?category=results">Results</a></li>
+                        <li><a href="news-en.html?category=interview">Interviews</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="info-en.html" class="mobile-dropdown-toggle active">
+                        Info
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="info-en.html" class="mobile-dropdown-self">Everything about KSLT</a></li>
+                        <li><a href="about-en.html">About the Project</a></li>
+                        <li><a href="rules-en.html">Rules</a></li>
+                        <li><a href="pricing-en.html">Pricing</a></li>
+                        <li><a href="faq-en.html">FAQ</a></li>
+                        <li><a href="offer-en.html">Public Offer</a></li>
+                        <li><a href="terms-en.html">Terms of Use</a></li>
+                        <li><a href="privacy-policy-en.html">Privacy Policy</a></li>
+                        <li><a href="sponsors-en.html">Become a sponsor</a></li>
+                        <li><a href="download-en.html"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Download App (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Language</span>
+                    <a href="rules.html" class="mobile-lang-option" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="rules-kg.html" class="mobile-lang-option" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="rules-en.html" class="mobile-lang-option active" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+<!-- HEADER:END -->
+
+    <main>
+        <!-- HERO -->
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('../images/heroes/tournaments.jpg')"></div>
+            <div class="ip-hero-content">
+                <h1 class="ip-hero-title"><span>KSLT</span> Rules</h1>
+                <p class="ip-hero-subtitle">Official rules and regulations of Kyrgyzstan Social Lawn Tennis</p>
+            </div>
+        </section>
+
+        <!-- RULES CONTENT -->
+        <div class="ip-container">
+
+            <div class="ip-toc ip-fade-in">
+                <div class="ip-toc-title">Table of Contents</div>
+                <ol class="ip-toc-list">
+                        <li><a href="#rules-general">General Provisions</a></li>
+                        <li><a href="#rules-membership">KSLT Membership</a></li>
+                        <li><a href="#rules-categories">Tournament Categories and Levels</a></li>
+                        <li><a href="#rules-entry">Tournament Entry and Draw</a></li>
+                        <li><a href="#rules-match">Match Format</a></li>
+                        <li><a href="#rules-ranking">Ranking System</a></li>
+                        <li><a href="#rules-conduct">Code of Conduct and Disciplinary Rules</a></li>
+                    </ol>
+            </div>
+
+            <div class="ip-rules-section ip-fade-in" id="rules-general">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">01</span>
+                    General Provisions
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>KSLT — the Kyrgyzstan Social Lawn Tennis community — was founded in April 2021 by a group of amateur tennis players and the heads of tennis clubs in Bishkek, and operates within the Kyrgyz Republic.</li>
+                    <li>KSLT is not a commercial organisation.</li>
+                    <li>The aims of KSLT: holding open tournaments for amateurs, friendly team matches between clubs of the city, the country and clubs abroad, coordinating amateur tennis and developing common rules for tournaments.</li>
+                    <li>These Rules are based on the KSLT Charter approved by the general meeting of founders on 13 April 2021 and its annexes.</li>
+                    <li>Matches are played under ITF tennis rules. The particulars adopted by KSLT — match format, scoring, discipline — are set out in these Rules and take precedence.</li>
+                    <li>Official languages of the community: Russian, Kyrgyz, English.</li>
+                    <li>Amendments to the Rules are made by the KSLT management. The current version is published on the website together with the date it takes effect.</li>
+                </ol>
+            </div>
+
+            <!-- Section -->
+            <div class="ip-rules-section ip-fade-in" id="rules-membership">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">02</span>
+                    KSLT Membership
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Membership of KSLT is individual and voluntary.</li>
+                    <li>Membership is open to an amateur tennis player residing in the Kyrgyz Republic, and also to a tennis club represented by its head or an authorised representative.</li>
+                    <li>Membership is obtained by taking part in KSLT tournaments or by voluntary application addressed to the Director of KSLT.</li>
+                    <li>A member of KSLT pays a one-off joining fee and membership dues — annually or monthly. The amounts are set by the KSLT management; the current figures are on the Pricing page.</li>
+                    <li>Membership is valid for the period paid for. Current membership is required to take part in ranking tournaments.</li>
+                    <li>If membership dues are left unpaid for six months, the participant ceases to be a member of KSLT and their ranking is frozen. Membership can be regained by paying the joining fee again.</li>
+                    <li>KSLT is entitled to refuse entry to tournaments to participants who have not paid their membership dues.</li>
+                    <li>A member of KSLT may leave the community voluntarily at any time.</li>
+                </ol>
+            </div>
+
+            <!-- Section -->
+            <div class="ip-rules-section ip-fade-in" id="rules-categories">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">03</span>
+                    Tournament Categories and Levels
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Singles ranking tournaments are held in five categories: Pro-Masters, Masters, Tour, Challenger, Futures.</li>
+                    <li>Futures is the entry level. Challenger is intermediate. Tour is upper intermediate, the lower draw of Masters. Masters is advanced. Pro-Masters is the highest level of skill.</li>
+                    <li>Doubles tournaments — both official and friendly — are not ranking tournaments and are held in the categories: PRO-AM (a professional paired with an amateur), MASTERS (combined NTRP of the pair 8–9), FUTURES (combined NTRP of the pair 6–7.7).</li>
+                    <li>Friendly Weekend are weekend tournaments: play for enjoyment and practice. No ranking points are awarded for them, and the tournament card carries the mark “Unranked”.</li>
+                    <li>Apart from the players' category, a tournament has a level — highest, first, second or third category. The level determines how many points a finishing position is worth.</li>
+                    <li>A tournament of the highest category is an open tournament with a draw of at least 32 participants or 16 pairs, in which at least 12 participants are in the top twenty of the KSLT ranking.</li>
+                    <li>First category: a draw of at least 24 participants or 10 pairs, with at least 10 participants from the top twenty. Second category: a draw of at least 12–16 participants or 8 pairs, with at least 3–5 participants from the top twenty. All other open tournaments fall into the third category.</li>
+                    <li>If a tournament or an age group has fewer than 8 participants or 6 pairs, no category is assigned to it and no ranking points are awarded.</li>
+                    <li>An amateur is a tennis player aged 25 or over who has not taken part in professional tournaments, has held no professional ranking and no sporting grade from Candidate Master of Sport upwards, and is not a professional coach. Players who do not meet these conditions may be admitted by a separate decision of KSLT.</li>
+                    <li>The top five players of the Pro-Masters ranking are not admitted to Masters tournaments. The top sixteen players of the Masters ranking are not admitted to Futures tournaments.</li>
+                </ol>
+            </div>
+
+            <!-- Section -->
+            <div class="ip-rules-section ip-fade-in" id="rules-entry">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">04</span>
+                    Tournament Entry and Draw
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>An upcoming tournament is announced no later than two weeks before it starts.</li>
+                    <li>Registration for a tournament closes no later than two days before the day it is held.</li>
+                    <li>The number of places is limited by the tournament draw. If more entries are received, places go to the players and pairs holding higher positions in the ranking.</li>
+                    <li>The organiser is entitled to reserve places for invited players and pairs (wild card). The number of wild cards, the size of the main draw and the number of qualifiers are announced in advance, in the tournament regulations.</li>
+                    <li>Entries submitted after registration has closed are accepted at the organiser's discretion. The organiser is entitled to hold a separate qualifying tournament.</li>
+                    <li>The format, venue, time, regulations and prize fund are determined by the tournament organiser.</li>
+                    <li>To avoid a conflict of interests, it is not recommended that one and the same person be tournament director, head referee and player.</li>
+                    <li>Balls are provided by the tournament organiser. The racket and sports clothing are the player's own responsibility.</li>
+                </ol>
+            </div>
+
+            <!-- Section -->
+            <div class="ip-rules-section ip-fade-in" id="rules-match">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">05</span>
+                    Match Format
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Commercial tournaments and tournaments of the highest category: a match of two sets to 6 games with a tie-break at 6:6. At deuce the Solo deciding point rule applies. At one set all, the deciding third set is played as a super tie-break to 10 points.</li>
+                    <li>One-day tournaments: a match of one set to 6 games. At 5:5 a tie-break to 7 points is played; at deuce, a deciding point.</li>
+                    <li>Matches are self-officiated. In a disputed situation the head referee of the tournament is called.</li>
+                    <li>Players are required to keep the score honestly and to call their own outs. If the players disagree and neither is certain, the point is replayed.</li>
+                    <li>A player must appear at the appointed time of the match. Being more than 15 minutes late counts as a disqualification — see section 07.</li>
+                    <li>A match may be rescheduled for a valid reason, with the agreement of both players and the tournament organiser.</li>
+                </ol>
+            </div>
+
+            <!-- Section -->
+            <div class="ip-rules-section ip-fade-in" id="rules-ranking">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">06</span>
+                    Ranking System
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>The KSLT ranking is cumulative: points are awarded for the position a player finishes in a tournament.</li>
+                    <li>The number of points depends on the level of the tournament and the position reached. The same position in a tournament of a lower category is worth fewer points.</li>
+                    <li>Points earned in a tournament count towards the ranking for 24 months.</li>
+                    <li>Ranking points are awarded to members of KSLT. Guests and outside participants receive no points, including those given a wild card.</li>
+                    <li>The ranking is kept for singles tournaments. Doubles and mixed tournaments are not ranking tournaments.</li>
+                    <li>New participants start in the Futures category and may move to a higher category on the results of their first three tournaments.</li>
+                    <li>Movement between categories — promotion and relegation — is determined by accumulated points and results.</li>
+                    <li>The ranking is recalculated after a tournament ends and is published on the website and in the app.</li>
+                    <li>The year-end finals are contested by the eight best players of the ranking. A win in a group-stage match is worth 50 points, a win in the semi-final 100, and a win in the final 150.</li>
+                    <li>If players are level on points, priority is decided by the number of wins, then by head-to-head meetings, then by the number of matches played.</li>
+                </ol>
+            </div>
+
+            <!-- Section -->
+            <div class="ip-rules-section ip-fade-in" id="rules-conduct">
+                <h2 class="ip-rules-section-title">
+                    <span class="ip-rules-section-num">07</span>
+                    Code of Conduct and Disciplinary Rules
+                </h2>
+                <ol class="ip-rules-list">
+                    <li>Participants of KSLT undertake to show respect to opponents, organisers, referees and spectators — during matches and the whole time they are at the tournament.</li>
+                    <li>Arriving more than 15 minutes late for a match counts as disqualification of the player.</li>
+                    <li>Throwing the racket or balls, verbal abuse, time-wasting, physical contact, foul language, unsporting behaviour and other acts contrary to commonly accepted standards of conduct during a match are penalised on a scale: first offence — a warning, second — a penalty point, third — disqualification.</li>
+                    <li>The head referee of the tournament is entitled to disqualify a player even for a single offence, if it seriously damages the image of the tournament or endangers the health of players, spectators or staff.</li>
+                    <li>Dress code: clean sports clothing and tennis shoes.</li>
+                    <li>Drinking alcohol before and during matches is prohibited. Smoking on the court area is prohibited.</li>
+                </ol>
+            </div>
+
+        </div>
+    
+        <!-- SPONSORS -->
+        <section id="sponsors" class="section-sponsors-compact"></section>
+    </main>
+
+    <!-- FOOTER -->
+<!-- FOOTER:START -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </div>
+                <p class="footer-desc">Kyrgyzstan Social Lawn Tennis. Rankings, tournaments and everything a player needs.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://t.me/c/1939029205/1" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@%D0%9A%D0%A1%D0%9B%D0%A2-%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%81%D1%82%D0%B0%D0%BD" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-block">
+                <h4>Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="tournaments-overview-en.html">Tournaments</a></li>
+                    <li><a href="players-en.html">Rankings</a></li>
+                    <li><a href="courts-en.html">Courts</a></li>
+                    <li><a href="coaches-en.html">Coaches</a></li>
+                    <li><a href="news-en.html">News</a></li>
+                    <li><a href="about-en.html">About</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>For players</h4>
+                <ul class="footer-links">
+                    <li><a href="rules-en.html">League rules</a></li>
+                    <li><a href="rules-en.html#rules-ranking">Rating system</a></li>
+                    <li><a href="faq-en.html">FAQ</a></li>
+                    <li><a href="pricing-en.html">Pricing</a></li>
+                    <li><a href="rules-en.html#rules-conduct">Discipline code</a></li>
+</ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>For sponsors and partners</h4>
+                <ul class="footer-links">
+                    <li><a href="sponsors-en.html">Become a sponsor</a></li>
+                    <li><a href="sponsors-en.html#current">Our sponsors</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block" id="contacts">
+                <h4>Contacts</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Bishkek, Kyrgyzstan</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© <span class="footer-year">2026</span> KSLT. All rights reserved.</p>
+            <nav class="footer-legal-nav" aria-label="Legal">
+                <ul class="footer-bottom-links">
+                    <li><a href="offer-en.html">Public offer</a></li>
+                    <li><a href="terms-en.html">Terms of Use</a></li>
+                    <li><a href="privacy-policy-en.html">Privacy policy</a></li>
+                </ul>
+            </nav>
+            <p class="footer-entity">
+                Public Foundation “Kyrgyzstan Social Lawn Tennis Community” (KSLT) · Registration No. 197575-3301-PF · TIN 01905202110030 · Kyrgyz Republic, Bishkek city, Sverdlovsky district, Chuy Ave. 127, apt. 26 · Governing law: the laws of the Kyrgyz Republic
+            </p>
+            <p class="footer-made">Made in Kyrgyzstan</p>
+        </div>
+    </footer>
+<!-- FOOTER:END -->
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/kslt-baza.js?v=2"></script>
+    <script src="../js/supabase-config.js?v=5"></script>
+    <script src="../js/kslt-yazyk.js?v=5"></script>
+    <script src="../js/kslt-ekranirovanie.js?v=2"></script>
+    <script src="../js/kslt-prosmotry.js?v=1"></script>
+    <script src="../js/kslt-lico.js?v=8"></script>
+    <script src="../js/kslt-fokus.js?v=4"></script>
+    <script src="../js/kslt-sponsory.js?v=1"></script>
+    <script src="../js/sponsors-loader.js?v=18"></script>
+    <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
+    <script src="../js/contact-icons.js?v=1"></script>
+    <script src="../js/kslt-zov.js?v=2"></script>
+    <script src="../js/auth-nav.js?v=38"></script>
+    <script src="../js/script.js?v=27"></script>
+    <script>
+        document.querySelectorAll('.ip-toc-list a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
+</body>
+</html>

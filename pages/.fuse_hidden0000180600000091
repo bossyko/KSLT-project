@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- CSP:START -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+<!-- CSP:END -->
+    <title>КСЛТ — Судья</title>
+    <meta name="description" content="Судья — КСЛТ, теннисное сообщество Кыргызстана.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="КСЛТ">
+    <meta property="og:title" content="КСЛТ — Судья">
+    <meta property="og:description" content="Судья — КСЛТ, теннисное сообщество Кыргызстана.">
+    <meta property="og:url" content="https://tennis.kg/pages/umpire.html">
+    <meta property="og:image" content="https://tennis.kg/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="../css/tokens.css?v=87">
+    <link rel="stylesheet" href="../css/umpire.css?v=38">
+</head>
+<body>
+    <!-- ТЕЛЕФОН БОКОМ — ОДНА РАСКЛАДКА. Решение Кости 25.09: вторая
+         раскладка стоит второго набора правил и второго прогона теста, а
+         судья держит телефон вертикально; боком он оказывается случайно. -->
+    <div class="um-turn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <rect x="7" y="2" width="10" height="20" rx="2"></rect>
+            <path d="M2 12a10 10 0 0 1 4-8"></path>
+        </svg>
+        <p>Поверните телефон</p>
+        <small>Судейский экран работает вертикально</small>
+    </div>
+
+    <div id="um-app">
+        <div class="um-status um-status-warmup">Загрузка...</div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/kslt-baza.js?v=2"></script>
+    <script src="../js/supabase-config.js?v=5"></script>
+    <script src="../js/kslt-ekranirovanie.js?v=2"></script>
+    <script src="../js/kslt-prosmotry.js?v=1"></script>
+    <script src="../js/umpire.js?v=8"></script>
+</body>
+</html>

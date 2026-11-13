@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FVXLFVPCKX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-FVXLFVPCKX");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- CSP:START -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co https://accounts.google.com; media-src 'self';">
+<!-- CSP:END -->
+    <title>КСЛТ — Часто задаваемые вопросы</title>
+    <meta name="description" content="Частые вопросы о КСЛТ: членство, турниры, рейтинг, корты и игра.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="КСЛТ">
+    <meta property="og:title" content="КСЛТ — Часто задаваемые вопросы">
+    <meta property="og:description" content="Частые вопросы о КСЛТ: членство, турниры, рейтинг, корты и игра.">
+    <meta property="og:url" content="https://tennis.kg/pages/faq.html">
+    <meta property="og:image" content="https://tennis.kg/images/KSLT.png">
+    <meta property="og:image:width" content="870">
+    <meta property="og:image:height" content="410">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#0A0A0A">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="../css/tokens.css?v=87">
+    <link rel="stylesheet" href="../css/style.css?v=486">
+    <link rel="stylesheet" href="../css/info-pages.css?v=86">
+</head>
+<body>
+    <!-- HEADER -->
+<!-- HEADER:START -->
+    <header class="floating-header header-hybrid">
+        <nav>
+            <!-- Левая часть: Логотип + Генеральный спонсор -->
+            <div class="nav-left">
+                <a href="../index.html" class="logo">
+                    <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </a>
+                <div class="sponsor-badge"></div>
+            </div>
+
+            <!-- Центр: Навигация -->
+            <ul class="nav-links">
+                <li>
+                    <a href="../index.html#live" class="nav-item nav-item-live">
+                        <span class="live-dot"></span>
+                        Live
+                    </a>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="tournaments-overview.html" class="nav-item nav-item-dropdown">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="tournaments.html?category=promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="tournaments.html?category=masters" class="nav-dropdown-item">Masters</a>
+                        <a href="tournaments.html?category=tour" class="nav-dropdown-item">Tour</a>
+                        <a href="tournaments.html?category=challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="tournaments.html?category=futures" class="nav-dropdown-item">Futures</a>
+                        <a href="tournaments.html?category=friendly" class="nav-dropdown-item">Friendly Weekend</a>
+                        <a href="battles-overview.html" class="nav-dropdown-item">Баттлы</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="players.html" class="nav-item nav-item-dropdown">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="players.html?tab=men-promasters" class="nav-dropdown-item">Pro-Masters</a>
+                        <a href="players.html?tab=men-masters" class="nav-dropdown-item">Masters</a>
+                        <a href="players.html?tab=men-tour" class="nav-dropdown-item">Tour</a>
+                        <a href="players.html?tab=men-challenger" class="nav-dropdown-item">Challengers</a>
+                        <a href="players.html?tab=men-futures" class="nav-dropdown-item">Futures</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="services.html" class="nav-item nav-item-dropdown">
+                        Услуги
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="courts.html" class="nav-dropdown-item">Теннисные корты</a>
+                        <a href="coaches.html" class="nav-dropdown-item">Тренеры</a>
+                        <a href="partners.html" class="nav-dropdown-item">Поиск игрока</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="news.html" class="nav-item nav-item-dropdown">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="news.html?category=announcement" class="nav-dropdown-item">Анонс</a>
+                        <a href="news.html?category=world" class="nav-dropdown-item">Мировой теннис</a>
+                        <a href="news.html?category=results" class="nav-dropdown-item">Результаты</a>
+                        <a href="news.html?category=interview" class="nav-dropdown-item">Интервью</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="info.html" class="nav-item nav-item-dropdown active">
+                        Инфо
+                        <span class="indicator-dot"></span>
+                        <svg class="nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <a href="about.html" class="nav-dropdown-item">О проекте</a>
+                        <a href="rules.html" class="nav-dropdown-item">Правила</a>
+                        <a href="pricing.html" class="nav-dropdown-item">Цены</a>
+                        <a href="faq.html" class="nav-dropdown-item">FAQ</a>
+                        <a href="offer.html" class="nav-dropdown-item">Публичная оферта</a>
+                        <a href="terms.html" class="nav-dropdown-item">Условия использования</a>
+                        <a href="privacy-policy.html" class="nav-dropdown-item">Политика конфиденциальности</a>
+                        <a href="sponsors.html" class="nav-dropdown-item">Стать спонсором</a>
+                        <a href="download.html" class="nav-dropdown-item"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Скачать приложение</a>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Правая часть: Авторизация + Язык -->
+            <div class="nav-right">
+                <a href="auth.html" class="btn-auth">Войти</a>
+
+                <!-- Выпадающее меню языков -->
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-current">RU</span>
+                        <svg class="lang-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <div class="lang-menu">
+                        <a href="faq.html" class="lang-option active" data-lang="RU">
+                            <span class="lang-flag">🇷🇺</span>
+                            <span class="lang-name">Русский</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="faq-kg.html" class="lang-option" data-lang="KG">
+                            <span class="lang-flag">🇰🇬</span>
+                            <span class="lang-name">Кыргызча</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                        <a href="faq-en.html" class="lang-option" data-lang="EN">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-check" aria-hidden="true"><svg class="lang-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Бургер меню для мобильных -->
+            <button class="burger-menu" id="burgerMenu">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+        </nav>
+
+        <!-- Мобильная навигация -->
+        <div class="mobile-nav" id="mobileNav">
+            <ul class="mobile-nav-links">
+                <li class="mobile-nav-dropdown">
+                    <a href="tournaments-overview.html" class="mobile-dropdown-toggle">
+                        Турниры
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="tournaments-overview.html" class="mobile-dropdown-self">Все турниры</a></li>
+                        <li><a href="tournaments.html?category=promasters">Pro-Masters</a></li>
+                        <li><a href="tournaments.html?category=masters">Masters</a></li>
+                        <li><a href="tournaments.html?category=tour">Tour</a></li>
+                        <li><a href="tournaments.html?category=challenger">Challengers</a></li>
+                        <li><a href="tournaments.html?category=futures">Futures</a></li>
+                        <li><a href="tournaments.html?category=friendly">Friendly Weekend</a></li>
+                        <li><a href="battles-overview.html">Баттлы</a></li>
+                    </ul>
+                </li>
+                <li><a href="../index.html#live"><span class="live-dot"></span> Live</a></li>
+                <li class="mobile-nav-dropdown">
+                    <a href="players.html" class="mobile-dropdown-toggle">
+                        Рейтинг
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="players.html" class="mobile-dropdown-self">Весь рейтинг</a></li>
+                        <li><a href="players.html?tab=men-promasters">Pro-Masters</a></li>
+                        <li><a href="players.html?tab=men-masters">Masters</a></li>
+                        <li><a href="players.html?tab=men-tour">Tour</a></li>
+                        <li><a href="players.html?tab=men-challenger">Challengers</a></li>
+                        <li><a href="players.html?tab=men-futures">Futures</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="services.html" class="mobile-dropdown-toggle">
+                        Услуги
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="services.html" class="mobile-dropdown-self">Все услуги</a></li>
+                        <li><a href="courts.html">Теннисные корты</a></li>
+                        <li><a href="coaches.html">Тренеры</a></li>
+                        <li><a href="partners.html">Поиск игрока</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="news.html" class="mobile-dropdown-toggle">
+                        Новости
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="news.html" class="mobile-dropdown-self">Все новости</a></li>
+                        <li><a href="news.html?category=announcement">Анонс</a></li>
+                        <li><a href="news.html?category=world">Мировой теннис</a></li>
+                        <li><a href="news.html?category=results">Результаты</a></li>
+                        <li><a href="news.html?category=interview">Интервью</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-dropdown">
+                    <a href="info.html" class="mobile-dropdown-toggle active">
+                        Инфо
+                        <span class="indicator-dot"></span>
+                        <svg class="mobile-nav-arrow" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+                            <path d="M1 1l4 4 4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="mobile-dropdown-menu">
+                        <li><a href="info.html" class="mobile-dropdown-self">Всё о КСЛТ</a></li>
+                        <li><a href="about.html">О проекте</a></li>
+                        <li><a href="rules.html">Правила</a></li>
+                        <li><a href="pricing.html">Цены</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="offer.html">Публичная оферта</a></li>
+                        <li><a href="terms.html">Условия использования</a></li>
+                        <li><a href="privacy-policy.html">Политика конфиденциальности</a></li>
+                        <li><a href="sponsors.html">Стать спонсором</a></li>
+                        <li><a href="download.html"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7"/><path d="m9 11 3 3 3-3"/><path d="M10.5 18.5h3"/></svg> Скачать приложение (Android)</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="mobile-nav-bottom">
+                <div class="mobile-lang-list">
+                    <span class="mobile-lang-title">Язык</span>
+                    <a href="faq.html" class="mobile-lang-option active" data-lang="RU">
+                        <span class="lang-flag">🇷🇺</span> Русский
+                    </a>
+                    <a href="faq-kg.html" class="mobile-lang-option" data-lang="KG">
+                        <span class="lang-flag">🇰🇬</span> Кыргызча
+                    </a>
+                    <a href="faq-en.html" class="mobile-lang-option" data-lang="EN">
+                        <span class="lang-flag">🇺🇸</span> English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+<!-- HEADER:END -->
+
+    <main>
+        <!-- HERO -->
+        <section class="ip-hero">
+            <div class="ip-hero-bg" style="background-image: url('../images/heroes/services.jpg')"></div>
+            <div class="ip-hero-content">
+                <span class="fq-slogan">твой теннисный CLUB</span>
+                <h1 class="ip-hero-title">Часто задаваемые <span>вопросы</span></h1>
+                <p class="ip-hero-subtitle">Ответы на частые вопросы о КСЛТ, членстве и турнирах</p>
+            </div>
+        </section>
+
+        <!-- FAQ CONTENT -->
+        <div class="ip-container">
+
+        <!-- ==================== ВСТУПЛЕНИЕ ==================== -->
+        <div class="ip-faq-category ip-fade-in">
+            <h2 class="ip-faq-category-title">Вступление в КСЛТ</h2>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Что нужно, чтобы вступить в КСЛТ?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Опыт игры не меньше шести месяцев, умение вести счёт и теннисная экипировка: ракетка, форма, кроссовки под покрытие корта — грунт или хард, — и кепка, если турнир на открытых кортах. Перед вступлением стоит посоветоваться с тренером: он подскажет, к какой категории вы ближе.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Как стать членом КСЛТ?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Всё делается на сайте или в приложении:
+                    <ol class="fq-steps">
+                        <li>Зарегистрируйтесь на сайте КСЛТ или скачайте приложение — Android в Google Play, iPhone в App Store.</li>
+                        <li>Заполните профиль и выберите свою категорию.</li>
+                        <li>Оплатите членский взнос — годовой или помесячный.</li>
+                    </ol>
+                    <p style="margin-top:14px;">Больше ничего делать не нужно: после оплаты вы попадаете в базу КСЛТ автоматически, доступ к рейтингу, турнирам и статистике открывается сразу. Чеки куратору высылать не надо.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Сколько стоит членство?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Взнос оплачивается ежемесячно или сразу за год — годовой выгоднее. Действующие суммы указаны на странице <a href="pricing.html">Цены</a>, чтобы они всегда были в одном месте и не расходились.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Что даёт членство?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <strong>Турниры.</strong> Участие во всех турнирах КСЛТ: рейтинговых одиночных, парных, коммерческих, выездных и дружеских выходного дня. Плюс приоритет при регистрации, когда мест меньше, чем желающих, и сниженный турнирный взнос.<br><br>
+                    <strong>Рейтинг и статистика.</strong> Место в общем рейтинге, история всех ваших матчей, статистика побед и поражений, форма последних игр и личные встречи с соперниками.<br><br>
+                    <strong>Скидки.</strong> На услуги тренеров, аренду кортов и услуги спортивных комплексов — у тех партнёров, кто их предоставляет.<br><br>
+                    <strong>Приложение.</strong> Уведомления о турнирах, вызовы на баттлы, живые счета матчей и личный кабинет с вашим членством.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">На что идут членские взносы?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    КСЛТ — это не только турниры. За кадром остаётся работа, которой не видно с корта: общение с участниками и обратная связь, новые форматы, переговоры со спонсорами и партнёрами, бухгалтерия и отчётность, поддержка сайта и домена, закуп мячей, дизайн и мерч. Членский взнос — вклад в развитие общего сообщества.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Что будет, если перестать платить?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Членство действует ровно в оплаченный период, и без него к рейтинговым турнирам не допускают. Если взносы не оплачены в течение шести месяцев, участник выбывает из членства КСЛТ, а рейтинг замораживается. Вернуться можно в любой момент, оплатив вступительный взнос заново. Подробнее — <a href="rules.html#rules-membership">Правила, раздел 02</a>.
+                </div></div>
+            </div>
+        </div>
+
+        <!-- ==================== УРОВЕНЬ И КАТЕГОРИИ ==================== -->
+        <div class="ip-faq-category ip-fade-in">
+            <h2 class="ip-faq-category-title">Уровень игры и категории</h2>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Что такое NTRP?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Система оценки уровня игры. Нужна затем, чтобы вы играли с равными и получали от матча удовольствие, а не разгром в одну калитку. «Я вроде играю, но какой у меня уровень?» — самый частый вопрос перед первым турниром, и NTRP на него отвечает.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Как определить свой уровень?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Оцените себя честно — это ни на что не влияет, кроме вашего же удовольствия от игры:
+                    <div class="fq-levels">
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Futures</span>
+                            <span class="fq-level-ntrp">2–2.5</span>
+                            <span class="fq-level-txt">Только начинаете. Удары нестабильны, розыгрыш держать трудно. Если вы недавно в теннисе — это нормально.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Challengers</span>
+                            <span class="fq-level-ntrp">3–3.5</span>
+                            <span class="fq-level-txt">Держите розыгрыш, появилась стабильность, понимаете правила и тактику. Занимали призовые места в Futures. У женщин этому уровню соответствует категория Tour.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Tour</span>
+                            <span class="fq-level-ntrp">3.5+</span>
+                            <span class="fq-level-txt">Стабильная игра, работает тактика, есть призовые места в Challengers. Мужская категория, нижняя сетка Masters.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Masters</span>
+                            <span class="fq-level-ntrp">4–4.5+</span>
+                            <span class="fq-level-txt">Уверенная игра, контроль мяча, тактика в одиночке и в паре. Призовые места в турнирах среднего и высокого уровня.</span>
+                        </div>
+                        <div class="fq-level">
+                            <span class="fq-level-cat">Pro-Masters</span>
+                            <span class="fq-level-ntrp">5</span>
+                            <span class="fq-level-txt">Тренировались в детстве, играли ATF или ITF, но несколько лет не выступали. Без КМС, МС и рейтинговых очков ITF.</span>
+                        </div>
+                    </div>
+                    <p style="margin-top:16px;">Окончательный уровень устанавливают организаторы — после того, как вы сыграете турнир или несколько.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Какие категории есть у мужчин и у женщин?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <div class="fq-cols">
+                        <div>
+                            <h5>Мужские</h5>
+                            <ul>
+                                <li>Pro-Masters</li>
+                                <li>Masters</li>
+                                <li>Tour</li>
+                                <li>Challengers</li>
+                                <li>Futures</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5>Женские</h5>
+                            <ul>
+                                <li>Masters</li>
+                                <li>Tour</li>
+                                <li>Futures</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="margin-top:14px;">У каждой категории свой чат в телеграм-канале КСЛТ — объявления о турнирах приходят именно туда.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Как понять, какая категория моя?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <strong>Futures</strong> — тренируетесь от трёх месяцев до двух лет, знаете правила, играли с соперниками мало или участвовали в турнирах, но не выигрывали.<br><br>
+                    <strong>Challengers</strong> — тренируетесь от года до трёх лет, играете стабильно, часто выигрываете соперников, участвовали в турнирах.<br><br>
+                    <strong>Tour</strong> — тренируетесь три-пять лет и больше; либо играли в международных турнирах уровня выше 3.5; либо выступали в Masters, но не выигрывали там; либо тренировались в детстве два-три года без ATF и ITF.<br><br>
+                    <strong>Masters</strong> — тренируетесь больше пяти лет, играете на хорошем уровне, часто выигрываете; участвовали в международных турнирах уровня выше 4.<br><br>
+                    <strong>Pro-Masters</strong> — тренировались в детстве и играли ATF или ITF, но несколько лет не выступали. Без КМС, МС и рейтинговых очков ITF.<br><br>
+                    Достаточно совпадения по одному из пунктов. Если сомневаетесь — выбирайте ниже: подняться проще, чем играть с теми, кто заметно сильнее.
+                </div></div>
+            </div>
+        </div>
+
+        <!-- ==================== ТУРНИРЫ ==================== -->
+        <div class="ip-faq-category ip-fade-in">
+            <h2 class="ip-faq-category-title">Турниры</h2>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Как записаться на первый турнир?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    <ol class="fq-steps">
+                        <li>О новом турнире вашей категории придёт уведомление в приложение и в телеграм.</li>
+                        <li>Откройте карточку турнира на сайте или в приложении — там регламент, дата, место и взнос.</li>
+                        <li>Нажмите «Регистрация». Мест ограниченное число, и они заканчиваются быстро.</li>
+                    </ol>
+                    <p style="margin-top:14px;">У членов КСЛТ приоритет при регистрации: если заявок больше, чем мест, они попадают в сетку первыми.</p>
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Как найти напарника для парного турнира?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Напишите о поиске пары в чате своей категории или в чате турнира. Объявления о парных турнирах публикуются в чатах «Дружеские турниры», «Doubles» и в чатах под эгидой спонсоров.<br><br>
+                    Чтобы вам ответили быстрее, укажите сразу три вещи: свой уровень игры, опыт участия в турнирах и формат — для удовольствия или на результат.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Входит ли турнирный взнос в членство?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Нет, это разные платежи. Турнирный взнос платится отдельно, и у каждого турнира он свой — сумма указана в карточке турнира. Членство даёт право заявиться, приоритет при регистрации и сниженный взнос, но не бесплатное участие.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Идут ли парные турниры в рейтинг?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Нет. Рейтинг КСЛТ ведётся по одиночным турнирам. Парные и микст — и официальные, и дружеские — рейтинговых очков не дают.
+                </div></div>
+            </div>
+
+            <div class="ip-faq-item">
+                <button class="ip-faq-question">Что такое Friendly Weekend?<span class="ip-faq-icon">+</span></button>
+                <div class="ip-faq-answer"><div class="ip-faq-answer-inner">
+                    Турниры выходного дня — поиграть в удовольствие и потренироваться. Рейтинговые очки за них не начисляются, на карточке такого турнира стоит метка «Без рейтинга». Условия участия определяет организатор, смотрите карточку конкретного турнира.
+                </div></div>
+            </div>
+        </div>
+
+        </div>
+    
+        <!-- SPONSORS -->
+        <section id="sponsors" class="section-sponsors-compact"></section>
+    </main>
+
+    <!-- FOOTER -->
+<!-- FOOTER:START -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-block footer-brand">
+                <div class="footer-logo">
+                    <img src="../images/kslt-logo.svg" alt="КСЛТ" class="logo-img">
+                </div>
+                <p class="footer-desc">Кыргызстанское Сообщество Любителей Тенниса. Рейтинг, турниры и всё, что нужно игроку.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/kslt_tennis.kg?igsh=OHNocjZhcHZxcTk0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://t.me/c/1939029205/1" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@%D0%9A%D0%A1%D0%9B%D0%A2-%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%81%D1%82%D0%B0%D0%BD" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-block">
+                <h4>Навигация</h4>
+                <ul class="footer-links">
+                    <li><a href="tournaments-overview.html">Турниры</a></li>
+                    <li><a href="players.html">Рейтинг</a></li>
+                    <li><a href="courts.html">Корты</a></li>
+                    <li><a href="coaches.html">Тренеры</a></li>
+                    <li><a href="news.html">Новости</a></li>
+                    <li><a href="about.html">О проекте</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Игрокам</h4>
+                <ul class="footer-links">
+                    <li><a href="rules.html">Правила лиги</a></li>
+                    <li><a href="rules.html#rules-ranking">Система рейтинга</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="pricing.html">Цены</a></li>
+                    <li><a href="rules.html#rules-conduct">Дисциплинарное положение</a></li>
+</ul>
+            </div>
+
+            <div class="footer-block">
+                <h4>Спонсорам и партнёрам</h4>
+                <ul class="footer-links">
+                    <li><a href="sponsors.html">Стать спонсором</a></li>
+                    <li><a href="sponsors.html#current">Наши спонсоры</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-block" id="contacts">
+                <h4>Контакты</h4>
+                <ul class="footer-contacts">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        <a href="mailto:kslt.kyrgyzstan@gmail.com">kslt.kyrgyzstan@gmail.com</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>г. Бишкек, Кыргызстан</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© <span class="footer-year">2026</span> КСЛТ. Все права защищены.</p>
+            <!-- ОСОЗНАННЫЙ ДУБЛЬ, не чинить и не схлопывать.
+                 Два названия документа подряд — это не забытая копипаста.
+                 Замер: на 390 внутри плашки доступно 358, а полные русские
+                 названия занимают 457 — не влезают, переносятся во второй
+                 ряд, и цель нажатия падает до 17px. Короткие дают 333 в один
+                 ряд высотой 44. На десктопе места хватает, и терять точное
+                 имя документа там незачем.
+                 Переключает .footer-legal-full / .footer-legal-short в
+                 style.css. Кыргызский и английский дубля НЕ имеют: их полные
+                 названия влезают и на 390 (324 и 241). -->
+            <nav class="footer-legal-nav" aria-label="Правовая информация">
+                <ul class="footer-bottom-links">
+                    <li><a href="offer.html"><span class="footer-legal-full">Публичная оферта</span><span class="footer-legal-short">Оферта</span></a></li>
+                    <li><a href="terms.html">Условия использования</a></li>
+                    <li><a href="privacy-policy.html"><span class="footer-legal-full">Политика конфиденциальности</span><span class="footer-legal-short">Конфиденциальность</span></a></li>
+                </ul>
+            </nav>
+            <p class="footer-entity">
+                Общественный фонд «Кыргызстанское сообщество любителей тенниса» · рег. № 197575-3301-ОФ · ИНН 01905202110030 · Кыргызская Республика, г. Бишкек, Свердловский район, пр. Чуй, 127, кв. 26 · Применимое право: законодательство Кыргызской Республики
+            </p>
+            <p class="footer-made">Сделано в Кыргызстане</p>
+        </div>
+    </footer>
+<!-- FOOTER:END -->
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="../js/kslt-baza.js?v=2"></script>
+    <script src="../js/supabase-config.js?v=5"></script>
+    <script src="../js/kslt-yazyk.js?v=5"></script>
+    <script src="../js/kslt-ekranirovanie.js?v=2"></script>
+    <script src="../js/kslt-prosmotry.js?v=1"></script>
+    <script src="../js/kslt-lico.js?v=8"></script>
+    <script src="../js/kslt-fokus.js?v=4"></script>
+    <script src="../js/kslt-sponsory.js?v=1"></script>
+    <script src="../js/sponsors-loader.js?v=18"></script>
+    <script>if (window.loadSponsors) loadSponsors('sponsors');</script>
+    <script src="../js/contact-icons.js?v=1"></script>
+    <script src="../js/kslt-zov.js?v=2"></script>
+    <script src="../js/auth-nav.js?v=38"></script>
+    <script src="../js/script.js?v=27"></script>
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.ip-faq-question').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var item = this.closest('.ip-faq-item');
+                var wasActive = item.classList.contains('active');
+                // Close all in same category
+                item.closest('.ip-faq-category').querySelectorAll('.ip-faq-item').forEach(function(el) {
+                    el.classList.remove('active');
+                });
+                if (!wasActive) item.classList.add('active');
+            });
+        });
+
+        // Scroll animations
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.ip-fade-in').forEach(function(el) { observer.observe(el); });
+    </script>
+</body>
+</html>
