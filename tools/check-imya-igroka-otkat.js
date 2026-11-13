@@ -15,7 +15,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['js/kslt-lico.js', 'js/scoreboard.js', 'js/live-match.js', 'js/dashboard.js',
+const ФАЙЛЫ = ['js/admin/sections/users.js', 'js/kslt-lico.js', 'js/scoreboard.js', 'js/live-match.js', 'js/dashboard.js',
                'supabase/functions/ensure-player-card/index.ts',
                'index.html', 'index-en.html', 'index-kg.html',
                'pages/scoreboard.html', 'maket/stend-tablo.html'];
@@ -86,6 +86,24 @@ const ОТКАТЫ = [
    "        cardMaybeNone: 'Ни одна не моя',",
    '',
    'слово окна есть на трёх языках: cardMaybeNone'],
+  // --- смена карточки в админке (13.11) ---
+  ['js/admin/sections/users.js',
+   '        if (user.player_id && !A.сотрудник(user.role)) {',
+   '        if (false) {',
+   'кнопка смены карточки есть и только у того, у кого карточка есть'],
+
+  ['js/admin/sections/users.js',
+   "        var партнёр = await A.client.from('tournament_registrations')\n            .select('id', { count: 'exact', head: true }).eq('partner_id', playerId);",
+   '        var партнёр = { count: 0 };',
+   'перед удалением считаются заявки, а не только очки'],
+
+  /* ОТКАТ БЬЁТ В ТО МЕСТО, ЗА КОТОРОЕ ОТВЕЧАЕТ ПРАВИЛО. Первая редакция
+     откатывала текст подсказки, а правило стережёт кнопку «всё равно
+     новую» — и честно молчало. */
+  ['js/admin/sections/users.js',
+   "                        (режим === 'smena' ? '' :",
+   "                        (false ? '' :",
+   'при смене не предлагается завести ещё одну карточку'],
 ];
 
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-imya-'));

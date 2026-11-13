@@ -915,6 +915,21 @@
             }
         }
 
+        /* СМЕНИТЬ КАРТОЧКУ — ТОЛЬКО КОГДА ОНА УЖЕ ЕСТЬ (13.11).
+
+           Привязать карточку админка умела лишь тому, у кого её нет
+           вовсе: поиск двойников стоял на пути «карточки нет -> завести».
+           А беда ровно обратная — карточку ЗАВЕЛИ пустую, пока настоящая
+           лежала рядом. Перепривязать было нечем, и каждый такой случай
+           закрывался запросом в базу: за один день 13.11 так свели
+           девятнадцать человек.
+
+           Сотруднику кнопка не нужна: ему карточка не заводится вовсе. */
+        if (user.player_id && !A.сотрудник(user.role)) {
+            actionBtns.push('<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrSmenitKartu">' +
+                L.usrSmenitKartu + '</button>');
+        }
+
         // Delete
         var canDelete = isAdm ? (!isSelf) : (A.currentRole === 'manager' && !isSelf && user.role === 'user');
         if (canDelete) {
@@ -1128,6 +1143,11 @@
             removeManager.addEventListener('click', function() {
                 changeUserRole(user.id, 'user');
             });
+        }
+
+        var smenaBtn = document.getElementById('adUsrSmenitKartu');
+        if (smenaBtn) {
+            smenaBtn.addEventListener('click', function() { сменитьКарточку(user); });
         }
 
         var deleteBtn = document.getElementById('adUsrDelete');
@@ -1373,7 +1393,7 @@
      * ни одного — админ выбирает вслух, потому что ошибка здесь стоит
      * чужого рейтинга.
      */
-    function спроситьПроДвойников(user, карточки) {
+    function спроситьПроДвойников(user, карточки, режим) {
         return new Promise(function (готово) {
             var existing = document.getElementById('adUsrDvoyniki');
             if (existing) existing.remove();
@@ -1401,12 +1421,17 @@
                         '<button class="ad-modal-close" id="adUsrDvClose" aria-label="' + L.modalClose + '">&times;</button>' +
                     '</div>' +
                     '<div class="ad-modal-body">' +
-                        '<p class="ad-usr-dv-why">' + L.usrDvoynikiText + '</p>' +
+                        '<p class="ad-usr-dv-why">' +
+                            (режим === 'smena' ? L.usrSmenaText : L.usrDvoynikiText) + '</p>' +
                         '<ul class="ad-usr-dv-list">' + строки + '</ul>' +
                     '</div>' +
                     '<div class="ad-modal-footer">' +
                         '<button class="ad-btn" id="adUsrDvCancel">' + L.cancel + '</button>' +
-                        ' <button class="ad-btn" id="adUsrDvNew">' + L.usrVsyoRavnoNovuyu + '</button>' +
+                        /* ПРИ СМЕНЕ «ВСЁ РАВНО НОВУЮ» НЕ ПРЕДЛАГАЕТСЯ: карточка
+                           у человека уже есть, и завести вторую — ровно та
+                           беда, которую эта кнопка и разбирает. */
+                        (режим === 'smena' ? '' :
+                            ' <button class="ad-btn" id="adUsrDvNew">' + L.usrVsyoRavnoNovuyu + '</button>') +
                     '</div>' +
                 '</div>';
 
@@ -1424,7 +1449,8 @@
             overlay.querySelectorAll('[data-dv]').forEach(function (кн) {
                 кн.addEventListener('click', function () { закрыть(кн.getAttribute('data-dv')); });
             });
-            document.getElementById('adUsrDvNew').addEventListener('click', function () { закрыть('new'); });
+            var кнНовую = document.getElementById('adUsrDvNew');
+            if (кнНовую) кнНовую.addEventListener('click', function () { закрыть('new'); });
             document.getElementById('adUsrDvCancel').addEventListener('click', function () { закрыть('cancel'); });
             document.getElementById('adUsrDvClose').addEventListener('click', function () { закрыть('cancel'); });
         });
@@ -1558,6 +1584,104 @@
             A.showToast(L.usrRoleChanged, 'success');
             loadAndEditUser(userId);
         }
+    }
+
+    /**
+     * СМЕНИТЬ КАРТОЧКУ ИГРОКА У ЧЕЛОВЕКА, У КОТОРОГО ОНА УЖЕ ЕСТЬ.
+     *
+     * Зачем: карточку человеку заводят при регистрации, и если его
+     * настоящую не нашли — он начинает с нуля, а старая с очками,
+     * матчами и историей лежит рядом ничья. Замер 13.11: таких было
+     * девятнадцать, и все сведены запросами в базу.
+     *
+     * ЖИВОЙ ОСТАЁТСЯ КАРТОЧКА С ИСТОРИЕЙ, А НЕ С ВЕРНЫМ ИМЕНЕМ. Имя —
+     * одно поле, его правят на месте; очки, матчи и история висят на id,
+     * и перенести их значило бы переписать половину таблиц.
+     *
+     * ПУСТАЯ УДАЛЯЕТСЯ ОТДЕЛЬНЫМ ВОПРОСОМ И ТОЛЬКО ПУСТАЯ. Удаление
+     * карточки уводит каскадом результаты, историю рейтинга, значки и
+     * заявки — молча, без ошибки. Поэтому перед вопросом считаются
+     * заявки и матчи, а не только очки: карточка с нулём очков вполне
+     * может держать заявку на турнир.
+     */
+    async function сменитьКарточку(user) {
+        if (!user || !user.player_id) return;
+
+        var имя = (user.full_name || '').trim();
+        if (!имя) { A.showToast(L.usrSmenaNetImeni, 'error'); return; }
+
+        /* ПОИСК — ОБЩИЙ ДОМ, а не третье написание одного понятия. Он
+           отбирает свободные карточки, поэтому нынешняя в список не
+           попадёт и перепривязать человека на него же нельзя. */
+        var двойники = await window.KSLT_KARTOCHKA.искать(A.client, {
+            строка: имя,
+            пол: playerGenderПредварительно(user),
+            предел: 8
+        });
+        if (!двойники.length) { A.showToast(L.usrSmenaNetKandidatov, 'info'); return; }
+
+        var выбор = await спроситьПроДвойников(user, двойники, 'smena');
+        if (выбор === 'cancel' || выбор === 'new') return;
+
+        var прежняя = user.player_id;
+
+        var привязка = await A.client.from('profiles')
+            .update({ player_id: выбор }).eq('id', user.id);
+        if (привязка.error) { A.showToast(привязка.error.message, 'error'); return; }
+
+        /* НОВАЯ КАРТОЧКА ПРИЗНАЁТСЯ ЗАНЯТОЙ СРАЗУ: по has_account её
+           отбирает поиск, и без этого она осталась бы предлагаться
+           другим людям как свободная. */
+        await A.client.from('players').update({ has_account: true }).eq('id', выбор);
+
+        A.showToast(L.usrPrivyazano, 'success');
+        await предложитьУбратьПустую(прежняя);
+        loadUsersList();
+    }
+
+    /**
+     * Предложить убрать карточку, оставшуюся без хозяина, — и только
+     * если на ней действительно ничего нет.
+     */
+    async function предложитьУбратьПустую(playerId) {
+        if (!playerId) return;
+
+        var карт = await A.client.from('players')
+            .select('id, name, points, wins, losses, doubles_wins, doubles_losses')
+            .eq('id', playerId).maybeSingle();
+        var к = карт.data;
+        if (!к) return;
+
+        /* ЧУЖОЙ ХОЗЯИН — ЗНАЧИТ НЕ СИРОТА. Один человек мог быть не
+           единственным, кто на неё ссылался. */
+        var хозяева = await A.client.from('profiles')
+            .select('id', { count: 'exact', head: true }).eq('player_id', playerId);
+        if ((хозяева.count || 0) > 0) return;
+
+        var заявки = await A.client.from('tournament_registrations')
+            .select('id', { count: 'exact', head: true }).eq('player_id', playerId);
+        var партнёр = await A.client.from('tournament_registrations')
+            .select('id', { count: 'exact', head: true }).eq('partner_id', playerId);
+
+        var следы = (к.points || 0) + (к.wins || 0) + (к.losses || 0) +
+                    (к.doubles_wins || 0) + (к.doubles_losses || 0) +
+                    (заявки.count || 0) + (партнёр.count || 0);
+
+        if (следы > 0) {
+            /* НЕПУСТУЮ НЕ ПРЕДЛАГАЕМ УДАЛИТЬ ВОВСЕ, а говорим почему:
+               иначе админ нажмёт «да» и уведёт каскадом чужие результаты. */
+            A.showToast(L.usrStarayaNePustaya, 'info');
+            return;
+        }
+
+        A.showConfirm(L.usrUdalitPustuyu,
+            L.usrUdalitPustuyuText + ' ' + (к.name || к.id),
+            async function () {
+                var res = await A.client.from('players').delete().eq('id', playerId);
+                if (res.error) A.showToast(res.error.message, 'error');
+                else A.showToast(L.usrPustayaUdalena, 'success');
+                loadUsersList();
+            });
     }
 
     async function deleteUserHandler(userId) {
