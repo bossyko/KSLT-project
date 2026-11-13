@@ -61,6 +61,33 @@ const PUBLIC_PAGES = [
     { path: '/pages/pricing-en.html', name: 'Pricing EN' },
     { path: '/pages/pricing-kg.html', name: 'Pricing KG' },
 
+    /* ДОБАВЛЕНЫ 12.11: до этого дня ни одна проба не открывала их ни
+       разу — ни на одном из пяти видов, ни на одном языке. Их нашёл
+       обход публичных страниц при закрытии куска планшетных ширин.
+       Правовые страницы и страница приложения — те, куда приходят из
+       сторов и по ссылке в подвале, то есть молчаливое падение там
+       заметят снаружи, а не мы. */
+    { path: '/pages/terms.html', name: 'Terms RU' },
+    { path: '/pages/terms-en.html', name: 'Terms EN' },
+    { path: '/pages/terms-kg.html', name: 'Terms KG' },
+    { path: '/pages/privacy-policy.html', name: 'Privacy RU' },
+    { path: '/pages/privacy-policy-en.html', name: 'Privacy EN' },
+    { path: '/pages/privacy-policy-kg.html', name: 'Privacy KG' },
+    { path: '/pages/download.html', name: 'Download RU' },
+    { path: '/pages/download-en.html', name: 'Download EN' },
+    { path: '/pages/download-kg.html', name: 'Download KG' },
+    /* ПЕРЕВОДЫ ОТКРЫВАЛИСЬ НЕ ВСЕ: русские страницы корта, тренера и
+       удаления аккаунта пробы знали, а английскую и кыргызскую — нет.
+       Страницы корта и тренера без ?id= показывают своё пустое
+       состояние; здесь проверяется, что они ВООБЩЕ открываются и не
+       падают, а их содержимое меряют 83-stranica-korta и соседи. */
+    { path: '/pages/court-en.html', name: 'Court EN' },
+    { path: '/pages/court-kg.html', name: 'Court KG' },
+    { path: '/pages/coach-en.html', name: 'Coach EN' },
+    { path: '/pages/coach-kg.html', name: 'Coach KG' },
+    { path: '/pages/delete-account-en.html', name: 'Delete account EN' },
+    { path: '/pages/delete-account-kg.html', name: 'Delete account KG' },
+
     // Services
     { path: '/pages/services.html', name: 'Services RU' },
     { path: '/pages/services-en.html', name: 'Services EN' },

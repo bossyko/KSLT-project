@@ -484,6 +484,7 @@ const КУСКИ = [
     ['вид графика', 'check-grafiki-vid.js', 'check-grafiki-vid-otkat.js'],
     ['обложка новости', 'check-oblozhka-novosti.js', 'check-oblozhka-novosti-otkat.js'],
     ['карта сайта', 'check-karta-sayta.js', 'check-karta-sayta-otkat.js'],
+    ['страницы под пробой', 'check-stranicy-pod-proboy.js', 'check-stranicy-pod-proboy-otkat.js'],
     ['кнопка наверх', 'check-knopka-naverh.js', 'check-knopka-naverh-otkat.js'],
     ['ссылка на вкладку', 'check-ssylka-vkladka.js', 'check-ssylka-vkladka-otkat.js'],
     ['заявки вкладками', 'check-zayavki-vkladki.js', 'check-zayavki-vkladki-otkat.js'],
