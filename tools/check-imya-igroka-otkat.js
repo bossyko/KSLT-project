@@ -31,22 +31,22 @@ const ОТКАТЫ = [
    'в доме карточка идёт раньше снимка'],
 
   ['js/kslt-lico.js',
-   'function имяНаЯзыке(игрок, снимок) {',
-   'function имяНаЯзыке(игрок) {\n        var снимок = null;',
+   'function имяНаЯзыке(игрок, снимок, заглушка) {',
+   'function имяНаЯзыке(игрок) {\n        var снимок = null, заглушка = null;',
    'дом имени принимает снимок вторым доводом'],
 
   ['index-en.html',
-   '                            var p1Name = KSLT_LICO.имяНаЯзыке(p1, m.player1_name);',
+   "                            var p1Name = KSLT_LICO.имяНаЯзыке(p1, m.player1_name, 'TBD');",
    '                            var p1Name = m.player1_name || p1.name_en || p1.name;',
    'снимок не стоит первым: index-en.html'],
 
   ['js/scoreboard.js',
-   '        var p1Name = window.KSLT_LICO.имяНаЯзыке(m.player1, m.player1_name);',
+   "        var p1Name = window.KSLT_LICO.имяНаЯзыке(m.player1, m.player1_name, 'Игрок 1');",
    "        var p1Name = m.player1_name || (m.player1 && m.player1.name) || 'Игрок 1';",
    'снимок не стоит первым: js/scoreboard.js'],
 
   ['js/live-match.js',
-   '        return window.KSLT_LICO.имяНаЯзыке(p, n === 1 ? m.player1_name : m.player2_name);',
+   "        return window.KSLT_LICO.имяНаЯзыке(p, n === 1 ? m.player1_name : m.player2_name, '—');",
    '        return getPlayerName(p, n === 1 ? m.player1_name : m.player2_name);\n' +
    '    }\n' +
    '    function getPlayerName(p, fallbackName) {\n' +
@@ -55,12 +55,12 @@ const ОТКАТЫ = [
    'в странице матча нет своей функции имени'],
 
   ['maket/stend-tablo.html',
-   '    <script src="../js/kslt-lico.js?v=9"></script>\n',
+   '    <script src="../js/kslt-lico.js?v=10"></script>\n',
    '',
    'дом подключён на каждой странице, которая его зовёт'],
 
   ['pages/scoreboard.html',
-   '    <script src="../js/kslt-lico.js?v=9"></script>',
+   '    <script src="../js/kslt-lico.js?v=10"></script>',
    '    <script src="../js/kslt-lico.js?v=8"></script>',
    'версия дома имени одна на весь сайт'],
 ];

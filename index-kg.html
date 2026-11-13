@@ -662,7 +662,7 @@
     <script src="js/session-monitor.js?v=4"></script>
     <script src="js/battle-format.js?v=6"></script>
     <script src="js/country-utils.js?v=69"></script>
-    <script src="js/kslt-lico.js?v=9"></script>
+    <script src="js/kslt-lico.js?v=10"></script>
     <script src="js/kslt-toast.js?v=3"></script>
     <script src="js/battle-cards.js?v=32"></script>
     <script src="js/kslt-chisla-kluba.js?v=1"></script>
@@ -775,8 +775,8 @@
                                вовсе — поле есть в базе, а в запросе его не
                                было, — и поверх этого снимок стоял старше
                                карточки. Теперь спрашивается и читается. */
-                            var p1Name = KSLT_LICO.имяНаЯзыке(p1, m.player1_name);
-                            var p2Name = KSLT_LICO.имяНаЯзыке(p2, m.player2_name);
+                            var p1Name = KSLT_LICO.имяНаЯзыке(p1, m.player1_name, 'TBD');
+                            var p2Name = KSLT_LICO.имяНаЯзыке(p2, m.player2_name, 'TBD');
                             var label = m.tournament_label || '';
 
                             var p1scores = '', p2scores = '';

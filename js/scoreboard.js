@@ -96,10 +96,9 @@
         /* КАРТОЧКА СТАРШЕ СНИМКА — ДОМ (кусок f21, 13.11). Было
            наоборот: строка `player1_name` стояла первой, и переименование
            игрока в карточке до табло не доезжало. Подписи «Игрок 1» и
-           «Игрок 2» сняты: домовый '?' — один знак «нет имени» на
-           продукт, а нумерованные подписи выглядели как настоящие имена. */
-        var p1Name = window.KSLT_LICO.имяНаЯзыке(m.player1, m.player1_name);
-        var p2Name = window.KSLT_LICO.имяНаЯзыке(m.player2, m.player2_name);
+           «Игрок 2» остаются: заглушку решает экран, а не дом. */
+        var p1Name = window.KSLT_LICO.имяНаЯзыке(m.player1, m.player1_name, 'Игрок 1');
+        var p2Name = window.KSLT_LICO.имяНаЯзыке(m.player2, m.player2_name, 'Игрок 2');
 
         var setsData = m.sets_data || [];
         var isCompleted = m.status === 'completed';
