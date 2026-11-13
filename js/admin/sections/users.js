@@ -199,13 +199,24 @@
            снимает отбор: иначе из него не выйти, не трогая другие
            поля. Клавиатура работает тем же путём — у карточки role и
            tabindex, Enter и пробел зовут то же нажатие. */
-        function поставитьОтбор(имя) {
-            usrFilterStat = (usrFilterStat === имя) ? '' : имя;
+        /* ОТМЕТКА ВЫБРАННОЙ КАРТОЧКИ ЖИВЁТ ОДНИМ МЕСТОМ И СТАВИТСЯ ЗАНОВО
+           ПОСЛЕ КАЖДОЙ ОТРИСОВКИ (12.11). Костя: «когда выбрал карточку,
+           непонятно, что выбрал — она не подсвечивается». Ставить класс
+           только в обработчике мало: раздел перерисовывает разметку
+           целиком, и отметка уходит вместе с ней, а отбор остаётся. */
+        function отметитьКарточки() {
             document.querySelectorAll('.ad-usr-card--knopka').forEach(function(к) {
-                var свой = к.dataset.usrstat === usrFilterStat && usrFilterStat !== '';
+                var свой = !!usrFilterStat && к.dataset.usrstat === usrFilterStat;
                 к.classList.toggle('ad-usr-card--vybran', свой);
                 к.setAttribute('aria-pressed', свой ? 'true' : 'false');
             });
+        }
+        A.отметитьКарточкиПользователей = отметитьКарточки;
+        отметитьКарточки();
+
+        function поставитьОтбор(имя) {
+            usrFilterStat = (usrFilterStat === имя) ? '' : имя;
+            отметитьКарточки();
             loadUsersList();
         }
         ['adUsrStatsGrid', 'adUsrBreakdown'].forEach(function(ид) {
@@ -335,6 +346,9 @@
 
         // Update stats — use ALL items for totals (funnel needs full data)
         updateUsrStats(items, periodFiltered, memMap);
+        /* Числа только что переписаны — отметка ставится следом, иначе
+           она переживёт не каждую отрисовку. */
+        if (A.отметитьКарточкиПользователей) A.отметитьКарточкиПользователей();
         renderUsrGrowthChart(items, delAll);
         usrAllItems = periodFiltered;
         items = periodFiltered;
