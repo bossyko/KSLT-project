@@ -118,8 +118,13 @@ const ОТКАТЫ = [
 
 ['токен капчи регистрации доходит до сервера и проверяется там',
  'supabase/functions/send-otp/index.ts',
- "if ((flow === 'forgot_password' || flow === 'register') && turnstileToken) {",
- "if (flow === 'forgot_password' && turnstileToken) {"],
+ "      if (flow === 'forgot_password' || flow === 'register') {\n        if (!turnstileToken) {",
+ "      if ((flow === 'forgot_password' || flow === 'register') && turnstileToken) {\n        if (false) {"],
+
+['послабление капчи действует только на своей машине',
+ 'js/auth.js',
+ "        if (!_signupToken && !_капчаНеОбязательна()) {",
+ "        if (!_signupToken && !_turnstileBroken) {"],
 
 ['отказ капчи по нашей вине не запирает человека',
  'supabase/functions/send-otp/index.ts', '    if (нашаБеда) {', '    if (false) {'],

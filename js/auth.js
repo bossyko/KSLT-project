@@ -198,10 +198,21 @@
     var TURNSTILE_SITE_KEY = '0x4AAAAAAEDoNUH1Z2T9Iiab';
     var _signupToken = null;
     var _forgotToken = null;
-    // Капча может не подняться: на localhost ключ не разрешён, у человека
-    // может не открыться challenges.cloudflare.com. Тогда токена не будет
-    // никогда, и требовать его — значит запереть вход насовсем.
+    /* ПОСЛАБЛЕНИЕ ЖИВЁТ ТОЛЬКО ТАМ, ГДЕ КЛЮЧ НЕ РАЗРЕШЁН (13.11).
+
+       Было: любая ошибка капчи снимала требование вовсе — и на боевой
+       тоже. Пока сервер токен не спрашивал, это было безвредно; теперь
+       он отказывает без токена, и послабление на боевой означало бы
+       «форма молчит, а человек не понимает почему».
+
+       На localhost ключ виджета не разрешён по определению: домен в
+       кабинете Cloudflare — tennis.kg. Там капча не поднимется никогда,
+       и свои пробы встали бы намертво. Поэтому послабление остаётся
+       ровно для своей машины, а на боевой человек видит внятное
+       «пройдите проверку». */
+    var _наСвоейМашине = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
     var _turnstileBroken = false;
+    var _капчаНеОбязательна = function () { return _turnstileBroken && _наСвоейМашине; };
 
     function initTurnstile() {
         if (typeof turnstile === 'undefined') return setTimeout(initTurnstile, 300);
@@ -874,7 +885,7 @@
             return;
         }
 
-        if (!_signupToken && !_turnstileBroken) {
+        if (!_signupToken && !_капчаНеОбязательна()) {
             showMessage(signupForm, L.errCaptcha, true);
             return;
         }
@@ -1363,7 +1374,7 @@
 
         var btn = forgotStep1.querySelector('.auth-btn');
 
-        if (!_forgotToken && !_turnstileBroken) {
+        if (!_forgotToken && !_капчаНеОбязательна()) {
             showMessage(forgotStep1, L.errCaptcha, true);
             return;
         }
