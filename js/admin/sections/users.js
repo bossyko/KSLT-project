@@ -336,8 +336,54 @@
      */
     var ПОРОГ_СВОЕЙ_КАРТОЧКИ = 5 * 60 * 1000;
 
+    /**
+     * ПОЧЕМУ КАРТОЧКИ НЕТ — НАЗЫВАЕТСЯ, А НЕ УГАДЫВАЕТСЯ ГЛАЗАМИ.
+     *
+     * Пустое место в столбце отвечало на вопрос «карточки нет», но не на
+     * следующий — «почему». А причин ровно четыре, и они разные по тому,
+     * что с ними делать:
+     *
+     *   сотрудник      админ и менеджер, карточка не заводится намеренно
+     *                  (ensure-player-card:62) — делать нечего
+     *   нет имени      профиль с пустым full_name (:74) — спросить человека
+     *   нет пола       gender не men и не women (:112) — спросить человека
+     *   ждёт вас       всё на месте, но функция нашла похожую карточку с
+     *                  чужим рейтингом и НЕ присвоила её (:88): подтвердить
+     *                  должен сам человек в кабинете
+     *
+     * ПОСЛЕДНЯЯ ПРИЧИНА — ВЫВОД ПО ИСКЛЮЧЕНИЮ, И ОНА ПОМЕЧЕНА ЧЕСТНО.
+     * Первые три видны прямо в профиле. Четвёртую отсюда не проверить:
+     * какого кандидата нашёл сервер, знает только сам сервер. Поэтому
+     * подпись говорит «похоже», а не утверждает.
+     *
+     * ПОЧЕМУ ЭТО ВАЖНО ИМЕННО СЕЙЧАС. Замер 13.11 по базе: карточка
+     * нашлась у 60 человек, заведена при регистрации у 22, нет вовсе у 5.
+     * Пятеро — это те, кто застрял на одной из причин выше, и до сих пор
+     * их нельзя было отличить друг от друга.
+     */
+    function причинаБезКарточки(u) {
+        var роль = u.role || 'user';
+        if (роль === 'admin' || роль === 'manager') return L.usrBezKartSotrudnik;
+        if (!(u.full_name || '').trim()) return L.usrBezKartNetImeni;
+        if (u.gender !== 'men' && u.gender !== 'women') return L.usrBezKartNetPola;
+        return L.usrBezKartZhdet;
+    }
+
     function мячикКарточки(u) {
-        if (!u.player_id) return '';
+        if (!u.player_id) {
+            /* СОТРУДНИК — НЕ БЕДА, И КРАСИТСЯ ИНАЧЕ. Остальные три
+               причины требуют действия, поэтому они заметнее. */
+            var роль = u.role || 'user';
+            var служебный = (роль === 'admin' || роль === 'manager');
+            var краскаБез = служебный
+                ? 'background:var(--alpha-white-08);color:var(--text-muted);'
+                : 'background:var(--warning-subtle);color:var(--warning);';
+            return '<span style="display:inline-flex;align-items:center;' +
+                   'margin-left:6px;padding:1px 6px;border-radius:4px;' +
+                   'font-size:var(--fs-2xs);font-weight:600;' + краскаБез + '"' +
+                   ' title="' + A.esc(L.usrBezKartTitle) + '">' +
+                   A.esc(причинаБезКарточки(u)) + '</span>';
+        }
         var к = usrКарточки[u.player_id];
         /* КАРТОЧКА БЕЗ ДАТЫ НЕ ВЫДАЁТСЯ ЗА НАЙДЕННУЮ. Нечем сравнить —
            значит ответа нет, и мячик молчит, а не врёт в одну сторону. */
@@ -350,16 +396,29 @@
            color. Эмодзи рисуется своей палитрой шрифта и на color не
            отзывается вовсе: оба вышли одинаково зелёными, различался
            один фон, и тот незаметно. Костя: «тёмный мячик и вовсе не
-           тёмный».
-           РАЗЛИЧАЮТСЯ НАЛИЧИЕМ ЗНАКА, А НЕ ЕГО ОТТЕНКОМ. Мячик стоит,
-           когда карточка нашлась; завели новую — не стоит ничего.
-           Пустое место читается с одного взгляда, оттенок — нет. */
-        if (!нашлась) return '';
+           тёмный». Красится СЛОВО рядом, а не знак.
+
+           ДВА ВОПРОСА — ДВА РАЗНЫХ МЕСТА В ЗНАЧКЕ, И ЭТО ВТОРАЯ ПОПРАВКА
+           ТОГО ЖЕ ДНЯ. Сначала я убрала мячик у новых карточек совсем:
+           наличие знака отвечало на «нашлась ли старая», но тем самым
+           пропал ответ на «есть ли карточка вообще», и Костя сразу это
+           увидел — «почему не привязаны другие».
+           Мячик СТОИТ У КАЖДОГО, у кого карточка есть: он про привязку.
+           Слово рядом говорит, откуда она взялась: «клуб» — карточка
+           ждала человека и нашлась при входе, «новая» — завели чистый
+           лист. Нет карточки — нет и значка целиком. */
         var очки = (к && к.points) || 0;
-        return '<span style="display:inline-block;margin-left:6px;padding:1px 6px;' +
-               'border-radius:4px;font-size:var(--fs-2xs);font-weight:600;' +
-               'background:var(--alpha-lime-12);color:var(--accent);"' +
-               ' title="' + A.esc(L.usrKartochkaNashlas + ' \u00B7 ' + очки) + '">&#127934;</span>';
+        var краска = нашлась
+            ? 'background:var(--alpha-lime-12);color:var(--accent);'
+            : 'background:var(--alpha-white-08);color:var(--text-muted);';
+        var слово = нашлась ? L.usrKartochkaKlub : L.usrKartochkaNovaya;
+        var подсказка = нашлась
+            ? L.usrKartochkaNashlas + ' \u00B7 ' + очки
+            : L.usrKartochkaZaveli;
+        return '<span style="display:inline-flex;align-items:center;gap:3px;' +
+               'margin-left:6px;padding:1px 6px;border-radius:4px;' +
+               'font-size:var(--fs-2xs);font-weight:600;' + краска + '"' +
+               ' title="' + A.esc(подсказка) + '">&#127934;' + A.esc(слово) + '</span>';
     }
 
     async function loadUsersList() {
@@ -367,7 +426,7 @@
         var isAdm = A.currentRole === 'admin';
 
         var query = A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, player_id')
+            .select('id, full_name, email, role, avatar_url, phone, telegram_chat_id, last_seen, created_at, banned_until, player_id, gender')
             .order('created_at', { ascending: false });
 
         if (usrFilterRole) {
