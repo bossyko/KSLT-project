@@ -138,10 +138,32 @@ async function картаСвободна(db: any, playerId: string): Promise<bo
  * одинаковый ключ.
  */
 function ключ(имя: string): string {
-  return транслит(имя)
-    .replace(/y/g, 'i')      // Айсулуу пишут и Aisuluu, и Aysuluu
-    .replace(/(.)\1+/g, '$1') // двойные буквы: Aisuluu ↔ Айсулу
-    .split('-').filter(Boolean).sort().join('-')
+  /* РАЗНОПИСАНИЯ СХЛОПЫВАЮТСЯ ДО ОДНОГО ВИДА (13.11).
+
+     ЧТО БЫЛО. Ключ знал только про «y/i» и двойные буквы, и расходился
+     на самых частых у нас буквах. Замер на живых случаях:
+       «Данияр Атаханов»  → atahanov-daniar
+       «Daniyar Atakhanov»→ atakhanov-daniar   ← не сошлось, завели дубль
+       «Константин Хан»   → han-konstantin
+       «Konstantin Khan»  → khan-konstantin    ← не сошлось
+       «Азамат Джумабаев» → zhumabaev…, «Azamat Jumabaev» → jumabaev…
+     Оба дубля 12–13.11 (Атаханов, Джумабаев) родились ровно здесь: имя
+     в базе кириллицей, у человека латиницей, и «х» он пишет kh, а «ж» —
+     j. Функция честно не находила карточку и заводила новую.
+
+     ТЕПЕРЬ каждая такая буква сводится к ОДНОМУ виду. Порядок замен
+     важен: dzh разбирается раньше zh, shch раньше sch.
+     Набор проверяется пробой на таблице написаний —
+     tools/check-klyuch-imeni.js, — а не доверием к этому списку. */
+  let т = транслит(имя)
+  т = т.replace(/shch/g, 'sch').replace(/sch/g, 'sh')          // щ: shch · sch · sh
+  т = т.replace(/dzh/g, 'j').replace(/dj/g, 'j').replace(/zh/g, 'j') // ж: dzh · dj · zh · j
+  т = т.replace(/kh/g, 'h')                                     // х: kh · h
+  т = т.replace(/x/g, 'ks')                                     // Alexandr · Aleksandr
+  т = т.replace(/ts/g, 'c').replace(/tz/g, 'c')                 // ц: ts · tz · c
+  т = т.replace(/y/g, 'i')      // Айсулуу пишут и Aisuluu, и Aysuluu
+  т = т.replace(/(.)\1+/g, '$1') // двойные буквы: Aisuluu ↔ Айсулу
+  return т.split('-').filter(Boolean).sort().join('-')
 }
 
 /** Имя латиницей: «Максим Серко» → «maksim-serko». */
