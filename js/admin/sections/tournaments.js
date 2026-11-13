@@ -158,6 +158,9 @@
                 '</div>' +
 
             '</div>' +
+            /* ОСТАТОК НАЗЫВАЕТСЯ ВСЛУХ, А НЕ ПРОПАДАЕТ. Пустым блок не
+               занимает места: строка появляется только когда остаток есть. */
+            '<div id="adTrnNiKuda" class="ad-trn-nikuda" hidden></div>' +
             '<div class="ad-filter-row ad-filter-sticky" id="adTrnFilterRow">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adTrnSearch" placeholder="' + L.trnSearch + '">' +
                 '<select class="ad-field-input ad-filter-select" id="adTrnCategoryFilter">' + catFilterHtml + '</select>' +
@@ -318,10 +321,24 @@
             { gender: 'mixed', format: 'mixed_doubles', totalId: 'adTrnTotalMX', bodyId: 'adTrnBodyMX' }
         ];
 
+        /* СУММА КАРТОЧЕК ОБЯЗАНА СХОДИТЬСЯ С ЧИСЛОМ ТУРНИРОВ (13.11).
+
+           Карточек пять, и каждая берёт СВОЮ пару «состав + формат».
+           Пары, которой нет ни в одной, форма завести не мешает: турнир
+           с format=doubles и gender=mixed не попадал никуда и ТИХО
+           выпадал из статистики — так прожили четыре турнира, и заметили
+           это не на экране, а разбором.
+
+           ЛЮБОЕ МОЛЧАЛИВОЕ ВЫПАДЕНИЕ ИЗ СТАТИСТИКИ ДОЛЖНО БЫТЬ ВИДНО.
+           Поэтому попавшие считаются, и остаток показывается строкой —
+           с названиями, чтобы админ знал, какие именно турниры править. */
+        var попалоВКарточки = 0;
+
         cards.forEach(function(card) {
             var filtered = trnAllData.filter(function(t) {
                 return t.gender === card.gender && t.format === card.format;
             });
+            попалоВКарточки += filtered.length;
             var cardTotal = filtered.length;
             var totalEl = document.getElementById(card.totalId);
             var bodyEl = document.getElementById(card.bodyId);
@@ -354,6 +371,45 @@
             bodyEl.innerHTML = html;
         });
 
+        /* ОСТАТОК. Считается вычитанием, а не вторым перебором с теми же
+           условиями: два прохода по одному правилу разошлись бы на первой
+           же правке карточек. */
+        var ниКуда = trnAllData.filter(function(t) {
+            return !cards.some(function(card) {
+                return t.gender === card.gender && t.format === card.format;
+            });
+        });
+
+        var блокНиКуда = document.getElementById('adTrnNiKuda');
+        if (блокНиКуда) {
+            if (!ниКуда.length) {
+                блокНиКуда.hidden = true;
+                блокНиКуда.innerHTML = '';
+            } else {
+                var имена = ниКуда.slice(0, 8).map(function(t) {
+                    return '<li>' + A.esc(t.title || t.id) +
+                           ' <span class="ad-trn-nikuda-para">' +
+                           A.esc(String(t.format || '—') + ' + ' + String(t.gender || '—')) +
+                           '</span></li>';
+                }).join('');
+                if (ниКуда.length > 8) имена += '<li>…</li>';
+                блокНиКуда.hidden = false;
+                блокНиКуда.innerHTML =
+                    '<div class="ad-trn-nikuda-head">' + L.trnStatNiKuda + ': ' + ниКуда.length + '</div>' +
+                    '<div class="ad-trn-nikuda-why">' + L.trnStatNiKudaPochemu + '</div>' +
+                    '<ul class="ad-trn-nikuda-list">' + имена + '</ul>';
+            }
+        }
+
+        /* СУММА ОБЯЗАНА СХОДИТЬСЯ, И ЭТО ПРОВЕРЯЕТСЯ, А НЕ ПОДРАЗУМЕВАЕТСЯ.
+           Если карточки и остаток вместе не дают всего числа турниров,
+           значит условия карточек пересеклись — один турнир посчитан
+           дважды. Молча такое не проходит. */
+        if (попалоВКарточки + ниКуда.length !== trnAllData.length) {
+            console.error('[KSLT] статистика турниров не сходится: по карточкам ' +
+                попалоВКарточки + ', вне карточек ' + ниКуда.length +
+                ', всего ' + trnAllData.length);
+        }
     }
 
     // ---- Tournament Column Header ----

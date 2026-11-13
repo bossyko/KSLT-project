@@ -464,6 +464,8 @@
         trnStatMenDoubles: 'Мужские парные',
         trnStatWomenDoubles: 'Женские парные',
         trnStatMixedDoubles: 'Смешанные парные',
+        trnStatNiKuda: 'Не попало ни в одну карточку',
+        trnStatNiKudaPochemu: 'у этих турниров сочетание формата и состава, которому не отвечает ни одна карточка',
         trnStatRating: 'Рейтинговых',
         trnStatFriendly: 'Дружеских',
         trnSearch: 'Поиск по названию...',

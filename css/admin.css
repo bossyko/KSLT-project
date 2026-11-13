@@ -9296,3 +9296,42 @@ select.ad-field-input {
 /* Признак работы — тот же, что у перестановки мест 03.11: строка
    приглушается и запирается, пока решение идёт в базу. */
 .ad-sft-busy { opacity: 0.55; cursor: progress; transition: opacity 0.15s; }
+
+/* ТУРНИРЫ, НЕ ПОПАВШИЕ НИ В ОДНУ КАРТОЧКУ (13.11).
+
+   Пять карточек статистики берут каждая свою пару «состав + формат», а
+   форма позволяет завести пару, которой нет ни в одной (doubles+mixed).
+   Такие турниры ТИХО выпадали из статистики — четыре прожили так
+   незамеченными. Строка появляется только когда остаток есть, и потому
+   не занимает места в обычный день. Тон предупреждения, а не ошибки:
+   это не поломка, это повод поправить турнир. */
+.ad-trn-nikuda {
+    margin-top: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: var(--bw-hair) solid var(--warning);
+    border-radius: var(--radius-md);
+    background: var(--alpha-orange-06);
+}
+
+.ad-trn-nikuda-head {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--warning);
+}
+
+.ad-trn-nikuda-why {
+    margin-top: var(--space-1);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+
+.ad-trn-nikuda-list {
+    margin: var(--space-2) 0 0;
+    padding-left: var(--space-4);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+}
+
+.ad-trn-nikuda-para {
+    color: var(--text-muted);
+}
