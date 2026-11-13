@@ -13,7 +13,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['js/admin/sections/bracket.js', 'js/tournament-detail.js'];
+const ФАЙЛЫ = ['js/admin/sections/bracket.js', 'js/tournament-detail.js', 'js/bracket-draw.js'];
 
 /* [файл, что ищем, на что меняем, какое правило должно упасть] */
 const ОТКАТЫ = [
@@ -22,19 +22,29 @@ const ОТКАТЫ = [
      встречается трижды, и откат отказался работать. Берём комментарий
      про групповой турнир: он в файле один. */
   ['js/admin/sections/bracket.js',
-   '// в групповом турнире draw_size не задают',
-   '// в групповом турнире draw_size не задают\n        var лишний = tournament.draw_size || 16;',
+   'var размерСетки = window.KSLT_DRAW.размерПлейофф(plMatches) || 16;',
+   'var размерСетки = tournament.draw_size || 16;',
    'счёт по полю draw_size не расползается: ровно 14 мест'],
 
   ['js/admin/sections/bracket.js',
-   'var размерСетки = первыйКруг ? первыйКруг * 2 : 16;',
-   'var размерСетки = 16;',
-   'счёт по матчам первого круга — ровно одно место'],
+   'window.KSLT_DRAW.размерПлейофф(plMatches) || 16',
+   'plMatches.filter(function(п) { return п.round_number === 1; }).length ? plMatches.filter(function(п) { return п.round_number === 1; }).length * 2 : 16',
+   'админка берёт размер плей-офф у дома'],
 
   ['js/tournament-detail.js',
-   'var plDrawSize = groupCount * qualifiers;',
-   'var plDrawSize = 8;',
-   'публичная сетка группового турнира считает круги по настройкам групп'],
+   'var plDrawSize = KSLT_DRAW.размерПлейофф(ploffMatches);',
+   'var plDrawSize = 0;',
+   'публичная страница берёт размер плей-офф у того же дома'],
+
+  ['js/bracket-draw.js',
+   "            if (м.round === '3RD' || м.round === 'IG') continue;",
+   "            if (м.round === '3RD') continue;",
+   'дом не считает доп. матчи линиями сетки'],
+
+  ['js/tournament-detail.js',
+   '                    if (!plDrawSize) {\n                        plDrawSize = groupCount * qualifiers;',
+   '                    if (true) {\n                        plDrawSize = groupCount * qualifiers;',
+   'запасной счёт по настройкам стоит ПОСЛЕ дома, а не вместо него'],
 
   ['js/tournament-detail.js',
    'var plTotalRounds = Math.log2(plDrawSize);',

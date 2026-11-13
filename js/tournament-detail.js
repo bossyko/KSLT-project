@@ -1675,9 +1675,24 @@ function renderSupabaseTournament(t, matches, registrations, playersMap, courtDa
 
                 // Playoff bracket (SE-style visual bracket above groups)
                 if (hasPlayoff) {
-                    // Determine playoff draw size
-                    var plDrawSize = groupCount * qualifiers;
-                    var d = 2; while (d < plDrawSize) d *= 2; plDrawSize = d;
+                    /* РАЗМЕР СЕТКИ ПЛЕЙ-ОФФ — ДОМ (13.11):
+                       KSLT_DRAW.размерПлейофф. Здесь он считался по
+                       настройкам групп — сколько пар ДОЛЖНО выйти, — а
+                       админка по матчам, то есть по тому, что есть на
+                       самом деле. 13.11 это разошлось: настройка
+                       говорила «из группы выходит один», 4 * 1 = 4, и
+                       зритель видел два круга вместо трёх — финал со
+                       страницы пропал.
+                       ЗАПАСНОЙ ХОД ОСТАВЛЕН НА СЛУЧАЙ, когда матчей
+                       первого круга нет вовсе (сетка заведена сразу с
+                       полуфиналов): тогда считаем по настройкам, как
+                       раньше. Это не второе определение, а ответ на
+                       вопрос, на который матчи молчат. */
+                    var plDrawSize = KSLT_DRAW.размерПлейофф(ploffMatches);
+                    if (!plDrawSize) {
+                        plDrawSize = groupCount * qualifiers;
+                        var d = 2; while (d < plDrawSize) d *= 2; plDrawSize = d;
+                    }
                     var plTotalRounds = Math.log2(plDrawSize);
 
                     // Build players array for getPlayer()
