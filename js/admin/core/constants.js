@@ -1748,6 +1748,7 @@
         liveYoutubeBad: 'Ссылку не разобрали — кадр откроется пустым. Нужна ссылка YouTube: live, watch, youtu.be или shorts.',
         liveBestOf: 'Кол-во сетов',
         liveSetFormat: 'Формат сета',
+        liveTBD: 'не определён',
         liveTournLabel: 'Турнир',
         liveModeTournament: 'Из турнирного матча',
         liveModeFree: 'Свободный матч',

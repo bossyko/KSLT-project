@@ -15,7 +15,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['js/admin/sections/users.js', 'js/kslt-lico.js', 'js/scoreboard.js', 'js/live-match.js', 'js/dashboard.js',
+const ФАЙЛЫ = ['js/admin/sections/live.js', 'js/admin/sections/users.js', 'js/kslt-lico.js', 'js/scoreboard.js', 'js/live-match.js', 'js/dashboard.js',
                'supabase/functions/ensure-player-card/index.ts',
                'index.html', 'index-en.html', 'index-kg.html',
                'pages/scoreboard.html', 'maket/stend-tablo.html'];
@@ -104,6 +104,16 @@ const ОТКАТЫ = [
    "                        (режим === 'smena' ? '' :",
    "                        (false ? '' :",
    'при смене не предлагается завести ещё одну карточку'],
+  // --- заглушка не становится данными (f24, 13.11) ---
+  ['js/admin/sections/live.js',
+   '                        m._p1Name = p1 ? p1.name : null;',
+   "                        m._p1Name = p1 ? (p1.name) : 'TBD';",
+   'в кэш кладётся правда, а не заглушка'],
+
+  ['js/admin/sections/live.js',
+   '                row.player1_name = m._p1Name || null;',
+   '                row.player1_name = m._p1Name;',
+   'в базу не пишется заглушка вместо null'],
 ];
 
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-imya-'));

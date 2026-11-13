@@ -428,7 +428,7 @@
             if (!mid) { preview.style.display = 'none'; return; }
             var m = cachedMatches.find(function(x) { return x.id === mid; });
             if (!m) return;
-            showPlayersPreview(m._p1Name, m._p2Name);
+            showPlayersPreview(дляПоказа(m._p1Name), дляПоказа(m._p2Name));
             // Auto-fill tournament label
             var tournSelect = document.getElementById('liveTournSelect');
             var tournName = tournSelect.options[tournSelect.selectedIndex].text;
@@ -442,8 +442,8 @@
             if (!bid) { preview.style.display = 'none'; return; }
             var b = cachedBattles.find(function(x) { return x.id === bid; });
             if (!b) return;
-            showPlayersPreview(b._p1Name, b._p2Name);
-            document.getElementById('liveTournLabel').value = b.battle_title || (b._p1Name + ' vs ' + b._p2Name);
+            showPlayersPreview(дляПоказа(b._p1Name), дляПоказа(b._p2Name));
+            document.getElementById('liveTournLabel').value = b.battle_title || (дляПоказа(b._p1Name) + ' vs ' + дляПоказа(b._p2Name));
         });
 
         // Sponsor upload
@@ -536,8 +536,12 @@
                 row.match_id = m.id;
                 row.player1_id = m.player1_id || null;
                 row.player2_id = m.player2_id || null;
-                row.player1_name = m._p1Name;
-                row.player2_name = m._p2Name;
+                /* СНИМОК ИМЕНИ, А НЕ ЗАГЛУШКА. Пусто значит «карточка есть,
+                   имя берите из неё»; строка нужна там, где карточки нет —
+                   экрану судьи и гостю без профиля. Писать сюда «TBD»
+                   значило бы выдать заглушку за имя человека. */
+                row.player1_name = m._p1Name || null;
+                row.player2_name = m._p2Name || null;
 
             } else if (mode === 'battle') {
                 var bid = document.getElementById('liveBattleSelect').value;
@@ -546,8 +550,8 @@
                 if (!b) return;
                 row.player1_id = b.challenger_player_id || null;
                 row.player2_id = b.opponent_player_id || null;
-                row.player1_name = b._p1Name;
-                row.player2_name = b._p2Name;
+                row.player1_name = b._p1Name || null;
+                row.player2_name = b._p2Name || null;
             }
 
             A.client.from('live_matches').insert(row).select().then(function(res) {
@@ -557,6 +561,19 @@
                 loadData();
             });
         });
+    }
+
+    /**
+     * ЗАГЛУШКА ЖИВЁТ ТОЛЬКО НА ЭКРАНЕ.
+     *
+     * У матча из сетки соперник может быть ещё не определён — полуфинал
+     * составлен, а кто в нём играет, решится завтра. Показать это надо,
+     * записать в базу нельзя: `live_matches.player1_name` читают главная,
+     * табло, страница матча и экран судьи, и строка «TBD» выглядела бы
+     * там настоящим именем человека.
+     */
+    function дляПоказа(имя) {
+        return имя || L.liveTBD;
     }
 
     function showPlayersPreview(p1, p2) {
@@ -657,8 +674,14 @@
                     cachedMatches = matches.map(function(m) {
                         var p1 = pMap[m.player1_id];
                         var p2 = pMap[m.player2_id];
-                        m._p1Name = p1 ? (p1.name) : 'TBD';
-                        m._p2Name = p2 ? (p2.name) : 'TBD';
+                        /* В КЭШ — ПРАВДА, ЗАГЛУШКА ТОЛЬКО ПРИ ПОКАЗЕ (13.11).
+                           Здесь стояло 'TBD', и эта же строка уходила в базу
+                           при сохранении — список и запись брали одно поле.
+                           Заглушка разметки становилась данными — её потом
+                           видел каждый зритель на главной и на табло, а
+                           починить это можно было только запросом. */
+                        m._p1Name = p1 ? p1.name : null;
+                        m._p2Name = p2 ? p2.name : null;
                         return m;
                     });
 
@@ -666,7 +689,7 @@
                     cachedMatches.forEach(function(m) {
                         var roundLabel = ROUND_MAP[m.round_number] || ('R' + m.round_number);
                         if (m.round === '3RD') roundLabel = ROUND_MAP[6];
-                        html += '<option value="' + m.id + '">' + roundLabel + ': ' + A.esc(m._p1Name) + ' vs ' + A.esc(m._p2Name) + '</option>';
+                        html += '<option value="' + m.id + '">' + roundLabel + ': ' + A.esc(дляПоказа(m._p1Name)) + ' vs ' + A.esc(дляПоказа(m._p2Name)) + '</option>';
                     });
                     if (sel) sel.innerHTML = html;
                 });
@@ -706,8 +729,9 @@
                     cachedBattles = battles.map(function(b) {
                         var p1 = pMap[b.challenger_player_id];
                         var p2 = pMap[b.opponent_player_id];
-                        b._p1Name = p1 ? (p1.name) : 'TBD';
-                        b._p2Name = p2 ? (p2.name) : 'TBD';
+                        /* То же и у вызовов: в кэше null, заглушка — при показе. */
+                        b._p1Name = p1 ? p1.name : null;
+                        b._p2Name = p2 ? p2.name : null;
                         return b;
                     });
 
@@ -715,7 +739,7 @@
                     if (!sel) return;
                     var html = '<option value="">' + L.liveSelectBattle + '</option>';
                     cachedBattles.forEach(function(b) {
-                        var label = b.battle_title || (b._p1Name + ' vs ' + b._p2Name);
+                        var label = b.battle_title || (дляПоказа(b._p1Name) + ' vs ' + дляПоказа(b._p2Name));
                         html += '<option value="' + b.id + '">' + A.esc(label) + '</option>';
                     });
                     sel.innerHTML = html;
