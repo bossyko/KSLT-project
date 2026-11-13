@@ -45,7 +45,12 @@
 
         var isAdm = A.currentRole === 'admin';
 
-        var curMonthName = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][new Date().getMonth()];
+        /* ПОДПИСЬ МЕСЯЦА БЕРЁТ ТОТ ЖЕ ДЕНЬ, ЧТО И ГРАФИК (13.11). Было
+           new Date().getMonth() — месяц по часам смотрящего: в ночь
+           смены месяца заголовок называл бы один месяц, а ось строилась
+           бы по другому. ОДНО ОПРЕДЕЛЕНИЕ НА ОДНО ПОНЯТИЕ. */
+        var сегодняКлуба = window.KSLT_VREMYA.сегодня();
+        var curMonthName = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][parseInt(сегодняКлуба.slice(5, 7), 10) - 1];
 
         container.innerHTML =
             '<div class="ad-section-header">' +
@@ -56,7 +61,7 @@
             // Chart (current month, full width)
             '<div class="ad-dash-chart-card">' +
                 '<div class="ad-table-card-header">' +
-                    '<div class="ad-table-card-title">' + L.usrChartTitle + ' — ' + curMonthName + ' ' + new Date().getFullYear() + '</div>' +
+                    '<div class="ad-table-card-title">' + L.usrChartTitle + ' — ' + curMonthName + ' ' + сегодняКлуба.slice(0, 4) + '</div>' +
                 '</div>' +
                 '<div style="position:relative;height:260px;padding:12px;">' +
                     '<canvas id="adUsrGrowthChart"></canvas>' +
@@ -1480,10 +1485,24 @@
         var canvas = document.getElementById('adUsrGrowthChart');
         if (!canvas || typeof Chart === 'undefined') return;
 
-        var now = new Date();
-        var year = now.getFullYear();
-        var month = now.getMonth();
-        var today = now.getDate();
+        /* ДЕНЬ СЧИТАЕТСЯ ВРЕМЕНЕМ КЛУБА, А НЕ ЧАСАМИ СМОТРЯЩЕГО (13.11).
+
+           ЧТО БЫЛО. «Сегодня» бралось как now.getDate() — день по часам
+           того, кто открыл админку, — а день каждой записи вырезался из
+           строки created_at, то есть по Гринвичу. ОДНО ПОНЯТИЕ «СЕГОДНЯ»
+           БЫЛО ОПРЕДЕЛЕНО ДВАЖДЫ, И БЕДА РОДИЛАСЬ РОВНО НА ШВЕ: Костя
+           смотрел из Чикаго вечером 12-го, в Гринвиче шло уже 13-е, и
+           условие day <= today выбрасывало ВСЕХ, кто зарегистрировался
+           «тринадцатого». График показал прирост 1 при 37 новых за месяц
+           на соседней карточке — экран противоречил сам себе.
+
+           ТЕПЕРЬ ОБА КОНЦА ОТ ОДНОГО ДОМА: и ось, и день записи считает
+           KSLT_VREMYA по зоне клуба (Asia/Bishkek). График больше не
+           зависит от того, из какого пояса на него смотрят. */
+        var сегодня = window.KSLT_VREMYA.сегодня();      // 'ГГГГ-ММ-ДД' в Бишкеке
+        var monthKey = сегодня.slice(0, 7);
+        var month = parseInt(сегодня.slice(5, 7), 10) - 1;
+        var today = parseInt(сегодня.slice(8, 10), 10);
 
         // Build labels: days 1..today
         var labels = [];
@@ -1491,17 +1510,15 @@
             labels.push(d);
         }
 
-        // Month key for filtering (e.g. "2026-03")
-        var monthKey = year + '-' + String(month + 1).padStart(2, '0');
-
         // Count registrations per day this month
         var regPerDay = {};
         for (var i = 1; i <= today; i++) regPerDay[i] = 0;
 
         allProfiles.forEach(function(p) {
             if (!p.created_at) return;
-            if (p.created_at.slice(0, 7) !== monthKey) return;
-            var day = parseInt(p.created_at.slice(8, 10), 10);
+            var деньЗаписи = window.KSLT_VREMYA.деньПоБишкеку(p.created_at);
+            if (деньЗаписи.slice(0, 7) !== monthKey) return;
+            var day = parseInt(деньЗаписи.slice(8, 10), 10);
             if (day >= 1 && day <= today) regPerDay[day]++;
         });
 
@@ -1511,8 +1528,9 @@
 
         allProfiles.forEach(function(pr) {
             if (!pr.player_id || !pr.created_at) return;
-            if (pr.created_at.slice(0, 7) !== monthKey) return;
-            var day = parseInt(pr.created_at.slice(8, 10), 10);
+            var деньЗаписи = window.KSLT_VREMYA.деньПоБишкеку(pr.created_at);
+            if (деньЗаписи.slice(0, 7) !== monthKey) return;
+            var day = parseInt(деньЗаписи.slice(8, 10), 10);
             if (day >= 1 && day <= today) plrPerDay[day]++;
         });
 
@@ -1522,8 +1540,9 @@
 
         allDeleted.forEach(function(del) {
             if (!del.deleted_at) return;
-            if (del.deleted_at.slice(0, 7) !== monthKey) return;
-            var day = parseInt(del.deleted_at.slice(8, 10), 10);
+            var деньЗаписи = window.KSLT_VREMYA.деньПоБишкеку(del.deleted_at);
+            if (деньЗаписи.slice(0, 7) !== monthKey) return;
+            var day = parseInt(деньЗаписи.slice(8, 10), 10);
             if (day >= 1 && day <= today) delPerDay[day]++;
         });
 
@@ -1662,8 +1681,11 @@
         var tgCount = 0, bannedCount = 0;
         var now = new Date();
 
-        // Count new this month
-        var monthStart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+        /* ГРАНИЦА МЕСЯЦА — ПО ВРЕМЕНИ КЛУБА (13.11). Было по часам
+           смотрящего, а сравнивалось с created_at из базы: тот же шов,
+           что чинил график выше. Карточка «Новых» и ось графика обязаны
+           считать один и тот же месяц. */
+        var monthStart = window.KSLT_VREMYA.сегодня().slice(0, 7) + '-01';
         var newThisMonth = 0;
 
         allItems.forEach(function(u) {
@@ -1672,7 +1694,7 @@
             if (u.banned_until && new Date(u.banned_until) > now) bannedCount++;
             var mem = memMap[u.id];
             if (mem && mem.status === 'active') activeMembers++;
-            if (u.created_at && u.created_at.slice(0, 10) >= monthStart) newThisMonth++;
+            if (u.created_at && window.KSLT_VREMYA.деньПоБишкеку(u.created_at) >= monthStart) newThisMonth++;
         });
 
         var conversionPct = total > 0 ? Math.round(linkedPlayers / total * 100) : 0;
