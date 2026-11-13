@@ -110,14 +110,34 @@
                 '<button class="ad-btn ad-btn-sm" id="adUsrPrdApply" style="display:' + (usrPeriodMode === 'custom' ? 'inline-flex' : 'none') + ';">' + L.usrPrdApply + '</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrPdfBtn" title="' + L.usrPdfExport + '">📄 Печать</button>' +
                 '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adUsrExcelBtn" title="' + L.usrExcelExport + '">📊 CSV</button>' +
-                '<button class="ad-btn ad-btn-sm ad-btn-outline" id="adLinkHistoryBtn">' + L.linkHistory + '</button>' +
             '</div>' +
-            '<div id="adLinkHistory" style="display:none;margin-bottom:16px;"></div>' +
 
-            // Заявки на привязку карточки: игрок нашёл себя в базе клуба и
-            // просит отдать ему карточку. Отдаём руками — по имени карточку
-            // не проверить, а с ней уходят рейтинг и вся история
-            '<div id="adUsrLinkRequests"></div>' +
+            /* ЗАЯВКИ НА ПРИВЯЗКУ КАРТОЧКИ — ДВА ВИДА ОДНОГО СПИСКА, А НЕ
+               ВЫГРУЗКА (12.11).
+               Было: кнопка «История заявок» стояла третьей подряд с
+               «Печать» и «CSV», тем же видом ad-btn-sm ad-btn-outline.
+               Соседи отдают файл, а она раскрывала ВТОРУЮ таблицу над
+               основной и сдвигала весь раздел вниз. Вид обещал одно,
+               делал другое.
+               Стало: вкладки над списком — ожидающие и решённые. Это и
+               есть то, чем они были: два вида одного списка, у которых
+               разный статус. Компонент .ad-rat-tabs взят готовым, его
+               уже носят Игроки, Вызовы, Live, Лояльность и Настройки —
+               новых не рисуем.
+               Игрок нашёл себя в базе клуба и просит отдать ему
+               карточку. Отдаём руками: по имени карточку не проверить,
+               а с ней уходят рейтинг и вся история. */
+            '<div class="ad-rat-tabs" id="adUsrLinkTabs">' +
+                '<button class="ad-rat-tab active" data-usrlink="pending">' + L.linkPending +
+                    ' <span id="adUsrLinkCount"></span></button>' +
+                '<button class="ad-rat-tab" data-usrlink="history">' + L.linkHistory + '</button>' +
+            '</div>' +
+            '<div class="ad-rat-panel active" id="adUsrLinkPanelPending">' +
+                '<div id="adUsrLinkRequests"></div>' +
+            '</div>' +
+            '<div class="ad-rat-panel" id="adUsrLinkPanelHistory">' +
+                '<div id="adLinkHistory"></div>' +
+            '</div>' +
 
             '<div class="ad-filter-row ad-filter-sticky">' +
                 '<input type="text" class="ad-field-input ad-filter-search" id="adUsrSearch" placeholder="' + L.usrSearch + '" value="' + A.esc(usrSearchQuery) + '">' +
@@ -1698,7 +1718,20 @@
             .order('created_at', { ascending: true });
 
         var заявки = res.data || [];
-        if (!заявки.length) { box.innerHTML = ''; return; }
+
+        /* СЧЁТЧИК НА ВКЛАДКЕ — ИЗ ТОГО ЖЕ ЗАПРОСА, А НЕ ВТОРЫМ. Число
+           ожидающих уже здесь; спрашивать его ещё раз значило бы завести
+           второй источник одного числа. */
+        var счёт = document.getElementById('adUsrLinkCount');
+        if (счёт) счёт.textContent = заявки.length ? '· ' + заявки.length : '';
+
+        if (!заявки.length) {
+            /* ПУСТОЕ СОСТОЯНИЕ — ГОТОВОЙ УТИЛИТОЙ, А НЕ ИНЛАЙНОМ:
+               .ad-tablica-pusto уже носят десять мест админки, и отступ
+               в ней стоит на ступени шкалы. */
+            box.innerHTML = '<div class="ad-tablica-pusto">' + L.linkPendingEmpty + '</div>';
+            return;
+        }
 
         var профили = {}, карточки = {};
         var pr = await A.client.from('profiles').select('id, full_name, email, phone, role')
@@ -1768,13 +1801,27 @@
     }
 
     function подключитьИсторию(box) {
-        var btn = box.querySelector('#adLinkHistoryBtn');
-        if (!btn) return;
-        btn.addEventListener('click', async function() {
+        var вкладки = box.querySelector('#adUsrLinkTabs');
+        if (!вкладки) return;
+        var загружена = false;
+        вкладки.addEventListener('click', async function(e) {
+            var вкладка = e.target.closest('.ad-rat-tab');
+            if (!вкладка) return;
+            var какая = вкладка.dataset.usrlink;
+            вкладки.querySelectorAll('.ad-rat-tab').forEach(function(т) {
+                т.classList.toggle('active', т === вкладка);
+            });
+            box.querySelector('#adUsrLinkPanelPending').classList.toggle('active', какая === 'pending');
+            box.querySelector('#adUsrLinkPanelHistory').classList.toggle('active', какая === 'history');
+            if (какая !== 'history') return;
+
             var окно = box.querySelector('#adLinkHistory');
-            if (окно.style.display !== 'none') { окно.style.display = 'none'; return; }
-            окно.style.display = '';
-            окно.innerHTML = '<div style="padding:10px;color:var(--text-muted);">…</div>';
+            /* ИСТОРИЯ ЧИТАЕТСЯ ОДИН РАЗ ЗА ОТРИСОВКУ: решённые заявки
+               не меняются, пока админ не решит новую, а каждое нажатие
+               вкладки раньше било в базу заново. */
+            if (загружена) return;
+            загружена = true;
+            окно.innerHTML = '<div class="ad-tablica-pusto">…</div>';
 
             var res = await A.client.from('player_link_requests')
                 .select('id, profile_id, player_id, status, note, created_at, decided_at')
@@ -1783,7 +1830,7 @@
                 .limit(30);
             var строки = res.data || [];
             if (!строки.length) {
-                окно.innerHTML = '<div style="padding:10px;color:var(--text-muted);">' + L.linkHistoryEmpty + '</div>';
+                окно.innerHTML = '<div class="ad-tablica-pusto">' + L.linkHistoryEmpty + '</div>';
                 return;
             }
 

@@ -739,6 +739,8 @@
         linkApproved: 'Карточка привязана',
         linkRejected: 'Заявка отклонена',
         linkStale: 'Игрок сменил выбор — список обновлён',
+        linkPending: 'Ожидают решения',
+        linkPendingEmpty: 'Заявок на привязку нет',
         linkHistory: 'История заявок',
         linkHistoryEmpty: 'Решённых заявок пока нет',
         linkStApproved: 'Привязана',

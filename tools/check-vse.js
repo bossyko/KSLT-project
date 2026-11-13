@@ -486,6 +486,7 @@ const КУСКИ = [
     ['карта сайта', 'check-karta-sayta.js', 'check-karta-sayta-otkat.js'],
     ['кнопка наверх', 'check-knopka-naverh.js', 'check-knopka-naverh-otkat.js'],
     ['ссылка на вкладку', 'check-ssylka-vkladka.js', 'check-ssylka-vkladka-otkat.js'],
+    ['заявки вкладками', 'check-zayavki-vkladki.js', 'check-zayavki-vkladki-otkat.js'],
 
     /* СТОЛБЦЫ ТАБЛИЦ — colgroup по числу колонок (h158, 12.11). */
     ['столбцы таблиц', 'check-stolbcy-tablic.js', 'check-stolbcy-tablic-otkat.js'],
