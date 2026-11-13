@@ -10,6 +10,11 @@
 
     var usrSearchQuery = '';
     var usrFilterRole = '';
+    /* КАРТОЧКА СТАТИСТИКИ — ЭТО ВОПРОС К СПИСКУ, А НЕ ТАБЛИЧКА (12.11).
+       Слово Кости: «карточки не кликабельные, можно будет сделать —
+       при нажатии отображалась инфа той карточки». Нажатие ставит
+       фильтр списка, повторное снимает. Пусто — список как был. */
+    var usrFilterStat = '';
     var usrPeriodMode = '', usrDateFrom = '', usrDateTo = '';
     var usrAllItems = [], usrMemMap = {};
     /* ОТБОР РАЗДЕЛА — ОДНО ОПРЕДЕЛЕНИЕ. То, что человек видит в таблице:
@@ -59,11 +64,11 @@
 
             // Stats cards — funnel row (4)
             '<div class="ad-usr-cards" id="adUsrStatsGrid">' +
-                '<div class="ad-usr-card" id="adUsrStatTotal">' +
+                '<div class="ad-usr-card ad-usr-card--knopka" id="adUsrStatTotal" data-usrstat="" role="button" tabindex="0">' +
                     '<div class="ad-usr-card-icon" style="background:var(--alpha-lime-12);color:var(--accent);">👥</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatTotal + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card" id="adUsrStatPlayers">' +
+                '<div class="ad-usr-card ad-usr-card--knopka" id="adUsrStatPlayers" data-usrstat="players" role="button" tabindex="0">' +
                     '<div class="ad-usr-card-icon" style="background:var(--success-subtle);color:var(--success);">🎾</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatPlayers + '</div></div>' +
                 '</div>' +
@@ -71,7 +76,7 @@
                     '<div class="ad-usr-card-icon" style="background:rgba(255,214,0,0.12);color:#ffd600;">📊</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrStatConversion + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card" id="adUsrStatNewMonth">' +
+                '<div class="ad-usr-card ad-usr-card--knopka" id="adUsrStatNewMonth" data-usrstat="new" role="button" tabindex="0">' +
                     '<div class="ad-usr-card-icon" style="background:rgba(0,136,204,0.12);color:#0088cc;">📈</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">...</div><div class="ad-usr-card-label">' + L.usrNovyh + ' (' + curMonthName + ')</div></div>' +
                 '</div>' +
@@ -79,11 +84,11 @@
 
             // Stats cards — detail row (4)
             '<div class="ad-usr-cards" id="adUsrBreakdown">' +
-                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatMembers">' +
+                '<div class="ad-usr-card ad-usr-card--sm ad-usr-card--knopka" id="adUsrStatMembers" data-usrstat="members" role="button" tabindex="0">' +
                     '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:var(--success-subtle);color:var(--success);">🏅</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatMembers + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatTg">' +
+                '<div class="ad-usr-card ad-usr-card--sm ad-usr-card--knopka" id="adUsrStatTg" data-usrstat="tg" role="button" tabindex="0">' +
                     '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:rgba(0,136,204,0.10);color:#0088cc;">✈️</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatTelegram + '</div></div>' +
                 '</div>' +
@@ -91,7 +96,7 @@
                     '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:var(--danger-subtle);color:var(--danger);">🗑️</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value" id="adUsrBrkDeleted">0</div><div class="ad-usr-card-label">' + L.usrStatDeleted + '</div></div>' +
                 '</div>' +
-                '<div class="ad-usr-card ad-usr-card--sm" id="adUsrStatBanned">' +
+                '<div class="ad-usr-card ad-usr-card--sm ad-usr-card--knopka" id="adUsrStatBanned" data-usrstat="banned" role="button" tabindex="0">' +
                     '<div class="ad-usr-card-icon ad-usr-card-icon--sm" style="background:var(--danger-subtle);color:var(--danger);">🚫</div>' +
                     '<div class="ad-usr-card-body"><div class="ad-usr-card-value">0</div><div class="ad-usr-card-label">' + L.usrStatBanned + '</div></div>' +
                 '</div>' +
@@ -188,6 +193,37 @@
             searchTimer = setTimeout(function() { loadUsersList(); }, 300);
         });
 
+        /* НАЖАТИЕ ПО КАРТОЧКЕ — ОДИН ОБРАБОТЧИК НА ВСЕ ШЕСТЬ, А НЕ ШЕСТЬ
+           СВОИХ. Карточка несёт имя отбора в data-usrstat, обработчик
+           один и висит на сетке. Повторное нажатие по той же карточке
+           снимает отбор: иначе из него не выйти, не трогая другие
+           поля. Клавиатура работает тем же путём — у карточки role и
+           tabindex, Enter и пробел зовут то же нажатие. */
+        function поставитьОтбор(имя) {
+            usrFilterStat = (usrFilterStat === имя) ? '' : имя;
+            document.querySelectorAll('.ad-usr-card--knopka').forEach(function(к) {
+                var свой = к.dataset.usrstat === usrFilterStat && usrFilterStat !== '';
+                к.classList.toggle('ad-usr-card--vybran', свой);
+                к.setAttribute('aria-pressed', свой ? 'true' : 'false');
+            });
+            loadUsersList();
+        }
+        ['adUsrStatsGrid', 'adUsrBreakdown'].forEach(function(ид) {
+            var сетка = document.getElementById(ид);
+            if (!сетка) return;
+            сетка.addEventListener('click', function(e) {
+                var к = e.target.closest('.ad-usr-card--knopka');
+                if (к) поставитьОтбор(к.dataset.usrstat);
+            });
+            сетка.addEventListener('keydown', function(e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                var к = e.target.closest('.ad-usr-card--knopka');
+                if (!к) return;
+                e.preventDefault();
+                поставитьОтбор(к.dataset.usrstat);
+            });
+        });
+
         document.getElementById('adUsrRoleFilter').addEventListener('change', function() {
             usrFilterRole = this.value;
             loadUsersList();
@@ -260,11 +296,38 @@
         usrMemMap = memMap;
 
         // Hide role=user with active membership (they are in Players section)
-        items = items.filter(function(u) {
-            if (A.сотрудник(u.role)) return true;
-            var mem = memMap[u.id];
-            return !(mem && mem.status === 'active');
-        });
+        /* ...КРОМЕ СЛУЧАЯ, КОГДА ИХ И СПРОСИЛИ. Карточка «С активным
+           членством» ведёт ровно к этим людям: скрывать их в ответ на
+           нажатие по ним значило бы показать пустой список. */
+        if (usrFilterStat !== 'members') {
+            items = items.filter(function(u) {
+                if (A.сотрудник(u.role)) return true;
+                var mem = memMap[u.id];
+                return !(mem && mem.status === 'active');
+            });
+        }
+
+        /* ОТБОР ПО КАРТОЧКЕ — ТЕ ЖЕ ПРИЗНАКИ, ЧТО И СЧЁТ НА НЕЙ. Числа
+           на карточках считает подсчётСтатистики теми же условиями:
+           player_id, telegram_chat_id, срок бана, активное членство,
+           месяц регистрации. Разойдись они — карточка показывала бы
+           одно число, а список другое. */
+        if (usrFilterStat) {
+            var сейчас = new Date();
+            var началоМесяца = сейчас.getFullYear() + '-' +
+                String(сейчас.getMonth() + 1).padStart(2, '0') + '-01';
+            items = items.filter(function(u) {
+                if (usrFilterStat === 'players') return !!u.player_id;
+                if (usrFilterStat === 'tg') return !!u.telegram_chat_id;
+                if (usrFilterStat === 'banned') return !!u.banned_until && new Date(u.banned_until) > сейчас;
+                if (usrFilterStat === 'new') return !!u.created_at && u.created_at.slice(0, 10) >= началоМесяца;
+                if (usrFilterStat === 'members') {
+                    var m = memMap[u.id];
+                    return !!(m && m.status === 'active');
+                }
+                return true;
+            });
+        }
 
         // Load deleted accounts count
         var delResult = await A.client.from('deleted_accounts').select('id, deleted_at');
@@ -1809,6 +1872,7 @@
         var вкладки = box.querySelector('#adUsrLinkTabs');
         if (!вкладки) return;
         var загружена = false;
+        var админ = A.currentRole === 'admin';
         вкладки.addEventListener('click', async function(e) {
             var вкладка = e.target.closest('.ad-rat-tab');
             if (!вкладка) return;
@@ -1853,7 +1917,14 @@
                 withdrawn: { текст: L.linkStWithdrawn, цвет: 'var(--text-muted)' }
             };
 
-            окно.innerHTML = '<div class="ad-table-card"><div class="ad-table-wrap"><table class="ad-table"><thead><tr>' +
+            /* РЕШЁННЫЕ ЗАЯВКИ МОЖНО УБРАТЬ — ПАЧКОЙ, ТЕМ ЖЕ ДОМОМ (12.11).
+               Слово Кости по снимку: «эти можно будет удалить,
+               отклонённые — это были тестовые запросы». Убирать их было
+               нечем: журнал только показывал. Галочки и полоса — те же,
+               что у восьми других разделов. Удаляет АДМИН: решённая
+               заявка — след решения, а не мусор строки. */
+            окно.innerHTML = '<div class="ad-table-card"><div class="ad-table-wrap">' +
+                '<table class="ad-table" id="adUsrLinkHistTable"><thead><tr>' +
                 '<th>' + L.thUser + '</th><th>' + L.linkCard + '</th><th>' + L.thStatus + '</th><th>' + L.thDate + '</th>' +
             '</tr></thead><tbody>' + строки.map(function(z) {
                 var ч = профили[z.profile_id] || {};
@@ -1861,6 +1932,7 @@
                 var п = подпись[z.status] || { текст: A.esc(z.status), цвет: 'var(--text-secondary)' };
                 var когда = z.decided_at || z.created_at;
                 return '<tr>' +
+                    (админ ? A.bulkCheckboxTd(z.id) : '') +
                     '<td>' + A.esc(ч.full_name || '—') +
                         '<div class="ad-podpis">' + A.esc(ч.email || '') + '</div></td>' +
                     '<td>' + A.esc(к.name || z.player_id) + '</td>' +
@@ -1870,6 +1942,18 @@
                         (когда ? window.KSLT_VREMYA.показДня(когда, 'ru-RU') : '—') + '</td>' +
                 '</tr>';
             }).join('') + '</tbody></table></div></div>';
+
+            if (админ) {
+                A.setupBulkDelete({
+                    tableId: 'adUsrLinkHistTable',
+                    tableName: 'player_link_requests',
+                    reloadFn: function() { загружена = false; вкладки.querySelector('[data-usrlink="history"]').click(); },
+                    доУдаления: function(ids) {
+                        return 'Записи решённых заявок будут стёрты. Привязка карточек от этого не меняется — ' +
+                            'уходит только след решения. Выбрано: ' + ids.length + '. Отменить это нельзя.';
+                    }
+                });
+            }
         });
     }
 

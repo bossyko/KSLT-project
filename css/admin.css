@@ -291,6 +291,33 @@ body.ad-page {
     margin-bottom: var(--space-md);
 }
 
+/* КАРТОЧКА, КОТОРАЯ ОТВЕЧАЕТ НА НАЖАТИЕ, ВЫГЛЯДИТ НАЖИМАЕМОЙ (12.11).
+   Костя: «карточки не кликабельные, можно будет сделать — при нажатии
+   отображалась инфа той карточки». Нажимаемы шесть из восьми: у
+   «Конверсии» нет своего списка (это доля), у «Удалено» список живёт в
+   другой таблице. Невидимая разница между нажимаемым и нет — хуже
+   отсутствия нажатия, поэтому только эти шесть носят класс. */
+.ad-usr-card--knopka {
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.ad-usr-card--knopka:hover {
+    border-color: var(--alpha-white-12);
+}
+
+.ad-usr-card--knopka:focus-visible {
+    outline: var(--bw-thick) solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ВЫБРАННАЯ КАРТОЧКА ГОВОРИТ НЕ ОДНИМ ЦВЕТОМ: рамка акцентом И
+   подложка — WCAG 1.4.1, цвет не единственный носитель смысла. */
+.ad-usr-card--vybran {
+    border-color: var(--accent);
+    background: var(--alpha-lime-12);
+}
+
 /* ---- Stats Grid ---- */
 /* ════ СЕТКА ПЛИТОК СТАТИСТИКИ — ОДНО ОПРЕДЕЛЕНИЕ НА ДЕВЯТЬ СЕТОК ════
    Круг 10 ветки D, 17.10. Было: девять сеток, 24 объявления, ЧЕТЫРЕ
