@@ -737,6 +737,7 @@
         plrRankChange: 'Динамика',
         plrNtrp: 'NTRP рейтинг',
         plrNtrpHint: 'Международная шкала 1.0–7.0',
+        usrKartochkaNashlas: 'Карточка клуба нашлась при входе · очков',
         usrStaffNoMembership: 'Сотрудник клуба',
         usrStaffNoMembershipHint: 'Рабочая учётная запись клуба — членства и карточки игрока у неё нет',
         linkRequests: 'Заявки на привязку карточки',
