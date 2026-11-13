@@ -59,7 +59,7 @@
         if (!client) return;
 
         client.from('live_matches')
-            .select('*, player1:players!live_matches_player1_id_fkey(name, name_en, photo), player2:players!live_matches_player2_id_fkey(name, name_en, photo)')
+            .select('*, player1:players!live_matches_player1_id_fkey(name, name_en, name_kg, photo), player2:players!live_matches_player2_id_fkey(name, name_en, name_kg, photo)')
             .eq('id', matchId)
             .single()
             .then(function(res) {
@@ -93,8 +93,13 @@
         var root = document.getElementById('sb-root');
         if (!root) return;
 
-        var p1Name = m.player1_name || (m.player1 && m.player1.name) || 'Игрок 1';
-        var p2Name = m.player2_name || (m.player2 && m.player2.name) || 'Игрок 2';
+        /* КАРТОЧКА СТАРШЕ СНИМКА — ДОМ (кусок f21, 13.11). Было
+           наоборот: строка `player1_name` стояла первой, и переименование
+           игрока в карточке до табло не доезжало. Подписи «Игрок 1» и
+           «Игрок 2» сняты: домовый '?' — один знак «нет имени» на
+           продукт, а нумерованные подписи выглядели как настоящие имена. */
+        var p1Name = window.KSLT_LICO.имяНаЯзыке(m.player1, m.player1_name);
+        var p2Name = window.KSLT_LICO.имяНаЯзыке(m.player2, m.player2_name);
 
         var setsData = m.sets_data || [];
         var isCompleted = m.status === 'completed';

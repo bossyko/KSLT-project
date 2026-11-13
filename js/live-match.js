@@ -148,8 +148,8 @@
 
         var p1 = m.player1 || {};
         var p2 = m.player2 || {};
-        var p1Name = getPlayerName(p1, m.player1_name);
-        var p2Name = getPlayerName(p2, m.player2_name);
+        var p1Name = window.KSLT_LICO.имяНаЯзыке(p1, m.player1_name);
+        var p2Name = window.KSLT_LICO.имяНаЯзыке(p2, m.player2_name);
 
         var setsData = m.sets_data || [];
         var isCompleted = m.status === 'completed';
@@ -448,18 +448,19 @@
 
     function nameOf(m, n) {
         var p = n === 1 ? (m.player1 || {}) : (m.player2 || {});
-        return getPlayerName(p, n === 1 ? m.player1_name : m.player2_name);
+        return window.KSLT_LICO.имяНаЯзыке(p, n === 1 ? m.player1_name : m.player2_name);
     }
 
     /* КОРОТКОЕ ИМЯ — в доме журнала (`KSLT_ZHURNAL.короткоеИмя`): оно
        нужно ленте, а лента теперь общая. */
 
-    function getPlayerName(p, fallbackName) {
-        if (isEn && p && p.name_en) return p.name_en;
-        if (isKg && p && p.name_kg) return p.name_kg;
-        if (p && p.name) return p.name;
-        return fallbackName || '—';
-    }
+    /* ИМЯ ИГРОКА — ДОМ (кусок f21, 13.11): `KSLT_LICO.имяНаЯзыке`.
+       Здесь был седьмой по счёту способ собрать одно и то же имя. Этот
+       был ВЕРНЫМ — карточка старше снимка, — и именно он уехал в дом,
+       а пять остальных приведены к нему. Снято отсюда, а не скопировано.
+       Заглушка сменилась с '—' на '?' домовую: знак вопроса уже стоит в
+       кружке без фотографии рядом, и два разных знака «нет имени» на
+       одной карточке читались как два разных состояния. */
 
     function avatarHtml(player, name) {
         if (player && player.photo) {

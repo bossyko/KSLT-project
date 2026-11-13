@@ -681,7 +681,7 @@
     <script src="js/kslt-yazyk.js?v=5"></script>
     <script src="js/kslt-ekranirovanie.js?v=2"></script>
     <script src="js/kslt-prosmotry.js?v=1"></script>
-    <script src="js/kslt-lico.js?v=8"></script>
+    <script src="js/kslt-lico.js?v=9"></script>
     <script src="js/kslt-zov.js?v=2"></script>
     <script src="js/kslt-baza.js?v=2"></script>
     <script src="js/auth-nav.js?v=38"></script>
@@ -857,8 +857,15 @@
                         matches.forEach(function(m) {
                             var p1 = pMap[m.player1_id] || {};
                             var p2 = pMap[m.player2_id] || {};
-                            var p1Name = m.player1_name || p1.name || 'TBD';
-                            var p2Name = m.player2_name || p2.name || 'TBD';
+                            /* КАРТОЧКА СТАРШЕ СНИМКА — ДОМ (кусок f21, 13.11).
+                               Снимок имени, записанный админкой при
+                               создании трансляции, стоял здесь ВЫШЕ живой
+                               карточки. В режимах «турнир» и
+                               «вызов» снимок заполнен ВСЕГДА, значит он всегда
+                               и побеждал: переименование игрока до главной не
+                               доезжало. Заглушка 'TBD' снята — домовый '?'. */
+                            var p1Name = KSLT_LICO.имяНаЯзыке(p1, m.player1_name);
+                            var p2Name = KSLT_LICO.имяНаЯзыке(p2, m.player2_name);
                             var label = m.tournament_label || '';
 
                             var p1scores = '', p2scores = '';
