@@ -75,6 +75,7 @@ const КУСКИ = [
     ['подвал',              'check-footer.js',       'check-footer-otkat.js'],
     ['страница матча',      'check-live-stranica.js','check-live-stranica-otkat.js'],
     ['имя игрока в live',   'check-imya-igroka.js',  'check-imya-igroka-otkat.js'],
+    ['размер сетки',        'check-razmer-setki.js', 'check-razmer-setki-otkat.js'],
     ['судейское окно',      'check-sudya.js',        'check-sudya-otkat.js'],
     ['страница турниров',   'check-turniry.js',      'check-turniry-otkat.js'],
     ['лента фильтров',      'check-lenta-filtrov.js', 'check-lenta-filtrov-otkat.js'],
