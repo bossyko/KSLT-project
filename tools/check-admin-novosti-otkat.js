@@ -67,10 +67,6 @@ const ОТКАТЫ = [
         `                newsImageOriginalFile = null;`,
    'снятие обложки уносит и исходник'],
 
-  [NJS, `                newsImageOriginalUrl = url;`,
-        `                newsImageUrl = url;`,
-   'вставка обложки ссылкой задаёт и исходник'],
-
   [NJS, `                zone.innerHTML = oblozhkaPustoHtml();`,
         `                zone.innerHTML =
                     '<div class="ad-image-upload-placeholder">' +

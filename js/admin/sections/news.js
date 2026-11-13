@@ -640,10 +640,17 @@
                     imagePreviewHtml +
                 '</div>' +
                 '<input class="ad-skryt" type="file" accept="image/jpeg,image/png" id="adNewsImgInput">' +
-                '<div class="ad-image-url-row">' +
-                    '<input type="text" class="ad-field-input" id="adNewsImgUrl" placeholder="' + L.orPasteUrl + '" value="' + A.esc(newsImageUrl || '') + '">' +
-                    '<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adNewsImgUrlBtn">' + L.applyUrl + '</button>' +
-                '</div>' +
+                /* ПОЛЕ «ИЛИ ВСТАВЬТЕ ССЫЛКУ» УБРАНО 12.11 по слову Кости.
+                   Оно было вторым путём мимо кадрирования: файл шёл через
+                   A.cropCover и приходил одной пропорцией, а ссылка клалась
+                   в базу как есть. Отсюда шесть пропорций обложек разом:
+                   1280x720, 1024x1280, 2560x1707, 940x788, 960x1280,
+                   1080x1350 — три из них вертикальные, и в шапке 1512x460
+                   вертикальная 1024x1280 показывала 24% своей высоты.
+                   Чужую картинку кадрировать нельзя — холст портится
+                   (tainted canvas), поэтому путь закрыт целиком, а не
+                   обставлен проверкой. Старые обложки остаются как есть:
+                   решение Кости 12.11 — «архив, кадрируются только новые». */
             '</div>' +
 
             // Meta: category, author, executor, date
@@ -1103,20 +1110,6 @@
         // Remove image
         setupImgRemove();
 
-        // URL apply
-        document.getElementById('adNewsImgUrlBtn').addEventListener('click', function() {
-            var url = document.getElementById('adNewsImgUrl').value.trim();
-            if (url) {
-                newsImageFile = null;
-                newsImageUrl = url;
-                /* Ссылкой дают ОДНУ картинку: она же и исходник, иначе
-                   кнопка «открыть афишу» в шапке ведёт на прежнюю */
-                newsImageOriginalFile = null;
-                newsImageOriginalUrl = url;
-                previewNewsImage(url);
-            }
-        });
-
         // Content Preview: render + live update
         renderNewsPreview();
         var previewTimer = null;
@@ -1486,7 +1479,6 @@
                 var zone = document.getElementById('adNewsImgZone');
                 zone.classList.remove('has-image');
                 zone.innerHTML = oblozhkaPustoHtml();
-                document.getElementById('adNewsImgUrl').value = '';
                 document.getElementById('adNewsImgInput').value = '';
             });
         }
