@@ -36,6 +36,7 @@
         birthday: 'Date of Birth', birthDay: 'Day', birthMonth: 'Month', birthYear: 'Year',
         months: ['','January','February','March','April','May','June','July','August','September','October','November','December'],
         male: 'Male', female: 'Female', selectGender: '— Select —',
+        askGenderTitle: 'One more thing', askGenderText: 'Club rankings are kept separately for men and women, so we need this to create your player card.',
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram connected',
         tgConnect: 'Connect Telegram',
@@ -398,6 +399,7 @@
         birthday: 'Туулган күнү', birthDay: 'Күн', birthMonth: 'Ай', birthYear: 'Жыл',
         months: ['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
         male: 'Эркек', female: 'Аял', selectGender: '— Тандаңыз —',
+        askGenderTitle: 'Дагы бир нерсе', askGenderText: 'Клубдун рейтинги эркектер менен аялдар үчүн өзүнчө жүргүзүлөт — оюнчу картаңызды түзүү үчүн ушул керек.',
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram байланган',
         tgConnect: 'Telegram байлоо',
@@ -748,6 +750,7 @@
         birthday: 'Дата рождения', birthDay: 'День', birthMonth: 'Месяц', birthYear: 'Год',
         months: ['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
         male: 'Мужской', female: 'Женский', selectGender: '— Выберите —',
+        askGenderTitle: 'Ещё одно', askGenderText: 'Рейтинг клуба ведётся раздельно для мужчин и женщин — без этого карточку игрока не завести.',
         instagram: 'Instagram', telegram: 'Telegram',
         tgConnected: 'Telegram подключён',
         tgConnect: 'Подключить Telegram',
@@ -1318,8 +1321,28 @@
             checkNewBadges(profile.player_id);
         }
 
-        // Карточка игрока: заводим или предлагаем свою, если её ещё нет
-        if (!profile.player_id) карточкаИгрока(profile);
+        /* ПОЛ СПРАШИВАЕТСЯ ДО КАРТОЧКИ, А НЕ ПОСЛЕ (13.11).
+
+           Профиль заводит триггер базы из raw_user_meta_data. Почтой пол
+           спрашивают на форме, Telegram — на своей форме дозаполнения, а
+           Google и Apple его не присылают вовсе: поле остаётся пустым.
+           Замер 13.11 по боевой: профилей 86, без пола 32.
+
+           Цена пустого поля не косметическая. `ensure-player-card` пишет
+           пол в карточку ТОЛЬКО когда он есть, — значит человек, вошедший
+           через Google, получал карточку без пола, а рейтинг у нас
+           раздельный: такая карточка не попадает ни в мужской, ни в
+           женский. И поиск своей карточки в кабинете отбирает по полу —
+           без него человек не узнал бы себя в списке.
+
+           Поэтому порядок: сперва спросить, потом заводить. */
+        if (!profile.player_id) {
+            if (profile.gender === 'men' || profile.gender === 'women') {
+                карточкаИгрока(profile);
+            } else {
+                спроситьПол(profile).then(function () { карточкаИгрока(profile); });
+            }
+        }
 
         /* СОГЛАСИЯ ИДУТ ПЕРЕД ПРИВЕТСТВИЕМ (Ю2, 07.11).
            Приветствие — приятность, согласие — закон: пока человек не
@@ -2739,6 +2762,41 @@
      * история, ошибиться нельзя. Не нашлась — сервер заводит новую, и человек
      * сразу может записываться на турниры.
      */
+    /**
+     * Спросить пол один раз, когда его неоткуда взять.
+     *
+     * Окно без крестика и без «потом»: пока ответа нет, карточку завести
+     * нельзя, а без карточки человек не запишется на турнир. Поэтому два
+     * ответа, оба заканчивают разговор.
+     */
+    function спроситьПол(profile) {
+        return new Promise(function (готово) {
+            function записать(пол, закрыть) {
+                profile.gender = пол;
+                client.from('profiles').update({ gender: пол }).eq('id', profile.id)
+                    .then(function (рез) {
+                        if (рез && рез.error) {
+                            /* ОТКАЗ БАЗЫ НЕ ПРЕВРАЩАЕТСЯ В «ВЫ ОТВЕТИЛИ».
+                               Иначе карточка завелась бы снова без пола, и
+                               человек больше никогда не увидел бы вопрос. */
+                            profile.gender = null;
+                            console.warn('[KSLT] пол не записался:', рез.error.message);
+                        }
+                        закрыть();
+                        готово();
+                    });
+            }
+            dbModal({
+                title: L.askGenderTitle,
+                body: '<p class="db-modal-text">' + L.askGenderText + '</p>',
+                actions: [
+                    { label: L.male, primary: true, onClick: function (закрыть) { записать('men', закрыть); } },
+                    { label: L.female, onClick: function (закрыть) { записать('women', закрыть); } }
+                ]
+            });
+        });
+    }
+
     async function карточкаИгрока(profile) {
         if (!client) return;
         try {
@@ -2750,6 +2808,15 @@
                `player_id`, — поэтому зовётся `карточкаИгрока`, а не
                короткая обёртка. */
             var д = (await window.KSLT_VHOD.карточкаИгрока(client)) || {};
+
+            if (д.status === 'no_gender') {
+                /* СЕРВЕР ОТКАЗАЛ, ПОТОМУ ЧТО ПОЛА НЕТ. Такое случится,
+                   если вопрос не задали или ответ не записался: спросим и
+                   позовём ещё раз, а не бросим человека без карточки. */
+                await спроситьПол(profile);
+                if (profile.gender) карточкаИгрока(profile);
+                return;
+            }
 
             if (д.status === 'candidate' && д.candidate) {
                 предложитьКарточку(д.candidate);
