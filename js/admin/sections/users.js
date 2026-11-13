@@ -1232,6 +1232,75 @@
 
 
 
+    /** Пол для отбора двойников: тот же словарь, что у карточки. */
+    function playerGenderПредварительно(user) {
+        return (user.gender === 'men' || user.gender === 'women') ? user.gender : null;
+    }
+
+    /**
+     * Показать найденные карточки и дать выбрать.
+     *
+     * Возвращает: id карточки · 'new' · 'cancel'. Молчаливого пути нет
+     * ни одного — админ выбирает вслух, потому что ошибка здесь стоит
+     * чужого рейтинга.
+     */
+    function спроситьПроДвойников(user, карточки) {
+        return new Promise(function (готово) {
+            var existing = document.getElementById('adUsrDvoyniki');
+            if (existing) existing.remove();
+
+            var R = window.KSLT_RULES;
+            var строки = карточки.map(function (p) {
+                var разряд = (R && R.categoryLabel && p.category_id)
+                    ? R.categoryLabel(p.category_id, 'ru') : (p.category_id || '');
+                var подпись = [разряд, (p.points || 0) + ' очков'].filter(Boolean).join(' \u00B7 ');
+                return '<li class="ad-usr-dv-row">' +
+                    '<span class="ad-usr-dv-name">' + A.esc(p.name || p.id) + '</span>' +
+                    '<span class="ad-usr-dv-meta">' + A.esc(подпись) + '</span>' +
+                    '<button class="ad-btn ad-btn-sm ad-btn-primary" data-dv="' + A.esc(p.id) + '">' +
+                        L.usrPrivyazat + '</button>' +
+                '</li>';
+            }).join('');
+
+            var overlay = document.createElement('div');
+            overlay.id = 'adUsrDvoyniki';
+            overlay.className = 'ad-modal-overlay';
+            overlay.innerHTML =
+                '<div class="ad-modal" style="max-width:520px;">' +
+                    '<div class="ad-modal-header">' +
+                        '<h3>' + L.usrDvoyniki + '</h3>' +
+                        '<button class="ad-modal-close" id="adUsrDvClose" aria-label="' + L.modalClose + '">&times;</button>' +
+                    '</div>' +
+                    '<div class="ad-modal-body">' +
+                        '<p class="ad-usr-dv-why">' + L.usrDvoynikiText + '</p>' +
+                        '<ul class="ad-usr-dv-list">' + строки + '</ul>' +
+                    '</div>' +
+                    '<div class="ad-modal-footer">' +
+                        '<button class="ad-btn" id="adUsrDvCancel">' + L.cancel + '</button>' +
+                        ' <button class="ad-btn" id="adUsrDvNew">' + L.usrVsyoRavnoNovuyu + '</button>' +
+                    '</div>' +
+                '</div>';
+
+            /* Окно поднимает общая оболочка: роль, подпись диктору, фокус
+               внутрь, ловушка Tab, возврат фокуса звавшему и Esc. */
+            /* Оболочка сама вставляет узел в документ — второй appendChild
+               здесь был бы лишним и спорил бы с ней за порядок фокуса. */
+            A.оболочкаОкна({ узел: overlay });
+
+            function закрыть(ответ) {
+                overlay.remove();
+                готово(ответ);
+            }
+
+            overlay.querySelectorAll('[data-dv]').forEach(function (кн) {
+                кн.addEventListener('click', function () { закрыть(кн.getAttribute('data-dv')); });
+            });
+            document.getElementById('adUsrDvNew').addEventListener('click', function () { закрыть('new'); });
+            document.getElementById('adUsrDvCancel').addEventListener('click', function () { закрыть('cancel'); });
+            document.getElementById('adUsrDvClose').addEventListener('click', function () { закрыть('cancel'); });
+        });
+    }
+
     async function autoCreatePlayer(user, categoryId) {
         /* СОТРУДНИКУ КАРТОЧКА НЕ ЗАВОДИТСЯ — кусок 143, 23.10, слово Кости.
            Сюда приходят из сохранения пользователя: выбрана категория, а
@@ -1245,6 +1314,40 @@
         }
         var name = (user.full_name || '').trim();
         if (!name) return;
+
+        /* ПЕРЕД СОЗДАНИЕМ — ПОИСК ДВОЙНИКА (13.11, h300).
+
+           Эта функция умела только ЗАВОДИТЬ: при совпадении имени она
+           уникализировала id суффиксом «-2», то есть дубль рождался молча.
+           Так появилась вторая карточка у Атаханова: старая звалась
+           `daniyar-atahanov`, профиль пришёл как «Daniyar Atakhanov», и
+           slug вышел другой — совпадения нет, проверка промолчала.
+
+           Корень (ключ имени в ensure-player-card) починен в тот же день,
+           но заслон нужен и здесь: чужая транскрипция, смена фамилии,
+           опечатка в базе. Поиск берётся у общего дома, а не пишется
+           заново — иначе это третье написание одного понятия. */
+        var двойники = await window.KSLT_KARTOCHKA.искать(A.client, {
+            строка: name,
+            пол: playerGenderПредварительно(user),
+            предел: 6
+        });
+        if (двойники.length) {
+            var выбор = await спроситьПроДвойников(user, двойники);
+            if (выбор === 'cancel') return;
+            if (выбор !== 'new') {
+                // выбор — id существующей карточки
+                var привязка = await A.client.from('profiles')
+                    .update({ player_id: выбор }).eq('id', user.id);
+                if (привязка.error) {
+                    A.showToast(привязка.error.message, 'error');
+                    return;
+                }
+                A.showToast(L.usrPrivyazano, 'success');
+                loadUsersList();
+                return;
+            }
+        }
 
         // Generate slug id
         var baseId = A.slugify(name);

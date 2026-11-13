@@ -9335,3 +9335,42 @@ select.ad-field-input {
 .ad-trn-nikuda-para {
     color: var(--text-muted);
 }
+
+/* ВЫБОР ИЗ ПОХОЖИХ КАРТОЧЕК (13.11, h300). Окно показывается, когда при
+   заводе карточки нашлись свободные с похожим именем: админ видит очки и
+   разряд и выбирает вслух — привязать к существующей или всё же завести
+   новую. Молчаливого пути нет: ошибка здесь стоит чужого рейтинга. */
+.ad-usr-dv-why {
+    margin: 0 0 var(--space-3);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+}
+
+.ad-usr-dv-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ad-usr-dv-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: var(--bw-hair) solid var(--border-subtle);
+}
+
+.ad-usr-dv-row:last-child {
+    border-bottom: 0;
+}
+
+.ad-usr-dv-name {
+    flex: 1;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+}
+
+.ad-usr-dv-meta {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}

@@ -486,6 +486,7 @@ const КУСКИ = [
     ['карта сайта', 'check-karta-sayta.js', 'check-karta-sayta-otkat.js'],
     ['страницы под пробой', 'check-stranicy-pod-proboy.js', 'check-stranicy-pod-proboy-otkat.js'],
     ['ключ имени', 'check-klyuch-imeni.js', 'check-klyuch-imeni-otkat.js'],
+    ['поиск карточки', 'check-poisk-kartochki.js', 'check-poisk-kartochki-otkat.js'],
     ['кнопка наверх', 'check-knopka-naverh.js', 'check-knopka-naverh-otkat.js'],
     ['ссылка на вкладку', 'check-ssylka-vkladka.js', 'check-ssylka-vkladka-otkat.js'],
     ['заявки вкладками', 'check-zayavki-vkladki.js', 'check-zayavki-vkladki-otkat.js'],
