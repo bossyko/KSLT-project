@@ -196,23 +196,27 @@
 
     // Turnstile CAPTCHA
     var TURNSTILE_SITE_KEY = '0x4AAAAAAEDoNUH1Z2T9Iiab';
-    var _signupToken = null;
     var _forgotToken = null;
     // Капча может не подняться: на localhost ключ не разрешён, у человека
     // может не открыться challenges.cloudflare.com. Тогда токена не будет
     // никогда, и требовать его — значит запереть вход насовсем.
     var _turnstileBroken = false;
 
+    /* НА РЕГИСТРАЦИИ КАПЧИ НЕТ (12.11). Она там стояла, но НИЧЕГО не
+       сторожила: токен никуда не уходил — единственный зов с ним ниже,
+       под условием flow === 'forgot_password', и сервер проверяет только
+       его (supabase/functions/send-otp/index.ts:244). Робота это не
+       останавливало, а живому человеку, у которого не открылся
+       challenges.cloudflare.com, рисовало красное «Пройдите проверку»
+       прямо над кнопкой «Создать аккаунт»: преграду там, где преграды
+       нет. Снимок с боевой 12.11. В приложении капчи на регистрации нет
+       вовсе. От роботов регистрацию держит серверный лимит (rate-limit,
+       пять запросов на почту). ПРЕГРАДА, СТОЯЩАЯ ТОЛЬКО В РАЗМЕТКЕ,
+       НИЧЕГО НЕ ПРЕГРАЖДАЕТ. */
+
     function initTurnstile() {
         if (typeof turnstile === 'undefined') return setTimeout(initTurnstile, 300);
-        var su = document.getElementById('signupTurnstile');
         var fg = document.getElementById('forgotTurnstile');
-        if (su) turnstile.render(su, {
-            sitekey: TURNSTILE_SITE_KEY, theme: 'dark',
-            callback: function(t) { _signupToken = t; _turnstileBroken = false; },
-            'expired-callback': function() { _signupToken = null; },
-            'error-callback': function() { _turnstileBroken = true; }
-        });
         /* КАПЧА НЕ РИСУЕТСЯ, ПОКА НЕ ПОНАДОБИТСЯ.
 
            Вопрос Кости: «может капчу в самый низ, на неё же не надо
@@ -868,11 +872,6 @@
             return;
         }
 
-        if (!_signupToken && !_turnstileBroken) {
-            showMessage(signupForm, L.errCaptcha, true);
-            return;
-        }
-
         setLoading(btn, true, L.creatingAccount, L.createAccount);
 
         // Server-side rate limit check
@@ -943,8 +942,6 @@
             }
 
             setLoading(btn, false, L.creatingAccount, L.createAccount);
-            _signupToken = null;
-            if (typeof turnstile !== 'undefined') turnstile.reset('#signupTurnstile');
 
             showOtpScreen('register', email, 'email', otpResult.channel || 'email', async function(code) {
                 // Verify OTP and create user
