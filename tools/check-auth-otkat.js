@@ -114,12 +114,12 @@ const ОТКАТЫ = [
  'css/style.css', '#signupFields {\n    display: flex;', '#signupFields {\n    display: block;'],
 
 ['ритм формы регистрации задаёт промежуток, а не встроенные отступы',
- 'css/style.css', '#signupFields {\n    display: flex;\n    flex-direction: column;\n    gap: 16px;',
- '#signupFields {\n    display: flex;\n    flex-direction: column;\n    row-gap: 0;'],
+ 'pages/auth-en.html', 'id="signupTurnstile"', 'id="signupTurnstile" style="margin-bottom:16px"'],
 
-['на регистрации капчи нет — ни в разметке, ни в коде',
- 'pages/auth-en.html', '                <button type="submit" class="auth-btn">Create Account</button>',
- '                <div id="signupTurnstile"></div>\n                <button type="submit" class="auth-btn">Create Account</button>'],
+['токен капчи регистрации доходит до сервера и проверяется там',
+ 'supabase/functions/send-otp/index.ts',
+ "if ((flow === 'forgot_password' || flow === 'register') && turnstileToken) {",
+ "if (flow === 'forgot_password' && turnstileToken) {"],
 
 ['остаток попыток склоняется, а не склеивается',
  'js/auth.js', 'otpAttemptsLeft: function (n) {\n            var сотня', "otpAttemptsLeft: ' попыток осталось', // var сотня"],

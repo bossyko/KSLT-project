@@ -240,8 +240,15 @@
       // человек регистрируется. При восстановлении берём из профиля
       let языкПолучателя: Язык = (body.lang === 'en' || body.lang === 'kg') ? body.lang : 'ru'
 
-      // Turnstile verification for web forgot_password
-      if (flow === 'forgot_password' && turnstileToken) {
+      /* КАПЧА ПРОВЕРЯЕТСЯ НА ОБОИХ ПОТОКАХ, ГДЕ ОНА СТОИТ НА ЭКРАНЕ.
+         Было только forgot_password: виджет на регистрации не проверял
+         никто — токен до сервера не доходил, а дошёл бы — его бы здесь
+         не спросили. Поймано 13.11 на боевой.
+         Токен пока проверяется, ЕСЛИ пришёл, а не требуется: ключ
+         виджета только что чинили по домену, и запирать живую
+         регистрацию до того, как аналитика Cloudflare покажет проходы,
+         нельзя. Требование — отдельным шагом (h305). */
+      if ((flow === 'forgot_password' || flow === 'register') && turnstileToken) {
         const turnstileOk = await verifyTurnstile(turnstileToken)
         if (!turnstileOk) {
           return json({ error: 'captcha_failed' }, 400)

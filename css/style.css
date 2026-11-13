@@ -9529,7 +9529,8 @@ body.nav-open {
 
     #signupForm.active > #signupFields > .auth-row,
     #signupForm.active > #signupFields > .auth-checkbox,
-    #signupForm.active > #signupFields > .auth-btn {
+    #signupForm.active > #signupFields > .auth-btn,
+    #signupForm.active > #signupFields > #signupTurnstile {
         grid-column: 1 / -1;
     }
 
