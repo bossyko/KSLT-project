@@ -65,10 +65,21 @@ function всеJS(дир, итог) {
 
 /** Столбцы, которые пишет человек — ЧИТАЮТСЯ ИЗ СХЕМЫ. */
 function столбцыЧеловека() {
+    /* ПАПКИ МИГРАЦИЙ БОЛЬШЕ НЕТ (13.11, h306): августовский слепок удалён
+       как второе описание схемы. Признак читает то, что осталось, и не
+       падает, если папки нет вовсе — прибор, умирающий от отсутствия
+       файла, не находит беду, а прячет её за своим падением. */
+    let схема = '';
     const дир = path.join(КОРЕНЬ, 'supabase', 'migrations');
-    let схема = fs.readdirSync(дир).filter(и => и.endsWith('.sql'))
-        .map(и => fs.readFileSync(path.join(дир, и), 'utf8')).join('\n');
+    if (fs.existsSync(дир)) {
+        схема += fs.readdirSync(дир).filter(и => и.endsWith('.sql'))
+            .map(и => fs.readFileSync(path.join(дир, и), 'utf8')).join('\n');
+    }
     схема += fs.readFileSync(path.join(КОРЕНЬ, 'supabase', 'schema.sql'), 'utf8');
+    /* Снимок схемы — нынешнее описание базы; столбцы берутся прежде всего
+       из него. */
+    const снимок = path.join(КОРЕНЬ, 'sql', 'схема', 'schema-snapshot.sql');
+    if (fs.existsSync(снимок)) схема += '\n' + fs.readFileSync(снимок, 'utf8');
     for (const д of [path.join(КОРЕНЬ, 'sql', 'схема'), path.join(КОРЕНЬ, 'sql', 'архив')]) {
         if (!fs.existsSync(д)) continue;
         схема += '\n' + fs.readdirSync(д).filter(и => и.endsWith('.sql'))
