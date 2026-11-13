@@ -70,9 +70,13 @@ const ОТКАТЫ = [
    ".ad-filter-sticky {\n    position: sticky;\n    top: 64px;",
    'полоса липнет к высоте шапки, а не к своему числу'],
 
+  /* 12.11: у раздела появился воздух над заголовком (ступень 16, зазор
+     25 вместо девяти — «прям сильно кверху прилипло»). Якорь шёл по
+     трём строкам подряд и ослеп на четвёртой. Теперь держится за то,
+     что этот откат и портит, — за саму строку overflow. */
   ['сделать секцию прокручиваемым предком', CSS,
-   ".ad-section.active {\n    display: block;\n    padding-top: 0;\n    overflow: visible;",
-   ".ad-section.active {\n    display: block;\n    padding-top: 0;\n    overflow-x: hidden;",
+   ".ad-section.active {\n    display: block;\n    padding-top: var(--space-4);\n    overflow: visible;",
+   ".ad-section.active {\n    display: block;\n    padding-top: var(--space-4);\n    overflow-x: hidden;",
    'секция не делается прокручиваемым предком'],
 
   ['укоротить список на стенде до удобного', СТ,
