@@ -16,13 +16,27 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ФАЙЛЫ = ['css/style.css', 'index.html', 'index-en.html', 'index-kg.html',
-               'js/rankings-data.js', 'js/battle-cards.js'];
+               'js/rankings-data.js', 'js/battle-cards.js',
+               /* 13.11, h272: правило про огонёк держится на нём. */
+               'js/script.js'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 const ПРАВИЛО = fs.readFileSync(path.join(__dirname, 'check-live.js'), 'utf8');
 
 /* [имя, файл, что ищем, на что меняем, какое правило должно упасть] */
 const ОТКАТЫ = [
+/* ДВА ОТКАТА 13.11 (h272): огонёк Live красили из двух мест, и решение
+   три месяца держалось комментарием, а не правилом. */
+['вернуть главной второго хозяина огонька', 'index.html',
+ '            if (window.KSLT_отметитьLive) window.KSLT_отметитьLive(!!active);',
+ "            document.querySelectorAll('.nav-item-live').forEach(function(a) { a.classList.toggle('is-live', !!active); });",
+ 'класс is-live ставит ровно одно место на весь продукт'],
+
+['снять у главной сообщение о Live', 'index-kg.html',
+ '            if (window.KSLT_отметитьLive) window.KSLT_отметитьLive(!!active);',
+ '            /* сообщение снято */',
+ 'главные сообщают о Live, а не спрашивают во второй раз'],
+
 ['вернуть секции плавающий clamp', 'css/style.css',
  '--section-vozduh: var(--space-10);   /* 40 */\n    padding: var(--section-vozduh) var(--pad-x);',
  'padding: var(--section-y-sm) var(--pad-x);',
