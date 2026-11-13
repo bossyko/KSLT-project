@@ -396,7 +396,7 @@
                         '</div>' +
                         '<div class="ad-field-group ad-rastyanut">' +
                             '<label class="ad-field-label">' + L.liveTournLabel + '</label>' +
-                            '<input type="text" class="ad-field-input" id="liveTournLabel" placeholder="KSLT Masters #1 • SF">' +
+                            '<input type="text" class="ad-field-input" id="liveTournLabel" placeholder="KSLT Masters #1 • 1/4 или Иван vs Пётр">' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
