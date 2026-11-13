@@ -409,9 +409,13 @@
            срок бана, месяц регистрации, активное членство. Разойдись
            они — карточка показывала бы одно число, а список другое. */
         if (usrFilterStat) {
+            /* НАЧАЛО МЕСЯЦА — ПО ВРЕМЕНИ КЛУБА (13.11, h307): дальше оно
+               сравнивается с created_at из базы, и карточка «Новых»
+               считает тот же месяц. */
+            var началоМесяца = A.сегодняБишкек().slice(0, 7) + '-01';
+            /* МОМЕНТ, А НЕ ДЕНЬ: срок бана сравнивается с «сейчас» как две
+               точки во времени, и пояс тут ничего не решает. */
             var сейчас = new Date();
-            var началоМесяца = сейчас.getFullYear() + '-' +
-                String(сейчас.getMonth() + 1).padStart(2, '0') + '-01';
             var откуда = items;
             if (usrFilterStat === 'members') {
                 /* Этих людей общий список прячет (они в разделе Игроки),
@@ -428,7 +432,8 @@
                 if (usrFilterStat === 'players') return !!u.player_id;
                 if (usrFilterStat === 'tg') return !!u.telegram_chat_id;
                 if (usrFilterStat === 'banned') return !!u.banned_until && new Date(u.banned_until) > сейчас;
-                if (usrFilterStat === 'new') return !!u.created_at && u.created_at.slice(0, 10) >= началоМесяца;
+                if (usrFilterStat === 'new') return !!u.created_at &&
+                    window.KSLT_VREMYA.деньПоБишкеку(u.created_at) >= началоМесяца;
                 if (usrFilterStat === 'members') {
                     var m = memMap[u.id];
                     return !!(m && m.status === 'active');
@@ -1825,19 +1830,13 @@
 
     // ---- Period ----
     function computeUsrPeriodDates() {
-        var now = new Date();
-        if (usrPeriodMode === 'this_month') {
-            usrDateFrom = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
-            usrDateTo = '';
-        } else if (usrPeriodMode === 'last_month') {
-            var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-            var lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-            usrDateFrom = lm.getFullYear() + '-' + String(lm.getMonth() + 1).padStart(2, '0') + '-01';
-            usrDateTo = lmEnd.getFullYear() + '-' + String(lmEnd.getMonth() + 1).padStart(2, '0') + '-' + String(lmEnd.getDate()).padStart(2, '0');
-        } else if (usrPeriodMode !== 'custom') {
-            usrDateFrom = '';
-            usrDateTo = '';
-        }
+        /* ГРАНИЦЫ — У ДОМА (13.11, h307). Тот же приём, что в финансах и
+           ваучерах: три раздела считали одно понятие тремя копиями, и все
+           три — по часам смотрящего. */
+        if (usrPeriodMode === 'custom') return;
+        var границы = A.границыПериода(usrPeriodMode);
+        usrDateFrom = границы.от;
+        usrDateTo = границы.до;
     }
 
     // ---- PDF ----

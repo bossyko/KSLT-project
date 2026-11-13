@@ -12940,7 +12940,7 @@
         try {
             var drawSize = tournament.draw_size || 16;
             var totalRounds = Math.log2(drawSize);
-            var season = new Date().getFullYear();
+            var season = A.сезон();
 
             // Очки платит занятое место, а не стадия: таблица Положения
             // различает третье и четвёртое, пятое и шестое
@@ -13108,7 +13108,7 @@
             var drawSize = tournament.draw_size || 16;
             var totalRounds = Math.log2(drawSize);
             var halfDraw = drawSize / 2;
-            var season = new Date().getFullYear();
+            var season = A.сезон();
 
             // В сетке всех мест каждое место разыграно отдельным матчем:
             // платим строго по таблице, уравнивать нечего
@@ -13261,7 +13261,7 @@
         try {
             var groupCount = tournament.group_count || 2;
             var qualifiers = tournament.qualifiers_per_group || 2;
-            var season = new Date().getFullYear();
+            var season = A.сезон();
 
             // Очки платит занятое место по таблице Положения. Здесь к нему
             // добавляются победы: за выход из группы мест не дают, а
@@ -14543,7 +14543,7 @@
     async function finalizeGroupLeagueTournament(tournament, matches, playersMap) {
         try {
             var groupCount = tournament.group_count || 2;
-            var season = new Date().getFullYear();
+            var season = A.сезон();
 
             var таблицаМест = await загрузитьТаблицуМест(tournament);
             /* Числа за победу и за участие берутся из ДЕЙСТВУЮЩЕЙ ВЕРСИИ,

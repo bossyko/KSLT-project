@@ -6804,16 +6804,33 @@
     function когдаЗаходили(когда) {
         if (!когда) return L.devicesNever;
         var д = new Date(когда);
-        var сейчас = new Date();
         /* ЛОКАЛЬ — ДОМ ЯЗЫКА (кусок 147). */
         var язык = KSLT_YAZYK.локаль;
-        var время = д.toLocaleTimeString(язык, { hour: '2-digit', minute: '2-digit' });
 
-        var сутки = 24 * 60 * 60 * 1000;
-        var началоСегодня = new Date(сейчас.getFullYear(), сейчас.getMonth(), сейчас.getDate()).getTime();
-        if (д.getTime() >= началоСегодня) return (KSLT_YAZYK.выбрать('today, ', 'бүгүн, ', 'сегодня, ')) + время;
-        if (д.getTime() >= началоСегодня - сутки) return KSLT_YAZYK.выбрать('yesterday', 'кечээ', 'вчера');
-        return д.toLocaleDateString(язык, { day: 'numeric', month: 'long' });
+        /* «СЕГОДНЯ» ЗДЕСЬ — ДЕНЬ КЛУБА (13.11, h307).
+
+           Было: время показывалось по часам смотрящего, и «сегодня»
+           считалось его же календарём, а весь остальной продукт
+           показывает моменты в поясе клуба через дом. Из Чикаго выходило
+           «вчера, 23:40» там, где в клубе шёл тот же день, — и рядом, в
+           соседней строке, дом показывал время клуба.
+
+           Сравнение дней — сравнение СТРОК 'ГГГГ-ММ-ДД': так не нужно
+           собирать полночь в чужом поясе, а значит неоткуда взяться
+           ошибке на сутки. */
+        var время = window.KSLT_VREMYA.показМомента
+            ? window.KSLT_VREMYA.показМомента(д, язык, { hour: '2-digit', minute: '2-digit' })
+            : д.toLocaleTimeString(язык, { hour: '2-digit', minute: '2-digit' });
+        var деньСобытия = window.KSLT_VREMYA.деньПоБишкеку(д);
+        var деньСегодня = window.KSLT_VREMYA.сегодня();
+        var деньВчера = window.KSLT_VREMYA.деньПоБишкеку(
+            new Date(деньСегодня + 'T12:00:00Z').getTime() - 24 * 60 * 60 * 1000);
+
+        if (деньСобытия === деньСегодня) return (KSLT_YAZYK.выбрать('today, ', 'бүгүн, ', 'сегодня, ')) + время;
+        if (деньСобытия === деньВчера) return KSLT_YAZYK.выбрать('yesterday', 'кечээ', 'вчера');
+        return window.KSLT_VREMYA.показДня
+            ? window.KSLT_VREMYA.показДня(д, язык, { day: 'numeric', month: 'long' })
+            : д.toLocaleDateString(язык, { day: 'numeric', month: 'long' });
     }
 
     // ---- Render Settings ----

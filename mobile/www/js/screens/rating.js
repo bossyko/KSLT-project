@@ -244,7 +244,8 @@
   function renderSubtitle() {
     var el = document.getElementById('ratingSubtitle');
     if (!el) return;
-    var season = new Date().getFullYear();
+    /* Год сезона — год клуба, а не часов смотрящего (13.11, h307). */
+    var season = parseInt(window.KSLT_VREMYA.сегодня().slice(0, 4), 10);
 
     function paint(n) {
       el.textContent = n + ' ' + I18N.t('rating.playersCount') + ' · ' +

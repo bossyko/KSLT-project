@@ -1254,7 +1254,7 @@
     }
 
     async function createPromotion(playerId, fromCatId, toCatId) {
-        var season = new Date().getFullYear();
+        var season = A.сезон();
         var res = await A.client.from('player_promotions').insert({
             player_id: playerId,
             from_category_id: fromCatId,

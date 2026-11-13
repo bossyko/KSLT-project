@@ -272,9 +272,13 @@
     }
 
     function updateFinStats(data) {
+        /* ОДНО ПОНЯТИЕ «СЕГОДНЯ» — ОДИН ДОМ (13.11, h307). Строкой ниже
+           `today` уже брался у времени клуба, а граница месяца тут же
+           считалась по часам СМОТРЯЩЕГО и сравнивалась с created_at из
+           базы. Два календаря в одной функции — ровно та беда, что
+           нашлась в графике динамики 13.11. */
         var today = KSLT_VREMYA.сегодня();
-        var now = new Date();
-        var monthStart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+        var monthStart = today.slice(0, 7) + '-01';
 
         var active = 0, expired = 0, month = 0, totalAmount = 0;
         data.forEach(function(p) {
@@ -295,19 +299,18 @@
     }
 
     function computeFinPeriodDates() {
-        var now = new Date();
-        if (finPeriodMode === 'this_month') {
-            finDateFrom = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
-            finDateTo = '';
-        } else if (finPeriodMode === 'last_month') {
-            var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-            var lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-            finDateFrom = lm.getFullYear() + '-' + String(lm.getMonth() + 1).padStart(2, '0') + '-01';
-            finDateTo = lmEnd.getFullYear() + '-' + String(lmEnd.getMonth() + 1).padStart(2, '0') + '-' + String(lmEnd.getDate()).padStart(2, '0');
-        } else if (finPeriodMode !== 'custom') {
-            finDateFrom = '';
-            finDateTo = '';
-        }
+        /* ГРАНИЦЫ МЕСЯЦЕВ — ПО ВРЕМЕНИ КЛУБА (13.11, h307). Эти даты идут
+           прямо в отбор платежей, то есть сравниваются с датами базы.
+           Считались по часам смотрящего: из Чикаго «этот месяц»
+           начинался не тогда, когда в Бишкеке.
+
+           Прошлый месяц берётся ВЫЧИТАНИЕМ ОДНОГО ДНЯ У ПЕРВОГО ЧИСЛА
+           ЭТОГО, а не арифметикой над номером месяца: так не нужно знать
+           ни длину февраля, ни перехода через год. */
+        if (finPeriodMode === 'custom') return;
+        var границы = A.границыПериода(finPeriodMode);
+        finDateFrom = границы.от;
+        finDateTo = границы.до;
     }
 
     function getTypeLabel(type) {
@@ -1070,8 +1073,15 @@
         var canvas = document.getElementById('adFinChart');
         if (!canvas || typeof Chart === 'undefined') return;
 
-        // Build last 12 months
-        var now = new Date();
+        /* ОСЬ ДВЕНАДЦАТИ МЕСЯЦЕВ — ОТ МЕСЯЦА КЛУБА (13.11, h307). Ключи
+           месяцев сравниваются с created_at из базы, а строились от часов
+           смотрящего: в ночь смены месяца из другого пояса ось начиналась
+           бы не с того месяца. */
+        var сегодняКлуба = KSLT_VREMYA.сегодня();
+        var now = new Date(
+            parseInt(сегодняКлуба.slice(0, 4), 10),
+            parseInt(сегодняКлуба.slice(5, 7), 10) - 1,
+            1);
         var months = [];
         for (var i = 11; i >= 0; i--) {
             var d = new Date(now.getFullYear(), now.getMonth() - i, 1);

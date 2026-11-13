@@ -2794,7 +2794,7 @@
         var rows = tbody.querySelectorAll('tr');
         var body = document.getElementById('ratResultsBody');
         var levelId = body ? body.dataset.levelId : '';
-        var season = new Date().getFullYear();
+        var season = A.сезон();
 
         var toUpsert = [];
 
@@ -2851,8 +2851,14 @@
      */
     function getOldestValidDate() {
         var now = new Date();
-        var year = now.getFullYear();
-        var oldest = now.getMonth() >= 8 ? (year - 1) : (year - 2);
+        /* СЕЗОН СЧИТАЕТСЯ ПО ВРЕМЕНИ КЛУБА (13.11, h307). Эта дата идёт
+           в отбор результатов, то есть сравнивается с датами базы, а
+           бралась по часам смотрящего: в ночь на 1 сентября из другого
+           пояса граница сезона уезжала на год. */
+        var деньКлуба = window.KSLT_VREMYA.сегодня();
+        var year = parseInt(деньКлуба.slice(0, 4), 10);
+        var месяц = parseInt(деньКлуба.slice(5, 7), 10);   // 1..12
+        var oldest = месяц >= 9 ? (year - 1) : (year - 2);
         return oldest + '-09-01';
     }
     A.getOldestValidDate = getOldestValidDate;
@@ -2933,7 +2939,10 @@
     async function runSeasonReset() {
         var warn = 'Очки за сезон, закончившийся в прошлом августе, сгорят. Каждому игроку, у кого изменятся очки или место, уйдёт сообщение в Telegram и push. Продолжить?';
 
-        var isSeptember = new Date().getMonth() === 8;
+        /* «СЕЙЧАС СЕНТЯБРЬ?» — ПО КАЛЕНДАРЮ КЛУБА (13.11, h307). От этого
+           ответа зависит, уйдёт ли предупреждение и флаг force на смену
+           сезона: ошибка здесь сжигает очки всем игрокам. */
+        var isSeptember = parseInt(window.KSLT_VREMYA.сегодня().slice(5, 7), 10) === 9;
         if (!isSeptember) {
             warn = L.plrSeychasNeSentyabr + warn;
         }

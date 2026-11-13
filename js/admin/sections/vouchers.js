@@ -193,15 +193,13 @@
 
     // ---- Period computation ----
     function computePeriodDates() {
-        var now = new Date();
-        if (vchPeriodMode === 'this_month') {
-            vchDateFrom = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
-            vchDateTo = '';
-        } else if (vchPeriodMode === 'last_month') {
-            var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-            var lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-            vchDateFrom = lm.getFullYear() + '-' + String(lm.getMonth() + 1).padStart(2, '0') + '-01';
-            vchDateTo = lmEnd.getFullYear() + '-' + String(lmEnd.getMonth() + 1).padStart(2, '0') + '-' + String(lmEnd.getDate()).padStart(2, '0');
+        /* ГРАНИЦЫ — У ДОМА (13.11, h307). Считались по часам смотрящего и
+           сравнивались с датами базы: из другого пояса отбор терял или
+           прихватывал ваучеры на стыке месяцев. */
+        if (vchPeriodMode === 'this_month' || vchPeriodMode === 'last_month') {
+            var границы = A.границыПериода(vchPeriodMode);
+            vchDateFrom = границы.от;
+            vchDateTo = границы.до;
         } else {
             vchDateFrom = '';
             vchDateTo = '';
