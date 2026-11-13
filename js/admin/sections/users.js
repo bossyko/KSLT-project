@@ -22,6 +22,7 @@
        и лист печати читают ЭТУ переменную и своего отбора не заводят —
        иначе файл и экран расходятся молча. */
     var usrОтобрано = [];
+    var usrИменаКарточек = {};
     var usrDeletedCount = 0, usrDeletedPeriodCount = 0;
     var usrChartInstance = null;
     var usrSortByMembership = 0; // 0=none, 1=asc (expiring soon first), -1=desc
@@ -275,6 +276,26 @@
         await loadUsersList();
     }
 
+
+    /**
+     * Подпись с именем карточки — ТОЛЬКО когда оно разошлось с именем
+     * профиля. Совпали — ничего не рисуем: одинаковая строка дважды
+     * это шум, а не сведение.
+     * Сравниваем по сути, а не по виду: лишние пробелы и регистр
+     * расхождением не считаются, иначе «Азиз  Исаков» и «азиз исаков»
+     * выглядели бы разными людьми.
+     */
+    function имяКарточки(u) {
+        if (!u.player_id) return '';
+        var карточка = (usrИменаКарточек[u.player_id] || '').trim();
+        if (!карточка) return '';
+        var профиль = (u.full_name || '').trim();
+        var свести = function(т) { return т.toLowerCase().replace(/\s+/g, ' '); };
+        if (свести(карточка) === свести(профиль)) return '';
+        return '<div class="ad-podpis" title="Так игрока ведёт клуб — имя карточки">' +
+            '\u{1F3BE} ' + A.esc(карточка) + '</div>';
+    }
+
     async function loadUsersList() {
         if (!A.client) return;
         var isAdm = A.currentRole === 'admin';
@@ -305,6 +326,24 @@
             });
         }
         usrMemMap = memMap;
+
+        /* ИМЯ КАРТОЧКИ РЯДОМ С ИМЕНЕМ ПРОФИЛЯ (12.11).
+           У одного человека живут ДВА имени: как он назвался при
+           регистрации (profiles.full_name) и как его ведёт клуб
+           (players.name). Привязка карточки их не сводит — функция
+           решить_привязку ставит только player_id и full_name не
+           трогает. Значит в списке видно одно имя, а в рейтинге и
+           сетках другое, и заметить расхождение было нечем.
+           Костя выбрал показывать оба, а не затирать одно другим:
+           то, как человек сам себя назвал, остаётся за ним. */
+        var карточкиИмена = {};
+        var идКарточек = items.filter(function(u) { return u.player_id; })
+            .map(function(u) { return u.player_id; });
+        if (идКарточек.length) {
+            var плРез = await A.client.from('players').select('id, name').in('id', идКарточек);
+            (плРез.data || []).forEach(function(п) { карточкиИмена[п.id] = п.name || ''; });
+        }
+        usrИменаКарточек = карточкиИмена;
 
         // Hide role=user with active membership (they are in Players section)
         /* Набор ДО скрытия нужен одной карточке — «С активным членством»:
@@ -532,7 +571,10 @@
             var tr = document.createElement('tr');
             if (canClick) tr.style.cursor = 'pointer';
             tr.innerHTML =
-                '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml + '<span>' + (name || email) + onlineDot + '</span>' + (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:var(--fs-2xs);font-weight:600;background:var(--alpha-lime-12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') + '</div></td>' +
+                '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml +
+                    '<span>' + (name || email) + onlineDot + имяКарточки(u) + '</span>' +
+                    (u.player_id ? '<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:var(--fs-2xs);font-weight:600;background:var(--alpha-lime-12);color:var(--accent);" title="Player ID: ' + A.esc(u.player_id) + '">&#127934;</span>' : '') +
+                '</div></td>' +
                 '<td style="color:var(--text-muted);font-size:var(--fs-sm);">' + email + '</td>' +
                 '<td>' + roleBadge + безТелеграма + '</td>' +
                 '<td>' + banBadge + '</td>' +
