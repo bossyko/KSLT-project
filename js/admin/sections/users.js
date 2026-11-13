@@ -296,38 +296,14 @@
         usrMemMap = memMap;
 
         // Hide role=user with active membership (they are in Players section)
-        /* ...КРОМЕ СЛУЧАЯ, КОГДА ИХ И СПРОСИЛИ. Карточка «С активным
-           членством» ведёт ровно к этим людям: скрывать их в ответ на
-           нажатие по ним значило бы показать пустой список. */
-        if (usrFilterStat !== 'members') {
-            items = items.filter(function(u) {
-                if (A.сотрудник(u.role)) return true;
-                var mem = memMap[u.id];
-                return !(mem && mem.status === 'active');
-            });
-        }
-
-        /* ОТБОР ПО КАРТОЧКЕ — ТЕ ЖЕ ПРИЗНАКИ, ЧТО И СЧЁТ НА НЕЙ. Числа
-           на карточках считает подсчётСтатистики теми же условиями:
-           player_id, telegram_chat_id, срок бана, активное членство,
-           месяц регистрации. Разойдись они — карточка показывала бы
-           одно число, а список другое. */
-        if (usrFilterStat) {
-            var сейчас = new Date();
-            var началоМесяца = сейчас.getFullYear() + '-' +
-                String(сейчас.getMonth() + 1).padStart(2, '0') + '-01';
-            items = items.filter(function(u) {
-                if (usrFilterStat === 'players') return !!u.player_id;
-                if (usrFilterStat === 'tg') return !!u.telegram_chat_id;
-                if (usrFilterStat === 'banned') return !!u.banned_until && new Date(u.banned_until) > сейчас;
-                if (usrFilterStat === 'new') return !!u.created_at && u.created_at.slice(0, 10) >= началоМесяца;
-                if (usrFilterStat === 'members') {
-                    var m = memMap[u.id];
-                    return !!(m && m.status === 'active');
-                }
-                return true;
-            });
-        }
+        /* Набор ДО скрытия нужен одной карточке — «С активным членством»:
+           она ведёт ровно к тем, кого это скрытие и убирает. */
+        var безСкрытия = items.slice();
+        items = items.filter(function(u) {
+            if (A.сотрудник(u.role)) return true;
+            var mem = memMap[u.id];
+            return !(mem && mem.status === 'active');
+        });
 
         // Load deleted accounts count
         var delResult = await A.client.from('deleted_accounts').select('id, deleted_at');
@@ -362,6 +338,46 @@
         renderUsrGrowthChart(items, delAll);
         usrAllItems = periodFiltered;
         items = periodFiltered;
+
+        /* ОТБОР ПО КАРТОЧКЕ МЕНЯЕТ СПИСОК, А НЕ СТАТИСТИКУ (12.11).
+           Первая редакция ставила отбор ДО подсчёта — и числа на
+           карточках поехали следом: 11 превращалось в 3, конверсия 55%
+           в 67%. Костя поймал это глазами: «зачем в карточках меняются
+           числа, надо оставить общее». Карточка — мера всего раздела,
+           и она не вправе меряться сама собой. Поэтому отбор стоит
+           ПОСЛЕ updateUsrStats и трогает только то, что видно ниже.
+
+           ПРИЗНАКИ ТЕ ЖЕ, ЧТО И У СЧЁТА: player_id, telegram_chat_id,
+           срок бана, месяц регистрации, активное членство. Разойдись
+           они — карточка показывала бы одно число, а список другое. */
+        if (usrFilterStat) {
+            var сейчас = new Date();
+            var началоМесяца = сейчас.getFullYear() + '-' +
+                String(сейчас.getMonth() + 1).padStart(2, '0') + '-01';
+            var откуда = items;
+            if (usrFilterStat === 'members') {
+                /* Этих людей общий список прячет (они в разделе Игроки),
+                   поэтому берём набор до скрытия — иначе нажатие по
+                   карточке открывало бы пустоту. Период учитываем тем же
+                   условием, что и выше. */
+                откуда = безСкрытия.filter(function(u) {
+                    if (usrDateFrom && !(u.created_at && u.created_at.slice(0, 10) >= usrDateFrom)) return false;
+                    if (usrDateTo && !(u.created_at && u.created_at.slice(0, 10) <= usrDateTo)) return false;
+                    return true;
+                });
+            }
+            items = откуда.filter(function(u) {
+                if (usrFilterStat === 'players') return !!u.player_id;
+                if (usrFilterStat === 'tg') return !!u.telegram_chat_id;
+                if (usrFilterStat === 'banned') return !!u.banned_until && new Date(u.banned_until) > сейчас;
+                if (usrFilterStat === 'new') return !!u.created_at && u.created_at.slice(0, 10) >= началоМесяца;
+                if (usrFilterStat === 'members') {
+                    var m = memMap[u.id];
+                    return !!(m && m.status === 'active');
+                }
+                return true;
+            });
+        }
 
         // Client-side search
         if (usrSearchQuery) {
