@@ -17,6 +17,10 @@ function копия() {
     fs.copyFileSync(path.join(корень, 'pages/admin.html'), path.join(двор, 'pages/admin.html'));
     /* С 12.11 сторож читает ещё и справочник красок — ОТКАТУ ДОЛЖНО
        БЫТЬ ЧТО ПОРТИТЬ (четвёртый раз за двое суток). */
+    /* ОТКАТУ ДОЛЖНО БЫТЬ ЧТО ПОРТИТЬ: с 12.11 сторож зовёт счёт красок
+       у дома tools/kontrast.mjs — без него песочница падала бы не на
+       том правиле (пятый раз за трое суток). */
+    fs.copyFileSync(path.join(корень, 'tools/kontrast.mjs'), path.join(двор, 'tools/kontrast.mjs'));
     fs.mkdirSync(path.join(двор, 'css'), { recursive: true });
     fs.copyFileSync(path.join(корень, 'css/tokens.css'), path.join(двор, 'css/tokens.css'));
     return двор;
@@ -67,8 +71,45 @@ const ОТКАТЫ = [
       ждём: /ряды графика красятся своими именами/ },
 
     { имя: 'имена рядов пропали из справочника',
-      правка: замена('css/tokens.css', '--chart-ryad-1: var(--cat-2);', '--chart-ryad-1-ubrano: var(--cat-2);'),
+      правка(двор) {
+          const п = path.join(двор, 'css/tokens.css');
+          const т = fs.readFileSync(п, 'utf8');
+          const м = т.match(/--chart-ryad-1:\s*var\(--[\w-]+\);/);
+          if (!м) return 'имени ряда 1 в справочнике нет';
+          fs.writeFileSync(п, т.replace(м[0], м[0].replace('--chart-ryad-1:', '--chart-ryad-1-ubrano:')));
+      },
       ждём: /имена рядов объявлены в справочнике/ },
+
+    { имя: 'ряды свелись к одной краске — полосы не различить',
+      правка(двор) {
+          const п = path.join(двор, 'css/tokens.css');
+          const т = fs.readFileSync(п, 'utf8');
+          const м1 = т.match(/--chart-ryad-1:\s*var\((--[\w-]+)\);/);
+          const м2 = т.match(/--chart-ryad-2:\s*var\((--[\w-]+)\);/);
+          if (!м1 || !м2) return 'имён рядов в справочнике нет';
+          fs.writeFileSync(п, т.replace(м2[0], '--chart-ryad-2: var(' + м1[1] + ');'));
+      },
+      ждём: /имена рядов объявлены в справочнике|ряды различимы/ },
+
+    { имя: 'ряд перекрашен в краску, тонущую на подложке',
+      правка(двор) {
+          const п = path.join(двор, 'css/tokens.css');
+          const т = fs.readFileSync(п, 'utf8');
+          const м = т.match(/--chart-ryad-2:\s*var\(--[\w-]+\);/);
+          if (!м) return 'имени ряда 2 в справочнике нет';
+          /* тёмно-серый: ΔE к зелёному велик, но на подложке #1E1E1E не виден */
+          const без = т.replace(м[0], '--chart-ryad-2: var(--cat-tmno);');
+          fs.writeFileSync(п, без.replace(':root {', ':root {\n  --cat-tmno: #2A2A2A;'));
+      },
+      ждём: /имена рядов объявлены в справочнике|ряды различимы/ },
+
+    { имя: 'строка графика стала уже двух полос',
+      правка: замена('js/kslt-grafik-vid.js', 'API.СТРОКА = 40;', 'API.СТРОКА = 24;'),
+      ждём: /строка вмещает пару полос с воздухом/ },
+
+    { имя: 'высоту обёртки перестали ставить из дома',
+      правка: замена('js/admin/sections/analytics.js', 'В.высота(canvas.parentElement, labels.length);', ''),
+      ждём: /высоту обёртки ставит дом/ },
 
     { имя: 'из дома пропала часть вида',
       правка: замена('js/kslt-grafik-vid.js', 'API.легенда =', 'API.легендаУбрана ='),

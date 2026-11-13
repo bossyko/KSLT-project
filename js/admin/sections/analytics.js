@@ -168,6 +168,7 @@
         var appValues = typeData.map(function(d) { return d.app; });
 
         var В = window.KSLT_GRAFIK_VID;
+        В.высота(canvas.parentElement, labels.length);
         var chart = new Chart(canvas, {
             type: 'bar',
             data: {
@@ -217,6 +218,7 @@
         var appValues = data.map(function(d) { return d.view_count_app || 0; });
 
         var В = window.KSLT_GRAFIK_VID;
+        В.высота(canvas.parentElement, labels.length);
         var chart = new Chart(canvas, {
             type: 'bar',
             data: {
