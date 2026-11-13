@@ -186,12 +186,22 @@ const ИЗВЕСТНЫЕ = зашитые.filter(м =>
        его отка́том. Это признаки, а не настройка кода. */
     /^tools\/check-dokumenty-prilozheniya(-otkat)?\.js:/.test(м) ||
     /^tools\/check-puti-otnositelnye-otkat\.js:/.test(м) ||
+    /* КАРТА САЙТА И robots.txt ГОВОРЯТ С РОБОТОМ, А НЕ С БРАУЗЕРОМ (12.11).
+       В sitemap.xml адрес обязан быть полным по спецификации, строка
+       Sitemap в robots.txt — тоже. Генератор tools/sitemap.js и сторож
+       check-karta-sayta.js держат этот адрес как признак, а не как
+       настройку кода. */
+    /^(sitemap\.xml|robots\.txt):/.test(м) ||
+    /^tools\/(sitemap|check-karta-sayta(-otkat)?)\.js:/.test(м) ||
     метатег(строкаПоМетке[м]));
 
-/* Метатег предпросмотра: ссылка в нём — часть разметки, а не код. */
+/* Метатег предпросмотра: ссылка в нём — часть разметки, а не код.
+   12.11 СЮДА ЖЕ ПОПАЛ hreflang: ссылки на языки обязаны быть ПОЛНЫМИ
+   адресами — относительный hreflang Google пропускает, а js до робота
+   не доживает. Тот же довод, что у canonical и og:url. */
 function метатег(стр) {
     return typeof стр === 'string' &&
-        /(property|name)="(og:(url|image)|twitter:image)"|rel="canonical"/.test(стр);
+        /(property|name)="(og:(url|image)|twitter:image)"|rel="canonical"|rel="alternate"[^>]*hreflang=/.test(стр);
 }
 const живые = зашитые.filter(м => ИЗВЕСТНЫЕ.indexOf(м) === -1);
 

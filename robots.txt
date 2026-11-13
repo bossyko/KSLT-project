@@ -1,0 +1,19 @@
+# КСЛТ — tennis.kg
+# Служебные разделы закрыты и мета-тегом noindex на самих страницах, и
+# здесь: мета видит только тот, кто страницу уже скачал, а robots.txt
+# останавливает обход до скачивания. ОДНО ПОНЯТИЕ — ДВА РУБЕЖА, и они
+# обязаны совпадать: список ниже сторожит tools/check-karta-sayta.js.
+
+User-agent: *
+Disallow: /pages/admin.html
+Disallow: /pages/admin-en.html
+Disallow: /pages/auth.html
+Disallow: /pages/auth-kg.html
+Disallow: /pages/auth-en.html
+Disallow: /pages/dashboard.html
+Disallow: /pages/dashboard-kg.html
+Disallow: /pages/dashboard-en.html
+Disallow: /pages/_preview-mobile.html
+Disallow: /pages/_preview-politika.html
+
+Sitemap: https://tennis.kg/sitemap.xml

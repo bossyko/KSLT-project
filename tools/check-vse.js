@@ -483,6 +483,7 @@ const КУСКИ = [
     /* ВИД ГРАФИКА — один дом на все графики (12.11). */
     ['вид графика', 'check-grafiki-vid.js', 'check-grafiki-vid-otkat.js'],
     ['обложка новости', 'check-oblozhka-novosti.js', 'check-oblozhka-novosti-otkat.js'],
+    ['карта сайта', 'check-karta-sayta.js', 'check-karta-sayta-otkat.js'],
 
     /* СТОЛБЦЫ ТАБЛИЦ — colgroup по числу колонок (h158, 12.11). */
     ['столбцы таблиц', 'check-stolbcy-tablic.js', 'check-stolbcy-tablic-otkat.js'],

@@ -110,7 +110,9 @@ const ОТКАТЫ = [
        живую копию продукта, работающую с той же базой. Сторож их не
        видел: про этот адрес ему не сказали. */
     ['вернуть прежний дом в og:url главной', 'index.html',
-     '<meta property="og:url" content="https://tennis.kg/index.html">',
+     /* 12.11: у главной og:url стал корнем — тем же адресом, что и
+        canonical. ОДИН АДРЕС У ОДНОЙ СТРАНИЦЫ, а якорь идёт за ним. */
+     '<meta property="og:url" content="https://tennis.kg/">',
      '<meta property="og:url" content="https://bossyko.github.io/KSLT-project/index.html">',
      'метатег предпросмотра ведёт на нынешний дом, а не на прежний'],
 
