@@ -7,16 +7,17 @@ const ДОМ = 'js/kslt-vyzov.js';
 const ДОМ_П = 'mobile/www/js/kslt-vyzov.js';
 const САЙТ = 'js/player.js';
 const ПРИЛ = 'mobile/www/js/screens/player-detail.js';
-const БАЗА = 'supabase/migrations/20260210000000_baseline.sql';
+/* ОПИСАНИЕ СХЕМЫ — СНИМОК, А НЕ СЛЕПОК (13.11, h306). */
+const БАЗА = 'sql/схема/schema-snapshot.sql';
 
 const ОТКАТЫ = [
   { имя: 'ограничение статусов в базе испорчено', ждём: 'ограничение статусов прочитано из базы',
-    файл: БАЗА, было: '"challenges_status_check" CHECK', станет: '"challenges_status_chek" CHECK' },
+    файл: БАЗА, было: 'challenges_status_check : CHECK', станет: 'challenges_status_chek : CHECK' },
 
   { имя: '`pending` добавлен в ограничение базы',
     ждём: 'статуса `pending` в базе действительно нет',
-    файл: БАЗА, было: "CONSTRAINT \"challenges_status_check\" CHECK ((\"status\" = ANY (ARRAY['active'::\"text\"",
-    станет: "CONSTRAINT \"challenges_status_check\" CHECK ((\"status\" = ANY (ARRAY['pending'::\"text\", 'active'::\"text\"" },
+    файл: БАЗА, было: "challenges_status_check : CHECK ((status = ANY (ARRAY['active'::text",
+    станет: "challenges_status_check : CHECK ((status = ANY (ARRAY['pending'::text, 'active'::text" },
 
   { имя: 'из дома убрано понятие', ждём: 'дом объявлен и отдаёт все четыре понятия',
     файл: ДОМ, было: '    API.занят = function (client, мойId, егоId) {',
@@ -105,7 +106,10 @@ const Я = require('./yakor-tega.js');
 
 function копия() {
   const к = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-vyz-'));
-  for (const о of ['js', 'mobile/www', 'pages', 'tools', 'supabase'])
+  /* СНИМОК СХЕМЫ ЕЗДИТ В ПЕСОЧНИЦУ ВМЕСТЕ С ОСТАЛЬНЫМ (13.11, h306):
+     прибор читает теперь его, а не слепок из `supabase/`. ОТКАТУ ДОЛЖНО
+     БЫТЬ ЧТО ПОРТИТЬ. */
+  for (const о of ['js', 'mobile/www', 'pages', 'tools', 'supabase', 'sql'])
     fs.cpSync(path.join(КОРЕНЬ, о), path.join(к, о), { recursive: true });
   return к;
 }

@@ -39,13 +39,19 @@ const ДОМ = 'js/kslt-vyzov.js';
 const ДОМ_П = 'mobile/www/js/kslt-vyzov.js';
 const САЙТ = 'js/player.js';
 const ПРИЛ = 'mobile/www/js/screens/player-detail.js';
-const БАЗА = 'supabase/migrations/20260210000000_baseline.sql';
+/* ОПИСАНИЕ СХЕМЫ ЧИТАЕТСЯ ИЗ СНИМКА, А НЕ ИЗ СЛЕПКА (13.11, h306).
+   Здесь стоял `supabase/migrations/…_baseline.sql` — слепок от 10.08,
+   отставший на три месяца. Статусы вызова в нём случайно совпали с
+   боевыми, и прибор три месяца давал ВЕЗЕНИЕ, а не уверенность. */
+const БАЗА = 'sql/схема/schema-snapshot.sql';
 const ФУНКЦИЯ = 'supabase/functions/create-challenge/index.ts';
 
 /* Допустимые статусы читаются ИЗ ОГРАНИЧЕНИЯ БАЗЫ, а не держатся
    списком: список, который держится руками, отстаёт. */
 const СТАТУСЫ = (function () {
-    const м = чит(БАЗА).match(/"challenges_status_check" CHECK \(\("status" = ANY \(ARRAY\[([^\]]*)\]/);
+    /* Снимок — чтение каталога, и ограничение записано в нём одной
+       строкой без кавычек у имён столбцов. */
+    const м = чит(БАЗА).match(/challenges_status_check : CHECK \(\(status = ANY \(ARRAY\[([^\]]*)\]/);
     if (!м) return null;
     return (м[1].match(/'([a-z_]+)'/g) || []).map(с => с.replace(/'/g, ''));
 })();
