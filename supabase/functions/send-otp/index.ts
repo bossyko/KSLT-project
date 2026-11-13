@@ -144,7 +144,27 @@
       body: formData.toString(),
     })
     const result = await res.json()
-    return result.success === true
+    if (result.success === true) return true
+
+    /* ЧЕЛОВЕК НЕ ОТВЕЧАЕТ ЗА НАШУ ПОЛОМКУ.
+       Cloudflare в `error-codes` разделяет две совсем разные вещи:
+       проверку не прошёл ПОСЕТИТЕЛЬ (invalid-input-response,
+       timeout-or-duplicate) и проверка не состоялась ПО НАШЕЙ ВИНЕ —
+       не тот или пустой секрет, отказ на стороне Cloudflare. Второе
+       нельзя превращать в «вы не прошли проверку»: это заперло бы
+       регистрацию для всех разом, а причина была бы у нас.
+       Довод не умозрительный: секрет ни разу не работал на боевой —
+       токен до сервера не доходил вовсе (13.11), так что первая же
+       настоящая проверка и будет первой его проверкой. */
+    const коды: string[] = Array.isArray(result['error-codes']) ? result['error-codes'] : []
+    const нашаБеда = коды.some((к) => к === 'invalid-input-secret' ||
+                                      к === 'missing-input-secret' ||
+                                      к === 'internal-error')
+    if (нашаБеда) {
+      console.error('turnstile: проверка не состоялась по нашей вине:', коды.join(','))
+      return true
+    }
+    return false
   }
 
   // Send message via Telegram bot

@@ -121,6 +121,12 @@ const ОТКАТЫ = [
  "if ((flow === 'forgot_password' || flow === 'register') && turnstileToken) {",
  "if (flow === 'forgot_password' && turnstileToken) {"],
 
+['отказ капчи по нашей вине не запирает человека',
+ 'supabase/functions/send-otp/index.ts', '    if (нашаБеда) {', '    if (false) {'],
+
+['истёкший токен капчи берётся заново, а не обнуляется навсегда',
+ 'js/auth.js', '_signupToken = null; turnstile.reset(su); }', '_signupToken = null; }'],
+
 ['остаток попыток склоняется, а не склеивается',
  'js/auth.js', 'otpAttemptsLeft: function (n) {\n            var сотня', "otpAttemptsLeft: ' попыток осталось', // var сотня"],
 

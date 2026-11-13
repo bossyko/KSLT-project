@@ -210,7 +210,13 @@
         if (su) turnstile.render(su, {
             sitekey: TURNSTILE_SITE_KEY, theme: 'dark',
             callback: function(t) { _signupToken = t; _turnstileBroken = false; },
-            'expired-callback': function() { _signupToken = null; },
+            /* ИСТЁКШИЙ ТОКЕН БЕРЁТСЯ ЗАНОВО, А НЕ ОБНУЛЯЕТСЯ НАВСЕГДА.
+               Токен Turnstile живёт пять минут, а форма регистрации
+               длинная: имя, фамилия, почта, пол, согласие. Было:
+               обнулили и ждём — человек дозаполнял и упирался в
+               «пройдите проверку» на кнопке, хотя ничего не нарушал.
+               reset заставляет виджет взять свежий токен. */
+            'expired-callback': function() { _signupToken = null; turnstile.reset(su); },
             'error-callback': function() { _turnstileBroken = true; }
         });
         /* КАПЧА НЕ РИСУЕТСЯ, ПОКА НЕ ПОНАДОБИТСЯ.
@@ -232,7 +238,7 @@
         if (fg) turnstile.render(fg, {
             sitekey: TURNSTILE_SITE_KEY, theme: 'dark', appearance: 'interaction-only',
             callback: function(t) { _forgotToken = t; _turnstileBroken = false; },
-            'expired-callback': function() { _forgotToken = null; },
+            'expired-callback': function() { _forgotToken = null; turnstile.reset(fg); },
             'error-callback': function() { _turnstileBroken = true; }
         });
     }
