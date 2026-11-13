@@ -41,19 +41,30 @@
         var btnWrap = document.createElement('div');
         btnWrap.className = 'ad-bulk-actions';
         btnWrap.style.display = 'none';
-        btnWrap.innerHTML = '<button class="ad-btn ad-btn-danger ad-btn-sm ad-bulk-delete-btn">' + L.deleteSelected + ' (<span class="ad-bulk-count">0</span>)</button>';
+        /* ВТОРОЕ ДЕЙСТВИЕ НАД ВЫБРАННЫМИ — НЕОБЯЗАТЕЛЬНОЕ, И ЕГО ЗНАЕТ
+           ЭКРАН, А НЕ ПОЛОСА (12.11). Уведомления просили не только
+           удалять пачкой, но и отзывать: «по одному удалять как-то
+           неудобно». Полоса про отзыв ничего не знает — экран передаёт
+           подпись и работу, тем же приёмом, что `доУдаления`. Разделы,
+           которые второго действия не просят, ведут себя как прежде. */
+        var ещё = opts.ещёДействие;
+        btnWrap.innerHTML =
+            (ещё ? '<button class="ad-btn ad-btn-sm ad-bulk-more-btn">' + ещё.подпись +
+                ' (<span class="ad-bulk-count">0</span>)</button>' : '') +
+            '<button class="ad-btn ad-btn-danger ad-btn-sm ad-bulk-delete-btn">' + L.deleteSelected + ' (<span class="ad-bulk-count">0</span>)</button>';
         table.parentNode.parentNode.insertBefore(btnWrap, table.parentNode);
 
         var checkAll = thCheck.querySelector('.ad-bulk-all');
         var bulkBtn = btnWrap.querySelector('.ad-bulk-delete-btn');
-        var countEl = btnWrap.querySelector('.ad-bulk-count');
+        var moreBtn = btnWrap.querySelector('.ad-bulk-more-btn');
+        var счётчики = btnWrap.querySelectorAll('.ad-bulk-count');
 
         function updateBulkUI() {
             var checked = table.querySelectorAll('tbody .ad-bulk-item:checked');
             var total = table.querySelectorAll('tbody .ad-bulk-item');
             var count = checked.length;
             btnWrap.style.display = count > 0 ? 'flex' : 'none';
-            countEl.textContent = count;
+            счётчики.forEach(function(э) { э.textContent = count; });
             checkAll.checked = total.length > 0 && count === total.length;
             /* НЕПОЛНЫЙ ВЫБОР БЫЛ НЕОТЛИЧИМ ОТ ПУСТОГО: отметишь одну строку
                из тридцати — шапка пустая, как будто не выбрано ничего.
@@ -82,6 +93,23 @@
             }
         });
 
+        /* Второе действие: экран сам решает, что делает и о чём спрашивает. */
+        if (moreBtn && ещё) {
+            moreBtn.addEventListener('click', async function() {
+                var ids = [];
+                table.querySelectorAll('tbody .ad-bulk-item:checked').forEach(function(cb) {
+                    ids.push(cb.dataset.bulkId);
+                });
+                if (!ids.length) return;
+                moreBtn.disabled = true;
+                try { await ещё.выполнить(ids); }
+                finally { moreBtn.disabled = false; }
+                checkAll.checked = false;
+                btnWrap.style.display = 'none';
+                await Promise.resolve(opts.reloadFn());
+            });
+        }
+
         // Bulk delete
         bulkBtn.addEventListener('click', async function() {
             var checked = table.querySelectorAll('tbody .ad-bulk-item:checked');
@@ -107,6 +135,17 @@
             }
 
             showConfirm(opts.confirmMsg || L.deleteSelectedConfirm, текст, async function() {
+                /* ЧТО СДЕЛАТЬ ДО УДАЛЕНИЯ СТРОКИ — ЗНАЕТ ЭКРАН (12.11).
+                   У рассылок порядок обратный привычному: сперва убрать
+                   сообщение у получателей, и только потом стирать запись
+                   журнала. Иначе строка исчезает вместе с кнопкой отзыва,
+                   а уведомление у людей висит, и убрать его больше нечем.
+                   Крючок зовётся ПОСЛЕ согласия человека, а `доУдаления`
+                   лишь собирает текст предупреждения — это разные вещи. */
+                if (opts.передУдалением) {
+                    try { await opts.передУдалением(ids); }
+                    catch (e) { showToast((e && e.message) || String(e), 'error'); return; }
+                }
                 var result = await A.client.from(opts.tableName).delete().in('id', ids);
                 if (result.error) {
                     showToast(result.error.message, 'error');
@@ -125,7 +164,7 @@
                        Одно обещание на компонент: полосы не будет сразу. */
                     checkAll.checked = false;
                     checkAll.indeterminate = false;
-                    countEl.textContent = '0';
+                    счётчики.forEach(function(э) { э.textContent = '0'; });
                     btnWrap.style.display = 'none';
                     /* И промис берём через `Promise.resolve`: обёртка, не
                        вернувшая его, больше не может обмануть ожидание */

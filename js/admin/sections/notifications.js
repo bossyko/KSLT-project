@@ -65,7 +65,7 @@
             '<div class="ad-card">' +
                 '<h3 class="ad-card-title">' + L.pushHistory + '</h3>' +
                 '<div class="ad-table-wrap">' +
-                    '<table class="ad-table">' +
+                    '<table class="ad-table" id="adPushTable">' +
                         '<thead><tr>' +
                             '<th>' + L.thDate + '</th>' +
                             '<th>' + L.pushTitle + '</th>' +
@@ -75,7 +75,7 @@
                             '<th>' + L.pushFcm + '</th>' +
                             '<th style="width:80px;"></th>' +
                         '</tr></thead>' +
-                        '<tbody id="adPushHistoryBody"><tr><td class="ad-tablica-pusto" colspan="7">...</td></tr></tbody>' +
+                        '<tbody id="adPushHistoryBody"><tr><td class="ad-tablica-pusto" colspan="8">...</td></tr></tbody>' +
                     '</table>' +
                 '</div>' +
             '</div>';
@@ -241,6 +241,12 @@
         var tbody = document.getElementById('adPushHistoryBody');
         if (!tbody || !A.client) return;
 
+        /* РОЛЬ СПРАШИВАЕТСЯ ДО ПЕРВОЙ ОТРИСОВКИ, А НЕ ПОСЕРЕДИНЕ. Стояла
+           ниже, а пустая строка считала ширину выше — и брала undefined
+           вместо признака: `var` поднимается, значение нет. */
+        var isAdmin = A.currentRole === 'admin';
+        var isStaff = isAdmin || A.currentRole === 'manager';
+
         var res = await A.client.from('push_log')
             .select('id, title, message, type, audience, recipients_count, fcm_sent, created_at, recalled_at')
             .order('created_at', { ascending: false })
@@ -248,15 +254,12 @@
 
         var rows = res.data || [];
         if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td class="ad-tablica-pusto" colspan="6">' + L.pushNoHistory + '</td></tr>';
+            tbody.innerHTML = '<tr><td class="ad-tablica-pusto" colspan="' + (isAdmin ? 8 : 7) + '">' + L.pushNoHistory + '</td></tr>';
             return;
         }
 
         var audienceLabels = { all: L.pushAll, members: L.pushMembers, user: L.pushUser };
         var typeLabels = { system: L.pushTypeSystem, tournament: L.pushTypeTournament, match: L.pushTypeMatch, battle: L.pushTypeBattle };
-
-        var isAdmin = A.currentRole === 'admin';
-        var isStaff = isAdmin || A.currentRole === 'manager';
 
         var recallLabel = 'Отозвать';
         var recallAgainLabel = 'Отозвать повторно';
@@ -288,6 +291,10 @@
             }
 
             return '<tr' + (recalled ? ' style="opacity:0.55;"' : '') + '>' +
+                /* ГАЛОЧКА ТОЛЬКО ТАМ, ГДЕ ЕСТЬ ЧТО С НЕЙ ДЕЛАТЬ: удалять
+                   рассылки вправе админ, и полоса массовых действий —
+                   его. Менеджеру галочка была бы кнопкой в никуда. */
+                (isAdmin ? A.bulkCheckboxTd(r.id) : '') +
                 '<td style="white-space:nowrap;font-size:var(--fs-xs);">' + date + '</td>' +
                 '<td style="font-weight:500;">' + A.esc(r.title || '') +
                     (recalled ? ' <span style="font-size:var(--fs-2xs);color:var(--text-muted);">\u00b7 ' + recalledLabel + '</span>' : '') +
@@ -331,6 +338,55 @@
                 loadHistory();
             });
         });
+
+        /* ПАЧКОЙ — ТЕМ ЖЕ ДОМОМ, ЧТО И ВЕЗДЕ (12.11). Слово Кости:
+           «нельзя выбрать несколько или всех и потом сделать с
+           выбранными — по одному удалять как-то неудобно». Полоса
+           массового выбора уже есть у восьми разделов, здесь её не было.
+           ОТЗЫВ ИДЁТ ПЕРЕД УДАЛЕНИЕМ, как и у одиночной кнопки: сперва
+           сообщение убирается у получателей, потом стирается запись. */
+        async function отозватьПачкой(ids) {
+            var убрано = 0, беды = 0;
+            for (var i = 0; i < ids.length; i++) {
+                var res = await A.client.rpc('recall_push', { p_push_id: ids[i] });
+                var err = (res.error && res.error.message) || (res.data && res.data.error);
+                if (err) { беды++; continue; }
+                убрано += (res.data && res.data.removed) || 0;
+            }
+            return { убрано: убрано, беды: беды };
+        }
+
+        if (isAdmin) {
+            A.setupBulkDelete({
+                tableId: 'adPushTable',
+                tableName: 'push_log',
+                reloadFn: loadHistory,
+                доУдаления: function(ids) {
+                    return 'Сообщения исчезнут у получателей, и записи журнала будут стёрты. ' +
+                        'Выбрано рассылок: ' + ids.length + '. Отменить это нельзя.';
+                },
+                передУдалением: async function(ids) {
+                    var и = await отозватьПачкой(ids);
+                    if (и.беды) throw new Error('Не удалось отозвать: ' + и.беды);
+                },
+                ещёДействие: {
+                    подпись: 'Отозвать',
+                    выполнить: async function(ids) {
+                        var ok = await A.showConfirmAsync(
+                            'Отозвать выбранные рассылки?',
+                            'Сообщения исчезнут у всех, кто их получил. Записи в журнале останутся с пометкой об отзыве. Выбрано: ' + ids.length,
+                            'Отозвать');
+                        if (!ok) return;
+                        var и = await отозватьПачкой(ids);
+                        if (и.беды) {
+                            A.showToast('Отозвано не всё: ошибок ' + и.беды + ', убрано у получателей ' + и.убрано, 'error');
+                        } else {
+                            A.showToast(L.ntfOkOtozvanoUbrano + и.убрано, 'success');
+                        }
+                    }
+                }
+            });
+        }
 
         tbody.querySelectorAll('.ad-push-del').forEach(function(btn) {
             btn.addEventListener('click', async function() {
