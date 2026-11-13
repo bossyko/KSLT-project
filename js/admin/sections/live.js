@@ -12,7 +12,10 @@
     var subTab = 'active';
     var activeList = [];
     var completedList = [];
-    var allPlayers = [];
+    /* ИМЕНА ПО ID — КАРТА, А НЕ СПИСОК ВСЕХ. Список нужен был только
+       чтобы найти в нём одно имя обходом; карта отвечает сразу и
+       заполняется ровно теми id, которые встретились в трансляциях. */
+    var имяПоId = {};
 
     // ---- Entry point ----
     function renderLiveSection() {
@@ -59,12 +62,16 @@
                 .eq('status', 'completed')
                 .order('completed_at', { ascending: false })
                 .limit(50),
-            A.client.from('players').select('id, name, name_en, photo').order('name')
+            /* ВСЕХ ИГРОКОВ ЗДЕСЬ БОЛЬШЕ НЕ ТЯНЕМ (f18, 13.11).
+               Стояло `.select(...).order('name')` без границы — на 13.11
+               это 290 строк при каждом входе в раздел, ради двух вещей:
+               подставить имя по id в двух списках и искать игрока в
+               свободном режиме. Обе обходятся точечными запросами:
+               имена — по нужным id, поиск — по тому, что набрали. */
         ]).then(function(results) {
             activeList = results[0].data || [];
             completedList = results[1].data || [];
-            allPlayers = results[2].data || [];
-            renderSubTab();
+            подгрузитьИмена(activeList.concat(completedList)).then(renderSubTab);
         });
     }
 
@@ -75,10 +82,30 @@
 
     function playerName(id, fallback) {
         if (fallback) return fallback;
-        for (var i = 0; i < allPlayers.length; i++) {
-            if (allPlayers[i].id === id) return allPlayers[i].name;
-        }
-        return '—';
+        return имяПоId[id] || '—';
+    }
+
+    /**
+     * Подтянуть имена ровно тех игроков, что встретились в трансляциях.
+     *
+     * СНИМОК ИМЕНИ ЕСТЬ НЕ ВСЕГДА, и потому без этого запроса не
+     * обойтись: у трансляций, заведённых из сетки, в `player1_name`
+     * теперь null (f24), а показать строку списка чем-то надо.
+     * Спрашиваем только недостающие id — повторный вход в раздел не
+     * повторяет запрос.
+     */
+    function подгрузитьИмена(записи) {
+        var нужны = [];
+        (записи || []).forEach(function (м) {
+            [м.player1_id, м.player2_id].forEach(function (id) {
+                if (id && !имяПоId[id] && нужны.indexOf(id) === -1) нужны.push(id);
+            });
+        });
+        if (!нужны.length) return Promise.resolve();
+        return A.client.from('players').select('id, name').in('id', нужны)
+            .then(function (рез) {
+                (рез.data || []).forEach(function (п) { имяПоId[п.id] = п.name || ''; });
+            });
     }
 
     function buildScoreDisplay(m) {
@@ -759,11 +786,29 @@
             var q = input.value.trim().toLowerCase();
             if (q.length < 2) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
 
-            timer = setTimeout(function() {
-                var filtered = allPlayers.filter(function(p) {
-                    return (p.name && p.name.toLowerCase().indexOf(q) !== -1) ||
-                           (p.name_en && p.name_en.toLowerCase().indexOf(q) !== -1);
-                }).slice(0, 8);
+            timer = setTimeout(async function() {
+                /* ИЩЕТ БАЗА, А НЕ ПАМЯТЬ (f18, 13.11). Раньше условием
+                   поиска был загруженный заранее список всех игроков —
+                   и ради восьми строк подсказки держались все. Запрос
+                   ищет по тем же двум полям и тем же вхождением
+                   подстроки, так что подсказка не изменилась. */
+                /* НАБРАННОЕ ЧЕЛОВЕКОМ УХОДИТ В СТРОКУ ФИЛЬТРА, И ЭТО
+                   ОПАСНО. В `or(...)` условия разделяются запятой, а
+                   скобки задают вложенность: наберут «Иванов, Петров» —
+                   и запрос развалится на бессмысленные куски. Проценты
+                   и подчёркивания в ilike значат «любой текст» и «любой
+                   знак», то есть меняют смысл поиска молча.
+                   Эти знаки выбрасываются ДО подстановки. Имён с ними у
+                   нас нет, а поиск остаётся поиском. */
+                var чисто = q.replace(/[,()"%_\\]/g, ' ').trim();
+                if (!чисто) { dropdown.style.display = 'none'; return; }
+
+                var рез = await A.client.from('players')
+                    .select('id, name, name_en, photo')
+                    .or('name.ilike.%' + чисто + '%,name_en.ilike.%' + чисто + '%')
+                    .order('name')
+                    .limit(8);
+                var filtered = рез.data || [];
 
                 if (!filtered.length) { dropdown.style.display = 'none'; return; }
 

@@ -114,6 +114,11 @@ const ОТКАТЫ = [
    '                row.player1_name = m._p1Name || null;',
    '                row.player1_name = m._p1Name;',
    'в базу не пишется заглушка вместо null'],
+  // --- раздел Live не тянет всех игроков (f18, 13.11) ---
+  ['js/admin/sections/live.js',
+   "                var чисто = q.replace(/[,()\"%_\\\\]/g, ' ').trim();",
+   '                var чисто = q;',
+   'набранное чистится перед подстановкой в фильтр'],
 ];
 
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-imya-'));
