@@ -95,6 +95,9 @@
         cardFoundTitle: 'This may be your player card',
         cardFoundYes: 'Yes, that is me',
         cardFoundNo: 'No, not me',
+        cardMaybeTitle: 'Is one of these your card?',
+        cardMaybeText: 'We found cards with a similar surname. Pick yours — or skip if none of them is you.',
+        cardMaybeNone: 'None of these is me',
         cyrTitle: 'Write your name in Cyrillic',
         cyrText: 'Club lists use Cyrillic names. Fix your name in the profile so it matches the rankings.',
         pointsShort: 'pts',
@@ -458,6 +461,9 @@
         cardFoundTitle: 'Балким, бул сиздин картыңыз',
         cardFoundYes: 'Ооба, бул мен',
         cardFoundNo: 'Жок, мен эмес',
+        cardMaybeTitle: 'Булардын бири сиздин картыңызбы?',
+        cardMaybeText: 'Фамилиясы окшош карталар табылды. Өзүңүздүкүн тандаңыз — эгер бири да сиздики болбосо, өткөрүп жибериңиз.',
+        cardMaybeNone: 'Бири да меники эмес',
         cyrTitle: 'Атыңызды кириллица менен жазыңыз',
         cyrText: 'Клубдун тизмелеринде аттар кириллица менен. Атыңызды профильде оңдоңуз — рейтингде туура көрүнөт.',
         pointsShort: 'упай',
@@ -809,6 +815,9 @@
         cardFoundTitle: 'Кажется, это ваша карточка',
         cardFoundYes: 'Да, это я',
         cardFoundNo: 'Нет, не я',
+        cardMaybeTitle: 'Возможно, одна из этих карточек ваша',
+        cardMaybeText: 'Мы нашли карточки с похожей фамилией. Выберите свою — или пропустите, если ни одна не ваша.',
+        cardMaybeNone: 'Ни одна не моя',
         cyrTitle: 'Напишите имя по-русски',
         cyrText: 'В списках клуба имена кириллицей. Поправьте имя в профиле — так вас найдут в рейтинге и в турнирах.',
         pointsShort: 'очков',
@@ -2819,7 +2828,13 @@
             }
 
             if (д.status === 'candidate' && д.candidate) {
-                предложитьКарточку(д.candidate);
+                /* ТОЧНОЕ СОВПАДЕНИЕ И СОВПАДЕНИЕ ПО ФАМИЛИИ — РАЗНЫЕ
+                   ВОПРОСЫ (13.11). Сервер помечает их `match`, и экран
+                   обязан спрашивать по-разному: при точном ключе он почти
+                   уверен, при фамилии — только догадывается. Старый ответ
+                   без поля `match` считается точным: так вело себя всё до
+                   этого дня, и менять его задним числом нечем. */
+                предложитьКарточку(д.candidate, д.candidates, д.match);
             } else if (д.status === 'created') {
                 profile.player_id = д.player_id;
                 // Имя латиницей: в списках клуба имена по-русски, попросим
@@ -2832,35 +2847,78 @@
     }
 
     /** «Кажется, это ваша карточка» — с рейтингом и очками, чтобы узнать себя. */
-    function предложитьКарточку(карточка) {
+    /**
+     * ПРЕДЛОЖИТЬ КАРТОЧКУ. Два разных вопроса в одном окне.
+     *
+     * ТОЧНЫЙ КЛЮЧ (`match` пусто или 'exact'): имя сошлось буква в букву
+     * после сведения написаний — «Konstantin Khan» и «Константин Хан».
+     * Спрашиваем уверенно и показываем одну карточку.
+     *
+     * ФАМИЛИЯ ('surname', 13.11): точный ключ не сошёлся, и сервер нашёл
+     * похожих по фамилии — так ловятся «Рома» против «Романа». Здесь
+     * уверенности нет, поэтому меняется ВСЁ: заголовок спрашивает, а не
+     * утверждает; показывается СПИСОК, а не одна карточка; и есть ответ
+     * «ни одна не моя». Подсунуть человеку чужой рейтинг, когда совпала
+     * одна фамилия, — это то, ради чего сервер и не привязывает сам.
+     *
+     * ПОЧЕМУ НЕ ОДИН ВОПРОС НА ОБА СЛУЧАЯ: «кажется, это ваша карточка»
+     * с одной кнопкой «да, это я» человек нажимает не глядя. Если за
+     * этим стоит догадка по фамилии, он возьмёт чужие очки и заметит это
+     * нескоро — а вернуть их потом можно только запросом в базу.
+     */
+    function предложитьКарточку(карточка, кандидаты, совпадение) {
         var box = document.getElementById('dbLinkCard');
         if (!box) return;
 
-        var подпись = [карточка.category_id, карточка.points ? карточка.points + ' ' + L.pointsShort : '']
-            .filter(Boolean).join(' \u00B7 ');
+        var поФамилии = совпадение === 'surname';
+        var список = (поФамилии && кандидаты && кандидаты.length) ? кандидаты : [карточка];
+
+        var строка = function (к) {
+            var подпись = [к.category_id, к.points ? к.points + ' ' + L.pointsShort : '']
+                .filter(Boolean).join(' \u00B7 ');
+            return '<button class="db-link-take" data-card="' + KSLT_экранировать(к.id) + '">' +
+                   KSLT_экранировать(к.name) +
+                   (подпись ? ' \u00B7 ' + KSLT_экранировать(подпись) : '') +
+                   '</button>';
+        };
 
         box.innerHTML =
             '<div class="db-link-card">' +
-                '<div class="db-link-title">' + L.cardFoundTitle + '</div>' +
-                '<div class="db-link-text"><b>' + KSLT_экранировать(карточка.name) + '</b>' +
-                    (подпись ? ' \u00B7 ' + KSLT_экранировать(подпись) : '') + '</div>' +
+                '<div class="db-link-title">' +
+                    (поФамилии ? L.cardMaybeTitle : L.cardFoundTitle) + '</div>' +
+                (поФамилии
+                    ? '<div class="db-link-text">' + L.cardMaybeText + '</div>'
+                    : '<div class="db-link-text"><b>' + KSLT_экранировать(карточка.name) + '</b>' +
+                      ((карточка.category_id || карточка.points)
+                        ? ' \u00B7 ' + KSLT_экранировать([карточка.category_id,
+                            карточка.points ? карточка.points + ' ' + L.pointsShort : '']
+                            .filter(Boolean).join(' \u00B7 '))
+                        : '') + '</div>') +
                 '<div class="db-link-actions">' +
-                    '<button class="db-link-take" id="dbCardYes">' + L.cardFoundYes + '</button>' +
-                    '<button class="db-link-other" id="dbCardNo">' + L.cardFoundNo + '</button>' +
+                    (поФамилии
+                        ? список.map(строка).join('')
+                        : '<button class="db-link-take" data-card="' +
+                          KSLT_экранировать(карточка.id) + '">' + L.cardFoundYes + '</button>') +
+                    '<button class="db-link-other" id="dbCardNo">' +
+                        (поФамилии ? L.cardMaybeNone : L.cardFoundNo) + '</button>' +
                 '</div>' +
             '</div>';
 
-        document.getElementById('dbCardYes').addEventListener('click', async function() {
-            var кн = this;
-            кн.disabled = true;
-            var сессия = await client.auth.getSession();
-            var д = (await window.KSLT_VHOD.карточкаИгрока(client,
-                { confirm_player_id: карточка.id })) || {};
-            if (д.ok) {
-                location.reload();
-            } else {
-                кн.disabled = false;
-            }
+        /* ОДИН ОБРАБОТЧИК НА ВСЕ КНОПКИ: их теперь от одной до пяти, и
+           вешать слушатель в цикле значит разойтись с разметкой на
+           первой же правке. */
+        box.querySelectorAll('[data-card]').forEach(function (кн) {
+            кн.addEventListener('click', async function () {
+                var все = box.querySelectorAll('button');
+                все.forEach(function (б) { б.disabled = true; });
+                var д = (await window.KSLT_VHOD.карточкаИгрока(client,
+                    { confirm_player_id: кн.getAttribute('data-card') })) || {};
+                if (д.ok) {
+                    location.reload();
+                } else {
+                    все.forEach(function (б) { б.disabled = false; });
+                }
+            });
         });
 
         document.getElementById('dbCardNo').addEventListener('click', function() {

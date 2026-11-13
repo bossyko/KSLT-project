@@ -15,7 +15,8 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
-const ФАЙЛЫ = ['js/kslt-lico.js', 'js/scoreboard.js', 'js/live-match.js',
+const ФАЙЛЫ = ['js/kslt-lico.js', 'js/scoreboard.js', 'js/live-match.js', 'js/dashboard.js',
+               'supabase/functions/ensure-player-card/index.ts',
                'index.html', 'index-en.html', 'index-kg.html',
                'pages/scoreboard.html', 'maket/stend-tablo.html'];
 
@@ -63,6 +64,28 @@ const ОТКАТЫ = [
    '    <script src="../js/kslt-lico.js?v=10"></script>',
    '    <script src="../js/kslt-lico.js?v=8"></script>',
    'версия дома имени одна на весь сайт'],
+  // --- догадка не выдаётся за уверенность (13.11) ---
+  ['supabase/functions/ensure-player-card/index.ts',
+   "          match: 'surname',",
+   "          match: 'exact',",
+   'сервер помечает, каким совпадением нашёл карточку'],
+
+  ['supabase/functions/ensure-player-card/index.ts',
+   'const частиМоего = мой.split(\'-\').filter((ч: string) => ч.length > 4)',
+   'const частиМоего = мой.split(\'-\').filter((ч: string) => ч.length > 2)',
+   'части имени короче пяти букв в поиск не идут'],
+
+  ['js/dashboard.js',
+   "        var поФамилии = совпадение === 'surname';",
+   '        var поФамилии = false;',
+   'кабинет спрашивает про догадку иначе, чем про точное совпадение'],
+
+  // СЛОВО СНИМАЕТСЯ ТОЛЬКО В ОДНОМ СЛОВАРЕ: правило ждёт три языка,
+  // значит два должны его ронять.
+  ['js/dashboard.js',
+   "        cardMaybeNone: 'Ни одна не моя',",
+   '',
+   'слово окна есть на трёх языках: cardMaybeNone'],
 ];
 
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-imya-'));
