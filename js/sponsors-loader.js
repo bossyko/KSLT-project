@@ -295,8 +295,17 @@
         setTimeout(function() { overlay.remove(); }, 250);
     }
 
-    // Build sponsor link/button — uses modal if has extra info, direct link otherwise
-    function buildSponsorElement(s, className, innerHtml) {
+    /* ОТКРЫВАЕТ ОКНО — ЗНАЧИТ КНОПКА, ВЕДЁТ ПО АДРЕСУ — ЗНАЧИТ ССЫЛКА (13.11).
+       Здесь плитка с окном была `<a href="#">`: для глаза одно и то же, а
+       диктор объявлял её ссылкой, и незрячий ждал перехода на сайт
+       спонсора. Вид держит `.plain-button` (css/style.css), он гасит
+       умолчания кнопки — шрифт, заливку, рамку, курсор.
+       ЧЕТВЁРТЫЙ ДОВОД `копия` — для второго прохода ленты: лента едет по
+       кругу и рисует каждого спонсора дважды, и до 13.11 диктор называл
+       всех по два раза, а Tab делал 18 остановок вместо 9. Копия
+       помечается `aria-hidden` и уходит из обхода; глазами она та же. */
+    function buildSponsorElement(s, className, innerHtml, копия) {
+        var скрыть = копия ? ' aria-hidden="true" tabindex="-1"' : '';
         var hasExtra = hasContactInfo(s);
         var hasMultipleLinks = 0;
         if (s.url) hasMultipleLinks++;
@@ -308,18 +317,18 @@
 
         // Modal if: has description/address, or has 2+ links
         if (hasExtra || hasMultipleLinks >= 2) {
-            return '<a href="#" class="' + className + '" data-sponsor-id="' + KSLT_экранировать(s.id) + '" title="' + KSLT_экранировать(s.name) + '">' +
-                innerHtml + '</a>';
+            return '<button type="button" class="plain-button ' + className + '" data-sponsor-id="' + KSLT_экранировать(s.id) + '" title="' + KSLT_экранировать(s.name) + '"' + скрыть + '>' +
+                innerHtml + '</button>';
         }
         // Single link — direct
         if (s.url) {
-            return '<a href="' + KSLT_экранировать(s.url) + '" target="_blank" rel="noopener noreferrer" class="' + className + '" title="' + KSLT_экранировать(s.name) + '">' +
+            return '<a href="' + KSLT_экранировать(s.url) + '" target="_blank" rel="noopener noreferrer" class="' + className + '" title="' + KSLT_экранировать(s.name) + '"' + скрыть + '>' +
                 innerHtml + '</a>';
         }
         // Ни ссылок, ни описания — нажимать не на что. Раньше здесь стояла
         // ссылка на «#»: она прыгала наверх страницы и цепляла решётку к
         // адресу, будто что-то произошло
-        return '<span class="' + className + ' spon-static" title="' + KSLT_экранировать(s.name) + '">' + innerHtml + '</span>';
+        return '<span class="' + className + ' spon-static" title="' + KSLT_экранировать(s.name) + '"' + скрыть + '>' + innerHtml + '</span>';
     }
 
     /**
@@ -396,7 +405,7 @@
                 return;
             }
 
-            var slides = '';
+            var slides = '', копии = '';
             // ПОРЯДОК ОБЩИЙ С СЕКЦИЕЙ. Здесь стояла своя сортировка по
             // sort_order ПО УБЫВАНИЮ, тогда как секция брала то же поле по
             // возрастанию: один список был выстроен наоборот в двух местах на
@@ -406,10 +415,16 @@
                 var inner = (s.logo ? '<img src="' + KSLT_экранировать(s.logo) + '" alt="' + KSLT_экранировать(s.name) + '">' : '') +
                     '<span>' + KSLT_экранировать(s.name) + '</span>';
                 slides += buildSponsorElement(s, 'carousel-slide-infinite', inner);
+                копии += buildSponsorElement(s, 'carousel-slide-infinite', inner, true);
             });
 
-            // Duplicate for infinite scroll effect
-            container.innerHTML = '<div class="carousel-track-infinite">' + slides + slides + '</div>';
+            /* ВТОРОЙ КРУГ — ТОТ ЖЕ РИСУНОК, НО НЕ ТЕ ЖЕ ДАННЫЕ (13.11).
+               Лента склеена из двух одинаковых проходов, чтобы шов не был
+               виден. Глазу это один бесконечный ряд, а диктору до 13.11 —
+               двадцать спонсоров вместо десяти, и Tab останавливался на
+               каждом дважды. Второй проход теперь помечен `aria-hidden` и
+               выведен из обхода: КОПИЯ ДЛЯ ГЛАЗА НЕ ЕСТЬ КОПИЯ ДЛЯ СЛУХА. */
+            container.innerHTML = '<div class="carousel-track-infinite">' + slides + копии + '</div>';
         });
     };
 

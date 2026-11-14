@@ -146,7 +146,7 @@ const снимок = page => page.evaluate(() => {
         test('окно спонсора объявлено, заперто и держит фокус', async ({ page }) => {
             await дождаться(page, адрес);
             const открылось = await page.evaluate(async () => {
-                const a = document.querySelector('#sponsors .sponsors-cloud a[data-sponsor-id]');
+                const a = document.querySelector('#sponsors .sponsors-cloud [data-sponsor-id]');
                 if (!a) return false;
                 a.click();
                 await new Promise(r => setTimeout(r, 400));
@@ -185,7 +185,7 @@ const снимок = page => page.evaluate(() => {
         test('Escape закрывает окно и возвращает страницу', async ({ page }) => {
             await дождаться(page, адрес);
             await page.evaluate(async () => {
-                const a = document.querySelector('#sponsors .sponsors-cloud a[data-sponsor-id]');
+                const a = document.querySelector('#sponsors .sponsors-cloud [data-sponsor-id]');
                 if (a) { a.click(); await new Promise(r => setTimeout(r, 400)); }
             });
             await page.keyboard.press('Escape');
@@ -223,6 +223,65 @@ const снимок = page => page.evaluate(() => {
             expect(вхождение, 'шапка и секция идут одним порядком:\n' +
                 '    шапка: ' + п.шапка.join(' · ') + '\n' +
                 '    секция: ' + п.низ.join(' · ')).toBeGreaterThanOrEqual(0);
+        });
+
+        /* ОТКРЫВАЕТ ОКНО — ЗНАЧИТ КНОПКА (13.11). Плитка спонсора никуда
+           не ведёт: она открывает окно с карточкой. До 13.11 она была
+           `<a href="#">`, и диктор объявлял её ссылкой — незрячий ждал
+           перехода на сайт спонсора, а получал окно.
+           И ВТОРОЙ КРУГ ЛЕНТЫ: она склеена из двух одинаковых проходов,
+           чтобы шов не был виден. Глазу это один ряд, диктору до 13.11 —
+           каждый спонсор дважды, а Tab останавливался на нём два раза.
+           ЗАМОРАЖИВАЕТСЯ ОТНОШЕНИЕ: помечена РОВНО половина ленты, и это
+           вторая половина, а первая остаётся в обходе целиком. */
+        test('плитка с окном — кнопка, и второй круг ленты не звучит дважды', async ({ page }) => {
+            await дождаться(page, адрес);
+            const о = await page.evaluate(() => {
+                const плитки = [...document.querySelectorAll('[data-sponsor-id]')];
+                const лента = [...document.querySelectorAll('#heroSponsorsCarousel .carousel-slide-infinite')];
+                const половина = лента.length / 2;
+                const имя = э => (э.getAttribute('title') || '').trim();
+                const первый = плитки[0] ? getComputedStyle(плитки[0]) : null;
+                return {
+                    плиток: плитки.length,
+                    неКнопки: плитки.filter(э => э.tagName !== 'BUTTON' ||
+                        э.getAttribute('type') !== 'button').map(э => э.tagName),
+                    решётки: document.querySelectorAll('a[href="#"]').length,
+                    лента: лента.length,
+                    скрытыхВсего: лента.filter(э => э.getAttribute('aria-hidden') === 'true').length,
+                    скрытыхВПервой: лента.slice(0, половина)
+                        .filter(э => э.getAttribute('aria-hidden') === 'true').length,
+                    вОбходеВоВторой: лента.slice(половина).filter(э => э.tabIndex >= 0).length,
+                    парыСовпали: лента.slice(0, половина).every((э, i) => имя(э) === имя(лента[половина + i])),
+                    вид: первый ? {
+                        шрифт: первый.fontFamily, кегль: первый.fontSize,
+                        фон: первый.backgroundColor, курсор: первый.cursor,
+                        выравн: первый.textAlign
+                    } : null,
+                    шрифтТела: getComputedStyle(document.body).fontFamily
+                };
+            });
+            if (!о.плиток) return;
+
+            expect(о.неКнопки, 'плитки с окном объявлены кнопками: ' + о.неКнопки.join(', ')).toEqual([]);
+            expect(о.решётки, 'ссылок на решётку на странице не осталось').toBe(0);
+
+            if (о.лента) {
+                expect(о.лента % 2, 'лента склеена из двух одинаковых кругов').toBe(0);
+                expect(о.парыСовпали, 'второй круг повторяет первый тем же порядком').toBe(true);
+                expect(о.скрытыхВсего, 'от диктора спрятана ровно половина ленты').toBe(о.лента / 2);
+                expect(о.скрытыхВПервой, 'первый круг слышен весь').toBe(0);
+                expect(о.вОбходеВоВторой, 'второй круг выведен из обхода Tab').toBe(0);
+            }
+
+            /* ВИД НЕ ПОЕХАЛ. Умолчания кнопки не наследуются от страницы:
+               без сброса сюда приедут системный шрифт 13.33, серая
+               заливка, рамка, `text-align: center` и курсор-стрелка. */
+            expect(о.вид.шрифт, 'шрифт плитки тот же, что у страницы').toBe(о.шрифтТела);
+            expect(о.вид.кегль, 'кегль плитки').toBe('16px');
+            expect(о.вид.фон, 'заливки у плитки нет').toBe('rgba(0, 0, 0, 0)');
+            expect(о.вид.курсор, 'курсор над плиткой — рука').toBe('pointer');
+            expect(о.вид.выравн, 'выравнивание не переехало в center').not.toBe('center');
         });
     });
 });

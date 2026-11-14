@@ -25,6 +25,34 @@ const ВЕРСИЯ_СЕЙЧАС = 'style.css?v=' + (fs.readFileSync(path.join(К
 const ВЕРСИЯ_НАЗАД = 'style.css?v=' + (Number(ВЕРСИЯ_СЕЙЧАС.replace(/\D+/g, '')) - 1);
 
 const ОТКАТЫ = [
+  /* ПЛИТКА С ОКНОМ — КНОПКА (13.11). Откат возвращает `<a href="#">`. */
+  ['js/sponsors-loader.js',
+   '<button type="button" class="plain-button \' + className',
+   '<a href="#" class="\' + className',
+   'плитка с окном — кнопка, а не ссылка на решётку'],
+
+  /* ВТОРОЙ БЛОК СБРОСА НИЖЕ КОМПОНЕНТОВ — ровно та беда, от которой
+     правило и стоит: вес один, и нижний перебьёт плитку. */
+  ['css/style.css',
+   '.carousel-slide-infinite {\n    flex: 0 0 auto;',
+   '.plain-button { padding: 0; }\n\n.carousel-slide-infinite {\n    flex: 0 0 auto;',
+   'сброс кнопки объявлен один раз и стоит выше компонентов'],
+
+  ['css/style.css',
+   '    font: inherit;\n    color: inherit;\n    text-align: inherit;',
+   '    color: inherit;\n    text-align: inherit;',
+   'сброс гасит умолчания кнопки: шрифт, заливку, рамку, курсор'],
+
+  ['js/sponsors-loader.js',
+   "'<div class=\"carousel-track-infinite\">' + slides + копии + '</div>'",
+   "'<div class=\"carousel-track-infinite\">' + slides + slides + '</div>'",
+   'второй круг ленты не повторяется для диктора'],
+
+  ['js/sponsors-loader.js',
+   '\' spon-static" title="\' + KSLT_экранировать(s.name) + \'"\' + скрыть + \'>',
+   '\' spon-static" title="\' + KSLT_экранировать(s.name) + \'">',
+   'пометка копии стоит во всех ветках плитки'],
+
   ['css/style.css',
    '    padding: var(--space-2);\n    background: transparent;\n    border: var(--bw-hair) solid transparent;',
    '    padding: var(--space-2);\n    background: transparent;',
