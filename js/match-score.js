@@ -30,7 +30,8 @@
         : {};
 
     var _myPlayerId = null;
-    var _myIds = null;
+    var _myPairs = null;
+    var _мойРяд = null;   // карточки под турнир открытого окна
     var _loaded = false;
     var _busy = false;
 
@@ -51,28 +52,74 @@
     };
 
     /**
-     * Все карточки, за которые человек отвечает: своя и капитаны тех пар,
-     * где он напарник.
+     * Все карточки, за которые человек отвечает, — И ТУРНИР, ГДЕ ЭТО ТАК.
      *
-     * В парном турнире в записи матча стоит капитан. Без этого списка
-     * напарник не увидел бы ни своей пары в сетке, ни кнопки.
+     * В парном турнире в записи матча стоит капитан. Без капитана напарник
+     * не увидел бы ни своей пары в сетке, ни кнопки.
+     *
+     * НАПАРНИЧЕСТВО ЖИВЁТ ВНУТРИ СВОЕГО ТУРНИРА, А НЕ ПОВСЮДУ. До 14.11
+     * здесь собирался один плоский список капитанов по всем заявкам сразу,
+     * и человек, бывший напарником Кошойбекова в одном турнире, видел
+     * матчи Кошойбекова ВЕЗДЕ — чужие пары, чужие одиночки, чужие турниры
+     * (находка Кости 14.11: «они могут не свои игры счёт вписывать»).
+     * База такой счёт отбивала (`match_side_of` сверяет турнир матча), но
+     * кнопка обещала то, чего не сделает.
+     *
+     * Отдаём разбор: своя карточка и карта «турнир → капитаны в нём».
      */
-    MS.myPlayerIds = async function () {
-        if (_myIds) return _myIds;
+    MS.myPairs = async function () {
+        if (_myPairs) return _myPairs;
         var pid = await MS.myPlayerId();
-        if (!pid) { _myIds = []; return _myIds; }
+        _myPairs = { свой: pid || null, поТурниру: {} };
+        if (!pid) return _myPairs;
 
-        _myIds = [pid];
         try {
             var r = await window.supabaseClient.from('tournament_registrations')
-                .select('player_id')
+                .select('player_id, tournament_id')
                 .eq('partner_id', pid)
                 .in('status', ['approved', 'draw']);
             (r.data || []).forEach(function (x) {
-                if (x.player_id && _myIds.indexOf(x.player_id) === -1) _myIds.push(x.player_id);
+                if (!x.player_id || !x.tournament_id) return;
+                var сп = _myPairs.поТурниру[x.tournament_id] || (_myPairs.поТурниру[x.tournament_id] = []);
+                if (сп.indexOf(x.player_id) === -1) сп.push(x.player_id);
             });
         } catch (e) {}
-        return _myIds;
+        return _myPairs;
+    };
+
+    /**
+     * ЗАКРЫТ ЛИ ТУРНИР ДЛЯ СЧЁТА — одно определение на все окна и списки.
+     * `completed` и `cancelled`: турнир отыгран или отменён, счёт в нём
+     * правит только организатор. `registration_closed` — это идущий
+     * турнир с закрытой записью, его матчи счёт ждут (замер 14.11: 207
+     * матчей в completed против 33 в registration_closed).
+     */
+    MS.турнирЗакрыт = function (t) {
+        if (!t || !t.status) return false;
+        return t.status === 'completed' || t.status === 'cancelled';
+    };
+
+    /** Карточки, которыми человек отвечает ИМЕННО В ЭТОМ турнире. */
+    MS.myPlayerIdsIn = async function (tournamentId) {
+        var п = await MS.myPairs();
+        var спис = п.свой ? [п.свой] : [];
+        var кап = tournamentId ? (п.поТурниру[tournamentId] || []) : [];
+        кап.forEach(function (id) { if (спис.indexOf(id) === -1) спис.push(id); });
+        return спис;
+    };
+
+    /**
+     * Все карточки без разбора — ТОЛЬКО ЧТОБЫ СПРОСИТЬ БАЗУ ПОШИРЕ.
+     * Решать «мой ли матч» по этому списку нельзя: он не знает турнира.
+     * Для решения есть `myPlayerIdsIn(tournamentId)`.
+     */
+    MS.myPlayerIdsShirokо = async function () {
+        var п = await MS.myPairs();
+        var спис = п.свой ? [п.свой] : [];
+        Object.keys(п.поТурниру).forEach(function (t) {
+            п.поТурниру[t].forEach(function (id) { if (спис.indexOf(id) === -1) спис.push(id); });
+        });
+        return спис;
     };
 
     /**
@@ -93,16 +140,31 @@
 
         var overlay = shell(L.loading, '<div class="ms-loading">' + L.loading + '</div>');
 
-        var pid = await MS.myPlayerIds();
         var userRes = await client.auth.getUser();
         var userId = userRes.data && userRes.data.user ? userRes.data.user.id : null;
 
         var res = await client.from('matches')
-            .select('*, tournament:tournaments(id, title, title_en, title_kg, set_format)')
+            .select('*, tournament:tournaments(id, title, title_en, title_kg, set_format, status)')
             .eq('id', matchId).single();
 
         if (res.error || !res.data) { close(overlay); return; }
         var m = res.data;
+
+        /* КАРТОЧКИ СЧИТАЮТСЯ ПОД ТУРНИР ЭТОГО МАТЧА, а не вообще.
+           Напарник отвечает за капитана там, где они пара, и только там. */
+        var pid = await MS.myPlayerIdsIn(m.tournament_id);
+        _мойРяд = pid;
+
+        /* ЗАКРЫТЫЙ ТУРНИР СЧЁТ НЕ ПРИНИМАЕТ. База с 14.11 отвечает
+           `tournament_closed`, окно даже не открываем: 207 матчей
+           завершённых турниров стояли без победителя и спрашивали счёт
+           (замер 14.11). Решает статус турнира, а не вид матча. */
+        if (MS.турнирЗакрыт(m.tournament)) {
+            close(overlay);
+            toast(L.errClosed || L.alreadyDone, 'info');
+            if (typeof onDone === 'function') onDone();
+            return;
+        }
 
         var ids = [m.player1_id, m.player2_id].filter(Boolean);
         var pl = await client.from('players_public').select('id, name, name_en, photo').in('id', ids);
@@ -256,7 +318,7 @@
         var имя = isEn ? (кто.name_en || кто.name || '') : (кто.name || '');
 
         // Исход крупно: подтверждающий не должен вычислять в уме, где его геймы
-        var выиграл = (_myIds || [_myPlayerId]).indexOf(m.winner_id) !== -1;
+        var выиграл = (_мойРяд || [_myPlayerId]).indexOf(m.winner_id) !== -1;
 
         var тело =
             '<div class="ms-trn">' + KSLT_экранировать(имяТурнира(trn)) + '</div>' +

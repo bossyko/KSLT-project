@@ -50,17 +50,25 @@
 
         // Свой номер и капитаны пар, где человек напарник: в парном турнире
         // в матче стоит капитан, и без списка напарник не увидел бы ничего
-        _pid = await MS.myPlayerIds();
-        if (!_pid || !_pid.length) return;        // гость или без карточки игрока
-
         var u = await client.auth.getUser();
         _uid = u.data && u.data.user ? u.data.user.id : null;
 
         var id = новыйПараметр('id');
         if (!id) return;
 
+        /* ЗАКРЫТЫЙ ТУРНИР КНОПОК НЕ ДАЁТ: счёт в нём правит организатор.
+           Признак закрытости — один на окно, список и сетку. */
+        var т = await client.from('tournaments').select('status').eq('id', id).single();
+        if (т.data && MS.турнирЗакрыт(т.data)) return;
+
+        /* КАРТОЧКИ ПОД ЭТОТ ТУРНИР, а не под все сразу. Плоский список
+           капитанов из чужих турниров показывал кнопку там, где человек
+           не играет (находка Кости 14.11). */
+        _pid = await MS.myPlayerIdsIn(id);
+        if (!_pid || !_pid.length) return;        // гость или без карточки игрока
+
         var res = await client.from('matches')
-            .select('id, player1_id, player2_id, winner_id, score_status, score_submitted_by')
+            .select('id, player1_id, player2_id, winner_id, score_status, score_submitted_by, score_submitted_player')
             .eq('tournament_id', id)
             .or('player1_id.in.(' + _pid.join(',') + '),player2_id.in.(' + _pid.join(',') + ')');
 

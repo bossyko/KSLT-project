@@ -52,23 +52,35 @@
         var MS = window.KSLT_MATCH_SCORE;
         if (!client || !MS) return;
 
-        var pid = await MS.myPlayerIds();
-        if (!pid || !pid.length) return;
+        /* СПРАШИВАЕМ ПОШИРЕ, РЕШАЕМ ПОУЖЕ. Базе отдаём все карточки, за
+           какие человек где-либо отвечает, — иначе пришлось бы делать
+           запрос на турнир. А «мой ли матч» решается ПОД ТУРНИР матча:
+           капитан мой только там, где мы пара. */
+        var пары = await MS.myPairs();
+        if (!пары.свой) return;
+        var pid = await MS.myPlayerIdsShirokо();
+        if (!pid.length) return;
 
         var u = await client.auth.getUser();
         var uid = u.data && u.data.user ? u.data.user.id : null;
 
         // Берём незакрытые: без победителя или ждущие подтверждения
         var res = await client.from('matches')
-            .select('id, player1_id, player2_id, winner_id, score, score_status, score_submitted_by, played_at, ' +
-                    'tournament:tournaments(title, title_en, title_kg)')
+            .select('id, tournament_id, player1_id, player2_id, winner_id, score, score_status, score_submitted_by, score_submitted_player, played_at, ' +
+                    'tournament:tournaments(title, title_en, title_kg, status)')
             .or('player1_id.in.(' + pid.join(',') + '),player2_id.in.(' + pid.join(',') + ')')
             .or('winner_id.is.null,score_status.eq.pending');
 
         if (res.error || !res.data) return;
 
-        var дела = res.data.map(function (m) {
-            return { m: m, что: MS.stateOf(m, pid, uid) };
+        var дела = res.data.filter(function (m) {
+            /* ЗАКРЫТЫЙ ТУРНИР НЕ СПРАШИВАЕТ СЧЁТ. Замер 14.11: 207 матчей
+               завершённых турниров висели без победителя и каждый день
+               просили счёт у игроков. */
+            return !MS.турнирЗакрыт(m.tournament);
+        }).map(function (m) {
+            var мои = [пары.свой].concat(пары.поТурниру[m.tournament_id] || []);
+            return { m: m, что: MS.stateOf(m, мои, uid), мои: мои };
         }).filter(function (x) {
             return x.что === 'enter' || x.что === 'confirm' || x.что === 'wait';
         });
@@ -85,10 +97,10 @@
         var byId = {};
         (pl.data || []).forEach(function (p) { byId[p.id] = p; });
 
-        нарисовать(дела, byId, pid);
+        нарисовать(дела, byId);
     }
 
-    function нарисовать(дела, byId, pid) {
+    function нарисовать(дела, byId) {
         убрать();
 
         var где = document.getElementById('dbGamesMatches');
@@ -102,7 +114,7 @@
 
         дела.forEach(function (x) {
             var m = x.m;
-            var мой = pid.indexOf(m.player1_id) !== -1;
+            var мой = x.мои.indexOf(m.player1_id) !== -1;
             var чужой = мой ? m.player2_id : m.player1_id;
             var соперник = byId[чужой] || {};
             var имя = isEn ? (соперник.name_en || соперник.name || '?') : (соперник.name || '?');

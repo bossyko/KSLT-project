@@ -19,6 +19,7 @@
   var _pid = null;
   var _uid = null;
   var _ids = null;
+  var _поТурниру = {};   // турнир -> капитаны, за кого человек отвечает в нём
   var _loaded = false;
   var _busy = false;
 
@@ -44,34 +45,65 @@
   MS.myUserId = function () { MS.myPlayerId(); return _uid; };
 
   /**
-   * Все карточки, за которые человек отвечает: своя и капитаны тех пар,
-   * где он напарник.
+   * Все карточки, за которые человек отвечает, — И ТУРНИР, ГДЕ ЭТО ТАК.
    *
-   * В парном турнире в записи матча стоит капитан. Без этого списка
-   * напарник не увидел бы ни своей пары, ни кнопки.
+   * В парном турнире в записи матча стоит капитан. Без капитана напарник
+   * не увидел бы ни своей пары, ни кнопки.
+   *
+   * НАПАРНИЧЕСТВО ЖИВЁТ ВНУТРИ СВОЕГО ТУРНИРА, А НЕ ПОВСЮДУ. До 14.11
+   * здесь копился один плоский список капитанов по всем заявкам сразу, и
+   * человек видел матчи капитана в ЧУЖИХ турнирах — чужие пары и чужие
+   * одиночки (находка Кости 14.11). Сайт болел тем же.
    */
   MS.loadMyIds = function () {
     var pid = MS.myPlayerId();
-    if (!pid) { _ids = []; return Promise.resolve(_ids); }
+    if (!pid) { _ids = []; _поТурниру = {}; return Promise.resolve(_ids); }
     if (_ids) return Promise.resolve(_ids);
     _ids = [pid];
+    _поТурниру = {};
     return window.supabaseClient.from('tournament_registrations')
-      .select('player_id')
+      .select('player_id, tournament_id')
       .eq('partner_id', pid)
       .in('status', ['approved', 'draw'])
       .then(function (r) {
         (r.data || []).forEach(function (x) {
-          if (x.player_id && _ids.indexOf(x.player_id) === -1) _ids.push(x.player_id);
+          if (!x.player_id) return;
+          if (_ids.indexOf(x.player_id) === -1) _ids.push(x.player_id);
+          if (!x.tournament_id) return;
+          var сп = _поТурниру[x.tournament_id] || (_поТурниру[x.tournament_id] = []);
+          if (сп.indexOf(x.player_id) === -1) сп.push(x.player_id);
         });
         return _ids;
       });
   };
 
+  /** Широкий список — только чтобы спросить базу, не чтобы решать. */
   MS.myIds = function () { return _ids || (MS.myPlayerId() ? [MS.myPlayerId()] : []); };
+
+  /** Карточки, которыми человек отвечает ИМЕННО В ЭТОМ турнире. */
+  MS.myIdsIn = function (tournamentId) {
+    var свой = MS.myPlayerId();
+    var спис = свой ? [свой] : [];
+    var кап = (tournamentId && _поТурниру[tournamentId]) || [];
+    кап.forEach(function (id) { if (спис.indexOf(id) === -1) спис.push(id); });
+    return спис;
+  };
+
+  /**
+   * ЗАКРЫТ ЛИ ТУРНИР ДЛЯ СЧЁТА. `completed` и `cancelled`: счёт в нём
+   * правит организатор. Замер 14.11: 207 матчей завершённых турниров
+   * висели без победителя и спрашивали счёт у игроков.
+   */
+  MS.турнирЗакрыт = function (t) {
+    if (!t || !t.status) return false;
+    return t.status === 'completed' || t.status === 'cancelled';
+  };
 
   MS.stateOf = function (match) {
     var R = window.KSLT_RULES;
-    return R ? R.matchScoreState(match, MS.myIds(), MS.myUserId()) : 'none';
+    if (!R || !match) return 'none';
+    if (MS.турнирЗакрыт(match.tournament)) return 'none';
+    return R.matchScoreState(match, MS.myIdsIn(match.tournament_id), MS.myUserId());
   };
 
   /** Открыть окно по номеру матча. Само решит, вписывать или подтверждать. */
@@ -80,7 +112,7 @@
     if (!client) return;
 
     client.from('matches')
-      .select('*, tournament:tournaments(title, title_en, title_kg, set_format)')
+      .select('*, tournament:tournaments(title, title_en, title_kg, set_format, status)')
       .eq('id', matchId).single()
       .then(function (res) {
         if (res.error || !res.data) return;
@@ -89,7 +121,10 @@
         if (состояние !== 'enter' && состояние !== 'confirm') {
           // Молчать нельзя: человек нажал и ждёт ответа. Чаще всего это
           // пара — напарник успел раньше, и делать уже нечего
-          if (состояние === 'done') сказать(t('score.alreadyDone', 'Счёт уже подтверждён'));
+          if (MS.турнирЗакрыт(m.tournament)) {
+            сказать(t('score.errClosed', 'Турнир закрыт — счёт правит организатор'));
+          }
+          else if (состояние === 'done') сказать(t('score.alreadyDone', 'Счёт уже подтверждён'));
           else if (состояние === 'wait') сказать(t('score.alreadySent', 'Счёт уже вписан — ждём соперника'));
           if (typeof onDone === 'function') onDone();
           return;
