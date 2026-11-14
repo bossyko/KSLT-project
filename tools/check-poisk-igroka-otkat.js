@@ -13,7 +13,9 @@ const { execFileSync } = require('child_process');
 
 const КОРЕНЬ = path.join(__dirname, '..');
 const ВРЕМ = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-poisk-'));
-['css', 'tools', 'js', 'pages'].forEach(д =>
+/* ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО ЧИТАЕТ ПРАВИЛО: с 13.11 сторож читает
+   ещё и файл функции партнёров в `sql/функции`. */
+['css', 'tools', 'js', 'pages', 'sql'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(ВРЕМ, д), { recursive: true }));
 
 const CSS = 'css/partners.css';
@@ -21,8 +23,20 @@ const СТИ = 'css/style.css';
 const JS  = 'js/partners.js';
 const ПОЛ = 'js/polosa-stranic.js';
 const EN  = 'pages/partners-en.html';
+const RPC = 'sql/функции/partners-pol-cheloveka-13noy.sql';
 
 const ОТКАТЫ = [
+
+  /* ВЕРНУТЬ ПОЛ КАТЕГОРИИ ТУРНИРА — ровно то, от чего лечились 13.11. */
+  [RPC, `      COALESCE(pl.gender, pr.gender),`,
+        `      CASE WHEN c.gender = 'men' THEN 'male' ELSE 'female' END,`,
+   'пол партнёра берётся у человека, а не у категории турнира'],
+
+  /* РАЗВЕСТИ СЛОВА: база говорит male/female, экран ждёт men/women. */
+  [JS, `list = list.filter(function(p) { return p.gender === _currentFilter; });`,
+       `list = list.filter(function(p) { return p.gender === (_currentFilter === 'men' ? 'male' : 'female'); });`,
+   'экран отбирает теми же словами, какие отдаёт база'],
+
 
   [CSS, `    min-height: var(--oblozhka-pol);`, `    min-height: 460px;`,
    'пол обложки берётся из общей крутилки раздела'],

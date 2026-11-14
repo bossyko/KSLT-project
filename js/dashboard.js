@@ -2551,8 +2551,18 @@
         window._profileSnapshot = getProfileFormValues();
         запомнитьСохранённое();
 
+        /* ПОЛ ЖИВЁТ В СКРЫТОМ ПОЛЕ, И ЕГО НАДО СЛУШАТЬ ОТДЕЛЬНО (13.11).
+           Выбор пола сделан двумя кнопками, а значение лежит в
+           `<input type="hidden" id="profileGender">` — у него нет класса
+           `db-field-input`, и в эту выборку он не попадал. Обработчик
+           кнопок честно слал `change`, но СОБЫТИЕ, КОТОРОЕ НЕКОМУ
+           СЛУШАТЬ, РАВНО ОТСУТСТВИЮ СОБЫТИЯ: человек жал «Женский»,
+           значение менялось, а «Сохранить» оставалась выключенной — и
+           пол нельзя было ни указать, ни поменять. Замер 13.11: пола нет
+           у 33 профилей из 88, и ни один из них не мог поправить это
+           сам. */
         // Listen for changes on all editable fields
-        var formFields = document.querySelectorAll('#db-profile .db-field-input, #db-profile input[type="checkbox"]');
+        var formFields = document.querySelectorAll('#db-profile .db-field-input, #db-profile input[type="checkbox"], #db-profile #profileGender');
         formFields.forEach(function(field) {
             field.addEventListener('input', checkProfileDirty);
             field.addEventListener('change', checkProfileDirty);
