@@ -362,8 +362,7 @@
      * их нельзя было отличить друг от друга.
      */
     function причинаБезКарточки(u) {
-        var роль = u.role || 'user';
-        if (роль === 'admin' || роль === 'manager') return L.usrBezKartSotrudnik;
+        if (A.сотрудник(u.role || 'user')) return L.usrBezKartSotrudnik;
         if (!(u.full_name || '').trim()) return L.usrBezKartNetImeni;
         if (u.gender !== 'men' && u.gender !== 'women') return L.usrBezKartNetPola;
         return L.usrBezKartZhdet;
@@ -373,8 +372,7 @@
         if (!u.player_id) {
             /* СОТРУДНИК — НЕ БЕДА, И КРАСИТСЯ ИНАЧЕ. Остальные три
                причины требуют действия, поэтому они заметнее. */
-            var роль = u.role || 'user';
-            var служебный = (роль === 'admin' || роль === 'manager');
+            var служебный = A.сотрудник(u.role || 'user');
             var краскаБез = служебный
                 ? 'background:var(--alpha-white-08);color:var(--text-muted);'
                 : 'background:var(--warning-subtle);color:var(--warning);';

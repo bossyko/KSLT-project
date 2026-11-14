@@ -17,7 +17,9 @@
  * Прогон:
  *   npx playwright test tests/e2e/diagnostika/varianty-shapka-1024.spec.js --project=desktop
  */
-const { test } = require('@playwright/test');
+/* ОБВЯЗКА, А НЕ ГОЛЫЙ PLAYWRIGHT (13.11): иначе проба идёт в БОЕВУЮ
+   базу и тянет из неё снимки — квота считается на всю организацию. */
+const { test } = require('../../fixtures');
 const fs = require('fs');
 const path = require('path');
 

@@ -35,13 +35,17 @@ function замена(было, стало) {
 const ОТКАТЫ = [
     {
         имя: 'пункт панели снова считает высоту из отступов (было 37 и 33)',
-        правка: замена('    min-height: var(--btn-h-sm);\n    line-height: 1.2;\n    display: flex;\n    align-items: center;\n    gap: 10px;\n    width: 100%;\n    padding: 9px 12px;',
+        /* ЯКОРЬ ДОГНАН 13.11: межстрочный пункта стал 1.3 (сведение
+           текстовых уровней), а здесь стояло 1.2 — якорь не находился
+           вовсе, и прувер честно сказал «встречается 0 раз». ОТКАТ,
+           КОТОРЫЙ НЕ СОСТОЯЛСЯ, НИЧЕГО НЕ ДОКАЗЫВАЕТ. */
+        правка: замена('    min-height: var(--btn-h-sm);\n    line-height: 1.3;\n    display: flex;\n    align-items: center;\n    gap: 10px;\n    width: 100%;\n    padding: 9px 12px;',
                        '    display: flex;\n    align-items: center;\n    gap: 10px;\n    width: 100%;\n    padding: 9px 12px;'),
         ждём: /высота пункта — ступень кнопок/,
     },
     {
         имя: 'у пункта снята высота строки — ссылка и кнопка снова разъедутся',
-        правка: замена('    min-height: var(--btn-h-sm);\n    line-height: 1.2;',
+        правка: замена('    min-height: var(--btn-h-sm);\n    line-height: 1.3;',
                        '    min-height: var(--btn-h-sm);'),
         ждём: /высота строки пункта задана/,
     },

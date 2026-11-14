@@ -16,8 +16,12 @@ const песок = fs.mkdtempSync(path.join(os.tmpdir(), 'kslt-holst-'));
 ['css', 'js', 'tools', 'pages', 'maket'].forEach(д =>
     fs.cpSync(path.join(КОРЕНЬ, д), path.join(песок, д), { recursive: true }));
 
+/* ДОМ ВИДА ГРАФИКОВ В СПИСКЕ С 13.11: настройки холста живут там с
+   12.11, и откат целит теперь туда. ПЕСОК ОБЯЗАН СОДЕРЖАТЬ ВСЁ, ЧТО
+   ПРАВИТ ОТКАТ. */
 const ФАЙЛЫ = ['js/rating-chart.js', 'js/admin/sections/analytics.js',
                 'js/admin/sections/users.js', 'js/admin/sections/finances.js',
+                'js/kslt-grafik-vid.js',
                 'js/kslt-kraska.js', 'css/tokens.css', 'pages/player.html'];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
@@ -56,8 +60,13 @@ const ОТКАТЫ = [
      "backgroundColor: 'var(--alpha-lime-12)',",
      'внутри new Chart() краска не пишется ни числом, ни var()'],
 
-    ['вернуть var() в обводку подсказки аналитики', AN,
-     "borderColor: window.KSLT_KRASKA.цвет('--chart-tip-border'),",
+    /* ПЕРЕНЕСЁН 13.11 ИЗ АНАЛИТИКИ В ДОМ ВИДА. Настройки подсказки
+       переехали в `js/kslt-grafik-vid.js` (h295, 12.11), в аналитике
+       краски не осталось вовсе — якоря здесь не стало, и прувер сказал
+       «якоря нет». ОТКАТ, КОТОРЫЙ НЕ СОСТОЯЛСЯ, НИЧЕГО НЕ ДОКАЗЫВАЕТ:
+       правило при этом молчало, потому что дома вида оно не читало. */
+    ['вернуть var() в обводку подсказки — дом вида графиков', 'js/kslt-grafik-vid.js',
+     "borderColor: краска('--chart-tip-border'),",
      "borderColor: 'var(--accent-glow)',",
      'внутри new Chart() краска не пишется ни числом, ни var()'],
 

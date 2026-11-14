@@ -18,7 +18,9 @@
  * Прогон:
  *   npx playwright test tests/e2e/diagnostika/zamer-logotip-kg-1180.spec.js --project=desktop
  */
-const { test } = require('@playwright/test');
+/* ОБВЯЗКА, А НЕ ГОЛЫЙ PLAYWRIGHT (13.11): иначе проба идёт в БОЕВУЮ
+   базу и тянет из неё снимки — квота считается на всю организацию. */
+const { test } = require('../../fixtures');
 const fs = require('fs');
 const path = require('path');
 
@@ -93,7 +95,11 @@ for (const палец of [false, true]) {
                         переполнение: document.documentElement.scrollWidth - window.innerWidth,
                         бургерВиден: (() => {
                             const б = document.querySelector('.burger, .mobile-menu-btn, .nav-burger');
-                            return б ? getComputedStyle(б).display !== 'none' : null;
+                            /* ВИДИМОСТЬ СПРАШИВАЕТСЯ У ДОМА (13.11). Своя
+                               проверка display видит только сам узел: скрытый
+                               предок её обманет. Дом из tests/fixtures.js
+                               поднимается по предкам и смотрит прямоугольник. */
+                            return б ? window.КСЛТ_виден(б) : null;
                         })()
                     };
                 });
