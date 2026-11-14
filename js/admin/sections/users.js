@@ -564,13 +564,32 @@
             });
         }
 
-        // Client-side search
+        /* ПОИСК ИЩЕТ ТАК ЖЕ, КАК ЧЕЛОВЕК ПОМНИТ ИМЯ (13.11, слово Кости:
+           «можно было бы искать как алтынай, а сейчас так не работает»).
+
+           Люди регистрируются латиницей — её отдаёт Google, — а карточки
+           клуб завёл кириллицей, и на экране видно обе строки: «Altynai
+           Dzhamanbaeva» и под ней «Алтынай Джаманбаева». Поиск же знал
+           только имя профиля, и набранное кириллицей не находило никого.
+
+           ТРИ ОПОРЫ, А НЕ ОДНА: имя профиля, почта и ИМЯ КАРТОЧКИ. Плюс
+           обратная раскладка запроса — тем же домом, что и поиск
+           карточки (`KSLT_KARTOCHKA.обратно`), а не своей таблицей:
+           набрал «alty» — ищется и «алты». */
         if (usrSearchQuery) {
-            var q = usrSearchQuery.toLowerCase();
+            var q = usrSearchQuery.toLowerCase().trim();
+            var qКир = (window.KSLT_KARTOCHKA && window.KSLT_KARTOCHKA.обратно(q)) || null;
             items = items.filter(function(u) {
-                var name = (u.full_name || '').toLowerCase();
-                var email = (u.email || '').toLowerCase();
-                return name.indexOf(q) !== -1 || email.indexOf(q) !== -1;
+                var где = [
+                    (u.full_name || '').toLowerCase(),
+                    (u.email || '').toLowerCase(),
+                    ((usrКарточки[u.player_id] || {}).name || '').toLowerCase()
+                ];
+                return где.some(function (строка) {
+                    if (!строка) return false;
+                    return строка.indexOf(q) !== -1 ||
+                           (qКир && строка.indexOf(qКир) !== -1);
+                });
             });
         }
 

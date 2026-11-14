@@ -88,9 +88,16 @@ const ОТКАТЫ = [
    'слово окна есть на трёх языках: cardMaybeNone'],
   // --- смена карточки в админке (13.11) ---
   ['js/admin/sections/users.js',
-   '        if (user.player_id && !A.сотрудник(user.role)) {',
-   '        if (false) {',
-   'кнопка смены карточки есть и только у того, у кого карточка есть'],
+   '        if (!A.сотрудник(user.role)) {',
+   '        if (user.player_id) {',
+   'кнопка карточки есть у любого не-сотрудника'],
+
+  // ПОДПИСЬ: сводим две подписи к одной — ровно та ошибка, за которую
+  // Костя поймал 13.11 («висит сменить карточку, а не Привязать»).
+  ['js/admin/sections/users.js',
+   '                (user.player_id ? L.usrSmenitKartu : L.usrPrivyazatKartu) + \'</button>\');',
+   '                L.usrSmenitKartu + \'</button>\');',
+   'подпись кнопки обещает ровно то, что сделает'],
 
   ['js/admin/sections/users.js',
    "        var партнёр = await A.client.from('tournament_registrations')\n            .select('id', { count: 'exact', head: true }).eq('partner_id', playerId);",
