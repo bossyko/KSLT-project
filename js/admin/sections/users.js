@@ -922,8 +922,25 @@
            закрывался запросом в базу: за один день 13.11 так свели
            девятнадцать человек.
 
-           Сотруднику кнопка не нужна: ему карточка не заводится вовсе. */
-        if (user.player_id && !A.сотрудник(user.role)) {
+           Сотруднику кнопка не нужна: ему карточка не заводится вовсе.
+
+           КНОПКА НУЖНА И ТОГДА, КОГДА КАРТОЧКИ НЕТ ВОВСЕ (13.11, слово
+           Кости: «а тут я не могу в его карточке сразу привязать без
+           запросов в базу?»). Пример того же дня: Закир Назаров записался
+           латиницей, карточка в базе кириллицей и с 1860 очками — завести
+           ему пустую нельзя, а привязать было нечем, и случай закрывался
+           запросом. Поиск обратную раскладку УЖЕ умеет (js/kslt-poisk-
+           карточки: «Zakir Nazarov» → «закир назаров»), не хватало только
+           входа в него.
+
+           ПОДПИСЬ ОДНА НА ОБА СЛУЧАЯ — слово Кости 13.11: «почему
+           сменить карточку может также привязать, оставить». Сперва я
+           развёл две подписи, «Сменить» и «Привязать», но действие одно:
+           человек получает ту карточку, которую выбрал админ. Два слова
+           на одно действие — лишняя развилка у того, кто жмёт эту кнопку
+           каждый день. Разницу объясняет текст внутри окна, он и так
+           меняется по делу. */
+        if (!A.сотрудник(user.role)) {
             actionBtns.push('<button class="ad-btn ad-btn-secondary ad-btn-sm" id="adUsrSmenitKartu">' +
                 L.usrSmenitKartu + '</button>');
         }
@@ -1397,17 +1414,25 @@
             if (existing) existing.remove();
 
             var R = window.KSLT_RULES;
-            var строки = карточки.map(function (p) {
-                var разряд = (R && R.categoryLabel && p.category_id)
-                    ? R.categoryLabel(p.category_id, 'ru') : (p.category_id || '');
-                var подпись = [разряд, (p.points || 0) + ' очков'].filter(Boolean).join(' \u00B7 ');
-                return '<li class="ad-usr-dv-row">' +
-                    '<span class="ad-usr-dv-name">' + A.esc(p.name || p.id) + '</span>' +
-                    '<span class="ad-usr-dv-meta">' + A.esc(подпись) + '</span>' +
-                    '<button class="ad-btn ad-btn-sm ad-btn-primary" data-dv="' + A.esc(p.id) + '">' +
-                        L.usrPrivyazat + '</button>' +
-                '</li>';
-            }).join('');
+            /* СПИСОК РИСУЕТСЯ ОДНОЙ ФУНКЦИЕЙ, А НЕ ДВАЖДЫ (13.11). Его
+               надо нарисовать и при открытии, и после каждого набора в
+               поиске: две копии разошлись бы на первой же правке. */
+            function строкиИз(спис) {
+                if (!спис.length) return '<li class="ad-usr-dv-row">' +
+                    '<span class="ad-usr-dv-meta">' + L.usrPoiskPusto + '</span></li>';
+                return спис.map(function (p) {
+                    var разряд = (R && R.categoryLabel && p.category_id)
+                        ? R.categoryLabel(p.category_id, 'ru') : (p.category_id || '');
+                    var подпись = [разряд, (p.points || 0) + ' очков'].filter(Boolean).join(' \u00B7 ');
+                    return '<li class="ad-usr-dv-row">' +
+                        '<span class="ad-usr-dv-name">' + A.esc(p.name || p.id) + '</span>' +
+                        '<span class="ad-usr-dv-meta">' + A.esc(подпись) + '</span>' +
+                        '<button class="ad-btn ad-btn-sm ad-btn-primary" data-dv="' + A.esc(p.id) + '">' +
+                            L.usrPrivyazat + '</button>' +
+                    '</li>';
+                }).join('');
+            }
+            var строки = строкиИз(карточки);
 
             var overlay = document.createElement('div');
             overlay.id = 'adUsrDvoyniki';
@@ -1420,8 +1445,21 @@
                     '</div>' +
                     '<div class="ad-modal-body">' +
                         '<p class="ad-usr-dv-why">' +
-                            (режим === 'smena' ? L.usrSmenaText : L.usrDvoynikiText) + '</p>' +
-                        '<ul class="ad-usr-dv-list">' + строки + '</ul>' +
+                            (режим === 'smena' ? L.usrSmenaText
+                              : режим === 'privyazka' ? L.usrPrivyazkaText
+                              : L.usrDvoynikiText) + '</p>' +
+                        /* РУЧНОЙ ПОИСК — НА СЛУЧАЙ, КОГДА ДОГАДКА НЕ СОШЛАСЬ
+                           (13.11, вопрос Кости: «а если вот не будет
+                           совпадений, там будет список, ввод ручной?»).
+                           Догадка строится по имени профиля, а человек мог
+                           записаться как угодно: ником, одной фамилией,
+                           чужой транскрипцией. Тогда админ набирает имя
+                           сам — ищет ТОТ ЖЕ дом, что и догадка, и видит
+                           только свободные карточки. */
+                        '<input type="text" class="ad-field-input ad-abzac-snizu"' +
+                            ' id="adUsrDvSearch" autocomplete="off"' +
+                            ' placeholder="' + L.usrIskatKartu + '">' +
+                        '<ul class="ad-usr-dv-list" id="adUsrDvList">' + строки + '</ul>' +
                     '</div>' +
                     '<div class="ad-modal-footer">' +
                         '<button class="ad-btn" id="adUsrDvCancel">' + L.cancel + '</button>' +
@@ -1444,8 +1482,34 @@
                 готово(ответ);
             }
 
-            overlay.querySelectorAll('[data-dv]').forEach(function (кн) {
-                кн.addEventListener('click', function () { закрыть(кн.getAttribute('data-dv')); });
+            /* ОБРАБОТЧИК ВЕШАЕТСЯ НА СПИСОК, А НЕ НА КАЖДУЮ СТРОКУ: строки
+               перерисовываются поиском, и свои слушатели ушли бы вместе с
+               ними. */
+            var список = overlay.querySelector('#adUsrDvList');
+            список.addEventListener('click', function (e) {
+                var кн = e.target.closest('[data-dv]');
+                if (кн) закрыть(кн.getAttribute('data-dv'));
+            });
+
+            var поле = overlay.querySelector('#adUsrDvSearch');
+            var таймер = null;
+            поле.addEventListener('input', function () {
+                clearTimeout(таймер);
+                var строка = поле.value.trim();
+                /* ЖДЁМ, ПОКА ЧЕЛОВЕК ДОПИШЕТ: иначе на каждую букву уходит
+                   запрос, и ответы возвращаются вперемешку. */
+                таймер = setTimeout(async function () {
+                    if (строка.length < 2) { список.innerHTML = строкиИз(карточки); return; }
+                    var найдено = await window.KSLT_KARTOCHKA.искать(A.client, {
+                        строка: строка,
+                        /* ПОЛ НЕ СУЖАЕТ РУЧНОЙ ПОИСК: админ ищет руками
+                           именно тогда, когда догадка не сошлась, и пол в
+                           профиле может быть ещё не указан. */
+                        пол: null,
+                        предел: 8
+                    });
+                    список.innerHTML = строкиИз(найдено);
+                }, 300);
             });
             var кнНовую = document.getElementById('adUsrDvNew');
             if (кнНовую) кнНовую.addEventListener('click', function () { закрыть('new'); });
@@ -1603,7 +1667,7 @@
      * может держать заявку на турнир.
      */
     async function сменитьКарточку(user) {
-        if (!user || !user.player_id) return;
+        if (!user) return;
 
         var имя = (user.full_name || '').trim();
         if (!имя) { A.showToast(L.usrSmenaNetImeni, 'error'); return; }
@@ -1616,9 +1680,14 @@
             пол: playerGenderПредварительно(user),
             предел: 8
         });
-        if (!двойники.length) { A.showToast(L.usrSmenaNetKandidatov, 'info'); return; }
+        /* ПУСТАЯ ДОГАДКА — НЕ ПРИЧИНА ЗАКРЫВАТЬ ДВЕРЬ (13.11). Раньше при
+           нуле кандидатов показывался тост, и дальше админ шёл в базу
+           запросом. Теперь окно открывается всегда: в нём поле ручного
+           поиска, и имя можно набрать любое. */
+        if (!двойники.length) A.showToast(L.usrSmenaNetKandidatov, 'info');
 
-        var выбор = await спроситьПроДвойников(user, двойники, 'smena');
+        var выбор = await спроситьПроДвойников(user, двойники,
+            user.player_id ? 'smena' : 'privyazka');
         if (выбор === 'cancel' || выбор === 'new') return;
 
         var прежняя = user.player_id;
@@ -1633,7 +1702,10 @@
         await A.client.from('players').update({ has_account: true }).eq('id', выбор);
 
         A.showToast(L.usrPrivyazano, 'success');
-        await предложитьУбратьПустую(прежняя);
+        /* УБИРАТЬ НЕЧЕГО, ЕСЛИ ПРЕЖНЕЙ НЕ БЫЛО: при привязке человека без
+           карточки `прежняя` пуста, и вопрос «удалить пустую?» был бы про
+           ничто. */
+        if (прежняя) await предложитьУбратьПустую(прежняя);
         loadUsersList();
     }
 
