@@ -1224,6 +1224,7 @@
         usrRole: 'Роль',
         usrTelegram: 'Telegram',
         usrTgConnected: 'Подключён',
+        usrTgIzBota: ' · из бота',
         usrTgNotConnected: 'Не подключён',
         usrLastSeen: 'Последний визит',
         usrRegistered: 'Дата регистрации',

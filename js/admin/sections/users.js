@@ -762,7 +762,7 @@
         if (!A.client) return;
 
         var userRes = await A.client.from('profiles')
-            .select('id, full_name, email, role, avatar_url, phone, phone_country, telegram_chat_id, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year, instagram, telegram')
+            .select('id, full_name, email, role, avatar_url, phone, phone_country, telegram_chat_id, telegram_username, last_seen, created_at, banned_until, ban_reason, player_id, gender, birth_day, birth_month, birth_year, instagram, telegram')
             .eq('id', id)
             .single();
 
@@ -1029,9 +1029,26 @@
                         '<label class="ad-field-label">Instagram</label>' +
                         '<input type="text" class="ad-field-input" value="' + A.esc(user.instagram || '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
+                    /* ДВА ТЕЛЕГРАМА НА ОДНОМ ЭКРАНЕ — ЭТО ОДНО ПОЛЕ (13.11,
+                       вопрос Кости: «почему тут написано что ТГ подключен?»).
+                       Вверху карточки стоит «TG: Подключён» — он смотрит на
+                       `telegram_chat_id`, то есть на привязку бота. А это
+                       поле показывает `telegram` — ник, который человек
+                       вписывает САМ для связи. У Айгерим Кушчубековой бот
+                       привязан, ник от телеграма известен (`igmk7`), а своё
+                       поле пустое — и экран говорил «подключён» и ставил
+                       прочерк рядом.
+                       ПОКАЗЫВАЕМ ТО, ЧТО ЗНАЕМ, И ГОВОРИМ ОТКУДА: своё поле
+                       первым, ник из бота вторым с пометкой. Пометка нужна,
+                       чтобы админ не считал ник подтверждённым человеком. */
                     '<div class="ad-field-group">' +
                         '<label class="ad-field-label">Telegram</label>' +
-                        '<input type="text" class="ad-field-input" value="' + A.esc(user.telegram || '—') + '" readonly style="opacity:0.6;cursor:not-allowed;">' +
+                        '<input type="text" class="ad-field-input" value="' +
+                            A.esc(user.telegram
+                                || (user.telegram_username
+                                    ? '@' + user.telegram_username + L.usrTgIzBota
+                                    : '—')) +
+                            '" readonly style="opacity:0.6;cursor:not-allowed;">' +
                     '</div>' +
                 '</div>' +
                 // Membership with inline payment
