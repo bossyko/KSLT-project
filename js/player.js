@@ -897,12 +897,15 @@
         // NTRP теперь двумя числами: одиночный разряд и парные турниры.
         // Строку с подписями собирает общий свод правил — тот же, что в
         // приложении, чтобы вид не разошёлся.
-        var ntrpСтрока = (window.KSLT_RULES && window.KSLT_RULES.ntrpСтрока)
-            ? window.KSLT_RULES.ntrpСтрока(player.ntrp_singles, player.ntrp_doubles,
-                                           KSLT_YAZYK.код)
-            : '';
-        if (ntrpСтрока) {
-            hero += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' + ntrpСтрока + '</span></div>';
+        var ntrpЧасти = (window.KSLT_RULES && window.KSLT_RULES.ntrpЧасти)
+            ? window.KSLT_RULES.ntrpЧасти(player.ntrp_singles, player.ntrp_doubles,
+                                          KSLT_YAZYK.код)
+            : [];
+        if (ntrpЧасти.length) {
+            hero += '<div class="pp-rating-row"><span class="pp-rating-label">NTRP</span><span class="pp-rating-value">' +
+                ntrpЧасти.map(function (часть) {
+                    return '<span class="pp-ntrp-chast">' + KSLT_экранировать(часть) + '</span>';
+                }).join('') + '</span></div>';
         }
         hero += '</div>';
 
