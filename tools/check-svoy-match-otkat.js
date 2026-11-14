@@ -25,8 +25,9 @@ const САЙТ = 'js/match-score.js',
       СВОД = 'js/kslt-rules.js',
       АДМ  = 'js/admin/sections/bracket.js',
       SQL  = 'sql/функции/zakrytyy-turnir-ne-prinimaet-schyot-14noy.sql',
-      SТОР = 'sql/схема/storona-vpisavshego-14noy.sql';
-const ФАЙЛЫ = [САЙТ, КАБ, СЕТ, ПРИЛ, СВОД, АДМ, SQL, SТОР];
+      SТОР = 'sql/схема/storona-vpisavshego-14noy.sql',
+      СПОР = 'sql/функции/zakrytyy-turnir-spor-14noy.sql';
+const ФАЙЛЫ = [САЙТ, КАБ, СЕТ, ПРИЛ, СВОД, АДМ, SQL, SТОР, СПОР];
 const исходник = {};
 ФАЙЛЫ.forEach(ф => { исходник[ф] = fs.readFileSync(path.join(КОРЕНЬ, ф), 'utf8'); });
 
@@ -123,6 +124,16 @@ const ОТКАТЫ = [
      "    IF public.turnir_zakryt_dlya_schyota(p_match_id) THEN\n        RETURN jsonb_build_object('ok', false, 'error', 'tournament_closed');\n    END IF;\n\n    IF v_match.score_status IS DISTINCT FROM 'pending' THEN",
      "    IF v_match.score_status IS DISTINCT FROM 'pending' THEN",
      'подтвердить в закрытом турнире база не даёт'],
+
+    ['снять замок со спора', СПОР,
+     "    -- ЗАКРЫТЫЙ ТУРНИР: спорить не о чем, решает организатор\n    IF public.turnir_zakryt_dlya_schyota(p_match_id) THEN\n        RETURN jsonb_build_object('ok', false, 'error', 'tournament_closed');\n    END IF;\n\n",
+     '',
+     'оспорить счёт в закрытом турнире база не даёт'],
+
+    ['вернуть автоприём, который не смотрит на турнир', СПОР,
+     '       AND NOT public.turnir_zakryt_dlya_schyota(m.id);',
+     '       ;',
+     'автоприём по часам закрытые турниры обходит'],
 
     ['админка пишет счёт ожидающим', АДМ,
      "                score_status: 'confirmed',",
