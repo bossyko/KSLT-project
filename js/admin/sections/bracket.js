@@ -2578,6 +2578,79 @@
 
     // ---- Render Bracket Management View ----
     // Called after saving a tournament that has bracket_type set, or from edit view
+    /**
+     * ЖУРНАЛ ЗАЯВОК ТУРНИРА — кто, что и когда сделал с составом.
+     *
+     * Пишет его триггер базы на `tournament_registrations`, здесь только
+     * чтение. Имена игроков берём из уже собранной карты, имена
+     * сотрудников — одним запросом на весь список, а не по строке.
+     *
+     * МОЛЧИТ, ЕСЛИ ПУСТО: журнал начал писаться 13.11, и у турниров
+     * прежних дней истории нет вовсе — пустая таблица с заголовком
+     * читалась бы как поломка.
+     */
+    async function нарисоватьЖурналЗаявок(tournamentId, playersMap) {
+        var коробка = document.getElementById('adBrkRegLog');
+        if (!коробка) return;
+
+        var ответ = await A.client.from('registration_log')
+            .select('deystvie, player_id, partner_id, bylo, stalo, kto, kogda')
+            .eq('tournament_id', tournamentId)
+            .order('kogda', { ascending: false })
+            .limit(50);
+        var строки = ответ.data || [];
+        if (!строки.length) return;
+
+        /* КТО СДЕЛАЛ — ОДНИМ ЗАПРОСОМ НА ВЕСЬ СПИСОК. По строке вышло бы
+           полсотни запросов ради пяти разных имён. */
+        var ктоИды = [];
+        строки.forEach(function (з) {
+            if (з.kto && ктоИды.indexOf(з.kto) === -1) ктоИды.push(з.kto);
+        });
+        var людиКарта = {};
+        if (ктоИды.length) {
+            var люди = await A.client.from('profiles').select('id, full_name').in('id', ктоИды);
+            (люди.data || []).forEach(function (ч) { людиКарта[ч.id] = ч.full_name; });
+        }
+
+        var СЛОВА = {
+            podana: L.logPodana, snyata: L.logSnyata,
+            status: L.logStatus, udalena: L.logUdalena
+        };
+
+        var тело = строки.map(function (з) {
+            var игрок = (playersMap && playersMap[з.player_id] && playersMap[з.player_id].name)
+                || з.player_id || '—';
+            var переход = (з.bylo || з.stalo)
+                ? [з.bylo, з.stalo].filter(Boolean).join(' → ')
+                : '';
+            /* ПУСТОЕ `kto` — ЭТО НЕ «НЕИЗВЕСТНО», А ЗАПРОС В БАЗУ: так
+               помечаются правки, сделанные мимо экрана. */
+            var кто = з.kto ? (людиКарта[з.kto] || з.kto.slice(0, 8)) : L.logIzBazy;
+            return '<tr>' +
+                /* ВРЕМЯ ПОКАЗЫВАЕТ ДОМ, И ОНО ПО БИШКЕКУ: админ сидит то в
+                   Чикаго, то дома, а турнир идёт в одном часовом поясе. */
+                '<td>' + A.esc(window.KSLT_VREMYA.показМомента(з.kogda, 'ru')) + '</td>' +
+                '<td>' + A.esc(игрок) + '</td>' +
+                '<td>' + A.esc(СЛОВА[з.deystvie] || з.deystvie) + '</td>' +
+                '<td class="ad-tiho">' + A.esc(переход) + '</td>' +
+                '<td class="ad-tiho">' + A.esc(кто) + '</td>' +
+            '</tr>';
+        }).join('');
+
+        коробка.innerHTML =
+            '<h3 class="ad-brk-log-title">' + L.logZagolovok + '</h3>' +
+            '<div class="ad-table-wrap"><table class="ad-table">' +
+                '<thead><tr>' +
+                    '<th>' + L.logKogda + '</th>' +
+                    '<th>' + L.logIgrok + '</th>' +
+                    '<th>' + L.logChto + '</th>' +
+                    '<th>' + L.thStatus + '</th>' +
+                    '<th>' + L.logKto + '</th>' +
+                '</tr></thead><tbody>' + тело + '</tbody>' +
+            '</table></div>';
+    }
+
     async function renderBracketManagement(tournamentId, forceTab) {
         var container = document.getElementById('ad-tournaments');
         if (!container) return;
@@ -2882,6 +2955,14 @@
         var сеткаЕсть = matches.length > 0;
         html += шапкаВыгрузки('adBrkRegPanel', L.trnTabRegs, сеткаЕсть ? '' : кнопкиДобавления());
         html += renderRegistrationsPanel(tournament, registrations, playersMap, canGenerate, debtPlayerIds, isDbl, regsMap, сеткаЕсть);
+        /* ЖУРНАЛ ЗАЯВОК (13.11). Спор «я подавал заявку» — «её нет» было
+           нечем разрешить: подача не оставляла следа вовсе. Теперь след
+           пишет БАЗА триггером (sql/схема/zhurnal-zayavok-13noy.sql), а
+           не код: мест, где заявки создаются и меняются, больше сорока,
+           и одно рано или поздно забыло бы записать.
+           Грузится отдельно и после панели: журнал — не состав турнира,
+           и его отказ не должен мешать работе с заявками. */
+        html += '<div id="adBrkRegLog" class="ad-brk-log"></div>';
         html += '</div>';
 
         // Bracket / Group panel
@@ -2951,6 +3032,8 @@
         // Кнопки выгрузки: читают таблицы своей панели, поэтому вешаем их
         // сразу после отрисовки — до того, как менеджер что-то нажмёт
         if (A.экспорт) A.экспорт.оживить(container, названиеТурнира);
+
+        нарисоватьЖурналЗаявок(tournamentId, playersMap);
 
         // У сетки уже есть своя строка действий — «Пересоздать жеребьёвку».
         // Кнопки выгрузки ставим в неё же: две полосы кнопок одна над другой
